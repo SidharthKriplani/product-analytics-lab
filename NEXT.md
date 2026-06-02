@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.59.0 (2026-06-02) — Profile page live. Identity, stats, sync, study plans, saved, settings. Sidebar avatar chip navigates to profile.*
+*Last updated: V4.60.0 (2026-06-02) — SQL Audit Batch 1 complete. e07 + e10 rewritten. SQL_QUALITY_AUDIT.md created. Profile page live (V4.59.0).*
 
 ---
 
@@ -17,7 +17,10 @@ Read this at the start of every build session. Do only this. Update before closi
 
 ## Next session
 
-**1. Confirm VITE_POSTHOG_KEY live in Vercel** — check env vars dashboard, establish WAU baseline before Batch 1 outreach.
+**1. SQL Quality Audit — Batch 2 (e11–e20)**
+Score full batch first, then fix flagged problems, build+verify, ship. See SQL_QUALITY_AUDIT.md for scores so far.
+
+**2. Confirm VITE_POSTHOG_KEY live in Vercel** — check env vars dashboard, establish WAU baseline before Batch 1 outreach.
 
 ---
 

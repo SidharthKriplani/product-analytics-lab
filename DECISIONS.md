@@ -246,11 +246,30 @@ Consult (ConsultationSpace) was cut from nav in V4.12 — it overlaps with Searc
 - Room labels: short, noun-form, no emoji (Stats, Metrics, RCA, Cases, Growth, BI)
 - Tools group: Search, Trainer, Companies, Defense, Saved
 - Learn group: Learn, Playbook
-- Track group: Pricing, Progress
+- Track group: Plans, Progress, Profile (signed-in only)
 - "Instrumentation" not "Instrum." — never truncate labels with a period
+
+**Sidebar auth pattern (V4.59.0+):**
+Not signed in: TRACK shows Sign In + Plans only. No bottom auth chip.
+Signed in: TRACK shows Profile (with OAuth avatar thumbnail) + Progress + Plans. Profile is the hub for identity, sync, settings, study plans, saved cases.
 
 ---
 
-## V4.48–49 Standing Rules Audit
+## SQL Lab Content Standard (V4.59.0+)
 
-All standing rules above remain in effect. V4.48–49 (per-room breakdown chart, shareable score card, Tier 5-6 restructuring) required **zero rule changes**. No architectural decisions were overridden. All design, content, monetization, and navigation principles remain unchanged.
+**SQL Lab problems must meet the multi-approach standard.**
+The new interview premium is thinking in multiple paradigms, not writing SQL. LLMs commoditized SQL writing. Every Medium/Hard/Master problem must support at least 2 distinct valid approaches. Problems with approach count = 1 at Medium tier or above are candidates for replacement.
+
+**Tiered solutions are the content standard going forward.**
+Every problem ships with: junior solution (works, suboptimal), senior solution (production-grade, explains why it's better), pro tip (one-line technique or trap callout), common mistake (what people get wrong on this specific problem).
+
+**Audit process: score batch → fix batch → ship batch.**
+Batch size = 10. Full rubric in SQL_LAB_PLAN.md Section 8. Audit artifact = SQL_QUALITY_AUDIT.md (cumulative, one row per problem). Batch 1 is calibration (score-per-problem, fix-per-problem). Batches 2–13 score full batch first, then fix.
+
+**Flag thresholds:** Score below 3 on any single rubric dimension, or below 20/35 total → rewrite required.
+
+---
+
+## V4.59.0 Standing Rules Audit
+
+All standing rules above remain in effect. V4.59.0 (Profile page, sidebar auth toggle, SQL audit planning) required two rule updates: Track group nav labels updated (Plans replaces Pricing, Profile added), SQL Lab content standard added. All other architectural, design, content, and monetization principles unchanged.

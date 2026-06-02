@@ -44,6 +44,8 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 
 ## What was just done
 
+**V4.60.0** — SQL Quality Audit Batch 1 complete. e07 rewritten (Disengaged Users → Repeat Launchers, teaches HAVING). e10 rewritten (Most Prescribed Drug → Geographic Patient Reach, teaches COUNT DISTINCT + 3-table JOIN). SQL_QUALITY_AUDIT.md created (cumulative audit artifact, all 13 batch slots). 8/10 pass, 2 rewritten.
+
 **V4.59.0** — Profile page (`/profile`). Identity card (OAuth avatar, name, email, provider badge, member since). Practice stats strip (cases done, rooms active, bookmarks). Cross-device sync button. Study plans (Defense + SQL). Recent saved cases. Settings (theme toggle, export/import). Sidebar avatar chip now navigates to profile instead of doing nothing.
 
 **V4.58.0** — Review Room S19–S25 (7 new scenarios). Statefulness fix: `exp-lab-progress-v1` added to PROGRESS_KEYS — Review Room completions now sync cross-device. CHANGELOG updated with V4.56/57/58 entries. All spine MD files current.
@@ -73,7 +75,7 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 
 ---
 
-## Next action — Confirm VITE_POSTHOG_KEY live in Vercel → Batch 1 outreach
+## Next action — SQL Quality Audit Batch 1 (e01–e10) → PostHog confirm → Batch 1 outreach
 
 **Auth fully live (V4.58.0):** Email magic link ✅, Google OAuth ✅, GitHub OAuth ✅. Sign-in button in sidebar. Progress syncs cross-device (all rooms including Review Room). E2E tested on production URL.
 

@@ -26,8 +26,12 @@ _No new features until PostHog baseline is established._
 
 ## Tier 1 — High impact, buildable now
 
+### SQL Lab Quality Audit (In progress — V4.59.0)
+- **SQL Quality Audit — 13 batches of 10.** Full rubric + process in SQL_LAB_PLAN.md Section 8. Audit artifact: SQL_QUALITY_AUDIT.md. Each batch: score → fix → build → ship. Batch 1 next session.
+- **Approach Explorer feature** — after submitting a solution, show "You found 1 of 3 approaches. Can you find the others?" with retry textarea. Full approach map revealed after attempt. Each approach gets: technique name, when to reach for it, one-line trade-off. This is PAL's primary SQL Lab differentiator vs. DataLemur/StrataScratch. Gate: depends on audit first establishing approach counts per problem.
+- **Tiered solutions upgrade** — each problem ships with junior solution, senior solution, pro tip, common mistake. Implemented batch-by-batch during the audit.
+
 ### Content
-- ~~Playbook articles for BI, Instrumentation, and Take-Home rooms~~ — ✅ shipped V4.8.2
 - ~~More BI cases (BI13+): real-time dashboards, Looker/Tableau case studies~~ — ✅ shipped V4.10.0 (bi13–bi16)
 - ~~More Instrumentation cases: dbt data models, data lineage, schema migration~~ — ✅ shipped V4.10.0 (inst09–inst12)
 

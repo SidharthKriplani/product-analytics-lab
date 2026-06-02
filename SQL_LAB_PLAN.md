@@ -530,6 +530,104 @@ All 211 problems are currently technical-spec. The 137 not in the conversion lis
 
 ---
 
+## Section 8 — SQL Quality Audit Plan (2026-06-02)
+
+### Motivation
+
+LLMs have commoditized SQL writing. The new interview premium is thinking in multiple paradigms simultaneously — knowing when to use a window function vs. a CTE vs. a subquery, and being able to articulate trade-offs. PAL's SQL Lab needs to teach that, not just test syntax recall. This audit upgrades all 130 problems to that standard.
+
+---
+
+### Evaluation Rubric
+
+Every problem is scored on 7 dimensions (1–5 each, max 35) plus 4 metadata fields.
+
+**Scored dimensions:**
+
+| # | Dimension | What it measures |
+|---|---|---|
+| 1 | Business framing | Reads like a real stakeholder ask, not a textbook prompt |
+| 2 | Company authenticity | Data model, metric, and context fit the tagged company |
+| 3 | Difficulty calibration | SQL complexity matches the Easy/Medium/Hard/Master tag |
+| 4 | Data challenge realism | Involves a realistic trap (NULLs, duplicates, date arithmetic, aggregation pitfalls) |
+| 5 | Distinctiveness | Meaningfully different from other problems at the same difficulty tier |
+| 6 | Insight quality | The correct query reveals a specific non-obvious business insight |
+| 7 | Trade-off clarity | Solution content explains when to use this approach and why vs. alternatives |
+
+**Flag thresholds:** Score below 3 on any single dimension, or below 20 total → rewrite required.
+
+**Metadata fields (documented, not scored):**
+
+| Field | What to record |
+|---|---|
+| SQL technique(s) | Named SQL constructs taught (ROW_NUMBER, DATE_TRUNC, LAG/LEAD, COALESCE, etc.) |
+| Analyst pattern | Business pattern it represents (funnel drop-off, cohort retention, sessionization, top-N, attribution, etc.) |
+| Approach count | How many distinct valid approaches exist (1 / 2 / 3+) |
+| Approaches list | Brief name of each approach (e.g., subquery / window function / CTE) |
+
+**Approach count flag:** Problems with approach count = 1 at Medium/Hard/Master tier are candidates for replacement. Thin problems with only one valid path don't build the multi-paradigm thinking that is the current interview premium.
+
+---
+
+### Multi-Approach Standard
+
+For every problem that supports 2+ approaches, the solution section should include:
+- **Approach A / B / C** — technique name, solution sketch
+- **When to reach for it** — one sentence on the real-world context where this approach wins
+- **Trade-off** — one line (readability, performance, portability)
+
+In the product, after submitting a solution: "You found 1 of 3 approaches. Can you find the others?" — with a retry textarea before the full approach map is revealed. This is the feature that separates PAL from every other SQL platform.
+
+---
+
+### Tiered Solutions Standard
+
+Every problem should have:
+- **Junior solution** — correct but suboptimal (subquery instead of window function, multiple passes instead of one)
+- **Senior solution** — clean, production-grade, explains *why* it's better
+- **Pro tip** — one-line callout of the technique or trap ("COUNT(col) excludes NULLs; COUNT(*) does not")
+- **Common mistake** — what gets people wrong on this specific problem
+
+---
+
+### Audit Process
+
+**Batch size: 10.** sqlLabProblems.js is 2,800 lines; 10 problems = ~200–300 lines, stays within context. 13 batches total.
+
+**Order:**
+- **Batch 1 (calibration):** Score each problem individually, fix it, move to the next. Purpose: calibrate the rubric itself. If the rubric has a gap, catch it on problem 3, not after scoring all 130.
+- **Batches 2–13:** Score the full batch of 10 first, then fix all flagged problems, then build+verify, then ship. Seeing all 10 before deciding what needs a full rewrite vs. minor tweak allows prioritization within the batch.
+
+**Per-batch output:**
+1. Scoring table (all 10 problems × 7 dimensions + metadata)
+2. Rewrite list (problems below threshold, with specific dimension flagged)
+3. Build + verify (0 errors)
+4. Commit + push
+
+**Audit artifact:** `SQL_QUALITY_AUDIT.md` — one row per problem, cumulative across all 13 batches. Single source of truth for problem health. Updated after every batch.
+
+---
+
+### Batch Map
+
+| Batch | Problems | Difficulty |
+|---|---|---|
+| 1 | e01–e10 | Easy |
+| 2 | e11–e20 | Easy |
+| 3 | e21–e30 | Easy |
+| 4 | e31–e40 | Easy |
+| 5 | e41–e50 | Easy |
+| 6 | m01–m10 | Medium |
+| 7 | m11–m20 | Medium |
+| 8 | m21–m30 | Medium |
+| 9 | m31–m40 | Medium |
+| 10 | h01–h10 | Hard |
+| 11 | h11–h25 | Hard |
+| 12 | master01–master08 | Master |
+| 13 | master09–master15 | Master |
+
+---
+
 ## Section 6 — What Doesn't Change (standing rules from DECISIONS.md)
 
 - File split: sqlLabDatamarts.js (schemas + seed) + sqlLabProblems.js (problems only) — never merge
