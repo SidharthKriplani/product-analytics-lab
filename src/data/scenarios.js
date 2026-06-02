@@ -3222,6 +3222,1533 @@ export const scenarios = [
     relatedConcepts: ['switchback experiment', 'carryover effect', 'washout period', 'time-series experiment', 'behavioral adaptation', 'interference'],
     scenarioFamily: 'switchback',
     tags: ['switchback', 'carryover', 'washout', 'surge pricing', 'two-sided marketplace', 'food delivery']
+  },
+
+  // ─────────────────────────────────────────────
+  // SCENARIO 23 — The Bot That Broke Randomization
+  // Theme: srm
+  // ─────────────────────────────────────────────
+  {
+    id: 's23-bot-traffic-srm',
+    title: 'The Bot That Broke Randomization',
+    subtitle: 'Pricing page redesign shows +18% conversion. SRM detected. Treatment arm has a bot traffic problem.',
+    isFree: false,
+    industry: 'b2b_saas',
+    difficulty: 'senior',
+    theme: 'srm',
+
+    context: {
+      company: 'Nexus',
+      product: 'B2B SaaS platform — project management and workflow automation, ~12K paying accounts, mid-market focus',
+      team: 'Growth and Monetization team',
+      background: 'Nexus ran a 50/50 A/B test of a redesigned pricing page. The new design simplified the three-tier pricing table, added a calculator widget showing estimated ROI, and restructured the CTA hierarchy. The experiment ran for 14 days targeting anonymous visitors to the /pricing URL.\n\nThe automated SRM check flagged an imbalance: control received 48.2% of traffic, treatment received 51.8%. Chi-square p-value for the SRM: 0.002. The analyst notes this is a 3.6% relative imbalance.\n\nInvestigation reveals that the new pricing page URL pattern (/pricing/v2 during the experiment) was picked up by a pricing intelligence scraper — a bot service that B2B competitors use to monitor each other\'s pricing. The scraper made ~4,200 additional visits to the treatment arm over 14 days, systematically hitting the new URL. These bot sessions inflate treatment traffic counts but do not convert. The bot sessions are identifiable: they share three user-agent strings, have zero time-on-page, and made no downstream pageviews.\n\nPrimary metric: free trial signup rate (visitor to trial). Treatment shows +18% lift (p=0.03).',
+      businessPressure: 'The Growth team has been trying to improve pricing page conversion for two quarters. The VP of Growth sees the +18% result and wants to ship before the end-of-quarter deadline. The analyst argues that the SRM is "small" — only a 3.6% imbalance — and that bot sessions don\'t convert anyway, so the conversion metric is unaffected.'
+    },
+
+    hypothesis: 'A simplified pricing page with an ROI calculator and restructured CTA hierarchy will increase free trial signup rate compared to the current pricing page.',
+
+    experimentDesign: {
+      type: 'a/b',
+      allocation: '50/50',
+      runtime: '14 days',
+      targetPopulation: 'Anonymous visitors to the /pricing URL (~18,400 sessions per arm before SRM)',
+      primaryMetric: 'Free trial signup rate (visitor to free trial)',
+      guardrailMetrics: ['Time-on-page (median)', 'Pricing page bounce rate', 'Demo request rate'],
+      sampleSizeContext: 'Powered to detect a 10% relative lift in free trial signup rate at 80% power. Bot sessions identified post-hoc: ~4,200 sessions concentrated in treatment arm, zero conversions, identifiable by user-agent.'
+    },
+
+    metricReadout: [
+      {
+        metric: 'Free trial signup rate — all traffic',
+        type: 'primary',
+        direction: 'up',
+        delta: '+18%',
+        pValue: 0.03,
+        confidenceInterval: '[+1.9%, +34.1%]',
+        significant: true,
+        note: 'Significant on full traffic. However, SRM is confirmed (p=0.002). Bot traffic in treatment arm (4,200 sessions, zero conversions) inflates the treatment denominator artificially, making the conversion rate appear higher relative to what it would be with clean traffic.'
+      },
+      {
+        metric: 'Free trial signup rate — bot sessions excluded',
+        type: 'diagnostic',
+        direction: 'up',
+        delta: '+9.4%',
+        pValue: 0.18,
+        confidenceInterval: '[-4.4%, +23.2%]',
+        significant: false,
+        note: 'When the 4,200 identified bot sessions are removed from the treatment denominator, the lift drops to +9.4% and loses significance. The CI is wide. The true effect may exist but the experiment cannot confirm it.'
+      },
+      {
+        metric: 'SRM check (traffic allocation)',
+        type: 'diagnostic',
+        direction: 'neutral',
+        delta: 'Control: 48.2% | Treatment: 51.8%',
+        pValue: 0.002,
+        confidenceInterval: null,
+        significant: true,
+        note: 'SRM confirmed. The assignment mechanism was compromised by bot traffic targeting the new URL pattern. The randomization assumption is violated regardless of whether bots converted.'
+      },
+      {
+        metric: 'Demo request rate',
+        type: 'guardrail',
+        direction: 'up',
+        delta: '+6.1%',
+        pValue: 0.21,
+        confidenceInterval: '[-3.5%, +15.7%]',
+        significant: false,
+        note: 'Directionally positive but not significant. Demo requests are human-only (require form fill), so bot traffic does not inflate this metric. The directionally positive signal is encouraging but insufficient to ship.'
+      }
+    ],
+
+    warningFlags: [
+      {
+        id: 'wf-srm-confirmed',
+        label: 'SRM confirmed at p=0.002 — assignment mechanism is compromised',
+        description: 'A chi-square SRM test at p=0.002 is not a borderline result. The treatment arm received 3.6% more sessions than expected under 50/50 allocation. When the root cause is bot traffic targeting a specific URL pattern, the contamination is systematic — not random noise. The randomization assumption (that units are independently and identically assigned to conditions) is violated. Any result from a contaminated experiment must be treated as unreliable.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-analyst-rationalization',
+        label: 'Analyst argument that "bots don\'t convert so the metric is clean" is incorrect',
+        description: 'The analyst\'s claim rests on a misunderstanding of what SRM invalidates. The problem is not that bots converted — it is that they inflated the treatment denominator. Free trial signup rate = (signups) / (total sessions). If the treatment arm has 4,200 extra zero-conversion sessions, the denominator is artificially inflated, which would actually suppress the treatment rate — meaning the true conversion rate (signups per human session) in treatment is higher than reported. But the assignment mechanism is still broken: we cannot be confident that the human sessions in treatment are drawn from the same distribution as control. Bot traffic may have displaced human sessions, changed page load characteristics, or arrived at specific times that are correlated with conversion propensity.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-bot-sessions-diagnostic',
+        label: 'Bot sessions identifiable post-hoc — exclusion analysis shows result loses significance',
+        description: 'When the 4,200 bot sessions (identified by user-agent, zero time-on-page, no downstream pageviews) are excluded from the treatment arm, the lift drops from +18% to +9.4% and p rises from 0.03 to 0.18. The experiment was powered to detect a 10% relative lift. After bot exclusion, the point estimate is below the minimum detectable effect and the CI spans null. The +18% result was partly an artifact of denominator inflation.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-url-pattern-exposure',
+        label: 'Root cause is the new URL pattern — fix before rerunning',
+        description: 'The bot targeted /pricing/v2, the URL used for the treatment variant. If the experiment is rerun without changing the URL pattern or adding bot filtering, the same contamination will recur. Before rerunning, either serve both variants from the same URL (variant determined by cookie/session flag server-side), implement bot filtering at the CDN layer, or add rate limiting on pricing page requests by user-agent.',
+        severity: 'warning'
+      }
+    ],
+
+    decisions: [
+      {
+        id: 'ship',
+        label: 'Ship the new pricing page — +18% conversion is significant and bots don\'t convert.',
+        description: 'The SRM is small and the metric is unaffected by non-converting bots.',
+        score: 'junior_miss',
+        feedback: 'This reasoning has two errors. First, the SRM is not "small" — a p=0.002 SRM test result is a strong signal that the assignment mechanism failed. Second, the analyst\'s logic that "bots don\'t convert so the metric is clean" misidentifies the problem. Bots inflated the treatment denominator, suppressing the apparent treatment conversion rate. When bots are removed, the lift drops from +18% to +9.4% and becomes non-significant. The experiment cannot support a ship decision in its current state.'
+      },
+      {
+        id: 'invalidate-rerun',
+        label: 'Invalidate the experiment. Fix bot filtering and URL exposure. Rerun with a clean assignment mechanism.',
+        description: 'SRM with a known root cause means the experiment is invalid. Fix the cause, then rerun.',
+        score: 'senior_ready',
+        feedback: 'This is the right call. The SRM root cause is identified and fixable: the new page URL was publicly discoverable by a pricing scraper. The fix is to serve both variants from the same URL (with variant assignment via a server-side cookie or session flag) and add bot filtering at the CDN layer before rerunning. The directionally positive demo request rate (+6.1%) gives some encouragement that the new page may have a real effect, but the experiment result itself cannot be trusted. Rerun with clean randomization.'
+      },
+      {
+        id: 'exclude-bots-ship',
+        label: 'Exclude the identified bot sessions from both arms and ship on the cleaned result.',
+        description: 'Bot sessions are identifiable — just remove them and use the cleaned result.',
+        score: 'analyst_ready',
+        feedback: 'Excluding identified bots is a reasonable diagnostic step, and doing so correctly shows the result drops to +9.4% (p=0.18) — non-significant. But even if the cleaned result were significant, bot exclusion post-hoc does not fully restore the validity of the experiment. We identified bots by user-agent and behavioral signals, but we cannot be certain we caught all of them. More importantly, the presence of systematic bot traffic in the treatment arm may have affected page load times, CDN caching, or session queue behavior during the experiment window in ways that aren\'t fully undone by exclusion. A clean rerun is the right path.'
+      },
+      {
+        id: 'extend',
+        label: 'Extend the experiment for another 14 days with bot filtering active.',
+        description: 'Keep running but add filtering so the new data is clean.',
+        score: 'analyst_ready',
+        feedback: 'Extending the experiment after discovering that the first 14 days were contaminated does not retroactively fix the contaminated period. If you pool the contaminated and clean periods, the result is still partially invalid. The correct approach is to stop the current experiment, fix the assignment mechanism, and start a fresh experiment with a clean randomization record. Running an extension on top of a contaminated base compounds the problem.'
+      },
+      {
+        id: 'ship-mobile-only',
+        label: 'Ship to a 10% traffic slice to validate before full rollout.',
+        description: 'A partial rollout limits risk while we get more signal.',
+        score: 'junior_miss',
+        feedback: 'A partial rollout does not address the underlying problem: the experiment result is invalid due to SRM. A 10% rollout of an untested change is not the same as a validated experiment result. The pricing page affects a high-intent conversion funnel — shipping an untested variant to any real traffic without valid experimental evidence is a risk that isn\'t justified by a contaminated positive result.'
+      }
+    ],
+
+    idealDecision: 'invalidate-rerun',
+    secondBestDecision: 'exclude-bots-ship',
+
+    juniorMistake: 'Ships on +18% because the p-value is significant and accepts the analyst\'s argument that bots don\'t affect a conversion metric. Does not understand that denominator inflation affects conversion rates, and does not follow through on what SRM actually invalidates.',
+
+    seniorFlags: [
+      'Any SRM with a confirmed root cause is a full invalidation — not a "small" problem to adjust around. The root cause here (URL pattern exposure to a pricing scraper) is systematic and reproducible, meaning the contamination is not random. Analytical adjustment of the denominator does not restore the independence of the assignment mechanism.',
+      'The bot-exclusion diagnostic is the right analysis to run, but the correct interpretation is: "after removing identified bots, the result is non-significant at p=0.18." This is not a reason to ship — it is a reason to rerun. The experiment was underpowered relative to the true effect size once contamination is removed.',
+      'The demo request rate (+6.1%, p=0.21) is the most trustworthy signal in this readout because demo requests require a human form fill — bots cannot inflate this metric. The directionally positive demo rate is weak evidence that the new page has a real effect, but it is not sufficient to ship without a clean experiment.'
+    ],
+
+    staffFlags: [
+      'Would have required at experiment design that both variants be served from the same URL, with variant assignment handled server-side (cookie or session hash). Exposing variant-specific URLs to public traffic is a known SRM risk for any product with competitive intelligence scrapers — which includes virtually all B2B SaaS pricing pages.',
+      'Would have pre-registered bot filtering criteria before the experiment started, not post-hoc. Post-hoc bot identification creates a garden-of-forking-paths problem: if the result had been null, would we have looked for bots? Pre-registration of exclusion criteria is part of a clean experimental protocol.'
+    ],
+
+    debrief: 'SRM (Sample Ratio Mismatch) invalidates an experiment regardless of how compelling the primary metric result looks. The intuition behind this is simple: if the assignment mechanism is broken, we cannot assume the treatment and control groups are comparable. Any difference in outcomes might reflect a difference in the groups, not a difference caused by the treatment.\n\nIn this case, the SRM root cause is unusually clear: a pricing intelligence scraper picked up the new treatment URL and made ~4,200 bot visits to the treatment arm over 14 days. The analyst\'s defense — "bots don\'t convert, so the conversion metric is clean" — sounds reasonable but is wrong in two ways.\n\nFirst, it misidentifies what SRM invalidates. The problem is not that bots converted. The problem is that their presence in the treatment arm (and not the control arm) means the two arms are no longer equivalent populations of human visitors. Bot traffic may have arrived at specific times of day, may have affected page caching or CDN behavior, or may have crowded out human sessions during high-traffic periods. These second-order effects are not visible in the conversion metric but they undermine the comparability assumption.\n\nSecond, the exclusion analysis confirms the practical impact: when the 4,200 bot sessions are removed from the treatment denominator, the lift drops from +18% to +9.4% and the result becomes non-significant (p=0.18). The experiment was powered to detect a 10% relative lift — the cleaned point estimate is below that threshold and the CI spans null.\n\nThe right call is to invalidate the experiment, fix the URL exposure problem (serve both variants from the same URL with server-side assignment), implement CDN-level bot filtering, and rerun. The directionally positive demo request rate (+6.1%) — a human-only signal — offers some encouragement that the new page may genuinely outperform, but it is not sufficient evidence on its own.\n\nThe process failure here is the lack of pre-registered bot exclusion criteria. If the experiment had pre-specified "sessions with zero time-on-page and known scraper user-agents will be excluded," the post-hoc exclusion would carry more weight. Without pre-registration, post-hoc exclusion is a forking path.',
+
+    interviewTakeaway: 'SRM with a confirmed root cause is a full experiment invalidation — not a small adjustment. The argument that "non-converting bots don\'t affect a conversion metric" is wrong: bots inflate the denominator and may affect group comparability in ways not visible in the top-line metric. The correct call is to identify the root cause, fix the assignment mechanism, and rerun. Always pre-register bot exclusion criteria before the experiment starts.',
+
+    relatedConcepts: ['sample ratio mismatch', 'bot traffic', 'assignment mechanism', 'denominator inflation', 'experiment invalidation', 'pre-registration'],
+    scenarioFamily: 'srm',
+    tags: ['srm', 'bot traffic', 'pricing page', 'b2b saas', 'conversion', 'url exposure', 'experiment invalidation']
+  },
+
+  // ─────────────────────────────────────────────
+  // SCENARIO 24 — The Consent Banner That Broke the Split
+  // Theme: srm
+  // ─────────────────────────────────────────────
+  {
+    id: 's24-cookie-consent-srm',
+    title: 'The Consent Banner That Broke the Split',
+    subtitle: 'New checkout flow shows SRM 54/46. Root cause: the new flow triggers a different cookie consent banner that bounces users before assignment completes.',
+    isFree: false,
+    industry: 'marketplace',
+    difficulty: 'senior',
+    theme: 'srm',
+
+    context: {
+      company: 'Crafted',
+      product: 'Consumer marketplace for handmade goods — EU-focused, 2.1M monthly active buyers, 340K sellers',
+      team: 'Checkout and Conversion team',
+      background: 'Crafted ran a 50/50 A/B test of a redesigned checkout flow. The new flow consolidated three checkout steps into two, surfaced saved payment methods earlier, and added a real-time delivery estimate. The experiment targeted all EU buyers initiating checkout over a 21-day window.\n\nSRM check: control received 54% of assigned sessions, treatment received 46%. Chi-square p-value: <0.001.\n\nRoot cause investigation: Crafted\'s cookie consent implementation (required under GDPR) is triggered at the page level. The existing checkout flow (control) uses a page that already has a prior consent record for most returning users — the consent banner rarely fires. The new checkout flow (treatment) uses a newly created page path that does not inherit the prior consent cookie, causing the GDPR consent banner to fire for all users on their first visit to the new path. A significant fraction of users — concentrated among mobile users on slow connections — bounce when the consent banner fires mid-checkout before the page fully loads. These users exit before their session is properly logged in the experiment assignment table.\n\nResult: treatment arm is systematically missing a portion of sessions (the bounced-on-consent users), making it appear smaller. Primary metric: checkout completion rate. Treatment shows +11% lift (p=0.04).',
+      businessPressure: 'The Checkout team has been working on this redesign for six weeks. The PM argues: "We know why the SRM happened — the consent banner. That\'s a known GDPR limitation in EU. We can adjust the results analytically by reweighting for the missing sessions. The conversion lift is real." The Head of Engineering wants to ship before the holiday season.'
+    },
+
+    hypothesis: 'Consolidating checkout into two steps and surfacing saved payment methods earlier will increase checkout completion rate compared to the three-step checkout flow.',
+
+    experimentDesign: {
+      type: 'a/b',
+      allocation: '50/50',
+      runtime: '21 days',
+      targetPopulation: 'EU buyers initiating checkout (~94,000 sessions per arm expected under clean 50/50)',
+      primaryMetric: 'Checkout completion rate (checkout initiated to order placed)',
+      guardrailMetrics: ['Payment error rate', 'Time-to-complete checkout (median)', 'Customer support contacts within 24h of purchase'],
+      sampleSizeContext: 'Powered to detect a 5% relative lift at 80% power. SRM identified: control 54%, treatment 46% of assigned sessions. Consent-bounce users are missing from assignment records — their sessions are not logged before exit.'
+    },
+
+    metricReadout: [
+      {
+        metric: 'Checkout completion rate — as-logged',
+        type: 'primary',
+        direction: 'up',
+        delta: '+11%',
+        pValue: 0.04,
+        confidenceInterval: '[+0.6%, +21.4%]',
+        significant: true,
+        note: 'Significant on logged sessions. But the SRM means the treatment arm is systematically missing users who bounced on the consent banner — these are real users who were assigned to treatment but exited before being logged. The treatment arm is a survivor-biased sample: it over-represents users who made it past the consent banner, who are systematically different (higher intent, better connection, desktop-skewed).'
+      },
+      {
+        metric: 'SRM check (session allocation)',
+        type: 'diagnostic',
+        direction: 'neutral',
+        delta: 'Control: 54% | Treatment: 46%',
+        pValue: 0.001,
+        confidenceInterval: null,
+        significant: true,
+        note: 'SRM confirmed. The consent banner fires for all treatment sessions on a new page path and causes a mobile-concentrated bounce before session logging. The missing sessions are not random — they are skewed toward mobile, lower-bandwidth users with lower average order values.'
+      },
+      {
+        metric: 'Treatment arm: mobile vs. desktop session share',
+        type: 'diagnostic',
+        direction: 'neutral',
+        delta: 'Control: 58% mobile | Treatment: 44% mobile',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: 'The mobile share in the treatment arm is 14pp lower than in control. This is the demographic signature of the consent-bounce SRM: mobile users on slower connections are disproportionately lost from treatment before session logging. The treatment arm\'s logged sessions skew toward desktop users, who have higher average order values and higher baseline completion rates.'
+      },
+      {
+        metric: 'Checkout completion rate — desktop users only',
+        type: 'diagnostic',
+        direction: 'up',
+        delta: '+4.2%',
+        pValue: 0.31,
+        confidenceInterval: '[-3.9%, +12.3%]',
+        significant: false,
+        note: 'When restricted to desktop users (where the SRM-induced demographic shift is minimal), the lift is +4.2% and non-significant. This is more representative of what a clean experiment would show for desktop. Mobile-only analysis is confounded by the consent-bounce selection.'
+      }
+    ],
+
+    warningFlags: [
+      {
+        id: 'wf-srm-assignment-broken',
+        label: 'SRM root cause is in the assignment mechanism itself — analytical adjustment cannot fix broken randomization',
+        description: 'The consent banner fires before session assignment is logged. This means the treatment arm never records these users at all — they are not assigned-and-excluded, they are unassigned. The standard analytical adjustment for SRM (reweighting by observed covariates) assumes the missing units are missing at random conditional on covariates. Here, the missingness is caused by the treatment itself (the new page path triggers the consent banner). This is informative missingness: users who bounce on consent are systematically different from users who complete the consent flow. Reweighting cannot reconstruct what these users would have done in the checkout flow.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-survivor-bias',
+        label: 'Treatment arm is a survivor-biased sample — logged treatment users are higher-intent than logged control users',
+        description: 'The 14pp mobile shortfall in the treatment arm is direct evidence of survivor bias. Mobile users on slow connections — who are more likely to bounce on the consent banner — are systematically underrepresented in the treatment arm. Mobile users at Crafted have lower average order values and lower baseline checkout completion rates. The treatment arm\'s logged sample skews toward higher-intent, desktop-heavy users. The +11% conversion lift is partly a selection effect: treatment users are a more conversion-prone group, not a representative group.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-pm-analytical-adjustment',
+        label: 'PM\'s proposal to "adjust analytically" does not fix a broken assignment mechanism',
+        description: 'Post-hoc reweighting can correct for observed covariate imbalances (e.g., if mobile share differs between arms, we can reweight by mobile/desktop). But it cannot account for unobserved differences between users who successfully navigated the consent flow and users who did not. The checkout intent, price sensitivity, and session context of consent-bouncers are unknown. There is no valid analytical path to a trustworthy result from this experiment.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-consent-page-path',
+        label: 'Root cause is fixable: new page path must inherit the existing consent cookie',
+        description: 'The fix is engineering-level: the new checkout flow\'s page path must be configured to inherit the existing consent cookie state rather than triggering a fresh consent flow. This requires either aliasing the path in the consent management platform or pre-checking consent state before initializing the new checkout page. Once fixed, the consent banner will fire only for genuinely new users — the same rate as control — and the SRM will be eliminated.',
+        severity: 'warning'
+      }
+    ],
+
+    decisions: [
+      {
+        id: 'ship',
+        label: 'Ship the new checkout flow — +11% conversion is significant and the SRM cause is understood.',
+        description: 'The SRM is explained. Ship.',
+        score: 'junior_miss',
+        feedback: 'Understanding why the SRM happened does not validate the result. The treatment arm is a systematically biased sample: it is missing mobile users who bounced on the consent banner before being logged. The logged treatment users over-represent desktop, higher-intent buyers. The +11% lift is at least partly a selection artifact. Shipping an untested checkout flow to all users — including the mobile users who were systematically excluded from the experiment — risks harming the segment that was not represented in the result.'
+      },
+      {
+        id: 'adjust-analytically',
+        label: 'Reweight the results by device type and other covariates to correct for the demographic imbalance.',
+        description: 'Use inverse probability weighting to adjust for the mobile/desktop imbalance.',
+        score: 'analyst_ready',
+        feedback: 'Reweighting by observed covariates (device type, past purchase count) can partially correct for the demographic imbalance. But the consent-bounce users are not just different on device type — they are different on unobserved dimensions too (checkout intent, connection quality, price sensitivity). The missingness is caused by the treatment itself, which means the missing-at-random assumption required for valid reweighting is violated. The desktop-only subgroup (where the SRM impact is minimal) shows +4.2% (p=0.31) — non-significant. This is the closest to a clean signal available and it does not support shipping.'
+      },
+      {
+        id: 'invalidate-fix-rerun',
+        label: 'Invalidate the experiment. Fix the consent cookie inheritance on the new page path. Rerun with clean assignment.',
+        description: 'The assignment mechanism is broken. Fix the root cause and rerun.',
+        score: 'senior_ready',
+        feedback: 'This is the correct call. The root cause is a specific, fixable engineering issue: the new checkout page path does not inherit the existing consent cookie, causing a fresh consent flow for all treatment users. Once the consent inheritance is fixed, the consent banner will fire at the same rate for both arms (only for genuinely new users), and the SRM will be eliminated. Rerunning with a clean assignment mechanism will produce a valid result. The 21-day experiment window was sufficient to power the test — a clean rerun of the same duration will be valid.'
+      },
+      {
+        id: 'ship-desktop-only',
+        label: 'Ship the new checkout flow to desktop users only, where the SRM impact is minimal.',
+        description: 'Desktop users are the cleanest subgroup. Ship there first.',
+        score: 'analyst_ready',
+        feedback: 'The desktop-only subgroup result (+4.2%, p=0.31) is not significant. Shipping based on a non-significant subgroup result from a contaminated experiment is not a valid evidence base. Additionally, shipping different checkout flows to desktop and mobile users creates product inconsistency and operational complexity. The right path is a clean full-traffic experiment after fixing the consent inheritance issue.'
+      },
+      {
+        id: 'extend',
+        label: 'Extend the experiment for another 21 days to accumulate more power.',
+        description: 'More data will give a clearer picture.',
+        score: 'junior_miss',
+        feedback: 'Extending a contaminated experiment does not fix the contamination. The consent-bounce SRM will continue for as long as the new page path does not inherit the existing consent cookie. Every new day of the experiment adds more sessions to the biased treatment arm. The experiment cannot be salvaged by extension — it needs a fresh start with a fixed assignment mechanism.'
+      }
+    ],
+
+    idealDecision: 'invalidate-fix-rerun',
+    secondBestDecision: 'adjust-analytically',
+
+    juniorMistake: 'Accepts the PM\'s argument that "the SRM cause is known, so we can adjust for it" and treats the +11% result as valid after reweighting. Does not understand that informative missingness caused by the treatment itself cannot be corrected by observed covariate reweighting.',
+
+    seniorFlags: [
+      'The critical distinction in SRM analysis is whether the missing units are missing completely at random (MCAR), missing at random conditional on covariates (MAR), or missing not at random (MNAR). A consent-bounce SRM is MNAR: missingness is caused by the treatment condition itself. MNAR missingness cannot be corrected by covariate reweighting. This is what the PM\'s "adjust analytically" proposal gets wrong.',
+      'The device-mix diagnostic (58% mobile in control, 44% mobile in treatment) is the right thing to check immediately after an SRM is confirmed. The 14pp gap is large enough to explain a substantial fraction of the +11% conversion lift. Mobile users have lower baseline checkout completion rates at Crafted — their underrepresentation in treatment inflates the apparent treatment conversion rate.',
+      'The desktop-only subgroup result (+4.2%, p=0.31) is the most informative clean signal available. It suggests the new checkout flow may have a small positive effect on desktop, but the experiment is not powered to confirm it in a subgroup analysis. This is the signal that should inform the rerun: power the new experiment to detect a 4–5% relative lift.'
+    ],
+
+    staffFlags: [
+      'Would have required at experiment design that the new page path be tested in staging for consent-cookie inheritance before any traffic was sent to it. For EU products with GDPR consent management, every new page path must be audited for consent behavior before experiment launch. This is a standard pre-launch checklist item for EU-market experiments.',
+      'Would have pre-specified the SRM diagnostic plan: if SRM is detected, immediately pull the device-mix comparison and consent-event firing rate by arm before any outcome analysis. The demographic diagnostic is the fastest way to characterize the selection bias and determine whether analytical adjustment is even worth attempting.'
+    ],
+
+    debrief: 'SRM invalidates experiments because it signals that the assignment mechanism — the process that determines which users are in control and which are in treatment — did not work as intended. The key question is always: why are the arms unequal in size, and is the cause random or systematic?\n\nIn this case, the cause is systematic and informative. The new checkout page path does not inherit the existing consent cookie, so the GDPR consent banner fires for all treatment users on their first visit. On mobile devices with slower connections, a meaningful fraction of users bounces before the page fully loads and before their session is logged in the experiment assignment table. These users are never counted in the experiment — not even as unassigned dropouts.\n\nThis creates a particular kind of SRM that is especially damaging: the missing units are missing not at random. Their absence from the treatment arm is caused by the treatment itself (the new page path). This means the treatment arm is a survivor-biased sample: it over-represents users who successfully navigated the consent flow, who are systematically higher-intent, more desktop-heavy, and more conversion-prone than the full population of users who would have encountered the new checkout flow in production.\n\nThe PM\'s proposal to adjust analytically by reweighting for device type is a reasonable instinct but fails on the MAR assumption. We can reweight by device type, but we cannot reweight for the unobserved differences between users who made it through the consent flow and users who did not — differences in checkout intent, price sensitivity, session context, and patience under latency. These unobserved dimensions drive the selection and cannot be recovered from the data.\n\nThe desktop-only subgroup (+4.2%, p=0.31) is the most trustworthy available signal, and it is non-significant. This tells us the effect, if real, is smaller than the +11% top-line suggests. Power the rerun to detect a 4–5% relative lift and fix the consent inheritance before launch.',
+
+    interviewTakeaway: 'SRM caused by the treatment condition itself (informative missingness) is not fixable by analytical adjustment. Reweighting by observed covariates assumes missing-at-random — when missingness is caused by the treatment, that assumption fails. Identify the demographic signature of the missing units, check the most trustworthy clean subgroup, fix the root cause, and rerun.',
+
+    relatedConcepts: ['sample ratio mismatch', 'GDPR consent', 'informative missingness', 'survivor bias', 'missing not at random', 'covariate reweighting'],
+    scenarioFamily: 'srm',
+    tags: ['srm', 'cookie consent', 'GDPR', 'EU', 'marketplace', 'checkout', 'mobile', 'survivor bias']
+  },
+
+  // ─────────────────────────────────────────────
+  // SCENARIO 25 — The D1 Mirage
+  // Theme: novelty_peeking
+  // ─────────────────────────────────────────────
+  {
+    id: 's25-d1-novelty-onboarding',
+    title: 'The D1 Mirage',
+    subtitle: 'New animated onboarding shows +11% D1 retention. D7 retention is already decaying to noise. D30 data not in yet.',
+    isFree: false,
+    industry: 'consumer_app',
+    difficulty: 'analyst',
+    theme: 'novelty_peeking',
+
+    context: {
+      company: 'Prism',
+      product: 'Short-form video app — 8.4M monthly active users, primarily 18–28 age cohort, US and Canada',
+      team: 'Growth and Onboarding team',
+      background: 'Prism\'s onboarding flow for new installs has been unchanged for 11 months: three static permission screens (camera, microphone, notifications) followed by a topic interest selector and a feed seed. The team redesigned the onboarding with animated screens: smooth transitions between permission prompts, a progress indicator, and a personalized "Your feed is ready" reveal animation at the end.\n\nThe experiment ran for 18 days targeting all new installs: 50/50 split at install time. SRM check is clean.\n\nRetention results by cohort day:\n- D1 retention: treatment +11.2% vs. control (p=0.02)\n- D7 retention: treatment +1.2% vs. control (p=0.61)\n- D30 retention: data not yet available (requires 30 days from install; experiment started 18 days ago, so only the first 18 cohort days have D30 data)\n\nThe PM wants to ship based on the D1 signal, arguing: "D1 is the most actionable retention metric. We have a significant result. Let\'s not wait another 12 days for D30 data we may not need."',
+      businessPressure: 'Prism\'s Q3 OKR includes a D1 retention improvement target. The PM is under pressure to ship a win before the quarter closes in 6 weeks. The Head of Product agrees that D1 is the team\'s primary focus metric for new user activation. The D7 decay is noted but framed as "expected variance."'
+    },
+
+    hypothesis: 'Animated onboarding screens with a personalized reveal will increase new user retention at D1, D7, and D30 by creating a more engaging first-time experience.',
+
+    experimentDesign: {
+      type: 'a/b',
+      allocation: '50/50',
+      runtime: '18 days (ongoing — D30 data requires 30 days from install)',
+      targetPopulation: 'New installs during experiment window (~22,000 users per arm)',
+      primaryMetric: 'D7 retention (pre-registered as primary in the experiment brief)',
+      guardrailMetrics: ['Onboarding completion rate', 'Permission grant rate (camera, microphone, notifications)', 'D1 uninstall rate'],
+      sampleSizeContext: 'Experiment brief pre-registered D7 retention as primary metric. D1 retention was listed as a leading indicator. The experiment was powered for D7 retention at 80% power to detect a 5% relative lift.'
+    },
+
+    metricReadout: [
+      {
+        metric: 'D1 retention',
+        type: 'secondary',
+        direction: 'up',
+        delta: '+11.2%',
+        pValue: 0.02,
+        confidenceInterval: '[+1.7%, +20.7%]',
+        significant: true,
+        note: 'Significant. Wide CI. D1 is the window most susceptible to novelty effect: new users experience animated onboarding exactly once. The animation\'s novelty may drive higher same-day return without translating to habit formation. D1 retention also includes users who return purely to explore the new visual — a behavior that does not persist.'
+      },
+      {
+        metric: 'D7 retention',
+        type: 'primary',
+        direction: 'up',
+        delta: '+1.2%',
+        pValue: 0.61,
+        confidenceInterval: '[-3.4%, +5.8%]',
+        significant: false,
+        note: 'Not significant. The pre-registered primary metric. The D1 lift has already decayed to noise by D7. This is the early signature of a novelty effect: the treatment outperforms on the first engagement window but the gap closes rapidly. If the effect were driven by genuine habit formation, we would expect the D7 lift to be directionally consistent with D1 and of similar magnitude.'
+      },
+      {
+        metric: 'D30 retention',
+        type: 'primary',
+        direction: 'neutral',
+        delta: 'Not yet available',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: 'D30 data requires 30 days from install date. The experiment has been running 18 days, so only the first 18 cohort days have matured to D30. Full D30 data is available in 12 days.'
+      },
+      {
+        metric: 'Onboarding completion rate',
+        type: 'guardrail',
+        direction: 'up',
+        delta: '+3.4%',
+        pValue: 0.08,
+        confidenceInterval: '[-0.4%, +7.2%]',
+        significant: false,
+        note: 'Directionally positive, not significant. More users complete the animated onboarding than the static version. This is a genuine usability improvement signal — but onboarding completion is a means, not an end. What matters is whether completing onboarding leads to retained usage.'
+      },
+      {
+        metric: 'D1 retention by cohort day (trend)',
+        type: 'diagnostic',
+        direction: 'neutral',
+        delta: 'Days 1–5 of experiment: D1 lift +14.8%. Days 11–18 of experiment: D1 lift +8.1%.',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: 'The D1 retention lift is declining over successive cohorts. Users installing in the first days of the experiment show a larger D1 boost than users installing in more recent cohort days. This is the novelty decay signature: the animation effect is strongest for earliest adopters and attenuates as novelty wears off in the broader install cohort.'
+      }
+    ],
+
+    warningFlags: [
+      {
+        id: 'wf-d7-decay',
+        label: 'D7 retention (pre-registered primary) is already non-significant — D1 lift has fully decayed',
+        description: 'The experiment brief pre-registered D7 retention as the primary metric. D7 is already available and is non-significant at p=0.61. The D1 significant result and the D7 null result together are the classic signature of a novelty effect: the treatment creates an elevated first-day engagement window that does not persist to weekly usage. Shipping on D1 when the pre-registered primary is null is a direct violation of the pre-registered analysis plan.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-novelty-decay-cohort-trend',
+        label: 'D1 lift declining across successive cohort days — novelty effect confirmed by temporal trend',
+        description: 'Users installing in the first 5 days of the experiment show a D1 lift of +14.8%. Users installing in days 11–18 show a lift of +8.1%. If the treatment effect were genuine habit formation, we would expect consistent D1 lift across cohort days. The declining trend confirms that the animation effect is novelty-driven: early cohort users are most susceptible because they encounter the animation before it becomes familiar. Later cohorts show a smaller effect as novelty attenuates.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-preregistered-primary-ignored',
+        label: 'PM is proposing to ship on a secondary metric while ignoring the non-significant pre-registered primary',
+        description: 'D1 retention was listed in the experiment brief as a "leading indicator." D7 retention was listed as the primary metric. The experiment was powered for D7. Shipping on D1 when D7 is non-significant is not a valid use of the pre-registered analysis plan — it is a post-hoc primary metric switch motivated by a positive result. This is a form of p-hacking by metric selection.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-d30-missing',
+        label: 'D30 data available in 12 days — shipping now means never knowing the long-run effect',
+        description: 'D30 retention is 12 days from being fully available. For a video app where long-run retention drives ad revenue and creator ecosystem health, D30 is the metric that matters most commercially. Shipping before D30 data is available means permanently closing the window to understand the long-run impact. If the treatment harms D30 retention (by setting expectations the product cannot meet), the team will never have a clean counterfactual to measure the damage.',
+        severity: 'warning'
+      }
+    ],
+
+    decisions: [
+      {
+        id: 'ship-d1',
+        label: 'Ship on D1 retention — the result is significant and D1 is the team\'s activation metric.',
+        description: 'D1 is significant at p=0.02. Ship.',
+        score: 'junior_miss',
+        feedback: 'The experiment brief pre-registered D7 as the primary metric. D7 is already non-significant (p=0.61). Shipping on D1 ignores the pre-registered primary and selects a secondary metric with a positive result — a classic post-hoc metric switch. The D1 lift has a strong novelty effect signature: it is declining across successive cohort days and has already decayed to noise at D7. Shipping on this result risks deploying an experience that improves first-day engagement metrics without improving actual retention.'
+      },
+      {
+        id: 'extend-d30',
+        label: 'Wait 12 more days for full D30 data, then make the ship decision on D7 + D30 together.',
+        description: 'D30 data is 12 days away. Wait for the full retention picture.',
+        score: 'senior_ready',
+        feedback: 'This is the right call. The pre-registered primary (D7) is non-significant and the D1 lift is showing novelty decay. Waiting 12 more days gives full D30 data, which will determine whether the onboarding change has any durable effect on retention. If D30 is also non-significant, the experiment is a null — the animation improves novelty engagement but not habit. If D30 is positive, it would be surprising given the D7 decay, but worth investigating. Either way, 12 days is a small cost relative to the risk of shipping a change that improves D1 metrics without improving real retention.'
+      },
+      {
+        id: 'ship-with-monitoring',
+        label: 'Ship but monitor D7 and D30 retention post-launch to validate.',
+        description: 'Ship now and use post-launch observational data to confirm retention.',
+        score: 'analyst_ready',
+        feedback: 'Post-launch observational monitoring cannot serve as a valid control. Once the new onboarding is shipped to all users, there is no control arm. Any observed retention trend post-launch is confounded by seasonality, product changes, marketing cohorts, and other factors. The opportunity to get a clean D30 measurement is the experiment itself — once it is over and the change is shipped, that window is permanently closed. The 12-day wait is the only path to a valid D30 estimate.'
+      },
+      {
+        id: 'null-rollback',
+        label: 'Call it a null result based on D7 and do not ship.',
+        description: 'D7 is the primary metric and it\'s non-significant. Null result.',
+        score: 'analyst_ready',
+        feedback: 'Calling a null on D7 alone is defensible given that D7 is the pre-registered primary and it is clearly non-significant. But waiting 12 days for D30 is a better call: it either confirms the null (D30 also non-significant) or surfaces a surprise (D30 positive despite D7 decay, which would warrant investigation). A null call now closes the question prematurely when additional data is 12 days away at low incremental cost.'
+      }
+    ],
+
+    idealDecision: 'extend-d30',
+    secondBestDecision: 'null-rollback',
+
+    juniorMistake: 'Ships on D1 retention because p=0.02 is significant, treating D1 as the key activation metric and dismissing D7 decay as "variance." Does not recognize that D7 was pre-registered as primary, that D1 is the peak novelty window, or that the cohort-day trend is a novelty decay signature.',
+
+    seniorFlags: [
+      'The pre-registered primary metric is D7, and it is non-significant. Any ship decision based on D1 alone is a post-hoc metric switch — a violation of the pre-registered analysis plan. In a rigorous experimental culture, the primary metric is defined before results are seen, and shipping based on a secondary metric when the primary is null requires explicit justification and usually a confirmatory rerun.',
+      'The cohort-day temporal trend in D1 lift (14.8% in early cohort days decaying to 8.1% in later cohort days) is the single most important piece of diagnostic evidence in this readout. It confirms that the D1 lift is novelty-driven: early adopters respond most strongly to the new animation, and the effect attenuates as the novelty wears off. This pattern predicts that D7 and D30 will be null, which D7 already confirms.',
+      'For a short-form video app, D30 retention is the metric most directly correlated with long-run ad revenue, creator engagement, and platform health. D1 retention is useful as a leading indicator but is known to be susceptible to novelty effects. Any retention experiment on a consumer app should have D30 as either the primary metric or a mandatory gating condition before ship.'
+    ],
+
+    staffFlags: [
+      'Would have pre-registered D30 as a mandatory gating condition (not just a secondary metric) at experiment design. For any onboarding change, the question is not "did we improve first-day engagement" but "did we improve the probability that new users become habitual users." D30 is the minimum horizon for answering that question on a short-form video product.',
+      'Would have included the cohort-day temporal D1 trend as a pre-registered novelty diagnostic: if the D1 lift declines by more than 30% from the first week of cohort entries to the second week, the result is flagged as novelty-driven and D30 becomes the only valid decision metric. This pre-registration removes the ambiguity about whether a declining temporal trend is "expected variance" or a novelty signature.'
+    ],
+
+    debrief: 'Novelty effects are one of the most common sources of false positives in consumer app experiments. When a new feature, design, or flow is visually different from the baseline, users notice — and they engage more on day one simply because something is new. This elevated first-day engagement is not habit formation; it is curiosity. The question every PM should ask about a D1 retention lift is: is this effect driven by genuine improvement to the product\'s core value, or is it driven by users noticing something is different?\n\nThe evidence in this readout answers that question clearly. Three signals point to novelty:\n\nFirst, D7 retention — the pre-registered primary metric — is non-significant at p=0.61. The D1 lift of +11.2% has fully decayed to noise within a week. If the animation improved the onboarding experience in a way that drove habit formation, we would expect a directionally consistent D7 lift. Instead, D7 is essentially flat.\n\nSecond, the cohort-day temporal trend shows the D1 lift declining from +14.8% in early cohort days to +8.1% in later cohort days. This is the novelty decay pattern: users who encountered the animated onboarding in the first days of the experiment had the strongest reaction because the animation was most novel. Users installing later show a smaller D1 effect as the novelty signal attenuates across successive cohorts.\n\nThird, the pre-registration context matters. The experiment brief listed D7 as primary and D1 as a leading indicator. The PM is now proposing to ship based on the leading indicator while the primary is null. This is a post-hoc primary metric switch — the kind of analysis flexibility that inflates false positive rates.\n\nThe correct call is to wait 12 days for D30 data. If D30 is also null, the experiment is a clean null: animated onboarding improves novelty engagement but not habit. If D30 is surprisingly positive, it would be unusual given the D7 decay pattern and would warrant investigation. Either way, 12 days is a low cost for a high-quality answer on the metric that matters most.',
+
+    interviewTakeaway: 'A D1 retention lift with a null D7 result is the classic novelty effect signature. D1 is the window most susceptible to novelty — users engage because something is different, not because the product is better. If D7 (the pre-registered primary) is null, shipping on D1 is a post-hoc metric switch. Always check for temporal decay in the D1 effect across successive cohort days — declining lift over time confirms novelty.',
+
+    relatedConcepts: ['novelty effect', 'retention cohort analysis', 'pre-registration', 'metric selection', 'temporal decay', 'D1 vs D7 vs D30'],
+    scenarioFamily: 'novelty_peeking',
+    tags: ['novelty effect', 'retention', 'onboarding', 'D1', 'D7', 'D30', 'consumer app', 'video app', 'pre-registration']
+  },
+
+  // ─────────────────────────────────────────────
+  // SCENARIO 26 — The Three-Analyst Peek
+  // Theme: novelty_peeking
+  // ─────────────────────────────────────────────
+  {
+    id: 's26-multi-analyst-peeking',
+    title: 'The Three-Analyst Peek',
+    subtitle: 'Three analysts independently checked results on days 3, 5, and 7. Each time p crossed 0.05. On day 9, p=0.04 is "confirmed significant." It isn\'t.',
+    isFree: false,
+    industry: 'ecommerce',
+    difficulty: 'senior',
+    theme: 'novelty_peeking',
+
+    context: {
+      company: 'Vela',
+      product: 'E-commerce platform — home goods and lifestyle, 1.4M monthly active buyers, average order value $87',
+      team: 'Revenue and Conversion team',
+      background: 'Vela ran a 14-day A/B test of a new product page layout. The redesign added a sticky add-to-cart bar, condensed the image gallery from six images to three with a swipe gesture, and moved customer reviews above the fold. Primary metric: revenue per visitor (RPV).\n\nThe experiment had a planned runtime of 14 days. Three analysts on the Revenue team each happened to check the experiment dashboard at different times:\n- Analyst A checked on Day 3: RPV treatment delta +4.1%, p=0.047. Sent a Slack message: "Looking good, almost there."\n- Analyst B checked on Day 5: RPV delta +3.8%, p=0.038. Slack: "We\'re significant! Should we ship?"\n- Analyst C checked on Day 7: RPV delta +2.9%, p=0.061. Slack: "Slipped back under. Wait for Day 14."\n- All three results and the Slack messages were visible to the PM and team lead.\n- Day 9 readout: RPV delta +3.2%, p=0.04. Team lead declares: "We\'ve been significant three times now. Day 9 is confirmed significant. Shipping."\n\nThe experiment was designed for a 14-day runtime with a fixed-horizon test (not a sequential test). No alpha spending plan was pre-registered.',
+      businessPressure: 'Vela\'s conversion team has a Q3 target to ship three revenue-positive experiments. The team lead sees multiple p<0.05 crossings as additional confirmation rather than additional risk. The PM says: "If three analysts all saw significance at different times, it\'s not a fluke."'
+    },
+
+    hypothesis: 'A product page redesign with a sticky add-to-cart bar, condensed image gallery, and above-the-fold reviews will increase revenue per visitor compared to the current product page layout.',
+
+    experimentDesign: {
+      type: 'a/b',
+      allocation: '50/50',
+      runtime: '14 days planned (stopped at day 9)',
+      targetPopulation: 'Visitors to product pages in the experiment (~48,000 visitors per arm over 14 days)',
+      primaryMetric: 'Revenue per visitor (RPV)',
+      guardrailMetrics: ['Add-to-cart rate', 'Checkout initiation rate', 'Return rate (7-day post-purchase)'],
+      sampleSizeContext: 'Powered to detect a 4% relative lift in RPV at 80% power over 14 days. No sequential testing or alpha spending plan was pre-registered. Fixed-horizon design.'
+    },
+
+    metricReadout: [
+      {
+        metric: 'Revenue per visitor — Day 9 readout',
+        type: 'primary',
+        direction: 'up',
+        delta: '+3.2%',
+        pValue: 0.04,
+        confidenceInterval: '[+0.2%, +6.2%]',
+        significant: true,
+        note: 'Significant at the day-9 stopping point. But this is the fourth time the team has looked at results (days 3, 5, 7, 9). Under a fixed-horizon design, the effective alpha is inflated by repeated looks. Four looks at a fixed-horizon test at alpha=0.05 per look inflates the family-wise error rate to approximately 18–20%. The true false positive rate for this result is far above 5%.'
+      },
+      {
+        metric: 'Revenue per visitor — Day 3',
+        type: 'diagnostic',
+        direction: 'up',
+        delta: '+4.1%',
+        pValue: 0.047,
+        confidenceInterval: null,
+        significant: true,
+        note: 'First informal look. Not a pre-registered interim analysis. Alpha was not adjusted.'
+      },
+      {
+        metric: 'Revenue per visitor — Day 5',
+        type: 'diagnostic',
+        direction: 'up',
+        delta: '+3.8%',
+        pValue: 0.038,
+        confidenceInterval: null,
+        significant: true,
+        note: 'Second informal look. "We\'re significant!" sent in Slack. Not a pre-registered interim. Alpha not adjusted.'
+      },
+      {
+        metric: 'Revenue per visitor — Day 7',
+        type: 'diagnostic',
+        direction: 'up',
+        delta: '+2.9%',
+        pValue: 0.061,
+        confidenceInterval: null,
+        significant: false,
+        note: 'Third informal look. Result slipped below significance threshold. This is the random walk of a p-value that is close to the decision boundary — it will cross and uncross the threshold multiple times by chance under the null hypothesis.'
+      },
+      {
+        metric: 'Add-to-cart rate',
+        type: 'guardrail',
+        direction: 'up',
+        delta: '+2.1%',
+        pValue: 0.22,
+        confidenceInterval: '[-1.3%, +5.5%]',
+        significant: false,
+        note: 'Directionally positive but not significant. If the RPV lift were driven by genuine conversion improvement, we would expect a directionally consistent add-to-cart signal. The weak and non-significant add-to-cart result is consistent with a noisy RPV estimate near the decision boundary.'
+      }
+    ],
+
+    warningFlags: [
+      {
+        id: 'wf-multi-analyst-peeking',
+        label: 'Three analysts checking independently is functionally equivalent to one analyst peeking three times',
+        description: 'Peeking inflates the false positive rate regardless of whether the same person does all the looking or multiple people each look once. Each look at a fixed-horizon experiment outside of a pre-registered interim analysis is an additional opportunity to stop early on a false positive. The fact that three different analysts each independently checked the dashboard does not make the multiple looks independent tests — they are all looking at the same accumulating data stream. The effective alpha for four looks (days 3, 5, 7, 9) at a fixed-horizon test is approximately 18–20% under a standard Pocock or O\'Brien-Fleming correction.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-slack-visibility',
+        label: 'Sharing interim results in Slack created social pressure to ship — this is a process failure, not just a stats failure',
+        description: 'The pattern of Analyst A and B sharing "we\'re significant!" in a shared Slack channel with the PM and team lead created expectation anchoring. By the time Day 9 results show p=0.04, the team lead has a social history of three prior significance crossings and interprets the Day 9 result as "confirmed." The process failure is not just statistical: sharing unadjusted interim results in a team channel creates a form of publication bias at the team level, where positive signals accumulate in memory and negative dips are dismissed as noise.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-optional-stopping',
+        label: 'Stopping at Day 9 rather than the pre-planned Day 14 is optional stopping — the decision to stop was made after observing a favorable result',
+        description: 'The experiment was designed to run 14 days. It was stopped at Day 9 after observing p=0.04 for the fourth time. Even if each look were at a pre-registered interim, stopping 5 days early reduces the sample size and the power of the test. Stopping because the result looks good — optional stopping — is the core mechanism by which peeking inflates false positive rates. The team lead\'s reasoning that "we\'ve been significant three times" is exactly backwards: multiple significance crossings near the boundary are evidence of a random walk near alpha, not confirmatory evidence of a true effect.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-no-sequential-test',
+        label: 'If interim looks are needed, the experiment should have used a sequential testing framework from the start',
+        description: 'Sequential testing frameworks (e.g., always-valid inference, alpha spending with O\'Brien-Fleming boundaries, mSPRT) are designed for experiments where the team needs to monitor results and stop early when evidence accumulates. They adjust the decision threshold at each look to preserve the family-wise error rate. Using a fixed-horizon design and peeking informally at the results is not sequential testing — it is fixed-horizon testing with inflated alpha.',
+        severity: 'warning'
+      }
+    ],
+
+    decisions: [
+      {
+        id: 'ship-day9',
+        label: 'Ship on Day 9 — p=0.04 with three prior significance crossings is strong confirmatory evidence.',
+        description: 'Multiple significance crossings confirm the result is real.',
+        score: 'junior_miss',
+        feedback: 'Multiple significance crossings of a fixed-horizon test near the alpha boundary are not confirmatory evidence — they are the expected behavior of a test statistic performing a random walk near the decision threshold. Under the null hypothesis, a test statistic that is near p=0.05 will cross and uncross the threshold multiple times. Each crossing is not an independent confirmation; it is the same noisy signal looked at repeatedly. The team lead\'s reasoning inverts the statistical logic. Four looks inflate the family-wise false positive rate to ~18–20%. The Day 9 result is not "confirmed significant" — it is "significant under an alpha that is 4x too large."'
+      },
+      {
+        id: 'run-to-day14',
+        label: 'Run to Day 14 as planned. Do not look at results again until the planned endpoint.',
+        description: 'Commit to the original 14-day fixed-horizon design.',
+        score: 'senior_ready',
+        feedback: 'This is the correct call for the current experiment. The fixed-horizon design requires running to the planned endpoint without acting on interim results. Stopping at Day 9 violates the fixed-horizon assumption. Running to Day 14 with a single final look at the planned endpoint gives a valid result at the pre-specified alpha=0.05. The team should also institute a process change: no sharing of interim results in Slack until the planned endpoint, and experiment dashboards should show only the planned endpoint date as a decision trigger.'
+      },
+      {
+        id: 'apply-bonferroni',
+        label: 'Apply a Bonferroni correction for four looks and re-evaluate significance at alpha=0.0125.',
+        description: 'Correct for the four looks and see if the result holds.',
+        score: 'analyst_ready',
+        feedback: 'Applying a post-hoc multiple comparisons correction is better than not correcting, but Bonferroni is conservative (it assumes the four looks are independent, which they are not — each look includes all prior data). A more appropriate adjustment would be an O\'Brien-Fleming or Pocock correction that accounts for the cumulative nature of sequential looks. Under O\'Brien-Fleming with four looks, the Day 9 threshold is approximately p=0.018, not p=0.05. The Day 9 result (p=0.04) does not pass this threshold. Running to Day 14 at the planned alpha is cleaner than post-hoc correction.'
+      },
+      {
+        id: 'rerun-sequential',
+        label: 'Invalidate the current experiment. Rerun with a pre-registered sequential testing framework.',
+        description: 'The right fix for a team that needs to monitor results is sequential testing from the start.',
+        score: 'senior_ready',
+        feedback: 'This is also correct and is the right long-run process fix. If the Vela Revenue team regularly monitors experiment dashboards and needs the ability to stop early when evidence accumulates, they should adopt a sequential testing framework (always-valid inference, mSPRT, or a group sequential design with pre-specified interim analysis times and alpha spending). Sequential testing provides valid early stopping with controlled false positive rates. The current approach — fixed-horizon design with informal peeking — is neither fixed-horizon nor sequential; it is the worst of both.'
+      }
+    ],
+
+    idealDecision: 'run-to-day14',
+    secondBestDecision: 'rerun-sequential',
+
+    juniorMistake: 'Interprets multiple p<0.05 crossings as independent confirmations of a true effect. Does not understand that each look at accumulating data is not a fresh independent test — it is the same data stream observed at a later point, and repeated observation inflates the family-wise error rate.',
+
+    seniorFlags: [
+      'The key insight is that peeking is a property of the decision process, not the identity of who looks. Three analysts each looking once at the same accumulating data stream have the same statistical effect as one analyst looking three times. The false positive rate is determined by the number of decision opportunities, not the number of decision-makers. Team coordination on experiment monitoring is a statistical problem, not just a workflow problem.',
+      'The p-value random walk is the right mental model for understanding why multiple crossings near alpha are not confirmatory. Under the null hypothesis, a test statistic near p=0.05 will bounce around the threshold by chance — it has no "memory" of prior crossings. Seeing p=0.047, 0.038, 0.061, 0.04 in succession is consistent with a noisy null result at the boundary, not a stable true positive.',
+      'The process fix is as important as the statistical fix. Experiment dashboards showing live p-values create a peeking culture by default. The right design is either: (a) lock the dashboard to show only the planned endpoint date and disable interim result views, or (b) adopt sequential testing with explicit early-stopping boundaries that are shown on the dashboard. Sharing interim results in Slack before the planned endpoint should be treated as a protocol violation.'
+    ],
+
+    staffFlags: [
+      'Would have required at experiment design that the team choose between fixed-horizon (no interim looks, single readout at planned endpoint) or sequential (pre-registered interim analysis times with explicit alpha spending). The choice should be made based on the team\'s business need: if early stopping is genuinely valuable (e.g., to catch a harmful treatment), use sequential. If there is no business need to stop early, use fixed-horizon and lock the dashboard until the endpoint.',
+      'Would have flagged the Slack pattern immediately when it started. Analyst A\'s "Looking good, almost there" message on Day 3 is the beginning of an expectation anchoring chain that compromises the team\'s ability to interpret Day 14 results objectively. A culture of sharing live p-values in team channels is a systematic false positive risk that manifests across many experiments, not just this one.'
+    ],
+
+    debrief: 'Peeking at experiment results before the planned endpoint inflates the false positive rate. This is a statistical fact that does not depend on intent, team structure, or how many people are doing the looking.\n\nThe intuition: under the null hypothesis (no true effect), a p-value performs a random walk. It starts near 0.5 (random) and drifts toward or away from 0.05 as data accumulates. If you watch a random walk long enough and are willing to stop whenever it crosses a threshold, you will eventually see a crossing even when the null is true. The probability of at least one crossing increases with each additional look.\n\nThe math confirms this: four equally-spaced looks at a fixed-horizon test at alpha=0.05 per look yield a family-wise false positive rate of approximately 18–20%. The team\'s Day 9 p=0.04 result is evaluated against a nominal alpha of 0.05, but the true false positive risk is nearly four times higher.\n\nThe team lead\'s reasoning — "we\'ve been significant three times, this is confirmed" — is exactly backwards. Multiple crossings near the decision boundary are the signature of a random walk near alpha, not confirmatory evidence. If the true effect were large and stable, we would expect p to consistently decrease over time as sample size grows, not to bounce around 0.05.\n\nThe process failure is equally important. Analyst A\'s "Looking good, almost there" Slack message on Day 3 set an expectation that was reinforced by subsequent crossings. By Day 9, the team is in a state where any p<0.05 will be interpreted as confirmation. This expectation anchoring is a form of team-level publication bias.\n\nThe fix has two components: (1) run to Day 14 and evaluate at the planned endpoint, and (2) change the process so interim results are not shared until the planned endpoint. If the team genuinely needs early stopping capability, adopt sequential testing with pre-registered interim analysis times and explicit alpha spending — not informal peeking.',
+
+    interviewTakeaway: 'Peeking is a property of the decision process, not the analyst. Multiple analysts each looking once has the same false positive risk as one analyst looking multiple times. Multiple p<0.05 crossings near alpha are a random walk signature, not confirmatory evidence. The fix is to either commit to the planned endpoint (fixed-horizon) or adopt sequential testing with pre-registered alpha spending from the start.',
+
+    relatedConcepts: ['peeking', 'optional stopping', 'alpha inflation', 'sequential testing', 'family-wise error rate', 'fixed-horizon testing', 'alpha spending'],
+    scenarioFamily: 'novelty_peeking',
+    tags: ['peeking', 'optional stopping', 'sequential testing', 'alpha inflation', 'multiple analysts', 'e-commerce', 'revenue per visitor']
+  },
+
+  // ─────────────────────────────────────────────
+  // S19 — SRM: The Missing Corporate Accounts
+  // ─────────────────────────────────────────────
+  {
+    id: 's19-vanta-srm',
+    title: 'The Missing Corporate Accounts',
+    subtitle: 'Vanta · B2B SaaS · Sample Ratio Mismatch',
+    difficulty: 'senior',
+    isFree: false,
+    company: 'Vanta',
+    industry: 'saas',
+    domain: 'onboarding',
+    estimatedMin: 18,
+    context: {
+      company: 'Vanta',
+      product: 'SOC 2 compliance automation — 17,600 trial accounts in experiment',
+      setup: 'Growth team tests a 3-email onboarding sequence (treatment) vs a single generic welcome email (control). Hypothesis: structured onboarding increases trial-to-paid conversion. 30-day experiment.'
+    },
+    hypothesis: 'A structured 3-email onboarding sequence with role-specific setup guides will increase trial-to-paid conversion vs a single generic welcome email.',
+    experimentDesign: {
+      type: 'A/B',
+      randomizationUnit: 'account',
+      targetPopulation: 'All new trial accounts created during the experiment window',
+      primaryMetric: 'Trial-to-paid conversion at 30 days',
+      plannedSplit: '50/50',
+      runtime: '30 days'
+    },
+    metricReadout: {
+      primaryMetric: {
+        name: 'Trial-to-paid conversion (30 days)',
+        control: '18.4%',
+        treatment: '22.5%',
+        delta: '+4.1pp',
+        relativeChange: '+22.3%',
+        pValue: 0.02,
+        confidenceInterval: '[+0.8pp, +7.4pp]',
+        significant: true
+      },
+      guardrailMetrics: [
+        { name: 'Email unsubscribe rate', control: '2.1%', treatment: '3.8%', delta: '+1.7pp', status: 'WARNING', note: 'Elevated but below 5% threshold' }
+      ],
+      diagnostics: [
+        {
+          metric: 'Account count by arm',
+          type: 'diagnostic',
+          direction: 'neutral',
+          delta: 'Control: 8,420. Treatment: 9,180. Expected: 8,800 each.',
+          pValue: 0.001,
+          confidenceInterval: null,
+          significant: true,
+          note: 'Chi-square SRM test p=0.001. The 380-account imbalance is not due to chance. Root cause: marketing automation silently excluded corporate email domains from control at a higher rate — spam filters triggered re-routing. Corporate accounts are higher-intent, biasing control low.'
+        }
+      ]
+    },
+    warningFlags: [
+      {
+        id: 'wf-srm-detected',
+        label: 'Sample ratio mismatch — control has 380 fewer accounts than expected (p=0.001)',
+        description: 'Planned 50/50 split of 17,600 should yield 8,800 per arm. Control: 8,420. Treatment: 9,180. The marketing automation tool silently excluded corporate email domains from control when spam filters blocked delivery — those accounts were re-routed. Corporate domains correlate with enterprise intent and higher conversion propensity. Control is biased toward lower-intent accounts.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-selection-bias',
+        label: 'Excluded accounts are higher-intent — control conversion rate is artificially low',
+        description: 'The 380 missing corporate accounts have above-average conversion propensity. Their exclusion from control depresses the control rate, inflating the treatment lift by an unknown amount. The true treatment effect cannot be estimated.',
+        severity: 'critical'
+      }
+    ],
+    decisions: [
+      {
+        id: 'ship',
+        label: 'Ship the 3-email sequence — +4.1pp at p=0.02 is significant.',
+        description: 'Ship to all trial accounts.',
+        score: 'junior_miss',
+        feedback: 'The +4.1pp lift is biased upward. Control is missing 380 high-intent corporate accounts whose exclusion made the control conversion rate artificially low. The true treatment effect is unknown — it could be anywhere from near-zero to the observed +4.1pp. Shipping on a biased result means deploying a feature whose actual impact is unquantified.'
+      },
+      {
+        id: 'investigate',
+        label: 'Stop and investigate the account imbalance before interpreting any metric.',
+        description: 'The SRM must be explained before any result can be trusted.',
+        score: 'senior_ready',
+        feedback: 'Correct. The first question when you see an account count mismatch is: what caused it, and does it bias the metric? Here the mechanism is clear — corporate email filtering excluded higher-intent accounts from control. The result is biased and cannot support a shipping decision. Re-run with the automation tool fixed.'
+      },
+      {
+        id: 'rerun',
+        label: 'Fix the automation tool and re-run from scratch.',
+        description: 'Get clean data.',
+        score: 'senior_ready',
+        feedback: 'Also correct and the most direct path. Fix the email tool\'s handling of corporate domains (or randomize upstream of delivery), re-run the 30-day experiment, read the result at the planned endpoint. This produces data you can act on with confidence.'
+      },
+      {
+        id: 'adjust-and-ship',
+        label: 'Estimate the missing accounts\' conversion rate and adjust the control.',
+        description: 'Statistical adjustment corrects the bias.',
+        score: 'analyst_ready',
+        feedback: 'Imputation adds assumptions that are difficult to validate. You don\'t know the counterfactual conversion rate for the missing accounts in the control condition. Statistical adjustment of SRM-contaminated results is a last resort for post-hoc analysis — not a substitute for a clean experiment.'
+      }
+    ],
+    idealDecision: 'investigate',
+    secondBestDecision: 'rerun',
+    juniorMistake: 'Ships on p=0.02 without running an SRM check on the account counts. Treats statistical significance as sufficient without verifying randomization integrity.',
+    seniorFlags: [
+      'The first diagnostic for any experiment is the sample ratio check: does the observed split match the planned split? A significant SRM is a hard stop before reading any metric.',
+      'The direction of SRM bias matters as much as its existence. A random imbalance adds noise. A systematic imbalance (corporate domain filtering) adds directional bias — the excluded accounts are higher-intent, making control look worse than it really is.',
+      'Root cause investigation of SRM is a debugging exercise: what in the assignment or delivery pipeline produced this imbalance? Common causes: race conditions, post-randomization bot filtering, delivery failures that trigger re-routing, and geographic bucketing that correlates with intent.'
+    ],
+    staffFlags: [
+      'Would have instrumented the randomization pipeline with real-time SRM monitoring — an alert fires when observed split deviates more than 2 standard errors from planned. Experiment flagged on Day 3, not Day 30.',
+      'Would have required randomization to happen before any email delivery attempt — account-level assignment upstream of the marketing automation tool. Any system that can silently drop accounts after assignment is a randomization integrity risk.'
+    ],
+    debrief: 'SRM is a signal that something in the assignment pipeline broke. Until you know what broke and whether it introduces directional bias, no metric result from the experiment can be trusted.\n\nIn this case, the mechanism is specific and damaging: corporate email domains — accounts with higher conversion propensity — were excluded from control at a higher rate than treatment. This means the control conversion rate (18.4%) understates what control would have converted at with a clean sample. The treatment lift (+4.1pp) is inflated by an unknown amount.\n\nThe fix is operational: correct the automation tool, re-run, read the result at the planned endpoint. There is no statistical shortcut that recovers a trustworthy estimate from SRM-contaminated data.\n\nThe process fix is equally important: SRM monitoring should run continuously throughout any experiment. A 30-day experiment that accumulates bias for 30 days before anyone notices is an avoidable failure. Real-time SRM alerts catch this on Day 3.',
+    interviewTakeaway: 'SRM is a randomization integrity failure. Run the sample ratio check before looking at any metric. If it\'s off, investigate the mechanism — the direction of bias determines whether the result is inflated, deflated, or unknowable.',
+    relatedConcepts: ['sample ratio mismatch', 'randomization integrity', 'selection bias', 'chi-square test', 'email deliverability', 'assignment pipeline'],
+    scenarioFamily: 'srm',
+    tags: ['SRM', 'sample ratio mismatch', 'email deliverability', 'B2B SaaS', 'corporate email', 'selection bias', 'randomization']
+  },
+
+  // ─────────────────────────────────────────────
+  // S20 — novelty_peeking: The Decaying Summary
+  // ─────────────────────────────────────────────
+  {
+    id: 's20-loom-novelty',
+    title: 'The Decaying Summary',
+    subtitle: 'Loom · Video Tool · Novelty Effect',
+    difficulty: 'senior',
+    isFree: false,
+    company: 'Loom',
+    industry: 'consumer',
+    domain: 'engagement',
+    estimatedMin: 18,
+    context: {
+      company: 'Loom',
+      product: 'Async video messaging — 280,000 weekly active viewers',
+      setup: 'Product team adds an AI transcript summary (3-5 bullets) shown below every video. Hypothesis: preview of content increases video completion rate. 3-week experiment, 50/50 viewer split.'
+    },
+    hypothesis: 'An AI transcript summary shown below each video will increase completion rate — viewers who can preview content will be more motivated to watch the full video.',
+    experimentDesign: {
+      type: 'A/B',
+      randomizationUnit: 'viewer',
+      targetPopulation: 'All viewers on Loom-hosted videos during the experiment window',
+      primaryMetric: 'Video completion rate (watched ≥80%)',
+      plannedSplit: '50/50',
+      runtime: '3 weeks'
+    },
+    metricReadout: {
+      primaryMetric: {
+        name: 'Video completion rate (≥80%)',
+        control: '41.2%',
+        treatment: '45.0%',
+        delta: '+3.8pp',
+        relativeChange: '+9.2%',
+        pValue: 0.04,
+        confidenceInterval: '[+0.2pp, +7.4pp]',
+        significant: true
+      },
+      guardrailMetrics: [
+        { name: 'Video share rate', control: '8.1%', treatment: '8.3%', delta: '+0.2pp', status: 'PASS', note: 'No meaningful change' },
+        { name: 'Re-watch rate', control: '12.4%', treatment: '9.8%', delta: '-2.6pp', status: 'WARNING', note: 'Viewers reading summary instead of re-watching segments' }
+      ],
+      diagnostics: [
+        {
+          metric: 'Weekly completion rate lift — treatment arm',
+          type: 'trend',
+          direction: 'negative',
+          delta: 'Week 1: +18.4pp vs control. Week 2: +11.1pp. Week 3: +4.3pp.',
+          pValue: null,
+          confidenceInterval: null,
+          significant: false,
+          note: 'Clear novelty decay. If trend continues, effect reaches ~0 by Week 5. The 3-week blended result averages a high-novelty Week 1 with a low-effect Week 3.'
+        }
+      ]
+    },
+    warningFlags: [
+      {
+        id: 'wf-novelty-decay',
+        label: 'Completion lift decays week-over-week — novelty effect signature',
+        description: 'Week 1: +18.4pp → Week 2: +11.1pp → Week 3: +4.3pp. Genuine improvements show stable or increasing lift as users build habits. Declining lift trending toward zero is the novelty signature. The 3-week blended result (+3.8pp) is dominated by the first-week curiosity spike.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-ci-width',
+        label: 'Wide CI [+0.2pp, +7.4pp] — barely significant, lower bound near zero',
+        description: 'If the novelty decay continues, the true steady-state effect likely falls below the lower confidence bound.',
+        severity: 'warning'
+      }
+    ],
+    decisions: [
+      {
+        id: 'ship',
+        label: 'Ship — +3.8pp at p=0.04 after 3 weeks is significant.',
+        description: 'Ship the AI summary to all viewers.',
+        score: 'junior_miss',
+        feedback: 'The 3-week result is not a stable estimate. Week 1: +18.4pp. Week 3: +4.3pp. The trend is clearly downward. Shipping on a blended average that includes a high-novelty first week means deploying a feature whose steady-state impact may be near zero. The re-watch rate decline (-2.6pp) adds further concern — viewers may be substituting summary-reading for re-watching, degrading comprehension even as completion rate rises.'
+      },
+      {
+        id: 'extend',
+        label: 'Extend to 6 weeks and measure where the effect stabilizes.',
+        description: 'The novelty decay needs to run its course.',
+        score: 'senior_ready',
+        feedback: 'Correct. Week 3 shows +4.3pp — still positive, but declining. You don\'t yet know whether the effect stabilizes at a durable positive value or continues to zero. Run to 6 weeks. If the effect stabilizes above a pre-specified minimum (e.g., +2pp), ship. If it reaches zero, the experiment saved you from shipping a zero-effect feature based on novelty.'
+      },
+      {
+        id: 'rollback',
+        label: 'Rollback — the decay shows the feature has no durable effect.',
+        description: 'Effect is trending to zero. Stop.',
+        score: 'analyst_ready',
+        feedback: 'Premature. Week 3 effect is still +4.3pp — not yet at zero. The direction is concerning but the decision requires waiting for the effect to stabilize, not stopping at the first sign of decay. Rollback would be correct if Week 3 were already near zero or negative.'
+      },
+      {
+        id: 'ship-new-users',
+        label: 'Ship to new users only — they won\'t have a novelty response.',
+        description: 'New Loom users haven\'t seen the summary before, so the effect reflects genuine value.',
+        score: 'analyst_ready',
+        feedback: 'This misunderstands the novelty effect. All users in Week 1 were new to this feature, which is why Week 1 shows the highest lift. The novelty effect is about feature familiarity, not platform tenure. What you need is more time — not a different user segment.'
+      }
+    ],
+    idealDecision: 'extend',
+    secondBestDecision: 'rollback',
+    juniorMistake: 'Ships on the 3-week blended result without plotting the weekly trend. Treats "3 weeks of significant data" as equivalent to "stable effect estimate."',
+    seniorFlags: [
+      'Novelty effects make new features look better than they are. The first-week lift is the feature\'s best week. The correct question is: does the effect stabilize, and if so, at what level?',
+      'Week-over-week trend analysis is as important as the aggregate result. A slope of +18.4 → +11.1 → +4.3 is a novelty curve, not a product improvement. The slope tells you the effect will be near zero before the feature becomes habitual.',
+      'The re-watch rate decline (-2.6pp) deserves independent investigation. If users substitute summary-reading for re-watching, completion rate may improve while comprehension decreases — a metric substitution that looks like engagement but may mask quality degradation.'
+    ],
+    staffFlags: [
+      'Would have pre-registered a novelty detection rule: "We require that the Week 4 weekly effect is within 30% of the Week 2 weekly effect before shipping. If the effect decays faster, we extend to Week 6."',
+      'Would have built novelty detection into the monitoring system: any feature showing Week 1 lift >2x Week 3 lift triggers an automatic extension flag before the result can be used for a shipping decision.'
+    ],
+    debrief: 'Novelty effects are the most common source of false positives in consumer product experimentation. Users engage with new features out of curiosity — they click, explore, and complete more than they will once the feature becomes familiar. This produces a high first-week lift that decays as habituation sets in.\n\nThe diagnostic is the week-over-week trend. A genuine product improvement produces stable or gently increasing lift as users build habits. A novelty effect produces a declining lift that trends toward zero. Here the evidence is unambiguous: +18.4pp, +11.1pp, +4.3pp across three weeks.\n\nThe 3-week blended result (+3.8pp, p=0.04) is an average of a high-novelty first week and a declining third week. It is not a stable estimate of the feature\'s long-run effect. The lower bound of the confidence interval (+0.2pp) is near zero — if the Week 4 effect is 2-3pp and Week 5 is near zero, the true durable effect is likely below even this lower bound.\n\nThe correct decision is to extend to 6 weeks and pre-specify a stability criterion: the feature ships if the Week 6 effect is within some percentage of the Week 4 effect. If it continues to decay, the experiment has correctly prevented shipping a zero-effect feature.\n\nThe re-watch rate signal adds complexity. Summary-reading substituting for re-watching may produce a metric improvement (completion) while degrading the underlying outcome (comprehension). This is worth tracking separately regardless of the shipping decision.',
+    interviewTakeaway: 'Novelty effects make new features look better than they are. The correct response to a strong first-week result is to plot the weekly trend and extend until the effect stabilizes — not to ship on a blended average that includes the curiosity spike.',
+    relatedConcepts: ['novelty effect', 'habituation', 'behavioral adaptation', 'metric decay', 'experiment duration', 'weekly trend analysis'],
+    scenarioFamily: 'novelty_peeking',
+    tags: ['novelty effect', 'decay', 'video completion', 'AI features', 'consumer app', 'weekly trend', 'habituation']
+  },
+
+  // ─────────────────────────────────────────────
+  // S21 — hte_subgroups: The Empty Suggestion Panel
+  // ─────────────────────────────────────────────
+  {
+    id: 's21-figma-hte',
+    title: 'The Empty Suggestion Panel',
+    subtitle: 'Figma · Design Tool · Heterogeneous Treatment Effects',
+    difficulty: 'staff',
+    isFree: false,
+    company: 'Figma',
+    industry: 'saas',
+    domain: 'feature-adoption',
+    estimatedMin: 20,
+    context: {
+      company: 'Figma',
+      product: 'Design tool with component libraries — 95,000 active teams in experiment',
+      setup: 'Product team ships "Smart Suggest" — AI panel suggesting published design system components while designing. Hypothesis: surfacing relevant components reduces search time and increases design consistency. 50/50 team-level split, 4 weeks.'
+    },
+    hypothesis: 'An AI component suggestion panel will increase adoption rate and reduce manual search time by surfacing relevant design system components contextually.',
+    experimentDesign: {
+      type: 'A/B',
+      randomizationUnit: 'team',
+      targetPopulation: 'All active Figma teams with ≥2 members active in the past 30 days',
+      primaryMetric: 'Feature adoption rate — % of sessions with ≥1 suggested component used',
+      plannedSplit: '50/50',
+      runtime: '4 weeks'
+    },
+    metricReadout: {
+      primaryMetric: {
+        name: 'Feature adoption rate (sessions with ≥1 suggested component used)',
+        control: '0%',
+        treatment: '6.8pp',
+        delta: '+6.8pp',
+        relativeChange: 'N/A (new feature)',
+        pValue: 0.03,
+        confidenceInterval: '[+0.6pp, +13.0pp]',
+        significant: true
+      },
+      guardrailMetrics: [
+        { name: 'Design session length', control: '42.1 min', treatment: '41.8 min', delta: '-0.3 min', status: 'PASS', note: 'No meaningful change' },
+        { name: 'Team 30-day retention', control: '71.2%', treatment: '70.9%', delta: '-0.3pp', status: 'PASS', note: 'No meaningful change' }
+      ],
+      diagnostics: [
+        {
+          metric: 'Adoption rate by account tier',
+          type: 'segment',
+          direction: 'divergent',
+          delta: 'Enterprise (published design system, 28% of teams, 71% of revenue): +19.2pp. Starter/Professional (no design system, 72% of teams, 29% of revenue): -2.1pp (p=0.41).',
+          pValue: 0.0004,
+          confidenceInterval: null,
+          significant: true,
+          note: 'Feature requires a published design system to return suggestions. Starter/Professional teams see an empty or irrelevant panel. The overall +6.8pp is driven entirely by Enterprise.'
+        }
+      ]
+    },
+    warningFlags: [
+      {
+        id: 'wf-empty-panel',
+        label: 'Feature requires a published design system — 72% of teams see an empty or irrelevant panel',
+        description: 'Smart Suggest queries the team\'s published design system for component matches. Teams without a published design system get either an empty panel or community library suggestions that don\'t match their design vocabulary. Overall +6.8pp adoption is entirely Enterprise-driven. The majority of teams gain nothing and may be confused by an empty AI panel.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-count-revenue-inversion',
+        label: 'Account count and revenue distribution are inverted — majority by count ≠ majority by value',
+        description: 'Starter/Professional: 72% of accounts, 29% of revenue. Enterprise: 28% of accounts, 71% of revenue. A shipping decision based on account-count majority would harm the revenue minority — which is the majority by business value.',
+        severity: 'warning'
+      }
+    ],
+    decisions: [
+      {
+        id: 'ship-all',
+        label: 'Ship to all teams — +6.8pp at p=0.03 is significant.',
+        description: 'The overall result is positive. Ship.',
+        score: 'junior_miss',
+        feedback: 'The overall +6.8pp is entirely driven by Enterprise (+19.2pp). Starter/Professional teams show -2.1pp — directionally negative, not significant, but reflecting a real experience: an empty or irrelevant suggestion panel. Shipping to all means 72% of teams get a broken-looking feature. Even if the harm is modest today, shipping an empty AI panel trains users that AI features in Figma are not useful for them — a perception that persists even after they upgrade.'
+      },
+      {
+        id: 'ship-enterprise',
+        label: 'Ship to Enterprise with published design systems only. Gate for Starter/Professional.',
+        description: 'The feature works for its intended segment. Don\'t ship an empty panel to everyone else.',
+        score: 'senior_ready',
+        feedback: 'Correct. Enterprise sees +19.2pp — genuine value for teams that have a design system to query. Gating to Enterprise means the segment that benefits gets the feature, and the majority of teams don\'t get an empty panel. The next step: design a separate experience for non-Enterprise teams — a prompt to publish a design system, or an alternative suggestion source — and test that separately.'
+      },
+      {
+        id: 'rollback',
+        label: 'Rollback entirely — the negative effect on Starter/Professional makes this unshippable.',
+        description: 'The feature harms the majority.',
+        score: 'analyst_ready',
+        feedback: 'Overcorrection. The -2.1pp for Starter/Professional is not statistically significant and reflects neutral-to-slightly-negative experience with an empty panel, not active harm. The Enterprise result (+19.2pp) is real. Denying Enterprise teams a feature that genuinely works because it doesn\'t work for a different segment is the wrong product decision. Segment, don\'t rollback.'
+      },
+      {
+        id: 'ship-with-empty-state',
+        label: 'Ship to all with an empty state message: "Publish a design system to unlock suggestions."',
+        description: 'A good empty state fixes the confusion problem.',
+        score: 'analyst_ready',
+        feedback: 'Better than shipping as-is, but still suboptimal. An empty state reduces confusion but doesn\'t fix the core problem: 72% of teams now have a panel in their UI that offers them nothing. Panel presence without value competes for attention and teaches users that the feature is not useful. A gate (don\'t show the panel until a design system exists) is cleaner than a good empty state.'
+      }
+    ],
+    idealDecision: 'ship-enterprise',
+    secondBestDecision: 'ship-with-empty-state',
+    juniorMistake: 'Ships to all based on overall p=0.03 without segmenting by account tier. Does not ask why adoption is only 6.8% if the feature is supposedly useful. Does not investigate which segment the feature was designed for.',
+    seniorFlags: [
+      'When a feature has a precondition to function, always segment by precondition presence before reading the aggregate. The overall adoption rate will understate the effect for users who meet the precondition and mask harm for users who don\'t.',
+      'Account count vs. revenue inversion is a common B2B trap. The correct calculation is: what is the revenue-weighted impact of shipping to all vs. Enterprise only? Enterprise at 71% of revenue seeing +19.2pp vastly outweighs the modest negative experience for the 29% revenue segment.',
+      'A -2.1pp directionally negative result at p=0.41 should not be dismissed as "neutral." It is underpowered, not zero. The direction is a signal. Design a different experience for the non-Enterprise segment and test it separately.'
+    ],
+    staffFlags: [
+      'Would have built the precondition gate into the feature design before the experiment: Smart Suggest only appears for teams with ≥1 published design system component. This eliminates the empty-panel problem and makes the experiment a clean test of value for the intended segment.',
+      'Would have pre-registered the Enterprise vs. Starter segment analysis as a primary analysis, not a post-hoc diagnostic. The feature\'s mechanism (requires published design system) makes the segment split a first-principles prediction — pre-registration prevents it from being dismissed as cherry-picking.'
+    ],
+    debrief: 'Heterogeneous treatment effects occur when a feature\'s impact differs systematically across user segments. In B2B SaaS, the most common source of heterogeneity is feature preconditions — requirements that some users meet and others don\'t.\n\nSmart Suggest requires a published design system. Enterprise teams have them. Starter/Professional teams typically don\'t. The experiment results are a mix of two very different experiences: Enterprise seeing a genuinely useful feature (+19.2pp), and Starter/Professional seeing an empty panel (-2.1pp).\n\nThe blended result (+6.8pp) is a weighted average. It is statistically significant but not interpretable as "this feature helps all teams." It means "Enterprise adoption is strong enough to push the blended average positive despite the majority of users gaining nothing."\n\nThe key analytical move is to segment before reading the aggregate. When a feature has a known precondition, the segment split is a first-principles prediction — not post-hoc cherry-picking. Enterprise vs. Starter/Professional should have been the primary analysis.\n\nThe correct decision is segmented rollout: ship to Enterprise, don\'t ship the empty panel to Starter/Professional. Design a different experience for non-Enterprise teams and test it in a separate experiment. This is more work than all-or-nothing shipping, but it produces better outcomes for every segment.\n\nThe account count vs. revenue inversion matters for prioritization. Starter/Professional are 72% of accounts but 29% of revenue. Their neutral-to-negative experience is a priority — but the urgency of fixing it is proportional to their revenue contribution, not their account count.',
+    interviewTakeaway: 'A significant overall result can mask harm to the majority. When a feature has a precondition, segment by precondition presence first. The right decision may be segmented rollout, not all-or-nothing shipping.',
+    relatedConcepts: ['heterogeneous treatment effects', 'segmentation', 'feature preconditions', 'B2B account tiers', 'revenue weighting', 'empty state design'],
+    scenarioFamily: 'hte_subgroups',
+    tags: ['HTE', 'subgroup analysis', 'feature precondition', 'design system', 'B2B SaaS', 'account tier', 'Enterprise vs Starter', 'empty state']
+  },
+
+  // ─────────────────────────────────────────────
+  // S22 — guardrail_breach: The Habit Erosion
+  // ─────────────────────────────────────────────
+  {
+    id: 's22-duolingo-guardrail',
+    title: 'The Habit Erosion',
+    subtitle: 'Duolingo · Language Learning · Guardrail Breach',
+    difficulty: 'senior',
+    isFree: false,
+    company: 'Duolingo',
+    industry: 'consumer',
+    domain: 'retention',
+    estimatedMin: 18,
+    context: {
+      company: 'Duolingo',
+      product: 'Language learning app — 48M daily active learners',
+      setup: 'Product team tests "Streak Repair" — if a user misses a day, they get a 24-hour window to complete a bonus lesson and restore their streak. Hypothesis: reducing streak loss anxiety increases long-term retention. 6-week experiment, 50/50 user split.'
+    },
+    hypothesis: 'Allowing users to repair a broken streak with a bonus lesson will reduce streak-loss churn and increase D30 and D60 retention by removing a major friction point.',
+    experimentDesign: {
+      type: 'A/B',
+      randomizationUnit: 'user',
+      targetPopulation: 'Users with streaks ≥7 days who miss at least one day during the experiment window',
+      primaryMetric: 'D30 retention rate',
+      plannedSplit: '50/50',
+      runtime: '6 weeks'
+    },
+    metricReadout: {
+      primaryMetric: {
+        name: 'D30 retention rate',
+        control: '41.8%',
+        treatment: '46.0%',
+        delta: '+4.2pp',
+        relativeChange: '+10.0%',
+        pValue: 0.01,
+        confidenceInterval: '[+1.1pp, +7.3pp]',
+        significant: true
+      },
+      guardrailMetrics: [
+        {
+          name: 'Daily lesson completion rate (lessons completed per active day)',
+          control: '1.82',
+          treatment: '1.67',
+          delta: '-0.15 lessons/day (-8.2%)',
+          status: 'BREACH',
+          note: 'Pre-specified guardrail: must not decrease >5%. Treatment users complete fewer lessons per active day — they are banking on streak repair instead of maintaining daily habits.'
+        },
+        {
+          name: 'D60 retention rate',
+          control: '31.2%',
+          treatment: '32.1%',
+          delta: '+0.9pp',
+          status: 'WARNING',
+          note: 'D60 lift is +0.9pp vs D30\'s +4.2pp — the retention benefit decays rapidly, suggesting the repair feature delays churn without preventing it.'
+        }
+      ],
+      diagnostics: [
+        {
+          metric: 'Streak repair usage rate among eligible users',
+          type: 'diagnostic',
+          direction: 'neutral',
+          delta: '68% of eligible treatment users used streak repair at least once. Average repairs per user: 2.1 over 6 weeks.',
+          pValue: null,
+          confidenceInterval: null,
+          significant: false,
+          note: 'High usage rate means the repair feature is not a rare safety net — it is being used as a regular substitute for daily practice by a majority of eligible users.'
+        }
+      ]
+    },
+    warningFlags: [
+      {
+        id: 'wf-lesson-completion-breach',
+        label: 'Daily lesson completion rate breached pre-specified guardrail — down 8.2%',
+        description: 'Treatment users complete 1.67 lessons per active day vs 1.82 in control — an 8.2% decline. Pre-specified guardrail was a max 5% decline. The repair feature is reducing the daily practice habit that is core to Duolingo\'s learning model and long-term engagement. Users are substituting streak repair for daily practice, not using it as a rare safety net.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-d60-decay',
+        label: 'D60 retention lift (+0.9pp) much smaller than D30 (+4.2pp) — repair delays churn, not prevents it',
+        description: 'If the retention benefit were durable, D60 would show a comparable lift to D30. The rapid decay from +4.2pp at D30 to +0.9pp at D60 suggests that streak repair postpones churn by 30 days — users stay because of the repair feature, but the degraded daily practice habit catches up with them.',
+        severity: 'warning'
+      }
+    ],
+    decisions: [
+      {
+        id: 'ship',
+        label: 'Ship — D30 retention +4.2pp at p=0.01. The guardrail breach is acceptable given the retention gain.',
+        description: 'The retention improvement outweighs the lesson completion decline.',
+        score: 'junior_miss',
+        feedback: 'The guardrail was pre-specified for a reason: daily lesson completion is the behavioral foundation of Duolingo\'s learning model. A feature that increases 30-day retention by letting users skip daily practice is not a product improvement — it is a short-term retention metric improvement at the cost of the core user behavior. The D60 decay (+0.9pp vs +4.2pp at D30) confirms that the benefit is temporary. You are retaining users in month 1 who churn in month 2 with worse learning habits than they started with.'
+      },
+      {
+        id: 'rollback',
+        label: 'Rollback — the guardrail breach is material and the D60 retention tells you the benefit doesn\'t hold.',
+        description: 'Pre-specified guardrail breached. Do not ship.',
+        score: 'senior_ready',
+        feedback: 'Correct. Pre-specified guardrails exist precisely for this situation: a primary metric improvement that comes at a cost to a metric you care about deeply. The lesson completion breach (-8.2% vs a 5% guardrail) is not a technicality — it is evidence that the feature is substituting for the behavior it was supposed to support. The D60 retention confirms the intuition: the improvement is a delay, not a prevention. The correct action is rollback and redesign — a repair feature that can only be used once per month, or that requires a harder earn (two lessons instead of one) to prevent habitual substitution.'
+      },
+      {
+        id: 'ship-limited',
+        label: 'Ship with a cap — allow streak repair only once per month to prevent habitual use.',
+        description: 'The safety net is valuable. Cap it so it can\'t become a substitute.',
+        score: 'analyst_ready',
+        feedback: 'This addresses the right problem — the habitual use pattern (2.1 repairs per user over 6 weeks = once every 2 weeks on average) — but "ship with a modification" based on a guardrail breach is not the correct protocol. The modified feature is a new product decision that has not been tested. Ship the current feature and you inherit the guardrail breach. The right path is to redesign the feature with the cap built in and test the modified version in a new experiment.'
+      },
+      {
+        id: 'extend',
+        label: 'Extend the experiment to 12 weeks to see if D60 retention improves.',
+        description: 'More time will show whether the retention benefit is durable.',
+        score: 'analyst_ready',
+        feedback: 'The D60 signal is already available from the 6-week experiment (users who enrolled in week 1 have 6 weeks of follow-up). Extending gives you D90 data, which will likely show further decay given the mechanism — degraded daily practice habits accumulate over time, not recover. The guardrail breach is not resolved by more time; it is the current behavioral state of treatment users right now.'
+      }
+    ],
+    idealDecision: 'rollback',
+    secondBestDecision: 'ship-limited',
+    juniorMistake: 'Ships on the D30 retention improvement without reading the guardrail breach or asking why D60 retention is so much weaker. Treats "retention is up" as sufficient evidence without asking what behavior change is driving it.',
+    seniorFlags: [
+      'When a primary metric improves but a guardrail breaches, the first question is: what is the mechanism? Here the mechanism is explicit — users are using the repair feature as a daily practice substitute (68% usage, 2.1 repairs in 6 weeks). That is not a safety net; that is a behavioral change.',
+      'D30 vs D60 retention divergence is a leading indicator of delayed churn. A retention feature that shows +4.2pp at D30 and +0.9pp at D60 is retaining users for one month while degrading the habits that would retain them at month 2. The correct question is: what does D90 look like?',
+      'Pre-specified guardrails are a commitment, not a suggestion. If the team pre-specified that lesson completion cannot decline more than 5%, then an 8.2% decline is a breach regardless of whether the primary metric improved. The guardrail was defined because the team believed lesson completion was a leading indicator of long-term value.'
+    ],
+    staffFlags: [
+      'Would have designed the repair feature with hard constraints from the start: repair available maximum once per 30-day period, repair requires completing two lessons (harder earn), repair streak displayed differently to preserve the meaning of the main streak. These constraints would have been tested in the experiment rather than bolted on after a guardrail breach.',
+      'Would have included D60 retention as a co-primary metric with D30, requiring both to be positive before shipping. A retention feature that is positive at D30 and flat at D60 has not demonstrated durable value.'
+    ],
+    debrief: 'Guardrail metrics exist to catch cases where a primary metric improvement is purchased at the cost of something the team values deeply. In this case, the cost is clear: treatment users practice less every day, use the repair feature habitually, and churn at nearly the same rate as control users by D60.\n\nThe mechanism is the diagnostic. 68% of eligible users used streak repair at least once. The average user repaired 2.1 times over 6 weeks — once every two weeks. This is not a rare safety net for exceptional circumstances. It is a behavioral change: users are learning that they can skip daily practice and repair the streak later. Duolingo\'s learning model depends on daily practice as the core habit. A feature that systematically weakens that habit is not a product improvement, regardless of what it does to D30 retention.\n\nThe D60 signal confirms the intuition. If streak repair genuinely addressed churn — if it was retaining users who would otherwise have left permanently — the retention benefit would compound over time, not decay. The rapid collapse from +4.2pp to +0.9pp between D30 and D60 is the signature of delayed churn: users stay because of the repair feature, but the weakened practice habit catches up with them in month 2.\n\nThe correct decision is rollback and redesign. A repair feature with tighter constraints — once per month maximum, harder earn (two lessons), distinct visual treatment to preserve streak meaning — addresses the safety net use case without enabling habitual substitution. That redesigned feature should be tested in a new experiment before shipping.',
+    interviewTakeaway: 'Guardrail breaches are commitments, not suggestions. When a primary metric improves but a guardrail breaches, investigate the mechanism before deciding whether to ship. If the mechanism explains why the primary metric improved, the guardrail breach may invalidate the primary metric result entirely.',
+    relatedConcepts: ['guardrail metrics', 'pre-specified constraints', 'behavioral substitution', 'retention decay', 'habit formation', 'D30 vs D60 retention'],
+    scenarioFamily: 'guardrail_breach',
+    tags: ['guardrail breach', 'streak', 'lesson completion', 'retention decay', 'habit substitution', 'consumer app', 'language learning']
+  },
+
+  // ─────────────────────────────────────────────
+  // S23 — multiple_testing: The Eight-Metric Dashboard
+  // ─────────────────────────────────────────────
+  {
+    id: 's23-airbnb-multiple-testing',
+    title: 'The Eight-Metric Dashboard',
+    subtitle: 'Airbnb · Host Onboarding · Multiple Testing',
+    difficulty: 'senior',
+    isFree: false,
+    company: 'Airbnb',
+    industry: 'marketplace',
+    domain: 'onboarding',
+    estimatedMin: 20,
+    context: {
+      company: 'Airbnb',
+      product: 'Host marketplace — 6,800 new hosts enrolled in experiment',
+      setup: 'Growth team tests a redesigned host onboarding flow with guided setup steps, photo tips, and pricing suggestions. They measure 8 metrics simultaneously across the onboarding funnel. After 4 weeks, 3 metrics show p<0.05.'
+    },
+    hypothesis: 'A redesigned host onboarding flow with guided steps, photo tips, and pricing suggestions will increase listing quality and speed-to-first-booking for new hosts.',
+    experimentDesign: {
+      type: 'A/B',
+      randomizationUnit: 'host',
+      targetPopulation: 'New hosts creating their first listing during the experiment window',
+      primaryMetric: 'First booking within 30 days',
+      plannedSplit: '50/50',
+      runtime: '4 weeks'
+    },
+    metricReadout: {
+      primaryMetric: {
+        name: 'First booking within 30 days',
+        control: '34.1%',
+        treatment: '36.8%',
+        delta: '+2.7pp',
+        relativeChange: '+7.9%',
+        pValue: 0.08,
+        confidenceInterval: '[-0.4pp, +5.8pp]',
+        significant: false
+      },
+      guardrailMetrics: [
+        { name: 'Host cancellation rate (first 30 days)', control: '3.2%', treatment: '3.4%', delta: '+0.2pp', status: 'PASS', note: 'Within acceptable range' }
+      ],
+      diagnostics: [
+        {
+          metric: '8 funnel metrics tested simultaneously',
+          type: 'diagnostic',
+          direction: 'mixed',
+          delta: 'Listing completion rate: p=0.03 ✓. Photo upload rate: p=0.41. Pricing setup completion: p=0.02 ✓. Message response rate: p=0.67. Availability setup: p=0.18. Superhost progress score: p=0.04 ✓. Review collection rate: p=0.29. First booking (primary): p=0.08.',
+          pValue: null,
+          confidenceInterval: null,
+          significant: false,
+          note: 'With 8 metrics at α=0.05, expected false positives under the null: 8 × 0.05 = 0.4. Bonferroni-corrected threshold: p<0.00625. Under correction, 0 of 8 metrics are significant. The 3 "significant" metrics are consistent with random variation at the boundary.'
+        }
+      ]
+    },
+    warningFlags: [
+      {
+        id: 'wf-multiple-testing',
+        label: '8 metrics tested simultaneously — 3 significant results consistent with expected false positives',
+        description: 'With 8 independent tests at α=0.05, the probability of at least one false positive is 1-(0.95^8) = 33.7%. Expected false positives under the null: 0.4. Observing 3 results at p<0.05 with p-values of 0.03, 0.02, and 0.04 is statistically consistent with 3 lucky draws from a null distribution. None of the 3 pass the Bonferroni-corrected threshold of p<0.00625.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-primary-not-significant',
+        label: 'The pre-specified primary metric (first booking) is not significant — p=0.08',
+        description: 'The experiment was designed to measure first booking within 30 days. That metric does not pass the significance threshold. Three secondary metrics that were not pre-specified as primary are being cited as evidence of success. This reverses the experiment design logic: secondary metrics should inform interpretation of a significant primary, not substitute for a non-significant primary.',
+        severity: 'critical'
+      }
+    ],
+    decisions: [
+      {
+        id: 'ship',
+        label: 'Ship — 3 of 8 metrics are significant. The onboarding flow demonstrably improves host quality.',
+        description: 'Listing completion, pricing setup, and superhost progress score all improved significantly.',
+        score: 'junior_miss',
+        feedback: 'Three significant results from 8 simultaneous tests is not strong evidence. Under Bonferroni correction (p<0.00625 for 8 tests), zero of the three significant results pass. The expected number of false positives from 8 tests at α=0.05 is 0.4 — observing 3 results near the threshold is within the range expected from random variation. Critically, the primary pre-specified metric (first booking) is not significant at p=0.08. Secondary metrics should not substitute for a non-significant primary.'
+      },
+      {
+        id: 'do-not-ship',
+        label: 'Do not ship. The primary metric is not significant, and the secondary results do not survive multiple testing correction.',
+        description: 'The experiment failed to demonstrate the effect it was designed to detect.',
+        score: 'senior_ready',
+        feedback: 'Correct. First booking within 30 days was the pre-specified primary metric. It shows p=0.08 — not significant. The three secondary metrics at p=0.02-0.04 do not survive Bonferroni correction and are consistent with false positives from testing 8 metrics simultaneously. The experiment should be treated as a null result on its primary endpoint. The team can use the secondary metric trends as hypotheses for a follow-up experiment with pre-specified primaries.'
+      },
+      {
+        id: 'rerun-primary-focus',
+        label: 'Rerun with a single pre-specified primary metric and sufficient power for that metric only.',
+        description: 'Narrow the experiment design and get a clean answer.',
+        score: 'senior_ready',
+        feedback: 'Also correct. The 8-metric design diluted power across too many outcomes and created a multiple testing problem. A follow-up experiment with one pre-specified primary (listing completion rate, given it showed the most directional signal) and adequate power for that metric would give a clean, trustworthy result. The current experiment gives the team hypotheses — not answers.'
+      },
+      {
+        id: 'apply-correction-ship',
+        label: 'Apply Bonferroni correction and ship based on whichever metrics survive.',
+        description: 'Statistical correction handles the multiple testing problem.',
+        score: 'analyst_ready',
+        feedback: 'Bonferroni correction is the right statistical move, but none of the three results survive it (Bonferroni threshold: p<0.00625). Under correction, zero metrics are significant. Additionally, applying post-hoc correction to a pre-analysis that did not specify a correction procedure is less rigorous than pre-specifying the correction before the experiment ran. The correct path is a new experiment with a pre-specified primary metric and explicit correction plan.'
+      }
+    ],
+    idealDecision: 'do-not-ship',
+    secondBestDecision: 'rerun-primary-focus',
+    juniorMistake: 'Ships because 3 of 8 metrics showed p<0.05, without calculating the family-wise false positive rate or applying any multiple testing correction. Does not notice that the primary pre-specified metric is not significant.',
+    seniorFlags: [
+      'The primary metric is the one the experiment was designed to measure. If the primary is not significant, the experiment is a null result — secondary metric movements are exploratory signals, not confirmatory evidence.',
+      'The expected number of false positives from k tests at α is k×α. With 8 tests at α=0.05, expect 0.4 false positives. Observing 3 results at p=0.02-0.04 is suspicious, not confirmatory — the p-values are suspiciously clustered near the threshold, which is what random walks near alpha look like.',
+      'Multiple testing correction should be pre-specified, not post-hoc. If the team knew they were testing 8 metrics, they should have declared a correction procedure (Bonferroni, Benjamini-Hochberg, or a hierarchical testing strategy) before the experiment launched.'
+    ],
+    staffFlags: [
+      'Would have required the team to declare a single primary metric and up to 3 secondary metrics before the experiment launched. Secondary metrics are reported for context, not for shipping decisions. The experiment design should make this explicit.',
+      'Would have designed a hierarchical testing strategy: test primary first; only test secondaries if primary is significant; apply Bonferroni to the secondary family. This controls family-wise error rate while preserving power for the primary metric.'
+    ],
+    debrief: 'Multiple testing inflates the false positive rate. When k hypotheses are tested simultaneously at α=0.05, the probability of at least one false positive is 1-(1-α)^k — for 8 tests, that is 33.7%. You will incorrectly conclude that at least one hypothesis is true roughly one time in three, even when all nulls are correct.\n\nThe expected number of false positives from 8 tests at α=0.05 is 0.4. Observing 3 results with p-values of 0.02, 0.03, and 0.04 is within the range of expected false positives from random variation. The p-values are near the decision boundary — exactly where random walks under the null spend time when you watch long enough.\n\nThe critical error in this experiment is treating secondary metrics as substitutes for a non-significant primary. The experiment was designed to detect first booking within 30 days. That metric does not pass significance. Pointing to secondary metrics — listing completion rate, pricing setup — as evidence of success is a form of p-hacking: running multiple tests and reporting the ones that crossed the threshold.\n\nThe correct action is to treat the experiment as a null result on its primary endpoint. The secondary metric signals are hypotheses for a follow-up experiment, not evidence for shipping. A follow-up with a single pre-specified primary (whichever secondary showed the most directional signal) and adequate power for that metric gives the team a trustworthy answer.',
+    interviewTakeaway: 'Multiple testing is the most common source of false positives in product experimentation. With k tests at α, expected false positives = k×α. If the primary metric is not significant, the experiment is a null result — secondary metrics showing p<0.05 are exploratory signals, not shipping evidence.',
+    relatedConcepts: ['multiple testing', 'family-wise error rate', 'Bonferroni correction', 'primary metric', 'pre-specification', 'false positive rate'],
+    scenarioFamily: 'multiple_testing',
+    tags: ['multiple testing', 'Bonferroni', 'family-wise error rate', 'primary metric', 'host onboarding', 'marketplace', 'null result']
+  },
+
+  // ─────────────────────────────────────────────
+  // S24 — multiple_testing: The Pre-Spec Drift
+  // ─────────────────────────────────────────────
+  {
+    id: 's24-pinterest-prespec',
+    title: 'The Pre-Spec Drift',
+    subtitle: 'Pinterest · Content Discovery · Multiple Testing',
+    difficulty: 'staff',
+    isFree: false,
+    company: 'Pinterest',
+    industry: 'consumer',
+    domain: 'content-discovery',
+    estimatedMin: 22,
+    context: {
+      company: 'Pinterest',
+      product: 'Visual discovery platform — 2.1M users in experiment',
+      setup: 'Product team tests "Board Recommendations" — an AI-powered panel suggesting related boards to follow based on a user\'s current board. Pre-registered primary metrics: save rate, time in app, board creation rate. Experiment runs 3 weeks. After results come in, the team also reports on 4 post-hoc segment analyses and 5 additional engagement metrics.'
+    },
+    hypothesis: 'Board Recommendations will increase content depth engagement: users who discover related boards will save more content, spend more time in app, and create more boards.',
+    experimentDesign: {
+      type: 'A/B',
+      randomizationUnit: 'user',
+      targetPopulation: 'Users who visited at least one board page during the experiment window',
+      primaryMetric: 'Save rate (saves per session) — pre-specified primary',
+      plannedSplit: '50/50',
+      runtime: '3 weeks'
+    },
+    metricReadout: {
+      primaryMetric: {
+        name: 'Save rate (saves per session) — pre-specified',
+        control: '4.82',
+        treatment: '5.14',
+        delta: '+0.32 saves/session (+6.6%)',
+        relativeChange: '+6.6%',
+        pValue: 0.02,
+        confidenceInterval: '[+0.05, +0.59]',
+        significant: true
+      },
+      guardrailMetrics: [
+        { name: 'Pin report rate', control: '0.31%', treatment: '0.30%', delta: '-0.01pp', status: 'PASS', note: 'No meaningful change' }
+      ],
+      diagnostics: [
+        {
+          metric: 'Pre-specified secondary metrics',
+          type: 'diagnostic',
+          direction: 'mixed',
+          delta: 'Time in app (pre-specified): +1.2 min/session (p=0.09, not significant). Board creation rate (pre-specified): +0.8pp (p=0.31, not significant).',
+          pValue: null,
+          confidenceInterval: null,
+          significant: false,
+          note: '2 of 3 pre-specified primary/secondary metrics are not significant. Only save rate passes.'
+        },
+        {
+          metric: 'Post-hoc analyses (not pre-specified)',
+          type: 'diagnostic',
+          direction: 'positive',
+          delta: 'New users (≤30 days): save rate +14.2% (p=0.003). Fashion category: save rate +18.1% (p=0.001). Users on iOS: time in app +3.1 min (p=0.04). Users who followed ≥1 recommended board: saves +31% (p<0.001). 4 additional engagement metrics: 2 significant at p<0.05.',
+          pValue: null,
+          confidenceInterval: null,
+          significant: false,
+          note: 'Post-hoc analyses show strong effects in specific segments. These were not pre-specified and must be treated as hypotheses, not confirmatory results.'
+        }
+      ]
+    },
+    warningFlags: [
+      {
+        id: 'wf-prespec-drift',
+        label: '2 of 3 pre-specified metrics not significant — post-hoc analyses are driving the shipping narrative',
+        description: 'Save rate (primary) is significant. Time in app and board creation rate (pre-specified secondaries) are not. The team is now citing 4 post-hoc segment analyses showing strong effects in new users, fashion category, iOS, and board followers. These analyses were not pre-specified and represent a form of pre-spec drift: the shipping decision is being driven by exploratory analyses, not the pre-registered hypothesis.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-post-hoc-inflation',
+        label: 'Post-hoc segment analyses inflate the apparent effect — fishing in the data after observing results',
+        description: 'Running 4 segment analyses and 5 engagement metrics post-hoc after observing mixed pre-specified results is a form of outcome switching. The probability that at least one of 9 post-hoc tests produces p<0.05 by chance is 1-(0.95^9) = 37%. The "strong effects" in new users and fashion are likely a combination of a real interaction effect and inflated false positive rates from undisclosed multiple testing.',
+        severity: 'warning'
+      }
+    ],
+    decisions: [
+      {
+        id: 'ship-all',
+        label: 'Ship to all — save rate is significant, and the post-hoc analyses show strong effects in multiple segments.',
+        description: 'Multiple signals all pointing in the same direction is confirmatory.',
+        score: 'junior_miss',
+        feedback: 'Post-hoc analyses pointing in the same direction as a pre-specified result is not confirmatory — it is expected, because the same underlying effect will surface in multiple metrics if it is real. The question is whether the post-hoc analyses are detecting real effects or are false positives from multiple testing. With 9 post-hoc tests, at least one false positive at p<0.05 is expected 37% of the time. The pre-specified secondaries (time in app, board creation) not being significant is a signal that the overall effect is smaller or more narrowly concentrated than the hypothesis stated.'
+      },
+      {
+        id: 'ship-primary-only',
+        label: 'Ship based on save rate only. Treat post-hoc analyses as hypotheses for follow-up.',
+        description: 'The pre-specified primary passed. Secondary analyses are exploratory.',
+        score: 'senior_ready',
+        feedback: 'This is defensible. Save rate was pre-specified as primary and is significant. The decision to ship can rest on this single pre-specified result. The post-hoc analyses — especially the new user and fashion category segments — should be treated as hypotheses for a follow-up targeted experiment, not as additional evidence for the current shipping decision. Time in app and board creation rate not being significant means the hypothesis that Board Recommendations drives broader engagement depth is not confirmed.'
+      },
+      {
+        id: 'confirm-segments',
+        label: 'Run a confirmatory experiment targeting new users and fashion category, then decide.',
+        description: 'The post-hoc segments showed strong effects. Confirm them before shipping broadly.',
+        score: 'senior_ready',
+        feedback: 'Also correct, and the more conservative path. The new user (p=0.003) and fashion category (p=0.001) signals are strong enough to be worth confirming — but they must be confirmed in a new experiment with those segments as the pre-specified target population, not used as justification for the current experiment\'s result. A confirmatory experiment with pre-specified segments and a single primary metric (save rate within that segment) would give the team a trustworthy answer about whether to target these segments specifically.'
+      },
+      {
+        id: 'do-not-ship',
+        label: 'Do not ship — 2 of 3 pre-specified metrics are not significant, suggesting the hypothesis is not confirmed.',
+        description: 'The experiment was designed to show broad engagement improvement. It didn\'t.',
+        score: 'analyst_ready',
+        feedback: 'This is too conservative given that the pre-specified primary (save rate) is significant. The hypothesis was that Board Recommendations increases save rate, time in app, and board creation. Save rate is confirmed. The others are not. This is a partial confirmation — the feature has a demonstrated effect on saves but not on broader engagement depth. Shipping based on a significant primary while noting that secondary metrics did not confirm the broader hypothesis is a legitimate approach.'
+      }
+    ],
+    idealDecision: 'ship-primary-only',
+    secondBestDecision: 'confirm-segments',
+    juniorMistake: 'Treats the post-hoc segment analyses as additional confirmatory evidence. Does not notice that 2 of 3 pre-specified metrics are not significant. Does not calculate how many post-hoc tests were run or what the false positive rate is.',
+    seniorFlags: [
+      'Pre-specification is a commitment to evaluate specific hypotheses at specific thresholds. When pre-specified metrics fail, the experiment has not confirmed the hypothesis — regardless of what post-hoc analyses show. The post-hoc analyses are exploratory, not confirmatory.',
+      'The distinction between confirmatory and exploratory analysis must be maintained at the point of the decision, not just at the design stage. A team that pre-specifies 3 metrics and then runs 9 post-hoc analyses has effectively converted a confirmatory experiment into an exploratory one. The results should be communicated accordingly.',
+      'Pre-spec drift is a cultural problem as much as a statistical one. It happens because the team is under pressure to show results, and the data contains something positive. The correct response is: report the pre-specified results honestly, then treat post-hoc findings as input to the next experiment brief.'
+    ],
+    staffFlags: [
+      'Would have required the experiment brief to include an explicit list of all analyses to be conducted, with a distinction between confirmatory (pre-specified, decision-relevant) and exploratory (post-hoc, hypothesis-generating). The brief would require sign-off before the experiment launched. Any analysis not on the list before launch is labeled exploratory in the final report.',
+      'Would have treated the new user and fashion category effects as a finding worth pursuing — but through a targeted follow-up experiment, not as justification for a broad ship. "This experiment found a strong signal in new users and fashion. Our next experiment will test Board Recommendations targeted at these segments with save rate as the pre-specified primary." That is the right scientific process.'
+    ],
+    debrief: 'Pre-specification exists to separate hypotheses from observations. When you declare in advance which metrics you will evaluate and at what thresholds, the results are confirmatory — they test a hypothesis that existed before the data was observed. When you identify metrics to report after observing the data, the results are exploratory — they generate hypotheses for future testing, not evidence for current decisions.\n\nIn this experiment, the pre-specified hypothesis was that Board Recommendations increases save rate, time in app, and board creation. Save rate passed. Time in app and board creation did not. A strict reading of the experiment design says the hypothesis was partially confirmed: the feature demonstrably increases saves but does not demonstrate the broader engagement depth improvement the team hypothesized.\n\nThe post-hoc analyses create the appearance of a stronger result than the experiment actually produced. New users showing +14.2% save rate improvement (p=0.003) and fashion category showing +18.1% (p=0.001) are compelling — but these analyses were not pre-specified. They were identified after observing that the pre-specified secondaries were not significant. This is a form of outcome switching: adjusting which hypothesis you report based on what the data shows.\n\nThe statistical consequence: with 9 post-hoc tests at α=0.05, the probability of at least one false positive is 37%. The strong effects in new users and fashion may be real interaction effects, or they may be the expected false positives from running 9 tests. Without a pre-specified hypothesis about these segments, you cannot distinguish between them from this experiment alone.\n\nThe correct path: ship based on the significant primary (save rate), label the post-hoc findings as exploratory, and run a confirmatory follow-up experiment targeting new users and fashion with pre-specified segments and a single primary metric.',
+    interviewTakeaway: 'Pre-specification is a commitment, not a suggestion. When pre-specified metrics fail, post-hoc analyses are hypotheses — not confirmatory evidence. The experiment result is what the pre-specified metrics say it is. Post-hoc segments get their own confirmatory experiment.',
+    relatedConcepts: ['pre-specification', 'confirmatory vs exploratory analysis', 'outcome switching', 'multiple testing', 'post-hoc analysis', 'false positive rate'],
+    scenarioFamily: 'multiple_testing',
+    tags: ['multiple testing', 'pre-specification', 'post-hoc analysis', 'outcome switching', 'Pinterest', 'content discovery', 'segment analysis']
+  },
+
+  // ─────────────────────────────────────────────
+  // S25 — hte_subgroups: The Long-Form Trap
+  // ─────────────────────────────────────────────
+  {
+    id: 's25-spotify-hte',
+    title: 'The Long-Form Trap',
+    subtitle: 'Spotify · Podcast Discovery · Heterogeneous Treatment Effects',
+    difficulty: 'senior',
+    isFree: false,
+    company: 'Spotify',
+    industry: 'consumer',
+    domain: 'content-discovery',
+    estimatedMin: 20,
+    context: {
+      company: 'Spotify',
+      product: 'Audio streaming — 3.8M users in experiment',
+      setup: 'Product team tests a new podcast recommendation algorithm that surfaces long-form podcasts (60+ min) based on listening history. Hypothesis: surfacing high-quality long-form content increases podcast engagement. 4-week experiment, 50/50 user split.'
+    },
+    hypothesis: 'A recommendation algorithm weighted toward long-form podcasts will increase overall podcast listen rate by surfacing high-quality content that users are likely to complete and return to.',
+    experimentDesign: {
+      type: 'A/B',
+      randomizationUnit: 'user',
+      targetPopulation: 'All users who opened the podcast tab at least once in the 30 days before experiment start',
+      primaryMetric: 'Podcast listen rate (% of sessions with ≥10 min of podcast listening)',
+      plannedSplit: '50/50',
+      runtime: '4 weeks'
+    },
+    metricReadout: {
+      primaryMetric: {
+        name: 'Podcast listen rate (sessions with ≥10 min podcast)',
+        control: '28.4%',
+        treatment: '31.5%',
+        delta: '+3.1pp',
+        relativeChange: '+10.9%',
+        pValue: 0.04,
+        confidenceInterval: '[+0.2pp, +6.0pp]',
+        significant: true
+      },
+      guardrailMetrics: [
+        { name: 'Music listen rate', control: '74.2%', treatment: '73.8%', delta: '-0.4pp', status: 'PASS', note: 'No meaningful cannibalization of music' },
+        { name: '30-day retention', control: '81.3%', treatment: '80.1%', delta: '-1.2pp', status: 'WARNING', note: 'Directionally negative, p=0.09 — not significant but worth monitoring' }
+      ],
+      diagnostics: [
+        {
+          metric: 'Listen rate by engagement tier',
+          type: 'segment',
+          direction: 'divergent',
+          delta: 'Power listeners (≥5 podcasts/month, 22% of users, 61% of podcast hours): +11.2pp (p=0.001). Casual listeners (0-1 podcasts/month, 58% of users, 12% of podcast hours): -4.8pp (p=0.02, statistically significant harm).',
+          pValue: 0.0001,
+          confidenceInterval: null,
+          significant: true,
+          note: 'The algorithm surfaces 60+ min episodes. Power listeners have time and habit to engage with long-form. Casual listeners are recommended content that requires 60+ min commitment — most skip it entirely and listen to nothing, dragging their listen rate below control.'
+        },
+        {
+          metric: 'Skip rate on recommended podcasts',
+          type: 'diagnostic',
+          direction: 'negative',
+          delta: 'Casual listeners: 78% skip rate on recommended long-form episodes (vs 41% skip rate on short-form). Power listeners: 22% skip rate on long-form recommendations.',
+          pValue: null,
+          confidenceInterval: null,
+          significant: false,
+          note: 'Casual listeners are being recommended content they are not willing to commit to. The algorithm optimizes for power listener preferences and misserves the majority segment.'
+        }
+      ]
+    },
+    warningFlags: [
+      {
+        id: 'wf-casual-listener-harm',
+        label: 'Casual listeners show statistically significant harm (-4.8pp, p=0.02) — not just directional noise',
+        description: 'Unlike typical HTE scenarios where the harmed segment shows a non-significant directional negative, here the casual listener harm is statistically significant (p=0.02). The algorithm recommends 60+ min episodes to users who have never listened to more than one podcast per month. 78% of those recommendations are skipped entirely, reducing casual listener engagement below baseline.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-retention-signal',
+        label: '30-day retention directionally negative (-1.2pp, p=0.09) — casual listener churn risk',
+        description: 'Retention is not significant but the direction is consistent with the casual listener harm. Users who repeatedly receive recommendations they skip may disengage from the podcast tab entirely. The 4-week experiment window may be too short to capture the full churn impact of a degraded recommendation experience.',
+        severity: 'warning'
+      }
+    ],
+    decisions: [
+      {
+        id: 'ship-all',
+        label: 'Ship to all — +3.1pp overall listen rate at p=0.04.',
+        description: 'The overall result is positive. Ship.',
+        score: 'junior_miss',
+        feedback: 'The +3.1pp overall result masks statistically significant harm to 58% of users. Casual listeners — the majority by account count — show -4.8pp listen rate (p=0.02). This is not a directional negative that might be noise; it is a significant harm. Shipping to all means deploying an algorithm that actively degrades the experience for the majority of users while improving it for the high-engagement minority. The retention signal (-1.2pp, p=0.09) suggests this degradation may compound over time.'
+      },
+      {
+        id: 'ship-power-users',
+        label: 'Ship to power listeners (≥5 podcasts/month) only. Do not apply to casual listeners.',
+        description: 'The algorithm works for its intended segment. Gate it to that segment.',
+        score: 'senior_ready',
+        feedback: 'Correct. Power listeners show +11.2pp listen rate improvement (p=0.001) — a strong, reliable effect for the segment the algorithm was designed for. Gating to power listeners means the algorithm serves users who have the habit and time for long-form content. Casual listeners get their current recommendation experience, which is not harming them. The next step: design a separate algorithm variant for casual listeners — optimized for shorter episodes (15-30 min) — and test that separately.'
+      },
+      {
+        id: 'rollback',
+        label: 'Rollback — significant harm to 58% of users outweighs benefit to 22%.',
+        description: 'The overall product experience is degraded for the majority.',
+        score: 'analyst_ready',
+        feedback: 'Rollback is a reasonable position given the statistically significant harm to casual listeners and the directionally negative retention signal. However, power listeners — 22% of users but 61% of podcast hours — would lose a feature that demonstrably improves their experience. A targeted rollout (power listeners only) captures the benefit without the harm. Rollback forgoes that benefit entirely, which is harder to justify when segmented deployment is available.'
+      },
+      {
+        id: 'adjust-algorithm',
+        label: 'Adjust the algorithm to reduce long-form weighting for users below a listen frequency threshold.',
+        description: 'Tune the algorithm to segment automatically rather than shipping a hard gate.',
+        score: 'senior_ready',
+        feedback: 'Also correct, and potentially more elegant than a hard gate. If the algorithm can dynamically weight episode length by user listen frequency — heavy weighting toward long-form for power listeners, light weighting for casual listeners — it could serve both segments without an explicit gate. But this modified algorithm has not been tested. "Ship a modified version we haven\'t tested" carries risk. A hard gate on the current algorithm (power listeners only) is the conservative, testable path. The dynamic version should be its own experiment.'
+      }
+    ],
+    idealDecision: 'ship-power-users',
+    secondBestDecision: 'rollback',
+    juniorMistake: 'Ships to all based on the overall +3.1pp result without checking for segment divergence. Does not notice that p=0.04 on a wide CI [+0.2pp, +6.0pp] suggests a mixed effect. Does not ask why skip rates are so high.',
+    seniorFlags: [
+      'When a recommendation algorithm produces an overall positive result with a wide confidence interval, the first question is: which users is this helping, and which is it hurting? Wide CIs on positive primaries often indicate that a strong positive in one segment is being diluted by a negative in another.',
+      'Statistically significant harm in a subgroup is qualitatively different from directionally negative but non-significant harm. A p=0.02 result for the harmed segment means the algorithm is reliably hurting casual listeners — not just noisily failing to help them. This changes the shipping calculus significantly.',
+      'The skip rate diagnostic (78% for casual listeners vs 22% for power listeners) tells you the mechanism: the algorithm is recommending content the majority of users are unwilling to consume. This is not a personalization win; it is a mismatch between the algorithm\'s optimization target (power listener preferences) and the majority\'s needs.'
+    ],
+    staffFlags: [
+      'Would have required the algorithm team to define the target user segment before the experiment: "This algorithm is designed for users with ≥5 podcast listens per month." The experiment would have been run on that segment as the primary population, with casual listeners as a pre-specified secondary to check for spillover effects. The current experiment design treated all users as equivalent when the algorithm clearly was not.',
+      'Would have flagged the listen frequency distribution as a key input to the algorithm design. If 58% of your user base listens to 0-1 podcasts per month, an algorithm that surfaces 60+ min episodes is calibrated for 22% of users and will actively mismatch for the majority. Distributional awareness of the user base should precede algorithm design, not follow experiment results.'
+    ],
+    debrief: 'This experiment illustrates a specific and common HTE pattern: an algorithm optimized for high-engagement users that systematically mismatch for the majority.\n\nLong-form podcast recommendations work well for power listeners — users who have time, established listening habits, and the patience to commit to a 60-minute episode. For casual listeners, the same recommendations create a commitment barrier. A user who listens to one podcast per month and is recommended a 90-minute true-crime series will skip it. Do that consistently and you degrade their experience below baseline.\n\nThe key difference from a typical HTE scenario is that the casual listener harm is statistically significant (p=0.02). This is not a directional negative that might resolve with more data — it is a reliable, measured harm. 78% of long-form recommendations to casual listeners are skipped. The mechanism is clear and the harm is confirmed.\n\nThe correct decision is segmented rollout: power listeners get the algorithm, casual listeners get their current recommendation experience. This captures 100% of the measured benefit (power listeners, +11.2pp) while delivering zero harm to the majority.\n\nThe retention signal (-1.2pp, p=0.09) deserves monitoring post-ship, even in the power-listener-only deployment. If power listeners who consume more long-form content are listening to less music, there may be a slower-moving cannibalization effect not captured in the 4-week window.\n\nThe longer-term product question is: what algorithm serves casual listeners well? Shorter episodes (15-30 min), familiar formats, and entry-level content would be the starting hypotheses. That is a separate experiment.',
+    interviewTakeaway: 'A positive overall result with a wide CI often signals a strong positive in one segment masking harm in another. When the harmed segment\'s result is statistically significant — not just directionally negative — that changes the shipping calculus from "maybe ship with caveats" to "segment the rollout before any deployment."',
+    relatedConcepts: ['heterogeneous treatment effects', 'recommendation algorithms', 'engagement tiers', 'segment harm', 'long-form content', 'algorithm personalization'],
+    scenarioFamily: 'hte_subgroups',
+    tags: ['HTE', 'podcast recommendations', 'long-form content', 'engagement tiers', 'casual vs power users', 'algorithm personalization', 'statistically significant harm']
   }
 
 ];

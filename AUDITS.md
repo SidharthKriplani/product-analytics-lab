@@ -517,7 +517,7 @@ No top-level React error boundary in the app. PAL has had three confirmed runtim
 
 ---
 
-### 104. ⚠️ BUILD — Supabase auth half-wired (not production-tested end-to-end)
+### 104. ✅ BUILD — Supabase auth half-wired (not production-tested end-to-end)
 
 **Version:** Logged V4.33.7 → Resolved V4.35.x. Homepage copy updated to "product analysts and PMs", "practice judgment calls not recall". No "Data Scientist" or "no backend" language in current Home.jsx.
 **Type:** BUILD + Architecture
@@ -529,6 +529,8 @@ Supabase auth is present in the codebase and referenced in the README (`VITE_SUP
 **Decision required (logged in DECISIONS.md):** Either (a) complete Supabase auth to production-ready standard — full E2E test, verify `PROGRESS_KEYS` covers all rooms, add auth error handling — or (b) remove Supabase entirely and be purely localStorage-first until Stripe sprint when backend investment is justified. Half-done is worse than either. This must be decided before Batch 2 outreach when new users will encounter the sign-in CTA.
 
 **Files to audit if completing:** `src/utils/syncProgress.js` (PROGRESS_KEYS completeness), `src/utils/auth.js`, `src/components/layout/Sidebar.jsx` (auth UI state), error handling paths throughout.
+
+**Resolved V4.56.0–V4.58.0:** PROGRESS_KEYS drift fixed (6 wrong keys corrected, 9 missing added, dynamic `pd-progress-*` prefix handling). Sign-in button added to sidebar. Magic link redirectTo fixed. Google + GitHub OAuth added (V4.57.0). E2E tested on production. `exp-lab-progress-v1` (Review Room) added to PROGRESS_KEYS (V4.58.0). All rooms now sync cross-device.
 
 ---
 

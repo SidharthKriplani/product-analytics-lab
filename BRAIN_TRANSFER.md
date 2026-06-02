@@ -1,6 +1,6 @@
-# Brain Transfer — V4.55.0
+# Brain Transfer — V4.58.0
 
-**Version:** V4.56.0 | **Build:** ✓ | **Git:** pushed | **Date:** 2026-06-02
+**Version:** V4.58.0 | **Build:** ✓ (1.79s, 0 errors) | **Git:** uncommitted (push from Mac terminal) | **Date:** 2026-06-02
 
 ---
 
@@ -44,6 +44,14 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 
 ## What was just done
 
+**V4.58.0** — Review Room S19–S25 (7 new scenarios). Statefulness fix: `exp-lab-progress-v1` added to PROGRESS_KEYS — Review Room completions now sync cross-device. CHANGELOG updated with V4.56/57/58 entries. All spine MD files current.
+
+**Review Room coverage now:** SRM×2, novelty_peeking×2, hte_subgroups×3, guardrail_breach×2, multiple_testing×3. All thin families closed.
+
+**V4.57.0** — Google OAuth + GitHub OAuth. AuthModal redesigned (real SVG icons, dark-mode correct). All 3 sign-in methods live and E2E tested on production.
+
+**V4.56.0** — Supabase auth complete (audit #104). PROGRESS_KEYS drift fixed. Sign-in button in sidebar. Magic link redirectTo fixed.
+
 **V4.55.0** — Debrief failure mode pass (5 remaining rooms) + 3 audits resolved.
 - Instrumentation/Behavioral/Estimation/Design/STF: failureMode content added. 5 runners updated.
 - Audit #100: BIRunner + GrowthRunner imperative hover mutations → useState. Others already clean.
@@ -65,11 +73,12 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 
 ## Next action — Confirm VITE_POSTHOG_KEY live in Vercel → Batch 1 outreach
 
-Supabase auth is live (audit #104 ✅ resolved V4.56.0). Users can sign in via email magic link, progress syncs cross-device.
+**Auth fully live (V4.58.0):** Email magic link ✅, Google OAuth ✅, GitHub OAuth ✅. Sign-in button in sidebar. Progress syncs cross-device (all rooms including Review Room). E2E tested on production URL.
 
 **Remaining pre-Batch 1 user actions:**
-1. Confirm `VITE_POSTHOG_KEY` is set in Vercel env vars (same place you added Supabase keys)
-2. Git push if not done yet
+1. Git push V4.58.0 from Mac terminal (command in git commit block below)
+2. Confirm `VITE_POSTHOG_KEY` is set in Vercel env vars (Settings → Environment Variables)
+3. Google consent screen name still propagating — auto-resolves, no action needed
 
 ---
 
@@ -107,7 +116,7 @@ Runners that render it: BIRunner, GrowthRunner, InstrumentationRunner, Behaviora
 ## Git commit
 
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.55.0: Debrief failure mode pass complete (all 10 rooms, 184 cases). Audits #99+#100+#91 resolved. MCQ Trainer past sessions. Progress zero-state fixed." && git push origin main
+cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.58.0: Review Room S19-S25 (7 new scenarios, all thin families closed). Statefulness fix: exp-lab-progress-v1 added to PROGRESS_KEYS. CHANGELOG + spine MDs current." && git push origin main
 ```
 
 ---

@@ -7,6 +7,7 @@ import { supabase } from './supabase.js';
 
 export const PROGRESS_KEYS = [
   // Core room progress
+  'exp-lab-progress-v1',          // Review Room (ScenarioRunner/progress.js)
   'pal-stat-foundations-progress-v1',
   'pal-stats-progress-v1',
   'pal-exp-foundation-progress-v1',

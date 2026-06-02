@@ -4,6 +4,55 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.58.0] — 2026-06-02 [CONTENT + FIX]
+
+### Review Room expansion (S19–S25) + Statefulness fix
+
+**Review Room — 7 new scenarios (18 → 25):**
+- S19 (srm): "Compliance Window" — Vanta B2B SaaS. Corporate accounts silently excluded by spam filters. Trap: ships on p=0.02 without running SRM check.
+- S20 (novelty_peeking): "The Decaying Summary" — Loom. +18.4pp Week 1 → +4.3pp Week 3. Trap: ships on 3-week blended average without plotting weekly decay.
+- S21 (hte_subgroups): "The Empty Suggestion Panel" — Figma. Enterprise +19.2pp, Starter -2.1pp. Trap: ships to all on overall p=0.03 without segmenting by design system presence.
+- S22 (guardrail_breach): "The Habit Erosion" — Duolingo. D30 retention +4.2pp but lesson completion -8.2pp, breaching guardrail. D60 retention only +0.9pp.
+- S23 (multiple_testing): "The Eight-Metric Dashboard" — Airbnb. 8 metrics, 3 hit p<0.05. Expected false positives: 0.4. None survive Bonferroni. Primary metric (first booking) never passed.
+- S24 (multiple_testing): "The Pre-Spec Drift" — Pinterest. Primary passes; 2 of 3 pre-specified secondaries don't. Team pivots to post-hoc segments.
+- S25 (hte_subgroups): "The Long-Form Trap" — Spotify. Podcast discovery feature shows strong positive effect in free tier, negative in premium. Trap: ships on blended average.
+
+**Coverage after this version:** SRM×2, novelty_peeking×2, hte_subgroups×3, guardrail_breach×2, multiple_testing×3. All 5 thin families closed.
+
+**Statefulness fix:** `exp-lab-progress-v1` (Review Room's localStorage key, defined in `src/utils/progress.js`) was missing from `PROGRESS_KEYS` in `syncProgress.js`. Review Room completions were never syncing to Supabase. Added. All rooms now sync.
+
+Files touched: `src/data/scenarios.js`, `src/utils/syncProgress.js`, `BRAIN_TRANSFER.md`, `NEXT.md`, `CHANGELOG.md`
+
+---
+
+## [4.57.0] — 2026-06-02 [AUTH]
+
+### Google OAuth + GitHub OAuth live
+
+- `AuthModal.jsx` redesigned: replaced fake "G" circle with real Google multicolor SVG, added GitHub button with real SVG icon. Both use `var(--surface-2)` / `var(--text)` — correct in light and dark mode.
+- `signInWithGitHub()` added to `auth.js`. Both OAuth providers pass `redirectTo: window.location.origin` so post-auth redirect lands on correct URL.
+- E2E tested on production: email magic link ✅, Google ✅, GitHub ✅.
+- Google consent screen published (app name propagating from Supabase URL → "Product Analytics Lab").
+
+Files touched: `src/components/auth/AuthModal.jsx`, `src/utils/auth.js`
+
+---
+
+## [4.56.0] — 2026-06-02 [AUTH + ARCHITECTURE]
+
+### Supabase auth complete — Audit #104 resolved
+
+- Fixed PROGRESS_KEYS drift: 6 wrong key names corrected, 9 missing keys added, dynamic `pd-progress-*` prefix handling for Product Design added via `DYNAMIC_PREFIXES` scan.
+- Sign-in button added to Sidebar bottom (`src/components/layout/Sidebar.jsx`).
+- `emailRedirectTo: window.location.origin` added to magic link flow so auth redirects land on the correct URL in production.
+- `.env.local` created with `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.
+- E2E tested: sign-in works, user appears in Supabase Users table, progress push/pull confirmed.
+- Audit #104 resolved.
+
+Files touched: `src/utils/syncProgress.js`, `src/utils/auth.js`, `src/components/layout/Sidebar.jsx`, `.env.local`
+
+---
+
 ## [4.55.0] — 2026-06-02 [CONTENT + BUILD]
 
 ### Debrief Failure Mode Pass — All Remaining Rooms + 3 Audits Resolved

@@ -399,6 +399,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'ltv-payback', label: 'LTV & Payback Period' }, { id: 'acquisition-quality', label: 'Acquisition Quality' }],
     leadershipNote: 'A Staff DS would instrument a weekly channel-mix dashboard that surfaces per-channel LTV:CAC alongside blended LTV, with an automated alert when any channel exceeds 50% of the acquisition mix. The insight "mix shifted" should never require a manual investigation — it should be visible at a glance. The leadership move is preventing the drift from happening silently, not diagnosing it after a 22% decline.',
+    failureMode: {
+      weakAnswer: 'The candidate agrees with the head of growth that paid social is performing well because per-channel LTV only dropped 4%. They recommend continuing to scale the paid social budget since volume is up 60% and each channel looks "basically flat." They never decompose the blended LTV into a weighted average, never compute the LTV:CAC ratio for each channel, and miss the mix-shift mechanism entirely.',
+      interviewerFollowUp: '"Paid social LTV dropped from $62 to $58 — I agree that\'s a small move. But before we scale the budget further, walk me through the LTV:CAC ratio for paid social specifically, and tell me what the blended LTV would be if we applied last year\'s channel mix to this year\'s per-channel numbers."',
+    },
   },
 
   {
@@ -441,6 +445,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'viral-loops', label: 'Viral Growth Loops' }, { id: 'acquisition-quality', label: 'Acquisition Quality' }],
     leadershipNote: 'A Staff DS would instrument K-factor as two separate metrics on the growth dashboard — sharing rate and referral conversion rate — with device breakdowns for both. A single K-factor number hides the mechanism. The leadership failure here was five months of growth investment targeting the wrong variable because no one decomposed the metric. Staff-level work includes defining the decomposed metric structure before the first sprint, not after six months of misallocated effort.',
+    failureMode: {
+      weakAnswer: 'The candidate supports the VP\'s $150k incentive program proposal. They note that K-factor is down 50% and that referral incentives are a proven lever for viral growth. They recommend running an incentive test with a higher reward tier and project that pushing sharing rate from 0.85 to 1.1 will recover K-factor. They never decompose K into sharing rate and conversion rate, never segment conversion by device, and never connect the mobile load time data to the conversion collapse.',
+      interviewerFollowUp: '"The sharing rate today is 0.85 — slightly higher than six months ago when K was 0.4. If shares are actually up, which step in the K-factor formula is broken, and does a $150k incentive program fix that step?"',
+    },
   },
 
   {
@@ -483,6 +491,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'paywall-conversion', label: 'Paywall Conversion' }, { id: 'funnel-analysis-framework', label: 'Funnel Analysis' }],
     leadershipNote: 'A Staff DS would build a cohort-segmented paywall dashboard that tracks conversion separately for "activated" users (completed core loop) vs "cold" users (never completed core loop). Blended paywall conversion is nearly useless as a north star — it falls when you acquire more cold users even if activated-user conversion is healthy. The leadership move is defining the right denominator for the metric before the paywall launches, not discovering the segmentation problem three months in.',
+    failureMode: {
+      weakAnswer: 'The candidate sides with the head of product and recommends lowering the price from $9.99 to $6.99, reasoning that the paywall hasn\'t moved despite four product iterations so the offer itself must be the problem. They may also support more aggressive push notifications to drive users back to the paywall. They never compare the activation profile of Week 1 converters vs current paywall visitors, never apply the launch cohort dynamics framework, and never compute whether a 30% price cut can actually recover revenue at realistic conversion improvement rates.',
+      interviewerFollowUp: '"Week 1 converters averaged 11.4 sessions and used 4.2 of 6 premium features before paying. Current paywall visitors average 3.1 sessions and 1.6 feature uses. If you lower the price to $6.99, what conversion rate do you need to maintain the same revenue — and is that realistic for a population with 3.1 sessions per month?"',
+    },
   },
 
   {
@@ -525,6 +537,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'geographic-retention', label: 'Geographic Retention Analysis' }, { id: 'cohort-retention-curves', label: 'Cohort Retention Curves' }],
     leadershipNote: 'A Staff DS would build a "market readiness scorecard" that evaluates each new market on payment method coverage, UI localization completeness, and first-purchase conversion before acquisition spend is authorized. The scorecard exists before the expansion launch — not as a post-hoc analysis three months after the retention gap appears. The geographic retention gap in this case was entirely predictable from the product configuration. A Director of Analytics would have flagged it at launch as a blocker.',
+    failureMode: {
+      weakAnswer: 'The candidate sides with the expansion team — "six months isn\'t long enough to judge a new market, retention will improve as the flywheel matures." They recommend continuing acquisition spend and giving the markets more time to develop. They treat the D30 gap as a structural market behavior difference, never interrogate the near-zero feature usage data as a diagnostic signal, and never calculate what share of users literally cannot transact given the available payment methods.',
+      interviewerFollowUp: '"Credit card penetration in the LatAm target demographic is 18% and the only payment method available is credit card. What is the theoretical ceiling on first-purchase conversion without adding any new payment methods — and how does the current 9% compare to that ceiling?"',
+    },
   },
 ];
 

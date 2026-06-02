@@ -115,7 +115,7 @@ export const trainerMCQ = [
       { id: 'a', text: '0', correct: false },
       { id: 'b', text: '1', correct: true },
       { id: 'c', text: '5', correct: false },
-      { id: 'd', text: 'It depends on the sample size.', correct: false },
+      { id: 'd', text: 'Roughly 0.95 — since each test has a 95% chance of being correct, the expected number of correct results is 20 × 0.95.', correct: false },
     ],
     explanation:
       'With α = 0.05 and all nulls true, each test has a 5% chance of a false positive. Across 20 independent tests, the expected number of false positives is 20 × 0.05 = 1. This is the multiple-testing problem: the family-wise error rate (FWER) is much higher than 5%, so corrections like Bonferroni or Benjamini-Hochberg are needed. Sample size affects power, not the expected false-positive count given all-null true hypotheses.',
@@ -146,14 +146,22 @@ export const trainerMCQ = [
     question:
       'A user cohort scored in the top 10% on an engagement metric last week. This week their average score is lower, even without any product change. The most likely explanation is:',
     options: [
-      { id: 'a', text: 'Product quality degraded silently.', correct: false },
+      {
+        id: 'a',
+        text: 'Selection effect — by definition only high-scoring users were selected, so the group will look worse in subsequent weeks as lower-scoring sessions occur.',
+        correct: false,
+      },
       {
         id: 'b',
         text: 'Regression to the mean — extreme scores naturally move closer to the population average over time.',
         correct: true,
       },
       { id: 'c', text: 'The cohort suffered attrition, removing engaged users.', correct: false },
-      { id: 'd', text: 'The metric measurement became unreliable.', correct: false },
+      {
+        id: 'd',
+        text: 'Novelty decay — users who engaged heavily last week are now fatigued, causing a temporary dip.',
+        correct: false,
+      },
     ],
     explanation:
       'Regression to the mean describes the statistical phenomenon where extreme observed values tend to be followed by less extreme values on subsequent measurements, because part of the extreme score was due to random variation (luck). Selecting users based on high scores selects for both true high engagement AND temporarily lucky noise; the next measurement captures less noise. This is why control groups are essential — without them, natural regression can be mistaken for treatment effects.',
@@ -203,7 +211,7 @@ export const trainerMCQ = [
       { id: 'a', text: '50%', correct: false },
       { id: 'b', text: '56%', correct: true },
       { id: 'c', text: '80%', correct: false },
-      { id: 'd', text: '100%', correct: false },
+      { id: 'd', text: '20% — the prior is already 20%, and the Bayes factor simply confirms it.', correct: false },
     ],
     explanation:
       'Using Bayes\' theorem: posterior odds = prior odds × Bayes factor. Prior odds = 0.20/0.80 = 0.25. Posterior odds = 0.25 × 5 = 1.25. Posterior probability = 1.25 / (1 + 1.25) ≈ 0.556 or ~56%. This illustrates why priors matter: the same data that would push a 50/50 prior to ~83% only moves a skeptical 20% prior to ~56%. Option C would require a much stronger prior or higher Bayes factor.',
@@ -234,7 +242,7 @@ export const trainerMCQ = [
       },
       {
         id: 'd',
-        text: 'No — opt-in features always show inflated CTR due to technical measurement errors.',
+        text: 'No — but only because the opt-in rate is too low; with a large enough opt-in population, observational comparisons become as reliable as a randomized experiment.',
         correct: false,
       },
     ],
@@ -349,14 +357,26 @@ export const trainerMCQ = [
     question:
       'You are A/B testing a referral program. Treatment users can invite friends, who may also end up in either group. Which core assumption of A/B testing does this violate?',
     options: [
-      { id: 'a', text: 'The central limit theorem', correct: false },
+      {
+        id: 'a',
+        text: 'Independence of observations — referred users create correlation within the treatment group, inflating the test statistic.',
+        correct: false,
+      },
       {
         id: 'b',
         text: 'SUTVA (Stable Unit Treatment Value Assumption) — treatment affects control-group users through referrals, creating interference.',
         correct: true,
       },
-      { id: 'c', text: 'Stratified randomization', correct: false },
-      { id: 'd', text: 'The law of large numbers', correct: false },
+      {
+        id: 'c',
+        text: 'External validity — the referral dynamic means results may not generalize beyond the experiment window.',
+        correct: false,
+      },
+      {
+        id: 'd',
+        text: 'Randomization balance — users who send referrals are systematically different from those who do not, violating equal group composition.',
+        correct: false,
+      },
     ],
     explanation:
       'SUTVA requires that one unit\'s outcome is not affected by another unit\'s treatment assignment. A referral program violates this because treatment users can recruit friends into the control group, "contaminating" control. This leads to underestimating the treatment effect (control benefit from spillover) or overestimating it (if treatment users cherry-pick recipients). Solutions include cluster-based randomization (randomize at the household/social cluster level), holdout experiments, or network-aware designs.',
@@ -405,7 +425,7 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'Daily checks slow down the experiment\'s data collection pipeline.',
+        text: 'It is fine as long as you only stop when the result is significant — a significant p-value is valid whenever it appears.',
         correct: false,
       },
       {
@@ -415,12 +435,12 @@ export const trainerMCQ = [
       },
       {
         id: 'c',
-        text: 'It is only a problem if the sample size is small.',
+        text: 'It is only a problem if the experiment runs longer than its pre-specified duration.',
         correct: false,
       },
       {
         id: 'd',
-        text: 'Stopping early always leads to underestimating the effect size.',
+        text: 'Stopping early is valid if the effect is large — a strong signal does not need the full sample.',
         correct: false,
       },
     ],
@@ -500,8 +520,8 @@ export const trainerMCQ = [
     options: [
       { id: 'a', text: 'It doubles.', correct: false },
       { id: 'b', text: 'It quadruples.', correct: true },
-      { id: 'c', text: 'It increases by 50%.', correct: false },
-      { id: 'd', text: 'It stays the same — MDE does not affect sample size.', correct: false },
+      { id: 'c', text: 'It increases by about 41% — variance scales with the square root of the effect size change.', correct: false },
+      { id: 'd', text: 'It doubles per side — treatment needs twice as many users, but control stays the same.', correct: false },
     ],
     explanation:
       'Sample size for a two-sample proportion/mean test scales with 1/MDE². Halving the MDE means you need to detect an effect half as large, which requires four times the sample (n ∝ 1/δ²). This is one of the most important experiment-design tradeoffs: detecting small effects is expensive. Practically, this is why teams set MDE based on the minimum business-meaningful effect, not the minimum theoretically possible effect.',
@@ -515,14 +535,26 @@ export const trainerMCQ = [
     question:
       'How long should a typical A/B test run at minimum, even if statistical significance is reached in 48 hours?',
     options: [
-      { id: 'a', text: 'Stop as soon as p < 0.05 to ship faster.', correct: false },
+      {
+        id: 'a',
+        text: 'Stop as soon as p < 0.05 — the sample size formula already accounts for day-of-week patterns if the test was sized correctly.',
+        correct: false,
+      },
       {
         id: 'b',
         text: 'At least one full business cycle (usually 1–2 weeks) to account for day-of-week effects and early novelty.',
         correct: true,
       },
-      { id: 'c', text: 'Exactly 30 days, regardless of significance.', correct: false },
-      { id: 'd', text: '24 hours to get a quick directional signal.', correct: false },
+      {
+        id: 'c',
+        text: 'Exactly 30 days, regardless of significance — shorter runs introduce seasonal confounds.',
+        correct: false,
+      },
+      {
+        id: 'd',
+        text: '48 hours is sufficient if statistical significance is reached — waiting longer only dilutes the novelty signal.',
+        correct: false,
+      },
     ],
     explanation:
       'User behavior varies significantly by day of week (e.g., Monday vs. weekend usage patterns). An experiment reaching significance in 48 hours may have sampled predominantly weekday users, making results unrepresentative of the full week. Additionally, novelty effects peak in the first few days. Running for at least one full business cycle (7 days) ensures the sample reflects the natural behavioral distribution. 30 days (Option C) is often unnecessarily long unless the metric has high intramonth variance.',
@@ -827,12 +859,12 @@ export const trainerMCQ = [
       },
       {
         id: 'b',
-        text: 'ICE requires more data inputs, making it slower to use.',
+        text: 'ICE conflates implementation Ease with business value, which can push low-effort but low-impact work to the top.',
         correct: false,
       },
       {
         id: 'c',
-        text: 'ICE cannot be used for consumer products, only enterprise software.',
+        text: 'ICE scores are not comparable across teams because Impact is subjectively defined by each scorer.',
         correct: false,
       },
       {
@@ -1002,12 +1034,12 @@ export const trainerMCQ = [
       },
       {
         id: 'c',
-        text: 'A prototype used internally by the team to validate technical feasibility.',
+        text: 'The simplest version of a product that can be shipped without embarrassing the team — polished enough for a public launch.',
         correct: false,
       },
       {
         id: 'd',
-        text: 'A product that meets the minimum market requirements to avoid legal compliance issues.',
+        text: 'A fully functional product scoped down to a single use case, built to acquire the first 1,000 users before expanding.',
         correct: false,
       },
     ],
@@ -1058,7 +1090,7 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'Demographic data is harder to collect than behavioral data.',
+        text: 'Demographic data is a lagging indicator — it reflects who users were when they signed up, not how they currently behave.',
         correct: false,
       },
       {
@@ -1068,12 +1100,12 @@ export const trainerMCQ = [
       },
       {
         id: 'c',
-        text: 'Demographic segmentation violates GDPR and cannot be used in product analytics.',
+        text: 'Demographic segments are useful for understanding the market but do not change across the user lifecycle, making them less actionable for retention campaigns.',
         correct: false,
       },
       {
         id: 'd',
-        text: 'Demographics only apply to B2C products and are irrelevant for B2B analytics.',
+        text: 'Demographic data is often self-reported and unreliable, so behavioral proxies are always more accurate.',
         correct: false,
       },
     ],

@@ -4,13 +4,13 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.56.0 (2026-06-02) — Supabase auth complete (audit #104 resolved). Fixed all PROGRESS_KEYS drift (32 keys). Sign-in button in sidebar. emailRedirectTo dynamic. E2E tested and working.*
+*Last updated: V4.58.0 (2026-06-02) — Review Room S19–S25 complete. Statefulness fixed (exp-lab-progress-v1 now in PROGRESS_KEYS). All spine MDs current. Ready for git push + Batch 1.*
 
 ---
 
 ## Pre-beta gates (do before Batch 1 invites)
 
-1. **Git push V4.43.0–V4.47.0** — run from Mac terminal (sandbox cannot push)
+1. **Git push V4.58.0** — run from Mac terminal (command in BRAIN_TRANSFER.md)
 2. **Confirm `VITE_POSTHOG_KEY` is live in Vercel** — check env vars in Vercel dashboard
 
 ---
@@ -18,8 +18,6 @@ Read this at the start of every build session. Do only this. Update before closi
 ## Next session
 
 **1. Confirm VITE_POSTHOG_KEY live in Vercel** — check env vars dashboard, establish WAU baseline before Batch 1 outreach.
-Decision due before Batch 2 outreach. Option A: complete to production-ready — E2E test with real Supabase project, verify `PROGRESS_KEYS` in syncProgress.js covers all current rooms (SQL Lab, all new rooms added since V4.24), add auth error handling. Option B: remove entirely, ship as localStorage-first. Half-done is worse than either.
-Note: User to handle Supabase setup/testing for Option A in next session (if chosen).
 
 ---
 
@@ -44,6 +42,15 @@ See Next session item 1.
 - Audit #100 — BIRunner + GrowthRunner imperative hover mutations replaced with useState. MetricDebriefPanel, RCADebriefPanel, CaseDebriefPanel already correct.
 - Audit #91 — MCQ Trainer: past sessions panel added (empty state + last 3 sessions). Progress page: zero-state now routes to stat-foundations with correct copy. BookmarksBrowser + LockOverlay confirmed.
 - Build: ✓ 821 modules, 0 errors.
+
+**Done this session (V4.58.0):**
+- Review Room S19–S25: 7 new scenarios added (18 → 25). Thin families closed: SRM×2, novelty_peeking×2, hte_subgroups×3, guardrail_breach×2, multiple_testing×3.
+- Statefulness fix: `exp-lab-progress-v1` (Review Room localStorage key) was missing from PROGRESS_KEYS in syncProgress.js. All rooms now sync cross-device.
+- CHANGELOG updated with V4.56.0, V4.57.0, V4.58.0 entries. BRAIN_TRANSFER.md and NEXT.md fully current.
+- Build: ✓ 1.79s, 0 errors.
+
+**Done this session (V4.57.0):**
+- Google OAuth + GitHub OAuth added to AuthModal. Real SVG icons (proper Google multicolor, GitHub). Dark-mode correct button styling using CSS variables. `signInWithGitHub()` added to auth.js. `redirectTo: window.location.origin` on both OAuth providers. E2E tested: Google sign-in works on production URL. GitHub enabled in Supabase. Google consent screen published (name propagating).
 
 **Done this session (V4.56.0):**
 - Supabase auth complete (audit #104 resolved). Fixed all PROGRESS_KEYS drift — 6 wrong key names corrected, 9 missing keys added, dynamic `pd-progress-*` prefix handling for Product Design. Sign-in button added to sidebar bottom. `emailRedirectTo: window.location.origin` added so magic links land on correct URL. `.env.local` created. E2E tested — sign in works, user appears in Supabase Users table.
