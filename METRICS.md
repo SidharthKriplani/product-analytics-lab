@@ -36,7 +36,7 @@ Events fire from `src/App.jsx` (navigation events) and directly from runner comp
 | `sql_answer_revealed` | User reveals the answer in SQL Lab (after all hints exhausted) | `{ problemId: string }` |
 
 ### Rooms tracked via `case_opened`
-`stats`, `design`, `review`, `metrics`, `rca`, `cases`, `code`, `prioritization`, `behavioral`, `estimation`, `stat-foundations`, `exp-foundations`, `metrics-foundations`, `rca-foundations`, `growth-analytics`, `bi`, `spot-the-flaw`, `take-home`, `product-design`, `challenges`, `instrumentation`
+`stats`, `design`, `review`, `metrics`, `rca`, `cases`, `code`, `prioritization`, `behavioral`, `estimation`, `stat-foundations`, `exp-foundations`, `metrics-foundations`, `rca-foundations`, `growth-analytics`, `bi`, `spot-the-flaw`, `take-home`, `product-design`, `challenges`, `instrumentation`, `sql-lab`
 
 ### Events not yet tracked (gaps)
 - Debrief revealed
@@ -124,8 +124,9 @@ All progress state lives in localStorage. Every key must be included in `onReset
 | `pal-defense-plan-v1` | Defense Strategy generated plan | serialized room + case ID pairs per day |
 | `pal-last-visited-*` | Last visited timestamp per room | ISO timestamp |
 | `pal-sql-lab-solved-v1` | SQL Lab — solved problem IDs | JSON array of ID strings |
-| `pal-sql-lab-plan-v1` | SQL Lab — Study Plan config (phase 2, unbuilt) | JSON object: role, intensity, target date |
-| `pal-sql-lab-times-v1` | SQL Lab — per-problem solve times (phase 2, unbuilt) | JSON object: problem ID → elapsed seconds |
+| `pal-sql-lab-times-v1` | SQL Lab — per-problem solve times | JSON object: problem ID → elapsed seconds (written on correct solve) |
+| `pal-sql-lab-dates-v1` | SQL Lab — solve dates for streak/heatmap | JSON object: date string → solve count (feeds Progress.jsx heatmap) |
+| `pal-onboarded-v1` | Home page — first-visit onboarding shown flag | `'1'` once dismissed |
 
 ---
 

@@ -179,3 +179,5 @@ This batch should include the Pricing page explicitly. Ask testers directly: "Do
 | V4.27.0 | File created. Batch 0 checklist written. Batch 1 fully specified. Batches 2–3 stubbed. |
 | V4.39.1 | SQL Lab at 250 problems. Internal preview only (hidden route `/sql-lab`, shortcut `q`). Not yet in Batch 2 checklist — phase 2 features (Study Plan, timer) must ship first. |
 | V4.44.0 | SQL Lab now at 130 problems (culled + quality-raised from 250). In Sidebar.jsx nav (no longer hidden). Hints system + timer shipped (V4.43.0). Foundations canonicalized (V4.44.0). Pre-beta gates updated: git push + PostHog confirm + foundations vetting pass before Batch 1 opens. |
+| V4.45.0 | Difficulty filter chips across all room browsers. About.jsx rewritten (accurate, current). Home.jsx beginner onboarding track. Foundation nudges on Design + Review rooms. |
+| V4.46.0 | SQL Lab Phase 3 (company filter, PostHog events, streak). All 65 foundation modules rewritten situation-first. Emoji removal pass. 60 case debriefs: failure mode + interviewer follow-up added. Pre-beta gates: git push + PostHog key confirm remain. |

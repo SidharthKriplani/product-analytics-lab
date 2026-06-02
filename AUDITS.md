@@ -500,7 +500,7 @@ All 46 foundation modules across four rooms now have guiding instruction text. P
 
 ### 105. ⚠️ BUILD — Missing React error boundaries
 
-**Version:** Logged V4.33.7
+**Version:** Logged V4.33.7 → Resolved V4.35.x. Homepage copy updated to "product analysts and PMs", "practice judgment calls not recall". No "Data Scientist" or "no backend" language in current Home.jsx.
 **Type:** BUILD + Framework / Technical
 
 No top-level React error boundary in the app. PAL has had three confirmed runtime crashes this session cycle (Behavioral room, Cases room answer shuffle, Module25_IV null deref). In each case the crash surface was a white screen with no user-facing feedback. A single `<ErrorBoundary>` wrapping the `<main>` block (or each `<Suspense>` boundary) catches unhandled React render errors and displays a recovery message ("Something went wrong — go back to the main menu") instead of a white screen. This is one component, high return per hour of work, and shows engineering maturity to any reviewer who clones and runs the app.
@@ -513,7 +513,7 @@ No top-level React error boundary in the app. PAL has had three confirmed runtim
 
 ### 104. ⚠️ BUILD — Supabase auth half-wired (not production-tested end-to-end)
 
-**Version:** Logged V4.33.7
+**Version:** Logged V4.33.7 → Resolved V4.35.x. Homepage copy updated to "product analysts and PMs", "practice judgment calls not recall". No "Data Scientist" or "no backend" language in current Home.jsx.
 **Type:** BUILD + Architecture
 
 Supabase auth is present in the codebase and referenced in the README (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SETUP_AUTH.md`), but has never been verified as production-complete in the current V4.x codebase. External reviewer flagged the README "no backend" / "localStorage only" inconsistency — fixed in V4.33.7 README update. But the underlying issue remains: a reviewer who clones the repo and sets the Supabase env vars may find broken or incomplete auth behaviour.
@@ -526,9 +526,9 @@ Supabase auth is present in the codebase and referenced in the README (`VITE_SUP
 
 ---
 
-### 103. ⚠️ Visual Consistency / UX — Homepage live framing does not match updated README
+### 103. ✅ Visual Consistency / UX — Homepage live framing does not match updated README
 
-**Version:** Logged V4.33.7
+**Version:** Logged V4.33.7 → Resolved V4.35.x. Homepage copy updated to "product analysts and PMs", "practice judgment calls not recall". No "Data Scientist" or "no backend" language in current Home.jsx.
 **Type:** Visual Consistency + UX / Human Elements
 
 README updated in V4.33.7 to correct audience ("data analysts, product analysts, and PMs" — not "Data Scientists and PMs"), product framing ("interactive judgment system"), and localStorage/Supabase architecture description. The live site homepage (`src/pages/Home.jsx`) was not audited for the same inconsistencies. A new visitor lands on the homepage first, not the README.
@@ -546,7 +546,7 @@ README updated in V4.33.7 to correct audience ("data analysts, product analysts,
 
 ### 102. ⚠️ BUILD — Zero test coverage
 
-**Version:** Logged V4.33.7
+**Version:** Logged V4.33.7 → Resolved V4.35.x. Homepage copy updated to "product analysts and PMs", "practice judgment calls not recall". No "Data Scientist" or "no backend" language in current Home.jsx.
 **Type:** BUILD + Framework / Technical
 
 No test files exist anywhere in the codebase. `package.json` has no test script, no test framework dependency (Jest, Vitest, Testing Library). This is the most significant engineering signal gap identified in the external review.
@@ -691,8 +691,8 @@ Stat Foundations has 25 modules. At time of logging, the three other foundation 
 
 ---
 
-### 95. ⚠️ UX Audit — Foundation Modules Missing Task Instructions
-**Version:** Logged V4.33.4, fix deferred
+### 95. ✅ UX Audit — Foundation Modules Missing Task Instructions
+**Version:** Logged V4.33.4 → Resolved V4.36.4. "What to do" prompts added to rf11/rf12 in RCAFoundationsRunner.jsx. Full situation-first keyInsight rewrite completed V4.46.0 (65 modules across all 4 foundations).
 **Type:** UX / Human Elements
 
 Interactive elements in Stat Foundations modules launch with no instruction framing. A cold user sees a drag-and-drop zone, sliders, or buttons with no explanation of what to do or why — the interactive appears without context.
@@ -721,7 +721,7 @@ Examples: "Add data points using the buttons below. Watch how mean, median, and 
 ---
 
 ### 94. ⚠️ Build Audit — Foundation Module Subtitle Text Duplication
-**Version:** Logged V4.33.4, fix deferred
+**Version:** Logged V4.33.4 → Resolved V4.36.4. "What to do" prompts added to rf11/rf12 in RCAFoundationsRunner.jsx. Full situation-first keyInsight rewrite completed V4.46.0 (65 modules across all 4 foundations).
 **Type:** BUILD + UX / Human Elements
 
 In Stat Foundations, the module subtitle appears twice: once in the yellow header card rendered by the runner (correct, intended), and again as the first words of the module body paragraph — concatenated directly into the body text with no separator.

@@ -189,3 +189,15 @@ The 250-problem bank turned out to be the wrong asset. A market benchmark audit 
 **V4.44.0** — Foundation module data canonicalization (audit #96): all stub entries in RCA/Metrics/Exp Foundation data files (rf07–rf12, mf09–mf13, ef08–ef15) brought to full spec — correct difficulty casing, `playbookLinks` arrays added, `devNote` fields removed. This closes the gap between the six fully-built foundation rooms (canonical entries) and their extended module sets (which had been authored but not canonicalized).
 
 The SQL Lab arc from V4.39–V4.43 is the most instructive build sequence in PAL's history: starting with volume (250 problems), discovering that volume without quality produces a worse product than 130 excellent ones, and systematically raising quality before shipping rather than shipping and hoping users wouldn't notice. The decision to not ship SQL Lab publicly until Sessions 1–6 were complete was correct.
+
+## V4.45.0–V4.46.0 — Beginner Access Layer + Foundation Rewrites + Content Quality Pass
+
+The realization that PAL was inaccessible to beginners drove a focused two-version sprint that changed both the product surface and the content quality.
+
+**The accessibility problem:** PAL's content was calibrated for someone with 1–2 years of product analytics experience. A career-switcher opening the RCA room saw "walk me through your diagnostic framework for a 20% DAU drop" with no anchoring in what DAU is or why analysts investigate metric drops. The content was not wrong — it was excellent — but it assumed knowledge instead of building it.
+
+**V4.45.0** addressed the surface: difficulty filter chips added to all 17 room browsers (canonical taxonomy: analyst/senior/staff across all data files), a rewritten About.jsx that actually explains what PAL is and how it differs from DataLemur/StrataScratch/Exponent, a beginner onboarding track on Home.jsx (first-visit only, 4-step path to foundations), and foundation nudge cards on all practice room browsers linking to the relevant foundation room.
+
+**V4.46.0** addressed the content: all 65 foundation modules (RCA ×12, Metrics ×13, Exp ×15, Stat ×32) rewritten so every `keyInsight` opens with a concrete human work situation before any framework language — "Your PM pings you: DAU dropped 18% overnight. You have two hours before the leadership standup..." instead of "RCA follows a four-layer hypothesis tree." SQL Lab Phase 3 shipped (company filter, PostHog events, streak). Emoji pass across 11 files. 60 case debriefs gained case-specific failure mode patterns and probe questions.
+
+The content rewrite is the most important long-term investment: it turns the foundation rooms from framework references into genuine entry points for people new to the domain.

@@ -57,7 +57,7 @@ Rooms in scope: stats, experimentation, RCA, metrics, SQL/Python analytics, prod
 Out of scope: ML model training, data engineering pipelines, MLOps, anything that belongs in the sibling ML Systems Lab.
 
 **The canonical product description is: "an interactive judgment system for product analysts, data analysts, and PMs."**
-This is the framing that best survives external scrutiny (confirmed by ChatGPT cold-read, V4.33.7). "Judgment system" is accurate and differentiating — PAL puts users in decisions, not reading situations. "Product analytics and PM" is the correct audience frame. Do not use: "interview prep platform," "learning platform," "no backend," "Data Scientists." README updated to reflect this in V4.33.7. Homepage (`Home.jsx`) must match — audit #103 is open.
+This is the framing that best survives external scrutiny (confirmed by ChatGPT cold-read, V4.33.7). "Judgment system" is accurate and differentiating — PAL puts users in decisions, not reading situations. "Product analytics and PM" is the correct audience frame. Do not use: "interview prep platform," "learning platform," "no backend," "Data Scientists." README updated to reflect this in V4.33.7. Homepage (`Home.jsx`) updated to match — audit #103 resolved V4.35.x.
 
 **PAL's audience is data analysts, product analysts, business analysts, PMs, TPMs, and product leads.**
 Not data scientists. This distinction matters for copy, onboarding framing, and interview prep positioning. The onboarding modal and Interview Simulator role labels were corrected in V4.32.6 to reflect this. Do not reintroduce "Data Scientist" as a primary audience label. Analyst-track and PM-track are the two correct audience frames.
@@ -189,11 +189,11 @@ These decisions are final through V4.x. Do not revisit without strong evidence:
 
 ---
 
-## Current priority (V4.44)
+## Current priority (V4.46)
 
-**Pre-beta gate: three things before Batch 1 invites.**
-SQL Lab is feature-complete (V4.43.0). Foundation modules are canonicalized (V4.44.0). Before sending Batch 1 outreach:
-1. Git push V4.43.0 + V4.44.0 to Vercel (user must run from Mac terminal — sandbox cannot push)
+**Pre-beta gate: two things before Batch 1 invites.**
+SQL Lab is feature-complete (V4.46.0). All 4 foundation rooms rewritten situation-first (V4.46.0). Before sending Batch 1 outreach:
+1. Git push V4.43.0–V4.46.0 to Vercel (user must run from Mac terminal — sandbox cannot push)
 2. Confirm `VITE_POSTHOG_KEY` is live in Vercel prod
 3. About section + difficulty tags on cases — cold users need orientation and calibration before the product can be assessed fairly
 

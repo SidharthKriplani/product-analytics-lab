@@ -59,9 +59,11 @@ _No new features until PostHog baseline is established._
 - **BI chart interpretation scenarios** — BI is inherently visual; text-only scenarios miss the point. Add a sub-format to the BI room: "here's a dashboard/chart — what do you conclude, what's wrong, what do you recommend?" Chart.js or Vega-Lite renders inline without a backend. Scenario types: declining trend with seasonal overlay, pie chart with misleading denominator, dual-axis chart where axes manipulate perception, dashboard with inconsistent date filters. This is directly what BI interviews test and no other prep tool does it visually. Effort: medium (one new component, ~10 new scenarios). Tier 1 — highest ROI among the new ideas.
 
 ### Pre-beta gate items (do before sending Batch 1 invites)
-- **About section** — PAL has no "why this, how to use it" page. Cold visitors land and immediately have to figure out what PAL is. Needs: (1) what it is and who it's for, (2) how it's different from DataLemur/StrataScratch/Exponent, (3) what the rooms are and how to sequence them, (4) how the judgment-first format works. Not a long page — a focused 400-word section or a dedicated `/about` route. Should exist before Batch 1 outreach. Effort: low (content + one page component).
-- **Difficulty calibration + filter** — PAL currently assumes intermediate level across all rooms. No difficulty labels on cases, no filter chips. Pre-beta: (a) audit and tag every case with Beginner/Intermediate/Senior difficulty, (b) add a difficulty filter chip to each room browser. This one structural gap means beginner users hit hard cases immediately and bounce. Effort: medium (data tagging pass + filter UI per room). One session per room cluster. Logged as audit #143.
-- **Foundations first-principles vetting pass** — Non-stat foundations (RCA, Metrics, Exp) have the right module count and canonical structure now, but haven't been read end-to-end to verify they build from first principles correctly. Does rf01 actually set up rf07? Does mf01 connect to mf09? A ~2–3 hour content QA pass reading each module sequence as a new user would. No code. Gate: do before Batch 1 invites so foundation rooms actually deliver on their promise. Logged as audit #141.
+- ~~**About section**~~ — ✅ shipped V4.45.0. About.jsx fully rewritten: what PAL is, who it's for, how it differs from DataLemur/StrataScratch/Exponent, all 17 rooms listed, difficulty levels explained, how to use by experience level.
+- ~~**Difficulty calibration + filter (audit #143)**~~ — ✅ shipped V4.45.0. All data files normalized to analyst/senior/staff taxonomy. DifficultyChips component created. Filter chips added to all room browsers.
+- ~~**Foundations first-principles vetting pass (audit #141)**~~ — ✅ resolved V4.46.0. All 65 modules across all 4 foundation rooms rewritten situation-first.
+- **Git push V4.43.0–V4.46.0** — run from Mac terminal (pending on user)
+- **Confirm `VITE_POSTHOG_KEY` live in Vercel** — check env vars dashboard (pending on user)
 
 ### Foundation + Practice Room Content Revision (large multi-session effort)
 
@@ -92,8 +94,8 @@ This is the highest-ROI content investment PAL can make. Current state: all room
 ### Content Quality
 - **Case debrief explanation depth — failure mode pass (audit #86)** — debriefs state the right answer but don\'t explain what a weak answer looks like or why it fails under interviewer follow-up. Run a pass across all room data files adding: (1) what the weak answer looks like, (2) the specific follow-up that exposes the gap. Prioritize RCA, Metrics, Stats first. High effort — full content pass.
 - **MCQ Trainer distractor quality (audit #87)** — some wrong options in `trainerMCQ.js` are too obviously eliminable. Each distractor should be correct in a different context, or adjacent-but-subtly-wrong. Full 40-question pass to rewrite weak distractors. One session.
-- **Foundation modules missing task instructions (audit #95)** — interactive elements in Stat Foundations (verified: Module 02 buttons, Module 04 sliders) launch with no instruction framing. Cold user has no idea what to do with the interactive. Assumed same gap in Exp, Metrics, RCA module files — must be verified by reading each room\'s module files before writing instructions. Fix: add a 1–2 sentence "What to do" prompt directly above each interactive element in each module component JSX. Instruction format: "[Action] + [what to observe]." Start with Stat Foundations, confirm pattern, then work through remaining three rooms. Affects `src/components/[foundation]/modules/*.jsx` across all four rooms (25 stat + 7 exp + 8 metrics + 6 rca modules). Medium effort — ~1 dedicated session. Gate: resolve audit #94 (subtitle duplication) first so modules are clean before adding instructions. _Partial: rf01 and rf05 now have "What to do" context baked into the interactive framing (V4.36.4). Full systematic pass with InstructionBox component still needed across all four rooms._
-- **Foundation module depth audit — RCA, Metrics, Exp (audit #96)** — Exp now has 15 modules, Metrics 13, RCA 12 (all stubs populated as of V4.36.0). Assess whether the new modules are deep enough for senior-level prep, or whether a second layer is warranted. What topics are still missing? ~1 session per room. Gate: task instructions pass (audit #95) first. _Partial: RCA room started in V4.36.4 — rf01 (framework viz), rf05 (mix-shift playground), rf07 (SVG metric tree) upgraded. rf02, rf03, rf04, rf06 still text-only. Metrics and Exp rooms not yet assessed._
+- ~~**Foundation modules missing task instructions (audit #95)**~~ — ✅ resolved V4.36.4. "What to do" prompts added to rf11/rf12 in RCAFoundationsRunner.jsx.
+- ~~**Foundation module depth audit — RCA, Metrics, Exp (audit #96)**~~ — ✅ resolved V4.44.0. All stub entries (rf07–rf12, mf09–mf13, ef08–ef15) canonicalized: isFree, playbookLinks, difficulty casing, devNote removed. Module counts: RCA=12, Metrics=13, Exp=15. All keyInsights rewritten situation-first in V4.46.0.
 
 ### SQL Lab — phase 3 features (problem bank + hints + timer + nav complete as of V4.43.0)
 
@@ -133,10 +135,10 @@ This is the highest-ROI content investment PAL can make. Current state: all room
 - ✅ Per-problem timer: starts on first keystroke, saves to `pal-sql-lab-times-v1` on solve (V4.43.0)
 - ✅ SQL Lab progress section in Progress.jsx (solved count by difficulty, total time, nav button) (V4.43.0)
 - ✅ SQL Lab in Sidebar.jsx analytics subgroup nav (V4.43.0)
-- 🔲 Company filter chip in ProblemSidebar (filter by datamartId / industry)
-- 🔲 Hints quality review: spot-check 20 problems, rewrite generic hints
-- 🔲 PostHog events: `sql_problem_solved`, `sql_hint_used`, `sql_answer_revealed`
-- 🔲 SQL Lab streak in Progress.jsx heatmap
+- ✅ Company filter chip in ProblemSidebar (V4.46.0)
+- ✅ Hints quality review: spot-checked 130 problems, no misleading hints found (V4.46.0)
+- ✅ PostHog events: `sql_problem_solved`, `sql_hint_used`, `sql_answer_revealed` (V4.46.0)
+- ✅ SQL Lab streak in Progress.jsx heatmap via `pal-sql-lab-dates-v1` (V4.46.0)
 - 🔲 Submit button + edge test cases (Hard/Master only — NULL, empty table, boundary)
 - 🔲 Study plan onboarding: 4-step modal (interview?/when?/role?/time-per-day?) → payoff screen with daily queue
 - 🔲 Plan modes: Casual / Steady / Intensive (30/60/120 min per day)

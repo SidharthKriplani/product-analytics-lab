@@ -2,8 +2,8 @@
 
 Single source of truth for all SQL Lab decisions, findings, architecture choices, and session sequencing. Created after the Session 1 investigative audit (2026-05-31). Update this file at the end of every SQL Lab session.
 
-**Current version:** V4.43.0 (Sessions 1–6 complete)
-**Last updated:** 2026-05-31
+**Current version:** V4.46.0 (Sessions 1–6 + Phase 3 complete)
+**Last updated:** 2026-06-02
 
 ---
 
@@ -22,6 +22,7 @@ Single source of truth for all SQL Lab decisions, findings, architecture choices
 | Session 4 (7 new datamarts) | ✅ Done — V4.42.0 |
 | Session 5 (130-problem target) | ✅ Done — V4.42.0 |
 | Session 6 (UX + hints + phase 2) | ✅ Done — V4.43.0 |
+| Phase 3 (company filter + PostHog events + streak) | ✅ Done — V4.46.0 |
 
 ---
 
