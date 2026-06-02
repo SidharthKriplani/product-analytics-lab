@@ -92,7 +92,7 @@ This is the highest-ROI content investment PAL can make. Current state: all room
 - **Beginner onboarding track on Home.jsx** — one clearly labeled section for career-switchers and complete beginners: "New to product analytics? Start here →" with a 4-step path: Stat Foundations → RCA Foundations → 3 Easy cases in Stats Room → Defense Strategy. Static UI component, no new routes needed. Effort: very low.
 
 ### Content Quality
-- **Case debrief explanation depth — failure mode pass (audit #86)** — debriefs state the right answer but don\'t explain what a weak answer looks like or why it fails under interviewer follow-up. Run a pass across all room data files adding: (1) what the weak answer looks like, (2) the specific follow-up that exposes the gap. Prioritize RCA, Metrics, Stats first. High effort — full content pass.
+- ~~**Case debrief explanation depth — failure mode pass (audit #86)**~~ — ✅ partially resolved V4.54.0. Cases (20), BI (16), Growth (8) done. Remaining: Design, Behavioral, Estimation, Instrumentation, STF. Each runner needs to render the field (Cases embeds in existing interviewPhrase; BI/Growth have new `failureMode` object rendered by updated runners).
 - **MCQ Trainer distractor quality (audit #87)** — some wrong options in `trainerMCQ.js` are too obviously eliminable. Each distractor should be correct in a different context, or adjacent-but-subtly-wrong. Full 40-question pass to rewrite weak distractors. One session.
 - ~~**Foundation modules missing task instructions (audit #95)**~~ — ✅ resolved V4.36.4. "What to do" prompts added to rf11/rf12 in RCAFoundationsRunner.jsx.
 - ~~**Foundation module depth audit — RCA, Metrics, Exp (audit #96)**~~ — ✅ resolved V4.44.0. All stub entries (rf07–rf12, mf09–mf13, ef08–ef15) canonicalized: isFree, playbookLinks, difficulty casing, devNote removed. Module counts: RCA=12, Metrics=13, Exp=15. All keyInsights rewritten situation-first in V4.46.0.
@@ -140,8 +140,8 @@ This is the highest-ROI content investment PAL can make. Current state: all room
 - ✅ PostHog events: `sql_problem_solved`, `sql_hint_used`, `sql_answer_revealed` (V4.46.0)
 - ✅ SQL Lab streak in Progress.jsx heatmap via `pal-sql-lab-dates-v1` (V4.46.0)
 - 🔲 Submit button + edge test cases (Hard/Master only — NULL, empty table, boundary)
-- 🔲 Study plan onboarding: 4-step modal (interview?/when?/role?/time-per-day?) → payoff screen with daily queue
-- 🔲 Plan modes: Casual / Steady / Intensive (30/60/120 min per day)
+- ✅ Study plan onboarding: 4-step modal — shipped V4.51.0 (StudyPlanModal in SqlLabPage.jsx, saves to pal-sql-lab-plan-v1)
+- ✅ Plan modes: Casual / Steady / Intensive — shipped V4.51.0
 - 🔲 Solved-aware plan: skips already-completed problems
 - 🔲 SQL Lab — framing quality pass (LeetCode/DataLemur/StrataScratch benchmarking): tighter business context, clearer input/output spec, company-realistic numbers. Session 3 did one rewrite pass; a second targeted pass would lift quality further.
 
@@ -214,8 +214,7 @@ Auto-detection (not manual checkboxes): plan step completion is auto-detected by
 
 **Prerequisite audit completed (V4.29.0):** Defense Strategy already computes and uses specific case IDs — `getTopCases()` returns full case objects with `.id` fields (e.g. RCA01, M01, C01), used directly in `onNavigate(meta.page, c.id)` chips. The IDs are there. BUT they are computed at render time and never persisted — so there is no stored record of "this was your plan." Auto-detection requires one additional step: when the plan is generated, serialize the plan (room + case ID pairs per day) to `pal-defense-plan-v1` in localStorage. Then detection logic cross-references stored IDs against progress keys on load. This is ~40 lines of code, not a schema change. No other prerequisite outstanding.
 
-**Layer 4A — Three-layer micro-sequence per skill (lowest effort, highest impact)**
-Currently the plan outputs room chips + 2 matched cases. Upgrade: for each skill in the day plan, show a structured micro-sequence — (1) "Read first" linking one Playbook article matched to that skill, (2) the relevant Foundation module if self-rated Weak/Okay, (3) 2–3 JD-matched cases as now, (4) "Drill" linking to the MCQ Trainer filtered to that category. PAL already has all four content layers; the Defense Strategy just needs to route through them in sequence rather than dumping room chips. The Playbook article link per skill is the single lowest-effort step here and closes the most visible gap.
+~~**Layer 4A — Three-layer micro-sequence per skill**~~ — ✅ shipped V4.51.0 (SKILL_ARTICLE_MAP in DefenseDocGenerator.jsx line 123, "Read first" link renders at line 799).
 
 **Layer 4B — Company track cross-referencing (medium effort)**
 If the JD or company name signals a known company (Meesho, Amazon, Google etc.), adjust skill weights against PAL\'s company track data. Meesho = RCA weighted heavier, supply-demand framing surfaced. Amazon = behavioral appears in every round regardless of JD language. Requires enough company track data to be trustworthy before shipping.
