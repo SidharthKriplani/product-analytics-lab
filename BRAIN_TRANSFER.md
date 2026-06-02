@@ -1,6 +1,6 @@
 # Brain Transfer — V4.64.0
 
-**Version:** V4.67.0 | **Build:** ✓ (2.27s, 0 errors) | **Git:** uncommitted (push from Mac terminal) | **Date:** 2026-06-02
+**Version:** V4.68.0 | **Build:** ✓ (2.09s, 0 errors) | **Git:** uncommitted (push from Mac terminal) | **Date:** 2026-06-02
 
 ---
 
@@ -43,6 +43,8 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 ---
 
 ## What was just done
+
+**V4.68.0** — SQL Quality Audit Batch 9 complete. Best pass rate yet — 4/10 flagged, 6 clean passes. 4 rewrites: h14 (double EXISTS→funnel temporal ordering), h22 (single-table HAVING→completion rate JOIN+rate), h25 (SUM OVER clone→MoM revenue LAG), h27 (NTILE clone→activity bucketing LEFT JOIN+CASE WHEN). 3 new datamarts introduced: hr_analytics, marketplace, food_delivery.
 
 **V4.67.0** — SQL Quality Audit Batch 8 complete (m36–m61). Live solution bug fixed (m36 temporal ordering). 3 rewrites: m37 (Easy-level→channel conversion rate), m47 (LAG clone→ROWS BETWEEN bounded rolling avg), m56 (IN subquery→relational division). m57 dual DENSE_RANK upgrade. m42 checkValues. m61 debrief. Trap enrichment taxonomy logged (SQL_LAB_PLAN Section 10, IDEAS Tier 1, DECISIONS standing rule).
 
@@ -89,7 +91,7 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 
 ---
 
-## Next action — SQL Quality Audit Batch 9 (Medium m31–m40) → PostHog confirm → Batch 1 outreach
+## Next action — SQL Quality Audit Batch 10 (Hard h01–h10) → PostHog confirm → Batch 1 outreach
 
 **Auth fully live (V4.58.0):** Email magic link ✅, Google OAuth ✅, GitHub OAuth ✅. Sign-in button in sidebar. Progress syncs cross-device (all rooms including Review Room). E2E tested on production URL.
 
@@ -134,7 +136,7 @@ Runners that render it: BIRunner, GrowthRunner, InstrumentationRunner, Behaviora
 ## Git commit
 
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.67.0: SQL Audit Batch 8 + Trap Enrichment taxonomy. m36 bug fix (temporal ordering), m37→conversion rate, m47→ROWS BETWEEN rolling avg, m56→relational division, m57 dual DENSE_RANK upgrade." && git push origin main
+cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.68.0: SQL Audit Batch 9 (Medium). 4 rewrites: h14→funnel temporal ordering, h22→completion rate, h25→MoM revenue LAG, h27→activity bucketing. 3 new datamarts: hr_analytics, marketplace, food_delivery." && git push origin main
 ```
 
 ---

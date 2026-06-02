@@ -17,8 +17,8 @@ Read this at the start of every build session. Do only this. Update before closi
 
 ## Next session
 
-**1. SQL Quality Audit — Batch 9 (Medium m31–m40)**
-Score full batch, fix flagged, build+verify, ship. See SQL_QUALITY_AUDIT.md for running scores.
+**1. SQL Quality Audit — Batch 10 (Hard h01–h10)**
+Score full batch, fix flagged, build+verify, ship. Hard rubric: chaining 2+ advanced concepts, naive approach gives wrong answer. See SQL_QUALITY_AUDIT.md for running scores.
 
 **2. Confirm VITE_POSTHOG_KEY live in Vercel** — check env vars dashboard, establish WAU baseline before Batch 1 outreach.
 
@@ -38,6 +38,9 @@ See Next session item 1.
 ---
 
 ## Carry-forward log
+
+**Done this session (V4.68.0):**
+- SQL Audit Batch 9 complete (h14,h22,h25,h27,h28,h39,h49,m76,m77,m78 — Medium positions 31–40). Best pass rate yet: 4/10 flagged. 4 rewrites: h14 (funnel temporal ordering), h22 (completion rate JOIN), h25 (MoM revenue LAG), h27 (activity bucketing LEFT JOIN+CASE WHEN). 3 new datamarts introduced. Build: ✓ 2.09s.
 
 **Done this session (V4.67.0):**
 - SQL Audit Batch 8 complete (m36–m61, file positions 21–30). 6/10 flagged. Live bug fixed (m36 temporal ordering — user 12 was false positive). 3 rewrites: m37 (channel conversion rate), m47 (ROWS BETWEEN bounded rolling avg), m56 (relational division). m57 dual DENSE_RANK upgrade. m42 checkValues. m61 debrief. Trap enrichment taxonomy logged in SQL_LAB_PLAN Section 10, IDEAS Tier 1, DECISIONS. Build: ✓ 2.27s.

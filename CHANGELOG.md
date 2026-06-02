@@ -4,6 +4,22 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.68.0] — 2026-06-02 [CONTENT]
+
+### SQL Quality Audit — Batch 9 (Medium m31–m40: h14, h22, h25, h27, h28, h39, h49, m76, m77, m78)
+
+**Results:** 6/10 pass — best pass rate since Batch 1. 4 full rewrites.
+
+- **h14 rewritten** — double EXISTS clone of m23. Replaced with "Login-Then-Export Funnel Accounts" — 2-CTE temporal ordering funnel (first_login per user vs first_export per user, joined with fe.first_export > fl.first_login). User 2 in account 1 correctly excluded (exported before first login).
+- **h22 rewritten** — HAVING SUM single table (Di=2, TC=2, total=20, Easy-level). Replaced with "Provider Appointment Completion Rate" (Zocdoc) — JOIN providers to appointments + SUM(CASE WHEN no_show=0) + rate calc with 100.0. checkValue: Dr. Smith, 10 appts, 60.0% completion.
+- **h25 rewritten** — SUM OVER clone of m16 (Di=1, same table/PARTITION BY/ORDER BY, checkValues empty). Replaced with "Month-over-Month Revenue Growth" (Amazon) — CTE + strftime SUM completed orders + LAG growth rate. Teaches completed-only filter, LAG expression repetition in SQLite, NULL-for-first-month. checkValue: 2024-01 revenue=229.96, prev=169.98.
+- **h27 rewritten** — NTILE(4) clone of m21 (Di=2). Replaced with "Account Transaction Activity Tier" (JPMorgan) — CTE + LEFT JOIN + COUNT(txn_id) + CASE WHEN threshold bucketing. LEFT JOIN for zero-transaction accounts; COUNT(txn_id) vs COUNT(*) trap on LEFT JOIN result. checkValue: account 1, 6 txns, high tier.
+- **m76, m77, m78** — three new datamarts introduced: hr_analytics (PERCENT_RANK salary, Workday), marketplace (COUNT DISTINCT semantic trap, Etsy), food_delivery (semantic bug debugging format, DoorDash). All scored 31/35.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `SQL_LAB_PLAN.md`
+
+---
+
 ## [4.67.0] — 2026-06-02 [CONTENT]
 
 ### SQL Quality Audit — Batch 8 (Medium m21–m30: m36, m37, m39, m41, m42, m43, m47, m56, m57, m61)

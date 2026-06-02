@@ -260,8 +260,35 @@ Full rubric + process in SQL_LAB_PLAN.md Section 8.
 
 ---
 
-## Batch 9 — Medium m31–m40
-**Status:** Pending
+## Batch 9 — Medium m31–m40 (file positions 31–40: h14, h22, h25, h27, h28, h39, h49, m76, m77, m78)
+**Status:** ✅ Complete | **Audited:** 2026-06-02 | **Flagged:** 4 | **Rewritten:** 4
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Approaches | Technique | Pattern | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| h14 | Login-Then-Export Funnel Accounts (rewritten) | Amplitude | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | 2-CTE + JOIN temporal ordering funnel | event sequence analysis | ✅ Rewritten (was double EXISTS clone of m23, Di=2) |
+| h22 | Provider Appointment Completion Rate (rewritten) | Zocdoc | 5 | 4 | 4 | 4 | 5 | 5 | 4 | 31 | 2 | JOIN + SUM(CASE WHEN) + rate calc | operational scorecard | ✅ Rewritten (was HAVING+SUM single table, Di=2 TC=2 total=20) |
+| h25 | Month-over-Month Revenue Growth (rewritten) | Amazon | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | CTE + strftime SUM + LAG growth rate | revenue analytics | ✅ Rewritten (was SUM OVER clone of m16, Di=1) |
+| h27 | Account Transaction Activity Tier (rewritten) | JPMorgan Chase | 5 | 5 | 4 | 4 | 5 | 5 | 4 | 32 | 2 | CTE + LEFT JOIN COUNT + CASE WHEN tier | service routing segmentation | ✅ Rewritten (was NTILE clone of m21, Di=2) |
+| h28 | Content Engagement Pivot | TikTok | 5 | 4 | 4 | 3 | 3 | 5 | 4 | 28 | 2 | SUM(CASE WHEN action=X) 5-column pivot | engagement mix analysis | ✅ Pass (first full multi-column pivot in audit) |
+| h39 | Multi-Provider Patients | Doximity | 5 | 4 | 3 | 4 | 4 | 5 | 3 | 28 | 2 | COUNT(DISTINCT) + COUNT(*) + HAVING | medication reconciliation | ✅ Pass (prescriptions table confirmed) |
+| h49 | User Engagement Recency | TikTok | 5 | 4 | 4 | 3 | 3 | 4 | 3 | 26 | 2 | CTE + MAX + JULIANDAY days-since-last | dormancy detection | ✅ Pass |
+| m76 | Employee Salary Percentile | Workday | 5 | 5 | 4 | 4 | 4 | 5 | 4 | 31 | 2 | PERCENT_RANK() OVER + WHERE is_active | pay equity analytics | ✅ Pass (new function, new datamart hr_analytics) |
+| m77 | Unique Buyer Reach per Seller | Etsy | 5 | 5 | 3 | 5 | 4 | 5 | 4 | 31 | 2 | COUNT(DISTINCT buyer_id) vs COUNT(*) | semantic error detection | ✅ Pass (live trap: seller 2 repeat buyer inflates COUNT(*)) |
+| m78 | Courier Delivery Count — Debug | DoorDash | 5 | 5 | 3 | 5 | 4 | 5 | 4 | 31 | 2 | WHERE status='delivered' semantic bug fix | semantic error detection | ✅ Pass (live trap: cancelled orders inflate delivery count) |
+
+### Batch 9 findings
+
+**4/10 flagged — best flag rate since Batch 1.** All 4 flags were pure clones; the 6 passes were strong (three at 31/35, all new datamarts/functions).
+
+**Double EXISTS clone (h14):** The original problem (login AND export events exist for the account) was structurally identical to m23 (Accounts with Mixed Transaction Outcomes, double EXISTS AND EXISTS). Replaced with a funnel problem that adds temporal ordering — not just "login and export both exist" but "export happened AFTER login." Two CTEs find the first login and first export per user; the JOIN enforces fe.first_export > fl.first_login. User 2 in account 1 (exported before first login) is correctly excluded. This is the pattern that m36 (Returned Then Re-Purchased) also teaches — temporal ordering as the critical dimension.
+
+**Easy-level single table (h22):** HAVING SUM(no_show) = 0 on a single table — same structure as m37 before its rewrite. Replaced with Provider Appointment Completion Rate (Zocdoc) — JOIN providers to appointments, conditional aggregation for completed vs no_shows, rate calculation with 100.0 * to prevent integer division. All 6 providers appear. checkValue: Dr. Smith, 10 appts, 4 no_shows, 60.0% completion.
+
+**SUM OVER clone (h25):** Literal clone of m16 — same table (orders), same PARTITION BY (user_id), same ORDER BY (created_at), same column names (running_total). Replaced with Month-over-Month Revenue Growth — CTE + strftime SUM of completed orders only + LAG for previous month + growth rate calculation. Teaches the completed-only filter (gross vs net revenue), LAG expression repetition in SQLite, and the NULL-for-first-month behavior. Distinct from m09 rewrite (MoM order COUNT, not revenue; includes all statuses; ecomm not saas).
+
+**NTILE clone (h27):** NTILE(4) on account balance — clone of m21 (NTILE on consumer interaction count). Replaced with Account Transaction Activity Tier — CTE + LEFT JOIN accounts to transactions + COUNT(txn_id) per account + CASE WHEN threshold bucketing. The LEFT JOIN is essential (accounts with 0 transactions must show 0, not disappear). COUNT(txn_id) vs COUNT(*) on the LEFT JOIN result is the live trap embedded in the problem. Account 1 (6 transactions) → high tier.
+
+**New datamarts/functions this batch:** hr_analytics (Workday, PERCENT_RANK), marketplace (Etsy, COUNT DISTINCT semantic trap), food_delivery (DoorDash, semantic bug debugging format).
 
 ---
 
