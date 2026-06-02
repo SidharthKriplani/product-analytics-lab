@@ -4,6 +4,29 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.74.0] — 2026-06-03 [CONTENT]
+
+### S-Grade Upgrade Pass — Infrastructure + Batch 1 (Easy e01–e10)
+
+**Infrastructure locked:**
+- 10-dimension rubric (MJ + FV + FA added, max 50, flag < 30) added to DECISIONS.md
+- SQL_LAB_PLAN.md Section 11: S-grade pass execution plan, batch map, addition format spec
+- SQL_UPGRADE_PASS.md created: tracking artifact for all 13 batches
+- IDEAS.md: Layer 2 (forensic/impossible/cascade/code-review formats) logged as new Tier 1 product sprint requiring UI work
+- BRAIN_TRANSFER.md + NEXT.md updated to reflect active pass
+
+**Batch 1 — Easy e01–e10 — debrief additions (MJ + FV + FA):**
+Every problem received:
+- **FV (Forensic Value):** specific wrong query that runs cleanly and measures the wrong thing, what it actually returns, and how to catch it before submitting
+- **FA (Falsifiability):** sanity check query + conditions under which the answer would be wrong
+- **MJ (Measurement Judgment):** for e02 (conversion rate denominator), e07 (2+ events vs 2+ days), e09 (no-show rate denominator) — assumption statements a senior analyst would make before writing SQL
+
+Key FV additions: e01 NOT IN NULL footgun (returns 0 rows silently), e02 integer division (100.0 missing → every rate is 0.0), e04 ended_at IS NULL vs status='active', e06 WHERE resolved_at = NULL (silent empty queue), e09 integer division in rate calculation (the most common silent rate bug). Build: ✓ 2.23s.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_UPGRADE_PASS.md`, `SQL_LAB_PLAN.md`, `DECISIONS.md`, `IDEAS.md`, `BRAIN_TRANSFER.md`, `NEXT.md`, `CHANGELOG.md`
+
+---
+
 ## [4.73.0] — 2026-06-03 [CONTENT]
 
 ### SQL Quality Audit COMPLETE — Batch 13 (Master: master12, master14, master18, master19, master25, master26, master27)

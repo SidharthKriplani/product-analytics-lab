@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.73.0 | **Build:** ✓ (2.21s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.74.0 | **Build:** ✓ (2.21s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -50,6 +50,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V4.74.0** — S-Grade Upgrade Pass infrastructure locked + Batch 1 (Easy e01–e10) complete. New 10-dimension rubric (adds MJ/FV/FA) in DECISIONS.md. Section 11 added to SQL_LAB_PLAN.md. SQL_UPGRADE_PASS.md created as tracking artifact. Layer 2 (forensic/impossible/cascade/code-review formats) logged in IDEAS.md Tier 1. No build needed (MD-only changes + debrief additions to sqlLabProblems.js).
+
 **V4.73.0** — SQL Quality Audit COMPLETE. Batch 13 (final 7 Master problems): 6/7 flagged. 3 rewrites: master18→Seller Scorecard (Etsy, marketplace, conditional aggregation + RANK), master19→Driver On-Time (DHL, logistics, SLA analytics), master25→Post Engagement (Reddit, social_network, ROW_NUMBER PARTITION BY). 3 debrief upgrades: master12 (3-CTE coverage formula + tie-break), master14 (active-account filter caveat), master26 (recursive chain explanation). master27 clean. Build ✓ 2.21s. **THE 13-BATCH SQL QUALITY AUDIT IS COMPLETE.**
 
 **V4.72.0** — SQL Audit Batch 12 (Master master01–master10). 4/8 flagged. Fixes: master02 company (Meta→Wayfair) + checkValue; master03 rewritten (channel LTV clone→category gross margin, 3-table JOIN + RANK); master05 expectedRowCount fixed (3→2), checkValues added, company (Chime→Revolut); master10 debrief cleaned (unfinished text removed) + TC upgraded. Build ✓ 2.41s.
@@ -62,14 +64,15 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — Trap Enrichment Pass (post-audit, highest priority)
+## Next action — S-Grade Upgrade Pass Batch 2 (Easy e11–e20)
 
-**The 13-batch SQL quality audit is COMPLETE.** All 130 problems at B-grade floor. Next: raise ceiling to A-grade.
+**S-Grade Upgrade Pass — in progress.** Batch 1 done (Easy e01–e10). 12 batches remaining.
 
-Full taxonomy + execution plan in `SQL_LAB_PLAN.md` Section 10 and `IDEAS.md` Tier 1.
-Short version: embed data traps (NULL in NOT IN, integer division, many-to-many fanout, RANGE vs ROWS, denominator confusion) into debrief + seed data for highest-impact problems. Estimated 5–6 sessions.
+New rubric: 10 dimensions (MJ + FV + FA added), max 50, flag < 30 or any dim < 3. Rubric in DECISIONS.md. Batch map in SQL_LAB_PLAN.md Section 11. Scores in SQL_UPGRADE_PASS.md.
 
-Also queued: prompt-clarity pass (30-min sweep of all 130 prompts after enrichment).
+Active reference for this pass: `SQL_UPGRADE_PASS.md` → current batch + scores. Read it, not this file, for batch state.
+
+Layer 2 (forensic/impossible/cascade formats) logged in IDEAS.md — own product sprint, do not start yet.
 
 ---
 

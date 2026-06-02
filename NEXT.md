@@ -15,11 +15,14 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ## Next session
 
-**1. SQL Lab — Trap Enrichment Pass [HIGHEST PRIORITY]**
-All 13 audit batches complete as of V4.73.0. Full taxonomy + execution plan in SQL_LAB_PLAN.md Section 10. Start with 6 highest-ROI traps (effort 2, impact 3): NULL in NOT IN subquery, integer division CAST, many-to-many fanout, COALESCE on LEFT JOIN aggregate, RANGE vs ROWS on tied dates, denominator confusion on rate problems.
+**1. S-Grade Upgrade Pass — Batch 2 (Easy e11–e20)**
+Batch 1 (e01–e10) complete. Add MJ + FV + FA debrief additions to next 10 Easy problems. Scores tracked in SQL_UPGRADE_PASS.md. Rubric in DECISIONS.md. Full plan in SQL_LAB_PLAN.md Section 11.
 
-**2. SQL Lab — Prompt-Clarity Pass**
-30-min sweep of all 130 prompts after enrichment pass. Verify each prompt clearly signals expected output shape. Not a re-audit — no rubric changes.
+**2. S-Grade Upgrade Pass — Batches 3–5 (remaining Easy)**
+Complete all 50 Easy problems before moving to Medium. Easy = MJ minimal, FV+FA standard additions.
+
+**3. S-Grade Upgrade Pass — Medium through Master (Batches 6–13)**
+Medium+ gets full MJ/FV/FA treatment + live trap embedding in seed data for top 30 problems.
 
 **3. Confirm VITE_POSTHOG_KEY live in Vercel**
 Establish WAU baseline before Batch 1 outreach.

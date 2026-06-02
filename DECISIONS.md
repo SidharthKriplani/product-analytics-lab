@@ -255,18 +255,32 @@ The best Easy SQL problems combine 2–3 naturally related concepts rather than 
 **Post-audit prompt-clarity pass is scheduled after Batch 13.**
 After all 13 batches complete, run a single 30-minute prose pass across all 130 problems to verify each prompt clearly signals the expected output shape. This is a cosmetic improvement, not a re-audit. No rubric changes. No re-scoring.
 
-**Trap enrichment pass is scheduled after Batch 13 (highest priority post-audit work).**
-The quality floor audit (Batches 1–13) gets every problem to a clean B-grade. The trap enrichment pass raises the ceiling to A+. Full taxonomy and execution plan in SQL_LAB_PLAN.md Section 10 and IDEAS.md Tier 1. Summary of the standard:
+**S-Grade Upgrade Pass — the definitive quality standard (V4.74.0+).**
+The B-grade audit (Batches 1–13) established the floor. The S-grade pass raises the ceiling. Every problem in the final bank must achieve S-grade. Full rubric, execution plan, and batch tracking in SQL_LAB_PLAN.md Section 11 and SQL_UPGRADE_PASS.md.
 
-A "B-grade" SQL problem teaches the correct concept with a clean solution and a real debrief. An "A-grade" SQL problem additionally embeds at least one of the following traps that make the naive solution silently wrong:
-- NULL trap (NOT IN with NULL subquery, COUNT(*) vs COUNT(col), SUM(NULL)=NULL, NULL arithmetic)
-- JOIN fanout (many-to-many row multiplication, LEFT JOIN + aggregate returning NULL not 0)
-- Integer division (3/5=0 without CAST — must be in every rate/percentage solution)
-- Window frame (RANGE vs ROWS on tied dates — every running total must specify ROWS BETWEEN)
-- Business logic ambiguity (denominator confusion, cohort vs calendar, gross vs net, current vs historical state)
-- Distribution trap (average on skewed data, single-entry groups making ranking meaningless)
+**The 10-dimension rubric (max 50). Flag: any dimension < 3 or total < 30.**
 
-These traps are not cosmetic. They change what the wrong answer looks like and reveal judgment gaps. Every Medium/Hard/Master problem in the final bank should have at least one of these traps documented in the debrief (effort 1) and the highest-impact 30 problems should have it embedded live in the seed data (effort 2–3).
+| Dim | Name | What it scores |
+|---|---|---|
+| BF | Business Framing | Stakes-first, real business pressure, not a textbook exercise |
+| CA | Company Authenticity | Company + datamart + business context aligned |
+| DC | Difficulty Calibration | SQL complexity matches tier benchmark |
+| DR | Data Challenge Realism | Seed data forces real analytical choices |
+| Di | Distinctiveness | No structural clone in bank |
+| IQ | Insight Quality | Debrief changes how the reader thinks about analytics |
+| TC | Trade-off Clarity | Alternatives documented + when to use each |
+| MJ | Measurement Judgment | Problem requires defining the metric before writing SQL. Score 1: fully specified, one correct interpretation. Score 5: intentionally ambiguous prompt, debrief shows 3+ valid interpretations and teaches which a senior analyst would choose and why |
+| FV | Forensic Value | A specific wrong query is documented — what it runs to, what it actually measures, and how to detect the error. Score 1: none. Score 5: complete wrong solution with plausible output, systematic detection method, and what process would have caught it in production |
+| FA | Falsifiability | A sanity check query is present, and the conditions under which the answer would be wrong are specified. Score 1: none. Score 5: 2+ diagnostic checks, suspicious-output description, and a production monitoring note |
+
+**Grade thresholds:**
+- B-grade: total ≥ 20, no dimension < 3. All 130 problems at this level after the audit.
+- A-grade: total ≥ 35, MJ+FV+FA combined ≥ 6. Trap enrichment taxonomy applied.
+- S-grade: total ≥ 42, MJ+FV+FA combined ≥ 12 (avg 4+ per new dimension). Every problem teaches measurement judgment, has a documented forensic wrong answer, and has a specified falsifiability check.
+
+**The trap enrichment taxonomy (9 categories) remains the reference for FV additions.** See SQL_LAB_PLAN.md Section 10 for all 43 named traps. The six highest-ROI traps to embed live in seed data: NULL in NOT IN, integer division, many-to-many fanout, COALESCE on LEFT JOIN aggregate, RANGE vs ROWS on tied dates, denominator confusion.
+
+**Layer 2 (new problem formats) is logged in IDEAS.md and requires a product sprint.** Do not start until Layer 1 (data pass) is complete across all 130 problems.
 
 **Standing rule: integer division is always wrong in SQL rate problems.**
 Every solution that computes a rate, percentage, or average using division must include CAST(...AS REAL) or multiply by 1.0 to avoid integer truncation. This applies retroactively to all existing solutions. Check during the enrichment pass.

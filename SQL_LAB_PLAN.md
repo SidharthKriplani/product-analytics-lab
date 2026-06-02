@@ -937,4 +937,57 @@ This table will be filled after the audit is complete. Format: problem ID, curre
 
 **Session 4:** Master problems (15) — effort 1–2. Debrief enrichment + one or two live traps. These are already complex; traps should compound the complexity, not replace it.
 
+---
+
+## Section 11 — S-Grade Upgrade Pass (V4.74.0+)
+
+**Status:** In progress. Tracking artifact: SQL_UPGRADE_PASS.md. Rubric locked in DECISIONS.md.
+
+### What this pass adds to every problem
+
+Three additions to the `debrief` field. No schema changes, no prompt changes, no UI changes.
+
+**FV — Forensic Value addition:**
+```
+**Wrong answer (runs, measures the wrong thing):**
+[specific wrong SQL] → returns [plausible-looking result] — but this measures [what it actually computes], not [what was asked]. The error: [one sentence root cause].
+**How to catch it:** [detection method — cross-check query or output inspection].
+```
+
+**FA — Falsifiability addition:**
+```
+**Sanity check:** [query that verifies the answer]. If this returns [suspicious value], go back — [what it indicates].
+**Your answer would be wrong if:** [condition 1] — [what to check]. [condition 2] — [what to check].
+```
+
+**MJ — Measurement Judgment addition (Medium+ only, Easy gets simplified version):**
+```
+**Before writing:** A senior analyst would confirm: [the key ambiguity or assumption that must be stated]. Without this, you risk [the specific wrong interpretation].
+```
+For problems with ≥2 valid interpretations, show all of them: what each SQL produces, which the stakeholder actually wanted, and how to confirm.
+
+### Batch map (13 batches × 10 problems, mirrors audit structure)
+
+| Batch | Problems | Tier | MJ effort | FV effort | FA effort |
+|---|---|---|---|---|---|
+| 1 | e01–e10 | Easy | minimal (score ≥ 2) | standard (score ≥ 4) | standard (score ≥ 4) |
+| 2 | e11–e20 | Easy | minimal | standard | standard |
+| 3 | e21–e30 | Easy | minimal | standard | standard |
+| 4 | e31–e40 | Easy | minimal | standard | standard |
+| 5 | e41–e50 | Easy | minimal | standard | standard |
+| 6 | m01–m10 | Medium | full (score ≥ 4) | full (score ≥ 4) | full (score ≥ 4) |
+| 7 | m11–m20 | Medium | full | full | full |
+| 8 | m21–m30 | Medium | full | full | full |
+| 9 | m31–m40 | Medium | full | full | full |
+| 10 | h01–h10 | Hard | full + ambiguity | full + live trap | full + cascade note |
+| 11 | h11–h25 | Hard | full + ambiguity | full + live trap | full + cascade note |
+| 12 | master01–10 | Master | full + impossible note | full + production ceiling | full + cascade note |
+| 13 | master11–27 | Master | full + impossible note | full + production ceiling | full + cascade note |
+
+### S-grade scoring after the pass
+
+Target per problem: MJ ≥ 3, FV ≥ 4, FA ≥ 4 → new dimensions total ≥ 11. Combined with existing B-grade score (avg 29/35 after audit), S-grade total target ≥ 40/50.
+
+Layer 2 (forensic/impossible/cascade/code-review formats) is logged in IDEAS.md Tier 1. Requires product sprint with new schema fields and UI components. Do not start until Layer 1 complete.
+
 **Total estimated:** 5–6 sessions after Batch 13 completes.

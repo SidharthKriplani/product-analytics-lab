@@ -26,8 +26,25 @@ _No new features until PostHog baseline is established._
 
 ## Tier 1 — High impact, buildable now
 
+### SQL Lab — S-Grade Upgrade Pass [HIGHEST PRIORITY — IN PROGRESS]
+**Gate:** All 13 audit batches complete ✅. Expanded from original trap enrichment plan. Full rubric + execution plan in SQL_LAB_PLAN.md Section 11. Tracking artifact: SQL_UPGRADE_PASS.md.
+
+The audit got every problem to B-grade floor. This pass raises the ceiling to S-grade by running two layers in parallel:
+
+**Layer 1 (data pass, executing now):** For every problem, add to the debrief: (1) FV — the specific wrong query that runs cleanly but measures the wrong thing, what it actually produces, and how to catch it; (2) FA — a sanity check query + the conditions under which the answer would be wrong; (3) MJ — the assumption a senior analyst would state before writing SQL, and where multiple valid interpretations exist, show all of them and explain which to use and why.
+
+**Layer 2 (product sprint, next sprint — requires UI work):** Four new problem format types that need new schema fields and runner components:
+- **Forensic format** — present a broken query that's been running in production; candidate finds the error, explains what it measures vs what was intended, writes the fix
+- **Impossible format** — a business question the data genuinely cannot answer (survivorship bias, tracking gaps, GDPR deletions, missing population); correct answer is "I cannot answer this reliably and here's why"
+- **Cascade format** — multi-part problem where a Part 1 error propagates through Part 2 and Part 3; platform reveals at the end which error compounded
+- **Code review format** — colleague's query is presented; candidate identifies what's wrong, explains what it actually measures, rewrites it
+
+Layer 2 requires: new schema fields (wrongSolution, sanityCheck, ambiguousInterpretations, forensicQuery), new runner UI components, new routing logic. Own sprint. Do not start until Layer 1 is fully shipped.
+
 ### SQL Lab — Trap Enrichment Pass (after Batch 13) [HIGHEST PRIORITY POST-AUDIT]
 **Gate:** All 13 audit batches complete. Full execution plan + complete trap taxonomy in SQL_LAB_PLAN.md Section 10.
+
+**NOTE: This pass is now subsumed into the S-Grade Upgrade Pass above (Layer 1). The trap taxonomy (9 categories, 43 traps) is still the reference for FV additions. See SQL_LAB_PLAN.md Section 10 for the full list.**
 
 The audit (Batches 1–13) gets every problem to a clean floor — no clones, correct labels, real debriefs. This pass raises the ceiling: it embeds data traps that break naive SQL silently, adds business logic ambiguity that reveals judgment gaps, and introduces the failure modes that separate interview pass from fail. No competitor does this. This is PAL's differentiator.
 
