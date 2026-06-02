@@ -183,15 +183,17 @@ These decisions are final through V4.x. Do not revisit without strong evidence:
 
 ---
 
-## Current priority (V4.25+)
+## Current priority (V4.44)
 
-**Feature building is paused. Distribution and analytics come first.**
-The product is technically complete enough to charge for. The next risk is not features — it is unknown usage. Before any new feature work:
-1. Confirm `VITE_POSTHOG_KEY` is live in Vercel prod
-2. Establish a WAU baseline from real sessions
-3. Observe where users drop off before deciding what to build next
+**Pre-beta gate: three things before Batch 1 invites.**
+SQL Lab is feature-complete (V4.43.0). Foundation modules are canonicalized (V4.44.0). Before sending Batch 1 outreach:
+1. Git push V4.43.0 + V4.44.0 to Vercel (user must run from Mac terminal — sandbox cannot push)
+2. Confirm `VITE_POSTHOG_KEY` is live in Vercel prod
+3. About section + difficulty tags on cases — cold users need orientation and calibration before the product can be assessed fairly
 
-Do not start new features until Step 2 is complete. Every feature decision before then is speculation.
+**Next build session: SQL Lab Phase 3** (company filter chip, hints quality review, PostHog events, streak in heatmap). See NEXT.md.
+
+**Feature gate that still applies:** Do not build interview experiences tab, share/routing, or mock interview revamps until PostHog confirms real usage patterns. Build against observed behavior, not assumptions.
 
 ---
 

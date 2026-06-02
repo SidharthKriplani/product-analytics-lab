@@ -55,17 +55,25 @@ _No new features until PostHog baseline is established._
 - **Emoji removal — full UI pass (audit #80)** — emojis in room headers, icon boxes, locked states, and nav give a childish, unserious feeling inconsistent with the senior-IC positioning. Replace all UI-chrome emojis with Icon component SVGs or typographic symbols. Scope: all browser header icon boxes, foundation page headers, paywall lock states, tool page headers. Do not touch emojis inside case/article content text (author-voice). Medium effort — systematic search-and-replace across ~20 files.
 - **Room header icon consistency — full pass (audit #79)** — icon treatment is inconsistent across room browsers. Growth Analytics uses bare "↗" character; A/B Foundations uses 🧪 in the h1; Stats/Metrics/RCA/Design rooms have no icon at all; others have the 36×36 colored box pattern. Standardize to the box pattern (36×36, var(--X-bg) fill, var(--X-border) border, Icon component inside) across all room browsers and foundation pages. Should be done in the same pass as audit #80.
 
+### Content — BI / Reporting
+- **BI chart interpretation scenarios** — BI is inherently visual; text-only scenarios miss the point. Add a sub-format to the BI room: "here's a dashboard/chart — what do you conclude, what's wrong, what do you recommend?" Chart.js or Vega-Lite renders inline without a backend. Scenario types: declining trend with seasonal overlay, pie chart with misleading denominator, dual-axis chart where axes manipulate perception, dashboard with inconsistent date filters. This is directly what BI interviews test and no other prep tool does it visually. Effort: medium (one new component, ~10 new scenarios). Tier 1 — highest ROI among the new ideas.
+
+### Pre-beta gate items (do before sending Batch 1 invites)
+- **About section** — PAL has no "why this, how to use it" page. Cold visitors land and immediately have to figure out what PAL is. Needs: (1) what it is and who it's for, (2) how it's different from DataLemur/StrataScratch/Exponent, (3) what the rooms are and how to sequence them, (4) how the judgment-first format works. Not a long page — a focused 400-word section or a dedicated `/about` route. Should exist before Batch 1 outreach. Effort: low (content + one page component).
+- **Difficulty calibration + filter** — PAL currently assumes intermediate level across all rooms. No difficulty labels on cases, no filter chips. Pre-beta: (a) audit and tag every case with Junior/Mid/Senior difficulty, (b) add a difficulty filter chip to each room browser. This one structural gap means beginner users hit hard cases immediately and bounce. Effort: medium (data tagging pass + filter UI per room). Needed before beta — otherwise calibration feedback will dominate all Batch 1 responses.
+- **Foundations first-principles vetting pass** — Non-stat foundations (RCA, Metrics, Exp) have the right module count and canonical structure now, but haven't been read end-to-end to verify they build from first principles correctly. Does rf01 actually set up rf07? Does mf01 connect to mf09? A ~2–3 hour content QA pass reading each module sequence as a new user would. No code. Gate: do before Batch 1 invites so foundation rooms actually deliver on their promise. Logged as audit #141.
+
 ### Content Quality
 - **Case debrief explanation depth — failure mode pass (audit #86)** — debriefs state the right answer but don\'t explain what a weak answer looks like or why it fails under interviewer follow-up. Run a pass across all room data files adding: (1) what the weak answer looks like, (2) the specific follow-up that exposes the gap. Prioritize RCA, Metrics, Stats first. High effort — full content pass.
 - **MCQ Trainer distractor quality (audit #87)** — some wrong options in `trainerMCQ.js` are too obviously eliminable. Each distractor should be correct in a different context, or adjacent-but-subtly-wrong. Full 40-question pass to rewrite weak distractors. One session.
 - **Foundation modules missing task instructions (audit #95)** — interactive elements in Stat Foundations (verified: Module 02 buttons, Module 04 sliders) launch with no instruction framing. Cold user has no idea what to do with the interactive. Assumed same gap in Exp, Metrics, RCA module files — must be verified by reading each room\'s module files before writing instructions. Fix: add a 1–2 sentence "What to do" prompt directly above each interactive element in each module component JSX. Instruction format: "[Action] + [what to observe]." Start with Stat Foundations, confirm pattern, then work through remaining three rooms. Affects `src/components/[foundation]/modules/*.jsx` across all four rooms (25 stat + 7 exp + 8 metrics + 6 rca modules). Medium effort — ~1 dedicated session. Gate: resolve audit #94 (subtitle duplication) first so modules are clean before adding instructions. _Partial: rf01 and rf05 now have "What to do" context baked into the interactive framing (V4.36.4). Full systematic pass with InstructionBox component still needed across all four rooms._
 - **Foundation module depth audit — RCA, Metrics, Exp (audit #96)** — Exp now has 15 modules, Metrics 13, RCA 12 (all stubs populated as of V4.36.0). Assess whether the new modules are deep enough for senior-level prep, or whether a second layer is warranted. What topics are still missing? ~1 session per room. Gate: task instructions pass (audit #95) first. _Partial: RCA room started in V4.36.4 — rf01 (framework viz), rf05 (mix-shift playground), rf07 (SVG metric tree) upgraded. rf02, rf03, rf04, rf06 still text-only. Metrics and Exp rooms not yet assessed._
 
-### SQL Lab — phase 2 features (problem bank complete as of V4.39.0)
+### SQL Lab — phase 3 features (problem bank + hints + timer + nav complete as of V4.43.0)
 
-**✅ V4.39.0 SHIPPED:** 250 problems — 100 Easy / 75 Medium / 50 Hard / 25 Master. Hidden route `/sql-lab`, keyboard shortcut `q`. Shared datamart architecture (5 datamarts × 5 tables), prepared-statement DB init, Clearbit logos, Challenge Vault sidebar section.
+**✅ V4.43.0 SHIPPED:** 130 problems (50E/40M/25H/15Master), hints system (1/2/5/5 by difficulty), per-problem timer, Progress.jsx SQL section, SQL Lab in Sidebar.jsx nav. Datamarts: 12 total (ecomm, saas, fintech, consumer, health, gaming, logistics, marketplace, food_delivery, social_network, edtech, hr_analytics).
 
-**Problem bank target:** ✅ COMPLETE — 250 problems (sql-e01–e100, sql-m01–m75, sql-h01–h50, sql-master01–master25). All original, not copied from DataLemur/StrataScratch. Same SQL concept coverage, different business context, different data.
+**Problem bank target:** ✅ COMPLETE — 130 problems (50E/40M/25H/15Master, culled + reclassified from original 250 in V4.40.0). All original, not copied from DataLemur/StrataScratch. Same SQL concept coverage, different business context, different data.
 
 **Difficulty tiers (qualitative distinctions, not just complexity):**
 - Easy: prompt implies the technique, 1–2 tables, clean data, tests whether you know the construct
@@ -90,16 +98,24 @@ _No new features until PostHog baseline is established._
 - ✅ Debrief reveal with --discovery amber border
 - ✅ Right sidebar: progress bar, difficulty/company filters, problem list with solved indicators
 - ✅ localStorage solved tracking (`pal-sql-lab-solved-v1`)
-- ✅ Company logos via Clearbit (`https://logo.clearbit.com/[domain]`)
+- ✅ Company logos via Google Favicon API (`https://www.google.com/s2/favicons?domain=...&sz=32`)
 - ✅ Challenge Vault: Master problems in separate sidebar section, never in plans
 - ✅ Master difficulty color: purple (`var(--purple)`)
 - ✅ Role tags per problem + priority for plan generation
-- ✅ 250 problems: 100E / 75M / 50H / 25Master
-- 🔲 Timer: starts on first keystroke, records elapsed on correct solve to `pal-sql-lab-times-v1`
+- ✅ 130 problems: 50E / 40M / 25H / 15Master (V4.40.0+)
+- ✅ Hints system: progressive reveal (1/2/5/5 by difficulty), Show Answer only after all hints exhausted (V4.43.0)
+- ✅ Per-problem timer: starts on first keystroke, saves to `pal-sql-lab-times-v1` on solve (V4.43.0)
+- ✅ SQL Lab progress section in Progress.jsx (solved count by difficulty, total time, nav button) (V4.43.0)
+- ✅ SQL Lab in Sidebar.jsx analytics subgroup nav (V4.43.0)
+- 🔲 Company filter chip in ProblemSidebar (filter by datamartId / industry)
+- 🔲 Hints quality review: spot-check 20 problems, rewrite generic hints
+- 🔲 PostHog events: `sql_problem_solved`, `sql_hint_used`, `sql_answer_revealed`
+- 🔲 SQL Lab streak in Progress.jsx heatmap
+- 🔲 Submit button + edge test cases (Hard/Master only — NULL, empty table, boundary)
 - 🔲 Study plan onboarding: 4-step modal (interview?/when?/role?/time-per-day?) → payoff screen with daily queue
 - 🔲 Plan modes: Casual / Steady / Intensive (30/60/120 min per day)
 - 🔲 Solved-aware plan: skips already-completed problems
-- 🔲 SQL Lab progress section in Progress.jsx (solved count by difficulty, total time, streak)
+- 🔲 SQL Lab — framing quality pass (LeetCode/DataLemur/StrataScratch benchmarking): tighter business context, clearer input/output spec, company-realistic numbers. Session 3 did one rewrite pass; a second targeted pass would lift quality further.
 
 **Study plan numbers:**
 
@@ -232,6 +248,12 @@ Same card-per-day format as current, but now the plan:
 
 ---
 
+### Interview Experiences tab
+Curated catalog of real analyst/PM interview experiences with a skill frequency graph ("what topics come up most, across which companies"). Submission flow: user pastes free text → you assess quality/completeness → approve and add manually. The curation bottleneck is real — this is ongoing work for the product's life. **Do not build the in-app submission flow first.** Manually source 20–30 experiences from LinkedIn/Reddit/r/dataengineering, validate the skill frequency pattern is interesting, then decide if the infrastructure is worth building. The graph itself (Chart.js, topics × frequency) is the high-value deliverable; the ingestion pipeline is the expensive part. Tier 2 — gate on having a real corpus first.
+
+### Share buttons + deep-link routing
+Share buttons without actual per-problem URLs are useless (they'd just link to home). Real work: add URL routing for individual problems and cases (SQL Lab problem IDs, Case IDs, Foundation module IDs). PAL is currently a pure SPA with no per-item routes. Adding `?problem=sql-e01` or `/sql-lab/sql-e01` routing requires changes to App.jsx + all runners. Once routing exists, share buttons are trivial. Do not build share buttons until routing exists. Effort: medium per room × 17 rooms. Start with SQL Lab (most benefit from sharing individual problems).
+
 ### Room relationship map — learning arc visualization
 
 **Gate: PostHog shows users getting lost — low room diversity per user, or high Home.jsx bounce.**
@@ -332,10 +354,14 @@ The keyboard shortcut badges (Tier 1 item above) can live on these nodes too, ma
 - More Take-Home prompts (TH06+): marketplace, fintech, health domains
 - Behavioral Room expansion: BEH31+ for Staff/Director-level leadership scenarios
 - Estimation Room: industry-specific tracks (fintech, healthtech, marketplace)
+- **Guesstimates sub-format in Estimation Room** — guesstimates are a subset of estimation (Fermi problems with business framing). PAL already has EST01–30; add 5–10 guesstimate-style problems with explicit "no data given, derive from first principles" framing. Low effort, directly interview-relevant.
 - **"Spot the flaw" adversarial format for RCA + Metrics** (from ML Systems Lab, adaptable) — show a plausible-looking analysis with a buried methodological error, no MCQ, user must identify and explain the flaw. Flaw types: selection bias, confounding variable, Simpson's Paradox, wrong metric, incorrect cohort definition, feature flag misconfiguration. PAL already has Spot the Flaw room (STF) — extend this mechanic into RCA and Metrics rooms as a sub-format.
 - **"Senior engineer reasoning" reveal layer** (from ML Systems Lab StaffLayerTab) — after each case, show "How a Staff analytics engineer reads this" with nuanced multi-step reasoning. Currently debriefs are authoritative but don't model the thought process explicitly.
 
 ### Features
+- **Code Lab SQL + Python hybrid** — Code Lab currently runs Python only (Pyodide). Adding sql.js (already in codebase from SQL Lab) would make Code Lab a genuine analyst IDE: write Python + SQL in the same session, referencing the same datamarts. This mirrors real analyst work. The positioning distinction from SQL Lab: Code Lab = free-form notebook environment (Python + SQL, open-ended exploration); SQL Lab = structured problem bank with graded checking. That's a clean separation. Effort: medium (sql.js already imported, datamarts reusable). Do after SQL Lab Phase 3 is complete.
+- **Mobile autocomplete for SQL/Python editor** — QoL feature for users trying to practice on phone. Monaco has known mobile issues; a lighter textarea with a keyword toolbar (SELECT / FROM / WHERE / GROUP BY chips) is more realistic. Low priority — mobile isn't the primary use case for SQL/Python practice. Tier 3.
+- **Country-curated content** — filter or tag cases by geography so users prepping for Indian companies see Meesho/Swiggy/Zepto framing, US users see Stripe/Airbnb framing. Infrastructure: add a `region` or `market` tag to case metadata. UI: filter chip on room browsers. Builds naturally from the Indian Company Tracks item already in Tier 2. Gate: confirm Indian user signal first.
 - `Escape` key closes hint accordions (currently only navigates home)
 - Mobile bottom nav rail for most-used rooms
 - "Shuffle" button in MCQ Trainer (randomise across all 40 questions)

@@ -100,7 +100,7 @@ Founder self-vet complete. 5 bugs found and fixed in V4.28.0. Additional feature
 ---
 
 ## Batch 1 — First External Testers
-*Status: PENDING — opens after Batch 0 passes*
+*Status: PENDING — pre-beta gates in progress (see NEXT.md). Opens after: git push V4.43.0+V4.44.0, PostHog confirmed live, foundations vetting pass done.*
 
 ### User profile
 2–3 people actively prepping for a senior analyst or business analyst role. Have an interview coming up in the next 7–14 days. Comfortable with SQL. Self-described as shaky on experimentation and RCA. Not from a pure engineering background.
@@ -178,3 +178,4 @@ This batch should include the Pricing page explicitly. Ask testers directly: "Do
 |---|---|
 | V4.27.0 | File created. Batch 0 checklist written. Batch 1 fully specified. Batches 2–3 stubbed. |
 | V4.39.1 | SQL Lab at 250 problems. Internal preview only (hidden route `/sql-lab`, shortcut `q`). Not yet in Batch 2 checklist — phase 2 features (Study Plan, timer) must ship first. |
+| V4.44.0 | SQL Lab now at 130 problems (culled + quality-raised from 250). In Sidebar.jsx nav (no longer hidden). Hints system + timer shipped (V4.43.0). Foundations canonicalized (V4.44.0). Pre-beta gates updated: git push + PostHog confirm + foundations vetting pass before Batch 1 opens. |

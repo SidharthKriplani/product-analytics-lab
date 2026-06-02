@@ -39,6 +39,22 @@ Start here when running an audit. Add rows as new types emerge.
 
 ---
 
+## Part XXIX — V4.44.0 Pre-Beta Audit Log
+
+### 141. ⚠️ Content Audit — Non-Stat Foundations First-Principles Sequence Vetting
+**Version:** Logged V4.44.0, fix pending (pre-beta gate)
+**Type:** Content Integrity / Coverage
+
+RCA, Metrics, and Exp Foundation modules have been canonicalized (all stubs filled, devNote removed, playbookLinks added — V4.44.0). However, the module sequences have not been read end-to-end as a cold user would to verify: (1) does each module genuinely set up the next? (2) do the `connection` texts actually bridge to the target room correctly? (3) are there conceptual gaps between beginner and advanced modules that a new user would get stuck on? This is a human content QA pass — no code.
+
+Scope: rf01–rf12, mf01–mf13, ef01–ef15. ~2–3 hours of reading.
+
+**Gate:** Complete before Batch 1 invites. Foundation rooms are presented as learning paths — if the sequence doesn't hold up, the core promise of the room is broken.
+
+**Fix:** Dedicated content pass (no build session) — read each room's module sequence in order, flag gaps or sequencing errors, edit content inline.
+
+---
+
 ## Part XXVIII — V4.39.11 SQL Lab Content Quality Audit (Investigative — no code changes)
 
 ### 130. ✅ Content — SQL Lab 39 duplicate-skeleton problems removed (V4.40.0)

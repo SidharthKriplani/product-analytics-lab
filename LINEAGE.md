@@ -173,3 +173,19 @@ The 25 Master problems form the Challenge Vault — always visible in the sideba
 SQL Lab is still internal-first — hidden at `/sql-lab`, accessible via keyboard shortcut `q`. Phase 2 features (Study Plan modal, per-problem timer, Progress page integration) are queued but unbuilt.
 
 *V4.38.0–V4.39.0 reconstructed from CHANGELOG.md.*
+
+## V4.40.0–V4.44.0 — SQL Lab Quality Arc + Foundation Canonicalization
+
+The 250-problem bank turned out to be the wrong asset. A market benchmark audit (2026-05-31) against DataLemur, StrataScratch, and LeetCode revealed that 39 problems were duplicate skeletons — the same SQL pattern applied to a different column, with no added conceptual difficulty. Another 21 were misclassified (Easy-level problems labeled Medium or Hard). The culled, reclassified target was 130 problems: 50E/40M/25H/15Master.
+
+**V4.40.0** — Cull + reclassify: 39 duplicates removed, 27 reclassified. Master tier fixed from 10 to 15 (the 10-problem vault was too thin to be useful). Validate-data.js pass confirmed clean.
+
+**V4.41.0** — All 74 remaining conversion candidates (prompts that read like textbook exercises rather than business stakeholder requests) rewritten: 16 Easy + 33 Medium + 17 Hard + 8 Master. Every rewrite follows a four-part business framing: who you are, what happened, what they're asking, what to return. Technique is never named — it must be derived from the business question. The 5-section debrief format applied to all Medium/Hard/Master rewrites.
+
+**V4.42.0** — Schema expansion: 7 new datamarts added (gaming, logistics, marketplace, food_delivery, social_network, edtech, hr_analytics), bringing the total to 12. The principle was "wider not longer" — more schemas prevent the problem where users memorize a datamart's layout by problem 10, turning what should be SQL practice into schema lookup. Each datamart has 10–12 problems assigned.
+
+**V4.43.0** — SQL Lab shipped as a full product feature: added to Sidebar.jsx nav, UX fixes (Google Favicon API, schema accordion raised, Master filter, sort enforcement), hints system (progressive reveal by difficulty: 1/2/5/5 hints, Show Answer only after all hints exhausted), per-problem timer (saves elapsed to localStorage on correct solve), Progress.jsx SQL Lab section.
+
+**V4.44.0** — Foundation module data canonicalization (audit #96): all stub entries in RCA/Metrics/Exp Foundation data files (rf07–rf12, mf09–mf13, ef08–ef15) brought to full spec — correct difficulty casing, `playbookLinks` arrays added, `devNote` fields removed. This closes the gap between the six fully-built foundation rooms (canonical entries) and their extended module sets (which had been authored but not canonicalized).
+
+The SQL Lab arc from V4.39–V4.43 is the most instructive build sequence in PAL's history: starting with volume (250 problems), discovering that volume without quality produces a worse product than 130 excellent ones, and systematically raising quality before shipping rather than shipping and hoping users wouldn't notice. The decision to not ship SQL Lab publicly until Sessions 1–6 were complete was correct.

@@ -8,6 +8,14 @@ Read this at the start of every build session. Do only this. Update before closi
 
 ---
 
+## Pre-beta gates (do before Batch 1 invites — not a build session)
+
+1. **Git push V4.43.0 + V4.44.0** — run from Mac terminal (sandbox cannot push)
+2. **Confirm `VITE_POSTHOG_KEY` is live in Vercel** — check env vars in Vercel dashboard
+3. **Foundations vetting pass (audit #141)** — read rf01–rf12, mf01–mf13, ef01–ef15 in order as a cold user. Flag any gaps in the module-to-module sequence. ~2–3 hrs, no code.
+
+---
+
 ## Next session
 
 **1. SQL Lab — Phase 3 (company filter chip + streak + PostHog events)** `M` `CODE`
