@@ -72,7 +72,7 @@ const FLAT_GROUPS = [
     items: [
       { id: 'profile',  label: 'Profile',  icon: 'user' },
       { id: 'progress', label: 'Progress', icon: 'bar-chart' },
-      { id: 'pricing',  label: 'Pricing',  icon: 'credit-card' },
+      { id: 'pricing',  label: 'Plans',    icon: 'credit-card' },
     ],
   },
 ];
@@ -321,15 +321,84 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
         {/* ── Nav ── */}
         <nav style={{ flex: 1, overflowY: 'auto', padding: '0.1rem 0.5rem 0.75rem', scrollbarWidth: 'none' }}>
 
-          {/* TRACK — Progress at top, before foundations */}
-          {FLAT_GROUPS.filter(g => g.label === 'TRACK').map(group => (
-            <div key={group.label} style={{ marginBottom: '0.1rem' }}>
-              <SectionLabel label={group.label} />
-              {group.items.map(item => (
-                <NavItem key={item.id} id={item.id} />
-              ))}
-            </div>
-          ))}
+          {/* TRACK — conditional on auth state */}
+          <div style={{ marginBottom: '0.1rem' }}>
+            <SectionLabel label="TRACK" />
+
+            {!user ? (
+              <>
+                {/* Sign In */}
+                <button
+                  onClick={() => { onShowAuth(); onClose(); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.45rem',
+                    width: '100%', textAlign: 'left',
+                    padding: '0.34rem 0.65rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: 'none', background: 'transparent',
+                    color: 'var(--text-muted)', fontWeight: 400,
+                    fontSize: '0.825rem', cursor: 'pointer',
+                    transition: 'background var(--transition-fast), color var(--transition-fast)',
+                    letterSpacing: '-0.005em',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+                >
+                  <Icon name="user" size={13} color="currentColor" style={{ opacity: 0.7, flexShrink: 0 }} />
+                  <span>Sign In</span>
+                </button>
+                <NavItem id="pricing" />
+              </>
+            ) : (
+              <>
+                {/* Profile with avatar */}
+                {(() => {
+                  const isActive = getIsActive('profile', currentPage);
+                  return (
+                    <button
+                      onClick={() => handleNav('profile')}
+                      className={isActive ? 'sidebar-nav-active' : ''}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.45rem',
+                        width: '100%', textAlign: 'left',
+                        padding: '0.34rem 0.65rem',
+                        borderRadius: 'var(--radius-sm)',
+                        border: 'none',
+                        background: isActive ? undefined : 'transparent',
+                        color: isActive ? undefined : 'var(--text-muted)',
+                        fontWeight: isActive ? undefined : 400,
+                        fontSize: '0.825rem', cursor: 'pointer',
+                        transition: 'background var(--transition-fast), color var(--transition-fast)',
+                        letterSpacing: '-0.005em',
+                      }}
+                      onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
+                      onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
+                    >
+                      {user.user_metadata?.avatar_url ? (
+                        <img
+                          src={user.user_metadata.avatar_url}
+                          alt=""
+                          style={{ width: 15, height: 15, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, opacity: isActive ? 1 : 0.8 }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: 15, height: 15, borderRadius: '50%', flexShrink: 0,
+                          background: 'var(--accent-bg, var(--surface-2))',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '0.52rem', fontWeight: 800, color: 'var(--accent)',
+                        }}>
+                          {user.email?.[0]?.toUpperCase()}
+                        </div>
+                      )}
+                      <span>Profile</span>
+                    </button>
+                  );
+                })()}
+                <NavItem id="progress" />
+                <NavItem id="pricing" />
+              </>
+            )}
+          </div>
 
           {/* FOUNDATIONS */}
           <SectionLabel label="FOUNDATIONS" />
@@ -413,58 +482,6 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
           ))}
 
         </nav>
-
-        {/* ── Bottom: auth ── */}
-        <div style={{ padding: '0 0.8rem 0.5rem', flexShrink: 0 }}>
-          {!user && (
-            <button
-              onClick={onShowAuth}
-              style={{
-                width: '100%', textAlign: 'left',
-                background: 'none', border: '1px solid var(--border)',
-                borderRadius: '6px', padding: '0.4rem 0.6rem',
-                fontSize: '0.75rem', color: 'var(--text-muted)',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
-              }}
-            >
-              <span style={{ fontSize: '0.85rem' }}>→</span> Sign in to sync progress
-            </button>
-          )}
-          {user && (
-            <button
-              onClick={() => { onNavigate('profile'); onClose(); }}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.25rem',
-                width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
-                borderRadius: '6px',
-              }}
-              title="View profile"
-            >
-              {user.user_metadata?.avatar_url ? (
-                <img
-                  src={user.user_metadata.avatar_url}
-                  alt="avatar"
-                  style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)', flexShrink: 0 }}
-                />
-              ) : (
-                <div style={{
-                  width: '24px', height: '24px', borderRadius: '50%',
-                  background: 'var(--accent-bg, var(--surface-2))',
-                  border: '1px solid var(--border)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 700,
-                  flexShrink: 0, textTransform: 'uppercase',
-                }}>
-                  {user.email ? user.email[0] : '?'}
-                </div>
-              )}
-              <span style={{ flex: 1, fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user.user_metadata?.full_name || user.user_metadata?.user_name || user.email}
-              </span>
-              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', flexShrink: 0 }}>&#8250;</span>
-            </button>
-          )}
-        </div>
 
         {/* ── Bottom: search ── */}
         <div style={{
