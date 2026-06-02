@@ -242,7 +242,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
           display: 'flex', alignItems: 'center', gap: '0.4rem',
         }}>
           <button
-            onClick={() => handleNav('home')}
+            onClick={() => handleNav(user ? 'progress' : 'home')}
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: '0.6rem',
@@ -394,7 +394,6 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                     </button>
                   );
                 })()}
-                <NavItem id="progress" />
                 <NavItem id="pricing" />
               </>
             )}

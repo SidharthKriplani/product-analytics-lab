@@ -654,7 +654,7 @@ export default function App() {
   const isFocusMode = page === 'runner' || page.endsWith('-runner');
 
   return (
-    <div className={`app-layout${isFocusMode ? ' focus-mode' : ''}${page === 'sql-lab' ? ' sql-lab-mode' : ''}`} style={{ color: 'var(--text)' }}>
+    <div className={`app-layout${isFocusMode ? ' focus-mode' : ''}${page === 'sql-lab' ? ' sql-lab-mode' : ''}${!user ? ' signed-out' : ''}`} style={{ color: 'var(--text)' }}>
       <Sidebar
         currentPage={page}
         onNavigate={navigate}
@@ -675,7 +675,7 @@ export default function App() {
             aria-label="Open menu"
           >☰</button>
           <button
-            onClick={() => navigate('home')}
+            onClick={() => navigate(user ? 'progress' : 'home')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.2rem 0' }}
           >
             <div style={{ width: 20, height: 20, background: 'linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -724,7 +724,7 @@ export default function App() {
           }>
         <div key={page} className={page === 'sql-lab' ? 'sql-lab-page-wrap' : 'pal-page-enter'}>
         {page === 'home' && (
-          <Home onNavigate={navigate} onStartScenario={openScenario} />
+          <Home onNavigate={navigate} onShowAuth={() => setShowAuth(true)} />
         )}
 
         {/* ── Stats Room ── */}

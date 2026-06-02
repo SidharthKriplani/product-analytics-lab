@@ -420,6 +420,35 @@ table { border-collapse: collapse; }
   animation: palPageEnter 0.22s ease both;
 }
 
+/* ── Landing page animations ───────────────────────────── */
+@keyframes palLandingIn {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes palLandingGlow {
+  0%, 100% { box-shadow: 0 0 22px rgba(99,102,241,0.35), 0 4px 18px rgba(99,102,241,0.2); }
+  50%      { box-shadow: 0 0 40px rgba(99,102,241,0.65), 0 4px 28px rgba(99,102,241,0.4); }
+}
+@keyframes palGhostFade {
+  0%, 100% { opacity: 0; }
+  30%, 70%  { opacity: 1; }
+}
+@keyframes palLandingBgDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(30px, -20px) scale(1.08); }
+  66%      { transform: translate(-20px, 15px) scale(0.95); }
+}
+.pal-landing-el {
+  animation: palLandingIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.pal-landing-glow {
+  animation: palLandingGlow 2.8s ease-in-out infinite;
+}
+/* signed-out layout: no sidebar */
+.signed-out .app-sidebar   { display: none; }
+.signed-out .app-main-wrapper { margin-left: 0; }
+.signed-out .mobile-topbar { display: none; }
+
 .pal-card-enter {
   animation: palCardEnter 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

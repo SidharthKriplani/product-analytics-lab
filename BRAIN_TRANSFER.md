@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.78.0 | **Build:** ✓ (2.07s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.79.0 | **Build:** ✓ (2.02s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V4.79.0** — Full signed-out/signed-in UX split. Home.jsx rewritten as clean full-screen landing (no sidebar, ghost analytics snippets, staggered entrance, glow-pulse CTA "Sign in to analyze →"). Signed-in: Progress is home, Progress removed from sidebar nav, logo navigates to progress. signed-out CSS class hides sidebar + resets margin. Build ✓ 2.02s.
 
 **V4.78.0** — Signed-in users land on Progress instead of landing page. One-line routing fix in App.jsx SIGNED_IN handler. All 8 session backlog items logged: AUDITS.md #144-146, IDEAS.md Tier 1/2/3 entries for FV/FA UI, RCA/Metrics content, Postgres migration, MCQ revamp, Interview Sim customization, Pandas (Tier 3/no for SQL Lab). Build ✓ 2.07s.
 
