@@ -621,7 +621,7 @@ Every problem should have:
 | 7 | m21–m33 | Medium | ✅ V4.66.0 | m21,m28,m30 + m24,m26,m29 checkValues + m24 company + m32,m33 debriefs | NTILE, global AVG OVER, SUM(SUM) OVER pct-of-total |
 | 8 | m36–m61 | Medium | ✅ V4.67.0 | m36 bug+m37+m47+m56 rewrites, m57 upgrade, m42 checkValues, m61 debrief | ROWS BETWEEN bounded window, relational division, dual DENSE_RANK |
 | 9 | h14,h22,h25,h27,h28,h39,h49,m76,m77,m78 | Medium | ✅ V4.68.0 | h14,h22,h25,h27 rewrites | Funnel temporal ordering, completion rate, MoM revenue LAG, activity bucketing |
-| 10 | h01–h10 | Hard | Pending | — | — |
+| 10 | h01–h17 | Hard | ✅ V4.69.0 | h07,h10,h13 rewrites + h17 checkValues | New vs returning split, 4-table JOIN P2P trap, PERCENT_RANK LTV |
 | 11 | h11–h25 | Hard | Pending | — | — |
 | 12 | master01–master08 | Master | Pending | — | — |
 | 13 | master09–master15 | Master | Pending | — | — |

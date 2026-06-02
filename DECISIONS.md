@@ -107,14 +107,7 @@ Every article opens with a concrete scenario — a Slack message, a PM ask, a li
 ## Design
 
 **CSS variables only. No hardcoded hex values.**
-Every color reference uses a CSS variable from `src/index.css`. Color-to-room assignments are fixed:
-- `--accent` (blue) → Review Room
-- `--teal` → Instrumentation, Stat Foundations
-- `--green` → Metrics
-- `--yellow` → Challenges, BI, Take-Home
-- `--red` → Spot the Flaw
-- `--purple` → Product Design, Prioritization, Leadership Lens
-- `--blue` → Behavioral
+Every color reference uses a CSS variable from `src/index.css`. Full color-to-room assignment table and variable list are in CLAUDE.md (authoritative — do not duplicate here).
 
 **Light mode is the default.**
 The product targets desktop analytical workspaces. Dark mode is available via toggle but light is default. Do not invert this.
@@ -123,19 +116,7 @@ The product targets desktop analytical workspaces. Dark mode is available via to
 Linear, PostHog, Retool, Stripe Docs. Not edtech, not gamified, not neon. No excessive animation. No completion certificates as primary motivation.
 
 **All animations use the utility class system in `src/index.css`. Never write ad-hoc keyframes or inline animation CSS.**
-PAL has a defined animation vocabulary (V4.35.x). Use it — do not invent new keyframes or inline `animation:` rules in component files. The system:
-- `.pal-page-enter` — page/view mount fade+rise (all pages, all module views)
-- `.pal-card-enter` — staggered card grid entry (pair with `animationDelay` inline)
-- `.pal-card-hover` — hover lift + shadow (all clickable cards)
-- `.pal-reveal-in` — spring-overshoot entrance for debrief/answer panels
-- `.pal-glow-pulse` — breathing glow on primary forward CTA (Next/Continue buttons after reveal)
-- `.pal-slide-up` — modal and overlay entrance
-- `.pal-success-ring` — correct answer ripple (green, triggered via JS class toggle)
-- `.pal-shake` — wrong answer shake (triggered via JS class toggle + setTimeout cleanup)
-- `.pal-pop` — badge or counter scale pop
-- `.pal-spotlight` — unlock sweep
-- `.pal-shimmer-box` — loading skeleton
-New animations that do not fit an existing class → add a new utility class to index.css, document it here, and apply `prefers-reduced-motion` coverage. Never ship a component with a one-off animation.
+Full animation class list (`.pal-page-enter`, `.pal-card-enter`, `.pal-reveal-in`, etc.) is in CLAUDE.md (authoritative). New animations → add utility class to index.css, update CLAUDE.md, cover with `prefers-reduced-motion`. Never ship a component with a one-off animation.
 
 **Mobile grids use `minmax(min(Xpx, 100%), 1fr)`.**
 Never use `minmax(Xpx, 1fr)` bare — the minimum will overflow on narrow viewports.

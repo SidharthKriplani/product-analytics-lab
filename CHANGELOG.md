@@ -4,6 +4,21 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.69.0] — 2026-06-02 [CONTENT]
+
+### SQL Quality Audit — Batch 10 (Hard h01–h10: h01, h02, h04, h05, h07, h08, h10, h11, h13, h17)
+
+**Results:** 7/10 pass — best batch ever. Two perfect scores (h01=35, h11=35). 3 rewrites + 1 checkValues fix.
+
+- **h07 rewritten** — CTE+LAG MoM order count (Di=1, identical to m09 rewrite, DC=3 Medium-level). Replaced with "New vs Returning Customer Revenue Split" (Shopify) — 2-CTE date matching + conditional aggregation + COUNT(DISTINCT CASE WHEN). Labels each order as new (created_at = first-ever order date) or returning. checkValue: Feb 2023 all-new revenue ($169.98, returning=$0).
+- **h10 rewritten** — 2-CTE ROW_NUMBER PARTITION BY (Di=2, same pattern as h08 in same batch). Replaced with "Merchant Exposure per User" (Stripe, fintech) — 4-table JOIN (users→accounts→transactions→merchants) + GROUP BY user + MAX(is_flagged). First problem in audit with P2P NULL trap live in the problem: INNER JOIN to merchants drops P2P transactions (merchant_id IS NULL), understating spend. checkValue: user 3 has_flagged_merchant=1 (FastCash Ltd).
+- **h13 rewritten** — SUM(SUM) OVER clone of m30 (Di=2), 2-sentence debrief. Replaced with "Customer Lifetime Spend Percentile" (Amazon, ecomm) — CTE + JOIN completed orders + PERCENT_RANK() global window. Teaches PERCENT_RANK vs NTILE distinction, completed-only filter impact, natural exclusion of no-purchase users. checkValue: user 5 (eve), total_spend=519.95, spend_percentile=1.0.
+- **h17 checkValues fixed** — user 5, avg_days_between=73 (gaps: 260+31+1+1=293 days / 4 gaps).
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `SQL_LAB_PLAN.md`
+
+---
+
 ## [4.68.0] — 2026-06-02 [CONTENT]
 
 ### SQL Quality Audit — Batch 9 (Medium m31–m40: h14, h22, h25, h27, h28, h39, h49, m76, m77, m78)

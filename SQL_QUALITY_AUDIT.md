@@ -292,8 +292,40 @@ Full rubric + process in SQL_LAB_PLAN.md Section 8.
 
 ---
 
-## Batch 10 — Hard h01–h10
-**Status:** Pending
+## Batch 10 — Hard h01–h10 (file positions 1–10: h01, h02, h04, h05, h07, h08, h10, h11, h13, h17)
+**Status:** ✅ Complete | **Audited:** 2026-06-02 | **Flagged:** 3 | **Rewritten:** 3 + 1 checkValues fix
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Approaches | Technique | Pattern | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| h01 | Jan-to-Feb User Retention | Mixpanel | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 35 | 3 | 2-CTE LEFT JOIN + NULL-safe COUNT | cohort retention rate | ✅ Pass (perfect score — INNER JOIN gives wrong 100% answer) |
+| h02 | Consecutive Order Day Streak | DoorDash | 5 | 4 | 5 | 5 | 5 | 5 | 4 | 33 | 2 | gap-and-island (julianday - ROW_NUMBER trick) | streak detection | ✅ Pass (DISTINCT trap for same-day orders embedded) |
+| h04 | Q1 2023 Cohort Repeat Purchase Rate | Shopify | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 34 | 2 | 3-CTE cohort pipeline + LEFT JOIN rate | cohort LTV analysis | ✅ Pass (MIN vs ANY order cohort scoping trap) |
+| h05 | Provider Below Practice Average | Teladoc | 5 | 4 | 5 | 4 | 5 | 5 | 5 | 33 | 3 | 2-CTE + CROSS JOIN scalar broadcast | outlier vs average detection | ✅ Pass (CROSS JOIN for scalar CTE broadcast — new pattern) |
+| h07 | New vs Returning Customer Revenue Split (rewritten) | Shopify | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 34 | 2 | 2-CTE date matching + conditional aggregation + COUNT DISTINCT CASE WHEN | new vs returning analytics | ✅ Rewritten (was CTE+LAG clone of m09 rewrite, Di=1, DC=3) |
+| h08 | Top Spender per Country | Amazon | 5 | 5 | 5 | 4 | 5 | 5 | 4 | 33 | 2 | 2-CTE + ROW_NUMBER PARTITION BY country | top-1-per-group | ✅ Pass (GROUP BY MAX failure mode documented) |
+| h10 | Merchant Exposure per User (rewritten) | Stripe | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 34 | 2 | 4-table JOIN chain + MAX(is_flagged) + P2P NULL trap | risk exposure aggregation | ✅ Rewritten (was ROW_NUMBER clone of h08, Di=2) |
+| h11 | No-Show Patients Without Follow-Up | Teladoc | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 35 | 3 | NOT EXISTS with temporal ordering | care gap detection | ✅ Pass (perfect score — temporal ordering in correlated subquery is the hard part) |
+| h13 | Customer Lifetime Spend Percentile (rewritten) | Amazon | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 34 | 2 | CTE + JOIN + PERCENT_RANK() global window | LTV percentile ranking | ✅ Rewritten (was SUM(SUM) OVER clone of m30, Di=2, 2-sentence debrief) |
+| h17 | Average Reorder Interval per Customer | Shopify | 5 | 5 | 5 | 5 | 4 | 5 | 4 | 33 | 2 | CTE + LAG + AVG of gaps (not total span/count) | reorder cadence | ✅ checkValues fixed (user 5, avg=73 days) |
+
+### Batch 10 findings
+
+**Best batch yet — only 3/10 flagged.** The Hard tier was written with significantly more care than Medium. Six problems scored 33–35 with no flags. Two perfect scores (h01=35, h11=35).
+
+**Medium-level mislabeled Hard (h07):** CTE + strftime + LAG for MoM order count was identical in structure, table, and output to m09 rewrite (Month-over-Month Order Volume, Instacart). DC=3, Di=1. Replaced with "New vs Returning Customer Revenue Split" — a genuinely harder pattern: 2-CTE date matching to label each order as new or returning, conditional aggregation for revenue + COUNT(DISTINCT CASE WHEN) for unique buyer counts per month. The COUNT(DISTINCT CASE WHEN) idiom is the distinguishing technique — avoids double-counting users with multiple orders on their first-ever date.
+
+**ROW_NUMBER clone (h10):** Same 2-CTE + ROW_NUMBER PARTITION BY pattern as h08 (both in this batch). Replaced with "Merchant Exposure per User" — a 4-table JOIN chain (users → accounts → transactions → merchants) + GROUP BY user + MAX(is_flagged) for boolean propagation. The P2P NULL trap is embedded live in the problem: INNER JOIN to merchants silently drops transactions where merchant_id IS NULL, understating total_spend. This is the first problem in the audit where the NULL-in-JOIN trap from the enrichment taxonomy is embedded as a live teaching moment.
+
+**Thin debrief + SUM(SUM) OVER clone (h13):** Same nested-aggregate window pattern as m30 rewrite. 2-sentence debrief. Replaced with "Customer Lifetime Spend Percentile" — CTE + JOIN (completed orders only) + PERCENT_RANK() global window. Teaches PERCENT_RANK vs NTILE distinction (continuous 0–1 value vs bucket labels), the completed-only filter impact on percentile distribution, and why 13-15 are excluded (no completed orders → JOIN drops them naturally). User 5 (eve, paid) leads at $519.95 = spend_percentile 1.0.
+
+**Patterns that make Hard genuinely Hard (all present in passing problems):**
+- INNER JOIN that looks correct but gives wrong answer (h01: INNER JOIN on feb_users gives 100% retention)
+- Gap-and-island ROW_NUMBER trick (h02: non-obvious that julianday - ROW_NUMBER groups consecutive dates)
+- Cohort scoping — MIN vs ANY order (h04: users who ordered IN Q1 vs users whose FIRST order was in Q1 are different sets)
+- CROSS JOIN for scalar broadcast (h05: only pattern that correctly propagates a global scalar to every row)
+- NOT EXISTS with temporal condition (h11: requires reasoning about what "no subsequent completion" means with dates)
+- COUNT(DISTINCT CASE WHEN) (h07 rewrite: standard conditional DISTINCT count pattern)
+- 4-table JOIN with NULL key trap (h10 rewrite: merchant_id NULL for P2P = silent exclusion)
 
 ---
 
