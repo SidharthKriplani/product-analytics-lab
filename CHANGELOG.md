@@ -4,6 +4,81 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.63.0] — 2026-06-02 [CONTENT]
+
+### SQL Quality Audit — Batch 4 (file positions 31–40: e52–e65)
+
+**Results:** 4/10 pass. 4 full rewrites + 2 targeted fixes. Anti-join overload in Easy tier fully resolved.
+
+- **e52 fix** — Empty checkValues[] bug corrected. First US order (order 1, alice@example.com) added as check value.
+- **e55 rewritten** — 5th IS NULL filter problem. Replaced with "User Activity Report with NULL Fill" — introduces COALESCE for NULL display handling, first appearance in Easy tier.
+- **e56 TC upgraded** — Good problem but TC=2. Debrief now documents the P2P NULL exclusion gap: INNER JOIN silently drops transactions where merchant_id IS NULL (P2P transfers), a real compliance blind spot. Two-CTE UNION ALL approach noted for production.
+- **e57 rewritten** — Near-clone of e11 (both: products never ordered, LEFT JOIN IS NULL on ecomm). Replaced with "UK and Canadian Market Orders" — teaches WHERE IN with literal list, a new skill. IN vs. OR comparison documented.
+- **e58 rewritten** — 5th anti-join problem. Replaced with "Power Users by Login Frequency" (HubSpot) — WHERE + GROUP BY + HAVING + JOIN in combination, teaches the full pre/post-aggregation filter pipeline.
+- **e59 rewritten** — 6th anti-join, Di=1. Replaced with "High-Intent Engagement Signals" (Pinterest) — WHERE IN ('like', 'share') + GROUP BY + COUNT. Teaches IN literal list in a different context from e57.
+- **e60 rewritten** — COUNT cluster. Replaced with "MRR by Plan Tier" (Baremetrics) — dual aggregate (SUM + COUNT) in one GROUP BY, first time this pattern appears.
+
+**New skills introduced (Batch 4):** COALESCE, WHERE IN literal list, dual aggregate (SUM+COUNT in one GROUP BY).
+
+**Easy tier anti-join count after Batch 4:** 2 (e01, e11) — down from 6 before this audit.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `SQL_LAB_PLAN.md`
+
+---
+
+## [4.62.0] — 2026-06-02 [CONTENT]
+
+### SQL Quality Audit — Batch 3 (file positions 21–30: e35–e51)
+
+**Results:** 4/10 pass. 4 full rewrites + 2 debrief upgrades.
+
+- **e35 rewritten** — "Session Source Mix" (GROUP BY + COUNT, 5th such problem). Replaced with "Revenue by Product Category" (Shopify) — SUM(quantity × unit_price) across a JOIN, first time computed-column aggregation appears in Easy tier.
+- **e40 rewritten** — "Appointments per Provider" (5th health datamart problem, GROUP BY COUNT clone). Replaced with "Total Balance per User" (Plaid, fintech) — SUM of account balances per user with active-status filter + JOIN.
+- **e42 rewritten** — "Enterprise-Eligible Accounts" (single-table WHERE >= filter, estimatedMin 4). Replaced with "Large Account Plan Distribution" (Slack) — 3-table JOIN (accounts + subscriptions + plans) + multi-condition WHERE. Identifies which large accounts have expansion headroom.
+- **e44 rewritten** — "Consumer Users by Country" (GROUP BY COUNT, vague framing). Replaced with "Premium Rate by Device OS" (Spotify) — SUM(binary)/COUNT rate calculation per device platform.
+- **e47 debrief upgraded** — TC 2→4. Added LEFT JOIN vs. NOT EXISTS approaches for true churn detection (accounts with no subsequent active subscription).
+- **e49 debrief upgraded** — TC 2→4. Added AVG vs. PERCENTILE_CONT(0.5) median note with SQL environment coverage (Postgres/BigQuery/Redshift support, SQLite workaround).
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `SQL_LAB_PLAN.md`
+
+---
+
+## [4.61.0] — 2026-06-02 [CONTENT]
+
+### SQL Quality Audit — Batch 2 (e11–e20, file positions 11–20)
+
+**Results:** 3/10 pass. 7 rewritten (heaviest batch so far).
+
+- **e13 (was sql-h16)** — ID mislabeled as Hard ('sql-h16') but filed with difficulty Easy. Fixed to 'sql-e13'. Company corrected from Doximity (physician networking) to CVS Health (pharmacy analytics — correct fit for prescription coverage days problem).
+- **e20 rewritten** — "Tech Industry Accounts" was `WHERE industry = 'tech'` on a single table. Replaced with "High-Adoption Accounts" — teaches HAVING with JOIN (accounts with 3+ active users).
+- **e23 upgraded** — "Verified Low-Risk Users" was `WHERE col1 = x AND col2 = y` with no JOIN. Upgraded with JOIN to accounts table + account status filter. New expectedRowCount: 8.
+- **e26 rewritten** — Literal duplicate of e06 (same disputes table, same IS NULL filter, different company tag). Replaced with "Average Spend by Category" (Brex) — introduces AVG aggregate for the first time in Easy tier.
+- **e29 rewritten** — "Providers Accepting New Patients" was a single boolean WHERE filter (estimatedMin: 3). Replaced with "Open Capacity by Clinic" — WHERE + GROUP BY + COUNT per clinic, teaches pre-filter-then-aggregate pattern.
+- **e32 rewritten** — Part of 3-problem COUNT cluster. Replaced with "May Clinic Appointments" (Kaiser Permanente) — teaches BETWEEN date filtering with ISO format date strings, 3 approaches documented.
+- **e34 rewritten** — Part of COUNT cluster. Replaced with "Premium Breakdown by Country" (LinkedIn) — teaches multi-column GROUP BY, a pattern used constantly in growth analytics.
+- **e33 kept** — "Transactions by Category" (Mastercard). Kept despite being in the COUNT cluster because its insight quality is highest: shopping average distorted by flagged merchant transactions is a real analytical pitfall.
+
+Files: `src/data/sqlLabProblems.js` (7 problems rewritten, 1 ID fixed), `SQL_QUALITY_AUDIT.md` (Batch 2 section added), `SQL_LAB_PLAN.md` (batch map updated)
+
+---
+
+## [4.60.0] — 2026-06-02 [CONTENT]
+
+### SQL Quality Audit — Batch 1 (e01–e10, calibration batch)
+
+First pass of the 13-batch SQL quality audit. Scored all 10 Easy problems on 7 rubric dimensions (Business Framing, Company Authenticity, Difficulty Calibration, Data Challenge Realism, Distinctiveness, Insight Quality, Trade-off Clarity). Created `SQL_QUALITY_AUDIT.md` as the cumulative audit artifact.
+
+**Results:** 8/10 pass. 2 problems rewritten.
+
+- **e07 rewritten** — "Disengaged Users" was structurally identical to e01 (anti-join LEFT JOIN IS NULL, different table names, same pattern). Replaced with "Repeat Launchers" (TikTok): HAVING clause, GROUP BY, retention segmentation. Teaches a distinct and commonly-tested concept. Distinctiveness: 2 → 5.
+- **e10 rewritten** — "Most Prescribed Drug" was structurally identical to e08 (GROUP BY + COUNT + ORDER BY + LIMIT 1, different table). Replaced with "Geographic Patient Reach" (Optum): COUNT(DISTINCT) across a 3-table bridge join. Distinctiveness: 2 → 5.
+
+**Calibration findings logged in SQL_QUALITY_AUDIT.md:** company authenticity scored on business framing fit (not schema ownership); e03/e04/e05 structural proximity flagged for cross-batch review after Batch 3.
+
+Files: `src/data/sqlLabProblems.js` (e07, e10 replaced), `SQL_QUALITY_AUDIT.md` (created)
+
+---
+
 ## [4.59.0] — 2026-06-02 [FEATURE]
 
 ### Profile page

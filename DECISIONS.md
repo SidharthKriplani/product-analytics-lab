@@ -268,6 +268,12 @@ Batch size = 10. Full rubric in SQL_LAB_PLAN.md Section 8. Audit artifact = SQL_
 
 **Flag thresholds:** Score below 3 on any single rubric dimension, or below 20/35 total → rewrite required.
 
+**Layered Easy standard (from DataLemur benchmark, 2026-06-02).**
+The best Easy SQL problems combine 2–3 naturally related concepts rather than testing a single clause in isolation. A problem that only tests one skill (e.g. WHERE filter on one column) is a tutorial, not an interview problem. Rewrites should target richer combinations: WHERE + GROUP BY + HAVING, JOIN + rate calculation, 3-table JOIN + multi-condition filter. This applies to all rewrites in Batches 5–13 and to any new Easy problems written in future.
+
+**Post-audit prompt-clarity pass is scheduled after Batch 13.**
+After all 13 batches complete, run a single 30-minute prose pass across all 130 problems to verify each prompt clearly signals the expected output shape. This is a cosmetic improvement, not a re-audit. No rubric changes. No re-scoring.
+
 ---
 
 ## V4.59.0 Standing Rules Audit

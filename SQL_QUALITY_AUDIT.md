@@ -37,18 +37,93 @@ Full rubric + process in SQL_LAB_PLAN.md Section 8.
 
 ---
 
-## Batch 2 — Easy e11–e20
-**Status:** Pending
+## Batch 2 — Easy e11–e20 (file positions 11–20)
+**Status:** ✅ Complete | **Audited:** 2026-06-02 | **Flagged:** 7 | **Rewritten:** 7
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Approaches | Technique | Pattern | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| e11 | Products That Never Sold | eBay | 4 | 4 | 5 | 4 | 3 | 3 | 3 | 26 | 2 | anti-join | inventory audit | ✅ Pass (3rd anti-join noted) |
+| e12 | Users Who Never Logged In | Mixpanel | 4 | 4 | 5 | 5 | 3 | 3 | 3 | 27 | 1 | IS NULL + JOIN | user activation | ✅ Pass |
+| e13 (was h16) | Total Medication Coverage Days | CVS Health | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 27 | 1 | computed aggregate arithmetic | adherence tracking | ✅ ID bug fixed (sql-h16 → sql-e13), company fixed (Doximity → CVS Health) |
+| e20 | High-Adoption Accounts (rewritten) | Salesforce | 5 | 4 | 5 | 4 | 5 | 4 | 4 | 31 | 2 | HAVING + JOIN | adoption segmentation | ✅ Rewritten (was trivial WHERE industry='tech') |
+| e23 | Fast-Track Users with Balance (rewritten) | Stripe | 5 | 5 | 5 | 4 | 4 | 4 | 4 | 31 | 2 | JOIN + multi-condition WHERE | compliance targeting | ✅ Rewritten (added JOIN + account status filter) |
+| e26 | Average Spend by Category (rewritten) | Brex | 4 | 5 | 5 | 4 | 5 | 4 | 4 | 31 | 1 | GROUP BY + AVG + ROUND | spend baseline | ✅ Rewritten (was duplicate of e06) |
+| e29 | Open Capacity by Clinic (rewritten) | Oscar Health | 4 | 4 | 5 | 4 | 5 | 4 | 4 | 30 | 2 | WHERE + GROUP BY + COUNT | capacity planning | ✅ Rewritten (was trivial boolean WHERE) |
+| e32 | May Clinic Appointments (rewritten) | Kaiser Permanente | 4 | 5 | 5 | 4 | 5 | 4 | 4 | 31 | 3 | BETWEEN date filter | audit / ops | ✅ Rewritten (was COUNT cluster duplicate) |
+| e33 | Transactions by Category | Mastercard | 3 | 4 | 5 | 2 | 3 | 4 | 2 | 23 | 1 | GROUP BY + COUNT | volume analysis | ✅ Pass (kept — best insight in COUNT cluster) |
+| e34 | Premium Breakdown by Country (rewritten) | LinkedIn | 5 | 4 | 5 | 4 | 5 | 4 | 4 | 31 | 1 | multi-column GROUP BY | growth segmentation | ✅ Rewritten (was COUNT cluster duplicate) |
+
+### Batch 2 findings
+
+**7/10 flagged and rewritten** — weakest batch so far. Three categories of issues:
+
+**Too-simple WHERE-only problems (e20, e29):** Single-table, single-condition filters with no joins, no aggregation, no data challenge. These are tutorial-level SQL, not interview-level. Both rewritten with JOIN + aggregation (HAVING + GROUP BY).
+
+**Literal duplicate (e26):** "Open Dispute Queue" on the Visa / fintech datamart was identical to e06 (PayPal / fintech disputes table, WHERE resolved_at IS NULL). Same table, same SQL, different company tag. Replaced with AVG spend by category — introduces the AVG aggregate function for the first time in the Easy tier.
+
+**COUNT cluster (e32, e33, e34):** Three consecutive GROUP BY + COUNT(*) problems with no data challenge and near-zero distinctiveness from each other and from e08. Kept e33 (best insight — flagged merchant distortion is a real analytical pitfall). Replaced e32 with BETWEEN date filtering and e34 with multi-column GROUP BY — both new patterns not yet seen in Easy.
+
+**ID bug (h16 → e13):** Problem had id 'sql-h16' but difficulty 'Easy' and estimatedMin 13. Mislabeled from an earlier classification session. ID corrected to 'sql-e13', company corrected from Doximity to CVS Health (pharmacy analytics, not physician networking).
+
+**Cross-batch pattern concern:** After 20 problems, anti-join (LEFT JOIN IS NULL) has now appeared 3 times (e01, e07-rewritten-to-HAVING, e11). e11 is distinct enough to keep but no more anti-joins should be added to Easy tier — the pattern is covered.
 
 ---
 
-## Batch 3 — Easy e21–e30
-**Status:** Pending
+## Batch 3 — Easy e21–e30 (file positions 21–30: e35–e51)
+**Status:** ✅ Complete | **Audited:** 2026-06-02 | **Flagged:** 6 | **Rewritten:** 4 + 2 debrief upgrades
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Approaches | Technique | Pattern | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| e35 | Revenue by Product Category (rewritten) | Shopify | 5 | 4 | 5 | 4 | 5 | 4 | 4 | 31 | 2 | SUM(computed) + JOIN | revenue by segment | ✅ Rewritten (was COUNT cluster) |
+| e36 | Top 3 Most Expensive Products | Best Buy | 4 | 4 | 5 | 3 | 3 | 3 | 3 | 25 | 2 | ORDER BY + LIMIT N | top-N ranking | ✅ Pass |
+| e37 | Events per Account | Mixpanel | 4 | 4 | 5 | 4 | 3 | 4 | 4 | 28 | 2 | GROUP BY + COUNT (zeros trap) | engagement ranking | ✅ Pass |
+| e39 | Repeat Buyers | Amazon | 5 | 5 | 5 | 4 | 3 | 4 | 3 | 29 | 1 | HAVING (purest form) | retention segmentation | ✅ Pass |
+| e40 | Total Balance per User (rewritten) | Plaid | 5 | 5 | 5 | 4 | 5 | 4 | 4 | 32 | 2 | SUM + JOIN + WHERE filter | wealth aggregation | ✅ Rewritten (was COUNT clone on overused health datamart) |
+| e42 | Large Account Plan Distribution (rewritten) | Slack | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | 3-table JOIN + multi-condition WHERE | expansion revenue | ✅ Rewritten (was trivial WHERE >= only) |
+| e44 | Premium Rate by Device OS (rewritten) | Spotify | 5 | 4 | 5 | 4 | 4 | 4 | 4 | 30 | 2 | SUM(binary)/COUNT rate + GROUP BY | platform monetization | ✅ Rewritten (was COUNT cluster) |
+| e47 | Churned Subscription Log | Zendesk | 4 | 4 | 3 | 3 | 3 | 5 | 4 | 26 | 2 | WHERE filter (LEFT JOIN + NOT EXISTS alternatives) | churn analysis | ✅ Debrief upgraded (TC 2→4) |
+| e49 | Avg Session Duration by Source | Shopify | 4 | 4 | 5 | 3 | 4 | 4 | 4 | 28 | 2 | AVG + GROUP BY (median alternative) | channel quality | ✅ Debrief upgraded (TC 2→4) |
+| e51 | Distinct Buyers Count | Etsy | 4 | 4 | 5 | 5 | 4 | 4 | 4 | 30 | 1 | COUNT(DISTINCT) — scalar | buyer activation | ✅ Pass |
+
+### Batch 3 findings
+
+**4 rewrites + 2 debrief upgrades** — improving batch over batch (B1: 2, B2: 7, B3: 6 but fewer full rewrites).
+
+**COUNT cluster continues (e35, e44):** Two more GROUP BY + COUNT(*) problems on single tables with no data challenges. e35 replaced with SUM over computed JOIN (revenue by category — first time this skill appears). e44 replaced with premium rate by device OS (rate calculation, same SUM/COUNT pattern as e02 but on a different dimension and datamart).
+
+**Too-simple numeric WHERE (e42):** Same issue as e20/e29 in Batch 2. Single table, single threshold filter (employee_count >= 100). Replaced with 3-table JOIN + multi-condition WHERE — shows exactly which large accounts have expansion headroom.
+
+**Health datamart overuse (e40):** Four health datamart problems in first 40 Easy problems (e09, e13, e29, e32). e40 was a 5th. Replaced with fintech/Plaid — SUM of balances per user across active accounts. Introduces SUM (distinct from COUNT and AVG) in a JOIN context.
+
+**Debrief-only upgrades (e47, e49):** Both had TC=2 — good SQL, good insight, but no alternative approaches. e47 now documents LEFT JOIN vs. NOT EXISTS for true churn detection. e49 now documents AVG vs. PERCENTILE_CONT(0.5) median, with a note on which SQL environments support each.
 
 ---
 
-## Batch 4 — Easy e31–e40
-**Status:** Pending
+## Batch 4 — Easy e31–e40 (file positions 31–40: e52–e65)
+**Status:** ✅ Complete | **Audited:** 2026-06-02 | **Flagged:** 6 | **Rewritten:** 4 + 2 targeted fixes
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Approaches | Technique | Pattern | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| e52 | US Customer Orders | Amazon | 5 | 5 | 5 | 4 | 4 | 4 | 3 | 30 | 2 | JOIN + WHERE filter | market segmentation | ✅ checkValues bug fixed |
+| e54 | Referred Consumer Users | Dropbox | 4 | 4 | 5 | 3 | 3 | 4 | 3 | 26 | 1 | IS NOT NULL filter | referral analytics | ✅ Pass |
+| e55 | User Activity Report with NULL Fill (rewritten) | Intercom | 4 | 4 | 5 | 4 | 5 | 4 | 4 | 30 | 2 | COALESCE | NULL display handling | ✅ Rewritten (5th IS NULL → COALESCE, new skill) |
+| e56 | Transactions at Non-US Merchants | JPMorgan | 5 | 5 | 5 | 4 | 4 | 4 | 4 | 31 | 2 | JOIN + WHERE != (P2P NULL gap) | cross-border compliance | ✅ TC debrief upgraded (NULL P2P exclusion documented) |
+| e57 | UK and Canadian Market Orders (rewritten) | Shopify | 5 | 4 | 5 | 4 | 5 | 4 | 4 | 31 | 2 | WHERE IN + JOIN | market segmentation | ✅ Rewritten (clone of e11 anti-join → IN clause, new skill) |
+| e58 | Power Users by Login Frequency (rewritten) | HubSpot | 5 | 4 | 5 | 4 | 4 | 4 | 4 | 30 | 2 | WHERE + GROUP BY + HAVING + JOIN | engagement segmentation | ✅ Rewritten (5th anti-join → WHERE+HAVING+JOIN combination) |
+| e59 | High-Intent Engagement Signals (rewritten) | Pinterest | 5 | 4 | 5 | 4 | 5 | 4 | 4 | 31 | 2 | WHERE IN + GROUP BY + COUNT | engagement analysis | ✅ Rewritten (6th anti-join, Di=1 → IN literal list, new skill) |
+| e60 | MRR by Plan Tier (rewritten) | Baremetrics | 5 | 5 | 5 | 4 | 5 | 4 | 4 | 32 | 2 | SUM + COUNT dual aggregate + JOIN | SaaS revenue analytics | ✅ Rewritten (COUNT cluster → dual aggregate in one GROUP BY, new pattern) |
+| e62 | Converted Sessions by Source | Google | 5 | 4 | 5 | 4 | 4 | 5 | 3 | 30 | 2 | SUM(binary) + COUNT GROUP BY | conversion analytics | ✅ Pass |
+| e65 | Total MRR from Active Subscriptions | ChartMogul | 4 | 5 | 5 | 4 | 4 | 4 | 3 | 29 | 1 | SUM scalar (no GROUP BY) | SaaS finance | ✅ Pass |
+
+### Batch 4 findings
+
+**Anti-join overload resolved.** e57 (clone of e11), e58 (5th anti-join), e59 (6th anti-join, Di=1) all replaced. Easy tier now has exactly 2 anti-join problems (e01, e11) — the right coverage for one concept.
+
+**New skills introduced this batch:** COALESCE for NULL display handling (e55), WHERE IN with literal list (e57, e59), dual aggregate (SUM + COUNT) in one GROUP BY (e60).
+
+**Remaining skills coverage after 40 problems:** anti-join, HAVING, COUNT DISTINCT, BETWEEN, multi-column GROUP BY, AVG, SUM(computed), SUM(binary) rate, 3-table JOIN, COALESCE, IN literal, dual aggregate, scalar SUM all covered at least once in Easy tier.
+
+**Cross-batch note:** e52 had empty checkValues[] — a data verification gap. Fixed. e56 TC upgraded with P2P NULL exclusion insight (JOIN silently drops P2P transactions where merchant_id IS NULL).
 
 ---
 

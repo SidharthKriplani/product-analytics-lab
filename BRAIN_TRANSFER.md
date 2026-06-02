@@ -44,6 +44,12 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 
 ## What was just done
 
+**V4.63.0** — SQL Quality Audit Batch 4 complete. 4 rewrites (e55→COALESCE, e57→IN clause, e58→HAVING+JOIN, e59→IN literal+GROUP BY, e60→dual SUM+COUNT) + 2 targeted fixes (e52 checkValues, e56 TC upgrade P2P NULL gap). Anti-join overload in Easy tier resolved — exactly 2 remain (e01, e11). 12 distinct Easy skills now covered across 40 problems.
+
+**V4.62.0** — SQL Quality Audit Batch 3 complete. 4 rewrites (e35→SUM computed JOIN, e40→SUM+JOIN fintech, e42→3-table JOIN expansion, e44→rate calc device OS) + 2 debrief upgrades (e47 NOT EXISTS pattern, e49 median alternative). SQL_QUALITY_AUDIT.md Batch 3 section complete.
+
+**V4.61.0** — SQL Quality Audit Batch 2 complete. 7/10 flagged and rewritten (weakest batch — too-simple WHERE filters, a literal e06 duplicate, and a COUNT cluster). Fixed: e20 (HAVING+JOIN), e23 (JOIN+multi-condition), e26 (AVG), e29 (WHERE+GROUP BY per clinic), e32 (BETWEEN), e34 (multi-column GROUP BY). e33 kept. h16 ID bug fixed to e13, company fixed Doximity→CVS Health. SQL_QUALITY_AUDIT.md Batch 2 section filled.
+
 **V4.60.0** — SQL Quality Audit Batch 1 complete. e07 rewritten (Disengaged Users → Repeat Launchers, teaches HAVING). e10 rewritten (Most Prescribed Drug → Geographic Patient Reach, teaches COUNT DISTINCT + 3-table JOIN). SQL_QUALITY_AUDIT.md created (cumulative audit artifact, all 13 batch slots). 8/10 pass, 2 rewritten.
 
 **V4.59.0** — Profile page (`/profile`). Identity card (OAuth avatar, name, email, provider badge, member since). Practice stats strip (cases done, rooms active, bookmarks). Cross-device sync button. Study plans (Defense + SQL). Recent saved cases. Settings (theme toggle, export/import). Sidebar avatar chip now navigates to profile instead of doing nothing.

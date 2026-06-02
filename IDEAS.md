@@ -26,6 +26,9 @@ _No new features until PostHog baseline is established._
 
 ## Tier 1 — High impact, buildable now
 
+### SQL Lab — Post-audit prompt-clarity pass (after Batch 13)
+30-minute sweep across all 130 problems after the full 13-batch audit is complete. For each problem, verify the prompt text clearly signals the expected output shape (what columns, approximate row count, what the key insight is). Based on DataLemur benchmark research (2026-06-02): their best Easy problems show a sample input table and expected output before writing. PAL's checkValues/expectedRowCount/expectedColumns already handle the data layer — this pass tightens the prose. Not a re-audit, not rubric changes. Schedule after Batch 13.
+
 ### SQL Lab Quality Audit (In progress — V4.59.0)
 - **SQL Quality Audit — 13 batches of 10.** Full rubric + process in SQL_LAB_PLAN.md Section 8. Audit artifact: SQL_QUALITY_AUDIT.md. Each batch: score → fix → build → ship. Batch 1 next session.
 - **Approach Explorer feature** — after submitting a solution, show "You found 1 of 3 approaches. Can you find the others?" with retry textarea. Full approach map revealed after attempt. Each approach gets: technique name, when to reach for it, one-line trade-off. This is PAL's primary SQL Lab differentiator vs. DataLemur/StrataScratch. Gate: depends on audit first establishing approach counts per problem.
@@ -206,6 +209,9 @@ Family 6 — Data Traps (across all): divide-by-zero, integer division, duplicat
 ---
 
 ## Tier 2 — High impact, more effort
+
+### SQL Lab — Schema-aware autocomplete
+Autocomplete on table names and column names specific to the active datamart, triggered on typing or Tab. Removes schema-lookup friction (stops users hunting through the accordion for `appointments.provider_id`) without removing SQL-logic friction. **Do NOT implement keyword autocomplete** (SELECT, WHERE, GROUP BY etc.) — keyword completion undermines the practice value by removing the exact friction that builds fluency. Schema autocomplete is the right line: remove friction on non-SQL knowledge, keep it on SQL knowledge. Requires either a proper code editor component (CodeMirror, Monaco) or a custom textarea handler with a datamart-aware suggestion engine. Medium-high effort. Gate: finish the SQL audit first so the datamarts are stable before building on top of them.
 
 ### Defense Strategy — pending upgrades
 

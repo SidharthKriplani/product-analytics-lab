@@ -610,21 +610,56 @@ Every problem should have:
 
 ### Batch Map
 
-| Batch | Problems | Difficulty |
-|---|---|---|
-| 1 | e01–e10 | Easy |
-| 2 | e11–e20 | Easy |
-| 3 | e21–e30 | Easy |
-| 4 | e31–e40 | Easy |
-| 5 | e41–e50 | Easy |
-| 6 | m01–m10 | Medium |
-| 7 | m11–m20 | Medium |
-| 8 | m21–m30 | Medium |
-| 9 | m31–m40 | Medium |
-| 10 | h01–h10 | Hard |
-| 11 | h11–h25 | Hard |
-| 12 | master01–master08 | Master |
-| 13 | master09–master15 | Master |
+| Batch | Problems | Difficulty | Status | Flagged | Rewritten |
+|---|---|---|---|---|---|
+| 1 | e01–e10 | Easy | ✅ V4.60.0 | e07, e10 | e07 (HAVING), e10 (COUNT DISTINCT) |
+| 2 | e11–e20 | Easy | ✅ V4.61.0 | e20,e23,e26,e29,e32,e34 + h16 ID bug | HAVING, AVG, BETWEEN, multi-col GROUP BY |
+| 3 | e35–e51 | Easy | ✅ V4.62.0 | e35,e40,e42,e44 + e47,e49 TC | SUM(computed), SUM+JOIN, 3-table JOIN, rate calc |
+| 4 | e52–e65 | Easy | ✅ V4.63.0 | e55,e57,e58,e59,e60 + e52 checkValues,e56 TC | COALESCE, IN literal, dual aggregate |
+| 5 | e41–e50 | Easy | Pending | — | — |
+| 6 | m01–m10 | Medium | Pending | — | — |
+| 7 | m11–m20 | Medium | Pending | — | — |
+| 8 | m21–m30 | Medium | Pending | — | — |
+| 9 | m31–m40 | Medium | Pending | — | — |
+| 10 | h01–h10 | Hard | Pending | — | — |
+| 11 | h11–h25 | Hard | Pending | — | — |
+| 12 | master01–master08 | Master | Pending | — | — |
+| 13 | master09–master15 | Master | Pending | — | — |
+
+---
+
+## Section 9 — Competitive Benchmark (2026-06-02)
+
+### What the top platforms look like at Easy
+
+Researched DataLemur, StrataScratch, and LeetCode Easy SQL problems during the audit to establish an external quality bar.
+
+**DataLemur** — highest quality of the three. Company-tagged, in-browser editor, hints + solutions. Best problems show a sample input table and expected output before writing. Good business framing on strong examples. Weakness: most are still textbook in structure (generic salary/department/employee tables with company names bolted on). Data traps minimal. Debriefs thin — one paragraph, "here's the query, here's why."
+
+**StrataScratch** — mixed. Some genuine company-specific framing. Many reduce to "write a query to find X" with no narrative or trap.
+
+**LeetCode** — most textbook. Correct SQL concepts, zero business context, no data challenges, no debriefs.
+
+### Where PAL already leads
+
+1. **Business narrative** — "The growth team wants to understand which acquisition sources retain users longest" vs. "write a query to calculate average session duration by source." Not close.
+2. **Data traps** — No platform embeds traps in seed data the way PAL does (`ended_at IS NULL` vs `status='active'`, `COUNT(*)` vs `COUNT(DISTINCT)`, `NOT IN` NULL footgun). PAL's differentiator at Easy level.
+3. **Debriefs** — DataLemur: one paragraph. PAL: business implication, weak answer, interviewer follow-up, alternative approaches.
+4. **Company authenticity** — DataLemur labels generic tables with company names. PAL ties the data model to what the company actually does.
+
+### Two benchmark insights applied to this audit
+
+**1. Layered Easy problems** — The best DataLemur Easy problems combine 2–3 naturally related concepts (date filter + HAVING + multiple aggregates in one problem). PAL's rewrites in Batches 1–4 already moved in this direction (e58: WHERE + GROUP BY + HAVING + JOIN; e60: SUM + COUNT dual aggregate). This is the right bar — richer single problems over thin single-skill ones. Continue applying in Batches 5–13.
+
+**2. Concrete expected output in prompt** — DataLemur shows a sample input and expected output before you start. PAL addresses this via expectedColumns, expectedRowCount, and checkValues — but the prompt text itself could be more explicit about what the output looks like. This does NOT require a re-audit of Batches 1–4. Schedule a standalone prompt-clarity pass after all 13 batches are complete.
+
+### Rubric verdict
+
+Benchmark confirmed the 7-dimension rubric is correctly calibrated. No new dimensions added. Adding dimensions mid-audit creates inconsistent scoring. The two benchmark insights are being applied naturally through existing DR, Di, and IQ scoring. Rubric stays as-is through Batch 13.
+
+### Post-audit prompt-clarity pass (schedule after Batch 13)
+
+A single 30-minute sweep across all 130 problems after the full audit is done. For each problem, verify the prompt text clearly signals the expected output shape (what columns, approximate count, what the key insight is). Not a re-audit — just a prose polish pass. Logged in IDEAS.md.
 
 ---
 

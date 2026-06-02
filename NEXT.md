@@ -17,8 +17,8 @@ Read this at the start of every build session. Do only this. Update before closi
 
 ## Next session
 
-**1. SQL Quality Audit — Batch 2 (e11–e20)**
-Score full batch first, then fix flagged problems, build+verify, ship. See SQL_QUALITY_AUDIT.md for scores so far.
+**1. SQL Quality Audit — Batch 5 (file positions 41–50)**
+Score full batch, fix flagged, build+verify, ship. See SQL_QUALITY_AUDIT.md for running scores.
 
 **2. Confirm VITE_POSTHOG_KEY live in Vercel** — check env vars dashboard, establish WAU baseline before Batch 1 outreach.
 
