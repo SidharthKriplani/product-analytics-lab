@@ -415,6 +415,20 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
 
         {/* ── Bottom: auth ── */}
         <div style={{ padding: '0 0.8rem 0.5rem', flexShrink: 0 }}>
+          {!user && (
+            <button
+              onClick={onShowAuth}
+              style={{
+                width: '100%', textAlign: 'left',
+                background: 'none', border: '1px solid var(--border)',
+                borderRadius: '6px', padding: '0.4rem 0.6rem',
+                fontSize: '0.75rem', color: 'var(--text-muted)',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
+              }}
+            >
+              <span style={{ fontSize: '0.85rem' }}>→</span> Sign in to sync progress
+            </button>
+          )}
           {user && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.25rem' }}>
               <div style={{
