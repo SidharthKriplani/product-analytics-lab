@@ -4,6 +4,71 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.73.0] — 2026-06-03 [CONTENT]
+
+### SQL Quality Audit COMPLETE — Batch 13 (Master: master12, master14, master18, master19, master25, master26, master27)
+
+**THE 13-BATCH SQL QUALITY AUDIT IS COMPLETE. All 130 problems at B-grade floor.**
+
+**Results:** 6/7 flagged. 3 rewrites + 3 debrief upgrades. master27 clean pass.
+
+- **master18 rewritten** — channel first-order value (Di=2 clone of master02). Replaced with "Seller Performance Scorecard" (Etsy, marketplace): 2-CTE conditional aggregation (COUNT/SUM CASE WHEN for completed only), LEFT JOIN to reviews for avg_rating (NULL for no reviews), RANK() window on net_revenue. GadgetWorld (0 completed sales) correctly appears with LEFT JOIN. checkValue: TechVault, rank=1.
+- **master19 rewritten** — saas COALESCE tier clone of master04 (Di=2). Replaced with "Driver On-Time Performance Report" (DHL, logistics): LEFT JOIN drivers→shipments with AND status='delivered' in ON clause, SUM(CASE WHEN) for on_time_count, CASE WHEN for NULL-safe rate and performance_band including 'no_data' for zero-delivery drivers. checkValue: Maria Ferrer, 66.7%, 'top'.
+- **master25 rewritten** — fintech risk profile clone of master01 (Di=2). Replaced with "Post Engagement Rate by Content Type" (Reddit, social_network): 3-CTE (published → post_stats LEFT JOIN → action_counts ROW_NUMBER PARTITION BY content_type → outer join on rn=1). Introduces top-action-per-group pattern using ROW_NUMBER PARTITION BY distinct from any prior problem. checkValue: video/4 posts/12 interactions/avg=3.0.
+- **master12** — debrief upgraded: formula walkthrough + ROW_NUMBER tie-break caveat + FIRST_VALUE alternative + adherence-gap follow-up.
+- **master14** — debrief fixed: removed contradictory "wait" language, clarified that accounts 1 and 3 DO appear (both have churned $999 subs), documented the production filter for excluding still-active accounts. TC upgraded.
+- **master26** — debrief upgraded: full chain explanation (1→2→4→9→12→13 = depth 5 for user 13), UNION ALL rationale, recursive CTE mechanics explained clearly.
+- **master27** — clean pass (3-CTE cohort pivot, unique pattern, all checkValues verified). month_0=0 for Nov cohort correctly reflects no sessions in November for any of the 4 users — all first played in December.
+- Build: ✓ 2.21s.
+
+**Audit totals (all 13 batches):** 130 problems scored. Flag rate: Easy avg 5.8/10 → Medium avg 5.2/10 → Hard avg 3.1/10 → Master avg 4.1/10 (higher due to Di=2 pattern clustering). Total rewrites: ~35. Total checkValues fixed: ~8. Total debriefs upgraded: ~12. Patterns introduced: anti-join, HAVING, COUNT DISTINCT, date arithmetic (JULIANDAY), window functions (ROW_NUMBER, RANK, DENSE_RANK, NTILE, LAG, LEAD, FIRST_VALUE, PERCENT_RANK, AVG OVER, SUM OVER, MIN/MAX OVER), gap-and-island, self-join, NOT EXISTS temporal, CROSS JOIN scalar, 4-table JOIN, cohort retention, relational division, WITH RECURSIVE. SQL Lab is now a genuinely differentiated product asset.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `BRAIN_TRANSFER.md`, `NEXT.md`, `CHANGELOG.md`
+
+---
+
+## [4.72.0] — 2026-06-03 [CONTENT]
+
+### SQL Audit Batch 12 (Master master01–master10)
+
+**Results:** 4/8 flagged. 1 rewrite + 3 targeted fixes.
+
+- **master02** — company fixed Meta→Wayfair (Meta doesn't run ecomm). checkValue updated to organic channel (paid/referral both 100% so paid was ambiguous).
+- **master03 rewritten** — channel LTV (Di=2 clone of master02, DC=3 Medium-level). Replaced with "Product Category Gross Margin Ranking" — 3-table JOIN (order_items→orders→products for COGS), 2-CTE, RANK() on margin_pct. Verified: home=54.99%, electronics=51.13%, books=50.46%, apparel=50.33%. checkValue: home/54.99/rank=1.
+- **master05** — expectedRowCount fixed 3→2 (actual query returns 2 rows). checkValues populated: txn_id=31, user_id=5, spend_ratio=5.01. Company Chime→Revolut (Chime already in master01 — duplicate company in batch).
+- **master10** — debrief fixed: removed unfinished "...wait" reasoning mid-sentence. Full debrief now explains INNER JOIN as AND logic, why carol is correctly excluded, and adds severity-scoring TC follow-up.
+- **master01, master04, master08, master09** — all pass. master08 (co-purchase affinity self-join) and master09 (ROW_NUMBER + self-join consecutive subscriptions) are best in batch.
+- Build: ✓ 2.41s.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `BRAIN_TRANSFER.md`, `NEXT.md`, `CHANGELOG.md`
+
+---
+
+## [4.71.0] — 2026-06-03 [MAINTENANCE + CONTENT]
+
+### MD Consolidation + SQL Audit Batch 11
+
+**MD consolidation (lossless, token-conserving):**
+- Deleted 4 noise files with zero unique content: SESSION_KICKOFF.md, SESSION_STARTER.md, SPINE_PROTOCOL.md, GIT_COMMIT_TEMPLATE.md (git troubleshooting snippet migrated to BRAIN_TRANSFER.md first)
+- Created docs/archive/ — moved 6 stale/one-time files: AUDITS_ARCHIVE.md, CHANGELOG_ARCHIVE.md, PLATFORM_ARCHITECTURE_MEMO.md, PRD_V1.md (was PRODUCT_ANALYTICS_SYSTEMS_LAB_PRD.md), ROADMAP_V425.md (was ROADMAP.md), SETUP_AUTH.md
+- BRAIN_TRANSFER.md: added active file reference hub, trimmed history to 3 versions, fixed stale open/deferred items, migrated git troubleshooting
+- NEXT.md: trimmed 183→35 lines — removed entire carry-forward log (already in CHANGELOG), kept queue + pre-beta gates only
+- DECISIONS.md: replaced duplicate CSS variable color table and animation class list with one-line cross-references to CLAUDE.md (authoritative)
+- Net: 26 files → 18 root active + 2 docs/ active + 6 docs/archive/. ~200 lines / ~3,000 tokens saved every session open.
+
+**SQL Audit Batch 11 (h24, master07/13/21, h31–h34, h41, h42):**
+- **master07** — already `difficulty: 'Master'`, no change needed. Score 33/35.
+- **master13 rewritten** — ROW_NUMBER clone of h07 rewrite (Di=1, 25/35). Replaced with "Buyer Cohort Repurchase Analysis" (Shopify): 3-CTE chain (ROW_NUMBER → first-buyer cohort H1/H2 → LEFT JOIN repurchase flags). Teaches cohort scoping, LEFT JOIN to retain zero-repeat users, MAX(CASE WHEN) binary flag, integer division trap. checkValue: H1 cohort_size=7, repeat_buyers=4, repeat_rate_pct=57.1.
+- **master21** — reclassified Hard→Master only. Self-join content is good (Di=4, IQ=5), just mislabeled.
+- **h33 rewritten** — CTE+JOIN+RANK clone of m28 (Di=2, 26/35). Replaced with "Content Above Category Benchmark" (TikTok): 2-CTE LEFT JOIN + AVG OVER PARTITION BY category (per-category window, distinct from m28's global AVG OVER). New trap: cannot filter on window function in WHERE — second CTE wrap required. checkValue: content_id=1, fitness, interaction_count=8.
+- **h34 rewritten** — LAG+JULIANDAY gap (Di=2, 26/35), third appearance. Replaced with "Concurrent Prescription Risk" (Doximity): self-join on prescriptions with 3-condition ON (same patient, same drug, provider_id < provider_id). Teaching moment: `<` vs `!=` in self-join pair de-duplication. ABS(JULIANDAY) for positive gap. checkValue: patient_id=1, Lisinopril, days_between_rx=2.
+- **h24, h31, h32, h41, h42** — all pass. h42 perfect score (35/35).
+- Build: ✓ 1.85s, 0 errors.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `BRAIN_TRANSFER.md`, `NEXT.md`, `DECISIONS.md`, `CHANGELOG.md`, `docs/archive/` (6 files moved), deleted: SESSION_KICKOFF.md, SESSION_STARTER.md, SPINE_PROTOCOL.md, GIT_COMMIT_TEMPLATE.md
+
+---
+
 ## [4.69.0] — 2026-06-02 [CONTENT]
 
 ### SQL Quality Audit — Batch 10 (Hard h01–h10: h01, h02, h04, h05, h07, h08, h10, h11, h13, h17)

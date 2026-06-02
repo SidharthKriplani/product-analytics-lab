@@ -329,15 +329,99 @@ Full rubric + process in SQL_LAB_PLAN.md Section 8.
 
 ---
 
-## Batch 11 — Hard h11–h25
-**Status:** Pending
+## Batch 11 — Hard h11–h25 (file positions 11–20: h24, master07, master13, master21, h31, h32, h33, h34, h41, h42)
+**Status:** ✅ Complete | **Audited:** 2026-06-03 | **Flagged:** 5 | **Reclassified:** 3 | **Rewritten:** 2
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Technique | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| h24 | First-Month Revenue by Signup Cohort | Shopify | 5 | 5 | 5 | 5 | 4 | 4 | 4 | 32 | LEFT JOIN date condition in ON clause | ✅ Pass |
+| master07 | Hypertension Care Gap | Epic Systems | 5 | 5 | 5 | 4 | 5 | 4 | 5 | 33 | 2-CTE NOT IN anti-join | ✅ Pass (already Master — no change) |
+| master13 | Buyer Cohort Repurchase Analysis (rewritten) | Shopify | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 34 | 3-CTE ROW_NUMBER → LEFT JOIN → cohort aggregate | ✅ Rewritten + reclassified Hard→Master |
+| master21 | Referral Performance by Referrer | Cash App | 4 | 4 | 4 | 3 | 4 | 5 | 4 | 28 | self-join + SUM(binary) | ✅ Reclassified Hard→Master |
+| h31 | CSM Portfolio MRR | Salesforce | 5 | 5 | 5 | 4 | 4 | 4 | 4 | 31 | LEFT JOIN + COALESCE + SUM(CASE WHEN) + COUNT DISTINCT | ✅ Pass |
+| h32 | Disputed Transaction Merchant Exposure | Stripe | 5 | 5 | 5 | 4 | 4 | 4 | 4 | 31 | CTE filter + JOIN + GROUP BY | ✅ Pass |
+| h33 | Content Above Category Benchmark (rewritten) | TikTok | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 34 | 2-CTE + LEFT JOIN + AVG OVER PARTITION BY (per-category window) | ✅ Rewritten (was CTE+JOIN+RANK clone, Di=2) |
+| h34 | Concurrent Prescription Risk (rewritten) | Doximity | 5 | 5 | 4 | 5 | 5 | 5 | 4 | 33 | self-join + 3-condition ON + ABS(JULIANDAY) | ✅ Rewritten (was LAG+JULIANDAY clone, Di=2) |
+| h41 | Monthly Account Growth Trend | Salesforce | 5 | 5 | 5 | 4 | 4 | 4 | 4 | 31 | SUM(COUNT(*)) OVER nested aggregate + strftime | ✅ Pass |
+| h42 | 30-Day Transaction Velocity | Stripe | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 35 | self-join with JULIANDAY range in JOIN condition | ✅ Pass (perfect score) |
+
+### Batch 11 findings
+
+**5 issues across 10 problems.** 3 reclassifications + 2 rewrites. No new checkValues bugs.
+
+**master07 already Master:** Scored as Hard in previous session, but the file already had `difficulty: 'Master'`. No change needed.
+
+**master13 clone (Di=1):** ROW_NUMBER PARTITION BY user_id → CASE WHEN order_rank=1 THEN 'new' was a literal clone of the h07 rewrite from Batch 10. Replaced with "Buyer Cohort Repurchase Analysis" — 3-CTE chain: ROW_NUMBER sequential numbering → first-buyer cohort assignment (H1/H2) → LEFT JOIN back for repurchase flags (MAX CASE WHEN). Teaches cohort scoping via first completed order, LEFT JOIN for retaining zero-repeat users, MAX(CASE WHEN) binary flag pattern, and integer division trap.
+
+**master21 reclassify:** Self-join + GROUP BY is Medium-Hard level, not Master. Di=4, IQ=5 — good content, just mislabeled. Reclassified Hard→Master.
+
+**h33 clone (Di=2):** CTE + JOIN content→interactions + GROUP BY creator + RANK was structurally identical to m28 rewrite. Replaced with "Content Above Category Benchmark" — 2-CTE: content_stats (LEFT JOIN + COUNT per piece) → benchmarked (AVG OVER PARTITION BY category). Outer query filters WHERE interaction_count > category_avg. New trap: cannot filter on window function result in WHERE directly — the second CTE wrap is required. Distinct from m28 (global AVG OVER) because PARTITION BY makes this a per-category benchmark.
+
+**h34 clone (Di=2):** LAG(scheduled_at) OVER (PARTITION BY patient_id) + JULIANDAY gap — third appearance of this exact technique (m26, m47, h34). Replaced with "Concurrent Prescription Risk" — self-join on prescriptions with three conditions (same patient, same drug, provider_id < provider_id). The `<` constraint is the key teaching moment: eliminates duplicate pairs without DISTINCT. ABS(JULIANDAY) for positive day gap. New trap: `!=` vs `<` in self-join safety pattern.
+
+**New patterns introduced this batch:** AVG OVER PARTITION BY (per-group window, different from global AVG OVER in m28), self-join with `<` safety constraint, 3-CTE cohort retention pipeline, MAX(CASE WHEN) binary flag aggregation.
 
 ---
 
-## Batch 12 — Master master01–master08
-**Status:** Pending
+## Batch 12 — Master (master01–master10: master01, master02, master03, master04, master05, master08, master09, master10)
+**Status:** ✅ Complete | **Audited:** 2026-06-03 | **Flagged:** 4 | **Rewritten:** 1 | **Fixed:** 3
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Technique | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| master01 | User Risk Scoring Engine | Chime | 5 | 5 | 5 | 5 | 4 | 5 | 4 | 33 | 3-CTE composite scoring + COALESCE + GROUP BY | ✅ Pass |
+| master02 | Channel 6-Month Retention | Wayfair | 4 | 4 | 4 | 4 | 3 | 5 | 4 | 28 | 2-CTE + LEFT JOIN + JULIANDAY 180d window | ✅ Company fixed (Meta→Wayfair) + checkValue fixed |
+| master03 | Product Category Gross Margin (rewritten) | Shopify | 5 | 5 | 4 | 5 | 4 | 5 | 4 | 32 | 2-CTE + 3-table JOIN + RANK window | ✅ Rewritten (was Di=2 channel LTV clone, DC=3) |
+| master04 | Account Health Score | Salesforce | 5 | 5 | 5 | 4 | 3 | 5 | 4 | 31 | 2-CTE multi-signal scoring + COALESCE + CASE WHEN | ✅ Pass |
+| master05 | Transaction Spend Anomaly Detection | Revolut | 5 | 4 | 4 | 5 | 3 | 5 | 5 | 31 | CTE per-user AVG + 3x threshold | ✅ expectedRowCount fixed (3→2), checkValues added, company fixed (Chime→Revolut) |
+| master08 | Product Co-Purchase Affinity | Amazon | 5 | 5 | 5 | 5 | 4 | 5 | 5 | 34 | self-join order_items + < pair constraint + COUNT | ✅ Pass |
+| master09 | Plan Upgrade/Downgrade Classification | Salesforce | 5 | 5 | 5 | 5 | 4 | 5 | 5 | 34 | 2-CTE ROW_NUMBER + self-join consecutive rows | ✅ Pass |
+| master10 | High-Risk Account Flagging | Stripe | 5 | 5 | 4 | 5 | 3 | 5 | 4 | 31 | 2-CTE + INNER JOIN as AND logic | ✅ Debrief fixed (unfinished text removed + TC upgraded) |
+
+### Batch 12 findings
+
+**4/8 flagged** — all fixable without full rewrites except master03.
+
+**master02 company mismatch:** Meta doesn't operate an ecommerce store. Changed to Wayfair — a DTC furniture retailer that would precisely this acquisition channel → 6-month buyer conversion analysis. checkValue updated from `paid/100.0` (ambiguous — referral also 100%) to `organic/total_users=6/converted=4/rate=66.7` (uniquely identifying).
+
+**master03 clone (Di=2, DC=3):** Channel LTV (SUM + COUNT + AVG per channel via LEFT JOIN) was structurally identical to master02 (channel × order aggregation via LEFT JOIN). Also Medium-Hard level, not Master. Replaced with "Product Category Gross Margin Ranking" — 3-table JOIN (order_items → orders → products) for COGS data, 2-CTE (line-level → category aggregate), RANK() on margin_pct. New pattern: cost basis analysis with COGS JOIN. Verified: home=54.99%, electronics=51.13%, books=50.46%, apparel=50.33%.
+
+**master05 data bug:** expectedRowCount was 3 but query returns 2 (txn 31 user 5 at 5.01x, txn 3 user 1 at 3.48x). Fixed to 2. checkValues populated. Company changed Chime→Revolut (Chime already used in master01 — duplicate company in same batch).
+
+**master10 debrief:** Contained unfinished reasoning ("txn 9 is user 3's... wait"). Replaced with complete debrief explaining: INNER JOIN as AND logic, why user 3 (carol) is correctly excluded (no open disputes despite flagged merchant transactions), TC upgraded with severity-scoring follow-up.
+
+**New Master patterns this batch:** 3-CTE composite risk scoring (master01), per-user avg anomaly detection (master05), self-join pair generation with `<` constraint (master08), ROW_NUMBER + self-join consecutive subscription rows (master09), cost-basis category margin with RANK (master03).
 
 ---
 
-## Batch 13 — Master master09–master15
-**Status:** Pending
+## Batch 13 — Master (final 7: master12, master14, master18, master19, master25, master26, master27)
+**Status:** ✅ Complete | **Audited:** 2026-06-03 | **Flagged:** 6 | **Rewritten:** 3 | **Debrief upgrades:** 3
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Technique | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| master12 | Prescription Coverage Days | Optum | 5 | 5 | 5 | 5 | 4 | 5 | 4 | 33 | 3-CTE: formula → aggregate → ROW_NUMBER top-drug | ✅ Debrief upgraded (IQ 4→5, TC 3→4) |
+| master14 | Churned Account Reactivation | Salesforce | 5 | 5 | 3 | 4 | 3 | 5 | 4 | 29 | 1-CTE MAX + HAVING + JOIN | ✅ Debrief fixed (contradictory "wait" removed, active-account filter note added, TC upgraded) |
+| master18 | Seller Performance Scorecard (rewritten) | Etsy | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 34 | 2-CTE + LEFT JOIN × 2 + conditional aggregation + RANK | ✅ Rewritten (was channel first-order clone of master02, Di=2) |
+| master19 | Driver On-Time Performance Report (rewritten) | DHL | 5 | 5 | 4 | 5 | 5 | 5 | 4 | 33 | 1-CTE + LEFT JOIN status filter in ON + CASE WHEN rate + band | ✅ Rewritten (was saas COALESCE tier clone of master04, Di=2) |
+| master25 | Post Engagement Rate by Content Type (rewritten) | Reddit | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 34 | 3-CTE + LEFT JOIN + ROW_NUMBER PARTITION BY + outer join on rn=1 | ✅ Rewritten (was fintech risk clone of master01, Di=2) |
+| master26 | Full Referral Tree Walk | LinkedIn | 5 | 5 | 5 | 4 | 5 | 5 | 5 | 34 | WITH RECURSIVE CTE + self-referential join | ✅ Debrief upgraded (removed "wait" language, chain explanation clarified) |
+| master27 | Signup Cohort Retention Curve | Supercell | 5 | 5 | 5 | 4 | 5 | 5 | 4 | 33 | 3-CTE + month offset arithmetic + COUNT DISTINCT CASE WHEN pivot | ✅ Pass (clean) |
+
+### Batch 13 findings
+
+**6/7 flagged — 3 rewrites + 3 debrief upgrades.** Only master27 needed no changes.
+
+**master18 clone (Di=2):** Channel first-order value (2-CTE + MIN created_at + channel aggregation) was structurally identical to master02 (2-CTE + MIN created_at + JULIANDAY window + channel aggregation). Replaced with "Seller Performance Scorecard" (Etsy, marketplace): 2-CTE LEFT JOIN sellers to transactions (conditional aggregation for completed only), LEFT JOIN to reviews for avg_rating, RANK() window. New pattern: marketplace analytics, conditional aggregation in LEFT JOIN context, avg_rating nullability. Verified: TechVault gmv=1487, net=1338.30, rank=1. GadgetWorld (0 completed sales) correctly appears with total_sales=0 due to LEFT JOIN.
+
+**master19 clone (Di=2):** saas COALESCE+CASE WHEN engagement tier was structurally identical to master04 (saas events+subscriptions → COALESCE → CASE WHEN label). Replaced with "Driver On-Time Performance Report" (DHL, logistics): LEFT JOIN drivers to shipments with AND s.status='delivered' in ON clause (not WHERE), SUM(CASE WHEN delivered<=scheduled) for on_time_count, CASE WHEN for performance_band with explicit 'no_data' for zero-delivery drivers. New pattern: logistics/SLA analytics, LEFT JOIN filter in ON vs WHERE distinction, NULL-safe rate calculation. checkValue: driver 2 (Maria Ferrer), 66.7%, 'top'.
+
+**master25 clone (Di=2):** fintech risk profile (1-CTE SUM CASE WHEN per user) was structurally identical to master01 (3-CTE composite risk scoring, same fintech datamart). Replaced with "Post Engagement Rate by Content Type" (Reddit, social_network): 3-CTE chain (published posts → post_stats LEFT JOIN → action_counts ROW_NUMBER PARTITION BY content_type). New pattern: content type pivot with top action per type using ROW_NUMBER PARTITION BY, LEFT JOIN vs INNER JOIN distinction for zero-interaction handling. checkValue: video, 4 posts, 12 interactions, avg=3.0.
+
+**master12 debrief:** Was 3 sentences walking through arithmetic. Upgraded to full treatment: formula explanation (days_supply × (refills+1)), ROW_NUMBER tie-break non-determinism, FIRST_VALUE alternative, 3-CTE chain explanation, adherence gap follow-up.
+
+**master14 debrief:** Had contradictory "Wait — account 1 is excluded... wait, it appears with its churned sub." Fixed: account 1 and 3 both appear because the query checks churned subscriptions regardless of current active subscriptions. Production fix (NOT IN active subs) documented explicitly. TC upgraded.
+
+**master26 debrief:** Had "1→9→12→13... wait — user 9 was referred by user 4 (depth 3)." Replaced with complete chain explanation (1→2→4→9→12→13) and UNION ALL vs UNION rationale.
+
+**master27:** Only clean pass in batch — 3-CTE cohort pivot is genuinely Master (complex month arithmetic, COUNT DISTINCT CASE WHEN pivot). checkValue verified: Nov-2023 cohort size=4, month_0=0 (all Nov users first played in December), month_1=4, month_2=3, month_3_plus=2.
+
+**NEW PATTERNS in final batch:** WITH RECURSIVE (only appearance in entire audit), cohort month-offset pivot (COUNT DISTINCT CASE WHEN per time window), seller GMV scorecard (conditional aggregation + double LEFT JOIN), SLA on-time rate with CASE WHEN null handling, content type engagement with ROW_NUMBER PARTITION BY top-action.

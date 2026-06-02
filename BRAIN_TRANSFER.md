@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.69.0 | **Build:** ✓ (2.20s, 0 errors) | **Date:** 2026-06-02
+**Version:** V4.73.0 | **Build:** ✓ (2.21s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -50,32 +50,26 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
-**V4.69.0** — SQL Quality Audit Batch 10 (Hard h01–h17, file positions 1–10). Best batch: 7/10 pass, 2 perfect scores (h01=35, h11=35). 3 rewrites: h07 (MoM clone→new/returning split), h10 (ROW_NUMBER clone→4-table JOIN P2P NULL trap), h13 (SUM(SUM) clone→PERCENT_RANK LTV). h17 checkValues fixed.
+**V4.73.0** — SQL Quality Audit COMPLETE. Batch 13 (final 7 Master problems): 6/7 flagged. 3 rewrites: master18→Seller Scorecard (Etsy, marketplace, conditional aggregation + RANK), master19→Driver On-Time (DHL, logistics, SLA analytics), master25→Post Engagement (Reddit, social_network, ROW_NUMBER PARTITION BY). 3 debrief upgrades: master12 (3-CTE coverage formula + tie-break), master14 (active-account filter caveat), master26 (recursive chain explanation). master27 clean. Build ✓ 2.21s. **THE 13-BATCH SQL QUALITY AUDIT IS COMPLETE.**
 
-**V4.68.0** — SQL Quality Audit Batch 9 (Medium, file positions 31–40). 4/10 flagged. 4 rewrites: h14 (funnel temporal ordering), h22 (completion rate JOIN), h25 (MoM revenue LAG), h27 (activity bucketing LEFT JOIN+CASE WHEN). 3 new datamarts: hr_analytics, marketplace, food_delivery.
+**V4.72.0** — SQL Audit Batch 12 (Master master01–master10). 4/8 flagged. Fixes: master02 company (Meta→Wayfair) + checkValue; master03 rewritten (channel LTV clone→category gross margin, 3-table JOIN + RANK); master05 expectedRowCount fixed (3→2), checkValues added, company (Chime→Revolut); master10 debrief cleaned (unfinished text removed) + TC upgraded. Build ✓ 2.41s.
 
-**V4.67.0** — SQL Quality Audit Batch 8 (Medium m36–m61). Live bug fixed (m36 temporal ordering). 3 rewrites: m37 (channel conversion rate), m47 (ROWS BETWEEN rolling avg), m56 (relational division). m57 dual DENSE_RANK upgrade. Trap enrichment taxonomy documented in SQL_LAB_PLAN Section 10.
+**V4.71.0** — MD consolidation + SQL Audit Batch 11. MD: deleted 4 noise files (SESSION_KICKOFF, SESSION_STARTER, SPINE_PROTOCOL, GIT_COMMIT_TEMPLATE), created docs/archive/ with 6 archived files (AUDITS_ARCHIVE, CHANGELOG_ARCHIVE, PLATFORM_ARCHITECTURE_MEMO, PRD_V1, ROADMAP_V425, SETUP_AUTH), trimmed NEXT.md (183→35 lines), trimmed BRAIN_TRANSFER history, removed duplicate CSS/animation content from DECISIONS.md. SQL Batch 11: 3 reclassifications (master07 already Master, master13+master21 Hard→Master), 2 rewrites (master13→3-CTE cohort repurchase, h33→AVG OVER PARTITION BY category benchmark, h34→self-join prescription safety). Build ✓ 1.85s.
+
+**V4.70.0** — SQL Quality Audit Batch 10 (Hard h01–h17). Best batch: 7/10 pass, 2 perfect scores (h01=35, h11=35). 3 rewrites: h07 (MoM clone→new/returning split), h10 (ROW_NUMBER clone→4-table JOIN P2P NULL trap), h13 (SUM(SUM) clone→PERCENT_RANK LTV). h17 checkValues fixed.
+
+**V4.69.0** — SQL Quality Audit Batch 9 (Medium, file positions 31–40). 4/10 flagged. 4 rewrites: h14 (funnel temporal ordering), h22 (completion rate JOIN), h25 (MoM revenue LAG), h27 (activity bucketing LEFT JOIN+CASE WHEN). 3 new datamarts: hr_analytics, marketplace, food_delivery.
 
 ---
 
-## Next action — Batch 11 (resume)
+## Next action — Trap Enrichment Pass (post-audit, highest priority)
 
-Batch 11 was scored last session (h24, master07/13/21, h31–h34, h41, h42) but edits were not executed. Scores:
+**The 13-batch SQL quality audit is COMPLETE.** All 130 problems at B-grade floor. Next: raise ceiling to A-grade.
 
-| ID | Score | Action |
-|---|---|---|
-| h24 | 32 | ✅ clean |
-| master07 | 29 | reclassify difficulty Hard→Master only |
-| master13 | 25 | rewrite + reclassify Hard→Master |
-| master21 | 26 | reclassify difficulty Hard→Master only |
-| h31 | 29 | ✅ clean |
-| h32 | 28 | ✅ clean |
-| h33 | 26 | rewrite (Di=2, CTE+JOIN clone) |
-| h34 | 26 | rewrite (Di=2, LAG+JULIANDAY clone) |
-| h41 | 32 | ✅ clean |
-| h42 | 35 | ✅ perfect |
+Full taxonomy + execution plan in `SQL_LAB_PLAN.md` Section 10 and `IDEAS.md` Tier 1.
+Short version: embed data traps (NULL in NOT IN, integer division, many-to-many fanout, RANGE vs ROWS, denominator confusion) into debrief + seed data for highest-impact problems. Estimated 5–6 sessions.
 
-**Execute:** 3 reclassifications (master07/13/21 difficulty field) + 2 rewrites (h33, h34) + MD updates + build + git.
+Also queued: prompt-clarity pass (30-min sweep of all 130 prompts after enrichment).
 
 ---
 

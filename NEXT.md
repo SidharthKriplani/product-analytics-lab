@@ -15,11 +15,11 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ## Next session
 
-**1. SQL Quality Audit — Batch 11 (resume)**
-Scores already done last session. Execute: 3 reclassifications (master07/13/21 difficulty Hard→Master) + 2 rewrites (h33 CTE+JOIN clone, h34 LAG+JULIANDAY clone) + MD updates + build + ship. Full score table in BRAIN_TRANSFER.md.
+**1. SQL Lab — Trap Enrichment Pass [HIGHEST PRIORITY]**
+All 13 audit batches complete as of V4.73.0. Full taxonomy + execution plan in SQL_LAB_PLAN.md Section 10. Start with 6 highest-ROI traps (effort 2, impact 3): NULL in NOT IN subquery, integer division CAST, many-to-many fanout, COALESCE on LEFT JOIN aggregate, RANGE vs ROWS on tied dates, denominator confusion on rate problems.
 
-**2. SQL Quality Audit — Batch 12 (Master master01–master08)**
-After Batch 11 ships. Score full batch → fix flagged → build → ship.
+**2. SQL Lab — Prompt-Clarity Pass**
+30-min sweep of all 130 prompts after enrichment pass. Verify each prompt clearly signals expected output shape. Not a re-audit — no rubric changes.
 
 **3. Confirm VITE_POSTHOG_KEY live in Vercel**
 Establish WAU baseline before Batch 1 outreach.
