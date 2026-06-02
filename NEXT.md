@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.50.0 (2026-06-02) — All audits resolved (91/87/79+80). Built FoundationNudgeCard + BeginnerOnboardingTrack reusable components. Three browser headers emoji-to-Icon replaced.*
+*Last updated: V4.51.0 (2026-06-02) — 15 product features built: FoundationNudgeCard + BeginnerOnboardingTrack integrated, Simulator redesign, Defense Strategy Layer 4A (Playbook links per skill), SQL Lab study plan modal, Trainer skill heatmap, ForwardPointerCard, Progress export/import, Behavioral keyboard shortcuts, and more.*
 
 ---
 
@@ -37,6 +37,19 @@ See Next session item 1.
 ---
 
 ## Carry-forward log
+
+**Done this session (V4.51.0 — 15 product features):**
+- FoundationNudgeCard integrated into RCABrowser, MetricsBrowser, CasesBrowser, DesignBrowser, ScenarioBrowser (replaces inline non-dismissable nudges with proper dismissable + foundation-completion-aware component)
+- BeginnerOnboardingTrack integrated into Home.jsx (replaces inline block)
+- Interview Simulator config redesign (audit #82): CSS variables for border-radius, stronger selected-state borders, higher visual gravity on role cards
+- Defense Strategy Layer 4A: SKILL_ARTICLE_MAP added, onOpenArticle wired through App.jsx, "Read first" Playbook link renders above room chips in each day card
+- SQL Lab study plan modal: 4-step flow (goal/days/intensity/confirm), plan generation + localStorage persistence to pal-sql-lab-plan-v1, "Study Plan" button in header
+- MCQ Trainer: skill heatmap grid in debrief (colored cells per category + "Study next" hint) alongside existing progress bars
+- ForwardPointerCard: new shared component, wired into RCARunner + CaseRunner debrief endings (Next case / Build interview plan / Company Tracks)
+- Progress export/import: "Export progress" (JSON download) + "Import progress" (file upload + reload) in Settings section
+- Behavioral runner: keyboard shortcuts (1=Strong, 2=Partial, 3=Miss after reveal; Enter=next)
+- 6 tasks confirmed already complete: plan persistence, keyboard shortcuts in Trainer, keyboard shortcut badges, Playbook→practice links, BI17-23 difficulty tags, shortcut badges on Home cards
+- Build: ✓ 0 errors.
 
 **Done this session (V4.50.0 — Audit completion + Tier 1 component build):**
 - Audit #91 (empty states): Verified BookmarksBrowser + LockOverlay already well-implemented per quality standard

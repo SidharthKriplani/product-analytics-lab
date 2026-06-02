@@ -83,6 +83,21 @@ var ROOM_DATA_MAP = {
   'growth-analytics': { key: 'growthAnalyticsCases',     titleField: 'title', idField: 'id' },
 };
 
+// ─── Skill → Playbook article map (Layer 4A) ─────────────────────────────────
+const SKILL_ARTICLE_MAP = {
+  exp:             { id: 'end-to-end-experiment',  label: 'End-to-End A/B Testing' },
+  metrics:         { id: 'north-star-metric',       label: 'North Star Metrics' },
+  rca:             { id: 'rca-framework',            label: 'The RCA Framework' },
+  sql:             { id: 'sql-window-functions',     label: 'SQL Window Functions' },
+  product:         { id: 'prioritization-frameworks',label: 'Prioritization Frameworks' },
+  growth:          { id: 'growth-accounting',        label: 'Growth Accounting' },
+  bi:              { id: 'dashboard-design',          label: 'Dashboard Design' },
+  instrumentation: { id: 'event-taxonomy',            label: 'Event Taxonomy' },
+  behavioral:      { id: 'star-method',               label: 'The STAR Method' },
+  estimation:      { id: 'fermi-estimation',          label: 'Fermi Estimation' },
+  stats:           { id: 'statistical-significance',  label: 'Statistical Significance' },
+};
+
 // ─── Skill definitions (id matches CATEGORY_LABELS ids) ──────────────────────
 const SKILL_DEFS = [
   { id: 'exp',             label: 'Experimentation / A/B',  rooms: ['exp-foundations', 'design', 'browser', 'spot-the-flaw'] },
@@ -331,7 +346,7 @@ function loadSavedPlanSteps() {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export function DefenseDocGenerator({ onBack, onNavigate, unlocked }) {
+export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocked }) {
   const allData = { scenarios, designScenarios, statsModules, metricCases, rcaCases, businessCases, productDesignScenarios, codeModules, prioritizationScenarios, behavioralQuestions, estimationProblems, statsFoundationsModules, growthAnalyticsCases };
 
   const [step, setStep]                   = useState('input');
@@ -699,6 +714,24 @@ export function DefenseDocGenerator({ onBack, onNavigate, unlocked }) {
                             {tc.label}
                           </span>
                         </div>
+                        {/* Layer 4A: Read first — Playbook article for primary skill */}
+                        {onOpenArticle && (() => {
+                          const primaryRoom = (dayObj.rooms || [])[0];
+                          const matchedSkill = SKILL_DEFS.find(s => s.rooms.includes(primaryRoom));
+                          const article = matchedSkill ? SKILL_ARTICLE_MAP[matchedSkill.id] : null;
+                          if (!article) return null;
+                          return (
+                            <div style={{ marginBottom: '0.5rem' }}>
+                              <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginRight: '0.4rem' }}>Read first</span>
+                              <button
+                                onClick={() => onOpenArticle(article.id)}
+                                style={{ background: 'none', border: 'none', padding: 0, color: 'var(--accent)', fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '2px' }}
+                              >
+                                {article.label} →
+                              </button>
+                            </div>
+                          );
+                        })()}
                         {/* Room chips */}
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.45rem' }}>
                           {(dayObj.rooms || []).map(roomId => {

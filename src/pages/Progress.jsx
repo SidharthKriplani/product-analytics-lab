@@ -1247,6 +1247,59 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
           ) : (
             <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>No progress to clear yet.</div>
           )}
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+              Export your progress as JSON for backup or device handoff.
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => {
+                  const ALL_PROGRESS_KEYS = [
+                    'pal-stats-progress-v1', 'pal-metrics-progress-v2', 'pal-rca-progress-v2',
+                    'pal-cases-progress-v2', 'pal-code-progress-v1', 'pal-behavioral-progress-v1',
+                    'pal-estimation-progress-v1', 'pal-stat-foundations-progress-v1',
+                    'pal-growth-analytics-progress-v1', 'pal-challenges-progress-v1',
+                    'pal-bi-progress-v1', 'pal-stf-progress-v1', 'pal-takehome-progress-v1',
+                    'pal-instrumentation-progress-v1', 'pal-pri-progress-v1',
+                    'pal-metrics-foundation-progress-v1', 'pal-rca-foundation-progress-v1',
+                    'pal-exp-foundation-progress-v1', 'pal-sql-lab-solved-v1',
+                    'pal-sql-lab-times-v1', 'pal-sql-lab-dates-v1', 'pal-bookmarks-v1',
+                    'pal-notes-v1', 'pal-access-code-v1', 'exp-lab-progress-v1',
+                    'pal-design-progress-v1',
+                  ];
+                  const snapshot = {};
+                  ALL_PROGRESS_KEYS.forEach(k => {
+                    const v = localStorage.getItem(k);
+                    if (v) snapshot[k] = v;
+                  });
+                  const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url; a.download = 'pal-progress.json'; a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.4rem 0.9rem', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text)', cursor: 'pointer' }}
+              >
+                Export progress
+              </button>
+              <label style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.4rem 0.9rem', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text)', cursor: 'pointer' }}>
+                Import progress
+                <input type="file" accept=".json" style={{ display: 'none' }} onChange={e => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = evt => {
+                    try {
+                      const data = JSON.parse(evt.target.result);
+                      Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, v));
+                      window.location.reload();
+                    } catch { alert('Invalid progress file.'); }
+                  };
+                  reader.readAsText(file);
+                }} />
+              </label>
+            </div>
+          </div>
         </div>
       </SectionCard>
 

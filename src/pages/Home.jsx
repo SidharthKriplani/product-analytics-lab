@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { learningPaths } from '../data/learningPaths.js';
 import { Icon } from '../components/shared/Icon.jsx';
+import { BeginnerOnboardingTrack } from '../components/shared/BeginnerOnboardingTrack.jsx';
 import { getRoomConfig } from '../data/roomConfig.js';
 
 const BRIEFS = [
@@ -260,17 +261,24 @@ function saveRole(role) {
 
 const todaysBrief = BRIEFS[Math.floor(Date.now() / 86400000) % BRIEFS.length];
 
+// Keyboard shortcut map (mirrors App.jsx useShortcuts)
+const ROOM_SHORTCUTS = {
+  'stats': 's', 'metrics': 'm', 'rca': 'r', 'estimation': 'e',
+  'code': 'o', 'spot-the-flaw': 'f', 'growth-analytics': 'g',
+  'bi': 'b', 'challenges': 'x', 'sql-lab': 'q',
+};
+
 const ALL_ROOM_DEFS = [
   { id: 'stat-foundations', label: 'Stat Foundations', nav: 'stat-foundations', color: 'var(--teal)' },
-  { id: 'stats', label: 'Stats Room', nav: 'stats', color: 'var(--blue-text)' },
-  { id: 'metrics', label: 'Metrics Room', nav: 'metrics', color: 'var(--green)' },
+  { id: 'stats', label: 'Stats Room', nav: 'stats', color: 'var(--blue-text)', shortcut: 's' },
+  { id: 'metrics', label: 'Metrics Room', nav: 'metrics', color: 'var(--green)', shortcut: 'm' },
   { id: 'design', label: 'Design Room', nav: 'design', color: 'var(--teal)' },
-  { id: 'rca', label: 'RCA Room', nav: 'rca', color: 'var(--yellow)' },
+  { id: 'rca', label: 'RCA Room', nav: 'rca', color: 'var(--yellow)', shortcut: 'r' },
   { id: 'cases', label: 'Cases Room', nav: 'cases', color: 'var(--purple)' },
-  { id: 'growth-analytics', label: 'Growth Analytics', nav: 'growth-analytics', color: 'var(--accent)' },
+  { id: 'growth-analytics', label: 'Growth Analytics', nav: 'growth-analytics', color: 'var(--accent)', shortcut: 'g' },
   { id: 'behavioral', label: 'Behavioral', nav: 'behavioral', color: 'var(--accent)' },
-  { id: 'estimation', label: 'Estimation', nav: 'estimation', color: 'var(--teal)' },
-  { id: 'bi', label: 'BI & Reporting', nav: 'bi', color: 'var(--yellow)' },
+  { id: 'estimation', label: 'Estimation', nav: 'estimation', color: 'var(--teal)', shortcut: 'e' },
+  { id: 'bi', label: 'BI & Reporting', nav: 'bi', color: 'var(--yellow)', shortcut: 'b' },
   { id: 'instrumentation', label: 'Instrumentation', nav: 'instrumentation', color: 'var(--teal)' },
 ];
 
@@ -711,45 +719,7 @@ export function Home({ onNavigate }) {
 
       {/* ── New here? Beginner pathway ──────────────────────────────────── */}
       {visitedRooms.length === 0 && (
-        <div style={{
-          marginBottom: '2rem',
-          padding: '1rem 1.25rem',
-          background: 'var(--teal-bg)',
-          border: '1px solid var(--teal-border)',
-          borderLeft: '3px solid var(--teal)',
-          borderRadius: 'var(--radius)',
-        }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--teal)', marginBottom: '0.35rem' }}>
-            New to product analytics?
-          </div>
-          <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '0.75rem' }}>
-            If you are transitioning from another field or just starting out, begin with the Foundation rooms before jumping into cases. They build the mental models the practice rooms assume.
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {[
-              { label: '1. Stat Foundations', nav: 'stat-foundations', color: 'var(--teal)' },
-              { label: '2. RCA Foundations', nav: 'rca-foundations', color: 'var(--teal)' },
-              { label: '3. Stats Room', nav: 'stats', color: 'var(--blue-text)' },
-              { label: '4. Defense Strategy', nav: 'defense-doc', color: 'var(--accent)' },
-            ].map(step => (
-              <button
-                key={step.nav}
-                onClick={() => onNavigate(step.nav)}
-                style={{
-                  fontSize: '0.78rem', fontWeight: 600,
-                  padding: '0.3rem 0.75rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--teal-border)',
-                  background: 'var(--surface)',
-                  color: step.color,
-                  cursor: 'pointer',
-                }}
-              >
-                {step.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <BeginnerOnboardingTrack onNavigate={onNavigate} />
       )}
 
       {/* ── Guided paths ────────────────────────────────────────────────── */}

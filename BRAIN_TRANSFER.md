@@ -1,8 +1,8 @@
-# Brain Transfer — V4.50.0 Session State
+# Brain Transfer — V4.51.0 Session State
 
 **Date:** 2026-06-02  
-**Session:** Audit completion + Tier 1 component build  
-**Outcome:** All audits resolved. Two reusable components built. Ready for git push + integration.
+**Session:** 15 product features built sequentially  
+**Outcome:** Full product build session. Components integrated, new features shipped. Build: ✓ 0 errors.
 
 ---
 
@@ -59,9 +59,41 @@
 
 ---
 
-## What Was Just Done
+## What Was Just Done (V4.51.0)
 
-### ✅ Audits Complete
+### ✅ 15 Product Features Shipped
+
+1. **FoundationNudgeCard integrated** — RCABrowser, MetricsBrowser, CasesBrowser, DesignBrowser, ScenarioBrowser. Replaces inline non-dismissable nudges. Component auto-hides when foundation is already completed.
+
+2. **BeginnerOnboardingTrack integrated** — Home.jsx inline block replaced with component. Import added.
+
+3. **Interview Simulator redesign (audit #82)** — InterviewSimulator.jsx config screen: CSS variables (var(--radius), var(--radius-sm)), 2px selected borders, stronger accent-bg, role card label 0.88rem→0.92rem, section labels bolder.
+
+4. **Defense Strategy Layer 4A** — SKILL_ARTICLE_MAP added to DefenseDocGenerator.jsx. onOpenArticle prop wired through App.jsx. "Read first" article link renders above room chips in each day card. Skill derived from primary room.
+
+5. **Defense Strategy plan persistence** — Already implemented (PLAN_KEY at line 278, setItem at line 337). Task was already done.
+
+6. **SQL Lab study plan modal** — StudyPlanModal component added to SqlLabPage.jsx. 4-step flow: goal/days/intensity/confirm. Plan generation (solved-aware, difficulty-sorted, daily chunks). "Study Plan" button in header. Saves to pal-sql-lab-plan-v1.
+
+7. **Trainer skill heatmap** — Debrief screen upgraded: colored cell grid (green/yellow/red per category), "Study next" hint for weakest category, existing progress bars retained.
+
+8. **Keyboard shortcuts in Trainer** — Already implemented (1-4 + Enter/Space). Task was already done.
+
+9. **Keyboard shortcut badges on Home.jsx** — Already implemented via getRoomConfig. Task was already done.
+
+10. **Playbook → practice direct linking** — Already implemented via PostDetail onOpenItem. Task was already done.
+
+11. **ForwardPointerCard** — New shared component at src/components/shared/ForwardPointerCard.jsx. Props: room, onNavigate, onNext. Wired into RCARunner + CaseRunner debrief endings. onNavigate added to both runners in App.jsx.
+
+12. **Progress export/import** — Settings section in Progress.jsx. Export: downloads pal-progress.json with all 26 localStorage keys. Import: file upload → restore all keys → page reload.
+
+13. **BI17-23 difficulty tags** — Already implemented. All 7 chart scenarios had difficulty fields. Task was already done.
+
+14. **Behavioral runner keyboard shortcuts** — useCallback + useEffect added. 1=Strong, 2=Partial, 3=Miss (after reveal only). Enter=Next (when rated + onNext available).
+
+15. **FoundationNudgeCard on DesignBrowser + ScenarioBrowser** — Same upgrade as task 1. Both browsers now use dismissable component instead of inline non-dismissable nudge.
+
+### ✅ Audits Complete (from V4.50.0)
 
 **Audit #91 (Empty States)** — VERIFIED COMPLETE
 - BookmarksBrowser: Already has proper empty state (lines 142-155). Shows emoji, title "No bookmarks yet", and CTA.
@@ -100,7 +132,7 @@
 ### Template 1: Default (USE THIS — single line)
 
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.50.0: All audits resolved (91/87/79+80). Built FoundationNudgeCard + BeginnerOnboardingTrack. Emoji→Icon in 3 headers." && git push origin main
+cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.51.0: 15 product features. FoundationNudgeCard integrated (5 browsers). BeginnerOnboardingTrack in Home. Simulator redesign. Defense Layer 4A. SQL Lab study plan modal. Trainer heatmap. ForwardPointerCard. Progress export/import. Behavioral shortcuts." && git push origin main
 ```
 
 **Just change:** Version (V4.50.0) and description, then paste into Mac terminal.

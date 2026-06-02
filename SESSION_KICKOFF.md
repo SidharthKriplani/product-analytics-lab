@@ -1,4 +1,4 @@
-# Session Kickoff — V4.50.0 → Next Build
+# Session Kickoff — V4.51.0 → Next Build
 
 ## ⚠️ SESSION PROTOCOL (Read this first)
 
@@ -109,21 +109,15 @@ import { BeginnerOnboardingTrack } from '../components/shared/BeginnerOnboarding
 
 ## 6️⃣ Priority Work Queue
 
-**Session 1 (Quick wins):**
-1. Integrate FoundationNudgeCard (3 rooms, ~15 min)
-2. Integrate BeginnerOnboardingTrack (Home.jsx, ~10 min)
-3. Test both in dev (~10 min)
-4. Commit + push
+**Next session (blocking Batch 2):**
+1. Supabase auth finish-or-cut decision (audit #104) — decide + execute
+2. Git push V4.51.0 from Mac terminal (user action)
+3. Confirm VITE_POSTHOG_KEY live in Vercel (user action)
 
-**Session 2 (Choose one):**
-- Option A: Finish emoji removal (audit #80 completion, ~2 hours)
-- Option B: Start Simulator redesign (audit #82, ~3 hours)
-
-**Not this session:**
-- Keyboard shortcuts
-- Learning paths
-- Heatmap
-- Stripe/Supabase decisions
+**After that:**
+- Finish emoji removal (audit #80) — PlaybookBrowser + BlogBrowser remaining
+- Room header icon consistency (audit #79) — full pass on remaining 8 browsers
+- Audit #99: missing key props on .map() calls
 
 ---
 
@@ -190,4 +184,4 @@ Good luck! 🚀
 
 ---
 
-**Session state:** V4.50.0 ready. All audits clean. Components built. Go fast.
+**Session state:** V4.51.0 ready. 15 features built. Supabase audit #104 decision pending. Go fast.

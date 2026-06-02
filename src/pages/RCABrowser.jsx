@@ -4,6 +4,7 @@ import { rcaCases } from '../data/rcaCases.js';
 import { getRCAProgress } from '../utils/rcaProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
+import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.jsx';
 
 const DIFF_CFG = {
   analyst: { label: 'Analyst', color: 'var(--accent)', bg: 'var(--accent-bg)', border: 'var(--accent-border)' },
@@ -109,30 +110,10 @@ export function RCABrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle, on
         </div>
       </div>
 
-      {/* Theory hint */}
-              {onNavigate && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '0.75rem',
-            padding: '0.7rem 1rem',
-            background: 'var(--teal-bg)',
-            borderLeft: '3px solid var(--teal)',
-            borderRadius: 'var(--radius-sm)',
-            marginBottom: '1.25rem',
-          }}>
-            <Icon name="book-open" size={14} color="var(--teal)" style={{ flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--teal)', marginBottom: '0.15rem' }}>Recommended starting point</div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                <button onClick={() => onNavigate('rca-foundations')} style={{
-                  background: 'none', border: 'none', padding: 0,
-                  color: 'var(--teal)', fontWeight: 700, cursor: 'pointer',
-                  fontSize: '0.78rem',
-                }}>RCA Foundations</button>
-                {' '}builds the diagnostic framework these cases use.
-              </div>
-            </div>
-          </div>
-        )}
+      {/* Foundation nudge */}
+      {onNavigate && (
+        <FoundationNudgeCard foundationRoom="rca-foundations" foundationLabel="RCA Foundations" onNavigate={onNavigate} />
+      )}
 
       {/* Theory / Cases tab bar */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>

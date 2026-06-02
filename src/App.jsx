@@ -803,6 +803,7 @@ export default function App() {
             unlocked={unlocked}
             onBack={() => navigate('rca')}
             onNext={nextRCACaseId ? () => openRCACase(nextRCACaseId) : undefined}
+            onNavigate={navigate}
           />
         )}
 
@@ -818,6 +819,7 @@ export default function App() {
             unlocked={unlocked}
             onBack={() => navigate('cases')}
             onNext={nextBusinessCaseId ? () => openBusinessCase(nextBusinessCaseId) : undefined}
+            onNavigate={navigate}
           />
         )}
 
@@ -1107,6 +1109,7 @@ export default function App() {
             <DefenseDocGenerator
               unlocked={unlocked}
               onBack={() => setPage('home')}
+              onOpenArticle={openPlaybookArticle}
               onNavigate={(targetPage, itemId) => {
                 if (itemId) {
                   switch (targetPage) {

@@ -4,6 +4,7 @@ import { metricCases } from '../data/metricCases.js';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getMetricsProgress } from '../utils/metricsProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
+import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.jsx';
 
 const DIFF_CFG = {
   foundational: { label: 'Foundational', color: 'var(--blue-text)', bg: 'var(--blue-bg)',   border: 'var(--blue-border)' },
@@ -72,30 +73,10 @@ export function MetricsBrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle
         </div>
       </div>
 
-      {/* Theory hint */}
-              {onNavigate && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '0.75rem',
-            padding: '0.7rem 1rem',
-            background: 'var(--green-bg)',
-            borderLeft: '3px solid var(--green)',
-            borderRadius: 'var(--radius-sm)',
-            marginBottom: '1.25rem',
-          }}>
-            <Icon name="book-open" size={14} color="var(--green)" style={{ flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--green)', marginBottom: '0.15rem' }}>Recommended starting point</div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                <button onClick={() => onNavigate('metrics-foundations')} style={{
-                  background: 'none', border: 'none', padding: 0,
-                  color: 'var(--green)', fontWeight: 700, cursor: 'pointer',
-                  fontSize: '0.78rem',
-                }}>Metrics Foundations</button>
-                {' '}builds the mental models these cases assume.
-              </div>
-            </div>
-          </div>
-        )}
+      {/* Foundation nudge */}
+      {onNavigate && (
+        <FoundationNudgeCard foundationRoom="metrics-foundations" foundationLabel="Metrics Foundations" onNavigate={onNavigate} />
+      )}
 
       {/* Theory / Cases tab bar */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>

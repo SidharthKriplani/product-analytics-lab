@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScenarioCard } from '../components/scenario/ScenarioCard.jsx';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { scenarios } from '../data/scenarios.js';
+import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.jsx';
 
 export function ScenarioBrowser({ allProgress, onSelect, unlocked, onUnlock, onOpenArticle, onNavigate }) {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -51,26 +52,7 @@ export function ScenarioBrowser({ allProgress, onSelect, unlocked, onUnlock, onO
 
       {/* Foundation nudge */}
       {onNavigate && (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '0.75rem',
-          padding: '0.7rem 1rem',
-          background: 'var(--accent-bg)',
-          borderLeft: '3px solid var(--accent)',
-          borderRadius: 'var(--radius-sm)',
-          marginBottom: '1.25rem',
-        }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--accent)', marginBottom: '0.15rem' }}>Recommended starting point</div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              <button onClick={() => onNavigate('exp-foundations')} style={{
-                background: 'none', border: 'none', padding: 0,
-                color: 'var(--accent)', fontWeight: 700, cursor: 'pointer',
-                fontSize: '0.78rem',
-              }}>Exp Foundations</button>
-              {' '}covers the experiment validity concepts these readouts test.
-            </div>
-          </div>
-        </div>
+        <FoundationNudgeCard foundationRoom="exp-foundations" foundationLabel="Exp Foundations" onNavigate={onNavigate} />
       )}
 
       {/* Theory / Cases tab bar */}

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { businessCases } from '../data/businessCases.js';
 import { getCaseProgress } from '../utils/caseProgress.js';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
+import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.jsx';
 
 export function CasesBrowser({ onSelectCase, unlocked, onUnlock, onNavigate }) {
   const [diffFilter, setDiffFilter] = useState('all');
@@ -47,29 +48,9 @@ export function CasesBrowser({ onSelectCase, unlocked, onUnlock, onNavigate }) {
       </div>
 
       {/* Theory hint */}
-              {onNavigate && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '0.75rem',
-            padding: '0.7rem 1rem',
-            background: 'var(--teal-bg)',
-            borderLeft: '3px solid var(--teal)',
-            borderRadius: 'var(--radius-sm)',
-            marginBottom: '1.25rem',
-          }}>
-            <Icon name="book-open" size={14} color="var(--teal)" style={{ flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--teal)', marginBottom: '0.15rem' }}>Recommended starting point</div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                <button onClick={() => onNavigate('rca-foundations')} style={{
-                  background: 'none', border: 'none', padding: 0,
-                  color: 'var(--teal)', fontWeight: 700, cursor: 'pointer',
-                  fontSize: '0.78rem',
-                }}>RCA Foundations</button>
-                {' '}builds the diagnostic framework these cases use.
-              </div>
-            </div>
-          </div>
-        )}
+      {onNavigate && (
+        <FoundationNudgeCard foundationRoom="rca-foundations" foundationLabel="RCA Foundations" onNavigate={onNavigate} />
+      )}
 
       {/* Difficulty filter chips */}
       <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />

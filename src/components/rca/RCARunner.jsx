@@ -8,6 +8,7 @@ import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
 import { saveRCAAttempt } from '../../utils/rcaProgress.js';
 import { track } from '../../utils/analytics.js';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const ROOM_KEY = 'rca';
 
@@ -65,7 +66,7 @@ const SQL_RATINGS = [
 ];
 
 // ─── Main Runner ─────────────────────────────────────────────────────────────
-export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext }) {
+export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onNavigate }) {
   const rcaCase = rcaCases.find(r => r.id === caseId);
   const startView = savedProgress ? 'debrief' : 'diagnosis';
   const [view, setView] = useState(startView);
@@ -417,6 +418,7 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext }) {
                 </button>
               )}
             </div>
+            <ForwardPointerCard room="rca" onNavigate={onNavigate} onNext={onNext} />
           </div>
         </>
       )}

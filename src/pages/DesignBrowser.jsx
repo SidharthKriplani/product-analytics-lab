@@ -3,6 +3,7 @@ import { designScenarios } from '../data/designScenarios.js';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getAllDesignProgress } from '../utils/designProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
+import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.jsx';
 
 const LEVEL_COLORS = {
   staff_level:   { color: 'var(--teal)',      bg: 'var(--teal-bg)',   border: 'var(--teal-border)' },
@@ -53,26 +54,7 @@ export function DesignBrowser({ onSelectScenario, onOpenArticle, onNavigate }) {
 
       {/* Foundation nudge */}
       {onNavigate && (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '0.75rem',
-          padding: '0.7rem 1rem',
-          background: 'var(--accent-bg)',
-          borderLeft: '3px solid var(--accent)',
-          borderRadius: 'var(--radius-sm)',
-          marginBottom: '1.25rem',
-        }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--accent)', marginBottom: '0.15rem' }}>Recommended starting point</div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              <button onClick={() => onNavigate('exp-foundations')} style={{
-                background: 'none', border: 'none', padding: 0,
-                color: 'var(--accent)', fontWeight: 700, cursor: 'pointer',
-                fontSize: '0.78rem',
-              }}>Exp Foundations</button>
-              {' '}covers the statistical principles and experiment design concepts this room applies.
-            </div>
-          </div>
-        </div>
+        <FoundationNudgeCard foundationRoom="exp-foundations" foundationLabel="Exp Foundations" onNavigate={onNavigate} />
       )}
 
       {/* Theory / Cases tab bar */}

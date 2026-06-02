@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { saveBehavioralAttempt, getBehavioralProgress } from '../../utils/behavioralProgress.js';
 import { track } from '../../utils/analytics.js';
 import { behavioralQuestions } from '../../data/behavioralQuestions.js';
@@ -122,6 +122,25 @@ export function BehavioralRunner({ caseId, onBack, onNext }) {
     setRating(null);
     setFrameOpen(false);
   }
+
+  // Keyboard shortcuts: 1=Needs Work, 2=Good, 3=Strong (only after reveal), Enter=next
+  const RATING_IDS = ['strong', 'partial', 'miss'];
+  const handleKey = useCallback((e) => {
+    if (!revealed) return;
+    if (['1', '2', '3'].includes(e.key) && !rating) {
+      const id = RATING_IDS[parseInt(e.key, 10) - 1];
+      if (id) handleRate(id);
+    }
+    if (e.key === 'Enter' && rating && onNext) {
+      e.preventDefault();
+      onNext();
+    }
+  }, [revealed, rating, onNext]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [handleKey]);
 
   // Determine schema type
   const isStarSchema = !!question.starGuide;

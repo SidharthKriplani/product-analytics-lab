@@ -354,34 +354,34 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
         </p>
 
         {/* Role selector */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ fontWeight: 600, fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
             Role
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.5rem' }}>
             {[
-              { key: 'product-analyst', label: 'Product Analyst', sub: 'Metrics + Stats + RCA + Estimation' },
-              { key: 'business-analyst', label: 'Business Analyst', sub: 'Cases + Metrics + RCA + Prioritization' },
-              { key: 'data-analyst', label: 'Data Analyst', sub: 'Stats + Metrics + RCA focus' },
-              { key: 'pm', label: 'PM / TPM', sub: 'Product Design + Prioritization + Cases' },
+              { key: 'product-analyst', label: 'Product Analyst', sub: 'Metrics · Stats · RCA · Estimation' },
+              { key: 'business-analyst', label: 'Business Analyst', sub: 'Cases · Metrics · RCA · Prioritization' },
+              { key: 'data-analyst', label: 'Data Analyst', sub: 'Stats · Metrics · RCA focus' },
+              { key: 'pm', label: 'PM / TPM', sub: 'Product Design · Prioritization · Cases' },
             ].map(r => (
               <button
                 key={r.key}
                 onClick={() => setRole(r.key)}
                 style={{
-                  background: role === r.key ? 'var(--accent-bg, rgba(59,130,246,0.08))' : 'var(--surface-2)',
-                  border: role === r.key ? '1.5px solid var(--accent-border, rgba(59,130,246,0.4))' : '1.5px solid var(--border)',
-                  borderRadius: '8px',
-                  padding: '0.75rem 1rem',
+                  background: role === r.key ? 'var(--accent-bg)' : 'var(--surface)',
+                  border: role === r.key ? '2px solid var(--accent)' : '1px solid var(--border)',
+                  borderRadius: 'var(--radius)',
+                  padding: '0.7rem 0.9rem',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'border-color 0.12s, background 0.12s',
                 }}
               >
-                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: role === r.key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.2rem' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.92rem', color: role === r.key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.2rem', letterSpacing: '-0.01em' }}>
                   {r.label}
                 </div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', lineHeight: 1.4 }}>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', lineHeight: 1.4 }}>
                   {r.sub}
                 </div>
               </button>
@@ -389,10 +389,10 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           </div>
         </div>
 
-        {/* Tier selector (only show when role is selected) */}
+        {/* Tier selector */}
         {role && (
-          <div style={{ marginBottom: '1.5rem' }}>
-            <div style={{ fontWeight: 600, fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <div style={{ marginBottom: '1.25rem' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               Level
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -404,17 +404,17 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                   key={t.key}
                   onClick={() => setTier(t.key)}
                   style={{
-                    background: tier === t.key ? 'var(--accent-bg, rgba(59,130,246,0.08))' : 'var(--surface-2)',
-                    border: tier === t.key ? '1.5px solid var(--accent-border, rgba(59,130,246,0.4))' : '1.5px solid var(--border)',
-                    borderRadius: '8px',
-                    padding: '0.6rem 1rem',
+                    background: tier === t.key ? 'var(--accent-bg)' : 'var(--surface)',
+                    border: tier === t.key ? '2px solid var(--accent)' : '1px solid var(--border)',
+                    borderRadius: 'var(--radius)',
+                    padding: '0.55rem 0.9rem',
                     cursor: 'pointer',
                     textAlign: 'left',
                     transition: 'border-color 0.12s, background 0.12s',
                     flex: 1,
                   }}
                 >
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: tier === t.key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.1rem' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.88rem', color: tier === t.key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.1rem' }}>
                     {t.label}
                   </div>
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
@@ -428,7 +428,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
 
         {/* Session Length selector */}
         <div style={{ marginBottom: '1rem' }}>
-          <div style={{ fontWeight: 600, fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
             Session Length
           </div>
           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
@@ -437,10 +437,10 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                 key={opt.count}
                 onClick={() => setSessionLength(opt.count)}
                 style={{
-                  background: sessionLength === opt.count ? 'var(--accent-bg, rgba(59,130,246,0.1))' : 'var(--surface-2)',
-                  border: sessionLength === opt.count ? '1.5px solid var(--accent-border, rgba(59,130,246,0.4))' : '1.5px solid var(--border)',
-                  borderRadius: '6px',
-                  padding: '0.3rem 0.75rem',
+                  background: sessionLength === opt.count ? 'var(--accent-bg)' : 'var(--surface)',
+                  border: sessionLength === opt.count ? '2px solid var(--accent)' : '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.3rem 0.8rem',
                   color: sessionLength === opt.count ? 'var(--accent)' : 'var(--text-muted)',
                   fontSize: '0.82rem',
                   fontWeight: sessionLength === opt.count ? 700 : 500,
@@ -456,7 +456,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
 
         {/* Mode selector */}
         <div style={{ marginBottom: '1.75rem' }}>
-          <div style={{ fontWeight: 600, fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
             Mode
           </div>
           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
@@ -465,10 +465,10 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                 key={opt.value}
                 onClick={() => setSessionMode(opt.value)}
                 style={{
-                  background: sessionMode === opt.value ? 'var(--accent-bg, rgba(59,130,246,0.1))' : 'var(--surface-2)',
-                  border: sessionMode === opt.value ? '1.5px solid var(--accent-border, rgba(59,130,246,0.4))' : '1.5px solid var(--border)',
-                  borderRadius: '6px',
-                  padding: '0.3rem 0.75rem',
+                  background: sessionMode === opt.value ? 'var(--accent-bg)' : 'var(--surface)',
+                  border: sessionMode === opt.value ? '2px solid var(--accent)' : '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.3rem 0.8rem',
                   color: sessionMode === opt.value ? 'var(--accent)' : 'var(--text-muted)',
                   fontSize: '0.82rem',
                   fontWeight: sessionMode === opt.value ? 700 : 500,
@@ -480,7 +480,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
               </button>
             ))}
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.4rem', margin: '0.4rem 0 0' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: '0.4rem 0 0' }}>
             {sessionMode === 'open' && 'Write your answers to case prompts.'}
             {sessionMode === 'mcq' && 'Choose from 4 options — immediate feedback after each.'}
             {sessionMode === 'mixed' && 'Alternates: even questions = MCQ, odd questions = open-ended.'}

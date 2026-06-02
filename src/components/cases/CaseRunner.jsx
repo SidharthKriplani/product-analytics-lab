@@ -5,6 +5,7 @@ import { CaseScoreReveal } from './CaseScoreReveal.jsx';
 import { CaseDebriefPanel } from './CaseDebriefPanel.jsx';
 import { saveCaseAttempt, clearCaseProgress } from '../../utils/caseProgress.js';
 import { track } from '../../utils/analytics.js';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 // ─── Seeded shuffle helpers ───
 // Deterministic per caseId+phaseId so the same tester sees the same order
@@ -90,7 +91,7 @@ function computeScore(businessCase, phaseChoices) {
 
 // ─── Main Runner ───
 
-export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext }) {
+export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, onNavigate }) {
   const businessCase = businessCases.find(b => b.id === caseId);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [phaseChoices, setPhaseChoices] = useState({});          // phaseId → optionId (pending)
@@ -346,6 +347,7 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext }) 
                 </button>
               )}
             </div>
+            <ForwardPointerCard room="cases" onNavigate={onNavigate} onNext={onNext} />
           </div>
         </>
       )}

@@ -261,6 +261,140 @@ function ProblemSidebar({ problems, currentIdx, solved, filterDiff, onFilterDiff
   );
 }
 
+// ─── Study Plan Modal ─────────────────────────────────────────────────────────
+const PLAN_KEY_SQL = 'pal-sql-lab-plan-v1';
+
+const PLAN_TOTALS = {
+  '3':  { casual: 4,  steady: 9,  intensive: 15 },
+  '7':  { casual: 10, steady: 21, intensive: 35 },
+  '14': { casual: 18, steady: 35, intensive: 56 },
+  '30': { casual: 30, steady: 70, intensive: 120 },
+};
+
+function StudyPlanModal({ solved, onClose, onApply }) {
+  const [step, setStep] = useState(0);
+  const [goal, setGoal] = useState('interview');
+  const [days, setDays] = useState('7');
+  const [intensity, setIntensity] = useState('steady');
+  const [plan, setPlan] = useState(null);
+
+  function generatePlan() {
+    const total = (PLAN_TOTALS[days] || PLAN_TOTALS['7'])[intensity] || 21;
+    const unsolved = SORTED_PROBLEMS.filter(p => !solved.has(p.id) && p.difficulty !== 'Master');
+    const selected = unsolved.slice(0, total);
+    const daysNum = parseInt(days, 10);
+    const perDay = Math.ceil(total / daysNum);
+    const dailyPlan = [];
+    for (let d = 0; d < daysNum; d++) {
+      const chunk = selected.slice(d * perDay, (d + 1) * perDay);
+      if (chunk.length > 0) dailyPlan.push({ day: d + 1, problems: chunk });
+    }
+    const result = { goal, days, intensity, generatedAt: Date.now(), dailyPlan };
+    try { localStorage.setItem(PLAN_KEY_SQL, JSON.stringify(result)); } catch {}
+    setPlan(result);
+    setStep(4);
+    if (onApply) onApply(result);
+  }
+
+  const overlayStyle = { position: 'fixed', inset: 0, background: 'var(--overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' };
+  const modalStyle = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', width: '100%', maxWidth: 480, padding: '1.75rem', boxShadow: 'var(--shadow-lg)' };
+  const labelStyle = { fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '0.5rem', display: 'block' };
+  const chipBase = { border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.75rem', fontSize: '0.82rem', cursor: 'pointer', background: 'var(--surface-2)', color: 'var(--text-muted)', fontWeight: 500, transition: 'all 0.1s' };
+  const chipActive = { ...chipBase, border: '2px solid var(--teal)', background: 'var(--teal-bg)', color: 'var(--teal)', fontWeight: 700 };
+
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div style={modalStyle} onClick={e => e.stopPropagation()}>
+        {step < 4 ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text)' }}>Build your SQL study plan</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>Step {step + 1} of 4</div>
+              </div>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.25rem' }}>✕</button>
+            </div>
+            <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, marginBottom: '1.5rem', overflow: 'hidden' }}>
+              <div style={{ width: `${((step + 1) / 4) * 100}%`, height: '100%', background: 'var(--teal)', borderRadius: 2, transition: 'width 0.3s' }} />
+            </div>
+
+            {step === 0 && (
+              <div>
+                <label style={labelStyle}>Why are you practicing SQL?</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  {[['interview', 'I have an interview coming up'], ['upskill', 'I want to get better at SQL'], ['practice', 'Just keeping my skills sharp']].map(([val, lbl]) => (
+                    <button key={val} onClick={() => setGoal(val)} style={goal === val ? chipActive : chipBase}>{lbl}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {step === 1 && (
+              <div>
+                <label style={labelStyle}>How many days do you have?</label>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {[['3', '3 days'], ['7', '1 week'], ['14', '2 weeks'], ['30', '1 month']].map(([val, lbl]) => (
+                    <button key={val} onClick={() => setDays(val)} style={days === val ? chipActive : chipBase}>{lbl}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {step === 2 && (
+              <div>
+                <label style={labelStyle}>How much time per day?</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  {[['casual', 'Casual — ~30 min/day'], ['steady', 'Steady — ~60 min/day'], ['intensive', 'Intensive — ~2 hrs/day']].map(([val, lbl]) => (
+                    <button key={val} onClick={() => setIntensity(val)} style={intensity === val ? chipActive : chipBase}>{lbl}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {step === 3 && (
+              <div>
+                <label style={labelStyle}>Confirm your plan</label>
+                <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.9rem 1rem', fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.6 }}>
+                  <strong>{(PLAN_TOTALS[days] || PLAN_TOTALS['7'])[intensity]}</strong> problems over <strong>{days === '30' ? '1 month' : days + ' days'}</strong> at <strong>{intensity}</strong> pace.
+                  Skipping <strong>{[...solved].length}</strong> already-solved problems.
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem' }}>
+              <button onClick={step === 0 ? onClose : () => setStep(s => s - 1)} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.45rem 0.9rem', fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                {step === 0 ? 'Cancel' : '← Back'}
+              </button>
+              <button onClick={step === 3 ? generatePlan : () => setStep(s => s + 1)} style={{ background: 'var(--teal)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', padding: '0.45rem 1.1rem', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}>
+                {step === 3 ? 'Generate Plan →' : 'Next →'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--teal)' }}>Your plan is ready</div>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+            </div>
+            <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+              {(plan?.dailyPlan || []).map(d => (
+                <div key={d.day} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.9rem' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--teal)', marginBottom: '0.3rem' }}>Day {d.day}</div>
+                  {d.problems.map(p => (
+                    <div key={p.id} style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', padding: '0.1rem 0' }}>
+                      ▸ {p.title} <span style={{ color: DIFF_COLOR[p.difficulty]?.text, fontSize: '0.68rem', fontWeight: 600 }}>{p.difficulty}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <button onClick={onClose} style={{ width: '100%', background: 'var(--teal)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', padding: '0.55rem', fontSize: '0.88rem', fontWeight: 700, cursor: 'pointer' }}>
+              Start practicing →
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function SqlLabPage({ onBack }) {
   const [problemIdx, setProblemIdx] = useState(0);
   const [db, setDb] = useState(null);
@@ -286,6 +420,7 @@ export function SqlLabPage({ onBack }) {
     } catch { return new Set(); }
   });
   const [expectedSample, setExpectedSample] = useState(null);
+  const [showPlanModal, setShowPlanModal] = useState(false);
   const dbRef = useRef(null);
 
   // Lock body scroll while SQL Lab is open
@@ -480,7 +615,14 @@ export function SqlLabPage({ onBack }) {
           <div style={{ width: 28, height: 28, background: 'var(--teal)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#fff', fontWeight: 700 }}>{'<>'}</div>
           <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--teal)', letterSpacing: '-0.02em' }}>SQL Lab</span>
         </div>
+        <button
+          onClick={() => setShowPlanModal(true)}
+          style={{ marginLeft: 'auto', background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.75rem', fontSize: '0.78rem', fontWeight: 600, color: 'var(--teal)', cursor: 'pointer' }}
+        >
+          Study Plan
+        </button>
       </div>
+      {showPlanModal && <StudyPlanModal solved={solved} onClose={() => setShowPlanModal(false)} onApply={() => setShowPlanModal(false)} />}
 
       {/* Scrollable content */}
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '1.5rem' }}>

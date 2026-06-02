@@ -460,7 +460,7 @@ function DebriefScreen({ questions, answers, onRetry, onNewSession, onBack }) {
         </div>
       </div>
 
-      {/* Category breakdown */}
+      {/* Weak topic heatmap grid */}
       <div style={{
         background: 'var(--surface)',
         border: '1.5px solid var(--border)',
@@ -469,29 +469,58 @@ function DebriefScreen({ questions, answers, onRetry, onNewSession, onBack }) {
         marginBottom: '1.25rem',
         boxShadow: 'var(--shadow-sm)',
       }}>
-        <h3 style={{ margin: '0 0 1rem', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Performance by Category
+        <h3 style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Skill Heatmap
         </h3>
-        {Object.entries(catStats).map(([cat, { correct, total: catTotal }]) => {
-          const catPct = catTotal > 0 ? correct / catTotal : 0;
+        {/* Colored grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(140px, 100%), 1fr))', gap: '0.5rem', marginBottom: '1.25rem' }}>
+          {Object.entries(catStats).map(([cat, { correct, total: catTotal }]) => {
+            const catPct = catTotal > 0 ? correct / catTotal : 0;
+            const color = scoreColor(catPct);
+            return (
+              <div key={cat} style={{
+                background: catPct >= 0.8 ? 'var(--green-bg)' : catPct >= 0.5 ? 'var(--yellow-bg)' : 'var(--red-bg)',
+                border: `1px solid ${catPct >= 0.8 ? 'var(--green-border)' : catPct >= 0.5 ? 'var(--yellow-border)' : 'var(--red-border)'}`,
+                borderRadius: 'var(--radius-sm)',
+                padding: '0.5rem 0.65rem',
+                textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 700, color, textTransform: 'capitalize', marginBottom: '0.2rem', letterSpacing: '0.03em' }}>{cat}</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 900, color }}>{Math.round(catPct * 100)}%</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{correct}/{catTotal}</div>
+              </div>
+            );
+          })}
+        </div>
+        {/* Study next hint */}
+        {(() => {
+          const weakCat = Object.entries(catStats)
+            .map(([cat, { correct, total: catTotal }]) => ({ cat, pct: catTotal > 0 ? correct / catTotal : 0 }))
+            .sort((a, b) => a.pct - b.pct)[0];
+          if (!weakCat || weakCat.pct >= 0.8) return null;
           return (
-            <div key={cat} style={{ marginBottom: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', textTransform: 'capitalize' }}>{cat}</span>
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{correct}/{catTotal}</span>
-              </div>
-              <div style={{ height: 8, background: 'var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
-                <div style={{
-                  width: `${catPct * 100}%`,
-                  height: '100%',
-                  background: scoreColor(catPct),
-                  borderRadius: 'var(--radius-sm)',
-                  transition: 'width 0.4s ease',
-                }} />
-              </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border)', paddingTop: '0.6rem' }}>
+              Study next: <strong style={{ color: 'var(--text)', textTransform: 'capitalize' }}>{weakCat.cat}</strong> — {Math.round(weakCat.pct * 100)}% correct this session.
             </div>
           );
-        })}
+        })()}
+        {/* Progress bars */}
+        <div style={{ marginTop: '1rem' }}>
+          {Object.entries(catStats).map(([cat, { correct, total: catTotal }]) => {
+            const catPct = catTotal > 0 ? correct / catTotal : 0;
+            return (
+              <div key={cat} style={{ marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', textTransform: 'capitalize' }}>{cat}</span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{correct}/{catTotal}</span>
+                </div>
+                <div style={{ height: 6, background: 'var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+                  <div style={{ width: `${catPct * 100}%`, height: '100%', background: scoreColor(catPct), borderRadius: 'var(--radius-sm)', transition: 'width 0.4s ease' }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Missed questions */}
