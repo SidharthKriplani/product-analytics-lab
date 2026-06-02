@@ -1,6 +1,6 @@
 # Brain Transfer — V4.53.1
 
-**Version:** V4.54.0 | **Build:** ✓ (2.85s, 0 errors) | **Git:** uncommitted | **Date:** 2026-06-02
+**Version:** V4.55.0 | **Build:** ✓ (1.70s, 0 errors) | **Git:** uncommitted | **Date:** 2026-06-02
 
 ---
 
@@ -28,6 +28,8 @@ Routes in nav: Stats · Metrics · Design · Review · RCA · Cases · Code · P
 
 ## What was just done
 
+**V4.55.0** — 3 audits + debrief pass completion: (1) Debrief failure mode pass complete across ALL rooms — Instrumentation (12), Behavioral (30), Estimation (30), Design (8), STF (12). DesignDebriefPanel updated to render failureMode. InstrumentationRunner, BehavioralRunner, EstimationRunner all updated with red-bordered Failure Mode section. STF embeds failure mode inline in flaw field. Total: 184 cases across 10 rooms now have failure mode content. (2) Audit #99 — key props verified present across all .map() calls, no missing keys found. (3) Audit #100 — BIRunner + GrowthRunner imperative hover mutations replaced with useState. MetricDebriefPanel, RCADebriefPanel, CaseDebriefPanel already clean. (4) Audit #91 — MCQ Trainer past sessions panel added (empty state + last 3 sessions display). Progress page zero-state fixed (now routes to stat-foundations, not growth-analytics). BookmarksBrowser + LockOverlay confirmed already correct. Build: ✓ 821 modules, 0 errors.
+
 **V4.54.0** — 3 content builds, 0 new routes: (1) Debrief failure mode pass — all 20 Cases room cases (C01–C22) now have weak answer + interviewer follow-up embedded in `seniorAnswer.interviewPhrase`. (2) Debrief failure mode pass — BI01–BI16 and GA01–GA08 have new `failureMode: { weakAnswer, interviewerFollowUp }` field; BIRunner + GrowthAnalyticsRunner updated to render it. Chart cases BI17–BI23 skipped (different format). (3) Review Room — 6 new scenarios appended to scenarios.js (S13–S18): cuped_variance, right_censored, multi_touch, b2b_constraints, geo_holdout, switchback. File grew from 12 to 18 scenarios. Build: ✓ 0 errors.
 
 **V4.53.1** — Maintenance only. Archived CHANGELOG pre-V4.38 → CHANGELOG_ARCHIVE.md. Archived AUDITS Parts I–XXI → AUDITS_ARCHIVE.md. Context limit rules added to CLAUDE.md.
@@ -38,7 +40,7 @@ Routes in nav: Stats · Metrics · Design · Review · RCA · Cases · Code · P
 
 ---
 
-## Next action — audit #104: Supabase finish or cut (still pending)
+## Next action — Supabase audit #104: finish or cut (still pending, blocking Batch 2)
 
 **Also done this session but IDEAS/AUDITS not yet updated:**
 - SQL Lab Study Plan modal — already shipped V4.51.0 (StudyPlanModal at line 274 SqlLabPage.jsx) — mark done in IDEAS.md

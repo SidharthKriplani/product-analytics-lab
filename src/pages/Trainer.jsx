@@ -59,12 +59,29 @@ function scoreLabel(pct) {
   return 'Keep practicing';
 }
 
+function loadScores() {
+  try {
+    return JSON.parse(localStorage.getItem('pal-trainer-scores-v1') || '[]');
+  } catch (_) { return []; }
+}
+
+function formatRelativeTime(ts) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return mins <= 1 ? 'just now' : mins + ' min ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs === 1 ? '1 hr ago' : hrs + ' hrs ago';
+  const days = Math.floor(hrs / 24);
+  return days === 1 ? 'yesterday' : days + ' days ago';
+}
+
 // ─── Setup Screen ─────────────────────────────────────────────────────────────
 
 function SetupScreen({ onStart }) {
   const [selectedCategories, setSelectedCategories] = useState(['all']);
   const [difficulty, setDifficulty] = useState('all');
   const [length, setLength] = useState(10);
+  const [pastScores] = useState(() => loadScores());
 
   function toggleCategory(cat) {
     if (cat === 'all') {
@@ -210,6 +227,77 @@ function SetupScreen({ onStart }) {
       >
         {previewPool.length === 0 ? 'No questions match' : 'Start Training →'}
       </button>
+
+      {/* Past sessions panel */}
+      <div style={{
+        marginTop: '1.75rem',
+        background: 'var(--surface)',
+        border: '1.5px solid var(--border)',
+        borderRadius: 12,
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          padding: '0.75rem 1.25rem',
+          borderBottom: '1px solid var(--border)',
+          fontWeight: 700,
+          fontSize: '0.85rem',
+          color: 'var(--text-secondary)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+        }}>
+          Past Sessions
+        </div>
+
+        {pastScores.length === 0 ? (
+          <div style={{ padding: '2rem 1.5rem', textAlign: 'center' }}>
+            <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '0.4rem', fontSize: '0.95rem' }}>
+              No practice sessions yet
+            </div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: '360px', margin: '0 auto', lineHeight: 1.55 }}>
+              Run a drill to see your skill breakdown by category — Statistics, Metrics, RCA, and Experimentation.
+            </div>
+          </div>
+        ) : (
+          <div>
+            {pastScores.slice(-3).reverse().map((s, i) => {
+              const pct = s.total > 0 ? s.score / s.total : 0;
+              const cats = s.categories && !s.categories.includes('all')
+                ? s.categories.map(c => categoryLabel[c] || c).join(', ')
+                : 'All categories';
+              return (
+                <div key={i} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.7rem 1.25rem',
+                  borderBottom: i < Math.min(pastScores.length, 3) - 1 ? '1px solid var(--border)' : 'none',
+                  gap: '0.75rem',
+                  flexWrap: 'wrap',
+                }}>
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)' }}>
+                      {s.score}/{s.total} correct
+                      <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: 8, fontSize: '0.78rem' }}>
+                        {cats}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: 2 }}>
+                      {formatRelativeTime(s.timestamp)}
+                    </div>
+                  </div>
+                  <div style={{
+                    fontWeight: 800,
+                    fontSize: '1rem',
+                    color: scoreColor(pct),
+                  }}>
+                    {Math.round(pct * 100)}%
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

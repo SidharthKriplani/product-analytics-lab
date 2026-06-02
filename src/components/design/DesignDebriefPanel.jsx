@@ -134,6 +134,27 @@ export function DesignDebriefPanel({
         </div>
       </section>
 
+      {/* Failure mode */}
+      {scenario.seniorDesign.failureMode && (
+        <section>
+          <SectionLabel>Common failure mode</SectionLabel>
+          <div style={{
+            background: 'var(--red-bg, rgba(239,68,68,0.08))', border: '1px solid var(--red-border, rgba(239,68,68,0.25))',
+            borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem',
+            display: 'flex', flexDirection: 'column', gap: '0.6rem',
+          }}>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.55, margin: 0 }}>
+              <span style={{ fontWeight: 700, color: 'var(--red)' }}>Weak answer: </span>
+              {scenario.seniorDesign.failureMode.weakAnswer}
+            </p>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.55, margin: 0 }}>
+              <span style={{ fontWeight: 700, color: 'var(--red)' }}>Interviewer follow-up: </span>
+              <em>{scenario.seniorDesign.failureMode.interviewerFollowUp}</em>
+            </p>
+          </div>
+        </section>
+      )}
+
       {/* Concepts in this scenario */}
       {allConceptIds.length > 0 && (
         <ConceptsSection

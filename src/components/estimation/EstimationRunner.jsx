@@ -400,6 +400,21 @@ export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
             </ul>
           </div>
 
+          {/* Failure Mode */}
+          {problem.failureMode && (
+            <div style={{ background: 'var(--red-bg, #fff5f5)', border: '1px solid var(--border)', borderLeft: '3px solid var(--red, #e53e3e)', borderRadius: '0 8px 8px 0', padding: '1rem 1.25rem', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--red, #e53e3e)', marginBottom: '0.75rem' }}>Failure Mode</div>
+              <div style={{ marginBottom: '0.6rem' }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>Weak answer pattern</div>
+                <p style={{ margin: 0, fontSize: '0.86rem', color: 'var(--text-secondary)', lineHeight: 1.65 }}>{problem.failureMode.weakAnswer}</p>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>Interviewer follow-up that exposes it</div>
+                <p style={{ margin: 0, fontSize: '0.86rem', color: 'var(--text)', lineHeight: 1.65, fontStyle: 'italic' }}>{problem.failureMode.interviewerFollowUp}</p>
+              </div>
+            </div>
+          )}
+
           {/* Your notes */}
           {userNote && (
             <div style={{ marginBottom: '1rem', padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>

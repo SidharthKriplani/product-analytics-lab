@@ -42,6 +42,10 @@ export const behavioralQuestions = [
       'Raising the concern for the first time in a group meeting or all-hands — this creates defensiveness, not alignment.',
       'Presenting only the opposing data without a clear "here\'s what I suggest we do instead" — data without a recommendation puts all the burden on the PM.',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate describes sending a Slack message to the PM with a chart and waiting for a response. No private conversation first, no reframing around the shared goal, no additional analysis to confirm the hypothesis. The story ends with the PM agreeing to look at it — but there\'s no clear action, no decision changed.',
+      interviewerFollowUp: '"You sent the PM a chart showing flat session depth. They replied \'interesting, I\'ll look into it.\' Two days pass. What do you do next, and how do you make sure this doesn\'t die in their inbox?"',
+    },
   },
 
   {
@@ -87,6 +91,10 @@ export const behavioralQuestions = [
       'Waiting until the scheduled review to surface a miss that was visible weeks earlier — this reads as either oblivious or politically motivated.',
       'Delivering the bad news without any analysis of why it happened — a metric number without a hypothesis is almost useless to a leader.',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate reports the metric miss at the QBR exactly as scheduled — no early signal, no pre-read, no 1:1 with the VP. Their framing is "the feature didn\'t work as expected." No diagnosis of why, no recommendation for Q3. The story is told as if delivering the news on schedule is itself the correct behavior.',
+      interviewerFollowUp: '"You could see by week 7 that the quarter was going to miss. The QBR is week 13. What is the specific cost to your credibility and the team\'s planning if you wait six more weeks versus surfacing it now?"',
+    },
   },
 
   {
@@ -132,6 +140,10 @@ export const behavioralQuestions = [
       'Presenting the anomaly without any segmentation or hypothesis — "DAU/MAU is down" tells you there\'s a problem but not where to look.',
       'Framing it as a "here\'s an interesting data fact" rather than a "here\'s a risk to our OKR" — the framing determines whether people act.',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate reports "I noticed DAU/MAU had declined 3 percentage points" in the next weekly review meeting. No prior segmentation by channel, no hypothesis about cause, no specific recommendation. They present the number and say "I thought the team should know." Leadership nods and the meeting moves on.',
+      interviewerFollowUp: '"You told the team DAU/MAU dropped 3 points. No one reacted. Why didn\'t the insight create action, and what would you have done differently to make it actionable before bringing it to the group?"',
+    },
   },
 
   {
@@ -177,6 +189,10 @@ export const behavioralQuestions = [
       'Raising the concern in the review thread or Slack channel where the growth team lead would be publicly corrected — this creates defensiveness and makes it about ego, not the data.',
       'Flagging the issue without the power calculation or tracking evidence — "I don\'t think this test ran long enough" without numbers is just an opinion.',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate raises the concern in the team\'s experiment review Slack channel the night before the all-hands, tagging the growth lead and their manager. No power calculation, no private conversation first, just a message saying "I have some concerns about the methodology on this experiment." The growth lead is defensive, the all-hands announcement goes ahead, and the relationship is strained.',
+      interviewerFollowUp: '"You posted the concern in a public Slack channel where the growth lead and their manager could both see it. Walk me through what the growth lead is feeling when they read that, and how that reaction affects your ability to actually get the announcement changed."',
+    },
   },
 
   {
@@ -222,6 +238,10 @@ export const behavioralQuestions = [
       'Leading with escalation to the other team\'s manager — this gets the work done once and poisons the relationship for every future ask.',
       'Framing the ask as urgent without explaining why — "this is a blocker" without a business case reads as your problem, not their priority.',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate says "I asked my manager to escalate to the engineering team\'s manager and that got it prioritized." The story ends there — no relationship work, no co-ownership, no attempt to understand the competing priority on the other team\'s side. The work got done, but the method is entirely authority-based.',
+      interviewerFollowUp: '"Your manager escalated and the engineering team reprioritized. What does the engineering lead think of you now, and how does that affect the next time you need something from them that isn\'t attached to a manager-to-manager escalation?"',
+    },
   },
 
   {
@@ -267,6 +287,10 @@ export const behavioralQuestions = [
       'Immediately assuming a surprising negative result is a bug or a measurement error — the first instinct should be to understand it, not dismiss it.',
       'Looking only at the primary metric and missing the secondary metrics that tell the fuller story.',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate sees time-spent down 8% and immediately recommends a rollback. No heterogeneous treatment effects check, no secondary metric investigation, no competing hypothesis. The story is told as "I correctly identified the model wasn\'t working" — but they never questioned whether the metric was telling the right story.',
+      interviewerFollowUp: '"Time-spent is down 8% across all users. Before you recommend rollback, what is the single segmentation cut that would most change your interpretation of this result, and what would each outcome tell you?"',
+    },
   },
 
   {
@@ -312,6 +336,10 @@ export const behavioralQuestions = [
       'Refusing to provide an estimate until the data is mature — the decision often can\'t wait, and "I don\'t have enough data" with no alternative is not an answer.',
       'Providing a single point estimate without confidence bounds — in an early-stage analysis, false precision is more damaging than an honest range.',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate tells the VP "we only have 3 weeks of data and I\'m not comfortable giving a revenue estimate — I\'ll have something more reliable at week 8." They offer nothing actionable. The VP has to go to the board with no number. The story is framed as "I maintained analytical integrity by not speculating."',
+      interviewerFollowUp: '"The board meeting is in 3 days. You have 3 weeks of cohort data. \'Wait until week 8\' is not an option. What is the structure of the estimate you give the VP, and how do you communicate your confidence level so the board can calibrate how much to rely on it?"',
+    },
   },
 
   {
@@ -357,6 +385,10 @@ export const behavioralQuestions = [
       'Defining technical jargon rather than replacing it — saying "novelty effect, which means..." is still harder to internalize than a concrete analogy.',
       'Over-explaining to the point where the audience loses the thread — pick one analogy, one visual, and stop.',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate gives a textbook definition: "A novelty effect is when users engage with a new feature more because it\'s unfamiliar, and the effect decays over time — this is a known limitation of short-run A/B tests." The CPO nods politely and says "okay so what do you recommend?" — but nothing in the explanation connected to their decision. No analogy, no data showing prior decay, no specific ask.',
+      interviewerFollowUp: '"You explained the novelty effect and the CPO said \'okay, good to know.\' They\'re still planning to announce the 5% lift at the all-hands in two days. What did your explanation fail to do, and what would you do differently in the next 10 minutes to actually change the decision?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -397,6 +429,10 @@ export const behavioralQuestions = [
       'Framing the story as a battle you won rather than a disagreement you resolved constructively',
       'Using vague language like "I pushed back" without describing specifically what you said and how you said it',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate says "I backed down in the moment because I didn\'t want to create conflict in the meeting, then followed up afterward with an email explaining my original analysis." No in-meeting de-escalation technique, no clarifying question to understand the director\'s data source, no private follow-up conversation — just a defensive email that goes unanswered.',
+      interviewerFollowUp: '"The director dismissed your analysis publicly. You said nothing in the meeting and sent a follow-up email that hasn\'t been replied to. It\'s been 48 hours. What are you doing now, and what is the specific risk to the product decision if this disagreement stays unresolved?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -437,6 +473,10 @@ export const behavioralQuestions = [
       'Describing the analysis methodology in detail while being vague about the outcome',
       'Crediting the team or PM for the decision without demonstrating your specific contribution',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate describes building a dashboard that the team now uses regularly. "People look at it every week and it informs their decisions." No specific decision that changed, no moment when the analysis was brought to a stakeholder with a recommendation, no concrete outcome the candidate can name. The story is about the dashboard existing, not about analysis driving a decision.',
+      interviewerFollowUp: '"You built a dashboard and the team uses it. Can you name one specific decision — with a date, a stakeholder, and an outcome — that changed because of your analysis? Not \'they had better visibility,\' but a specific call that went differently because of what you showed them?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -477,6 +517,10 @@ export const behavioralQuestions = [
       'Never accepting the decision — continuing to raise the same objection after the decision was made',
       'Disagreeing on strategic vision or business priorities without any analytical basis',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate disagreed with the PM\'s roadmap direction, raised it in the next team planning meeting in front of the full team, and when the PM held the direction anyway, kept bringing it up in subsequent syncs. The story ends with "the launch underperformed and I was proven right." There\'s no accept-and-commit behavior, no acknowledgment that continuing to relitigate was counterproductive.',
+      interviewerFollowUp: '"You raised the concern in the planning meeting, the PM kept the direction, and you turned out to be right about the underperformance. What should you have done differently at the point the decision was made — and separately, what did being right in the end actually cost you in terms of the working relationship?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -517,6 +561,10 @@ export const behavioralQuestions = [
       'Not naming the specific assumptions that made the incomplete data actionable',
       'Confusing confidence in the analysis with confidence in the outcome',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate describes receiving incomplete data, flags all the missing pieces to the stakeholder, and recommends waiting two more weeks for the data quality to improve. They frame this as "being rigorous." No bounded estimate, no provisional recommendation with stated assumptions, no attempt to act on what was available.',
+      interviewerFollowUp: '"You told the stakeholder you needed two more weeks. The decision was made without your analysis — using a VP\'s gut estimate. What would a provisional recommendation with explicit uncertainty statements have given the stakeholder that your refusal to answer didn\'t?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -557,6 +605,10 @@ export const behavioralQuestions = [
       'Replacing a simple, understandable metric with a complex formula that nobody can explain to the CEO',
       'Not testing the metric for perverse incentives — does optimizing for it actually require doing the right things?',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate designed a new composite metric, wrote it up in a doc, shared it in Slack, and announced it was the new standard. Two teams started using it, three ignored it. The story is told as "I introduced a better metric." No analysis of why adoption failed, no description of the organizational work done to actually get teams to change what they measure.',
+      interviewerFollowUp: '"You designed the metric and sent the doc. Three teams ignored it. What specifically do you do next — not \'socialize it more broadly\' but the concrete step that turns a skeptical team from ignoring your metric into using it for their weekly review?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -597,6 +649,10 @@ export const behavioralQuestions = [
       'Implying you would side with whoever controls your performance review',
       'Treating every stakeholder conflict as an analytical dispute when some are genuinely strategic disagreements that data cannot resolve',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate ran the same analysis twice using each stakeholder\'s preferred method, presented both results side by side, and said "both interpretations have merit — it depends on how you define the segment." No conclusion, no recommendation, no identification of which method was analytically correct. Both stakeholders left with confirmation that they were right.',
+      interviewerFollowUp: '"You presented both cuts of the data. Marketing thinks their interpretation is supported. Product thinks theirs is supported. The meeting ends with no resolution. What happens at the next decision point, and what did your analysis actually contribute?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -637,6 +693,10 @@ export const behavioralQuestions = [
       'Adding a secondary guardrail metric without addressing the root cause (the gameable primary metric)',
       'Noticing gaming only after it caused a significant negative business outcome rather than proactively',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate noticed that a team was gaming a metric, brought it to the team lead as a personal integrity issue, and got a defensive reaction. The conversation centered on whether the team was intentionally gaming rather than whether the metric had a design flaw. Nothing changed. The metric stayed as is with a new policy saying "don\'t game it."',
+      interviewerFollowUp: '"You told the team lead that their team was gaming the metric. They pushed back: \'we\'re just optimizing for what we\'re measured on.\' They\'re not wrong. Why is the behavior actually the metric\'s fault, and what does the redesigned metric look like that makes the same gaming behavior require actually improving the underlying outcome?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -677,6 +737,10 @@ export const behavioralQuestions = [
       'Accepting no personal responsibility — the team, the data, the timeline were all to blame, not any decision you made',
       'Performing humility ("I realized I have a lot to learn") without a specific lesson',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate describes a project that got cancelled due to budget cuts. They frame this as their "failure." There\'s nothing they did wrong — external factors ended the project. No personal responsibility, no identifiable hypothesis that was wrong, no concrete lesson that changed a future behavior. The lesson is "I learned to always confirm budget before starting."',
+      interviewerFollowUp: '"Budget got cut and the project ended — that\'s not a failure, that\'s an external event. Can you tell me about a time you made an analytical judgment call that turned out to be wrong — not something that was done to you, but something you actually got wrong — and what specifically you changed about how you work as a result?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -717,6 +781,10 @@ export const behavioralQuestions = [
       'Confusing "presenting to multiple teams" with "creating something multiple teams adopted"',
       'Being vague about what specifically was built and how specifically it was used',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate describes presenting their team\'s methodology at a company all-hands. Two other teams reached out to ask follow-up questions. The story is told as cross-team impact. There\'s no artifact, no adoption, no evidence another team changed their process. "I shared knowledge" is not the same as "I created something others used."',
+      interviewerFollowUp: '"You presented at the all-hands and two teams sent follow-up questions. Six months later, are those teams doing anything differently? If not — what was the actual impact of the presentation, and what would have made the contribution actually stick?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -757,6 +825,10 @@ export const behavioralQuestions = [
       'Conflating "I was thorough" with "I was appropriately rigorous" — thoroughness is not a virtue when the decision doesn\'t require it',
       'Being unable to say "this analysis is good enough to act on" — indecision is a decision, and usually the wrong one',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate describes spending three days on a thorough analysis for a decision that needed an answer in three hours — "I wanted to make sure I got it right." The decision was made by others before they finished. They present this as "I have high standards." There\'s no awareness that thoroughness that arrives after the decision window closes has zero value.',
+      interviewerFollowUp: '"The decision needed an answer in 3 hours and you delivered in 3 days. The PM used their gut instead. What is the cost of your \'high standards\' in that scenario, and what is the explicit reasoning process you should have done in the first 10 minutes to decide whether 3 hours of analysis was sufficient or whether 3 days was genuinely required?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -797,6 +869,10 @@ export const behavioralQuestions = [
       'Treating all ethical concerns as equally severe — there is a spectrum from "questionable framing" to "material misrepresentation" and they require different responses',
       'Being unable to describe a specific situation, using vague language about "maintaining data integrity" without examples',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate says "I always maintain data integrity and I\'ve never been asked to do anything unethical." No situation comes to mind, no reflection on the gray areas they\'ve navigated. When pressed, they describe a situation where a stakeholder asked them to "put the best light on the data" and they complied without pushback — but frame this as normal analytical work.',
+      interviewerFollowUp: '"Your stakeholder asked you to only show the segments where the feature performed well and not show the overall negative result. You said it was \'just highlighting the relevant cut.\' Walk me through the test: if the VP knew the overall result was negative, would they still present this to the board the same way? If not — what is the presentation actually doing?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -837,6 +913,10 @@ export const behavioralQuestions = [
       'Taking credit for analysis that was actually prompted by a manager or stakeholder comment',
       'The analysis being technically interesting but strategically irrelevant — analytical initiative that doesn\'t connect to business priorities isn\'t the right kind of initiative',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate describes doing an exploratory analysis on a dataset they found interesting, sharing the results in a team meeting, receiving positive reactions, and then moving on. "People said it was really insightful." There\'s no decision that changed, no follow-up to ensure the finding got acted on, no second meeting to drive toward action.',
+      interviewerFollowUp: '"The team found your analysis interesting and appreciated it. Two weeks later, is anything different about how the team works, what they build, or what they measure? If not — what would you have done after the first meeting to make sure the insight didn\'t die in appreciation?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -878,6 +958,10 @@ export const behavioralQuestions = [
       'Describing "disagree and commit" as something you did after only minimal advocacy — if you had a real concern and said nothing, that is not disagree and commit, that is compliance without voice',
       'Using the story to surface a grievance about a former employer rather than to demonstrate a professional skill',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate disagreed with the decision, said nothing clearly, executed it reluctantly while "making sure my concerns were on record," and the decision later failed. The story is told as vindication: "I knew it was wrong, I told them, they didn\'t listen, it failed." There\'s no committed execution, no professional handling of the outcome, and no reflection on what they could have done differently to be heard earlier.',
+      interviewerFollowUp: '"You said \'I made sure my concerns were on record.\' What does that mean in practice — and how does an observer on your team tell the difference between \'disagree and commit\' and \'disagree and quietly build an alibi for when it goes wrong\'?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -919,6 +1003,10 @@ export const behavioralQuestions = [
       'Softening the message so aggressively that the severity is obscured — "we\'re tracking slightly below plan" when you\'re 25% below target is not honest communication',
       'Delivering the bad news without a recommendation, forcing the decision-maker to do all the problem-solving with no analytical input',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate waited for the monthly review to surface a metric miss that was visible two weeks earlier, delivered it as a slide in the deck with no prior conversation, and ended with "so we missed the target." No structured what/why/so-what, no pre-read, no private conversation with the VP first. The leadership team was surprised and the candidate was surprised they were surprised.',
+      interviewerFollowUp: '"You surfaced the miss at the monthly review. Your VP says afterwards: \'Why am I hearing about this now?\' What is the most honest answer to that question — and what should you have done at the moment two weeks ago when you first saw the miss in the data?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -960,6 +1048,10 @@ export const behavioralQuestions = [
       'Providing a vague probabilistic statement ("probably around X") without the specific reasoning that justifies the estimate',
       'Confusing "I felt uncertain" with "I communicated my uncertainty structure to the decision-maker" — the first is a feeling, the second is a skill',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate was asked for a recommendation with incomplete data and responded with a list of all the data they were missing, an explanation of why those gaps made the question unanswerable, and a request to revisit in three weeks. When the decision-maker said "I need something now," the candidate said "I can\'t responsibly give you a number." The decision was made without them.',
+      interviewerFollowUp: '"You listed the data gaps and said you couldn\'t responsibly give a number. The decision-maker went with their intuition. Two scenarios: (1) their intuition was right, (2) their intuition was wrong. In which scenario does your refusal to estimate look better — and is that the right frame for evaluating whether you did your job?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -1001,6 +1093,10 @@ export const behavioralQuestions = [
       'Framing the reversal as proof of agility rather than as an act of intellectual honesty — the two are different things',
       'Describing the reversal but not describing how you communicated it — the communication of the reversal is the behavior being evaluated',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate reversed their recommendation but waited for the stakeholder to notice the inconsistency and ask about it. When asked, they said "new data came in that changed the picture." No proactive outreach, no structured communication of what changed and why, no ownership of the original error. The reversal was reactive, not self-initiated.',
+      interviewerFollowUp: '"You waited for the stakeholder to notice the reversal rather than going to them first. They\'ve already acted on your original recommendation. What is the cost of the 48-hour delay between when you knew you were wrong and when they found out — and what would the message have looked like if you had gone to them proactively?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -1042,6 +1138,10 @@ export const behavioralQuestions = [
       'Framing the story as "I navigated between two difficult people" rather than "I identified the right resolution process for the type of conflict this was"',
       'Never having a view of your own — describing a fully neutral analyst who just presented both sides without any analytical contribution',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate ran analysis for both stakeholders using their respective preferred methodologies, presented both results side by side in a joint meeting, and said "you can see both perspectives are supported by different cuts of the data." The meeting ended with no decision. Both stakeholders left convinced their interpretation was right.',
+      interviewerFollowUp: '"You gave both stakeholders a result that confirmed their view. The joint meeting ended in a standoff. This is worse than before your analysis — now each side has a chart. What should you have done before that meeting, and what does the analytical answer to this dispute actually require?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -1083,6 +1183,10 @@ export const behavioralQuestions = [
       'Describing influence as "presenting at a meeting and getting buy-in" — that is one step, not an influence campaign',
       'Relying on authority proxies (getting your skip-level to endorse the change, dropping a VP\'s name in conversations) rather than genuine peer influence',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate proposed a process change in a team meeting, got verbal agreement from the people in the room, sent a follow-up email with instructions, and considers the change to have happened. Three months later, two of the five teams are using it. The other three reverted to the old process after a week. The story is told as a success: "I drove adoption of a new process across the organization."',
+      interviewerFollowUp: '"Three of five teams reverted after a week. What specifically happened in week two that caused the reversion — and what did you not do in the rollout that would have caught and addressed that pattern before it solidified?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -1124,6 +1228,10 @@ export const behavioralQuestions = [
       'Framing the story around how much you enjoyed mentoring rather than around what the other person changed',
       'The person you mentored had no particular challenge — "I mentored someone who was already very capable" is not this question',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate says they had regular 1:1 check-ins with a junior analyst, "shared feedback whenever they asked," and the junior analyst "grew a lot in confidence." No specific observation about what was holding the person back, no concrete piece of feedback that changed a behavior, no example of what the person does differently now. The story is a description of availability, not development.',
+      interviewerFollowUp: '"You said they grew in confidence. What specific behavior did they change — not \'felt better\' but something you can observe in a meeting or a deliverable — that directly resulted from something you said or showed them?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -1165,6 +1273,10 @@ export const behavioralQuestions = [
       'Describing a story where you said no and then regretted it because you were wrong about the importance of the request — this is a bad prioritization story, not a backbone story',
       'Saying no and then continuing to feel guilty about it — shows the discomfort with declining hasn\'t been resolved',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate agreed to the request, did a rushed version of the work that was clearly incomplete, and delivered it late. They then explained in the delivery message all the reasons it wasn\'t their best work. They frame this as "I tried to be helpful but I should have managed expectations better." The actual answer — saying no to the full scope — was never attempted.',
+      interviewerFollowUp: '"You delivered a rushed, incomplete version rather than having the no conversation. The stakeholder is now making decisions based on incomplete analysis. What was the actual cost of not saying no clearly upfront — and what is the specific sentence you should have said when the request came in?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -1206,6 +1318,10 @@ export const behavioralQuestions = [
       'The story ends with "and they agreed with me" as the measure of success — the measure of success is whether the concern was heard and fairly evaluated, not whether you won',
       'Conflating pushing back with relitigating after the decision is made — these are different behaviors with different implications',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate "expressed some concerns" in the all-hands after the decision was announced, in front of 30 people. The manager was visibly uncomfortable. Nothing changed and the relationship became awkward. The story is told as courage: "I spoke truth to power." There was no private conversation first, no structured case, no specific data point — just a public objection that created friction without creating change.',
+      interviewerFollowUp: '"You raised the concern in the all-hands in front of 30 people. Your manager was visibly uncomfortable. What is your manager thinking right now, and how does that affect your ability to influence the next decision — and the one after that?"',
+    },
   },
 
   // ─────────────────────────────────────────────
@@ -1247,5 +1363,9 @@ export const behavioralQuestions = [
       'Describing a past failure without connecting it to an ongoing pattern and a specific behavior change',
       'The behavior change is in the future: "I\'m planning to work on X" — the question asks what you\'ve actively done, not what you intend to do',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate says: "I used to not communicate enough, but I\'ve been working on it. Now I try to send more proactive updates." No mechanism for what changed, no specific example of catching the old pattern and executing the new one, no description of what \'more proactive\' actually means in practice. The pattern is vague and the fix is vaguer.',
+      interviewerFollowUp: '"You said you now \'try to send more proactive updates.\' Give me the last three times you sent a proactive update you wouldn\'t have sent before — what triggered each one, and what changed in your work process that made that happen?"',
+    },
   },
 ];

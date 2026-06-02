@@ -472,6 +472,8 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
 
   // Markdown export toast
   const [copiedToast, setCopiedToast] = useState(false);
+  const [revealHovered, setRevealHovered] = useState(false);
+  const [exportHovered, setExportHovered] = useState(false);
 
   // "What did you miss?" state
   const [missedText, setMissedText] = useState(() => loadMissed()[missedKey] || '');
@@ -755,6 +757,8 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
       {!answerRevealed && (
         <button
           onClick={handleReveal}
+          onMouseEnter={() => setRevealHovered(true)}
+          onMouseLeave={() => setRevealHovered(false)}
           style={{
             width: '100%',
             background: 'var(--yellow)',
@@ -766,9 +770,8 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
             cursor: 'pointer',
             marginBottom: '2rem',
             transition: 'opacity 0.1s',
+            opacity: revealHovered ? 0.9 : 1,
           }}
-          onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
         >
           Reveal Model Answer →
         </button>
@@ -872,14 +875,17 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
           <div style={{ marginBottom: '1.5rem', position: 'relative', display: 'inline-block' }}>
             <button
               onClick={handleExportMarkdown}
+              onMouseEnter={() => setExportHovered(true)}
+              onMouseLeave={() => setExportHovered(false)}
               style={{
-                background: 'var(--surface)', border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                border: exportHovered ? '1px solid var(--teal-border)' : '1px solid var(--border)',
                 borderRadius: '7px', padding: '0.45rem 0.9rem',
-                color: 'var(--text-muted)', fontSize: '0.82rem', fontWeight: 500,
+                color: exportHovered ? 'var(--teal)' : 'var(--text-muted)',
+                fontSize: '0.82rem', fontWeight: 500,
                 cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem',
+                transition: 'border-color 0.1s, color 0.1s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--teal-border)'; e.currentTarget.style.color = 'var(--teal)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
             >
               📋 Export as Markdown
             </button>

@@ -907,28 +907,50 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
               )}
             </div>
 
-            {/* "Crushing it" state */}
+            {/* "Crushing it" / new user state */}
             {(everythingStrong || (totalCompleted === 0 && topRecs.length === 0)) && (
               <div style={{
-                background: 'var(--green-bg)', border: '1px solid var(--green-border)',
-                borderRadius: '8px', padding: '0.9rem 1rem',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap',
+                background: totalCompleted === 0 ? 'var(--surface)' : 'var(--green-bg)',
+                border: totalCompleted === 0 ? '1px solid var(--border)' : '1px solid var(--green-border)',
+                borderRadius: '8px', padding: '1.1rem 1.25rem',
               }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--green)', fontWeight: 600 }}>
-                  {totalCompleted === 0
-                    ? '👋 Pick any room to get started — each one sharpens a different interview skill.'
-                    : "You're crushing it! Keep the streak going."}
-                </div>
-                {onNavigate && (
-                  <button
-                    onClick={() => onNavigate('growth-analytics')}
-                    style={{
-                      background: 'var(--green-bg)', border: '1px solid var(--green-border)',
-                      borderRadius: '6px', padding: '0.4rem 0.75rem',
-                      color: 'var(--green)', fontSize: '0.78rem', fontWeight: 700,
-                      cursor: 'pointer', whiteSpace: 'nowrap',
-                    }}
-                  >Take Today's Drill →</button>
+                {totalCompleted === 0 ? (
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text)', marginBottom: '0.35rem' }}>
+                      You haven\'t completed any cases yet
+                    </div>
+                    <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.55 }}>
+                      Start with Stat Foundations — it\'s the floor that every other room builds on. Your progress across all rooms will appear here once you begin.
+                    </div>
+                    {onNavigate && (
+                      <button
+                        onClick={() => onNavigate('stat-foundations')}
+                        style={{
+                          background: 'var(--teal)', border: 'none',
+                          borderRadius: '6px', padding: '0.45rem 0.9rem',
+                          color: '#fff', fontSize: '0.82rem', fontWeight: 700,
+                          cursor: 'pointer', whiteSpace: 'nowrap',
+                        }}
+                      >Start Stat Foundations →</button>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--green)', fontWeight: 600 }}>
+                      You\'re crushing it! Keep the streak going.
+                    </div>
+                    {onNavigate && (
+                      <button
+                        onClick={() => onNavigate('growth-analytics')}
+                        style={{
+                          background: 'var(--green-bg)', border: '1px solid var(--green-border)',
+                          borderRadius: '6px', padding: '0.4rem 0.75rem',
+                          color: 'var(--green)', fontSize: '0.78rem', fontWeight: 700,
+                          cursor: 'pointer', whiteSpace: 'nowrap',
+                        }}
+                      >Take Today\'s Drill →</button>
+                    )}
+                  </div>
                 )}
               </div>
             )}

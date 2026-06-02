@@ -1,0 +1,1 @@
+var e=`pal-rca-foundation-progress-v1`;function t(){try{let t=localStorage.getItem(e);return t?JSON.parse(t):{}}catch{return{}}}function n(n){try{let r=t();r[n]={completedAt:new Date().toISOString()},localStorage.setItem(e,JSON.stringify(r))}catch{}}export{n,t};

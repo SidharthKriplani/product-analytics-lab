@@ -26,6 +26,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'At staff level, you enforce a measurement plan review gate: no feature ships without a signed-off measurement plan. You also maintain a company-wide event taxonomy so checkout_step_viewed is defined once and reused, not redefined per team. Consistency in naming (snake_case, verb_object pattern) enables cross-team joins later.',
+    failureMode: {
+      weakAnswer: 'The candidate lists a few metrics — checkout completion rate, maybe cart abandonment — but skips the event schema entirely and says nothing about instrumentation validation. The measurement plan is just a list of KPIs, not an actionable tracking spec. No session_id, no user_type property, no QA plan.',
+      interviewerFollowUp: '"Your plan mentions checkout_completion_rate as the primary metric — what exact events and properties do you need in the data warehouse to compute that metric, and how do you verify they\'re firing correctly in staging before launch?"',
+    },
     keyTakeaways: [
       'Measurement plans define primary, secondary, and guardrail metrics plus event schemas — written before code ships',
       'Event validation (staging QA + smoke test) catches silent tracking failures that poison analysis data'
@@ -59,6 +63,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'The organizational challenge is harder than the technical one. Teams resist taxonomy reviews as gatekeeping. Frame it as enabling — a unified taxonomy means your dashboard can join Notion Doc events with Notion Calendar events, which no team can do today. Show a concrete cross-team insight that was only possible after unification, and adoption follows.',
+    failureMode: {
+      weakAnswer: 'The candidate proposes renaming all 847 events immediately and rebuilding dashboards from scratch. No mention of backward compatibility, dual-firing, or a migration period. They treat this as a one-time cleanup rather than an ongoing governance problem.',
+      interviewerFollowUp: '"If you rename page_view to page_viewed in production tonight, what breaks tomorrow morning and for how long — and what would you have done instead?"',
+    },
     keyTakeaways: [
       'Object-Action naming pattern (noun_verb, snake_case) is the industry standard for scalable event taxonomies',
       'Migrate by dual-firing new and old events simultaneously — never rename in place, as it destroys downstream dependencies'
@@ -92,6 +100,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'At staff level, you don\'t just diagnose this incident — you build the prevention system. A data quality monitor runs hourly: if DAU drops >15% vs same hour yesterday, PagerDuty fires before any human notices. The runbook for this exact incident type lives in Confluence. Your job is to never be the person manually investigating this on a Monday morning again.',
+    failureMode: {
+      weakAnswer: 'The candidate immediately concludes the DAU drop is real — a product bug or user behavior change — and starts drafting a root cause hypothesis about the content quality of Sunday posts. They never check the data pipeline, never look at server-side API call logs, and never cross-validate with payment or lesson completion events.',
+      interviewerFollowUp: '"Before you form any hypothesis about why users stopped engaging, what is the single fastest check that tells you whether this is a real user drop versus a data pipeline failure — and what would each outcome look like in the numbers?"',
+    },
     keyTakeaways: [
       'Cross-validate metric drops with independent sources (server logs, payment data) before concluding real vs pipeline issue',
       'Most sudden large metric drops are data pipeline failures — ETL issues, timezone errors, partial data loads'
@@ -125,6 +137,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'At senior/staff level, SRM checks should be automated: the experimentation platform flags any experiment with SRM p<0.001 and prevents result reporting until it\'s resolved. Never let a team ship on SRM-contaminated data — the PM pressure to ship on a "12% lift" is a recurring failure mode that erodes trust in experimentation over time.',
+    failureMode: {
+      weakAnswer: 'The candidate sees 52,000 vs 41,000 and says "that\'s a 11% imbalance, which seems large, but the result is highly significant at p<0.001, so the experiment effect is probably real." They focus on the magnitude of the lift rather than the validity of the randomization. They may recommend proceeding with a caveat.',
+      interviewerFollowUp: '"The PM argues that p=0.001 on the outcome metric is strong evidence regardless of the traffic split. Walk me through exactly why that reasoning is wrong — what does the SRM tell you about the 52,000 users in the treatment group that makes their engagement lift uninterpretable?"',
+    },
     keyTakeaways: [
       'SRM invalidates the entire experiment — not just the affected arm — because groups are no longer randomized equivalents',
       'Automated SRM alerts on the experimentation platform prevent teams from reporting on contaminated experiments'
@@ -158,6 +174,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'Privacy-by-design is a competitive advantage, not just compliance. At director level, you establish a Data Minimization Review as part of the measurement plan process: every new event field must justify its collection. This reduces legal risk and builds user trust, which increasingly correlates with engagement in privacy-conscious markets.',
+    failureMode: {
+      weakAnswer: 'The candidate removes IP address and calls the schema compliant. They keep user_id in every event payload and never discuss pseudonymization, consent tiers, or the difference between anonymous session tracking and user-level tracking. Their "solution" is essentially the same schema with one field removed.',
+      interviewerFollowUp: '"You\'ve removed IP address — but user_id is still in every event payload. Under GDPR, user_id is personal data. How does your A/B test assignment and funnel analysis work if you replace user_id with a daily-rotating hashed identifier instead?"',
+    },
     keyTakeaways: [
       'Pseudonymize with rotating salts to preserve within-session joins while preventing cross-context user tracking',
       'Consent tiers ensure core product analytics continue without consent while richer behavioral data requires opt-in'
@@ -191,6 +211,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'Data contracts are a cultural intervention as much as a technical one. The Uber incident happened because the Marketplace team didn\'t know their event had 47 consumers — the knowledge wasn\'t discoverable. At director level, you mandate consumer registration and make it visible: "Your event trip_completed has 47 registered consumers — here they are." That number alone changes behavior.',
+    failureMode: {
+      weakAnswer: 'The candidate describes a data contract as just a schema definition with a version number. They say "you add schema validation to reject mismatched events." No mention of SLAs, ownership, or the consumer registry. They treat this as a purely technical problem, missing that the Uber incident happened because nobody knew who was consuming the event.',
+      interviewerFollowUp: '"Your contract has schema validation and versioning — but the Marketplace team still doesn\'t know the 47 consumers exist. How does your contract prevent the exact scenario where a developer renames a field because they don\'t know anyone downstream is reading it?"',
+    },
     keyTakeaways: [
       'Data contracts require a consumer registry — without knowing who depends on your data, you can\'t assess breaking change impact',
       'Schema registries with dual-fire deprecation periods are the operational mechanism for safe schema evolution'
@@ -224,6 +248,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'This is also a privacy design moment: the viewer\'s collection_viewed event includes anonymous viewers. You must ensure anonymous viewer data is not joined to signed-in activity without consent. At staff level, you\'d review this with the privacy team before shipping.',
+    failureMode: {
+      weakAnswer: 'The candidate defines events for the creator side only — collection_created, collection_shared — and ignores the viewer side entirely. They define viral coefficient vaguely as "shares that resulted in signups" but have no event to actually measure the link between a specific share and a downstream signup.',
+      interviewerFollowUp: '"A user shares a collection URL and three people sign up for Pinterest in the next week. How does your tracking plan tell you those three signups came from that specific share — what event, what property, and what join does that require?"',
+    },
     keyTakeaways: [
       'Two-sided features require events on both creator and viewer journeys — track the full viral loop',
       'A join key (collection_id) threading through all events enables tracing from share to signup to engagement'
@@ -257,6 +285,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'The 30% of data team time spent answering event questions is the business case for this project. At director level, frame it as: we are going to reclaim 30% of the data team\'s capacity by investing 6 months in cleanup and governance. That\'s the ROI argument. Instrumentation debt is invisible until you measure the cost.',
+    failureMode: {
+      weakAnswer: 'The candidate proposes fixing all 300 events simultaneously over 6 months, without any triage by usage or business impact. They spend equal time on events nobody queries as on business-critical ones. They frame the whole project as a documentation effort and never address the organizational challenge of getting engineers to update client code.',
+      interviewerFollowUp: '"You have 6 months and 2 engineers. Of your 300 events, 200 have not been queried in 6 months. What is the first thing you do, and what percentage of the events do you never touch?"',
+    },
     keyTakeaways: [
       'Triage by query frequency — fix Tier 1 (business-critical, heavily used) events first, deprecate unused events',
       'An event registry with mandatory ownership is the governance mechanism that prevents instrumentation debt from recurring'
@@ -290,6 +322,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'A staff analytics engineer would have shipped source contracts (dbt 1.5+ contracts: block) on all production sources, making breaking changes fail at CI rather than at 2am. The 2am page is a CI gap, not a human error.',
+    failureMode: {
+      weakAnswer: 'The candidate\'s incident response is to update the dbt source() reference in the YAML file and re-run all 340 models overnight. They treat the fix as a simple find-and-replace and ignore that the dashboards need restoring immediately. They miss the compatibility shim approach and have no governance recommendation beyond "add a comment in the PR."',
+      interviewerFollowUp: '"It\'s 2:05am. The dashboards have been broken for 12 hours. Updating the dbt YAML and re-running 340 models will take 4 more hours. What do you do in the next 10 minutes to restore dashboard access before the full re-run completes?"',
+    },
     keyTakeaways: [
       'dbt source renames break all downstream refs — create compatibility views as immediate mitigation',
       'CI must include dbt test --select source:* before any warehouse schema migration',
@@ -324,6 +360,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'A staff analytics engineer would instrument this with a feature flag segment — all events carry a feature_flag_variant property so the tracking plan doubles as A/B test instrumentation from day one. No retroactive joins needed.',
+    failureMode: {
+      weakAnswer: 'The candidate defines events but uses raw numeric properties for list_size on mobile (e.g., list_size: 247) instead of bucketing, and forgets to link the cannibalization guard to the same user over time. Their cannibalization measurement compares aggregate post rates before and after launch rather than tracking the same users pre- and post-adoption.',
+      interviewerFollowUp: '"Your cannibalization analysis shows that total regular Story posts dropped 8% after Close Friends launched. But you haven\'t controlled for who adopted Close Friends. How do you separate \'Close Friends caused substitution\' from \'regular Story usage happened to drop for unrelated reasons that week\'?"',
+    },
     keyTakeaways: [
       'Mobile tracking plans need low-cardinality properties (buckets, not raw numbers)',
       'Cannibalization measurement = pre/post same-user comparison, not aggregate comparison',
@@ -358,6 +398,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'Staff engineers instrument field-level read tracking in the data warehouse from the start of the migration — not as an afterthought. Without it, you cannot know when it is safe to drop the old fields, and migrations drag on indefinitely.',
+    failureMode: {
+      weakAnswer: 'The candidate proposes versioning the event (payments_v2) and asking all 800 consumers to migrate to the new topic. They set a 30-day hard cutoff after which they delete payments_v1. No dual-write, no field usage tracking, no awareness that 800 consumers cannot all migrate in 30 days.',
+      interviewerFollowUp: '"You told all 800 consumers to migrate to payments_v2 by day 30 and you\'ll delete v1 on day 31. It\'s day 31. You don\'t know how many consumers actually migrated. What breaks, how badly, and how would you have known when it was actually safe to drop v1 before cutting over?"',
+    },
     keyTakeaways: [
       'Expand-Contract pattern = add new fields → dual-write → migrate consumers → remove old fields',
       'Never drop a field based on "we told them to migrate" — verify zero reads in production',
@@ -392,6 +436,10 @@ export const instrumentationCases = [
       ]
     },
     leadershipNote: 'Staff-level data governance means shipping the PII classifier as infrastructure, not as a policy document. The policy says don\'t log PII; the classifier makes it technically impossible to accidentally log PII by rejecting non-compliant events at the ingestion layer before they reach Snowflake.',
+    failureMode: {
+      weakAnswer: 'The candidate removes the PII fields from the event producer and considers the incident resolved. They don\'t check Snowflake Time Travel, don\'t audit third-party exports to BI tools or Amplitude, and never contact the privacy/legal team. Their governance recommendation is to "add PII to the code review checklist."',
+      interviewerFollowUp: '"You\'ve deployed the producer fix and run UPDATE to NULL the columns in Snowflake. The privacy team asks: \'Can you confirm that driver_phone_number is no longer accessible by any Lyft system or third-party tool?\' What is the complete list of systems you need to check before you can say yes?"',
+    },
     keyTakeaways: [
       'PII breach response: stop producer → revoke access → delete from all sinks (including Time Travel and third-party exports)',
       'Deletion is not complete until verified in every downstream system',

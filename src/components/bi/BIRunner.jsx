@@ -44,6 +44,7 @@ const RATING_STYLE = {
 // Screen 1: Situation
 function SituationScreen({ caseData, onBegin }) {
   const [hintsOpen, setHintsOpen] = useState(false);
+  const [beginHovered, setBeginHovered] = useState(false);
   const diffCfg = DIFF_CFG[caseData.difficulty] || DIFF_CFG.analyst;
 
   return (
@@ -171,13 +172,14 @@ function SituationScreen({ caseData, onBegin }) {
 
       <button
         onClick={onBegin}
+        onMouseEnter={() => setBeginHovered(true)}
+        onMouseLeave={() => setBeginHovered(false)}
         style={{
           background: 'var(--yellow)', border: 'none', borderRadius: '8px',
           padding: '0.85rem 1.75rem', fontSize: '0.95rem', fontWeight: 700,
           color: '#1a1400', cursor: 'pointer', transition: 'opacity 0.1s',
+          opacity: beginHovered ? 0.88 : 1,
         }}
-        onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
-        onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
       >
         Begin Analysis →
       </button>
@@ -188,6 +190,7 @@ function SituationScreen({ caseData, onBegin }) {
 // Screen 2: Work
 function WorkScreen({ caseData, onReveal }) {
   const [text, setText] = useState('');
+  const [revealHovered, setRevealHovered] = useState(false);
   const canReveal = text.trim().length >= 50;
 
   return (
@@ -231,6 +234,8 @@ function WorkScreen({ caseData, onReveal }) {
       <button
         onClick={() => canReveal && onReveal(text)}
         disabled={!canReveal}
+        onMouseEnter={() => setRevealHovered(true)}
+        onMouseLeave={() => setRevealHovered(false)}
         style={{
           background: canReveal ? 'var(--yellow)' : 'var(--surface-2)',
           border: canReveal ? 'none' : '1px solid var(--border)',
@@ -239,9 +244,8 @@ function WorkScreen({ caseData, onReveal }) {
           color: canReveal ? '#1a1400' : 'var(--text-dim)',
           cursor: canReveal ? 'pointer' : 'not-allowed',
           transition: 'opacity 0.1s',
+          opacity: revealHovered && canReveal ? 0.88 : 1,
         }}
-        onMouseEnter={e => { if (canReveal) e.currentTarget.style.opacity = '0.88'; }}
-        onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
       >
         Reveal Model Answer →
       </button>
@@ -256,6 +260,7 @@ function RevealScreen({ caseData, onBack, onNext, unlocked, onNavigate }) {
   const [checked, setChecked] = useState([false, false, false]);
   const [userNote, setUserNote] = useState(() => loadNote(ROOM_KEY, caseData.id));
   const [noteSaved, setNoteSaved] = useState(false);
+  const [nextHovered, setNextHovered] = useState(false);
 
   function handleRate(r) {
     setRating(r);
@@ -558,14 +563,15 @@ function RevealScreen({ caseData, onBack, onNext, unlocked, onNavigate }) {
         {onNext && rating && (
           <button
             onClick={onNext}
+            onMouseEnter={() => setNextHovered(true)}
+            onMouseLeave={() => setNextHovered(false)}
             style={{
               background: 'var(--yellow)', border: 'none', borderRadius: '7px',
               padding: '0.5rem 1.25rem', color: '#1a1400', fontSize: '0.85rem',
               fontWeight: 700, cursor: 'pointer', marginLeft: 'auto',
               transition: 'opacity 0.1s',
+              opacity: nextHovered ? 0.88 : 1,
             }}
-            onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
-            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
           >
             Next Case →
           </button>

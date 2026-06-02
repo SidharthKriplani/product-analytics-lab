@@ -1,0 +1,1 @@
+var e=`pal-exp-foundation-progress-v1`;function t(){try{return JSON.parse(localStorage.getItem(e)||`{}`)}catch{return{}}}function n(n){try{let r=t();r[n]={completedAt:new Date().toISOString()},localStorage.setItem(e,JSON.stringify(r))}catch{}}export{n,t};

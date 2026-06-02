@@ -1,0 +1,1 @@
+var e=`pal-metrics-foundation-progress-v1`;function t(t){try{let n=localStorage.getItem(e);return n&&JSON.parse(n)[t]||null}catch{return null}}function n(){try{let t=localStorage.getItem(e);return t?JSON.parse(t):{}}catch{return{}}}function r(t){try{let r=n();r[t]={completedAt:new Date().toISOString()},localStorage.setItem(e,JSON.stringify(r))}catch{}}export{t as n,r,n as t};

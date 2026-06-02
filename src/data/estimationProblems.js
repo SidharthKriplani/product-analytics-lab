@@ -58,6 +58,10 @@ export const estimationProblems = [
       'Forgetting to apply a peak-hour multiplier for a 9am scenario',
       'Anchoring only on global data without building up from first principles — you should do both and reconcile',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates daily Uber rides in NYC, divides by 24 to get an hourly rate, and states that as the answer. They never apply the peak-hour multiplier for 9am, never convert rides-per-hour to concurrent rides using trip duration, and ignore the subway\'s effect on penetration by using a 50% adoption rate.',
+      interviewerFollowUp: '"You said 65,000 rides per hour at 9am. But the question asks how many rides are happening right now — simultaneously in progress. If each ride takes 15 minutes, how does that change your answer, and what number do you actually get?"',
+    },
   },
 
   {
@@ -120,6 +124,10 @@ export const estimationProblems = [
       'Confusing "storage cost for new uploads" with "total YouTube storage cost including historical library"',
       'Getting the unit conversions wrong (PB → TB → GB) — work through units explicitly',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate multiplies 500 hours/minute of uploads × 60 min × 24 hrs × 365 days × 2 GB/hour = some large number of GB, then multiplies by $0.023/GB/month × 12 to get annual cost. They forget the 4x transcoding multiplier, treat the full exabyte as stored from January 1, and use public cloud retail pricing — ending up with an estimate 20-40x too high.',
+      interviewerFollowUp: '"Your estimate comes to $2 billion for YouTube\'s annual storage cost on new uploads alone. Google\'s entire capital expenditure for all data centers is roughly $12 billion. Does that ratio feel right — and what is the single adjustment to your calculation that would move it most toward reality?"',
+    },
   },
 
   {
@@ -180,6 +188,10 @@ export const estimationProblems = [
       'Confusing "users" (often means MAU) with "daily actives" — the question asks specifically for DAU',
       'Forgetting that dual-SIM phones are common in India and some users have 2 WhatsApp numbers',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate applies 80% WhatsApp penetration to India\'s 1.4 billion total population and equates MAU with DAU, arriving at ~1.1 billion daily active users. They never adjust for smartphone penetration (~52% in India) or apply a DAU/MAU ratio, and treat every Indian adult as a daily WhatsApp user.',
+      interviewerFollowUp: '"You got 1.1 billion daily WhatsApp users in India — that\'s more than the entire smartphone-owning population of India. What\'s the first assumption in your chain that breaks down, and what would a corrected number look like?"',
+    },
   },
 
   {
@@ -239,6 +251,10 @@ export const estimationProblems = [
       'Confusing total Yelp business listings (~5M) with restaurant-specific listings (~600k)',
       'Not doing a sanity check against the NRA\'s published ~1M restaurants figure',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates only sit-down restaurants using a "1 restaurant per 2,000 people" density rule, applies it to 330M Americans, and treats Yelp coverage as 100%. They get ~165,000 listings — off by nearly 4x — because they excluded QSR/fast food and never discounted for incomplete Yelp coverage of small independent restaurants.',
+      interviewerFollowUp: '"You estimated 165,000 Yelp restaurant listings. The NRA reports roughly 1 million restaurants in the US total. If Yelp has 60% coverage of all restaurants, what does that imply your estimate missed — and which restaurant category is almost certainly the gap?"',
+    },
   },
 
   {
@@ -300,6 +316,10 @@ export const estimationProblems = [
       'Confusing "songs" with "albums" or "artists" — the question asks specifically for tracks',
       'Not triangulating with a second method — using only one approach without cross-validation leaves the estimate ungrounded',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate assumes a flat 1 million tracks released per year across 70 years of recorded music history, multiplies 70M total tracks, and states that as the Spotify catalog. They miss the exponential upload explosion post-2015 (when DIY distribution platforms arrived) and don\'t triangulate with any second method.',
+      interviewerFollowUp: '"You got 70 million tracks using a flat annual release rate. Spotify has publicly disclosed approximately 100 million tracks on the platform. What does the discrepancy tell you about where your flat-rate assumption breaks down most severely — and in which 5-year period would the actual release rate have grown most sharply?"',
+    },
   },
 
   {
@@ -360,6 +380,10 @@ export const estimationProblems = [
       'Not knowing that 86,400 = 24 × 60 × 60 seconds in a day — this is a fundamental constant you should know',
       'Anchoring on the "2 trillion/year" figure from 2016 without noting it was cited 8+ years ago and search volume has grown since',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate takes 5 billion daily Google users × 3 searches/day = 15 billion searches/day, then divides by 24 to get ~625 million searches per hour and states that as the per-second answer. They divide by hours instead of seconds, landing at a number 3,600x too high — and never catch the error with a sanity check.',
+      interviewerFollowUp: '"You got 625 million searches per second. That would mean Google processes more searches every second than there are people on Earth. What\'s the conversion you missed — and once you fix it, does your final per-second estimate feel reasonable?"',
+    },
   },
 
   {
@@ -422,6 +446,10 @@ export const estimationProblems = [
       'Not doing the LTV/CAC sanity check — without it, you can\'t tell whether your CAC estimate is strategically plausible',
       'Using total marketing spend ÷ new hosts — conflates host and guest acquisition spend, and includes retention/brand spend',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates Airbnb\'s total marketing spend (~$500M), assumes half goes to host acquisition, divides by new hosts added per year, and declares that the CAC. They never adjust for activation rate (many signed-up hosts never list), never segment by paid vs. organic channels, and skip the LTV/CAC sanity check entirely.',
+      interviewerFollowUp: '"You got $250 CAC per new host signup. An Airbnb host who lists for 2 years at $10,000 annual gross bookings generates roughly $2,000–3,000 in Airbnb revenue. Does a $250 CAC pass a basic LTV/CAC test — and what does your number actually measure versus what the question is asking for?"',
+    },
   },
 
   {
@@ -484,6 +512,10 @@ export const estimationProblems = [
       'Using global Instagram ARPU rather than US-specific — the US number is 8-12x the global average',
       'Forgetting to benchmark against comparable platforms — ARPU estimates without a benchmark have no reality check',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate takes Meta\'s US total ARPU of ~$272/year, notes Instagram has ~2B global MAU out of Meta\'s ~3B, estimates Instagram\'s share as 67% of Meta\'s revenue, and applies that to US users — arriving at ~$182/year per US Instagram user. They confuse global user share with US revenue share and use Meta\'s aggregate ARPU rather than building up from ad impressions and CPMs.',
+      interviewerFollowUp: '"You used Meta\'s total US ARPU as a proxy for Instagram specifically. But Facebook and Instagram have very different US user bases and advertiser demand dynamics. If US Instagram MAU is ~165M and Instagram\'s US revenue is roughly $30B, what does that imply per-user — and how far is that from your estimate?"',
+    },
   },
 
   {
@@ -542,6 +574,10 @@ export const estimationProblems = [
       'Confusing "sent" with "delivered" when citing the 100B figure — this causes apparent contradiction with a bottom-up estimate',
       'Ignoring group chats — they account for a large share of messages in high-engagement markets',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates WhatsApp has ~500M DAU (significantly underestimating the 2B+ user base), applies 5 messages per user per day, and gets 2.5 billion daily messages. They miss group chat multipliers, undercount the user base by 4x, and never triangulate against the publicly-known ~100 billion messages/day figure.',
+      interviewerFollowUp: '"You got 2.5 billion messages per day. WhatsApp has publicly stated they deliver approximately 100 billion messages per day. Your estimate is 40x below that. What is the most important variable you underestimated — and by how much would adjusting just the user count move your answer?"',
+    },
   },
 
   {
@@ -601,6 +637,10 @@ export const estimationProblems = [
       'Estimating in GB instead of TB/PB — not recognizing that 36,000 hours of multi-profile video is petabyte scale',
       'Confusing catalog hours with total watchtime — catalog hours is what Netflix stores; watchtime per day is a different metric',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates Netflix has 36,000 hours of content, stores one file per hour at 4 GB/hour, and arrives at ~144 TB of total storage. They store one encoding variant per title, forget the 1,000-variant multiplier for adaptive bitrate streaming across all devices, and never apply the 3x replication factor — missing the actual answer by roughly 1,000x.',
+      interviewerFollowUp: '"You got 144 TB. Netflix runs on AWS and has disclosed their infrastructure is at exabyte scale. If you store 1,000 encoding profiles per hour of content instead of one, and replicate 3x, what does your storage estimate become — and does that scale make more sense for a service with 260 million subscribers?"',
+    },
   },
 
   {
@@ -660,6 +700,10 @@ export const estimationProblems = [
       'Not accounting for insurance per ride — a non-trivial fixed variable cost in rideshare',
       'Computing profit as "take rate minus overhead" without recognizing that Uber\'s "take rate" net revenue still has significant COGS against it',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates an average Uber ride costs $22, assumes Uber\'s take rate is 25%, and says Uber earns $5.50 per ride — concluding the cost per ride must be below that. They never account for driver pay as a cost to Uber, never add insurance, support, and platform overhead, and confuse gross booking revenue with Uber\'s net revenue.',
+      interviewerFollowUp: '"You said Uber earns $5.50 per ride from a $22 fare. But driver pay comes out of the gross booking before Uber\'s take. If the driver receives 73% of the $22 fare — $16 — what does that leave for Uber\'s gross booking net revenue, and how does that change the economics you described?"',
+    },
   },
 
   {
@@ -718,6 +762,10 @@ export const estimationProblems = [
       'Not distinguishing SWEs from SREs, data scientists, and hardware engineers — the question asks specifically about software engineers',
       'Forgetting to note that TVCs (contractor population) likely doubles the effective technical workforce',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates Google has about 50,000 total employees, applies a 60% engineering fraction, and arrives at ~30,000 software engineers. They significantly underestimate Google\'s total headcount (~180,000 FTE, publicly disclosed), conflate all technical roles with software engineers, and miss that SWEs are roughly 25-30% of total headcount, not 60%.',
+      interviewerFollowUp: '"You estimated 30,000 software engineers. Google disclosed ~180,000 total employees in their most recent annual report. If SWEs are approximately 25-30% of headcount at large tech companies, what range do you get — and why did anchoring on 50,000 total employees lead you so far off?"',
+    },
   },
 
   {
@@ -778,6 +826,10 @@ export const estimationProblems = [
       'Forgetting the US is only ~half of Uber\'s global Delivery segment — don\'t apply global figures directly',
       'Not accounting for restaurant advertising revenue — Uber Eats Ads is a meaningful and fast-growing incremental revenue line',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates Uber Eats processes $20 billion in US gross order value annually and states that as the revenue. They conflate gross bookings with Uber\'s net revenue (which is ~13% of gross order value), assume Uber Eats has 50% US market share rather than 23%, and arrive at an estimate roughly 7x too high.',
+      interviewerFollowUp: '"You said Uber Eats US revenue is $20 billion. Uber\'s entire global Delivery segment net revenue is approximately $6 billion. If the US is half of global, and you\'re reporting gross order value instead of net revenue, what two adjustments does your number need — and what does the corrected figure look like?"',
+    },
   },
 
   {
@@ -838,6 +890,10 @@ export const estimationProblems = [
       'Using Paris metro (12M people) rather than Paris city proper (2.1M) — results in a 5x overcount of the addressable housing stock',
       'Not cross-checking demand-side vs. supply-side estimates — one approach alone leaves the estimate ungrounded',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate uses the Paris metro area population of 12 million, applies a 3% STR penetration rate, and arrives at ~360,000 Airbnb listings. They ignore the 120-day annual cap on whole-unit listings, use metropolitan area instead of city proper, and never apply an active-listing discount for stale inventory — overstating the answer by roughly 8-10x.',
+      interviewerFollowUp: '"You estimated 360,000 Airbnb listings in Paris. Paris city proper has about 1.4 million housing units and one of the strictest STR regulatory environments in Europe, with a 120-day annual cap. Given those two corrections alone, what is the ceiling on your estimate — and does 360,000 survive either check?"',
+    },
   },
 
   {
@@ -898,6 +954,10 @@ export const estimationProblems = [
       'Forgetting voice notes — audio messages are significant in markets like Brazil and Nigeria (WhatsApp voice notes are the dominant communication medium)',
       'Not distinguishing transit data from stored data — WhatsApp mostly delivers-and-discards; the data is transmitted but not necessarily stored long-term',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate treats all 100 billion daily WhatsApp messages as text at ~1 KB each, multiplies to get 100 TB/day, and states that as the answer. They ignore that roughly 10% of messages are images, videos, or voice notes — each thousands of times larger than a text — which makes the media volume orders of magnitude larger than the text volume.',
+      interviewerFollowUp: '"You got 100 TB per day assuming all messages are text. If just 5% of messages are short video clips at an average of 5 MB compressed, how much data does that 5% add — and does that single correction change your total estimate by 2x, 10x, or 100x?"',
+    },
   },
 
   {
@@ -959,6 +1019,10 @@ export const estimationProblems = [
       'Ignoring the household multiplier — Netflix has significantly more viewers than paid accounts',
       'Not accounting for the daily active rate — most subscriber households don\'t watch every single day',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate states that Netflix has 260 million subscribers and assumes 20% are watching at any given moment, arriving at 52 million concurrent viewers. They never account for the fact that "right now" implies a specific time of day, never apply a daily active household rate (~40-50%), and don\'t discount for the fact that most subscribers are asleep for a large fraction of any 24-hour window.',
+      interviewerFollowUp: '"You assumed 20% of 260M subscribers are always watching simultaneously. At 3am UTC, what fraction of households globally do you think are actively streaming? How does accounting for global time zone distribution change your concurrent viewer estimate?"',
+    },
   },
 
   {
@@ -1020,6 +1084,10 @@ export const estimationProblems = [
       'Not knowing that Amazon runs its own last-mile delivery network (AMZL) and delivers ~70%+ of its own packages',
       'Using a flat US population and guessing "average orders per American" — misses the strong bifurcation between heavy Prime users and light shoppers',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates 330M Americans × 1.5 orders/month = ~500M monthly orders = ~16M/day. They apply a flat per-capita order rate across the entire US population without segmenting Prime vs. non-Prime members, completely missing that Prime members (~170M) generate over 80% of Amazon\'s order volume at ~5x the frequency of non-Prime shoppers.',
+      interviewerFollowUp: '"You estimated 16 million Amazon packages per day in the US. Amazon disclosed delivering over 5 billion packages in the US in 2022 — about 14 million per day. Your bottom-up estimate is close, but for the wrong reason. You applied a flat 1.5 orders/month to everyone — what does the estimate look like if you segment Prime vs. non-Prime separately, and why does the flat rate accidentally get close to the right answer?"',
+    },
   },
 
   {
@@ -1080,6 +1148,10 @@ export const estimationProblems = [
       'Treating TikTok\'s US user base as larger than Instagram\'s — Instagram (~165M US MAU) is still slightly larger; TikTok has closed the gap but hasn\'t overtaken it',
       'Forgetting the under-13 exclusion — TikTok does not allow users under 13, which removes a significant portion of the youngest cohort',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate applies a flat 30% TikTok penetration to all 260M US adults and arrives at 78M MAU. They ignore the dramatic age-skew (80%+ of US 18-24 year olds use TikTok vs. under 10% of 55+ year olds), don\'t know TikTok\'s publicly disclosed US MAU of ~150M, and miss that the under-13 age group is excluded from the platform entirely.',
+      interviewerFollowUp: '"You got 78M by applying a flat 30% to all US adults. TikTok has disclosed ~150M US MAU. If the 13-24 age cohort has roughly 80% penetration and accounts for most of TikTok\'s US base, and the 50+ cohort has under 10%, how does a segmented model get you closer to 150M than your flat-rate model?"',
+    },
   },
 
   {
@@ -1141,6 +1213,10 @@ export const estimationProblems = [
       'Ignoring the free-tier user base — free users are a majority of Zoom accounts and contribute significantly to total meeting volume',
       'Not accounting for weekday vs. weekend variation — using a flat 7-day average without a weekend discount overestimates weekday activity',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate remembers that Zoom reported 300 million daily meeting participants at the April 2020 pandemic peak and uses that as the current answer. They don\'t apply any post-pandemic normalization, treat the participant count as a meeting count, and arrive at "300 million meetings per day" — conflating participants with meetings and using a 4-year-old peak figure.',
+      interviewerFollowUp: '"You said 300 million meetings per day based on the 2020 peak participant figure. Two problems: that was participants, not meetings; and that was the pandemic peak, not today. If average meeting size is 6 participants and post-pandemic Zoom usage is roughly 50-60% of the 2020 peak, what range do you actually get?"',
+    },
   },
 
   {
@@ -1203,6 +1279,10 @@ export const estimationProblems = [
       'Not knowing the global podcast ad market size (~$4B in 2023, IAB) — without this anchor, top-down estimates are ungrounded',
       'Forgetting that Premium subscribers still hear ads on some podcast content — not all podcast ad revenue is "free tier only"',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates Spotify has 100M podcast listeners, assumes 2 ads per hour at a $5 CPM, listens for 1 hour/week, and arrives at ~$50M annual podcast ad revenue. They use a music streaming CPM ($5) instead of a podcast-specific CPM ($18-25), ignore the Spotify Audience Network\'s off-app inventory, and don\'t triangulate against the known $4B global podcast ad market.',
+      interviewerFollowUp: '"You got $50M using a $5 CPM. Podcast ads typically command $18-25 CPM because listeners are highly engaged and ads are host-read. If you use $20 CPM instead of $5, and Spotify captures 30% of the global $4B podcast ad market, what range do you get — and does your bottom-up estimate reconcile with the top-down?"',
+    },
   },
 
   {
@@ -1262,6 +1342,10 @@ export const estimationProblems = [
       'Confusing Uber\'s global delivery bookings with US-only bookings — US is ~55% of Uber\'s delivery business',
       'Not considering the group-order consolidation effect — a party of 10 may place one $200 Uber Eats order, not 10 individual orders',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates a typical Uber Eats daily order volume in the US (~4M orders/day) and uses that directly for New Year\'s Eve without applying any seasonality multiplier. They treat NYE as a normal day, miss the 2-3x demand spike from parties and gatherings, and don\'t distinguish Uber Eats\' US share from its global delivery business.',
+      interviewerFollowUp: '"You assumed New Year\'s Eve has the same order volume as a typical Tuesday. Which other high-demand delivery events do you know of — Super Bowl, Valentine\'s Day, Mother\'s Day — and what does their typical demand multiplier suggest NYE\'s should be? How does applying a 2.5x multiplier change your estimate?"',
+    },
   },
 
   {
@@ -1323,6 +1407,10 @@ export const estimationProblems = [
       'Not converting units correctly — PB to TB to GB arithmetic errors are common under pressure',
       'Ignoring the distinction between "one day\'s uploads" and "all of YouTube\'s library" — the question asks specifically about new uploads in one day',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates 500 hours/minute × 60 minutes = 30,000 hours of daily uploads, converts at 2 GB/hour to 60,000 GB = ~60 TB, applies public cloud pricing of $0.023/GB/month × 12 months = $16,560/day in annual storage cost. They forget the 4x transcoding multiplier and use list price instead of Google\'s internal infrastructure cost, understating both storage volume and cost.',
+      interviewerFollowUp: '"You calculated $16,560 per day for YouTube\'s annual storage cost from one day\'s uploads. But you stored only the raw upload file. YouTube encodes every video into ~1,000 format/quality/bitrate variants for adaptive streaming. If storage volume increases 4x from transcoding and annual cost is monthly cost × 12, what is the corrected annual cost — and what does it imply about YouTube\'s total infrastructure bill?"',
+    },
   },
 
   {
@@ -1384,6 +1472,10 @@ export const estimationProblems = [
       'Assuming all created groups are active — many WhatsApp groups are created for events and then go dormant',
       'Not accounting for geographic variation — applying US/EU group behavior to the global user base significantly underestimates group usage in India and Latin America',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates 2 billion WhatsApp users, assumes each user is in 3 groups, and states 6 billion active WhatsApp groups. They forget to divide by the average group size to convert group memberships into unique groups — a fundamental double-counting error that inflates the answer by roughly 15-20x.',
+      interviewerFollowUp: '"You said 6 billion WhatsApp groups by multiplying 2B users × 3 groups each. But each of those 3 groups also counts all the other members — so you\'re counting the same group once per member. If the average group has 15 members, what is the unique group count — and how does that change your answer?"',
+    },
   },
 
   {
@@ -1443,6 +1535,10 @@ export const estimationProblems = [
       'Treating all 1B users as heavy navigators — the vast majority of casual users generate far less tile/routing traffic',
       'Forgetting to separate data transfer costs from compute costs — both are real and additive',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate takes Google Maps\' public API pricing ($2 per 1,000 map tile loads), estimates 1 billion users × 10 tile loads/session × 1 session/day = 10 billion tile loads/day × $0.002 = $20M/day = $7B/year in infrastructure cost. They use Google\'s own retail API pricing (which is revenue, not internal cost) and get a number that implies Google loses money on Maps before any other expenses.',
+      interviewerFollowUp: '"You used Google\'s public Maps API price as a proxy for their internal infrastructure cost. That API price is what Google charges external developers — it includes margin. Google\'s actual internal infrastructure cost is estimated at 5-15% of that price. How does adjusting to 10% of your per-tile cost change your annual estimate?"',
+    },
   },
 
   {
@@ -1502,6 +1598,10 @@ export const estimationProblems = [
       'Forgetting that most NYC residents are renters, not owners — NYC\'s 70% renter rate is far above the US average',
       'Ignoring that whole-unit vacation rentals are now essentially banned in NYC (host must be present)',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates NYC housing stock at 3.5 million units, applies a 1% STR penetration rate, and arrives at 35,000 Airbnb listings — a reasonable pre-2023 estimate. They are unaware that NYC\'s Local Law 18 took effect in September 2023, which requires hosts to register and be present during stays, effectively eliminating whole-unit short-term rentals and cutting active listings from ~40,000 to under 5,000.',
+      interviewerFollowUp: '"You got 35,000 listings based on a 1% penetration rate. In September 2023 New York City enacted Local Law 18 requiring host presence and registration. What does that regulation specifically prohibit — and how would awareness of that law change both your estimate and the structure of your answer?"',
+    },
   },
 
   {
@@ -1560,6 +1660,10 @@ export const estimationProblems = [
       'Not knowing Meta\'s 500M daily Stories users disclosure — this is a widely-cited publicly available figure',
       'Ignoring the Reels factor — Reels has taken significant share of session time from Stories since 2020',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates that Instagram has 2 billion MAU, assumes 20% of users post a Story each day, and arrives at 400M daily Stories users. They frame the answer around posters only — missing that the vast majority of daily Stories users are viewers, not posters — and use a posting rate that conflates creators with consumers.',
+      interviewerFollowUp: '"You estimated 400M daily Stories users based on 20% of MAU posting daily. Meta has disclosed 500M daily Stories users across their apps. The gap is small, but your logic is wrong: you\'re counting posters, not all users who interact with Stories. If only 5% of DAU post but 40% view, which number does the question ask for — and why does the distinction matter for product decisions about the Stories feature?"',
+    },
   },
 
   {
@@ -1619,6 +1723,10 @@ export const estimationProblems = [
       'Ignoring ABR — Netflix adaptively reduces quality when networks are congested; theoretical max bitrate ≠ actual delivered',
       'Confusing global Netflix bandwidth with US peak bandwidth',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates 80M US subscribers × 4K streaming bitrate of 25 Mbps = 2,000 Tbps (2 Pbps) of Netflix US peak bandwidth. They use total subscribers instead of peak concurrent streams (~20M), and apply the maximum 4K bitrate rather than the blended average (most streams are HD at 5-8 Mbps, not 4K at 25 Mbps).',
+      interviewerFollowUp: '"You said 2 Pbps of peak bandwidth. Sandvine reports Netflix accounts for roughly 15% of global internet traffic. The entire US internet backbone handles about 600 Tbps at peak. Your estimate of 2,000 Tbps is 3x the entire US internet capacity. What are the two overestimates in your calculation — and what does the corrected answer look like?"',
+    },
   },
 
   {
@@ -1678,6 +1786,10 @@ export const estimationProblems = [
       'Forgetting the spike factor — payment processor support volumes are highly correlated with outages and fraud events',
       'Not segmenting by merchant type — a 10-person startup and a Fortune 500 company have very different support interaction patterns',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates Stripe processes 500M transactions/day, applies a 1% ticket rate (one ticket per 100 transactions), and arrives at 5M daily support tickets. They treat every failed transaction as a support contact, apply a consumer-app contact rate to a B2B developer platform, and never distinguish between automated error responses and actual human support tickets.',
+      interviewerFollowUp: '"You applied a 1% ticket-per-transaction rate. Most Stripe errors are handled programmatically by developer code — they never result in a human support ticket. What is the difference between a Stripe API error (handled in code) and a support ticket (a human contacts Stripe), and how does that distinction collapse your estimate by 2-3 orders of magnitude?"',
+    },
   },
 
   {
@@ -1737,6 +1849,10 @@ export const estimationProblems = [
       'Using floor area directly without accounting for vertical storage (20-foot racking doubles usable storage per floor area)',
       'Not knowing Amazon\'s Prime Day disclosed revenue — this is the essential anchor for the order volume calculation',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate estimates Amazon\'s total US fulfillment center floor space at ~300M square feet and says "Amazon needs X% more for Prime Day" — applying a flat percentage uplift to total warehouse capacity without anchoring on actual Prime Day order volume uplift or the per-unit space requirement for incremental SKUs.',
+      interviewerFollowUp: '"You applied a 20% floor space uplift to Amazon\'s total warehouse capacity. But the question is about incremental space for the Prime Day inventory surge, not a percentage of existing capacity. If Prime Day generates ~300M incremental orders above normal volume, and each order requires roughly 1 cubic foot of pre-staged picking space, what does the incremental space requirement actually look like from the bottom up?"',
+    },
   },
 
   {
@@ -1797,5 +1913,9 @@ export const estimationProblems = [
       'Treating "open tab" and "actively loaded tab" as synonymous — Chrome aggressively suspends background tabs to reduce RAM usage',
       'Anchoring too conservatively on the median (5 tabs) without accounting for the heavy-user tail that pulls the average up',
     ],
+    failureMode: {
+      weakAnswer: 'The candidate states "Chrome has 3.3 billion installs, and the average user has 5 tabs open, so there are 16.5 billion open tabs globally." They apply the install count as if all 3.3B Chrome users are simultaneously browsing, apply a uniform 5-tab count to both mobile and desktop users, and never run a RAM sanity check on whether the world\'s hardware could support that many loaded tabs.',
+      interviewerFollowUp: '"You said 16.5 billion open tabs at 100 MB RAM per tab = 1.65 exabytes of RAM needed. The entire world\'s installed PC RAM is estimated at about 50 petabytes. Your estimate needs 33x more RAM than exists. What are the two assumptions that most inflate your number — and how does correcting for active-session rate and mobile vs. desktop tab counts bring it into a plausible range?"',
+    },
   },
 ];

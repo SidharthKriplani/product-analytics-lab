@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.54.0 (2026-06-02) — Debrief failure mode pass (Cases 20 cases, BI 16 cases, Growth 8 cases). BIRunner + GrowthRunner updated to render failureMode field. 6 new Review Room scenarios (cuped_variance, right_censored, multi_touch, b2b_constraints, geo_holdout, switchback). Session protocol files rewritten for token efficiency. Build: ✓ 0 errors.*
+*Last updated: V4.55.0 (2026-06-02) — Debrief failure mode pass complete across all 10 rooms (184 cases total). Audits #99/#100/#91 resolved. MCQ Trainer past sessions panel. Progress zero-state fixed. Build: ✓ 821 modules, 0 errors.*
 
 ---
 
@@ -37,6 +37,13 @@ See Next session item 1.
 ---
 
 ## Carry-forward log
+
+**Done this session (V4.55.0):**
+- Debrief failure mode pass — Instrumentation (12), Behavioral (30), Estimation (30), Design (8), STF (12). All 5 runners updated to render `failureMode` field. DesignDebriefPanel updated separately.
+- Audit #99 — key props verified across MetricChoicePanel, MetricDebriefPanel, RCAFoundationsRunner, ChallengesRunner. All .map() calls already had correct keys.
+- Audit #100 — BIRunner + GrowthRunner imperative hover mutations replaced with useState. MetricDebriefPanel, RCADebriefPanel, CaseDebriefPanel already correct.
+- Audit #91 — MCQ Trainer: past sessions panel added (empty state + last 3 sessions). Progress page: zero-state now routes to stat-foundations with correct copy. BookmarksBrowser + LockOverlay confirmed.
+- Build: ✓ 821 modules, 0 errors.
 
 **Done this session (V4.54.0):**
 - Debrief failure mode pass — Cases room: 20 cases (C01–C22) now have `\n\n**Weak answer:** ... **Interviewer follow-up:** ...` appended to `seniorAnswer.interviewPhrase`

@@ -555,6 +555,10 @@ export const designScenarios = [
           conceptLink: 'srm',
         },
       ],
+      failureMode: {
+        weakAnswer: 'The candidate chooses checkout conversion rate as the primary metric, sets "review results at end of test" as the decision rule with no pre-committed thresholds, and skips the SRM check. They design an experiment that will produce a number but cannot make a defensible ship or no-ship decision.',
+        interviewerFollowUp: '"You chose checkout conversion rate as your primary metric and said you\'ll review contextually at the end. The test results show +4.2% conversion and -3.1% average order value. With no pre-committed rule, what decision do you make — and how do you prevent that decision from being post-hoc rationalization?"',
+      },
     },
 
     pairedScenarioPrompt: {
@@ -1083,6 +1087,10 @@ export const designScenarios = [
           conceptLink: 'mde',
         },
       ],
+      failureMode: {
+        weakAnswer: 'The candidate uses session-level randomization because "it\'s simpler to implement," sets week-1 activation as primary with a 7-day runtime, and adds no verification step for ML model instrumentation. They have a test that will complete and produce a number — but a silent ML failure could invalidate the entire treatment arm without any alert.',
+        interviewerFollowUp: '"You set session-level randomization and a 7-day runtime to measure week-1 activation. A user who abandons onboarding and returns the next day would see a different version. How does that affect the assignment you\'re trying to measure — and what does your treatment group actually contain?"',
+      },
     },
 
     pairedScenarioPrompt: {
@@ -1570,6 +1578,10 @@ export const designScenarios = [
           conceptLink: 'novelty-effect',
         },
       ],
+      failureMode: {
+        weakAnswer: 'The candidate runs a 2-week test with overall WAU as the primary and reports "the result is statistically significant." They never pre-register the mobile subgroup analysis and, when overall WAU is null but mobile WAU is positive at week 2, pivot to declaring the mobile result the primary finding — turning a pre-planned test into a post-hoc fishing exercise.',
+        interviewerFollowUp: '"Overall WAU was null. You\'re reporting the mobile subgroup as the win. You didn\'t pre-register this subgroup. Given that you\'re now running a test within a test — why does the nominal alpha of 0.05 no longer apply to the mobile result, and what would you need to do to make this finding publishable?"',
+      },
     },
 
     pairedScenarioPrompt: {
@@ -2074,6 +2086,10 @@ export const designScenarios = [
           conceptLink: 'p-value',
         },
       ],
+      failureMode: {
+        weakAnswer: 'The candidate accepts all 6 metrics as co-equal primaries, runs the test, and at readout reports "4 of 6 metrics improved, so the feature is a success." They apply no multiple testing correction, never resolve the success definition with the PM before launch, and allow the post-hoc "most metrics improved" framing to stand.',
+        interviewerFollowUp: '"4 of your 6 metrics improved, 2 didn\'t. With 6 metrics at α=0.05 and no multiple testing correction, how many false positives would you expect by chance alone — and if the answer is ~1.3, does \'4 out of 6 improved\' actually tell you anything about whether the notification redesign works?"',
+      },
     },
 
     pairedScenarioPrompt: {
@@ -2608,6 +2624,10 @@ export const designScenarios = [
           conceptLink: 'novelty-effect',
         },
       ],
+      failureMode: {
+        weakAnswer: 'The candidate agrees with the PM that CTR is the right primary metric "since that\'s what the model optimizes for," runs the test for 14 days, reads a +11% CTR lift as a success, and recommends shipping. They never add add-to-cart or purchase as guardrail metrics and never flag the circular validation problem of using the training objective as the evaluation metric.',
+        interviewerFollowUp: '"CTR is up 11%. You\'re recommending ship. If the ML model learned to surface listings with misleading thumbnails that get clicked but rarely purchased, how would your experiment catch that — and what specific metric would show the problem that your current design doesn\'t track?"',
+      },
     },
 
     pairedScenarioPrompt: {
@@ -3092,6 +3112,10 @@ export const designScenarios = [
           conceptLink: 'srm',
         },
       ],
+      failureMode: {
+        weakAnswer: 'The candidate uses notification open rate as the primary metric "because that\'s the engagement signal the team cares about," runs 14 days, reads a +19% open rate lift, and recommends shipping. Opt-out rate is noted as a metric to watch post-launch but is not a blocking guardrail. They never distinguish between opens that lead to sessions and opens that lead to app closes.',
+        interviewerFollowUp: '"Open rate is up 19% and you\'re recommending ship. If the ML model learned to send notifications at moments of idle phone-checking — when users tap to dismiss rather than engage — how would your experiment tell the difference between an open that drives a session and an open that drives an immediate app close?"',
+      },
     },
 
     pairedScenarioPrompt: {
@@ -3565,6 +3589,10 @@ export const designScenarios = [
           conceptLink: 'novelty-effect',
         },
       ],
+      failureMode: {
+        weakAnswer: 'The candidate accepts seller-level randomization as proposed by engineering, runs a 14-day A/B, and reports that treatment sellers show +18% conversion rate — recommending the program be shipped. They never flag the SUTVA violation: buyers interact with both treatment and control sellers simultaneously, so control sellers lose demand to treatment sellers and the measured lift is reallocation, not additive growth.',
+        interviewerFollowUp: '"Your treatment sellers show +18% conversion and you\'re recommending ship. But a buyer who messaged a treatment seller (fast responder, badge, boosted in search) instead of a control seller — did you just create new demand, or did you redirect an existing buyer away from a control seller? How does your experiment design distinguish those two outcomes?"',
+      },
     },
 
     pairedScenarioPrompt: {
@@ -4031,6 +4059,10 @@ export const designScenarios = [
           conceptLink: 'power',
         },
       ],
+      failureMode: {
+        weakAnswer: 'The candidate accepts checklist completion as the primary metric, runs the test for 14 days, reads a +34% completion rate lift, and recommends shipping. They never check whether checklist completers show higher 14-day retention, never flag that completion is gameable by trivial steps like "set personal preferences," and declare the feature a success based entirely on the progress bar metric.',
+        interviewerFollowUp: '"Checklist completion is up 34%. Before you recommend ship, I want to see one number: what is the 14-day retention rate for users who completed the checklist versus those who didn\'t — and if it\'s flat or worse in the treatment arm, what does that tell you about what the checklist actually taught users to do?"',
+      },
     },
 
     pairedScenarioPrompt: {
