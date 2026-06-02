@@ -50,6 +50,7 @@ const PrioritizationBrowser = lazy(() => import('./pages/PrioritizationBrowser.j
 const PlaybookBrowser       = lazy(() => import('./pages/PlaybookBrowser.jsx').then(m => ({ default: m.PlaybookBrowser })));
 const BlogBrowser           = lazy(() => import('./pages/BlogBrowser.jsx').then(m => ({ default: m.BlogBrowser })));
 const Progress              = lazy(() => import('./pages/Progress.jsx').then(m => ({ default: m.Progress })));
+const ProfilePage           = lazy(() => import('./pages/ProfilePage.jsx').then(m => ({ default: m.ProfilePage })));
 const Unlock                = lazy(() => import('./pages/Unlock.jsx').then(m => ({ default: m.Unlock })));
 const About                 = lazy(() => import('./pages/About.jsx').then(m => ({ default: m.About })));
 const RoomMap               = lazy(() => import('./pages/RoomMap.jsx').then(m => ({ default: m.RoomMap })));
@@ -1157,6 +1158,15 @@ export default function App() {
 
         {/* ── Support pages ── */}
         {page === 'pricing' && <Pricing onShowUnlock={() => setPage('unlock')} onBack={() => setPage('home')} />}
+        {page === 'profile' && (
+          <ProfilePage
+            user={user}
+            onNavigate={navigate}
+            onShowAuth={() => setShowAuth(true)}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        )}
         {page === 'progress' && (
           <Progress
             allProgress={progressSnapshot}

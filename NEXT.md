@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.58.0 (2026-06-02) — Review Room S19–S25 complete. Statefulness fixed (exp-lab-progress-v1 now in PROGRESS_KEYS). All spine MDs current. Ready for git push + Batch 1.*
+*Last updated: V4.59.0 (2026-06-02) — Profile page live. Identity, stats, sync, study plans, saved, settings. Sidebar avatar chip navigates to profile.*
 
 ---
 
@@ -42,6 +42,12 @@ See Next session item 1.
 - Audit #100 — BIRunner + GrowthRunner imperative hover mutations replaced with useState. MetricDebriefPanel, RCADebriefPanel, CaseDebriefPanel already correct.
 - Audit #91 — MCQ Trainer: past sessions panel added (empty state + last 3 sessions). Progress page: zero-state now routes to stat-foundations with correct copy. BookmarksBrowser + LockOverlay confirmed.
 - Build: ✓ 821 modules, 0 errors.
+
+**Done this session (V4.59.0):**
+- Profile page at `/profile`. Sections: identity card (OAuth avatar, name, email, provider badge, member since), practice stats (cases done + rooms active + bookmarks count + per-room breakdown), cross-device sync button (manual push+pull), study plans (Defense Strategy + SQL Lab plan status with nav links), recent saved cases (last 4 bookmarks), settings (theme toggle, export/import progress).
+- Sidebar: avatar chip now navigates to `/profile` and shows OAuth avatar image if available. Shows display name from OAuth metadata when present.
+- Files: `src/pages/ProfilePage.jsx` (new), `src/App.jsx` (lazy import + route), `src/components/layout/Sidebar.jsx` (avatar chip redesign).
+- Build: ✓ 1.88s, 0 errors.
 
 **Done this session (V4.58.0):**
 - Review Room S19–S25: 7 new scenarios added (18 → 25). Thin families closed: SRM×2, novelty_peeking×2, hte_subgroups×3, guardrail_breach×2, multiple_testing×3.

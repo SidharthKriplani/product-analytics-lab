@@ -430,34 +430,38 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
             </button>
           )}
           {user && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.25rem' }}>
-              <div style={{
-                width: '24px', height: '24px', borderRadius: '50%',
-                background: 'var(--accent-bg, var(--surface-2))',
-                border: '1px solid var(--border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--accent)',
-                fontSize: '0.7rem', fontWeight: 700,
-                flexShrink: 0,
-                textTransform: 'uppercase',
-              }}>
-                {user.email ? user.email[0] : '?'}
-              </div>
+            <button
+              onClick={() => { onNavigate('profile'); onClose(); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.25rem',
+                width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+                borderRadius: '6px',
+              }}
+              title="View profile"
+            >
+              {user.user_metadata?.avatar_url ? (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt="avatar"
+                  style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)', flexShrink: 0 }}
+                />
+              ) : (
+                <div style={{
+                  width: '24px', height: '24px', borderRadius: '50%',
+                  background: 'var(--accent-bg, var(--surface-2))',
+                  border: '1px solid var(--border)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 700,
+                  flexShrink: 0, textTransform: 'uppercase',
+                }}>
+                  {user.email ? user.email[0] : '?'}
+                </div>
+              )}
               <span style={{ flex: 1, fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user.email}
+                {user.user_metadata?.full_name || user.user_metadata?.user_name || user.email}
               </span>
-              <button
-                onClick={async () => { await signOut(); onClose(); }}
-                style={{
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  fontSize: '0.72rem', color: 'var(--text-muted)',
-                  padding: '0.2rem 0.3rem', flexShrink: 0,
-                }}
-                title="Sign out"
-              >
-                Sign out
-              </button>
-            </div>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', flexShrink: 0 }}>&#8250;</span>
+            </button>
           )}
         </div>
 

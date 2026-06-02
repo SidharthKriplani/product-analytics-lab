@@ -4,6 +4,32 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.59.0] — 2026-06-02 [FEATURE]
+
+### Profile page
+
+New `/profile` page accessible by clicking the avatar chip in the sidebar.
+
+**Identity card:** OAuth avatar image (Google/GitHub) or initials fallback. Display name from OAuth metadata. Email. Provider badge (Google / GitHub / Email). Member since date.
+
+**Practice stats:** Cases completed (computed live from all room localStorage keys), rooms active, bookmark count, per-room breakdown chips.
+
+**Cross-device sync:** Manual "Sync now" button that calls `pushProgressToSupabase` + `pullProgressFromSupabase`. Visual feedback: idle → syncing → synced / error, auto-resets after 3s.
+
+**Study plans:** Defense Strategy plan (step count + "Open plan" link) and SQL Study Plan (goal label + daily target + "Open SQL Lab" link). Empty states with "Build one" / "Set one up" prompts.
+
+**Saved cases:** Last 4 bookmarks (most recent first) with room label and difficulty badge. "View all" link to `/bookmarks`.
+
+**Settings:** Theme toggle (light/dark). Export progress (JSON download of all 26 localStorage keys). Import progress (JSON upload + reload).
+
+**Not-signed-in state:** Clean prompt with sign-in CTA, no broken sections.
+
+**Sidebar:** Avatar chip redesigned — shows OAuth avatar image when available (Google/GitHub), display name from metadata when present, navigates to `/profile` on click.
+
+Files: `src/pages/ProfilePage.jsx` (new, 280 lines), `src/App.jsx` (lazy import + route), `src/components/layout/Sidebar.jsx` (avatar chip)
+
+---
+
 ## [4.58.0] — 2026-06-02 [CONTENT + FIX]
 
 ### Review Room expansion (S19–S25) + Statefulness fix

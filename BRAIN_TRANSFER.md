@@ -1,6 +1,6 @@
-# Brain Transfer — V4.58.0
+# Brain Transfer — V4.59.0
 
-**Version:** V4.58.0 | **Build:** ✓ (1.79s, 0 errors) | **Git:** uncommitted (push from Mac terminal) | **Date:** 2026-06-02
+**Version:** V4.59.0 | **Build:** ✓ (1.88s, 0 errors) | **Git:** uncommitted (push from Mac terminal) | **Date:** 2026-06-02
 
 ---
 
@@ -43,6 +43,8 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 ---
 
 ## What was just done
+
+**V4.59.0** — Profile page (`/profile`). Identity card (OAuth avatar, name, email, provider badge, member since). Practice stats strip (cases done, rooms active, bookmarks). Cross-device sync button. Study plans (Defense + SQL). Recent saved cases. Settings (theme toggle, export/import). Sidebar avatar chip now navigates to profile instead of doing nothing.
 
 **V4.58.0** — Review Room S19–S25 (7 new scenarios). Statefulness fix: `exp-lab-progress-v1` added to PROGRESS_KEYS — Review Room completions now sync cross-device. CHANGELOG updated with V4.56/57/58 entries. All spine MD files current.
 
@@ -116,7 +118,7 @@ Runners that render it: BIRunner, GrowthRunner, InstrumentationRunner, Behaviora
 ## Git commit
 
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.58.0: Review Room S19-S25 (7 new scenarios, all thin families closed). Statefulness fix: exp-lab-progress-v1 added to PROGRESS_KEYS. CHANGELOG + spine MDs current." && git push origin main
+cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.59.0: Profile page. Identity card, stats, sync, study plans, saved cases, settings. Sidebar avatar navigates to profile." && git push origin main
 ```
 
 ---
