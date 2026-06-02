@@ -185,6 +185,35 @@ Make a product + engineering call first. Not everything belongs. Ask: does this 
 
 ---
 
+## Context limit prevention (critical — read this)
+
+PAL's 1M token context limit gets hit when large source files + spine files + conversation history compound. Hit it and you get incomplete edits, missed steps, and unreliable work.
+
+**Files that will burn your context if read in full — always Grep first:**
+
+| File | Lines | Rule |
+|---|---|---|
+| `src/pages/PlaybookBrowser.jsx` | ~5,000 | Never read in full. Grep for component/function name, then `Read` with offset+limit. |
+| `src/data/designScenarios.js` | ~4,000 | Grep for case id, read ±30 lines. |
+| `src/data/rcaCases.js` | ~4,000 | Same. |
+| `src/data/businessCases.js` | ~3,800 | Same. |
+| `src/data/sqlLabProblems.js` | ~2,800 | Same. |
+| `src/components/expFoundations/ExpFoundationsRunner.jsx` | ~2,700 | Grep for the function/section. |
+| `src/data/metricCases.js` | ~2,600 | Same. |
+| `src/data/scenarios.js` | ~2,300 | Same. |
+| `CHANGELOG.md` | ~2,900 | Pre-V4.40 archived in CHANGELOG_ARCHIVE.md. Only read the top (recent versions). |
+| `AUDITS.md` | ~2,100 | Pre-V4.30 archived in AUDITS_ARCHIVE.md. Read from offset if you need older audits. |
+
+**Operating rules:**
+
+1. **Session open: read BRAIN_TRANSFER.md + NEXT.md + CLAUDE.md only.** Do not proactively read source files before knowing exactly which function or section you need.
+2. **One focused batch per session.** Plan work that touches 3–5 files max. If you need 10+ files, split across sessions.
+3. **Never read a file >2,000 lines in full.** Use `Grep` to find the section, then `Read` with offset+limit.
+4. **Use subagents for large-file tasks.** The Agent tool spawns a fresh context — delegate any task requiring reading a large file to a subagent rather than doing it in the main session.
+5. **CLAUDE.md stays under 250 lines.** New rules only — no sprint logs. Sprint history lives in NEXT.md carry-forward log.
+
+---
+
 ## MD spine files (what each does)
 
 | File | Purpose |
