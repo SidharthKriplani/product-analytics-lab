@@ -127,8 +127,35 @@ Full rubric + process in SQL_LAB_PLAN.md Section 8.
 
 ---
 
-## Batch 5 — Easy e41–e50
-**Status:** Pending
+## Batch 5 — Easy e41–e50 (file positions 41–50: e67–e86)
+**Status:** ✅ Complete | **Audited:** 2026-06-02 | **Flagged:** 6 | **Rewritten:** 3 + 2 debrief upgrades + 1 reclassification + 1 company fix
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Approaches | Technique | Pattern | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| e67 | Patients 50 or Older | Humana | 4 | 4 | 5 | 4 | 4 | 3 | 4 | 28 | 1 | WHERE age range filter | patient segmentation | ✅ Pass |
+| e68 | Content by Premium Creators | Patreon | 4 | 5 | 5 | 4 | 3 | 3 | 3 | 27 | 1 | JOIN + WHERE filter | creator analytics | ✅ Pass |
+| e69 | Net Revenue on Discounted Orders (rewritten) | Nordstrom | 5 | 4 | 5 | 4 | 5 | 4 | 4 | 31 | 2 | arithmetic in SELECT + multi-condition WHERE | promotions analysis | ✅ Rewritten (was trivial WHERE subtotal > 100, DC=2) |
+| e70 | Active FX Exposure by Currency (rewritten) | Revolut | 5 | 5 | 5 | 4 | 5 | 4 | 4 | 32 | 2 | dual aggregate COUNT+SUM + WHERE pre-filter | FX hedging | ✅ Rewritten (was single-aggregate COUNT cluster, DR=2) |
+| e72 | Appointments Without Diagnoses | Athenahealth | 5 | 5 | 5 | 5 | 3 | 5 | 4 | 32 | 2 | LEFT JOIN IS NULL anti-join (medical context) | clinical quality | ✅ Pass (best in batch) |
+| e74 | Order Status Summary (rewritten) | ASOS | 4 | 4 | 5 | 3 | 5 | 4 | 4 | 29 | 2 | triple aggregate COUNT+SUM+AVG in one GROUP BY | finance reporting | ✅ Rewritten (was clone of e08, Di=2, TC=2) |
+| e77 | Diagnoses per Provider | Athenahealth | 4 | 3 | 5 | 4 | 3 | 4 | 4 | 27 | 2 | JOIN + GROUP BY + COUNT (clinical productivity) | provider productivity | ✅ Pass + company fix (Doximity → Athenahealth) + debrief upgraded |
+| e78 | Revenue by Acquisition Channel | Klaviyo | 4 | 4 | 5 | 4 | 4 | 4 | 4 | 29 | 2 | SUM + JOIN + GROUP BY channel | channel analytics | ✅ Debrief upgraded (TC 2→4: subquery approach + LEFT JOIN zero-order variant) |
+| e81 | Total Disputed Exposure | Stripe | 4 | 5 | 5 | 3 | 3 | 4 | 4 | 28 | 2 | SUM scalar + WHERE filter | compliance reporting | ✅ Debrief upgraded (TC 2→4: conditional aggregation approach for resolved vs. unresolved split) |
+| e86 | Level Engagement Percentile | Zynga | 5 | 5 | 1 | 5 | 5 | 5 | 4 | 30 | 2 | PERCENT_RANK() window fn + CTE | percentile ranking | ✅ Reclassified Easy→Medium (DC=1: window fn + CTE is Medium by market rubric) |
+
+### Batch 5 findings
+
+**6/10 flagged.** Improving trend (B1:2, B2:7, B3:6, B4:6, B5:6 flagged). Three full rewrites + 2 debrief upgrades + 1 difficulty reclassification + 1 company tag fix.
+
+**Too-simple single-aggregate (e69, e70):** e69 was `WHERE subtotal > 100` on one table — a single range filter with no join, no aggregation, DC=2. Replaced with "Net Revenue on Discounted Orders" — arithmetic in SELECT (subtotal − discount as effective_price) plus two WHERE conditions (status = 'completed' AND discount > 0), teaching computed column derivation. e70 was `COUNT(*) GROUP BY currency` on one table, DR=2. Replaced with "Active FX Exposure by Currency" — dual aggregate (COUNT + SUM) with WHERE pre-filter, giving both account volume and dollar exposure in one query.
+
+**Clone of e08 (e74):** "Interactions per Content Item" was `COUNT(*) GROUP BY content_id ORDER BY interaction_count DESC` — structurally identical to e08 "Top-Performing Content." Replaced with "Order Status Summary" (ASOS) — triple aggregate (COUNT + SUM + AVG) in a single GROUP BY, the standard finance analyst deliverable format.
+
+**Company authenticity fix (e77):** Doximity is physician networking software — not the right company for a clinical diagnosis-counting query. Fixed to Athenahealth (EHR system). Note: e72 is also Athenahealth, which creates two Athenahealth problems in this batch. Both are clinically authentic and structurally distinct (anti-join vs. GROUP BY+COUNT). Acceptable given domain specificity.
+
+**Debrief-only upgrades (e78, e81):** Both had TC=2. e78 now documents both the JOIN approach and the subquery approach, plus a LEFT JOIN variant for including zero-order channels. e81 now documents the conditional aggregation approach (SUM(CASE WHEN resolved_at IS NULL THEN amount END)) to split disputed exposure into resolved vs. unresolved in a single pass.
+
+**Reclassification (e86):** "Level Engagement Percentile" uses PERCENT_RANK() over a CTE — unambiguously Medium by the market rubric (any window function = Medium). DC=1. Reclassified to Medium; it now joins the Medium tier pool and will be scored in a Medium batch audit.
 
 ---
 

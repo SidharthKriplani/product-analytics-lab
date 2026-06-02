@@ -1,6 +1,6 @@
-# Brain Transfer — V4.59.0
+# Brain Transfer — V4.64.0
 
-**Version:** V4.59.0 | **Build:** ✓ (1.88s, 0 errors) | **Git:** uncommitted (push from Mac terminal) | **Date:** 2026-06-02
+**Version:** V4.64.0 | **Build:** ✓ (1.78s, 0 errors) | **Git:** uncommitted (push from Mac terminal) | **Date:** 2026-06-02
 
 ---
 
@@ -44,6 +44,8 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 
 ## What was just done
 
+**V4.64.0** — SQL Quality Audit Batch 5 complete. 3 rewrites (e69→arithmetic in SELECT + multi-condition WHERE, e70→dual COUNT+SUM FX exposure, e74→triple aggregate COUNT+SUM+AVG) + 2 debrief upgrades (e78 channel analytics subquery alt, e81 conditional aggregation split) + 1 reclassification (e86 Easy→Medium, window fn + CTE) + 1 company tag fix (e77 Doximity→Athenahealth). Easy tier: 50 problems audited. All core Easy SQL patterns now covered at least once.
+
 **V4.63.0** — SQL Quality Audit Batch 4 complete. 4 rewrites (e55→COALESCE, e57→IN clause, e58→HAVING+JOIN, e59→IN literal+GROUP BY, e60→dual SUM+COUNT) + 2 targeted fixes (e52 checkValues, e56 TC upgrade P2P NULL gap). Anti-join overload in Easy tier resolved — exactly 2 remain (e01, e11). 12 distinct Easy skills now covered across 40 problems.
 
 **V4.62.0** — SQL Quality Audit Batch 3 complete. 4 rewrites (e35→SUM computed JOIN, e40→SUM+JOIN fintech, e42→3-table JOIN expansion, e44→rate calc device OS) + 2 debrief upgrades (e47 NOT EXISTS pattern, e49 median alternative). SQL_QUALITY_AUDIT.md Batch 3 section complete.
@@ -81,7 +83,7 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 
 ---
 
-## Next action — SQL Quality Audit Batch 1 (e01–e10) → PostHog confirm → Batch 1 outreach
+## Next action — SQL Quality Audit Batch 6 (Medium m01–m10) → PostHog confirm → Batch 1 outreach
 
 **Auth fully live (V4.58.0):** Email magic link ✅, Google OAuth ✅, GitHub OAuth ✅. Sign-in button in sidebar. Progress syncs cross-device (all rooms including Review Room). E2E tested on production URL.
 
@@ -126,7 +128,7 @@ Runners that render it: BIRunner, GrowthRunner, InstrumentationRunner, Behaviora
 ## Git commit
 
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.59.0: Profile page. Identity card, stats, sync, study plans, saved cases, settings. Sidebar avatar navigates to profile." && git push origin main
+cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.64.0: SQL Audit Batch 5. 3 rewrites (arithmetic in SELECT, dual aggregate FX, triple aggregate). 2 debrief upgrades (e78, e81). e86 reclassified Easy→Medium. e77 company fix Doximity→Athenahealth." && git push origin main
 ```
 
 ---

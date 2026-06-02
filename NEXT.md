@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.60.0 (2026-06-02) — SQL Audit Batch 1 complete. e07 + e10 rewritten. SQL_QUALITY_AUDIT.md created. Profile page live (V4.59.0).*
+*Last updated: V4.64.0 (2026-06-02) — SQL Audit Batch 5 complete. 50 Easy problems audited. e69/e70/e74 rewritten, e78/e81 debriefs upgraded, e86 reclassified Medium, e77 company fixed.*
 
 ---
 
@@ -17,8 +17,8 @@ Read this at the start of every build session. Do only this. Update before closi
 
 ## Next session
 
-**1. SQL Quality Audit — Batch 5 (file positions 41–50)**
-Score full batch, fix flagged, build+verify, ship. See SQL_QUALITY_AUDIT.md for running scores.
+**1. SQL Quality Audit — Batch 6 (Medium m01–m10)**
+Score full batch, fix flagged, build+verify, ship. Medium rubric: same 7 dimensions but DC and Di expectations are higher — window functions, CTEs, multi-step compositions. See SQL_QUALITY_AUDIT.md for running scores.
 
 **2. Confirm VITE_POSTHOG_KEY live in Vercel** — check env vars dashboard, establish WAU baseline before Batch 1 outreach.
 
@@ -38,6 +38,10 @@ See Next session item 1.
 ---
 
 ## Carry-forward log
+
+**Done this session (V4.64.0):**
+- SQL Audit Batch 5 complete (e67–e86, file positions 41–50). 6/10 flagged. 3 rewrites: e69 (arithmetic in SELECT + multi-condition WHERE), e70 (dual COUNT+SUM with WHERE pre-filter), e74 (triple aggregate COUNT+SUM+AVG). 2 debrief upgrades: e78 (subquery alt + zero-order LEFT JOIN), e81 (conditional aggregation split). e86 reclassified Easy→Medium (PERCENT_RANK + CTE). e77 company fixed Doximity→Athenahealth. 50 Easy problems fully audited.
+- Build: ✓ 1.78s, 0 errors.
 
 **Done this session (V4.55.0):**
 - Debrief failure mode pass — Instrumentation (12), Behavioral (30), Estimation (30), Design (8), STF (12). All 5 runners updated to render `failureMode` field. DesignDebriefPanel updated separately.

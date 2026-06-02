@@ -616,7 +616,7 @@ Every problem should have:
 | 2 | e11–e20 | Easy | ✅ V4.61.0 | e20,e23,e26,e29,e32,e34 + h16 ID bug | HAVING, AVG, BETWEEN, multi-col GROUP BY |
 | 3 | e35–e51 | Easy | ✅ V4.62.0 | e35,e40,e42,e44 + e47,e49 TC | SUM(computed), SUM+JOIN, 3-table JOIN, rate calc |
 | 4 | e52–e65 | Easy | ✅ V4.63.0 | e55,e57,e58,e59,e60 + e52 checkValues,e56 TC | COALESCE, IN literal, dual aggregate |
-| 5 | e41–e50 | Easy | Pending | — | — |
+| 5 | e67–e86 | Easy | ✅ V4.64.0 | e69,e70,e74 + e78,e81 TC + e86 reclassified + e77 company | arithmetic in SELECT, triple aggregate, FX dual aggregate |
 | 6 | m01–m10 | Medium | Pending | — | — |
 | 7 | m11–m20 | Medium | Pending | — | — |
 | 8 | m21–m30 | Medium | Pending | — | — |

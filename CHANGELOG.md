@@ -4,6 +4,26 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.64.0] — 2026-06-02 [CONTENT]
+
+### SQL Quality Audit — Batch 5 (file positions 41–50: e67–e86)
+
+**Results:** 4/10 pass. 3 full rewrites + 2 debrief upgrades + 1 difficulty reclassification + 1 company tag fix.
+
+- **e69 rewritten** — "Large-Value Orders" was `WHERE subtotal > 100` on a single table (DC=2, estimatedMin 3). Replaced with "Net Revenue on Discounted Orders" — arithmetic in SELECT (effective_price = subtotal − discount) + two-condition WHERE (status = 'completed' AND discount > 0). First appearance of computed column derivation as the primary technique.
+- **e70 rewritten** — "Accounts by Currency" was single-aggregate `COUNT(*) GROUP BY currency` with no WHERE, DR=2. Replaced with "Active FX Exposure by Currency" (Revolut) — dual aggregate (COUNT + SUM) with WHERE status = 'active' pre-filter. Answers both capacity and dollar-exposure questions in one query.
+- **e74 rewritten** — "Interactions per Content Item" was structurally identical to e08 (GROUP BY + COUNT + ORDER BY + LIMIT). Replaced with "Order Status Summary" (ASOS) — triple aggregate (COUNT + SUM + AVG with ROUND) in one GROUP BY. Standard finance analyst deliverable format, new pattern in Easy tier.
+- **e77 company fix** — Doximity → Athenahealth (physician networking is wrong domain for clinical diagnosis query). Debrief also upgraded: subquery approach and LEFT JOIN zero-case variant documented.
+- **e78 debrief upgraded** — TC 2→4. Added subquery alternative approach + LEFT JOIN variant for including zero-order channels.
+- **e81 debrief upgraded** — TC 2→4. Added conditional aggregation approach (SUM(CASE WHEN resolved_at IS NULL THEN amount END)) for split reporting of resolved vs. unresolved disputed exposure.
+- **e86 reclassified** — PERCENT_RANK() + CTE on Easy tier. DC=1. Reclassified to Medium (market rubric: any window function = Medium). Will be scored in a Medium batch audit.
+
+**Easy tier skill coverage after 50 problems:** All core Easy patterns covered — anti-join (×2), HAVING, COUNT DISTINCT, BETWEEN, multi-column GROUP BY, AVG, SUM(computed), SUM(binary) rate, 3-table JOIN, COALESCE, IN literal, dual aggregate, scalar SUM, arithmetic in SELECT (derived column), triple aggregate, date range WHERE.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `SQL_LAB_PLAN.md`
+
+---
+
 ## [4.63.0] — 2026-06-02 [CONTENT]
 
 ### SQL Quality Audit — Batch 4 (file positions 31–40: e52–e65)
