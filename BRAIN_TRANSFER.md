@@ -1,6 +1,6 @@
 # Brain Transfer — V4.64.0
 
-**Version:** V4.66.0 | **Build:** ✓ (2.09s, 0 errors) | **Git:** uncommitted (push from Mac terminal) | **Date:** 2026-06-02
+**Version:** V4.67.0 | **Build:** ✓ (2.27s, 0 errors) | **Git:** uncommitted (push from Mac terminal) | **Date:** 2026-06-02
 
 ---
 
@@ -43,6 +43,8 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 ---
 
 ## What was just done
+
+**V4.67.0** — SQL Quality Audit Batch 8 complete (m36–m61). Live solution bug fixed (m36 temporal ordering). 3 rewrites: m37 (Easy-level→channel conversion rate), m47 (LAG clone→ROWS BETWEEN bounded rolling avg), m56 (IN subquery→relational division). m57 dual DENSE_RANK upgrade. m42 checkValues. m61 debrief. Trap enrichment taxonomy logged (SQL_LAB_PLAN Section 10, IDEAS Tier 1, DECISIONS standing rule).
 
 **V4.66.0** — SQL Quality Audit Batch 7 complete (Medium m21–m33). Worst batch since Easy B2 — 7/10 flagged. 3 rewrites: m21 (ROW_NUMBER clone→NTILE quartile), m28 (RANK clone→global AVG OVER benchmark), m30 (AVG OVER clone→SUM(SUM) OVER pct-of-total). 3 checkValues fixed (m24,m26,m29). Company dup fixed m24 Gainsight→Salesforce. 2 debrief upgrades (m32 FIRST_VALUE, m33 4-table JOIN).
 
@@ -87,7 +89,7 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 
 ---
 
-## Next action — SQL Quality Audit Batch 8 (Medium m21–m30) → PostHog confirm → Batch 1 outreach
+## Next action — SQL Quality Audit Batch 9 (Medium m31–m40) → PostHog confirm → Batch 1 outreach
 
 **Auth fully live (V4.58.0):** Email magic link ✅, Google OAuth ✅, GitHub OAuth ✅. Sign-in button in sidebar. Progress syncs cross-device (all rooms including Review Room). E2E tested on production URL.
 
@@ -132,7 +134,7 @@ Runners that render it: BIRunner, GrowthRunner, InstrumentationRunner, Behaviora
 ## Git commit
 
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.66.0: SQL Audit Batch 7 (Medium). 3 rewrites (m21→NTILE, m28→global AVG OVER, m30→SUM(SUM) OVER pct). 3 checkValues fixed. m24 company fix. m32+m33 debriefs upgraded." && git push origin main
+cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.67.0: SQL Audit Batch 8 + Trap Enrichment taxonomy. m36 bug fix (temporal ordering), m37→conversion rate, m47→ROWS BETWEEN rolling avg, m56→relational division, m57 dual DENSE_RANK upgrade." && git push origin main
 ```
 
 ---

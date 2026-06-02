@@ -619,7 +619,7 @@ Every problem should have:
 | 5 | e67–e86 | Easy | ✅ V4.64.0 | e69,e70,e74 + e78,e81 TC + e86 reclassified + e77 company | arithmetic in SELECT, triple aggregate, FX dual aggregate |
 | 6 | m01–m20 | Medium | ✅ V4.65.0 | m07,m09,m14 + m13 checkValues | JULIANDAY date arith, MoM LAG, DENSE_RANK PARTITION BY |
 | 7 | m21–m33 | Medium | ✅ V4.66.0 | m21,m28,m30 + m24,m26,m29 checkValues + m24 company + m32,m33 debriefs | NTILE, global AVG OVER, SUM(SUM) OVER pct-of-total |
-| 8 | m21–m30 | Medium | Pending | — | — |
+| 8 | m36–m61 | Medium | ✅ V4.67.0 | m36 bug+m37+m47+m56 rewrites, m57 upgrade, m42 checkValues, m61 debrief | ROWS BETWEEN bounded window, relational division, dual DENSE_RANK |
 | 9 | m31–m40 | Medium | Pending | — | — |
 | 10 | h01–h10 | Hard | Pending | — | — |
 | 11 | h11–h25 | Hard | Pending | — | — |

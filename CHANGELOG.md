@@ -4,6 +4,24 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.67.0] — 2026-06-02 [CONTENT]
+
+### SQL Quality Audit — Batch 8 (Medium m21–m30: m36, m37, m39, m41, m42, m43, m47, m56, m57, m61)
+
+**Results:** 4/10 pass. 3 full rewrites + 1 dual-metric upgrade + 1 live solution bug fix + 1 checkValues fix + 2 debrief upgrades.
+
+- **m36 solution bug fixed** — self-join without temporal ordering included user 12 (completed Aug 2023, returned Apr 2024) as a "re-purchaser" — incorrectly, since their completion preceded their return. Added `AND o2.created_at > o1.created_at`. expectedRowCount corrected 3→2. Debrief upgraded with the failure mode explanation.
+- **m37 rewritten** — HAVING+SUM on single table (DC=2, total=19, Easy-level). Replaced with "Channel Session Conversion Rate" (Shopify) — JOIN sessions to users, GROUP BY channel, SUM(binary converted) for conversions, 100.0*SUM/COUNT rate. Integer division trap embedded.
+- **m42 checkValues** — fixed (appt 1, patient 1, F, age 38).
+- **m47 rewritten** — LAG+JULIANDAY clone of m26. Replaced with "Rolling 3-Order Average Spend" (Shopify) — AVG() OVER (ROWS BETWEEN 2 PRECEDING AND CURRENT ROW). First bounded rolling window frame in the audit. checkValue: user 5 order 11 → rolling_3_avg=129.99.
+- **m56 rewritten** — IN subquery+DISTINCT (DR=2 Di=2 TC=2, thin). Replaced with "Complete Fitness Content Viewers" (Spotify) — relational division via HAVING COUNT(DISTINCT content_id) = (SELECT COUNT(*) FROM content WHERE category='fitness'). Classic relational division pattern: generalizes automatically when new content is added. checkValue: user 2 (one of 2 users engaging with all fitness content).
+- **m57 upgraded** — single DENSE_RANK (3rd CTE+ranking clone, Di=2). Upgraded to dual DENSE_RANK: order_rank (by times_ordered) + revenue_rank (by total_revenue). Teaches ranking divergence — most-ordered ≠ most-revenue-generating. Di 2→4.
+- **m61 debrief upgraded** — TC=2→4: INNER JOIN failure mode, COUNT DISTINCT vs COUNT distinction, EXISTS alternative and its brittleness, normalization follow-up.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `SQL_LAB_PLAN.md`
+
+---
+
 ## [4.66.0] — 2026-06-02 [CONTENT]
 
 ### SQL Quality Audit — Batch 7 (Medium m11–m20: m21, m23, m24, m25, m26, m28, m29, m30, m32, m33)

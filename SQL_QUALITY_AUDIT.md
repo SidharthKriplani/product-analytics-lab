@@ -226,8 +226,37 @@ Full rubric + process in SQL_LAB_PLAN.md Section 8.
 
 ---
 
-## Batch 8 — Medium m21–m30
-**Status:** Pending
+## Batch 8 — Medium m21–m30 (file positions 21–30: m36, m37, m39, m41, m42, m43, m47, m56, m57, m61)
+**Status:** ✅ Complete | **Audited:** 2026-06-02 | **Flagged:** 6 | **Rewritten:** 3 + 1 dual-metric upgrade + 1 solution bug fix + 1 checkValues fix + 2 debrief upgrades
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Approaches | Technique | Pattern | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| m36 | Returned Then Re-Purchased Customers | Zalando | 5 | 4 | 4 | 3 | 4 | 4 | 4 | 32 | 2 | self-join (orders × 2) + temporal ordering | customer recovery detection | ✅ Solution bug fixed (temporal ordering missing — user 12 was false positive) + debrief upgraded |
+| m37 | Channel Session Conversion Rate (rewritten) | Shopify | 5 | 4 | 4 | 4 | 5 | 5 | 4 | 31 | 2 | JOIN + GROUP BY + SUM(binary) + rate calc | channel analytics | ✅ Rewritten (was Easy-level HAVING+SUM single table, DC=2 Di=2 total=19) |
+| m39 | Account Event Date Range | Mixpanel | 4 | 4 | 5 | 4 | 5 | 5 | 4 | 31 | 2 | MIN/MAX OVER (no ORDER BY) = full-partition aggregate | account activity window | ✅ Pass (best in batch) |
+| m41 | Transaction Size Buckets | PayPal | 5 | 4 | 3 | 3 | 4 | 5 | 4 | 28 | 2 | CASE WHEN value bucketing + GROUP BY 1 | fraud threshold calibration | ✅ Pass |
+| m42 | Patient Age at Appointment | Teladoc | 5 | 4 | 4 | 4 | 3 | 5 | 4 | 29 | 2 | JULIANDAY/365.25 + CAST (age at visit) | clinical stratification | ✅ checkValues fixed (appt 1, patient F, age 38) |
+| m43 | Interaction Breakdown with Total | YouTube | 4 | 4 | 4 | 3 | 4 | 4 | 4 | 27 | 2 | UNION ALL to append summary row | QA verification reporting | ✅ Pass |
+| m47 | Rolling 3-Order Average Spend (rewritten) | Shopify | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | AVG OVER ROWS BETWEEN 2 PRECEDING AND CURRENT ROW | bounded rolling window | ✅ Rewritten (was LAG+JULIANDAY clone of m26, Di=2) |
+| m56 | Complete Fitness Content Viewers (rewritten) | Spotify | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | relational division (HAVING COUNT DISTINCT = scalar subquery) | complete-set matching | ✅ Rewritten (was IN subquery + DISTINCT, DC=3 DR=2 Di=2 TC=2) |
+| m57 | Product Sales Rank (dual-metric upgrade) | Amazon | 4 | 4 | 5 | 4 | 4 | 5 | 4 | 30 | 2 | two DENSE_RANK() OVER with different ORDER BY | order vs revenue divergence | ✅ Upgraded (was single DENSE_RANK clone, Di=2 → Di=4 with dual ranking) |
+| m61 | Content Engagement Diversity | TikTok | 5 | 4 | 3 | 3 | 4 | 4 | 4 | 27 | 2 | COUNT(DISTINCT action) + LEFT JOIN + GROUP BY | engagement diversity signal | ✅ Debrief upgraded (TC 2→4: INNER JOIN failure mode, COUNT DISTINCT vs COUNT, generalizability) |
+
+### Batch 8 findings
+
+**6/10 flagged.** Notable issues: one live solution bug, three clones, one mislabeled Easy problem, one thin problem.
+
+**Solution bug (m36):** The self-join matched users with ANY returned order AND ANY completed order — but without temporal ordering, user 12 (completed Aug 2023, returned Apr 2024) was included as a "re-purchaser" when they had actually purchased, THEN returned. Fixed by adding `AND o2.created_at > o1.created_at` to enforce the correct temporal direction. expectedRowCount drops 3→2.
+
+**Mislabeled Easy (m37):** HAVING + SUM on a single table with no JOIN — same SQL structure as Easy tier e20 (High-Adoption Accounts) and e39 (Repeat Buyers). DC=2, total=19 (below floor). Replaced with Channel Session Conversion Rate — JOIN sessions to users to get channel, GROUP BY channel, SUM(binary converted column) for conversions, 100.0 * SUM / COUNT for rate. Integer division trap embedded (100.0 prefix required). Introduces SUM of binary column as rate numerator pattern.
+
+**LAG+JULIANDAY clone (m47):** Structurally identical to m26 (Session Gap Analysis): LAG(date) OVER (PARTITION BY user_id ORDER BY date) + JULIANDAY difference. Replaced with Rolling 3-Order Average — AVG() OVER with explicit ROWS BETWEEN 2 PRECEDING AND CURRENT ROW. First appearance of a bounded rolling window frame (not unbounded). The debrief explicitly contrasts ROWS vs RANGE on tied dates and unbounded vs bounded frames.
+
+**Thin problem (m56):** WHERE IN (subquery) + DISTINCT outer query — no aggregation, no window function, thin debrief. DR=2, Di=2, TC=2. Replaced with relational division — users who engaged with ALL fitness content pieces. Uses GROUP BY + HAVING COUNT(DISTINCT content_id) = (SELECT COUNT(*) FROM content WHERE category = 'fitness'). Classic relational division pattern; the scalar subquery in HAVING automatically adjusts when new fitness content is added.
+
+**Dual-metric upgrade (m57):** Single DENSE_RANK was the 3rd CTE+ranking problem. Upgraded to two DENSE_RANK() OVER calls with different ORDER BY (one by times_ordered, one by total_revenue). Introduces the "ranking divergence" pattern — most-ordered ≠ most-revenue-generating. Di 2→4. The debrief teaches when order_rank ≠ revenue_rank and what that reveals.
+
+**New patterns this batch:** ROWS BETWEEN 2 PRECEDING AND CURRENT ROW (bounded rolling window), relational division (HAVING COUNT DISTINCT = scalar subquery), dual DENSE_RANK with different ORDER BY, MIN/MAX OVER without ORDER BY (full-partition aggregate), temporal ordering in self-join, UNION ALL summary row, CASE WHEN value bucketing.
 
 ---
 

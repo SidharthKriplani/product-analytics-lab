@@ -17,7 +17,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 ## Next session
 
-**1. SQL Quality Audit — Batch 8 (Medium m21–m30)**
+**1. SQL Quality Audit — Batch 9 (Medium m31–m40)**
 Score full batch, fix flagged, build+verify, ship. See SQL_QUALITY_AUDIT.md for running scores.
 
 **2. Confirm VITE_POSTHOG_KEY live in Vercel** — check env vars dashboard, establish WAU baseline before Batch 1 outreach.
@@ -38,6 +38,9 @@ See Next session item 1.
 ---
 
 ## Carry-forward log
+
+**Done this session (V4.67.0):**
+- SQL Audit Batch 8 complete (m36–m61, file positions 21–30). 6/10 flagged. Live bug fixed (m36 temporal ordering — user 12 was false positive). 3 rewrites: m37 (channel conversion rate), m47 (ROWS BETWEEN bounded rolling avg), m56 (relational division). m57 dual DENSE_RANK upgrade. m42 checkValues. m61 debrief. Trap enrichment taxonomy logged in SQL_LAB_PLAN Section 10, IDEAS Tier 1, DECISIONS. Build: ✓ 2.27s.
 
 **Done this session (V4.66.0):**
 - SQL Audit Batch 7 complete (m21–m33, file positions 11–20). 7/10 flagged — worst batch since Easy B2. 3 rewrites: m21 (NTILE quartile), m28 (global AVG OVER benchmark), m30 (SUM(SUM) OVER pct-of-total, fintech). 3 checkValues bugs fixed (m24,m26,m29). m24 company dup (Gainsight→Salesforce). m32+m33 debriefs upgraded. Build: ✓ 2.09s.
