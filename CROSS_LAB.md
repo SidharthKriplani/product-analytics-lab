@@ -2,7 +2,7 @@
 
 Ideas that originated from thinking about PAL but apply to sibling labs, or ideas for sibling labs that contain patterns PAL can learn from. This file is a routing layer — ideas here should be actioned in the appropriate repo.
 
-Last updated: V4.44.0 (2026-05-31)
+Last updated: V4.49.0 (2026-06-02)
 
 ---
 

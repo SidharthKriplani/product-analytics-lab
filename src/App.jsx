@@ -483,14 +483,23 @@ export default function App() {
     { key: '/', action: () => setPage('search') },
     { key: 'k', ctrlKey: true, action: () => setPage('search') },
     { key: 'Escape', action: () => { if (page !== 'home') setPage('home'); } },
-    { key: 'p', action: () => setPage('progress') },
+    // Room browsers
+    { key: 's', action: () => navigate('stats') },
+    { key: 'm', action: () => navigate('metrics') },
+    { key: 'r', action: () => navigate('rca') },
+    { key: 'e', action: () => navigate('estimation') },
+    { key: 'o', action: () => navigate('code') },
+    { key: 'f', action: () => navigate('spot-the-flaw') },
+    { key: 'g', action: () => navigate('growth-analytics') },
+    // Tools & utilities
+    { key: 'p', action: () => navigate('progress') },
     { key: 'h', action: () => setPage('home') },
-    { key: 't', action: () => setPage('trainer') },
-    { key: 'c', action: () => setPage('consult') },
-    { key: 'x', action: () => setPage('challenges') },
-    { key: 'b', action: () => setPage('bi') },
-    { key: 'd', action: () => setPage('defense-doc') },
-    { key: 'q', action: () => setPage('sql-lab') },
+    { key: 't', action: () => navigate('trainer') },
+    { key: 'c', action: () => navigate('consult') },
+    { key: 'x', action: () => navigate('challenges') },
+    { key: 'b', action: () => navigate('bi') },
+    { key: 'd', action: () => navigate('defense-doc') },
+    { key: 'q', action: () => navigate('sql-lab') },
   ]);
 
   function getNextScenarioId(currentId) {

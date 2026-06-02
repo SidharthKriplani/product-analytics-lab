@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { learningPaths } from '../data/learningPaths.js';
 import { Icon } from '../components/shared/Icon.jsx';
+import { getRoomConfig } from '../data/roomConfig.js';
 
 const BRIEFS = [
   {
@@ -659,7 +660,10 @@ export function Home({ onNavigate }) {
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {jumpRooms.map(room => (
+          {jumpRooms.map(room => {
+            const cfg = getRoomConfig(room.id);
+            const hasShortcut = cfg.shortcut && cfg.shortcut !== 'd'; // exclude 'd' (used by defense-doc)
+            return (
             <button
               key={room.id}
               onClick={() => onNavigate(room.nav)}
@@ -682,14 +686,26 @@ export function Home({ onNavigate }) {
                 e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
                 e.currentTarget.style.borderColor = 'var(--border)';
               }}
+              title={hasShortcut ? `Press ${cfg.shortcut} to open` : ''}
             >
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: room.color, flexShrink: 0 }} />
               <span style={{ fontWeight: 600, fontSize: '0.83rem', color: 'var(--text)', letterSpacing: '-0.01em' }}>{room.label}</span>
+              {hasShortcut && (
+                <span style={{
+                  fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-dim)',
+                  background: 'var(--surface-2)', border: '1px solid var(--border)',
+                  borderRadius: '3px', padding: '0.1rem 0.35rem',
+                  letterSpacing: '0.05em',
+                }}>
+                  {cfg.shortcut}
+                </span>
+              )}
               {room.lastVisit && (
                 <span style={{ fontSize: '0.69rem', color: 'var(--text-dim)' }}>{room.lastVisit}</span>
               )}
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 

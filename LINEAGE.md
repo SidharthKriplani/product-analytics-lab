@@ -84,6 +84,8 @@ Learning paths were sharpened: "Code Track," "Full-Stack DS Interview," and othe
 
 By V4.5, PAL had 17 rooms and 150+ playable items. The rate of room additions slowed — deliberately.
 
+**V4.47.0** — BI chart interpretation scenarios shipped. Visual judgment-practice added to the BI room: 7 scenarios covering deceptive charting patterns (axis zoom, Simpson's Paradox, dual-axis manipulation, cherry-picked windows, aggregation hiding divergence, missing seasonality, omitted zero baseline). ChartScenario component renders recharts visualizations, poses multiple-choice interpretation questions, reveals model answers + key insights. Integrates seamlessly with existing BIRunner routing (format detection). BI room now covers both text-based business case analysis and visual chart interpretation — the full scope of BI interview work.
+
 **V4.6–V4.19** — Infrastructure hardening and polish. Bug sweep across all runners (mobile hover mutation pattern, null deref, broken paywall displays). Full dark mode rebuild (luminance gap verification at real device brightness). Mobile audit: safe-area-inset, proper grid layout, webkit tap highlight, Code Room mobile notice. Icon system (SVG Icon.jsx, 24 Lucide-compatible icons). CSS utility class system (`.pal-timer`, `.pal-cta`, `.pal-back-btn`, `.pal-progress-track`). Typography overhaul (Inter font, 0.68rem global font floor). Visual hierarchy pass across all 17 room browsers (difficulty borders, progress bars, sort button active states). Copy rewrites: every room description rewritten from mechanics-first to stakes-first. A/B Test Interpreter tool. Role readiness score. 91-day practice heatmap. Daily drill. Onboarding modal.
 
 **V4.22** — Price raised from $49 to $69. Nav emoji removal. Nav labels standardized.

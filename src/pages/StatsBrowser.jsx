@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { statsModules } from '../data/statsModules.js';
 import { getAllStatsProgress } from '../utils/statsProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
+import { getRoomConfig } from '../data/roomConfig.js';
 
 const DIFF_CFG = {
   foundational: { label: 'Foundational', color: 'var(--blue-text)', bg: 'var(--blue-bg)',    border: 'var(--blue-border)' },
@@ -52,29 +53,46 @@ export function StatsBrowser({ onSelectModule, onOpenArticle, onNavigate }) {
     <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem', width: '100%', boxSizing: 'border-box' }}>
 
       {/* Header */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <div style={{
-          fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
-          color: 'var(--accent)', marginBottom: '0.4rem',
-        }}>
-          Stats Room
-        </div>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: '0 0 0.5rem', letterSpacing: '-0.02em' }}>
-          Statistical Concepts
-        </h1>
-        <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '540px' }}>
-          Stats questions in interviews are never pure math — they are always attached to a decision. Should we ship? Is this result real or noise? Can we trust the sample? Knowing the formula is not the bar; knowing which concept applies, what it means for this specific decision, and where the common misread is — that is what gets tested.
-        </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{statsModules.length} modules</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: 96, height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.min(100, Math.round(completedCount / statsModules.length * 100))}%`, background: 'var(--accent)', borderRadius: 2, transition: 'width 0.4s' }} />
+      {(() => {
+        const cfg = getRoomConfig('stats');
+        return (
+        <div style={{ marginBottom: '1.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '0.75rem' }}>
+            <div style={{
+              width: '36px', height: '36px',
+              background: cfg.bg, borderRadius: '6px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <Icon name={cfg.icon} size={20} color={cfg.color} />
             </div>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{completedCount}/{statsModules.length}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{
+                fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
+                color: cfg.color, marginBottom: '0.25rem',
+              }}>
+                {cfg.label}
+              </div>
+              <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: '0', letterSpacing: '-0.02em' }}>
+                Statistical Concepts
+              </h1>
+            </div>
+          </div>
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '540px' }}>
+            Stats questions in interviews are never pure math — they are always attached to a decision. Should we ship? Is this result real or noise? Can we trust the sample? Knowing the formula is not the bar; knowing which concept applies, what it means for this specific decision, and where the common misread is — that is what gets tested.
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{statsModules.length} modules</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ width: 96, height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.min(100, Math.round(completedCount / statsModules.length * 100))}%`, background: cfg.color, borderRadius: 2, transition: 'width 0.4s' }} />
+              </div>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{completedCount}/{statsModules.length}</span>
+            </div>
           </div>
         </div>
-      </div>
+        );
+      })()}
 
       {/* Theory hint */}
               {onNavigate && (

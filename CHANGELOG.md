@@ -4,6 +4,54 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.49.0] — 2026-06-02 [FEATURE + ARCHITECTURE]
+
+### Shareable Score Summary Card + Tier 5-6 Restructuring
+
+**Shareable score summary card — `src/pages/InterviewSimulator.jsx`:**
+Added gradient card in debrief showing session score with "Copy Score" button. Card displays:
+- Total score (MCQ mode) or "Complete" (open-ended)
+- Session config (length, role, time)
+- One-click clipboard copy for LinkedIn/resume sharing
+- Format: "PAL: 18/20 · 90% · Product Analyst (Senior) · 45:32"
+
+**Tier 5-6 Architecture restructuring — `IDEAS.md`:**
+Reorganized Tier 2-4 into new strategic clusters (Tier 5A-5F) based on ROI (impact ÷ effort × dependencies):
+- **5A** — Interview Prep Acceleration (Defense layers, Quiz articles, verbal practice)
+- **5B** — Code Execution + Timing (SQL playground, hybrid Lab, timed exams)
+- **5C** — Feedback Loops (learning paths, weak heatmaps, forward pointers)
+- **5D** — Content Organization (Deep Dives IA, Interview Experiences tab)
+- **5E** — UX Polish (room map, difficulty badges, keyboard shortcuts, export/import)
+- **5F** — Sharing (share buttons + routing, clipboard score share)
+- **Tier 6** — Long-term strategic (India tracks, SVG illustrations, PWA, interview Q&A bank, failure catalog)
+
+**Hard prerequisites tracked in Tier 6** for gates requiring PostHog data, user signal, or strategic decisions (Supabase auth, paywall flip).
+
+**Build:** ✓ 0 errors. Gradient card responsive, clipboard API fallback present.
+**Files:** InterviewSimulator.jsx modified (~40 lines), IDEAS.md restructured (120 lines added).
+
+---
+
+## [4.48.0] — 2026-06-02 [FEATURE]
+
+### Interview Simulator Per-Room Breakdown Chart (Tier 2)
+
+**Per-room skill breakdown in debrief — `src/pages/InterviewSimulator.jsx`:**
+Added recharts BarChart showing % correct by skill/room in MCQ and mixed-mode sessions. Chart appears in debrief header (after session config summary, before individual case cards) only when session includes MCQ questions. Calculation: for each room in the session, count total questions and correct answers, compute percentage, display in vertical bar chart with room name on X-axis, % on Y-axis.
+
+**Example breakdown for Product Analyst (MCQ mode):**
+- Metrics: 95% (2/2 correct)
+- Statistics: 67% (2/3 correct)
+- RCA: 100% (1/1 correct)
+- Estimation: 50% (1/2 correct)
+
+**Benefits:** Shows clearer skill-level signal than summary score alone. Users identify weak rooms immediately, actionable for next session prep. Works for all 4 roles (Product Analyst, Business Analyst, Data Analyst, PM).
+
+**Build:** ✓ 0 errors. recharts already in dependencies. Responsive container scales on mobile.
+**Files:** 1 modified file (InterviewSimulator.jsx, ~60 lines added).
+
+---
+
 ## [4.47.0] — 2026-06-02 [FEATURE]
 
 ### BI Chart Interpretation Scenarios

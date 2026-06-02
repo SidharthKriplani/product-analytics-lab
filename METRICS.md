@@ -34,6 +34,7 @@ Events fire from `src/App.jsx` (navigation events) and directly from runner comp
 | `sql_problem_solved` | User gets a SQL Lab problem correct | `{ problemId: string, difficulty: string, datamartId: string, elapsedSec: number }` |
 | `sql_hint_used` | User reveals a hint in SQL Lab | `{ problemId: string, hintIndex: number }` |
 | `sql_answer_revealed` | User reveals the answer in SQL Lab (after all hints exhausted) | `{ problemId: string }` |
+| `score_summary_copied` | User clicks "Copy Score" button in Interview Simulator debrief | `{ role: string, tier: string, score: string, sessionMode: string }` |
 
 ### Rooms tracked via `case_opened`
 `stats`, `design`, `review`, `metrics`, `rca`, `cases`, `code`, `prioritization`, `behavioral`, `estimation`, `stat-foundations`, `exp-foundations`, `metrics-foundations`, `rca-foundations`, `growth-analytics`, `bi`, `spot-the-flaw`, `take-home`, `product-design`, `challenges`, `instrumentation`, `sql-lab`
@@ -136,7 +137,7 @@ All progress state lives in localStorage. Every key must be included in `onReset
 |---|---|---|
 | V2.3 | Opened all content for free during beta | No conversion data existed; couldn't charge without usage proof |
 | V3.6 | Stripe scaffolded but not activated | Beta still running; no retention or testimonial data to support paid launch |
-| V4.x | PostHog wired but key not confirmed live in prod | Baseline data collection deferred — update this when key is confirmed active |
+| V4.47.0 | PostHog env var set in Vercel, awaiting user confirmation it's live in prod | Key configured but activation status unknown until user verifies in dashboard |
 
 ---
 
@@ -144,8 +145,9 @@ All progress state lives in localStorage. Every key must be included in `onReset
 
 Before any paid conversion attempt, establish these baselines:
 
-1. Confirm `VITE_POSTHOG_KEY` is active in Vercel production environment
-2. Measure WAU and 7-day return rate for 4 weeks
-3. ✅ `case_completed` event shipped — all 18 runners instrumented
-4. Identify the most-opened room (content expansion priority)
-5. Identify the most paywall-hit room (first unlock candidate post-beta)
+1. **NEXT (user gate):** Confirm `VITE_POSTHOG_KEY` is active in Vercel production environment (user to check dashboard)
+2. Once confirmed live: Measure WAU and 7-day return rate for 4 weeks
+3. ✅ `case_completed` event shipped — all 18 runners instrumented (V4.6.1)
+4. ✅ SQL Lab events added: `sql_problem_solved`, `sql_hint_used`, `sql_answer_revealed` (V4.46.0)
+5. Identify the most-opened room (content expansion priority) — requires PostHog live
+6. Identify the most paywall-hit room (first unlock candidate post-beta) — requires PostHog live

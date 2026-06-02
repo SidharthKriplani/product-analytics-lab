@@ -2,7 +2,7 @@
 
 Single source of truth for all SQL Lab decisions, findings, architecture choices, and session sequencing. Created after the Session 1 investigative audit (2026-05-31). Update this file at the end of every SQL Lab session.
 
-**Current version:** V4.46.0 (Sessions 1–6 + Phase 3 complete)
+**Current version:** V4.49.0 (Sessions 1–6 + Phase 3 complete; V4.48–49 = BI charts + Interview Simulator features, no SQL Lab changes)
 **Last updated:** 2026-06-02
 
 ---

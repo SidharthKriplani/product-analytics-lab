@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.47.0 (2026-06-02) — BI chart interpretation scenarios added (7 visual cases, BI17–BI23). Build clean.*
+*Last updated: V4.49.0 (2026-06-02) — Shareable score summary + Tier 5-6 architecture restructuring. Build clean. Backlog now organized by ROI clusters (5A-5F) with hard prerequisites clear.*
 
 ---
 

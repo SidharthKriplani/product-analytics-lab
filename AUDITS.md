@@ -99,6 +99,12 @@ Medium cuts (11): m27, m38, m44, m50, m55, m59, m63, m65, m67, m68, m69 — Easy
 Hard cuts (3): h36 (duplicate of h28), h43 (Easy-level mislabeled Hard), h46 (duplicate of h29).
 Master cuts (5): master15, master17, master20, master22, master24 — Medium-level problems mislabeled Master.
 
+---
+
+## V4.48–49 Status (No New Audits)
+
+**V4.48–49:** Per-room breakdown chart in Interview Simulator debrief + shareable score summary card. No audit findings triggered. All existing audits remain open/resolved as documented above. Next audit cycle: PostHog baseline watch (wait for 20 real sessions) before deciding paywall flip timing.
+
 **Fix:** Removed in V4.40.0. Full list in SQL_LAB_PLAN.md Section 2A.
 **Files:** `src/data/sqlLabProblems.js`
 

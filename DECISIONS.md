@@ -249,3 +249,9 @@ Consult (ConsultationSpace) was cut from nav in V4.12 — it overlaps with Searc
 - Learn group: Learn, Playbook
 - Track group: Pricing, Progress
 - "Instrumentation" not "Instrum." — never truncate labels with a period
+
+---
+
+## V4.48–49 Standing Rules Audit
+
+All standing rules above remain in effect. V4.48–49 (per-room breakdown chart, shareable score card, Tier 5-6 restructuring) required **zero rule changes**. No architectural decisions were overridden. All design, content, monetization, and navigation principles remain unchanged.

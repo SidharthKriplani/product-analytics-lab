@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { statsModules } from '../data/statsModules.js';
 import { rcaCases } from '../data/rcaCases.js';
 import { metricCases } from '../data/metricCases.js';
@@ -15,21 +16,55 @@ function pickRandom(arr, seed) {
   return arr[idx];
 }
 
-function buildSession(role, seed, count = 5) {
-  const dsQuestions = [
-    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed) },
-    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 1) },
-    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 2) },
-    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 3) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandom(behavioralQuestions, seed + 4) },
+function buildSession(role, tier, seed, count = 5) {
+  // ─────────────────────────────────────────
+  // Data-focused roles (Product Analyst, Business Analyst, Data Analyst)
+  // ─────────────────────────────────────────
+  const productAnalystQuestions = [
+    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed) },
+    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 1) },
+    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 2) },
+    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 3) },
+    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 4) },
     { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 5) },
     { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 6) },
-    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 7) },
-    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 8) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandom(behavioralQuestions, seed + 9) },
-    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 10) },
-    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 11) },
+    { room: 'behavioral', label: 'Behavioral', case: pickRandom(behavioralQuestions, seed + 7) },
+    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 8) },
+    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 9) },
+    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 10) },
+    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 11) },
   ];
+
+  const businessAnalystQuestions = [
+    { room: 'cases', label: 'Business Case', case: pickRandom(businessCases, seed) },
+    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 1) },
+    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 2) },
+    { room: 'cases', label: 'Business Case', case: pickRandom(businessCases, seed + 3) },
+    { room: 'prioritization', label: 'Prioritization', case: pickRandom(prioritizationScenarios, seed + 4) },
+    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 5) },
+    { room: 'behavioral', label: 'Behavioral', case: pickRandom(behavioralQuestions, seed + 6) },
+    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 7) },
+    { room: 'cases', label: 'Business Case', case: pickRandom(businessCases, seed + 8) },
+    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 9) },
+    { room: 'prioritization', label: 'Prioritization', case: pickRandom(prioritizationScenarios, seed + 10) },
+    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 11) },
+  ];
+
+  const dataAnalystQuestions = [
+    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed) },
+    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 1) },
+    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 2) },
+    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 3) },
+    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 4) },
+    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 5) },
+    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 6) },
+    { room: 'behavioral', label: 'Behavioral', case: pickRandom(behavioralQuestions, seed + 7) },
+    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 8) },
+    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 9) },
+    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 10) },
+    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 11) },
+  ];
+
   const pmQuestions = [
     { room: 'product-design', label: 'Product Design', case: pickRandom(productDesignScenarios, seed) },
     { room: 'prioritization', label: 'Prioritization', case: pickRandom(prioritizationScenarios, seed + 1) },
@@ -44,8 +79,15 @@ function buildSession(role, seed, count = 5) {
     { room: 'product-design', label: 'Product Design', case: pickRandom(productDesignScenarios, seed + 10) },
     { room: 'prioritization', label: 'Prioritization', case: pickRandom(prioritizationScenarios, seed + 11) },
   ];
-  const full = role === 'ds' ? dsQuestions : pmQuestions;
-  return full.slice(0, count);
+
+  // Select question pool by role
+  let questionPool;
+  if (role === 'product-analyst') questionPool = productAnalystQuestions;
+  else if (role === 'business-analyst') questionPool = businessAnalystQuestions;
+  else if (role === 'data-analyst') questionPool = dataAnalystQuestions;
+  else questionPool = pmQuestions;
+
+  return questionPool.slice(0, count);
 }
 
 function formatTime(seconds) {
@@ -141,6 +183,7 @@ export function InterviewSimulator({ onBack, onNavigate, unlocked }) {
 function InterviewSimulatorInner({ onBack, onNavigate }) {
   const [screen, setScreen] = useState('setup'); // 'setup' | 'active' | 'debrief'
   const [role, setRole] = useState(null);
+  const [tier, setTier] = useState(null); // 'senior' | 'staff'
   const [sessionLength, setSessionLength] = useState(5); // default Standard
   const [sessionMode, setSessionMode] = useState('open'); // 'open' | 'mcq' | 'mixed'
   const [session, setSession] = useState(null);
@@ -186,7 +229,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
 
   function startSimulation() {
     const seed = Math.floor(Date.now() / 86400000);
-    const built = buildSession(role, seed, sessionLength);
+    const built = buildSession(role, tier, seed, sessionLength);
     setSession(built);
     setCurrentCaseIndex(0);
     setElapsed(0);
@@ -245,6 +288,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
       history.unshift({
         date: new Date().toISOString(),
         role,
+        tier,
         sessionLength,
         sessionMode,
         elapsedSeconds: elapsed,
@@ -316,8 +360,10 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.5rem' }}>
             {[
-              { key: 'ds', label: 'Data / Product Analyst', sub: 'Stats + RCA + Metrics + Estimation + Behavioral' },
-              { key: 'pm', label: 'PM / TPM / Product Lead', sub: 'Product Design + Prioritization + Estimation + Behavioral + Cases' },
+              { key: 'product-analyst', label: 'Product Analyst', sub: 'Metrics + Stats + RCA + Estimation' },
+              { key: 'business-analyst', label: 'Business Analyst', sub: 'Cases + Metrics + RCA + Prioritization' },
+              { key: 'data-analyst', label: 'Data Analyst', sub: 'Stats + Metrics + RCA focus' },
+              { key: 'pm', label: 'PM / TPM', sub: 'Product Design + Prioritization + Cases' },
             ].map(r => (
               <button
                 key={r.key}
@@ -342,6 +388,43 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
             ))}
           </div>
         </div>
+
+        {/* Tier selector (only show when role is selected) */}
+        {role && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ fontWeight: 600, fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Level
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {[
+                { key: 'senior', label: 'Senior', sub: 'Challenging cases' },
+                { key: 'staff', label: 'Staff', sub: 'Most difficult cases' },
+              ].map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => setTier(t.key)}
+                  style={{
+                    background: tier === t.key ? 'var(--accent-bg, rgba(59,130,246,0.08))' : 'var(--surface-2)',
+                    border: tier === t.key ? '1.5px solid var(--accent-border, rgba(59,130,246,0.4))' : '1.5px solid var(--border)',
+                    borderRadius: '8px',
+                    padding: '0.6rem 1rem',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'border-color 0.12s, background 0.12s',
+                    flex: 1,
+                  }}
+                >
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: tier === t.key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.1rem' }}>
+                    {t.label}
+                  </div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                    {t.sub}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Session Length selector */}
         <div style={{ marginBottom: '1rem' }}>
@@ -410,16 +493,16 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
 
         <button
           onClick={startSimulation}
-          disabled={!role}
+          disabled={!role || !tier}
           style={{
-            background: role ? 'var(--accent)' : 'var(--surface-2)',
-            color: role ? '#000' : 'var(--text-muted)',
+            background: (role && tier) ? 'var(--accent)' : 'var(--surface-2)',
+            color: (role && tier) ? '#000' : 'var(--text-muted)',
             border: 'none',
             borderRadius: '8px',
             padding: '0.75rem 2rem',
             fontSize: '1rem',
             fontWeight: 700,
-            cursor: role ? 'pointer' : 'not-allowed',
+            cursor: (role && tier) ? 'pointer' : 'not-allowed',
             transition: 'background 0.15s',
           }}
         >
@@ -791,6 +874,56 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           </p>
         </div>
 
+        {/* Per-room breakdown chart */}
+        {hasMCQResults && (
+          <div style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+          }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1rem' }}>
+              Skill Breakdown
+            </h3>
+            {(() => {
+              const breakdown = {};
+              session.forEach((s, i) => {
+                const room = s.label;
+                if (!breakdown[room]) breakdown[room] = { total: 0, correct: 0 };
+                breakdown[room].total += 1;
+                if (isQuestionMCQ(i) && mcqAnswers[i] !== undefined) {
+                  const mcqQ = mcqQuestions[i];
+                  const chosenOpt = mcqQ?.options.find(o => o.id === mcqAnswers[i]);
+                  if (chosenOpt?.correct) breakdown[room].correct += 1;
+                }
+              });
+              const chartData = Object.entries(breakdown).map(([room, stats]) => ({
+                room,
+                pct: Math.round((stats.correct / stats.total) * 100),
+              }));
+              return (
+                <div style={{ width: '100%', height: 300 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 30 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                      <XAxis dataKey="room" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} angle={-45} textAnchor="end" height={80} />
+                      <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} label={{ value: '% Correct', angle: -90, position: 'insideLeft' }} domain={[0, 100]} />
+                      <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} contentStyle={{
+                        background: 'var(--surface-2)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '6px',
+                        color: 'var(--text)',
+                      }} />
+                      <Bar dataKey="pct" fill="var(--accent)" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {session.map((s, i) => {
             const roomCase = s?.case;
@@ -943,6 +1076,55 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
               </div>
             );
           })}
+        </div>
+
+        {/* Shareable score summary card */}
+        <div style={{
+          background: 'linear-gradient(135deg, var(--accent), var(--accent-bg))',
+          border: '2px solid var(--accent)',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          marginTop: '2rem',
+          marginBottom: '1.5rem',
+          color: '#000',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'rgba(0,0,0,0.7)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.3rem' }}>
+                Session Score
+              </div>
+              <div style={{ fontSize: '2rem', fontWeight: 700 }}>
+                {hasMCQResults ? `${mcqScores.correct}/${mcqScores.total}` : 'Complete'}
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'rgba(0,0,0,0.65)', marginTop: '0.2rem' }}>
+                {sessionLengthLabel} · {roleLabel} · {formatTime(elapsed)}
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                const summary = hasMCQResults
+                  ? `PAL: ${mcqScores.correct}/${mcqScores.total} · ${Math.round((mcqScores.correct / mcqScores.total) * 100)}% · ${roleLabel} · ${formatTime(elapsed)}`
+                  : `PAL: ${sessionLengthLabel} complete · ${roleLabel} · ${formatTime(elapsed)}`;
+                navigator.clipboard.writeText(summary);
+                alert('Score copied to clipboard!');
+              }}
+              style={{
+                background: 'rgba(0,0,0,0.15)',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.5rem 1rem',
+                color: '#000',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.12s',
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(0,0,0,0.25)'}
+              onMouseLeave={(e) => e.target.style.background = 'rgba(0,0,0,0.15)'}
+            >
+              📋 Copy Score
+            </button>
+          </div>
         </div>
 
         {/* Actions */}

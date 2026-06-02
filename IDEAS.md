@@ -56,7 +56,7 @@ _No new features until PostHog baseline is established._
 - **Room header icon consistency — full pass (audit #79)** — icon treatment is inconsistent across room browsers. Growth Analytics uses bare "↗" character; A/B Foundations uses 🧪 in the h1; Stats/Metrics/RCA/Design rooms have no icon at all; others have the 36×36 colored box pattern. Standardize to the box pattern (36×36, var(--X-bg) fill, var(--X-border) border, Icon component inside) across all room browsers and foundation pages. Should be done in the same pass as audit #80.
 
 ### Content — BI / Reporting
-- **BI chart interpretation scenarios** — BI is inherently visual; text-only scenarios miss the point. Add a sub-format to the BI room: "here's a dashboard/chart — what do you conclude, what's wrong, what do you recommend?" Chart.js or Vega-Lite renders inline without a backend. Scenario types: declining trend with seasonal overlay, pie chart with misleading denominator, dual-axis chart where axes manipulate perception, dashboard with inconsistent date filters. This is directly what BI interviews test and no other prep tool does it visually. Effort: medium (one new component, ~10 new scenarios). Tier 1 — highest ROI among the new ideas.
+- ~~**BI chart interpretation scenarios**~~ — ✅ shipped V4.47.0 (7 visual scenarios, BI17–BI23, using recharts). ChartScenario component handles multiple-choice + reveal + insights. BIRunner detects format='chart' and routes accordingly.
 
 ### Pre-beta gate items (do before sending Batch 1 invites)
 - ~~**About section**~~ — ✅ shipped V4.45.0. About.jsx fully rewritten: what PAL is, who it's for, how it differs from DataLemur/StrataScratch/Exponent, all 17 rooms listed, difficulty levels explained, how to use by experience level.
@@ -346,7 +346,7 @@ The keyboard shortcut badges (Tier 1 item above) can live on these nodes too, ma
 - Difficulty progression lock (must complete junior before senior unlocks) — opt-in mode only
 - **Learning paths with checkpoint tracking** (from ML Systems Lab, directly portable) — "6-week Analytics Interview Ready," "Metrics Mastery Track," "PM Onboarding Path." Each path is a guided sequence across rooms, with step completion checkmarks + progress counter (X/N steps). localStorage pattern identical to existing rooms.
 - ~~**JD-to-skill-gap mapper** (from ML Systems Lab JDPrepTab + GenAI Lab PrepLab)~~ — ✅ shipped V4.27.0 as Defense Strategy (3-step flow: JD parse → self-rating gap score → personalized plan with round breakdown + outside-PAL flagging)
-- **Per-room breakdown in mock exam debrief** (from ML Systems Lab CombinatorTab) — after Interview Simulator session, show visual bar chart: Metrics 90% / Growth 65% / Behavioral 78% / Stats 80%. Gives clearer skill gap signal than current pass/fail format.
+- ~~**Per-room breakdown in mock exam debrief** (from ML Systems Lab CombinatorTab)~~ — ✅ shipped V4.48.0. Recharts BarChart in debrief header showing % correct per skill/room. Works for all roles + MCQ/mixed modes.
 - **Verbal practice with speech-to-text** (from ML Systems Lab VerbatimTab) — Web Speech API, user speaks 2-min answer to interview question, transcript shown, self-score on 4 criteria (clarity, depth, speed, recovery). Already have the interview question bank.
 
 ### Features
@@ -393,7 +393,7 @@ The keyboard shortcut badges (Tier 1 item above) can live on these nodes too, ma
 - `Escape` key closes hint accordions (currently only navigates home)
 - Mobile bottom nav rail for most-used rooms
 - "Shuffle" button in MCQ Trainer (randomise across all 40 questions)
-- Per-session score summary after Interview Simulator (shareable card)
+- ~~Per-session score summary after Interview Simulator (shareable card)~~ — ✅ shipped V4.49.0. Gradient card in debrief with score display + "Copy Score" clipboard button for LinkedIn sharing.
 - Consultation Space expansion: show heatmap of which concepts are most queried
 - **Weak topic heatmap in Trainer debrief** (from ML Systems Lab TrainerTab, directly portable) — after MCQ drill session, show colored grid: Stats/Metrics/RCA/Design/etc. with % correct per room. "Study these next" surface specific weak-room cases.
 - **Forward-pointer card at case/challenge endings** (from GenAI Lab sprint pattern, directly portable) — every case completion shows a "Master this concept" card: one related case to try next + one Defense Strategy angle + one Company Track suggestion. Removes the dead-end after debrief.
@@ -432,6 +432,64 @@ The keyboard shortcut badges (Tier 1 item above) can live on these nodes too, ma
 | Stats Room as text-heavy MVP | Better to not ship than to ship another textbook |
 | Cross-device sync | Requires backend; not a V4 problem |
 | Standalone GenAI room | GenAI is a thread across rooms, not a room itself; would produce thin content |
+
+---
+
+## Tier 5 — Strategic work clusters (by ROI)
+
+**5A — Interview Prep Acceleration**
+- Defense Strategy Layer 4A (micro-sequence per skill, Playbook linking)
+- Quiz Me on Playbook articles (auto-MCQs from article content)
+- Verbal practice with speech-to-text (Web Speech API + self-score)
+
+**5B — Code Execution + Timing**
+- Code Room — SQL playground (in-browser sql.js + sample datasets)
+- Code Lab SQL + Python hybrid (Pyodide + sql.js in one session)
+- Timed exam lock mechanic (30/45/60-min answer lock until timer ends)
+
+**5C — Feedback Loops + Guidance**
+- Learning paths with checkpoint tracking ("6-week Interview Ready," "Metrics Mastery")
+- Weak topic heatmap in Trainer debrief (colored grid: Metrics/Stats/RCA/etc. % correct)
+- Forward-pointer card at case endings (one related case + one Defense angle + one Company track)
+
+**5D — Content Organization**
+- Deep Dives IA overhaul (series view → tag filtering → personalized sections)
+- Interview Experiences tab (skill frequency graph from 20–30 curated experiences)
+
+**5E — UX Polish + Navigation**
+- Room relationship map (visual learning arc: Analytics → SQL → PM/judgment tracks)
+- Difficulty badges on room entry cards (Junior/Mid/Senior + estimated time)
+- Keyboard shortcuts in Trainer/Challenges (1/2/3/4 for options, Enter for submit)
+- Progress export/import (JSON device handoff without Supabase)
+
+**5F — Sharing + Social**
+- Share buttons + deep-link routing (per-problem/per-case URLs)
+- Share score clipboard button (format: "PAL: 18/20 · 90% · Strong: Metrics · Weak: Growth")
+
+---
+
+## Tier 6 — Long-term strategic
+
+**User Research Gates (wait for signal before investing)**
+- India PM Company Tracks (Meesho, Swiggy, Zepto, Blinkit, etc.) — gate: PostHog confirms Indian user cohort
+- Concept drawer inline SVG illustrations — gate: Batch 1 feedback confirms comprehension gap
+- Country-curated content filter (region tag on cases) — gate: India user signal + enough case variants
+
+**Platform Investments**
+- Learning path completion certificates (downloadable PDF, LinkedIn shareable)
+- Breadcrumb nav on case runners ("PAL > RCA > Case Bank > RCA07")
+- Skill category tagging across rooms (8 core skills, cross-room filtering)
+- ELI5 mode toggle on Playbook articles (simplified register per article)
+- PWA + offline support (service worker, installable, mobile commute)
+- Marketplace metric tree interactive module (GMV decomposition, category/cohort drill-down)
+- Multi-part escalating case dossiers (3–5 part company scenarios, build on prior answer)
+- Interview Q&A bank with 4-tier model answers (Junior/Mid/Senior/Principal)
+- Analytics Failures catalog (25 named patterns: bad event taxonomy, selection bias, Simpson's Paradox, etc.)
+
+**Hard Prerequisites (gates)**
+- Supabase auth decision (NEXT.md item 1 — finish or cut before Batch 2)
+- PostHog baseline (20 real sessions watched, room drop-off identified)
+- Paywall strategy decision (when to flip `isUnlocked()` to false)
 
 ---
 
