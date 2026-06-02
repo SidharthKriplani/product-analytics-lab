@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.77.0 | **Build:** ✓ (2.16s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.78.0 | **Build:** ✓ (2.07s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V4.78.0** — Signed-in users land on Progress instead of landing page. One-line routing fix in App.jsx SIGNED_IN handler. All 8 session backlog items logged: AUDITS.md #144-146, IDEAS.md Tier 1/2/3 entries for FV/FA UI, RCA/Metrics content, Postgres migration, MCQ revamp, Interview Sim customization, Pandas (Tier 3/no for SQL Lab). Build ✓ 2.07s.
 
 **V4.77.0** — Forensic format shipped. New `difficulty: 'Forensic'` tier in SQL Lab. 10 forensic problems (f01–f10): integer division, missing quantity, COUNT DISTINCT, = NULL × 2, missing HAVING, re-subscriber churn, COUNT vs COUNT(DISTINCT zip), wrong GROUP BY dimension, off-by-one formula. DIFF_COLOR + filter chip + broken query block UI added to SqlLabPage.jsx. Spec in SQL_LAB_PLAN.md Section 12. Build ✓ 2.16s.
 

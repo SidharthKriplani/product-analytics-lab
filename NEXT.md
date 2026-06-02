@@ -15,8 +15,11 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ## Next session
 
-**1. Forensic Format — Batch 2 (f11–f20)**
-Batch 1 (f01–f10) shipped. Next: average of averages, JOIN fanout, wrong JOIN type, temporal ordering, ambiguous metric definition. Same format: broken query upfront, user fixes it.
+**1. Forensic checkValues bug audit (f01–f10)**
+Audit all 10 forensic problems for whole-number REAL checkValues that need '.0' stripped. Pattern: ROUND() returning 40.0 → JS 40 → String '40', not '40.0'. Fixed f01/f04/f09. Check f02, f03, f05–f08, f10. See AUDITS.md #144.
+
+**2. Forensic Format — Batch 2 (f11–f20)**
+Batch 1 shipped. Next: average of averages, JOIN fanout, wrong JOIN type, temporal ordering, ambiguous metric definition.
 
 **2. Forensic Format — Batch 2 (f11–f20)**
 Average of averages, fanout, HAVING missing, wrong JOIN, temporal ordering.

@@ -41,6 +41,15 @@ Forensic problems live in SQL Lab as a new `difficulty: 'Forensic'` tier alongsi
 - **Cascade format** — multi-part; Part 1 error propagates; platform shows compounded impact at the end
 - **Code review format** — colleague's query; identify bug, explain what it measures, rewrite it
 
+### Homepage routing — signed-in users land on Progress [SHIPPED V4.78.0]
+When a user has an active session, the app redirects from the landing page to Progress on mount. The landing page is for conversion; returning users want their dashboard. One-line change in the SIGNED_IN auth handler in App.jsx: `setPage(p => p === 'home' ? 'progress' : p)`.
+
+### FV/FA debrief sections — structured rendering [Audit #146]
+The wrong-answer showcase, sanity check, and assumption statement sections need distinct visual treatment — coloured left-border block per section, scannable labels. Currently rendered as plain paragraphs. Medium effort: either extend renderDebrief() to detect section headers (**Wrong answer**, **Sanity check**) and render them as styled blocks, or split debrief into separate schema fields and render them individually. See AUDITS.md #146.
+
+### RCA Foundations + Metrics Foundations — content research pass
+Both foundations need content that "clicks instantly" — the kind that makes the concept obvious the first time. Current modules are correct but not memorable. Needs: (1) research pass on what practitioners say actually made concepts click for them; (2) rewrite modules with better anchors, worked examples, and contrast pairs (right vs wrong framing). Gate: research first, write second. Do not rewrite without a clear "better anchor" identified per module.
+
 ### SQL Lab — Trap Enrichment Pass (after Batch 13) [HIGHEST PRIORITY POST-AUDIT]
 **Gate:** All 13 audit batches complete. Full execution plan + complete trap taxonomy in SQL_LAB_PLAN.md Section 10.
 
@@ -261,6 +270,15 @@ Family 6 — Data Traps (across all): divide-by-zero, integer division, duplicat
 
 ## Tier 2 — High impact, more effort
 
+### SQL Lab — PostgreSQL migration (V5 consideration)
+The SQL Lab currently runs on sql.js (SQLite in-browser). Interviews use PostgreSQL. The gap matters: PERCENTILE_CONT, DATE_TRUNC, window function syntax, CTEs with RETURNING, and EXPLAIN ANALYZE are all Postgres-only. Migration requires: hosted query execution API, sandboxed Postgres instances per session, backend auth, query timeout/safety layer. Estimated 3–4 weeks minimum. The right model is API-backed execution (similar to DataLemur). Not a session task — needs architectural planning. Gate: forensic Batch 3 complete, PostHog shows SQL Lab is core usage driver.
+
+### MCQ Quiz + Company Tracks — visual and content revamp
+User-reported as needing "huge work." Before scoping: audit what specifically is broken — is it the question quality, the UX of the answer flow, the visual design, or the company track content depth? Needs a diagnostic pass before any build work starts. Do not start without a specific problem statement. Gate: run a structured audit (add to AUDITS.md) and define what "revamped" actually means.
+
+### Interview Simulator — role and level customization
+Split DS/PM modes into specific roles (Product Analyst, Business Analyst, Data Analyst, PM) with Senior/Staff tiers. Already deferred in NEXT.md. Gate: PostHog confirms Simulator usage is meaningful before investing in customization depth.
+
 ### SQL Lab — Schema-aware autocomplete
 Autocomplete on table names and column names specific to the active datamart, triggered on typing or Tab. Removes schema-lookup friction (stops users hunting through the accordion for `appointments.provider_id`) without removing SQL-logic friction. **Do NOT implement keyword autocomplete** (SELECT, WHERE, GROUP BY etc.) — keyword completion undermines the practice value by removing the exact friction that builds fluency. Schema autocomplete is the right line: remove friction on non-SQL knowledge, keep it on SQL knowledge. Requires either a proper code editor component (CodeMirror, Monaco) or a custom textarea handler with a datamart-aware suggestion engine. Medium-high effort. Gate: finish the SQL audit first so the datamarts are stable before building on top of them.
 
@@ -433,6 +451,11 @@ The keyboard shortcut badges (Tier 1 item above) can live on these nodes too, ma
 ---
 
 ## Tier 3 — Interesting, lower priority
+
+### SQL Lab — Pandas/Python solving mode
+Running Python (Pandas) as an alternative to SQL for solving SQL Lab problems. Requires Pyodide (Python in browser), a separate execution sandbox, and a different validation approach (DataFrame output vs SQL result set). High complexity, unclear learning value in a SQL-focused room. The Code Lab hybrid (SQL + Python in Code Lab) is the right home for this — see Tier 3 item below. Do not add Pandas to SQL Lab.
+
+
 
 ### Branding reserve
 - **Logo mark I (bar chart P)** — bar chart that forms a P shape, inverted (light bg, purple bars). Warmest mark in the set — the one users might smile at first sight. Reserve for: swag, social card variant, email footer, or a secondary mark once brand is more established. Do not ship as primary — it reads clever before it reads premium. Primary mark is E (CI) shipped in V4.31.0. SVG files live in `/branding/`.

@@ -157,6 +157,7 @@ export default function App() {
         pullProgressFromSupabase(session.user).then(() => {
           setUser(session.user);
           refreshProgress();
+          setPage(p => p === 'home' ? 'progress' : p);
         });
       } else if (event === 'SIGNED_OUT') {
         setUser(null);

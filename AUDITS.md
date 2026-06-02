@@ -39,6 +39,25 @@ Start here when running an audit. Add rows as new types emerge.
 
 ---
 
+## Part XXX — V4.77.x Open Items (2026-06-03)
+
+### 144. ⚠️ Build Audit — Forensic checkValues float formatting (f01–f10)
+SQLite REAL values that are whole numbers (40.0, 25.0, 50.0, 3500.0) return as JS integers (40, 25, 50, 3500). The validator does `String(row[i]) === String(val)`, so checkValues using '40.0' will never match. Fixed f01 (no_show_pct), f04 (amount), f09 (premium_pct) in V4.77.1. Remaining f02–f10 checkValues should be audited before Batch 2 ships. Pattern: any REAL column value that is a whole number needs the string checkValue without '.0'.
+
+**Files:** `src/data/sqlLabProblems.js` — forensic problems f01–f10
+
+### 145. ⚠️ UX Audit — SQL Lab Study Plan not working
+User-reported: Study Plan button in SQL Lab is not functioning. Root cause unknown — not yet diagnosed. Needs: open SqlLabPage.jsx, find Study Plan handler, reproduce the failure, fix.
+
+**Files:** `src/pages/SqlLabPage.jsx`
+
+### 146. ⚠️ Content/Visual Audit — FV/FA debrief sections need structured rendering
+The wrong-answer showcase, sanity check, and assumption statement sections added in the S-grade pass are plain paragraphs in the debrief text. They visually blend together. Need distinct visual blocks (coloured left border, section label) to make each section scannable. Currently rendered via renderDebrief() which only handles bold + paragraph breaks. Needs a more structured renderer or separate schema fields.
+
+**Files:** `src/pages/SqlLabPage.jsx` — renderDebrief(), and optionally `src/data/sqlLabProblems.js` schema
+
+---
+
 ## Part XXIX — V4.44.0 Pre-Beta Audit Log
 
 ### 143. ✅ Content Audit — Difficulty Tagging Pass (All Rooms)
