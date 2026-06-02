@@ -693,6 +693,49 @@ export function Home({ onNavigate }) {
         </div>
       </div>
 
+      {/* ── New here? Beginner pathway ──────────────────────────────────── */}
+      {visitedRooms.length === 0 && (
+        <div style={{
+          marginBottom: '2rem',
+          padding: '1rem 1.25rem',
+          background: 'var(--teal-bg)',
+          border: '1px solid var(--teal-border)',
+          borderLeft: '3px solid var(--teal)',
+          borderRadius: 'var(--radius)',
+        }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--teal)', marginBottom: '0.35rem' }}>
+            New to product analytics?
+          </div>
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '0.75rem' }}>
+            If you are transitioning from another field or just starting out, begin with the Foundation rooms before jumping into cases. They build the mental models the practice rooms assume.
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {[
+              { label: '1. Stat Foundations', nav: 'stat-foundations', color: 'var(--teal)' },
+              { label: '2. RCA Foundations', nav: 'rca-foundations', color: 'var(--teal)' },
+              { label: '3. Stats Room', nav: 'stats', color: 'var(--blue-text)' },
+              { label: '4. Defense Strategy', nav: 'defense-doc', color: 'var(--accent)' },
+            ].map(step => (
+              <button
+                key={step.nav}
+                onClick={() => onNavigate(step.nav)}
+                style={{
+                  fontSize: '0.78rem', fontWeight: 600,
+                  padding: '0.3rem 0.75rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--teal-border)',
+                  background: 'var(--surface)',
+                  color: step.color,
+                  cursor: 'pointer',
+                }}
+              >
+                {step.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Guided paths ────────────────────────────────────────────────── */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>

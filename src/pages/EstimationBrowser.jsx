@@ -3,8 +3,9 @@ import { estimationProblems } from '../data/estimationProblems.js';
 import { getAllEstimationProgress } from '../utils/estimationProgress.js';
 
 const DIFFICULTY_COLOR = {
-  Analyst: { color: 'var(--accent)', bg: 'var(--accent-bg)', border: 'var(--accent-border)' },
-  Senior:  { color: 'var(--purple)', bg: 'var(--purple-bg)', border: 'var(--purple-border)' },
+  analyst: { color: 'var(--accent)',  bg: 'var(--accent-bg)',  border: 'var(--accent-border)' },
+  senior:  { color: 'var(--teal)',    bg: 'var(--teal-bg)',    border: 'var(--teal-border)'   },
+  staff:   { color: 'var(--yellow)',  bg: 'var(--yellow-bg)',  border: 'var(--yellow-border)' },
 };
 
 const APPROACH_COLOR = {
@@ -37,7 +38,7 @@ const ALL_DIFFICULTIES = (() => {
   const diffs = new Set();
   estimationProblems.forEach(p => { if (p.difficulty) diffs.add(p.difficulty); });
   // Preserve a sensible order
-  const ORDER = ['Analyst', 'Senior'];
+  const ORDER = ['analyst', 'senior', 'staff'];
   return Array.from(diffs).sort((a, b) => {
     const ia = ORDER.indexOf(a), ib = ORDER.indexOf(b);
     if (ia !== -1 && ib !== -1) return ia - ib;

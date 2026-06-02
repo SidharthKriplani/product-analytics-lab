@@ -11,7 +11,7 @@ export const expFoundationModules = [
     isFree: true,
     estimatedMin: 5,
     tags: ['causality', 'randomization', 'why-ab'],
-    keyInsight: 'Observational data conflates treatment with selection — users who see a feature differ from those who don\'t. Random assignment is the only mechanism that breaks this confound and lets you make causal claims.',
+    keyInsight: 'A PM points at a chart: "Power users who used the new search feature retained at 85% vs 60% for users who didn\'t. It\'s working." You pause. Power users are different people — they seek out features, they have more intent, they\'d retain better regardless. Observational data conflates treatment with selection: users who see a feature differ from those who don\'t in every way you can\'t measure. Random assignment is the only mechanism that breaks this confound and makes causal claims valid.',
     connection: 'Every experiment in the Review Room and Design Room rests on this principle. If you cannot articulate why randomization enables causal inference, you cannot defend your experiment design under pressure.',
   },
   {
@@ -23,7 +23,7 @@ export const expFoundationModules = [
     isFree: true,
     estimatedMin: 6,
     tags: ['randomization unit', 'spillover', 'network effects'],
-    keyInsight: 'The randomization unit must match the unit of analysis. Mismatches create inconsistent user experiences and inflate false positive rates. Network effects and spillover require cluster-level randomization.',
+    keyInsight: 'You randomize a checkout UI change at the session level. A user gets the new variant on visit one, the old on visit two, and files a support ticket about the inconsistent experience. Meanwhile your false positive rate is inflated because sessions from the same user end up in both groups. The randomization unit must match the unit of analysis. Mismatches create bad user experiences and broken statistics simultaneously — and network effects add a third problem that only cluster-level randomization solves.',
     connection: 'SRM (module 5) often traces back to a mismatch between the assignment unit and the logging unit. Understanding randomization units first prevents you from misdiagnosing data quality issues as bias.',
   },
   {
@@ -35,7 +35,7 @@ export const expFoundationModules = [
     isFree: true,
     estimatedMin: 8,
     tags: ['power', 'MDE', 'sample size', 'alpha', 'beta'],
-    keyInsight: 'Required sample size scales with 1/MDE squared. Halving the minimum detectable effect quadruples runtime. Most teams underpower experiments by setting ambitions MDE targets without checking against their traffic.',
+    keyInsight: 'Your PM wants to detect a 1% lift in conversion. You run the power calculation: 14 million users per arm, 22 weeks at current traffic. The conversation goes quiet. Required sample size scales with 1/MDE squared — halving the detectable effect quadruples runtime. Most teams underpower experiments by setting ambitious targets without checking them against actual traffic. Run the calculation before committing to a timeline, not after the experiment is already live.',
     connection: 'Power analysis is the gate to every experiment. Without it, a null result is uninterpretable — you don\'t know if there was no effect or if you simply couldn\'t detect it. This module is prerequisite for modules 4 through 7.',
   },
   {
@@ -47,7 +47,7 @@ export const expFoundationModules = [
     isFree: true,
     estimatedMin: 7,
     tags: ['p-value', 'confidence interval', 'significance'],
-    keyInsight: 'A p-value is the probability of seeing data this extreme if the null were true — not the probability the null is true. Statistical significance does not imply practical significance. A wide CI with a significant p-value is common when sample size is large.',
+    keyInsight: 'The readout says p = 0.03 and the PM asks: "So there\'s a 3% chance the feature doesn\'t work?" No. A p-value is the probability of seeing data this extreme if the null were true — not the probability the null is true. These are completely different questions. And statistical significance does not mean practical significance: with enough users, a 0.01% lift becomes significant. Always report the confidence interval alongside the p-value so stakeholders understand the range of plausible effects.',
     connection: 'Misreading p-values is the most common way experiment readouts go wrong in practice. Interviewers will probe this. The true/false format in this module is exactly how the trap questions are set.',
   },
   {
@@ -59,7 +59,7 @@ export const expFoundationModules = [
     isFree: true,
     estimatedMin: 6,
     tags: ['SRM', 'assignment', 'data quality'],
-    keyInsight: 'SRM means the observed variant split differs from the intended split in a way unlikely to be chance. It invalidates the experiment because the groups are no longer comparable. You must pause and diagnose before drawing any conclusions.',
+    keyInsight: 'You launch a 50/50 split and after a week the dashboard shows 52% in control, 48% in treatment. Small difference — but a chi-square test says it\'s not noise. This is a Sample Ratio Mismatch, and it means the groups are no longer comparable. Maybe a bot filter fired differently, maybe the assignment logic had a bug. Whatever the cause, you cannot interpret the results. Pause the experiment, diagnose the cause, and relaunch. Drawing conclusions from an SRM-compromised test is worse than running no test at all.',
     connection: 'SRM is the data quality check for experiments — the same instinct that makes you check tracking before blaming the product in RCA. Always run an SRM check before interpreting experiment results.',
   },
   {
@@ -71,7 +71,7 @@ export const expFoundationModules = [
     isFree: true,
     estimatedMin: 6,
     tags: ['novelty effect', 'learning effect', 'long-run'],
-    keyInsight: 'Users explore new UI out of curiosity. Initial lift often decays to steady-state or below. Running an experiment long enough to capture stable behavior — typically at least one full weekly cycle, often 2-4 weeks — is the only mitigation.',
+    keyInsight: 'You check the experiment after three days: +8% engagement, looking great. You call it early and ship. Two weeks later engagement has settled back to baseline — worse than before because users learned the new pattern and found it annoying. The first days of a new UI measure curiosity, not value. Initial lift from novelty often decays to steady-state or below. Running an experiment long enough to capture stable behaviour — at least one full weekly cycle, usually 2-4 weeks — is the only way to know if you\'re measuring a real effect.',
     connection: 'The novelty effect is the temporal equivalent of the mix shift in RCA. Just as you segment by cohort to find mix shifts, you segment by time to find novelty decay. Both are about not trusting aggregate snapshots.',
   },
   {
@@ -83,7 +83,7 @@ export const expFoundationModules = [
     isFree: true,
     estimatedMin: 7,
     tags: ['multiple testing', 'FWER', 'guardrail metrics', 'Bonferroni'],
-    keyInsight: 'At alpha=0.05, each additional metric tested adds a 5% chance of a spurious significant result. With 20 metrics you expect 1 false positive by chance. Bonferroni correction divides alpha by the number of tests — conservative but reliable.',
+    keyInsight: 'Your experiment readout has 20 metrics. Three show p < 0.05. The team wants to highlight all three as wins. But at alpha=0.05, you expect one false positive just by chance across 20 tests — statistically, at least one of those "wins" is noise. The more metrics you test, the more likely you are to find something significant that isn\'t real. Bonferroni correction divides alpha by the number of tests, which is conservative but prevents you from celebrating phantom results.',
     connection: 'Guardrail metrics (the ones you watch to catch regressions you did not target) are a designed response to the multiple testing problem. Knowing the theory lets you defend why you use a stricter threshold for guardrails than for primary metrics.',
   },
   {
@@ -95,7 +95,7 @@ export const expFoundationModules = [
     isFree: false,
     estimatedMin: 10,
     tags: ['a/a testing', 'platform validation', 'false positives'],
-    keyInsight: 'An A/A test where both groups receive identical treatment should show no significant difference — if it does, your randomization or variance estimation is broken.',
+    keyInsight: 'Before your team runs its first live experiment on the new platform, you split users 50/50 and give both groups the exact same experience. After two weeks the test shows p = 0.02 — "significant." That\'s a problem. An A/A test should show no significant difference because nothing changed. If it does, your randomization logic is broken or your variance estimation is wrong. Every experiment you run on that platform is compromised until you fix it. A/A testing is not optional hygiene — it\'s the baseline.',
     connection: 'A/A testing is a prerequisite to trusting any A/B result. If your platform has systematic bias, every experiment you run is compromised. Interviewers use A/A scenarios to probe whether you validate infrastructure before drawing conclusions.',
     playbookLinks: [
       { id: 'experiment-design', label: 'Experiment Design' },
@@ -111,7 +111,7 @@ export const expFoundationModules = [
     isFree: false,
     estimatedMin: 10,
     tags: ['CUPED', 'variance reduction', 'pre-experiment covariates', 'statistical power'],
-    keyInsight: 'CUPED subtracts the component of the outcome metric that is predictable from pre-experiment behavior. Removing this noise reduces variance, which means smaller MDEs become detectable with the same sample — or equivalently, the same MDE requires less runtime.',
+    keyInsight: 'Your experiment needs six weeks to reach power and the PM wants results in two. You can\'t get more traffic. What do you do? Use pre-experiment data. Users who were highly engaged last month will likely be highly engaged this month regardless of the treatment — that predictable variance is noise. CUPED subtracts the component of the outcome metric predictable from pre-experiment behaviour, reducing variance. Less variance means smaller effects become detectable with the same sample — or the same MDE requires much less runtime.',
     connection: 'CUPED is the practical answer to the question "how do we run faster experiments without compromising power?" It extends the power module (ef03) — once you understand why n scales with 1/MDE squared, CUPED gives you a lever to shift that curve without adding traffic.',
     playbookLinks: [
       { id: 'statistical-power', label: 'Statistical Power' },
@@ -127,7 +127,7 @@ export const expFoundationModules = [
     isFree: false,
     estimatedMin: 10,
     tags: ['sequential testing', 'always-valid p-values', 'alpha spending', 'peeking'],
-    keyInsight: 'Peeking at results and stopping early when p < 0.05 inflates the true false positive rate well above 5%. Sequential testing methods (alpha spending, always-valid inference) let you make early decisions with valid error control — but they require planning the stopping rule before you start.',
+    keyInsight: 'Wednesday morning your experiment dashboard shows p = 0.049. You stop the test and ship. You\'ve just p-hacked — possibly without knowing it. If you peek at results and stop when you hit significance, the true false positive rate is nowhere near 5%; it can exceed 20% depending on how often you checked. Sequential testing methods — alpha spending, always-valid inference — let you make early decisions with valid error control. But they require planning the stopping rule before the experiment starts, not discovering it mid-run.',
     connection: 'The "peeking problem" is one of the most common ways teams accidentally p-hack without realizing it. Sequential testing is the designed solution — and knowing the difference between a planned interim analysis and ad-hoc peeking is exactly what interviewers probe when they ask about experiment velocity.',
     playbookLinks: [
       { id: 'statistical-power', label: 'Statistical Power' },
@@ -143,7 +143,7 @@ export const expFoundationModules = [
     isFree: false,
     estimatedMin: 12,
     tags: ['network effects', 'SUTVA', 'interference', 'spillover', 'cluster randomization'],
-    keyInsight: 'SUTVA (Stable Unit Treatment Value Assumption) requires that one unit\'s outcome is unaffected by another unit\'s treatment. Social networks, marketplaces, and referral programs violate this — treatment effects spill between users, making standard experiment estimates biased in unpredictable directions.',
+    keyInsight: 'You run a standard A/B test on a new feed ranking algorithm at a social platform. Treatment users see more relevant content and post more. But their posts show up in the feeds of control users — who also become more active. Your control group is contaminated by the treatment. Standard experiments assume one user\'s outcome is unaffected by another user\'s assignment. Social networks, marketplaces, and referral programs break this assumption — treatment effects spill across users, making your estimates biased in directions you cannot predict.',
     connection: 'Network effects are why the randomization unit module (ef02) exists — cluster randomization is the structural fix for SUTVA violations. Understanding interference makes you fluent in why two-sided marketplace experiments and social feed tests require fundamentally different designs than simple product UI tests.',
     playbookLinks: [
       { id: 'experiment-design', label: 'Experiment Design' },
@@ -159,7 +159,7 @@ export const expFoundationModules = [
     isFree: false,
     estimatedMin: 10,
     tags: ['holdout group', 'cumulative impact', 'long-term holdout', 'experiment debt'],
-    keyInsight: 'A holdout group is a slice of users permanently excluded from all new features. Comparing their trajectory to the fully-treated population gives you the cumulative causal impact of your entire launch program — something individual A/B tests cannot provide because they only measure one change at a time.',
+    keyInsight: 'Your team shipped 40 winning experiments last year. Revenue grew 6%. But the sum of all those individual experiment lifts projected to 18%. Where did the rest go? Interaction effects, cannibalisation, and novelty decay. A holdout group — a slice of users permanently excluded from all new features — lets you compare the untouched population against the fully-treated one. That comparison is the only way to measure the true cumulative causal impact of your entire launch programme, not the sum of optimistic individual lifts.',
     connection: 'Holdout groups answer the question that individual experiments cannot: "Are all these small wins adding up to real business impact?" This is a maturity signal — candidates who know holdouts understand that the sum of individual experiment lifts rarely equals the true compound effect.',
     playbookLinks: [
       { id: 'experiment-design', label: 'Experiment Design' },
@@ -175,7 +175,7 @@ export const expFoundationModules = [
     isFree: false,
     estimatedMin: 12,
     tags: ['multi-armed bandit', 'explore-exploit', 'Thompson sampling', 'epsilon-greedy'],
-    keyInsight: 'A/B tests fix traffic allocation for the experiment duration — they optimize for measurement. Bandits shift traffic toward better-performing variants in real time — they optimize for reward during the experiment. The tradeoff is inference quality vs. opportunity cost of running a losing variant.',
+    keyInsight: 'You\'re testing five button copy variants and your standard A/B test will keep showing the worst-performing copy to 20% of users for six weeks. A PM asks: "Can we just shift traffic toward the winning variant while we learn?" Yes — that\'s a bandit. A/B tests fix traffic allocation to maximise measurement quality. Bandits shift traffic toward better-performing variants in real time to minimise the cost of running losers. The tradeoff is inference quality versus opportunity cost — and knowing when that tradeoff favours a bandit is a real design judgment.',
     connection: 'The explore-exploit tradeoff is the conceptual core of bandit algorithms and it shows up in PM interviews about personalization, recommendation systems, and ad serving. Knowing when a bandit is better than a fixed A/B test — and when it is not — is a practical design judgment interviewers test for.',
     playbookLinks: [
       { id: 'experiment-design', label: 'Experiment Design' },
@@ -191,7 +191,7 @@ export const expFoundationModules = [
     isFree: false,
     estimatedMin: 12,
     tags: ['geo experiment', 'market-level randomization', 'incrementality', 'matched markets'],
-    keyInsight: 'Geo experiments randomize at the geographic unit (city, DMA, country) rather than the user. This sidesteps network spillover and enables testing of channels — like TV, OOH, or pricing — where user-level assignment is impossible. The tradeoff is dramatically fewer randomization units, which limits statistical power.',
+    keyInsight: 'The growth team wants to test a TV ad campaign. You can\'t randomly assign which users see a TV ad. You can randomly assign which cities get the campaign. Geo experiments randomize at the city, DMA, or country level — which sidesteps user-level spillover and makes offline channel testing possible. The tradeoff: you go from millions of users as randomization units to maybe 30 cities. That dramatically limits statistical power, and matching markets carefully before you start is the only way to compensate.',
     connection: 'Geo experiments are the practical answer to the SUTVA problem (ef11) for offline channels and marketplace interventions. They also connect to incrementality measurement in marketing — a domain where product analysts at growth-stage companies are routinely expected to design and interpret these tests.',
     playbookLinks: [
       { id: 'network-effects', label: 'Network Effects' },
@@ -207,7 +207,7 @@ export const expFoundationModules = [
     isFree: false,
     estimatedMin: 12,
     tags: ['switchback experiment', 'time-based randomization', 'marketplace', 'two-sided platforms'],
-    keyInsight: 'Switchback experiments randomize over time periods rather than users — alternating treatment and control windows within the same market. This handles the two-sided marketplace problem where splitting users creates within-platform interference, but it introduces temporal autocorrelation that must be modeled explicitly.',
+    keyInsight: 'You work at a ride-sharing company and want to test a new surge pricing algorithm. You can\'t split drivers and riders into treatment and control — a driver in control competing with a driver in treatment creates immediate interference. The solution: alternate treatment and control by time window within the same market. Treatment hour, control hour, treatment hour. Switchback experiments randomize over time rather than users, which eliminates within-market interference. The cost: adjacent time windows are correlated, and that autocorrelation must be modelled explicitly or your variance estimates are wrong.',
     connection: 'Switchback designs are the canonical solution for ride-sharing, food delivery, and other dense marketplace experiments where demand and supply interact at a market level — making user-level randomization meaningless. Knowing this design signals fluency with the hardest class of experiment problems interviewers raise for marketplace PMs and analysts.',
     playbookLinks: [
       { id: 'network-effects', label: 'Network Effects' },

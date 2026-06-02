@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { designScenarios } from '../data/designScenarios.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getAllDesignProgress } from '../utils/designProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 
@@ -15,7 +16,7 @@ const DESIGN_DIFF_CFG = {
   staff:   { color: 'var(--teal)' },
 };
 
-export function DesignBrowser({ onSelectScenario, onOpenArticle }) {
+export function DesignBrowser({ onSelectScenario, onOpenArticle, onNavigate }) {
   const [theoryActive, setTheoryActive] = useState(false);
   const allProgress = getAllDesignProgress();
 
@@ -49,6 +50,30 @@ export function DesignBrowser({ onSelectScenario, onOpenArticle }) {
           <span>Pairs with Review Room scenarios</span>
         </div>
       </div>
+
+      {/* Foundation nudge */}
+      {onNavigate && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '0.75rem',
+          padding: '0.7rem 1rem',
+          background: 'var(--accent-bg)',
+          borderLeft: '3px solid var(--accent)',
+          borderRadius: 'var(--radius-sm)',
+          marginBottom: '1.25rem',
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--accent)', marginBottom: '0.15rem' }}>Recommended starting point</div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+              <button onClick={() => onNavigate('exp-foundations')} style={{
+                background: 'none', border: 'none', padding: 0,
+                color: 'var(--accent)', fontWeight: 700, cursor: 'pointer',
+                fontSize: '0.78rem',
+              }}>Exp Foundations</button>
+              {' '}covers the statistical principles and experiment design concepts this room applies.
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Theory / Cases tab bar */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>

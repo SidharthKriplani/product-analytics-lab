@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { biCases } from '../data/biCases.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getAllBIProgress } from '../utils/biProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 
@@ -56,9 +57,18 @@ export function BIBrowser({ onSelectCase, unlocked, onOpenArticle }) {
   const completedCount = Object.keys(allProgress).length;
   const [activeFilter, setActiveFilter] = useState('All');
   const [theoryActive, setTheoryActive] = useState(false);
+  const [diffFilter, setDiffFilter] = useState('all');
+
+  const diffCounts = {
+    all: biCases.length,
+    analyst: biCases.filter(c => c.difficulty === 'analyst').length,
+    senior: biCases.filter(c => c.difficulty === 'senior').length,
+    staff: biCases.filter(c => c.difficulty === 'staff').length,
+  };
 
   const filtered = biCases
     .filter(c => matchesFilter(c.domain, activeFilter))
+    .filter(c => diffFilter === 'all' || c.difficulty === diffFilter)
     .slice()
     .sort((a, b) => DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty]);
 
@@ -75,9 +85,9 @@ export function BIBrowser({ onSelectCase, unlocked, onOpenArticle }) {
             width: '36px', height: '36px', borderRadius: '9px',
             background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.1rem', flexShrink: 0,
+            fontSize: '0.85rem', fontWeight: 700, color: 'var(--yellow)', flexShrink: 0,
           }}>
-            📊
+            BI
           </span>
           <div>
             <div style={{
@@ -166,6 +176,11 @@ export function BIBrowser({ onSelectCase, unlocked, onOpenArticle }) {
           );
         })}
       </div>
+      )}
+
+      {/* Difficulty filter chips */}
+      {!theoryActive && (
+        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
       )}
 
       {/* Case cards — 2-col grid on desktop, 1-col on mobile */}

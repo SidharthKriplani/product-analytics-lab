@@ -4,6 +4,62 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.46.0] — 2026-06-02 [FEATURE + CONTENT]
+
+### SQL Lab Phase 3 + Foundation Rewrites + Emoji Pass + Debrief Failure Modes
+
+**SQL Lab Phase 3 (`src/pages/SqlLabPage.jsx`, `src/pages/Progress.jsx`):**
+- Company/datamart filter chip added to ProblemSidebar — chips per datamartId, active in teal, with counts
+- PostHog events wired: `sql_problem_solved` (payload: problemId, difficulty, datamartId, elapsedSec), `sql_hint_used` (hintIndex), `sql_answer_revealed`
+- New localStorage key `pal-sql-lab-dates-v1` (date→solve count) written on each correct solve
+- Progress.jsx heatmap now includes SQL Lab solve dates — SQL Lab practice appears in the heatmap and streak counter
+- Hints quality spot-check: all 130 problems reviewed, no misleading hints found
+
+**Foundation rewrites — situation-first keyInsight (4 files, 65 modules total):**
+All `keyInsight` fields rewritten to open with a concrete human business situation before any framework language. "Your PM pings you: DAU dropped 18% overnight. You have two hours..." not "RCA follows a four-layer hypothesis tree."
+- `src/data/rcaFoundationModules.js` — 12 modules (rf01–rf12) rewritten
+- `src/data/metricsFoundationModules.js` — 13 modules (mf01–mf13) rewritten
+- `src/data/expFoundationModules.js` — 15 modules (ef01–ef15) rewritten
+- `src/data/statsFoundationsModules.js` — 32 modules (sf01–sf32) rewritten. All validate-data.js checks: PASS.
+
+**Emoji removal + Simulator layout (audit #80, #82):**
+Removed UI-chrome emojis from: BIBrowser, ChallengesBrowser, Trainer, SqlLabPage (Challenge Vault label), ConsultationSpace, Progress, DefenseDocGenerator, CodeBrowser, ExpFoundationsBrowser, SearchPage, CompanyTracks. InterviewSimulator config screen redesigned: role cards tighter grid, compact chip selectors, no bouncy hover, reduced max-width.
+
+**Case debrief failure mode pass (audit #86, 60 cases):**
+Every debrief in rcaCases.js (24 cases), metricCases.js (16 cases), statsModules.js (20 modules) now ends with: **Weak answer pattern** (case-specific, not generic) + **Interviewer follow-up that exposes it** (exact probe question tied to the case data).
+
+**Build:** ✓ 0 errors in ~1s. validate-data.js: all target files PASS.
+**Audits resolved:** #80 (emoji removal), #82 (Simulator layout), #86 (debrief failure modes), #141 (foundations vetting — completed via rewrites)
+
+---
+
+## [4.45.0] — 2026-06-02 [FEATURE]
+
+### Difficulty Filter Chips + About Page Rewrite + Beginner Onboarding + Foundation Nudges
+
+**Difficulty taxonomy normalization (`src/data/`):**
+All room data files now use a consistent difficulty taxonomy: `analyst / senior / staff`. Previously inconsistent values normalized across 6 files: `takehomeCases.js` (Any level→analyst, Mid-level→senior), `prioritizationScenarios.js` (capitalized→lowercase), `productDesignScenarios.js` (hard→staff, medium→senior), `businessCases.js` (advanced→staff), `behavioralQuestions.js` (mid→analyst, Mid-level→analyst, Senior→senior), `estimationProblems.js` (Analyst/Senior/Staff→lowercase), `challengesCases.js` (capitalized→lowercase).
+
+**DifficultyChips shared component (`src/components/shared/DifficultyChips.jsx`):**
+New reusable filter chip bar. Accepts `value`, `onChange`, `counts` props. Auto-hides tiers with 0 cases. Handles `junior` as alias for `analyst`. Used across all room browsers.
+
+**Difficulty filter chips added to all room browsers:**
+Agent-assisted: MetricsBrowser, GrowthAnalyticsBrowser, BIBrowser, InstrumentationBrowser, SpotTheFlawBrowser, CasesBrowser, DesignBrowser, ProductDesignBrowser, TakehomeBrowser, CodeBrowser, RCABrowser. Manual: PrioritizationBrowser (added DifficultyChips + diffFilter state). Config updated: BehavioralBrowser (DIFFICULTY_COLOR aligned to new taxonomy), EstimationBrowser (DIFFICULTY_COLOR + ORDER aligned).
+
+**About.jsx — full rewrite:**
+Previous page was V2-era (referenced "six rooms", "data scientists", stale build history). Rewritten to reflect current state: 17 rooms, 130 SQL problems, Foundation modules, difficulty levels, how to use PAL by experience level, how it differs from DataLemur/StrataScratch/Exponent, technical details.
+
+**Home.jsx — beginner onboarding track:**
+New teal card shown only on first visit (visitedRooms.length === 0): "New to product analytics? Start here →" with 4-step path: Stat Foundations → RCA Foundations → Stats Room → Defense Strategy.
+
+**Foundation nudges added:**
+DesignBrowser and ScenarioBrowser (Review Room) now show "Recommended starting point: Exp Foundations" nudge, consistent with existing nudges in Stats/RCA/Metrics/Cases/Growth/STF browsers. Both received `onNavigate` prop wired from App.jsx.
+
+**Build:** ✓ 0 errors in 1.30s.
+**Files:** `src/components/shared/DifficultyChips.jsx` (new), `src/pages/About.jsx`, `src/pages/Home.jsx`, `src/App.jsx`, all room browser pages, all room data files listed above.
+
+---
+
 ## [4.44.0] — 2026-05-31 [DATA]
 
 ### Foundation Module Data Canonicalization (Audit #96)

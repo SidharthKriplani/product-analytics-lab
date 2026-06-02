@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { datamarts } from '../data/sqlLabDatamarts.js';
+import { track } from '../utils/analytics.js';
 
 const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3 };
 
@@ -140,12 +141,15 @@ function SidebarProblemBtn({ p, globalIdx, isCurrent, isSolved, onSelect }) {
   );
 }
 
-function ProblemSidebar({ problems, currentIdx, solved, filterDiff, onFilterDiff, onSelect }) {
+const DATAMARTS = ['all', ...new Set(sqlLabProblems.map(p => p.datamartId))];
+
+function ProblemSidebar({ problems, currentIdx, solved, filterDiff, onFilterDiff, filterDatamart, onFilterDatamart, onSelect }) {
   const nonMaster = problems.filter(p => p.difficulty !== 'Master');
   const masterProblems = problems.filter(p => p.difficulty === 'Master');
-  const filtered = filterDiff === 'Master'
+  const filtered = (filterDiff === 'Master'
     ? masterProblems
-    : nonMaster.filter(p => !filterDiff || p.difficulty === filterDiff);
+    : nonMaster.filter(p => !filterDiff || p.difficulty === filterDiff)
+  ).filter(p => filterDatamart === 'all' || p.datamartId === filterDatamart);
   const solvedCount = problems.filter(p => solved.has(p.id)).length;
 
   return (
@@ -188,6 +192,31 @@ function ProblemSidebar({ problems, currentIdx, solved, filterDiff, onFilterDiff
         </div>
       </div>
 
+      {/* Datamart filter */}
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.875rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Company</div>
+        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+          {DATAMARTS.map(dm => {
+            const active = filterDatamart === dm;
+            const count = dm === 'all' ? problems.length : problems.filter(p => p.datamartId === dm).length;
+            const label = dm === 'all' ? ('All (' + count + ')') : (dm + ' (' + count + ')');
+            return (
+              <button
+                key={dm}
+                onClick={() => onFilterDatamart(active && dm !== 'all' ? 'all' : dm)}
+                style={{
+                  padding: '3px 9px', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 600,
+                  cursor: 'pointer', border: '1px solid',
+                  background: active ? 'rgba(20,184,166,0.1)' : 'var(--surface-2)',
+                  color: active ? 'var(--teal)' : 'var(--text-muted)',
+                  borderColor: active ? 'rgba(20,184,166,0.3)' : 'var(--border)',
+                }}
+              >{label}</button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Problem list */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
         <div style={{ padding: '0.5rem 0.875rem', borderBottom: '1px solid var(--border)', fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -210,12 +239,12 @@ function ProblemSidebar({ problems, currentIdx, solved, filterDiff, onFilterDiff
       </div>
 
       {/* Challenge Vault — Master problems (hidden when Master filter is active, they show in main list) */}
-      {masterProblems.length > 0 && filterDiff !== 'Master' && (
+      {masterProblems.filter(p => filterDatamart === 'all' || p.datamartId === filterDatamart).length > 0 && filterDiff !== 'Master' && (
         <div style={{ background: 'var(--surface)', border: '1px solid var(--purple-border, rgba(139,92,246,0.25))', borderRadius: '10px', overflow: 'hidden' }}>
           <div style={{ padding: '0.5rem 0.875rem', borderBottom: '1px solid var(--border)', fontSize: '0.68rem', fontWeight: 700, color: 'var(--purple, #8b5cf6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            ⚡ Challenge Vault
+            Challenge Vault
           </div>
-          {masterProblems.map(p => {
+          {masterProblems.filter(p => filterDatamart === 'all' || p.datamartId === filterDatamart).map(p => {
             const globalIdx = problems.findIndex(x => x.id === p.id);
             return (
               <SidebarProblemBtn
@@ -246,6 +275,7 @@ export function SqlLabPage({ onBack }) {
   const [correct, setCorrect] = useState(null);
   const [hintsShown, setHintsShown] = useState(0);
   const [filterDiff, setFilterDiff] = useState(null);
+  const [filterDatamart, setFilterDatamart] = useState('all');
   const timerRef = useRef(null);
   const timerStartRef = useRef(null);
   const [elapsedSec, setElapsedSec] = useState(0);
@@ -268,18 +298,27 @@ export function SqlLabPage({ onBack }) {
   const dm = problem ? datamarts[problem.datamartId] : null;
   const diffStyle = problem ? (DIFF_COLOR[problem.difficulty] || DIFF_COLOR.Easy) : DIFF_COLOR.Easy;
 
-  // Mark solved on correct answer + save elapsed time
+  // Mark solved on correct answer + save elapsed time + fire analytics + record streak date
   useEffect(() => {
     if (correct !== true || !problem) return;
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    const elapsed = timerStartRef.current ? Math.round((Date.now() - timerStartRef.current) / 1000) : 0;
     if (timerStartRef.current) {
-      const elapsed = Math.round((Date.now() - timerStartRef.current) / 1000);
       try {
         const stored = JSON.parse(localStorage.getItem('pal-sql-lab-times-v1') || '{}');
         stored[problem.id] = elapsed;
         localStorage.setItem('pal-sql-lab-times-v1', JSON.stringify(stored));
       } catch {}
     }
+    // Record solve date for heatmap
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const dateDiary = JSON.parse(localStorage.getItem('pal-sql-lab-dates-v1') || '{}');
+      dateDiary[today] = (dateDiary[today] || 0) + 1;
+      localStorage.setItem('pal-sql-lab-dates-v1', JSON.stringify(dateDiary));
+    } catch {}
+    // Analytics
+    track('sql_problem_solved', { problemId: problem.id, difficulty: problem.difficulty, datamartId: problem.datamartId, elapsedSec: elapsed });
     setSolved(prev => {
       const next = new Set(prev);
       next.add(problem.id);
@@ -577,7 +616,7 @@ export function SqlLabPage({ onBack }) {
                     <>
                       {!allExhausted && (
                         <button
-                          onClick={() => setHintsShown(n => Math.min(n + 1, hintCap))}
+                          onClick={() => { track('sql_hint_used', { problemId: problem.id, hintIndex: hintsShown + 1, difficulty: problem.difficulty }); setHintsShown(n => Math.min(n + 1, hintCap)); }}
                           style={{
                             padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
                             background: 'rgba(20,184,166,0.08)', color: 'var(--teal)',
@@ -589,7 +628,7 @@ export function SqlLabPage({ onBack }) {
                       )}
                       {allExhausted && (
                         <button
-                          onClick={() => { if (query.trim().length >= 50) setRevealed(true); }}
+                          onClick={() => { if (query.trim().length >= 50) { track('sql_answer_revealed', { problemId: problem.id, difficulty: problem.difficulty }); setRevealed(true); } }}
                           disabled={query.trim().length < 50}
                           title={query.trim().length < 50 ? ('Write ' + (50 - query.trim().length) + ' more char' + (50 - query.trim().length !== 1 ? 's' : '') + ' to unlock') : 'Show answer'}
                           style={{
@@ -692,6 +731,8 @@ export function SqlLabPage({ onBack }) {
         solved={solved}
         filterDiff={filterDiff}
         onFilterDiff={setFilterDiff}
+        filterDatamart={filterDatamart}
+        onFilterDatamart={setFilterDatamart}
         onSelect={idx => setProblemIdx(idx)}
       />
     </div>

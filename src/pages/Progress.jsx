@@ -254,7 +254,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
     { label: 'Prioritization', completed: prioritizationScenarios.filter(s => priProgress[s.id]?.completedAt).length, total: prioritizationScenarios.length, color: 'var(--yellow)',
       onReset: makeRoomResetter(['pal-pri-progress-v1']) },
     { label: 'SQL Lab', completed: sqlLabProblems.filter(p => sqlSolved.has(p.id)).length, total: sqlLabProblems.length, color: 'var(--teal)',
-      onReset: makeRoomResetter(['pal-sql-lab-solved-v1', 'pal-sql-lab-times-v1']) },
+      onReset: makeRoomResetter(['pal-sql-lab-solved-v1', 'pal-sql-lab-times-v1', 'pal-sql-lab-dates-v1']) },
   ];
 
   const gaCompleted = growthAnalyticsCases.filter(c => gaProgress[c.id]?.rating).length;
@@ -361,6 +361,11 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
         });
       } catch {}
     });
+    // SQL Lab solve dates (keyed directly by date string)
+    try {
+      const sqlDates = JSON.parse(localStorage.getItem('pal-sql-lab-dates-v1') || '{}');
+      Object.keys(sqlDates).forEach(d => dates.add(d));
+    } catch {}
     return dates;
   }
 
@@ -455,7 +460,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
 
       {/* Overview Section */}
       <SectionCard
-        icon="📊"
+        icon="~"
         title="Overview"
         open={overviewOpen}
         onToggle={() => setOverviewOpen(o => !o)}
@@ -631,7 +636,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
 
       {/* Study Plan Section */}
       <SectionCard
-        icon="📚"
+        icon="--"
         title="Study Plan"
         open={studyPlanOpen}
         onToggle={() => setStudyPlanOpen(o => !o)}
@@ -662,7 +667,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
             const d = daysAgo(p.completedAt);
             recommendations.push({
               type: 'revisit',
-              icon: '🔄',
+              icon: '·',
               title: `Revisit — ${c.id}: ${c.title}`,
               reason: `You rated this ${p.rating === 1 ? '"miss"' : '"weak"'}${d !== null ? ` ${d === 0 ? 'today' : `${d} day${d !== 1 ? 's' : ''} ago`}` : ''}.`,
               nav: 'growth-analytics',
@@ -677,7 +682,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
             const d = daysAgo(p.completedAt);
             recommendations.push({
               type: 'revisit',
-              icon: '🔄',
+              icon: '·',
               title: `Revisit — ${q.title}`,
               reason: `You rated this ${p.rating === 1 ? '"miss"' : '"weak"'}${d !== null ? ` ${d === 0 ? 'today' : `${d} day${d !== 1 ? 's' : ''} ago`}` : ''}. Behavioral answers need sharpening.`,
               nav: 'behavioral',
@@ -692,7 +697,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
             const d = daysAgo(p.completedAt);
             recommendations.push({
               type: 'revisit',
-              icon: '🔄',
+              icon: '·',
               title: `Revisit — ${ep.title}`,
               reason: `You rated this ${p.rating === 1 ? '"miss"' : '"weak"'}${d !== null ? ` ${d === 0 ? 'today' : `${d} day${d !== 1 ? 's' : ''} ago`}` : ''}. Estimation frameworks need more practice.`,
               nav: 'estimation',
@@ -706,7 +711,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
           if (p?.attempts > 0 && (p.level === 'wrong' || p.level === 'partial')) {
             recommendations.push({
               type: 'revisit',
-              icon: '🔄',
+              icon: '·',
               title: `Revisit Stats — ${m.title}`,
               reason: `You scored "${p.level}" after ${p.attempts} attempt${p.attempts !== 1 ? 's' : ''}. One more pass should lock this in.`,
               nav: 'stats',
@@ -719,7 +724,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
         if (gaAttempted >= 2 && sfCompleted === 0) {
           recommendations.push({
             type: 'bridge',
-            icon: '🔗',
+            icon: '·',
             title: 'Start Stat Foundations',
             reason: `You've done ${gaAttempted} Growth Analytics case${gaAttempted !== 1 ? 's' : ''} but haven't touched Stat Foundations — the theory will make GA problems much clearer.`,
             nav: 'stat-foundations',
@@ -729,7 +734,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
         if (sfCompleted >= 5 && gaAttempted === 0) {
           recommendations.push({
             type: 'bridge',
-            icon: '🔗',
+            icon: '·',
             title: 'Apply your stats in Growth Analytics',
             reason: `You've completed ${sfCompleted} Stat Foundations modules. Growth Analytics is the next step to apply that knowledge to real business cases.`,
             nav: 'growth-analytics',
@@ -740,7 +745,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
         if ((casesCompleted.length >= 3 || gaAttempted >= 3) && behAttempted === 0) {
           recommendations.push({
             type: 'bridge',
-            icon: '🔗',
+            icon: '·',
             title: 'Add Behavioral practice',
             reason: `You've been grinding analytical rooms but haven't practiced behavioral questions — interviewers always ask both.`,
             nav: 'behavioral',
@@ -763,7 +768,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
           if (r.done === 0) {
             recommendations.push({
               type: 'new',
-              icon: '🆕',
+              icon: '·',
               title: `Start ${r.label}`,
               reason: r.note,
               nav: r.nav,
@@ -789,7 +794,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
             if (allLow) {
               recommendations.push({
                 type: 'levelup',
-                icon: '⬆️',
+                icon: '·',
                 title: `Level up in ${room.label}`,
                 reason: `You've attempted ${attempted.length}/${room.items.length} ${room.label} problems but are still scoring at junior/analyst level. Try harder problems with a tighter framework.`,
                 nav: room.nav,
@@ -1028,7 +1033,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
 
         return (
           <SectionCard
-            icon="🔁"
+            icon=">"
             title="Review Queue"
             open={reviewQueueOpen}
             onToggle={() => setReviewQueueOpen(o => !o)}
@@ -1093,7 +1098,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
 
       {/* Room Progress Section */}
       <SectionCard
-        icon="🏠"
+        icon="#"
         title="Room Progress"
         open={roomProgressOpen}
         onToggle={() => setRoomProgressOpen(o => !o)}
@@ -1223,7 +1228,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
 
       {/* Settings Section */}
       <SectionCard
-        icon="⚙️"
+        icon="*"
         title="Settings"
         open={settingsOpen}
         onToggle={() => setSettingsOpen(o => !o)}

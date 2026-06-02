@@ -2,114 +2,107 @@ export function About() {
   const sections = [
     {
       title: 'What this is',
-      body: `Product Analytics Lab is an interactive judgment gym for product analysts and data scientists who already understand the basics of A/B testing. The gap it fills: there are many resources for learning experimental statistics, but very few that give you practice making judgment calls under messy, realistic product data.
+      body: `Product Analytics Lab (PAL) is an interactive judgment gym for product analysts, data analysts, and PMs who want to practice the analytical decisions that decide real interviews — not recall frameworks from a textbook.
 
-The lab has six rooms, each testing a different analytical skill:
+The gap PAL fills: most prep resources teach you what A/B testing, RCA, and metric design are. Very few give you practice making judgment calls under realistic business pressure with messy, ambiguous data. PAL puts you in the decision, not the definition.
 
-Stats Room — A stakeholder makes a specific claim about the experiment data. You evaluate whether it is valid, directionally reasonable but incomplete, not supported, or inconclusive. 8 modules covering p-values, CIs, power, SRM, multiple testing, guardrails, novelty effects, and SUTVA.
-
-Metrics Room — You're given a product context and a business goal. Define the primary metric, diagnostic metrics, and guardrails. Scored against a senior metric design standard with a full debrief. 6 cases covering search, activation, push notifications, marketplace quality, revenue, and GenAI deflection.
-
-Design Room — Set the primary metric, randomization unit, guardrails, trust checks, and pre-committed decision rule before data exists. 8 scenarios, each paired with a Review Room counterpart.
-
-Review Room — You're dropped into a messy experiment readout with SRM flags, guardrail breaches, conflicting metrics, and business pressure. Make the ship, rollback, or investigate call. 12 scenarios.
-
-RCA Room — A metric moved. Step through a structured 5-stage diagnosis: system check, decompose, segment, hypothesize, validate. 6 cases covering real product failure modes from payment bugs to notification fatigue.
-
-Cases Room — An exec asks a business question. Work through a 6-phase analysis: clarify the ask, define KPIs, form hypotheses, cut the data, choose methods, recommend. 4 cases with ambiguous briefs and business pressure.
-
-The answer is rarely "p < 0.05, ship it." This is where you practice the harder calls.`,
+17 rooms. 150+ cases. SQL Lab with 130 problems. Foundation modules across Stats, Experimentation, RCA, and Metrics. Every case tests judgment, not recall.`,
     },
     {
       title: "Who it's for",
-      body: `Product analysts, data scientists, growth analysts, and PMs who already know what a p-value, SRM, and SUTVA are — and want to practice applying that knowledge under business pressure with messy readouts.
+      body: `Product analysts, data analysts, business analysts, and PMs preparing for senior IC and leadership-track interviews.
 
-Items are calibrated at three levels: Analyst (catch the main issue), Senior (correct reasoning and mechanism), and Staff (precise framing, forward-looking recommendations).
+If you are transitioning into product analytics from technical operations, consulting, or engineering — start with the Foundation rooms. They build the mental models the practice rooms assume.
 
-If you need the foundational statistics explained, this is not the right place to start. Learn those first, then return here to practice the calls.`,
+If you already know what a p-value, SRM, and metric tree are — jump directly into the practice rooms and use Defense Strategy to build a targeted prep plan from your actual job description.`,
     },
     {
-      title: 'How scoring works',
-      body: `All rooms use pre-computed scoring based on structured multiple-choice responses. No AI grading, no free-text evaluation.
+      title: 'How it differs from DataLemur, StrataScratch, Exponent',
+      body: `DataLemur and StrataScratch: excellent SQL and Python question banks. PAL is not a question bank — it is a judgment system. The cases are not "write a query that returns X." They are "here is a metric that dropped 18% — what do you check first and why?"
 
-Stats Room: Four options per claim — Valid, Directionally reasonable but incomplete, Not supported, Cannot conclude. Each maps to a level (Junior / Analyst / Senior / Staff) with rationale.
+Exponent: case interview coaching with community and mock interviews. PAL is asynchronous, self-directed, and structured around specific analytical failure modes rather than coaching rubrics.
 
-Metrics Room: Five fields answered simultaneously. Each option carries a score value (0, 1, or 2). Total score / max possible → percentage → level: ≥80% Staff, ≥60% Senior, ≥40% Analyst, <40% Junior.
-
-Design Room: Five fields, each scored 0–2 by dimension quality. Aggregate level by weighted total.
-
-Review Room: Four decision options (Ship / Rollback / Investigate / Pause) each scored at Junior / Analyst / Senior / Staff with full rationale.
-
-RCA Room: Five sequential steps. Each option labeled strong (2), partial (1), or wrong (0). Total / max → level.
-
-Cases Room: Six sequential phases. Same strong/partial/wrong scoring as RCA. Per-phase breakdown shown in debrief.
-
-This keeps the product static, offline-capable, and consistent. The same inputs produce the same scores for everyone.`,
+The specific gap PAL targets: experiment analysis judgment (not just stats formulas), RCA diagnostic instinct (not just framework recitation), and metric design under business pressure (not just definitions). These are the skills that decide senior PA interviews that existing tools do not systematically practice.`,
     },
     {
-      title: 'Why no AI grading',
-      body: `Free-text entry + AI evaluation is the obvious next step for a product like this. We've chosen not to build it, for three reasons:
+      title: 'How to use PAL',
+      body: `New to product analytics or transitioning from another field:
+→ Start with Stat Foundations + RCA Foundations. Read every module in order. Then try 3 cases in the Stats Room and RCA Room before moving on.
 
-Consistency: pre-computed scoring means the same answer gets the same result for every user every time. AI evaluation introduces variance that makes calibration harder.
+Already familiar with the core concepts, prepping for a specific interview:
+→ Start with Defense Strategy (under Tools). Paste your job description, self-rate your gaps, pick your time horizon. Your personalized day plan tells you which rooms to hit in what order.
 
-Operating cost: AI grading at any real scale requires an API with a cost-per-call. Static scoring has zero marginal cost, which means no pricing decision changes the learning experience.
+Practicing specific skills:
+→ Use Global Search (/) to find cases by topic. SQL Lab is the structured SQL/Python problem bank — 130 problems ordered by difficulty with hints and a timer. MCQ Trainer for fast recall drilling.
 
-Quality bar: writing the four scored options per question forces us to specify exactly what good, acceptable, and wrong judgment looks like. That specification is itself a learning artifact — reading the scored options teaches you how to distinguish levels of quality. Free-text answers sidestep this work and lose the teaching value embedded in the option design.
-
-When a scenario has a right answer, structured choices let us say so clearly.`,
+Tracking progress:
+→ Progress page shows completion by room, role readiness score, a practice heatmap, and recommended next steps.`,
     },
     {
-      title: 'The senior analyst debrief',
-      body: `After you submit in any room, you see a full senior analyst read of the case. This is the learning payoff — not just whether you got it right, but how an experienced analyst would frame the problem, what they'd flag to stakeholders, and what they'd do next.
+      title: 'The rooms',
+      body: `Foundation rooms (free, start here if new):
+— Stat Foundations: 25 interactive modules on statistical thinking for experimentation
+— RCA Foundations: 12 modules on structured root cause analysis
+— Metrics Foundations: 13 modules on metric design, hierarchy, and sensitivity
+— Exp Foundations: 15 modules on A/B test design, validity, and advanced methods
 
-The debrief is written to reflect real senior-level thinking: it names the failure mode, explains why it matters in this context, and connects the decision to downstream business risk. Read it carefully even when you got the call right.`,
+Core analytics practice rooms:
+— Stats Room: evaluate stakeholder claims about experiment data — valid, directionally reasonable, not supported, or inconclusive
+— Metrics Room: define primary metrics, diagnostics, and guardrails for a given product context
+— Experiment Design Room: design an experiment before you see the data — metric, unit, guardrails, trust checks
+— Experiment Review Room: make the ship/rollback/investigate call on a messy readout with conflicting signals
+— RCA Room: step through a structured diagnosis of a metric movement
+— Cases Room: work a business question from executive ask through to recommendation
+— Growth Analytics Room: analyze growth metrics, cohort curves, and supply-demand dynamics
+— BI & Reporting Room: interpret dashboards, surface insights, recommend actions
+— Spot the Flaw Room: identify the methodological error in an analysis that looks correct
+— Analytics Instrumentation Room: design event schemas and debug tracking failures
+
+Practice tools:
+— SQL Lab: 130 graded problems (50 Analyst / 40 Senior / 25 Staff / 15 Master Vault)
+— Code Room: Python + SQL execution environment
+— MCQ Trainer: 40 multiple-choice questions across core concepts
+— Interview Simulator: timed practice sessions with role-specific question banks
+— Cross-Room Challenges: multi-room scenarios that integrate skills
+
+Prep tools:
+— Defense Strategy: paste your JD → gap score → personalized day-by-day plan
+— Company Tracks: round-by-round prep packs for specific companies
+— Deep Dives: long-form Playbook articles on every major concept`,
     },
     {
-      title: 'Guided paths',
-      body: `The Progress page includes four guided paths that sequence items across rooms:
+      title: 'Difficulty levels',
+      body: `Every case and problem in PAL is tagged with a difficulty level:
 
-Beginner Path: Stats → Metrics → Design → Review. Start with foundational concepts, then apply them to metric design and experiment execution.
+Analyst — the entry point for practiced analysts. Requires knowing the concept; tests whether you can apply it correctly in a business context. Good for warming up or drilling a weak area.
 
-Experimentation Path: Stats modules paired with their Design and Review counterparts. Deep-dive on the experiment loop.
+Senior — requires chaining concepts or handling a data trap. The level most senior IC interviews operate at. This is where most PAL prep time should be spent.
 
-Product Analytics Path: Metrics → RCA → Cases. Focus on the non-experiment analytics skills most often tested in senior interviews.
+Staff — requires judgment calls with incomplete information, trade-off decisions, and forward-looking recommendations beyond the immediate technical answer. Used for staff+ interview prep and the SQL Lab Master Vault.
 
-GenAI Analytics Path: Three cases (M06, RCA06, C03) that all touch GenAI product metrics — deflection, escalation, and support automation ROI.
-
-Paths don't gate content — they're navigational aids. You can take any case in any order.`,
+Filter by difficulty in any room browser using the chips above the case list.`,
     },
     {
       title: 'Technical details',
-      body: `This is a fully static frontend application. No backend, no database, no API calls. All scenario content is shipped as JavaScript data files. Progress and theme preference are stored in your browser's localStorage. Nothing leaves your device.
+      body: `Fully static React + Vite SPA. No backend, no database, no API calls. All case content ships as JavaScript data files. Progress is stored in your browser's localStorage. Nothing leaves your device.
 
-Built with React and Vite. Deployable to any static host (Vercel, Netlify, GitHub Pages). Zero operating cost at any traffic level.
+SQL Lab runs SQLite in the browser via sql.js (WASM). Python Code Lab runs via Pyodide. Both are fully in-browser — no server-side execution.
 
-localStorage keys: exp-lab-theme, exp-lab-progress-v1 (Review), pal-design-progress-v1 (Design), pal-stats-progress-v1 (Stats), pal-metrics-progress-v2 (Metrics), pal-rca-progress-v2 (RCA), pal-cases-progress-v2 (Cases).`,
-    },
-    {
-      title: 'Build history',
-      body: `V1 (shipped): Review Room · 8 scenarios · Free + Beta.
-
-V1.1 (shipped): Judgment Bank · 50-scenario architecture · theme system.
-
-V1.2 (shipped): Product Analytics Lab rebrand · Design Room · 14 concept cards.
-
-V1.5 (shipped): Stats Room MVP · 8 modules covering p-value, CI, power, SRM, multiple testing, guardrail metrics, novelty effect, and SUTVA.
-
-V1.6 (shipped): Core loop depth · 4 new paired Design scenarios (D05–D08) · 4 new Review scenarios (S09–S12) · structured claim evaluation mechanic · 28 playable items.
-
-V2.0 (current): Metrics Room (6 cases) · RCA Room (6 cases) · Cases Room (4 cases) · Guided paths · Readiness summary · 44 playable items total.`,
+Deployed on Vercel. Works offline once loaded. Free to use with access code; full access via one-time unlock.`,
     },
   ];
 
   return (
     <div className="pal-page-enter" style={{ maxWidth: '760px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
       <div style={{ marginBottom: '2.5rem' }}>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.025em', marginBottom: '0.4rem' }}>
-          Methodology
+        <h1 style={{
+          fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)',
+          letterSpacing: '-0.025em', marginBottom: '0.4rem',
+        }}>
+          About PAL
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: 0 }}>
-          What this is, how it works, and why it's built this way.
+          What it is, how it works, and how to get value from it.
         </p>
       </div>
 
@@ -119,12 +112,16 @@ V2.0 (current): Metrics Room (6 cases) · RCA Room (6 cases) · Cases Room (4 ca
             fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)',
             marginBottom: '0.65rem',
             paddingBottom: '0.5rem',
-            borderBottom: '1px solid var(--border-subtle)',
-          }}>{section.title}</h2>
+            borderBottom: '1px solid var(--border)',
+          }}>
+            {section.title}
+          </h2>
           <div style={{
             fontSize: '0.875rem', color: 'var(--text-secondary)',
             lineHeight: 1.75, whiteSpace: 'pre-line',
-          }}>{section.body}</div>
+          }}>
+            {section.body}
+          </div>
         </div>
       ))}
     </div>

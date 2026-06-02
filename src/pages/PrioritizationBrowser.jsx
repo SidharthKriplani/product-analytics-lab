@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { prioritizationScenarios } from '../data/prioritizationScenarios.js';
 import { getAllPrioritizationProgress } from '../utils/prioritizationProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 
 const TAGS = ['All', 'RICE', 'effort-impact', 'technical debt', 'stakeholder conflict', 'OKRs', 'platform vs. feature'];
 
 const DIFFICULTY_COLOR = {
-  Intermediate: { color: 'var(--accent)', bg: 'var(--accent-bg)', border: 'var(--accent-border)' },
-  Advanced:     { color: 'var(--red)',    bg: 'var(--red-bg)',    border: 'var(--red-border)'    },
+  analyst: { color: 'var(--accent)',  bg: 'var(--accent-bg)',  border: 'var(--accent-border)' },
+  senior:  { color: 'var(--teal)',    bg: 'var(--teal-bg)',    border: 'var(--teal-border)'   },
+  staff:   { color: 'var(--yellow)',  bg: 'var(--yellow-bg)',  border: 'var(--yellow-border)' },
 };
 
 const RATING_COLOR = {
@@ -18,12 +20,20 @@ const RATING_COLOR = {
 
 export function PrioritizationBrowser({ onStart, unlocked, onOpenArticle }) {
   const [activeTag, setActiveTag] = useState('All');
+  const [diffFilter, setDiffFilter] = useState('all');
   const [theoryActive, setTheoryActive] = useState(false);
   const progress = getAllPrioritizationProgress();
 
-  const filtered = activeTag === 'All'
-    ? prioritizationScenarios
-    : prioritizationScenarios.filter(s => s.tags.includes(activeTag));
+  const diffCounts = {
+    all: prioritizationScenarios.length,
+    analyst: prioritizationScenarios.filter(s => s.difficulty === 'analyst').length,
+    senior: prioritizationScenarios.filter(s => s.difficulty === 'senior').length,
+    staff: prioritizationScenarios.filter(s => s.difficulty === 'staff').length,
+  };
+
+  const filtered = prioritizationScenarios
+    .filter(s => activeTag === 'All' || s.tags.includes(activeTag))
+    .filter(s => diffFilter === 'all' || s.difficulty === diffFilter);
 
   const completedCount = Object.keys(progress).length;
   const completedIds = new Set(Object.keys(progress));
@@ -103,6 +113,8 @@ export function PrioritizationBrowser({ onStart, unlocked, onOpenArticle }) {
 
       {/* Scenario cards */}
       {!theoryActive && (
+      <>
+        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
         {filtered.map((scenario, index) => {
           const prog = progress[scenario.id];
@@ -210,6 +222,7 @@ export function PrioritizationBrowser({ onStart, unlocked, onOpenArticle }) {
           );
         })}
       </div>
+      </>
       )}
 
       {theoryActive && (

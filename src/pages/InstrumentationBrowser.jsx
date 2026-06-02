@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { instrumentationCases } from '../data/instrumentationCases.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getAllInstrumentationProgress } from '../utils/instrumentationProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 
@@ -40,9 +41,18 @@ export function InstrumentationBrowser({ onSelectCase, unlocked, onOpenArticle }
   const completedCount = Object.keys(allProgress).length;
   const [activeFilter, setActiveFilter] = useState('All');
   const [theoryActive, setTheoryActive] = useState(false);
+  const [diffFilter, setDiffFilter] = useState('all');
+
+  const diffCounts = {
+    all: instrumentationCases.length,
+    analyst: instrumentationCases.filter(c => c.difficulty === 'analyst' || c.difficulty === 'junior').length,
+    senior: instrumentationCases.filter(c => c.difficulty === 'senior').length,
+    staff: instrumentationCases.filter(c => c.difficulty === 'staff').length,
+  };
 
   const filtered = instrumentationCases
     .filter(c => matchesFilter(c.domain, activeFilter))
+    .filter(c => diffFilter === 'all' || c.difficulty === diffFilter || (diffFilter === 'analyst' && c.difficulty === 'junior'))
     .slice()
     .sort((a, b) => DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty]);
 
@@ -149,6 +159,11 @@ export function InstrumentationBrowser({ onSelectCase, unlocked, onOpenArticle }
           );
         })}
       </div>
+      )}
+
+      {/* Difficulty filter chips */}
+      {!theoryActive && (
+        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
       )}
 
       {/* Case cards */}

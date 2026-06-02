@@ -74,6 +74,12 @@ GenAI content lives inside existing rooms (Playbook articles, RCA cases, Metrics
 **Every room is a judgment exercise, not a knowledge transfer.**
 The positioning is "practice the calls." Every room must put the user in a decision-making situation, not a reading situation. No room should feel like a course or textbook chapter.
 
+**Practice rooms use soft gates, never hard gates.**
+PAL is a practice space users return to, not a course they complete in sequence. Practice rooms are never hard-locked behind foundation completion, quiz walls, or questionnaires. The correct beginner mechanism is: (1) a dismissable "foundation recommended" nudge card at room entry when the linked foundation has not been completed, and (2) difficulty-tagged cases (Beginner/Intermediate/Senior) with filter chips so users self-calibrate. The nudge recommends — it never blocks. A user who ignores the nudge and jumps straight into Hard cases has made an informed choice. This decision is standing through V4.x. Do not reopen.
+
+**Foundation modules must open with a human situation, not a framework.**
+Every foundation module (RCA, Metrics, Exp, Stat) should open with a concrete scenario — "your PM pinged you: DAU dropped 20% overnight" — before introducing any framework or taxonomy. Framework-first is the textbook pattern. Situation-first is PAL's pattern. This applies to every module rewrite going forward, not just new modules.
+
 ---
 
 ## Content

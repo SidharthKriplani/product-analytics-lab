@@ -65,9 +65,9 @@ export function ChallengesBrowser({ onSelectChallenge, unlocked }) {
             width: '36px', height: '36px', borderRadius: '9px',
             background: 'var(--red-bg)', border: '1px solid var(--red-border)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.1rem', flexShrink: 0,
+            fontSize: '0.85rem', fontWeight: 700, color: 'var(--red)', flexShrink: 0,
           }}>
-            ⚡
+            X
           </span>
           <div>
             <div style={{
@@ -104,7 +104,7 @@ export function ChallengesBrowser({ onSelectChallenge, unlocked }) {
           </span>
           {completedCount > 0 && (
             <span style={{ fontSize: '0.82rem', color: 'var(--red)' }}>
-              ⚡ {completedCount} completed
+              {completedCount} completed
             </span>
           )}
         </div>

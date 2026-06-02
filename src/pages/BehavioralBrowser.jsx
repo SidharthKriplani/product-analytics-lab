@@ -3,9 +3,9 @@ import { behavioralQuestions } from '../data/behavioralQuestions.js';
 import { getAllBehavioralProgress } from '../utils/behavioralProgress.js';
 
 const DIFFICULTY_COLOR = {
-  'Any level':  { color: 'var(--text-muted)', bg: 'var(--surface-2)',  border: 'var(--border)'         },
-  'Mid-level':  { color: 'var(--accent)',     bg: 'var(--accent-bg)',  border: 'var(--accent-border)'  },
-  'Senior':     { color: 'var(--red)',         bg: 'var(--red-bg)',     border: 'var(--red-border)'     },
+  'analyst': { color: 'var(--accent)',  bg: 'var(--accent-bg)',  border: 'var(--accent-border)' },
+  'senior':  { color: 'var(--teal)',   bg: 'var(--teal-bg)',    border: 'var(--teal-border)'   },
+  'staff':   { color: 'var(--yellow)', bg: 'var(--yellow-bg)',  border: 'var(--yellow-border)' },
 };
 
 const CATEGORY_COLOR = {
@@ -40,7 +40,7 @@ const ALL_DIFFICULTIES = (() => {
   const diffs = new Set();
   behavioralQuestions.forEach(q => { if (q.difficulty) diffs.add(q.difficulty); });
   // Preserve a sensible order if possible
-  const ORDER = ['Any level', 'Mid-level', 'Senior'];
+  const ORDER = ['analyst', 'senior', 'staff'];
   const sorted = Array.from(diffs).sort((a, b) => {
     const ia = ORDER.indexOf(a), ib = ORDER.indexOf(b);
     if (ia !== -1 && ib !== -1) return ia - ib;

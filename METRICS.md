@@ -31,6 +31,9 @@ Events fire from `src/App.jsx` (navigation events) and directly from runner comp
 | `paywall_hit` | User tries to open a locked case while `isUnlocked()` is false | `{ room: string, id: string }` |
 | `unlocked` | User successfully enters the beta unlock code | _(no properties)_ |
 | `open_challenge` | User opens a Cross-Room Challenge | `{ id: string, title: string }` |
+| `sql_problem_solved` | User gets a SQL Lab problem correct | `{ problemId: string, difficulty: string, datamartId: string, elapsedSec: number }` |
+| `sql_hint_used` | User reveals a hint in SQL Lab | `{ problemId: string, hintIndex: number }` |
+| `sql_answer_revealed` | User reveals the answer in SQL Lab (after all hints exhausted) | `{ problemId: string }` |
 
 ### Rooms tracked via `case_opened`
 `stats`, `design`, `review`, `metrics`, `rca`, `cases`, `code`, `prioritization`, `behavioral`, `estimation`, `stat-foundations`, `exp-foundations`, `metrics-foundations`, `rca-foundations`, `growth-analytics`, `bi`, `spot-the-flaw`, `take-home`, `product-design`, `challenges`, `instrumentation`

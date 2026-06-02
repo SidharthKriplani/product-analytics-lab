@@ -21,7 +21,7 @@ The job is to build a good product, not to make every session feel productive.
 
 ## What this project is (5 lines)
 
-**Product Analytics Lab (PAL)** is a browser-based interview prep platform for product analysts and PMs. Users practice judgment calls — not recall — across 17 rooms covering stats, experimentation, RCA, metrics, SQL/Python, product design, prioritization, behavioral, estimation, analytics instrumentation, and A/B foundations. React + Vite SPA, localStorage + optional Supabase auth. Deployed on Vercel. Repo: `github.com/SidharthKriplani/experimentation-systems-lab`. Current version: V4.36.4.
+**Product Analytics Lab (PAL)** is a browser-based interview prep platform for product analysts and PMs. Users practice judgment calls — not recall — across 17 rooms covering stats, experimentation, RCA, metrics, SQL/Python, product design, prioritization, behavioral, estimation, analytics instrumentation, and A/B foundations. React + Vite SPA, localStorage + optional Supabase auth. Deployed on Vercel. Repo: `github.com/SidharthKriplani/experimentation-systems-lab`. Current version: V4.46.0.
 
 ---
 
@@ -106,14 +106,17 @@ src/
   index.css                   — full CSS variable theme system
   data/                       — all case/scenario/module data files
                                 (includes expFoundationModules.js, metricsFoundationModules.js,
-                                 rcaFoundationModules.js and all other room data files)
+                                 rcaFoundationModules.js, statsFoundationsModules.js,
+                                 sqlLabDatamarts.js, sqlLabProblems.js — never merge these two,
+                                 and all other room data files)
   pages/                      — browser pages (one per room)
   components/
-    layout/Header.jsx          — nav (PRACTICE ROOMS / PRACTICE / LEARN / TOOLS / TRACK)
+    layout/Sidebar.jsx         — primary nav (PRACTICE ROOMS / PRACTICE / LEARN / TOOLS / TRACK)
+                                 Header.jsx exists but is unused — Sidebar.jsx is the real nav
     expFoundations/            — Experimentation Foundations runner
     metricsFoundations/        — Metrics Foundations runner
     rcaFoundations/            — RCA Foundations runner
-    shared/                    — shared components (e.g. DebriefCopyButton.jsx)
+    shared/                    — shared components (DebriefCopyButton.jsx, DifficultyChips.jsx, Icon.jsx, etc.)
     [room]/[Room]Runner.jsx    — case runner components
   utils/
     analytics.js               — PostHog wrapper (env-var gated, PII-stripped)
@@ -171,12 +174,12 @@ Make a product + engineering call first. Not everything belongs. Ask: does this 
 
 ## Adding a new room (checklist)
 
-1. `src/data/[room]Cases.js` — data file, single quotes, escape apostrophes
+1. `src/data/[room]Cases.js` — data file, single quotes, escape apostrophes. Tag every case with `difficulty: 'analyst' | 'senior' | 'staff'`
 2. `src/utils/[room]Progress.js` — localStorage key `pal-[room]-progress-v1`
-3. `src/pages/[Room]Browser.jsx` — named export, mobile-safe grid
+3. `src/pages/[Room]Browser.jsx` — named export, mobile-safe grid. Import `DifficultyChips` from `../components/shared/DifficultyChips.jsx` and wire `diffFilter` state + filter on the displayed array
 4. `src/components/[room]/[Room]Runner.jsx` — named export, `onBack`, `onNext`, `unlocked` props
 5. `src/App.jsx` — lazy import, state var, open function, routing block, `onResetAllProgress` key
-6. `src/components/layout/Header.jsx` — nav item + active state for runner page
+6. `src/components/layout/Sidebar.jsx` — nav item in correct subgroup + `getIsActive()` mapping
 7. `src/pages/Progress.jsx` — add to completionMap, allRoomProgress, heatmap dates, getNextSuggested
 8. `public/sitemap.xml` — add route
 
@@ -192,8 +195,10 @@ Make a product + engineering call first. Not everything belongs. Ask: does this 
 | `LINEAGE.md` | Narrative history of PAL — origin, major pivots, identity decisions, access/monetization arc. Written in prose, not version entries. Reconstructed from CHANGELOG.md. Read when you need to understand how the product got here. |
 | `CHANGELOG.md` | Full technical build log — every version with what changed, why, and which files. Terse version entries at the top; detailed narrative entries below. Source of truth for LINEAGE.md. |
 | `IDEAS.md` | Tiered backlog — In Progress / Tier 1 / Tier 2 / Tier 3 / Retired. |
-| `AUDITS.md` | Health log — 111 audits to date, with ✅ resolved / ⚠️ open status. |
+| `AUDITS.md` | Health log — 143 audits to date, with ✅ resolved / ⚠️ open status. |
 | `METRICS.md` | Tracked events, user funnel, success metrics, localStorage keys. |
 | `docs/CONTENT_QUALITY_BAR.md` | 8-dimension standard every case must pass before shipping. |
 | `docs/SCENARIO_BANK_TAXONOMY.md` | 15 scenario families for the Review Room. |
 | `ROLLOUT.md` | Beta rollout plan — batches, self-vet checklists, tester briefs, feedback tracking. Operational only; not a backlog. |
+| `SQL_LAB_PLAN.md` | SQL Lab build history — problem count decisions, difficulty rubric, datamart architecture, session log. |
+| `CROSS_LAB.md` | Cross-lab ideas — patterns from MSL/GAL that PAL can borrow, and PAL ideas that belong in sibling repos. |

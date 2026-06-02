@@ -260,14 +260,6 @@ export function SearchPage({ onNavigate }) {
       {/* Page header */}
       <div style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-          <span style={{
-            width: '32px', height: '32px', borderRadius: '8px',
-            background: 'var(--purple-bg)', border: '1px solid var(--purple-border)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1rem', flexShrink: 0,
-          }}>
-            🔍
-          </span>
           <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
             Search
           </h1>
@@ -281,10 +273,10 @@ export function SearchPage({ onNavigate }) {
       <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
         <span style={{
           position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)',
-          color: 'var(--text-muted)', fontSize: '1rem', pointerEvents: 'none',
-          lineHeight: 1,
+          color: 'var(--text-muted)', fontSize: '0.85rem', pointerEvents: 'none',
+          lineHeight: 1, fontWeight: 600,
         }}>
-          🔍
+          /
         </span>
         <input
           ref={inputRef}
@@ -366,7 +358,7 @@ export function SearchPage({ onNavigate }) {
           color: 'var(--text-muted)',
           fontSize: '0.9rem',
         }}>
-          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🔍</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-dim)', marginBottom: '0.75rem' }}>/</div>
           Start typing to search across all PAL cases and modules
         </div>
       )}

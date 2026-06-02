@@ -11,7 +11,7 @@ export const rcaFoundationModules = [
     tags: ['rca framework', 'hypothesis tree', 'structured diagnosis', 'metric drop'],
     estimatedMin: 6,
     isFree: true,
-    keyInsight: 'RCA follows a four-layer hypothesis tree: data quality → external/seasonal → product change → user behaviour shift. Work top-to-bottom. Data quality is cheap to rule out and the most common false alarm — always start there.',
+    keyInsight: 'Your PM pings you: DAU dropped 18% overnight. You have two hours before the leadership standup and no idea why. The only way through is structure: data quality first (is it even real?), then external factors, then product changes, then user behaviour. Work top-to-bottom — each layer is cheaper to rule out than the one below.',
     connection: 'Every RCA case in the Metrics Room uses this framework implicitly. Once you internalise the four layers, any metric drop becomes a structured diagnostic problem rather than a guessing game.',
     playbookLinks: [
       { id: 'rca-framework', label: 'RCA Framework' },
@@ -27,7 +27,7 @@ export const rcaFoundationModules = [
     tags: ['decomposition', 'DAU', 'new users', 'retained users', 'resurrected users', 'funnel'],
     estimatedMin: 6,
     isFree: true,
-    keyInsight: 'A 20% DAU drop can be new user acquisition failure, D1 retention collapse, or resurrected user dropoff — three completely different fixes. Decompose first, diagnose second. Jumping to diagnosis without decomposition is the #1 RCA mistake.',
+    keyInsight: 'You\'re in a war-room call and someone says "DAU is down 20%, must be the onboarding change we shipped." Stop. A 20% DAU drop can be new user acquisition failure, D1 retention collapse, or resurrected user dropoff — three completely different fixes. Decompose first, diagnose second. Jumping to a cause before breaking the metric apart is the single most common RCA mistake.',
     connection: 'In A/B test analysis, decomposition tells you whether a primary metric movement was driven by the target segment or a composition shift. The decomposition skill transfers directly from RCA to experiment evaluation.',
     playbookLinks: [
       { id: 'metric-decomposition', label: 'Metric Decomposition' },
@@ -43,7 +43,7 @@ export const rcaFoundationModules = [
     tags: ['data quality', 'tracking failure', 'instrumentation', 'pipeline failure', 'logging bug'],
     estimatedMin: 7,
     isFree: true,
-    keyInsight: 'The most expensive RCA mistake is treating a data quality issue as a product problem. Before diagnosing root cause, verify: Did tracking change? Did a pipeline fail? Is the drop platform-specific (iOS only = SDK issue)? Is the drop event-specific (only one event type affected = logging bug)?',
+    keyInsight: 'You open the dashboard Monday morning and checkout events are down 40%. Before you pull the on-call engineer, ask four questions: Did tracking change? Did a pipeline fail? Is the drop iOS-only (SDK issue)? Is it only one event type (logging bug)? Nine times out of ten, the answer is in one of those four questions — and none of them require blaming a product change.',
     connection: 'Data quality checks are also the first step in A/B test analysis — if your experiment metrics show an unexpected pattern in the control group, suspect instrumentation before suspecting the treatment.',
     playbookLinks: [
       { id: 'data-quality', label: 'Data Quality' },
@@ -59,7 +59,7 @@ export const rcaFoundationModules = [
     tags: ['seasonality', 'external factors', 'day-of-week', 'holidays', 'competitor', 'app store'],
     estimatedMin: 6,
     isFree: true,
-    keyInsight: 'Before blaming the product, rule out time-based and external causes: day-of-week effects, holidays, competitor launches, app store ranking changes, marketing spend drops, platform outages. These are the null hypothesis. If you cannot rule out seasonality, you have not done RCA.',
+    keyInsight: 'It\'s the first Tuesday after a long weekend and your weekly active users are down 12%. The product team is nervous. Before anyone pulls a war-room, check: is this just Monday traffic depressing the weekly count? Did a competitor launch something last week? Did marketing pause spend? These external and calendar effects are your null hypothesis. If you cannot rule them out, you have not started RCA — you\'ve just started guessing.',
     connection: 'Seasonality is also the most common confounder in A/B tests — if your treatment group was exposed during a holiday week, your results are confounded. RCA and experiment analysis share the same seasonality awareness.',
     playbookLinks: [
       { id: 'rca-framework', label: 'RCA Framework' },
@@ -75,7 +75,7 @@ export const rcaFoundationModules = [
     tags: ['Simpson\'s paradox', 'mix shift', 'segmentation', 'aggregate vs segment', 'cohort'],
     estimatedMin: 7,
     isFree: true,
-    keyInsight: 'An aggregate metric drop can mask that every individual segment is flat or improving — the mix shifted. A DAU drop may mean fewer low-engagement users (churning low-value users looks like a DAU drop but may be healthy). Always break the aggregate into meaningful segments before concluding there is a problem.',
+    keyInsight: 'A VP pulls up the dashboard and says "conversion rate dropped 3 points." You break it by country and every single market is flat or up. How? The user mix shifted — a campaign brought in lower-intent users who diluted the aggregate rate even though the product is working fine for existing segments. An aggregate metric drop can hide that every individual segment is healthy. Always break the aggregate before concluding there is a problem.',
     connection: 'Simpson\'s Paradox is the shared villain of RCA and A/B test analysis. In experiments, it causes conversion rate to move in the opposite direction at the segment level vs the aggregate. In RCA, it causes a metric drop to reverse when you segment properly.',
     playbookLinks: [
       { id: 'simpsons-paradox', label: "Simpson's Paradox" },
@@ -91,7 +91,7 @@ export const rcaFoundationModules = [
     tags: ['recommendation', 'communication', 'executive summary', 'fix', 'monitoring', 'prevention'],
     estimatedMin: 7,
     isFree: true,
-    keyInsight: 'RCA ends with a recommendation, not just a cause. The complete structure: (1) what dropped and by how much, (2) the confirmed root cause with evidence, (3) the proposed fix and owner, (4) how you will measure success of the fix, (5) what you will monitor to catch recurrence. Missing step 4 or 5 means the RCA is incomplete.',
+    keyInsight: 'You\'ve found the root cause — a botched deploy broke deep link handling for Android. Now what? Half the room goes quiet. Finding the cause is only the halfway point. A complete RCA answers five questions: what dropped and by how much, the confirmed cause with evidence, the proposed fix and owner, how you\'ll measure whether the fix worked, and what you\'ll monitor to catch recurrence. Missing the last two means the same incident happens again in six weeks.',
     connection: 'The RCA communication structure is identical to the A/B test readout structure: what changed, why, what we recommend, how we will know if we are right. Both are hypothesis-driven, evidence-backed narratives for a decision-maker.',
     playbookLinks: [
       { id: 'rca-framework', label: 'RCA Framework' },
@@ -107,7 +107,7 @@ export const rcaFoundationModules = [
     isFree: false,
     estimatedMin: 10,
     tags: ['metric tree', 'decomposition', 'drivers', 'structured diagnosis'],
-    keyInsight: 'A metric tree forces you to be exhaustive: revenue = users x sessions x conversion x AOV. Every drop lives in exactly one node — the tree tells you where to look, not what you\'ll find.',
+    keyInsight: 'Revenue is down 8% and three people in the room have three different theories. Without a shared structure, you\'ll spend 45 minutes debating opinions. A metric tree ends the debate: revenue = users x sessions x conversion x AOV. Every drop lives in exactly one node — the tree tells you where to look. Build it before you theorize, not after.',
     connection: 'In A/B test analysis, the metric tree tells you which sub-metric drove the primary metric movement — and whether that\'s the one you intended to move. Metric trees make post-experiment attribution as structured as pre-experiment design.',
     playbookLinks: [
       { id: 'metric-decomposition', label: 'Metric Decomposition' },
@@ -123,7 +123,7 @@ export const rcaFoundationModules = [
     isFree: false,
     estimatedMin: 10,
     tags: ['SQL', 'diagnosis', 'window functions', 'trend', 'segmentation query'],
-    keyInsight: 'The first three SQL moves in any RCA are always the same: time-series the raw event count by day, break it by platform and region, and compare this week to last week and last year. Analysts who jump to complex joins before these three queries have not yet confirmed whether the signal is real.',
+    keyInsight: 'An alert fires: purchases are down 22% in the last hour. You open your SQL editor. Where do you start? Not with a complex multi-table join — with three simple queries: daily event counts over the past two weeks, a breakdown by platform and region, and a comparison to the same window last year. These three queries take under ten minutes and either confirm the signal is real or kill the investigation before anyone gets paged.',
     connection: 'The same three diagnostic queries — time-series by day, break by platform/region, compare to prior periods — are the first three queries in any A/B test sanity check. If your control group shows an unexpected pattern after launch, run these before attributing anything to the treatment.',
     playbookLinks: [
       { id: 'rca-framework', label: 'RCA Framework' },
@@ -139,7 +139,7 @@ export const rcaFoundationModules = [
     isFree: false,
     estimatedMin: 9,
     tags: ['seasonality', 'trend', 'time series', 'WoW', 'YoY', 'decomposition'],
-    keyInsight: 'A metric that is down 12% week-over-week may be perfectly healthy if the same week last year was also down 12%. Analysts who lack a seasonality-adjusted baseline mistake calendar effects for product problems every single quarter.',
+    keyInsight: 'You\'re reviewing the weekly metrics report and DAU is down 12% week-over-week. The PM is alarmed. You pull up the same week last year — also down 12%. The product is fine; the calendar is doing what it always does. Analysts who only look at WoW changes without a seasonality-adjusted baseline generate false alarms every single quarter. Same-week-last-year is the first sanity check you run, not the last.',
     connection: 'Seasonality-adjusted baselines are equally critical in A/B test analysis. An experiment spanning a holiday must compare treatment and control within the same time window — and any WoW metric movement in the results should be checked against the same week in prior years before being attributed to the treatment.',
     playbookLinks: [
       { id: 'rca-framework', label: 'RCA Framework' },
@@ -155,7 +155,7 @@ export const rcaFoundationModules = [
     isFree: false,
     estimatedMin: 10,
     tags: ['data quality', 'instrumentation', 'pipeline', 'logging', 'SDK', 'tracking'],
-    keyInsight: 'Platform-specific drops almost always mean an SDK change, not a product problem. Event-specific drops almost always mean a logging bug. Pipeline-wide drops almost always mean a data engineering failure. These three patterns are recognizable in under five minutes if you know what to look for — and each one saves hours of misdirected investigation.',
+    keyInsight: 'Session start events dropped 35% on iOS. Your first instinct is a product regression — but wait. Is this iOS-only (almost always an SDK change)? Is it one event type only (almost always a logging bug)? Is everything down everywhere (almost always a pipeline failure)? These three patterns are recognizable in under five minutes if you know what to look for. Miss them and you\'ll send engineers chasing a product bug that doesn\'t exist.',
     connection: 'Platform-specific drops in A/B test results almost always indicate an SDK change or logging inconsistency, not a real treatment effect. The data quality checklist from RCA applies directly to experiment instrumentation — run it before declaring any unexpected experiment result as meaningful.',
     playbookLinks: [
       { id: 'data-quality', label: 'Data Quality' },
@@ -171,7 +171,7 @@ export const rcaFoundationModules = [
     isFree: false,
     estimatedMin: 9,
     tags: ['external factors', 'competitor', 'app store', 'market', 'macro', 'platform policy'],
-    keyInsight: 'The best analysts maintain a live "external context log" — a running list of competitor moves, platform policy changes, macro events, and marketing spend shifts. Without this log, external factors look like product problems, and engineers get pulled into investigations that have no product fix.',
+    keyInsight: 'Three weeks into an investigation, someone mentions in passing that a major competitor relaunched their free tier the same week your retention started dropping. Nobody had flagged it. The best analysts keep a live log of competitor moves, platform policy changes, macro events, and marketing spend shifts. Without that log, external causes look like product problems — and engineers spend weeks optimizing code when the real fix is in the pricing team\'s court.',
     connection: 'External events during an experiment window are a confound. A competitor launch, app store policy change, or macro shock during your test period shifts both groups — but unevenly if your treatment changed acquisition or engagement patterns. Documenting external context at experiment launch is a discipline that separates senior analysts from junior ones.',
     playbookLinks: [
       { id: 'rca-framework', label: 'RCA Framework' },
@@ -187,7 +187,7 @@ export const rcaFoundationModules = [
     isFree: false,
     estimatedMin: 12,
     tags: ['multi-cause', 'compounding factors', 'interaction effects', 'advanced RCA', 'causal chain'],
-    keyInsight: 'Real incidents often have two or three contributing causes that interact: a data quality issue masks a partial product regression, while a seasonal dip inflates the apparent severity. Analysts who stop at the first plausible cause produce incomplete RCAs. The test: remove each cause and ask — would the full drop still exist?',
+    keyInsight: 'You find a logging bug that explains 40% of the drop. You report it and the team ships a fix — but the metric recovers only partially. There was a second cause underneath the first: a real retention regression that the data quality issue had been obscuring. Real incidents often have two or three interacting causes. Stop at the first plausible explanation and you write an incomplete RCA. The test: remove each cause individually and ask — would the full drop still exist?',
     connection: 'Multi-level causal thinking is the senior skill in both RCA and experiment analysis. When a primary metric moves unexpectedly in an A/B test, the cause is often a combination of an interaction effect, a novelty effect, and a segment composition shift — not a single clean explanation. Stopping at the first plausible cause is the most common senior analyst failure mode.',
     playbookLinks: [
       { id: 'rca-framework', label: 'RCA Framework' },

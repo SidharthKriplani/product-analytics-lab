@@ -119,10 +119,10 @@ const OUTSIDE_PAL_SIGNALS = [
 
 // ─── Interview round templates ────────────────────────────────────────────────
 const ROUND_TEMPLATES = [
-  { id: 'screening', label: 'Screening / HR',        icon: '📋', focus: 'Background, motivation, basic metrics vocabulary. Low technical depth.', skillIds: ['behavioral', 'metrics'] },
-  { id: 'technical', label: 'Technical Round',        icon: '💻', focus: 'SQL, data analysis, product analytics, KPIs in context. Your hardest prep surface.', skillIds: ['sql', 'metrics', 'growth', 'instrumentation', 'stats'] },
-  { id: 'case',      label: 'Case / Problem Solving', icon: '🔍', focus: 'RCA, business cases, product design decisions. Structure matters more than the answer.', skillIds: ['rca', 'product', 'estimation', 'growth'] },
-  { id: 'final',     label: 'Bar Raiser / Final',     icon: '🎯', focus: 'Experimentation design, business judgment, prioritization under constraints.', skillIds: ['exp', 'product', 'bi'] },
+  { id: 'screening', label: 'Screening / HR',        focus: 'Background, motivation, basic metrics vocabulary. Low technical depth.', skillIds: ['behavioral', 'metrics'] },
+  { id: 'technical', label: 'Technical Round',        focus: 'SQL, data analysis, product analytics, KPIs in context. Your hardest prep surface.', skillIds: ['sql', 'metrics', 'growth', 'instrumentation', 'stats'] },
+  { id: 'case',      label: 'Case / Problem Solving', focus: 'RCA, business cases, product design decisions. Structure matters more than the answer.', skillIds: ['rca', 'product', 'estimation', 'growth'] },
+  { id: 'final',     label: 'Bar Raiser / Final',     focus: 'Experimentation design, business judgment, prioritization under constraints.', skillIds: ['exp', 'product', 'bi'] },
 ];
 
 // ─── Helpers: original ────────────────────────────────────────────────────────
@@ -522,17 +522,16 @@ export function DefenseDocGenerator({ onBack, onNavigate, unlocked }) {
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.9rem' }}>Pick the mode that matches your runway.</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
               {[
-                { key: 'cram', label: 'Cram Up',  sub: 'Interview today or tomorrow', icon: '⚡' },
-                { key: '3',    label: '3 Days',    sub: 'Short but focused prep window', icon: '📅' },
-                { key: '7',    label: '7 Days',    sub: 'Standard structured prep', icon: '📆' },
-                { key: '14',   label: '14 Days',   sub: 'Thorough gap-first coverage', icon: '🗓' },
+                { key: 'cram', label: 'Cram Up',  sub: 'Interview today or tomorrow' },
+                { key: '3',    label: '3 Days',    sub: 'Short but focused prep window' },
+                { key: '7',    label: '7 Days',    sub: 'Standard structured prep' },
+                { key: '14',   label: '14 Days',   sub: 'Thorough gap-first coverage' },
               ].map(t => (
                 <button
                   key={t.key}
                   onClick={() => setTimeHorizon(t.key)}
                   style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textAlign: 'left', padding: '0.8rem 1rem', background: timeHorizon === t.key ? 'var(--purple-bg)' : 'var(--surface)', border: '1.5px solid ' + (timeHorizon === t.key ? 'var(--purple-border)' : 'var(--border)'), borderRadius: 'var(--radius)', cursor: 'pointer', transition: 'all 0.1s' }}
                 >
-                  <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{t.icon}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.88rem', fontWeight: 700, color: timeHorizon === t.key ? 'var(--purple)' : 'var(--text)' }}>{t.label}</div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>{t.sub}</div>
@@ -623,7 +622,6 @@ export function DefenseDocGenerator({ onBack, onNavigate, unlocked }) {
                   return (
                     <div key={round.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.9rem 1rem', borderLeft: '3px solid ' + roundAccent }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.3rem' }}>
-                        <span style={{ fontSize: '0.85rem' }}>{round.icon}</span>
                         <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>{round.label}</span>
                       </div>
                       <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '0.6rem' }}>{round.focus}</div>
@@ -646,7 +644,7 @@ export function DefenseDocGenerator({ onBack, onNavigate, unlocked }) {
             {stratPlan.type === 'cram' && (
               <div style={{ marginBottom: '1.25rem' }}>
                 <div style={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-                  ⚡ Cram Up — top priorities right now
+                  Cram Up — top priorities right now
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginBottom: '1rem' }}>
                   {stratPlan.topRooms.map((roomId, i) => {

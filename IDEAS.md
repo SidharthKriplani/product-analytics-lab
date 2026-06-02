@@ -60,8 +60,34 @@ _No new features until PostHog baseline is established._
 
 ### Pre-beta gate items (do before sending Batch 1 invites)
 - **About section** — PAL has no "why this, how to use it" page. Cold visitors land and immediately have to figure out what PAL is. Needs: (1) what it is and who it's for, (2) how it's different from DataLemur/StrataScratch/Exponent, (3) what the rooms are and how to sequence them, (4) how the judgment-first format works. Not a long page — a focused 400-word section or a dedicated `/about` route. Should exist before Batch 1 outreach. Effort: low (content + one page component).
-- **Difficulty calibration + filter** — PAL currently assumes intermediate level across all rooms. No difficulty labels on cases, no filter chips. Pre-beta: (a) audit and tag every case with Junior/Mid/Senior difficulty, (b) add a difficulty filter chip to each room browser. This one structural gap means beginner users hit hard cases immediately and bounce. Effort: medium (data tagging pass + filter UI per room). Needed before beta — otherwise calibration feedback will dominate all Batch 1 responses.
+- **Difficulty calibration + filter** — PAL currently assumes intermediate level across all rooms. No difficulty labels on cases, no filter chips. Pre-beta: (a) audit and tag every case with Beginner/Intermediate/Senior difficulty, (b) add a difficulty filter chip to each room browser. This one structural gap means beginner users hit hard cases immediately and bounce. Effort: medium (data tagging pass + filter UI per room). One session per room cluster. Logged as audit #143.
 - **Foundations first-principles vetting pass** — Non-stat foundations (RCA, Metrics, Exp) have the right module count and canonical structure now, but haven't been read end-to-end to verify they build from first principles correctly. Does rf01 actually set up rf07? Does mf01 connect to mf09? A ~2–3 hour content QA pass reading each module sequence as a new user would. No code. Gate: do before Batch 1 invites so foundation rooms actually deliver on their promise. Logged as audit #141.
+
+### Foundation + Practice Room Content Revision (large multi-session effort)
+
+This is the highest-ROI content investment PAL can make. Current state: all rooms and foundations are calibrated for someone with 1–2 years of product analytics experience who already knows what RCA, cohort analysis, and A/B testing are and is practicing judgment on top of that knowledge. A career-switcher from technical operations, consulting, or any non-PA background hits the RCA room, sees "walk me through your framework for a 20% DAU drop" with no anchoring in what DAU is, why it matters, or what a framework even means in this context, and bounces. The content is not wrong — it is excellent — but it is written for the wrong entry point.
+
+**The fix is at the foundation level, not the practice room level.** Practice rooms are correctly designed for judgment practice; the issue is that foundations do not actually build the knowledge needed to enter those rooms. Every foundation module currently opens with a framework ("RCA follows a four-layer hypothesis tree...") when it should open with a human situation ("Your PM just pinged you: DAU dropped 20% overnight. You have 2 hours before the leadership review. What do you do?"). First the situation, then the concept, then the framework.
+
+**Approach: one room at a time, smallest concentration unit.**
+
+- **RCA Foundations rewrite** — highest beginner gap. rf01 must establish: what a metric drop is, why analysts investigate rather than PMs, what the stakes of a wrong diagnosis are. Every subsequent module builds on that. Logged as audit #142.
+- **Stat Foundations rewrite** — second priority. sf01 must establish: what statistical claims in business actually mean, why a "significant result" can still be wrong, what an analyst is actually deciding when they look at p-values. The interactive modules are excellent once you understand what they're for — the problem is newcomers don't know what they're for.
+- **Metrics Foundations rewrite** — third. mf01 must establish: what a metric is and isn't in a product context, why the difference between a vanity metric and an actionable one costs companies millions. Framing before taxonomy.
+- **Exp Foundations rewrite** — fourth. ef01 is already the best-framed ("Why We Experiment") but the path from ef01 to ef07 is steep for someone who has never designed an experiment.
+- **Practice rooms — beginner difficulty layer** — after foundations are fixed, add 3–5 explicitly Beginner-tagged cases per room with heavy scaffolding: cleaner setups, more constrained decision space, explicit hint on what framework applies. These are not dumbed-down versions — they are entry points that assume no prior PA experience.
+
+**What is NOT being built:** Hard gates, quiz walls before room entry, required sequence locks. These make PAL a gated course, not a practice space — and that conflicts with PAL's product identity. See DECISIONS.md.
+
+**Soft gate that IS being built:** When a user enters a practice room without having completed the linked foundation, show a dismissable card: "Haven't done [Room] Foundations yet? That's the best starting point → [Go to Foundations]." Recommended, not required.
+
+**Beginner pathway on Home.jsx:** One clearly labeled entry track for career-switchers — "New to product analytics? Start here: Stat Foundations → RCA Foundations → 3 beginner cases → Defense Strategy." Does not change the existing nav or room structure. Just a visible onboarding path.
+
+**Effort:** Large. Each foundation rewrite = 1 dedicated session. Each practice room beginner layer = 1 session. Total: ~8–10 sessions across all rooms. Execute one room at a time.
+
+### Beginner UX (soft gates, not hard gates)
+- **Soft "foundation recommended" nudge on practice room entry** — when a user enters a practice room without the linked foundation completed, show a single dismissable card at the top of the browser: "Haven't done [X] Foundations yet? It's the best starting point. → [Go to Foundations]". One sentence, one CTA, dismiss-able. Does not block entry. Does not lock the room. Effort: low (~30 lines per room, reusable component). Needs `isFree` + foundation-completion localStorage check. This is the correct mechanism — not a quiz wall or hard gate.
+- **Beginner onboarding track on Home.jsx** — one clearly labeled section for career-switchers and complete beginners: "New to product analytics? Start here →" with a 4-step path: Stat Foundations → RCA Foundations → 3 Easy cases in Stats Room → Defense Strategy. Static UI component, no new routes needed. Effort: very low.
 
 ### Content Quality
 - **Case debrief explanation depth — failure mode pass (audit #86)** — debriefs state the right answer but don\'t explain what a weak answer looks like or why it fails under interviewer follow-up. Run a pass across all room data files adding: (1) what the weak answer looks like, (2) the specific follow-up that exposes the gap. Prioritize RCA, Metrics, Stats first. High effort — full content pass.

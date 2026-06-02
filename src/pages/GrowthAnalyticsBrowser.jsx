@@ -1,6 +1,7 @@
 import { Icon } from '../components/shared/Icon.jsx';
 import { useState } from 'react';
 import { growthAnalyticsCases } from '../data/growthAnalyticsCases.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getAllGrowthAnalyticsProgress } from '../utils/growthAnalyticsProgress.js';
 import { isBookmarked } from '../utils/bookmarks.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
@@ -34,10 +35,20 @@ export function GrowthAnalyticsBrowser({ onSelectCase, unlocked, onOpenArticle, 
   const completedCount = Object.keys(allProgress).length;
   const [activeDomain, setActiveDomain] = useState('All');
   const [theoryActive, setTheoryActive] = useState(false);
+  const [diffFilter, setDiffFilter] = useState('all');
 
-  const filteredCases = activeDomain === 'All'
+  const diffCounts = {
+    all: growthAnalyticsCases.length,
+    analyst: growthAnalyticsCases.filter(c => c.difficulty === 'analyst').length,
+    senior: growthAnalyticsCases.filter(c => c.difficulty === 'senior').length,
+    staff: growthAnalyticsCases.filter(c => c.difficulty === 'staff').length,
+  };
+
+  const domainFiltered = activeDomain === 'All'
     ? growthAnalyticsCases
     : growthAnalyticsCases.filter(c => c.domain === activeDomain);
+
+  const filteredCases = domainFiltered.filter(c => diffFilter === 'all' || c.difficulty === diffFilter);
 
   const completedIds = new Set(Object.keys(allProgress));
   const firstUnstartedId = growthAnalyticsCases.find(c => !completedIds.has(c.id))?.id;
@@ -168,6 +179,11 @@ export function GrowthAnalyticsBrowser({ onSelectCase, unlocked, onOpenArticle, 
           );
         })}
       </div>
+      )}
+
+      {/* Difficulty filter chips */}
+      {!theoryActive && (
+        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
       )}
 
       {/* Case cards */}

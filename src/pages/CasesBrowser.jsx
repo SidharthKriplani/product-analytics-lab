@@ -1,10 +1,22 @@
 import { Icon } from '../components/shared/Icon.jsx';
+import { useState } from 'react';
 import { businessCases } from '../data/businessCases.js';
 import { getCaseProgress } from '../utils/caseProgress.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 
 export function CasesBrowser({ onSelectCase, unlocked, onUnlock, onNavigate }) {
+  const [diffFilter, setDiffFilter] = useState('all');
   const completedIds = new Set(businessCases.map(bc => bc.id).filter(id => getCaseProgress(id)));
   const firstUnstartedId = businessCases.find(bc => !completedIds.has(bc.id))?.id;
+
+  const diffCounts = {
+    all: businessCases.length,
+    analyst: businessCases.filter(c => c.difficulty === 'analyst').length,
+    senior: businessCases.filter(c => c.difficulty === 'senior').length,
+    staff: businessCases.filter(c => c.difficulty === 'staff').length,
+  };
+
+  const displayCases = businessCases.filter(c => diffFilter === 'all' || c.difficulty === diffFilter);
 
   return (
     <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
@@ -59,9 +71,12 @@ export function CasesBrowser({ onSelectCase, unlocked, onUnlock, onNavigate }) {
           </div>
         )}
 
+      {/* Difficulty filter chips */}
+      <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
+
       {/* Case cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-        {businessCases.map((bc, index) => {
+        {displayCases.map((bc, index) => {
           const progress = getCaseProgress(bc.id);
 
           return (

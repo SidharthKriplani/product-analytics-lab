@@ -1,6 +1,7 @@
 import { Icon } from '../components/shared/Icon.jsx';
 import { useState } from 'react';
 import { spotTheFlawCases } from '../data/spotTheFlawCases.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getAllSTFProgress } from '../utils/spotTheFlawProgress.js';
 
 const DIFF_CFG = {
@@ -32,10 +33,20 @@ export function SpotTheFlawBrowser({ onSelectCase, unlocked, onNavigate }) {
   const allProgress = getAllSTFProgress();
   const completedCount = Object.keys(allProgress).length;
   const [activeFlawType, setActiveFlawType] = useState('All');
+  const [diffFilter, setDiffFilter] = useState('all');
 
-  const filteredCases = activeFlawType === 'All'
+  const diffCounts = {
+    all: spotTheFlawCases.length,
+    analyst: spotTheFlawCases.filter(c => c.difficulty === 'analyst').length,
+    senior: spotTheFlawCases.filter(c => c.difficulty === 'senior').length,
+    staff: spotTheFlawCases.filter(c => c.difficulty === 'staff').length,
+  };
+
+  const flawFiltered = activeFlawType === 'All'
     ? spotTheFlawCases
     : spotTheFlawCases.filter(c => c.flawType === activeFlawType);
+
+  const filteredCases = flawFiltered.filter(c => diffFilter === 'all' || c.difficulty === diffFilter);
 
   const completedIds = new Set(Object.keys(allProgress));
   const firstUnstartedId = spotTheFlawCases.find(c => !completedIds.has(c.id))?.id;
@@ -143,6 +154,9 @@ export function SpotTheFlawBrowser({ onSelectCase, unlocked, onNavigate }) {
           );
         })}
       </div>
+
+      {/* Difficulty filter chips */}
+      <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
 
       {/* Case cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>

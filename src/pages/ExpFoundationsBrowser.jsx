@@ -52,7 +52,6 @@ export function ExpFoundationsBrowser({ onStart, unlocked, onNavigate }) {
       {/* Header */}
       <div style={{ marginBottom: '1.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
-          <span style={{ fontSize: '1.4rem' }}>⚗️</span>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.03em', margin: 0 }}>
             Experimentation Foundations
           </h1>

@@ -1,6 +1,7 @@
 import { Icon } from '../components/shared/Icon.jsx';
 import { useState } from 'react';
 import { metricCases } from '../data/metricCases.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getMetricsProgress } from '../utils/metricsProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 
@@ -25,11 +26,21 @@ const DIFF_ORDER = { analyst: 0, foundational: 0, intermediate: 1, senior: 1, ad
 export function MetricsBrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle, onNavigate }) {
   const [sortBy, setSortBy] = useState('default');
   const [theoryActive, setTheoryActive] = useState(false);
+  const [diffFilter, setDiffFilter] = useState('all');
   const completedCount = metricCases.filter(c => getMetricsProgress(c.id)).length;
 
-  const displayCases = sortBy === 'difficulty'
+  const diffCounts = {
+    all: metricCases.length,
+    analyst: metricCases.filter(c => c.difficulty === 'analyst').length,
+    senior: metricCases.filter(c => c.difficulty === 'senior').length,
+    staff: metricCases.filter(c => c.difficulty === 'staff').length,
+  };
+
+  const baseCases = sortBy === 'difficulty'
     ? [...metricCases].sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 1) - (DIFF_ORDER[b.difficulty] ?? 1))
     : metricCases;
+
+  const displayCases = baseCases.filter(c => diffFilter === 'all' || c.difficulty === diffFilter);
 
   const firstUnstartedId = metricCases.find(mc => !getMetricsProgress(mc.id))?.id;
 
@@ -115,6 +126,11 @@ export function MetricsBrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle
           <button key={opt} onClick={() => setSortBy(opt)} className={`pal-sort-btn${sortBy === opt ? ' active' : ''}`}>{opt === 'default' ? 'Default' : 'By Difficulty'}</button>
         ))}
       </div>
+      )}
+
+      {/* Difficulty filter chips */}
+      {!theoryActive && (
+        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
       )}
 
       {/* Case cards grid */}

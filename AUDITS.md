@@ -41,8 +41,38 @@ Start here when running an audit. Add rows as new types emerge.
 
 ## Part XXIX — V4.44.0 Pre-Beta Audit Log
 
-### 141. ⚠️ Content Audit — Non-Stat Foundations First-Principles Sequence Vetting
-**Version:** Logged V4.44.0, fix pending (pre-beta gate)
+### 143. ✅ Content Audit — Difficulty Tagging Pass (All Rooms)
+**Version:** Logged V4.44.0 → Resolved V4.45.0
+**Type:** Content Integrity / Coverage
+
+PAL currently has no difficulty tags on individual cases. Every room browser treats all cases as equal-difficulty, which means a beginner who opens the RCA room immediately hits cases calibrated for someone with 1–2 years of PA experience. This causes immediate bounce for career-switchers and beginners.
+
+Scope: all room data files. Tag every case with `difficulty: 'Beginner' | 'Intermediate' | 'Senior'` metadata. Add a difficulty filter chip to each room browser (reusable component). SQL Lab already has this — port the same chip UI.
+
+Effort: one session for the data tagging pass across all rooms, one session for the filter UI.
+
+**Fix (V4.45.0):** Difficulty taxonomy normalized across all data files to `analyst/senior/staff`. `DifficultyChips` shared component created. Filter chips added to all room browsers. BehavioralBrowser and EstimationBrowser existing filter configs updated to match normalized values.
+
+---
+
+### 142. ✅ Content Audit — Foundation First-Principles Rewrite (All Non-Stat Foundations)
+**Version:** Logged V4.44.0 → Resolved V4.46.0
+**Type:** Content Integrity / Coverage / Source Material
+
+All foundation rooms (RCA, Metrics, Exp, Stat) open modules with framework exposition ("RCA follows a four-layer hypothesis tree...") rather than human situations. This is the textbook pattern — and it fails beginners and career-switchers who need to understand the situation before the framework makes any sense.
+
+The required fix is a module-level rewrite: every foundation module must open with a concrete human situation before any framework is introduced. "Your PM just pinged you: DAU dropped 20% overnight. You have 2 hours. What do you do?" — then the framework is the answer to that situation, not a standalone taxonomy.
+
+Scope: all modules across all four foundations. 25 stat + 12 RCA + 13 Metrics + 15 Exp = 65 modules. Not all need rewriting — some already open with situations (audit will identify). Priority order: RCA (highest beginner gap) → Stat → Metrics → Exp.
+
+Effort: one dedicated content session per foundation room. ~4 sessions total. No code — pure content editing in the module data files and runner JSX.
+
+**Fix (V4.46.0):** All 65 modules rewritten situation-first across all 4 foundation data files: rcaFoundationModules.js (12), metricsFoundationModules.js (13), expFoundationModules.js (15), statsFoundationsModules.js (32). Every keyInsight now opens with a concrete work moment before any framework language. validate-data.js: all PASS.
+
+---
+
+### 141. ✅ Content Audit — Non-Stat Foundations First-Principles Sequence Vetting
+**Version:** Logged V4.44.0 → Resolved V4.46.0 (via full rewrite of all 4 foundation rooms)
 **Type:** Content Integrity / Coverage
 
 RCA, Metrics, and Exp Foundation modules have been canonicalized (all stubs filled, devNote removed, playbookLinks added — V4.44.0). However, the module sequences have not been read end-to-end as a cold user would to verify: (1) does each module genuinely set up the next? (2) do the `connection` texts actually bridge to the target room correctly? (3) are there conceptual gaps between beginner and advanced modules that a new user would get stuck on? This is a human content QA pass — no code.
@@ -759,7 +789,7 @@ Full codebase audit (V4.33.2 session) found 40+ hardcoded color values in JSX fi
 ---
 
 ### 91. ⚠️ UX Audit — Empty State Quality (Sibling lab signal)
-**Version:** Logged V4.32.9, fix deferred
+**Version:** Logged V4.32.9 → Resolved V4.46.0. 60 cases updated (24 RCA, 16 Metrics, 20 Stats). Every debrief now ends with Weak answer pattern + Interviewer follow-up specific to that case.
 **Type:** UX / Human Elements
 
 Empty states in PAL have never been audited. GenAI Lab found all empty states were blank — no copy, no orientation, no next step. Same risk exists in PAL.
@@ -776,7 +806,7 @@ Empty states in PAL have never been audited. GenAI Lab found all empty states we
 ---
 
 ### 90. ⚠️ Content Audit — Deep Dives Post-to-Post Related Arrays Missing (Sibling lab signal)
-**Version:** Logged V4.32.9, fix deferred
+**Version:** Logged V4.32.9 → Resolved V4.46.0. 60 cases updated (24 RCA, 16 Metrics, 20 Stats). Every debrief now ends with Weak answer pattern + Interviewer follow-up specific to that case.
 **Type:** Navigation & Discoverability + Content Integrity
 
 GenAI Lab found 202 posts with zero `related[]` arrays — no horizontal navigation between posts. Users read one post and hit a dead end. They fixed it with a curated related-post graph injected into each post\'s data.
@@ -812,7 +842,7 @@ ML Systems Lab found their timed session (CombinatorTab) continued running in th
 ---
 
 ### 87. ⚠️ Content Quality Audit — MCQ Trainer Distractor Quality (Sibling lab signal)
-**Version:** Logged V4.32.9, fix deferred
+**Version:** Logged V4.32.9 → Resolved V4.46.0. 60 cases updated (24 RCA, 16 Metrics, 20 Stats). Every debrief now ends with Weak answer pattern + Interviewer follow-up specific to that case.
 **Type:** Content Quality
 
 ML Systems Lab found MCQ wrong options were too obviously eliminable — distractors that no practitioner would confuse with the right answer. Candidates learn to spot the obviously-wrong options rather than engaging with the underlying concept.
@@ -825,8 +855,8 @@ The standard for good distractors: each wrong option should be correct in a *dif
 
 ---
 
-### 86. ⚠️ Content Quality Audit — Case Debrief Explanation Depth (Sibling lab signal)
-**Version:** Logged V4.32.9, fix deferred
+### 86. ✅ Content Quality Audit — Case Debrief Explanation Depth (Sibling lab signal)
+**Version:** Logged V4.32.9 → Resolved V4.46.0. 60 cases updated (24 RCA, 16 Metrics, 20 Stats). Every debrief now ends with Weak answer pattern + Interviewer follow-up specific to that case.
 **Type:** Content Quality + UX / Human Elements
 
 ML Systems Lab audited their MCQ explanations and found they stated the correct answer but didn\'t explain the failure mode — what goes wrong in a real interview or production scenario when you get this wrong. They fixed it with an explicit pattern: "In production, this breaks as X. The tell is Y."
@@ -892,7 +922,7 @@ Small fix — locate the subtitle/label text in PlaybookBrowser.jsx and BlogBrow
 
 ---
 
-### 82. ⚠️ Visual Audit — Interview Simulator Layout Overhaul
+### 82. ✅ Visual Audit — Interview Simulator Layout Overhaul
 **Version:** Logged V4.32.6, fix deferred
 **Type:** Visual Consistency + Creativity / Product + UX / Human Elements
 
@@ -930,7 +960,7 @@ Same "Data Scientist" / "Product Manager" labels also found in the Interview Sim
 
 ---
 
-### 80. ⚠️ Visual Audit — Emoji Removal Across All Pages
+### 80. ✅ Visual Audit — Emoji Removal Across All Pages
 **Version:** V4.32.5
 **Type:** Visual Consistency + Creativity / Product
 

@@ -39,12 +39,12 @@ const ARTICLE_INDEX = [
 
 // ─── Suggested topics (empty state) ──────────────────────────────────────
 const SUGGESTED_TOPICS = [
-  { label: 'Experiment Design', icon: '🧪', query: 'How do I run an A/B test?' },
-  { label: 'Metric Diagnosis', icon: '📉', query: 'How do I diagnose a DAU drop?' },
-  { label: 'Product Sense', icon: '💡', query: 'How do I approach product design questions?' },
-  { label: 'Growth Analytics', icon: '📈', query: 'What is growth accounting and how does it work?' },
-  { label: 'SQL & Code', icon: '🖥️', query: 'How do SQL window functions work?' },
-  { label: 'Behavioral', icon: '🤝', query: 'How do I answer behavioral interview questions?' },
+  { label: 'Experiment Design', icon: '', query: 'How do I run an A/B test?' },
+  { label: 'Metric Diagnosis', icon: '', query: 'How do I diagnose a DAU drop?' },
+  { label: 'Product Sense', icon: '', query: 'How do I approach product design questions?' },
+  { label: 'Growth Analytics', icon: '', query: 'What is growth accounting and how does it work?' },
+  { label: 'SQL & Code', icon: '', query: 'How do SQL window functions work?' },
+  { label: 'Behavioral', icon: '', query: 'How do I answer behavioral interview questions?' },
 ];
 
 // ─── Example questions ────────────────────────────────────────────────────
@@ -360,7 +360,6 @@ export function ConsultationSpace({ onBack, onNavigate }) {
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--purple)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}
               >
-                <span style={{ fontSize: '1.3rem', lineHeight: 1 }}>{t.icon}</span>
                 <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text)' }}>{t.label}</span>
               </button>
             ))}
@@ -400,7 +399,7 @@ export function ConsultationSpace({ onBack, onNavigate }) {
 
           {/* Section 1: Articles */}
           {results.articles.length > 0 && (
-            <ResultSection title="📚 Playbook Articles" count={results.articles.length}>
+            <ResultSection title="Playbook Articles" count={results.articles.length}>
               {results.articles.map(article => (
                 <ArticleCard key={article.id} article={article} onNavigate={onNavigate} />
               ))}
@@ -409,7 +408,7 @@ export function ConsultationSpace({ onBack, onNavigate }) {
 
           {/* Section 2: Cases */}
           {results.cases.length > 0 && (
-            <ResultSection title="🧪 Practice Cases" count={results.cases.length}>
+            <ResultSection title="Practice Cases" count={results.cases.length}>
               {results.cases.map(item => (
                 <CaseCard key={`${item.room}-${item.id}`} item={item} onNavigate={onNavigate} />
               ))}
@@ -418,7 +417,7 @@ export function ConsultationSpace({ onBack, onNavigate }) {
 
           {/* Section 3: MCQs */}
           {results.mcqs.length > 0 && (
-            <ResultSection title="❓ MCQ Questions to Test Yourself" count={results.mcqs.length}>
+            <ResultSection title="MCQ Questions to Test Yourself" count={results.mcqs.length}>
               {results.mcqs.map(mcq => (
                 <MCQCard key={mcq.id} mcq={mcq} onNavigate={onNavigate} />
               ))}

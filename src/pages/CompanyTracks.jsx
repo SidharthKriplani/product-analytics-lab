@@ -191,7 +191,7 @@ function CompanyCard({ track, onSelect, index }) {
       {/* Stats row */}
       <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
         <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-          📚 {totalCases} cases
+          {totalCases} cases
         </span>
         <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
           ⏱ {track.estimatedHours} hours

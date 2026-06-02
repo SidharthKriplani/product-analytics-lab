@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { takehomeCases } from '../data/takehomeCases.js';
 import { getAllTakehomeProgress } from '../utils/takehomeProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 
 const TRACK_LABEL = {
   ds: 'Data Science',
@@ -40,8 +41,17 @@ export function TakehomeBrowser({ onSelectCase, unlocked, onOpenArticle }) {
   const completedCount = Object.keys(allProgress).length;
   const [activeFilter, setActiveFilter] = useState('all');
   const [theoryActive, setTheoryActive] = useState(false);
+  const [diffFilter, setDiffFilter] = useState('all');
+
+  const diffCounts = {
+    all: takehomeCases.length,
+    analyst: takehomeCases.filter(c => c.difficulty === 'analyst').length,
+    senior: takehomeCases.filter(c => c.difficulty === 'senior').length,
+    staff: takehomeCases.filter(c => c.difficulty === 'staff').length,
+  };
 
   const filteredCases = takehomeCases.filter(c => {
+    if (diffFilter !== 'all' && c.difficulty !== diffFilter) return false;
     if (activeFilter === 'all') return true;
     if (activeFilter === 'ds') return c.track === 'ds' || c.track === 'both';
     if (activeFilter === 'pm') return c.track === 'pm' || c.track === 'both';
@@ -134,6 +144,11 @@ export function TakehomeBrowser({ onSelectCase, unlocked, onOpenArticle }) {
           );
         })}
       </div>
+
+      {/* Difficulty filter chips */}
+      {!theoryActive && (
+        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
+      )}
 
       {/* Filter chips */}
       {!theoryActive && (

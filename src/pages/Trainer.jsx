@@ -114,7 +114,6 @@ function SetupScreen({ onStart }) {
         marginBottom: '1.5rem',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-          <span style={{ fontSize: '1.5rem' }}>🎯</span>
           <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--text)' }}>MCQ Quiz</h1>
         </div>
         <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.55 }}>

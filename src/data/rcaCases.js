@@ -203,7 +203,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When a metric drops the same day as a deployment, the deployment is guilty until proven innocent — I check error logs before I open the analytics dashboard.'
     },
-    leadershipNote: 'A Staff DS treats a major metric drop as a test of the monitoring infrastructure, not just the product. Before presenting the RCA, they ask: why did it take us X hours to detect this, and what alert would have caught it within 30 minutes? The post-mortem output is always a monitoring improvement, not just a root cause document.',
+    leadershipNote: 'A Staff DS treats a major metric drop as a test of the monitoring infrastructure, not just the product. Before presenting the RCA, they ask: why did it take us X hours to detect this, and what alert would have caught it within 30 minutes? The post-mortem output is always a monitoring improvement, not just a root cause document. **Weak answer pattern:** The candidate says "I\'d check all the dashboards and look for unusual patterns in user behavior" — starting broad instead of immediately cross-referencing the Tuesday deployment with the Visa error logs. **Interviewer follow-up that exposes it:** "You mentioned checking dashboards first — what specifically would you look at, and why would you start there rather than the payment provider\'s error API?"',
   },
 
   {
@@ -408,7 +408,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'Zero results is a coverage problem, not a ranking problem — before touching the algorithm, I check whether the index even has the items the query is looking for.'
     },
-    leadershipNote: 'A Senior Analytics Manager would require a "launch readiness checklist" for any experiment that includes traffic normalization checks, guardrail metric pre-registration, and an on-call engineer for the first 48 hours. This RCA is a process failure as much as a technical failure.',
+    leadershipNote: 'A Senior Analytics Manager would require a "launch readiness checklist" for any experiment that includes traffic normalization checks, guardrail metric pre-registration, and an on-call engineer for the first 48 hours. This RCA is a process failure as much as a technical failure. **Weak answer pattern:** The candidate says "I\'d check for a demand shift toward unusual queries" — ignoring the 2am pipeline run and diving into user behavior without first checking the most proximate system change. **Interviewer follow-up that exposes it:** "The catalog re-ingestion ran two hours before the spike — why would you investigate demand shifts before checking the pipeline output?"',
   },
 
   {
@@ -613,7 +613,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'In marketplace cancellation analysis, reason codes are your fastest diagnostic tool — "not as described" tells you this is a supply quality problem, not a demand problem, before you pull a single additional query.'
     },
-    leadershipNote: 'At the leadership level, an RCA on a data pipeline failure triggers a data reliability SLA review — not just a fix. A Staff DS would ask: what is our MTTD (mean time to detect) and MTTR (mean time to recover) for data incidents, and how do we improve both by 50%?',
+    leadershipNote: 'At the leadership level, an RCA on a data pipeline failure triggers a data reliability SLA review — not just a fix. A Staff DS would ask: what is our MTTD (mean time to detect) and MTTR (mean time to recover) for data incidents, and how do we improve both by 50%? **Weak answer pattern:** The candidate segments by buyer cohort or acquisition channel, reasoning that "new buyers might have higher expectations" — missing that the reason codes already name seller-side failures, making buyer-side hypotheses irrelevant until seller quality is ruled out. **Interviewer follow-up that exposes it:** "The cancellation reason code says \'item not as described\' — whose failure does that implicate, and how does that change which segment you\'d cut first?"',
   },
 
   {
@@ -818,7 +818,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'Open rate is a proxy — when I see high open rates and declining retention, I immediately check opt-out rate and task completion per session, because the campaign might be training users to ignore the app, not return to it.'
     },
-    leadershipNote: 'Leadership-level RCA considers the second-order effect: after the fix, what should change about how the team builds features to prevent recurrence? A Staff DS drives a retrospective that produces process changes, not just a ticket.',
+    leadershipNote: 'Leadership-level RCA considers the second-order effect: after the fix, what should change about how the team builds features to prevent recurrence? A Staff DS drives a retrospective that produces process changes, not just a ticket. **Weak answer pattern:** The candidate points to the 34% open rate as evidence the campaign is working and blames D7 retention on "seasonal user quality" or "app bugs" — accepting the proxy metric at face value while ignoring the 4.5x opt-out spike that directly names the mechanism. **Interviewer follow-up that exposes it:** "Open rate went up to 34% — is that a good sign or a bad sign in this context, and how does the 18% opt-out rate change your interpretation?"',
   },
 
   {
@@ -1023,7 +1023,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'Revenue growth with margin compression usually means you are selling to the wrong mix of customers or the right customers at the wrong price — I build a cohort P&L to see the unit economics by segment before I recommend any pricing or cost changes.'
     },
-    leadershipNote: 'An Analytics Director would treat this as evidence of insufficient experiment review governance. The output is not just a rollback — it is a new rule in the experiment design checklist that prevents future launches with this failure mode.',
+    leadershipNote: 'An Analytics Director would treat this as evidence of insufficient experiment review governance. The output is not just a rollback — it is a new rule in the experiment design checklist that prevents future launches with this failure mode. **Weak answer pattern:** The candidate builds a revenue growth analysis and recommends "cutting costs broadly" without segmenting by customer cohort — missing that 71% gross margin on enterprise vs. 61% on SMB requires a tiered pricing fix, not a blunt cost reduction. **Interviewer follow-up that exposes it:** "Revenue grew 18% and margin compressed — before recommending any action, how would you figure out whether this is a pricing problem, a cost problem, or a customer mix problem?"',
   },
 
   {
@@ -1229,7 +1229,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'For any AI support system, I always ask: does our deflection metric measure non-escalation or actual resolution? Because if it\'s the former, we\'re probably celebrating the bot closing tickets the user didn\'t feel were worth escalating — not tickets that were actually resolved.'
     },
-    leadershipNote: 'A Staff DS presenting this RCA to leadership emphasizes not just the root cause but the detection gap: how long was this broken before we noticed, and what is the customer impact of that detection latency? The recommendation includes a monitoring SLA.',
+    leadershipNote: 'A Staff DS presenting this RCA to leadership emphasizes not just the root cause but the detection gap: how long was this broken before we noticed, and what is the customer impact of that detection latency? The recommendation includes a monitoring SLA. **Weak answer pattern:** The candidate proposes "A/B testing different bot response templates to improve resolution quality" — jumping to optimization when the root issue is that the deflection metric never measured resolution at all, meaning there\'s no baseline to optimize against. **Interviewer follow-up that exposes it:** "Deflection rate is near target — why would you say the bot is underperforming, and what specific metric would you build to confirm your suspicion before recommending any changes?"',
   },
 
   {
@@ -1434,7 +1434,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When fraud spikes simultaneously with a new low-friction onboarding flow, I assume an organized ring found the gap before we did — my first question is whether seller and buyer accounts were created in the same infrastructure cluster, not whether individual orders look suspicious.',
     },
-    leadershipNote: 'Leadership-level RCA on a supply-side problem requires cross-functional ownership — operations, engineering, and product all need to align on the fix. A Staff DS brokers that alignment, not just writes the analysis.',
+    leadershipNote: 'Leadership-level RCA on a supply-side problem requires cross-functional ownership — operations, engineering, and product all need to align on the fix. A Staff DS brokers that alignment, not just writes the analysis. **Weak answer pattern:** The candidate investigates individual suspicious orders one by one, looking for behavioral anomalies in buyer patterns — treating this as a single-account fraud problem rather than immediately checking for coordinated infrastructure signals like shared IP clusters or synchronized account creation timing. **Interviewer follow-up that exposes it:** "The fraud rate tripled in 72 hours — does that pace suggest individual bad actors or an organized operation, and how does your diagnosis method change depending on the answer?"',
   },
 
   {
@@ -1639,7 +1639,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'On content platforms, I always track session depth and return frequency together — a feature that increases one while suppressing the other is a trade-off, not a win, and session length without D1 retention is a vanity metric.',
     },
-    leadershipNote: 'A Director of Analytics uses this case as evidence for investing in an automated anomaly detection system. The root cause is identified, but the meta-lesson is: manual detection of metric anomalies at scale is not sustainable. The leadership recommendation is a monitoring infrastructure investment.',
+    leadershipNote: 'A Director of Analytics uses this case as evidence for investing in an automated anomaly detection system. The root cause is identified, but the meta-lesson is: manual detection of metric anomalies at scale is not sustainable. The leadership recommendation is a monitoring infrastructure investment. **Weak answer pattern:** The candidate immediately recommends "rolling back the Auto-Play feature" without first segmenting by user type or checking whether session depth changed — conflating a DAU drop with the feature being bad when the actual mechanism (passive consumption replacing active sessions) requires a different fix. **Interviewer follow-up that exposes it:** "DAU dropped after Auto-Play launched — before recommending a rollback, what\'s the one metric you\'d check to determine whether users are watching more but returning less often?"',
   },
 
   {
@@ -1844,6 +1844,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When MRR growth decelerates without a drop in new bookings, I go straight to the waterfall — expansion and contraction tell you whether your existing customers believe in the product, and NRR by segment tells you which part of your business is structurally sound.',
     },
+    leadershipNote: 'A VP of Revenue Operations uses this case to reinforce that blended NRR is a vanity metric in a multi-segment SaaS business — it averages a healthy enterprise book with a structurally eroding SMB book, hiding the problem until it is too late to address. **Weak answer pattern:** The candidate says "new customer signups are flat so acquisition is the problem" — looking at the top of the funnel when the entire signal is in the existing customer base, where expansion collapsed from $42k to $18k and contraction doubled. **Interviewer follow-up that exposes it:** "New MRR is flat, not declining — why would you focus on acquisition, and what does the MRR waterfall tell you about where the actual problem is?"',
   },
 
   {
@@ -2048,6 +2049,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When churn spikes in a single month, I immediately check whether a pricing change just hit a billing cycle — the 30-day renewal cadence creates a predictable lag between price changes and churn events that analysts often miss.',
     },
+    leadershipNote: 'A Director of Finance uses this case to illustrate that pricing changes are natural experiments — the billing cycle creates a predictable lag that analysts can use to measure price elasticity even without a formal A/B test. **Weak answer pattern:** The candidate cites "increased competition" or "product dissatisfaction" as the primary hypothesis, noting the 29% exit survey response saying "found alternative" — without noticing the 6-week lag that cleanly maps the spike to the billing cycle renewal date after the price increase. **Interviewer follow-up that exposes it:** "67% of exits said \'price too high\' and 78% of churners were month-to-month — what does that combination tell you about whether this is a product problem or a pricing problem?"',
   },
 
   {
@@ -2251,6 +2253,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When fill rate drops and CPM rises simultaneously, I know supply is being removed from the auction — I look for any recent content classification, filtering, or policy change that could be suppressing inventory before I look at advertiser demand.',
     },
+    leadershipNote: 'A Head of Monetization uses this case to institutionalize cross-functional impact reviews for any content policy change — because a trust and safety decision can crater ad revenue before the ad ops team even knows a filter was deployed. **Weak answer pattern:** The candidate diagnoses the revenue drop as "advertiser demand softening" and recommends "outbound sales to refill the ad pipeline" — reasoning from the 22% revenue decline without checking whether CPM moved opposite to fill rate, which is the diagnostic signature of a supply constraint rather than demand collapse. **Interviewer follow-up that exposes it:** "CPM is up 4% but revenue is down 22% — what does that combination tell you about whether this is a demand problem or a supply problem?"',
   },
 
   {
@@ -2454,6 +2457,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'Ranking algorithms optimized for engagement quality create cold-start traps for new supply — any new creator, seller, or contributor starts with structurally worse signals than incumbents, so my first question when new-side retention drops is always whether a ranking change just made the gap bigger.',
     },
+    leadershipNote: 'A Head of Creator Growth uses this case to establish a standing rule: any ranking algorithm change must include a new-creator impact assessment before deployment, because the cold-start population is structurally invisible in aggregate creator retention metrics until the supply compression lags into consumer DAU weeks later. **Weak answer pattern:** The candidate recommends "reverting the completion-rate algorithm because new creators have lower completion rates" — treating this as a content quality problem rather than a bootstrapping structural gap, and missing that established creator retention is unchanged, which rules out a global quality regression. **Interviewer follow-up that exposes it:** "Established creator retention is still 84% and new creator retention dropped 30% — does that pattern suggest the algorithm is broken, or that it\'s working correctly for established creators but failing for a specific subset?"',
   },
 
   // ─────────────────────────────────────────────
@@ -2579,7 +2583,7 @@ export const rcaCases = [
         'CTR denominator definition matters — including non-opted-in users makes CTR a mixed metric',
         'Two-step iOS permission flows consistently outperform direct OS prompts in opt-in rate'
       ],
-      interviewPhrase: '"Segment by platform first. Android flat, iOS down 55% the same week we changed the permission flow — I\'d check new-user opt-in rate before and after the flow change, then compute CTR separately for pre- and post-change cohorts."'
+      interviewPhrase: '"Segment by platform first. Android flat, iOS down 55% the same week we changed the permission flow — I\'d check new-user opt-in rate before and after the flow change, then compute CTR separately for pre- and post-change cohorts." **Weak answer pattern:** The candidate says "send more push notifications to compensate for the lower CTR" — treating the denominator problem (non-opted-in users inflating it) as a content quality problem, which means they\'ve identified neither the cause nor the mechanism. **Interviewer follow-up that exposes it:** "Android CTR is flat, iOS CTR is down 55% — if the notification content and send frequency are identical on both platforms, what does that isolation tell you about where to look?"'
     }
   },
 
@@ -2705,7 +2709,7 @@ export const rcaCases = [
         'Connection pool saturation should be a standard deployment canary metric',
         'Config-only hotfixes are faster and safer than full rollbacks — preserve this as an incident response tool'
       ],
-      interviewPhrase: '"Pool exhaustion errors after a pool config change in a refactor — that\'s a near-certain cause. Immediate fix is a config rollback of just the pool size, not a full code rollback. Prevention is automated pool saturation monitoring as a deployment canary."'
+      interviewPhrase: '"Pool exhaustion errors after a pool config change in a refactor — that\'s a near-certain cause. Immediate fix is a config rollback of just the pool size, not a full code rollback. Prevention is automated pool saturation monitoring as a deployment canary." **Weak answer pattern:** The candidate recommends "a full code rollback of the deploy" without first checking whether only the /integrations/webhook endpoint is affected and whether a config-only fix is available — treating all deploys as monolithic when the error is scoped to a single endpoint that changed one config value. **Interviewer follow-up that exposes it:** "The error is concentrated in /integrations/webhook specifically — before doing a full rollback, what would you check to see if there\'s a faster, lower-risk fix available?"'
     }
   },
 
@@ -2832,7 +2836,7 @@ export const rcaCases = [
         'NRR stability for older cohorts rules out product problems and points to acquisition mix issues',
         'MRR growth decomposition is essential before diagnosing growth deceleration'
       ],
-      interviewPhrase: '"Decompose MRR first. NRR stability for old cohorts tells me the product works. Conversion drop and ACV decline both coinciding with the self-serve channel launch points to mix shift — lower-fit users converting less and paying less. Fix is a qualification layer at signup, not a product fix."'
+      interviewPhrase: '"Decompose MRR first. NRR stability for old cohorts tells me the product works. Conversion drop and ACV decline both coinciding with the self-serve channel launch points to mix shift — lower-fit users converting less and paying less. Fix is a qualification layer at signup, not a product fix." **Weak answer pattern:** The candidate recommends "extending the free trial from 14 to 30 days to improve conversion" — treating the 9% conversion rate as a product problem when the NRR stability of existing cohorts has already ruled out a product issue, and the 22% ACV decline has already pointed to mix shift rather than user friction. **Interviewer follow-up that exposes it:** "Existing customer NRR is stable at 108% — what does that tell you about whether this is a product problem or a customer selection problem?"'
     }
   },
 
@@ -2959,7 +2963,7 @@ export const rcaCases = [
         'Ranking signal changes need quality guardrails — recency without a quality floor degrades marketplaces with uneven listing quality',
         'Post-click bounce rate is one of the highest-signal metrics for search relevance'
       ],
-      interviewPhrase: '"Zero-result flat but CTR and add-to-cart down with post-click bounce up — relevance problem, not coverage. Connect that to recency boost: surfacing newer but lower-quality listings. Fix: quality-gated recency — boost only listings above a minimum quality threshold."'
+      interviewPhrase: '"Zero-result flat but CTR and add-to-cart down with post-click bounce up — relevance problem, not coverage. Connect that to recency boost: surfacing newer but lower-quality listings. Fix: quality-gated recency — boost only listings above a minimum quality threshold." **Weak answer pattern:** The candidate says "zero-result rate is unchanged so search is working fine" and pivots to investigating demand trends — failing to recognize that zero-result flat with post-click bounce up is the specific diagnostic signature of results existing but being irrelevant. **Interviewer follow-up that exposes it:** "Zero-result rate didn\'t change, but buyers are bouncing back to search immediately after clicking — what does that pattern tell you about whether the problem is result availability or result quality?"'
     }
   },
 
@@ -3086,7 +3090,7 @@ export const rcaCases = [
         'Social graph seeding is a retention mechanism, not just a setup step — removing it trades short-run completion for long-run retention',
         'When a proxy metric improves while the business outcome worsens, the test selected the wrong success metric'
       ],
-      interviewPhrase: '"The A/B test optimized the wrong metric — completion rate is a proxy. Right primary metric for onboarding is D7 retention. Trace the mechanism: fewer follows → sparser feed → less reason to return. Fix: keep the streamlined flow but restore a mandatory social connection step, using contact import to lower friction."'
+      interviewPhrase: '"The A/B test optimized the wrong metric — completion rate is a proxy. Right primary metric for onboarding is D7 retention. Trace the mechanism: fewer follows → sparser feed → less reason to return. Fix: keep the streamlined flow but restore a mandatory social connection step, using contact import to lower friction." **Weak answer pattern:** The candidate accepts the A/B test result at face value since "it showed +12% completion rate improvement" and recommends shipping, without questioning whether completion rate is the right success metric for an onboarding change that aims to drive D7 retention. **Interviewer follow-up that exposes it:** "The A/B test showed +12% onboarding completion rate — is that sufficient evidence to ship, and what would you want to see in the data before approving the change?"'
     }
   },
 
@@ -3213,7 +3217,7 @@ export const rcaCases = [
         'Static system parameters calibrated for peak conditions fail systematically in off-peak — build adaptive controls',
         'Fill rate is the highest-signal health metric for ad systems — a >5pp drop requires immediate investigation'
       ],
-      interviewPhrase: '"Content up but impressions down — delivery problem, not audience. Fill rate dropped 21pp from two compounding factors: Q4 budget exhaustion and the frequency cap reducing per-session inventory. Fix: dynamic cap that relaxes when fill rate is low, not a static cap calibrated for peak demand."'
+      interviewPhrase: '"Content up but impressions down — delivery problem, not audience. Fill rate dropped 21pp from two compounding factors: Q4 budget exhaustion and the frequency cap reducing per-session inventory. Fix: dynamic cap that relaxes when fill rate is low, not a static cap calibrated for peak demand." **Weak answer pattern:** The candidate says "content consumption is up 8% so the platform is healthy and the revenue drop is just seasonal" — treating January seasonality as the complete explanation without checking whether ad impressions moved opposite to content consumption, which is the diagnostic signal that separates a demand-side seasonal dip from a delivery-side constraint. **Interviewer follow-up that exposes it:** "Content views are up 8% but ad revenue is down 22% — does that combination make seasonality a complete explanation, or does it point to a specific delivery mechanism you\'d want to investigate?"'
     }
   },
 
@@ -3340,7 +3344,7 @@ export const rcaCases = [
         '"I don\'t know what to do next" support tickets are a localization and UX signal, not an intent signal',
         'Check mobile vs. desktop usage split immediately in any new international market'
       ],
-      interviewPhrase: '"68% dropout at workspace setup with \'don\'t know what to do\' support tickets — comprehension failure. Three factors: English-only product, no mobile app for 78% mobile-first users, and English-search acquisition over-indexing on English proficiency. Prioritize: localization first, then mobile experience, then acquisition channel."'
+      interviewPhrase: '"68% dropout at workspace setup with \'don\'t know what to do\' support tickets — comprehension failure. Three factors: English-only product, no mobile app for 78% mobile-first users, and English-search acquisition over-indexing on English proficiency. Prioritize: localization first, then mobile experience, then acquisition channel." **Weak answer pattern:** The candidate recommends "hiring more SEA-based customer success staff" to resolve the 3x support ticket volume — treating comprehension failure as a staffing problem rather than a product localization problem, which would scale support costs without reducing the underlying dropout rate. **Interviewer follow-up that exposes it:** "68% of users are dropping out at workspace setup — is that a support capacity problem, a product comprehension problem, or something else entirely, and how does your answer change your recommendation?"'
     }
   },
 
@@ -3469,7 +3473,7 @@ export const rcaCases = [
         'Variable compute costs in SaaS do not dilute with volume — "grow your way out" only works for fixed costs',
         'Pricing constraint: set the floor at minimum acceptable tier-level gross margin (60%+), then price above that for business value'
       ],
-      interviewPhrase: '"Decompose COGS by category — infrastructure at 62% growth vs. 25% revenue is the headline. Then per-tier unit economics: 3× price for 8× cost = ~31% enterprise gross margin, dragging blended average as enterprise share grows. Fix: reprice to a 65% margin floor and invest in architecture to reduce per-unit compute costs."'
+      interviewPhrase: '"Decompose COGS by category — infrastructure at 62% growth vs. 25% revenue is the headline. Then per-tier unit economics: 3× price for 8× cost = ~31% enterprise gross margin, dragging blended average as enterprise share grows. Fix: reprice to a 65% margin floor and invest in architecture to reduce per-unit compute costs." **Weak answer pattern:** The candidate recommends "reducing infrastructure costs by optimizing code efficiency" without first computing per-tier unit economics — treating this as an engineering efficiency problem when the diagnosis requires confirming that the enterprise tier is priced at 3× but costs 8× to serve, a pricing structure problem that engineering optimization alone cannot fix. **Interviewer follow-up that exposes it:** "Infrastructure costs grew 62% while revenue grew 25% — before recommending any action, how would you figure out whether this is a cost efficiency problem or a pricing structure problem?"'
     }
   },
 
@@ -3597,7 +3601,7 @@ export const rcaCases = [
         'Week-1 engagement metrics are inflated by launch promotional activity — evaluate feature health at W4+ using segmented cohorts',
         'Discovery infrastructure is not free — removing it from a feature that hasn\'t built organic loops collapses engagement'
       ],
-      interviewPhrase: '"Segment first. Power users at 61% week 6 means real value — not novelty decay. The aggregate drop is casual users losing discovery access. Hosts at 55% vs. attendees at 6% tells me the retention mechanism is creation-led. Two interventions: contextual discovery restoration when quality rooms are live, and a host conversion funnel targeting high-engagement attendees."'
+      interviewPhrase: '"Segment first. Power users at 61% week 6 means real value — not novelty decay. The aggregate drop is casual users losing discovery access. Hosts at 55% vs. attendees at 6% tells me the retention mechanism is creation-led. Two interventions: contextual discovery restoration when quality rooms are live, and a host conversion funnel targeting high-engagement attendees." **Weak answer pattern:** The candidate concludes "the feature failed due to novelty decay" and recommends "sunsetting Audio Rooms" — treating the aggregate 8% engagement as the full story, without segmenting to see that 12% of users still have 61% engagement in week 6, which falsifies a novelty decay diagnosis. **Interviewer follow-up that exposes it:** "Overall engagement dropped to 8%, but 12% of users have 61% engagement in week 6 — does that distribution support novelty decay, and what does it tell you about whether the feature has real value?"'
     }
   },
 
@@ -3724,7 +3728,7 @@ export const rcaCases = [
         'Error log message type is the fastest diagnostic: "API version mismatch" vs. "auth failed" vs. "timeout" point to different root causes',
         'Synthetic test transaction monitoring catches response format changes before production failures'
       ],
-      interviewPhrase: '"Brazil only, Pix specifically, same day as an API update notice — segment by payment method first, check Pix error logs. \'API version mismatch\' = provider updated their format and our integration is still parsing the old one. Immediate fix: update the parser. Prevention: automated synthetic test transactions to catch format changes before production failures."'
+      interviewPhrase: '"Brazil only, Pix specifically, same day as an API update notice — segment by payment method first, check Pix error logs. \'API version mismatch\' = provider updated their format and our integration is still parsing the old one. Immediate fix: update the parser. Prevention: automated synthetic test transactions to catch format changes before production failures." **Weak answer pattern:** The candidate investigates "whether Brazilian users\' fraud risk increased" or "whether there was a network outage" — diagnosing payment failure as a demand or infrastructure problem rather than immediately cross-referencing the Brazil Central Bank\'s API update notice with the Pix-specific 28% success rate (vs. 92% for cards). **Interviewer follow-up that exposes it:** "Card payments are still 92% successful in Brazil, only Pix is failing — what does that specificity tell you about whether this is a network problem, a fraud problem, or an integration problem?"'
     }
   },
 
@@ -3851,7 +3855,7 @@ export const rcaCases = [
         'Support resolution time is a leading indicator of enterprise NPS — a 3× increase precedes churn by 1-2 quarters',
         'CS capacity must scale with enterprise account growth, not headcount budget cycles'
       ],
-      interviewPhrase: '"Product up, NPS down in enterprise — that\'s switching costs masking satisfaction erosion. Support at 11hr vs. 4hr is the most acute operational issue. CS flat with 25% more accounts is a capacity math problem. Fix CS ratio first, then depth-over-breadth roadmap policy."'
+      interviewPhrase: '"Product up, NPS down in enterprise — that\'s switching costs masking satisfaction erosion. Support at 11hr vs. 4hr is the most acute operational issue. CS flat with 25% more accounts is a capacity math problem. Fix CS ratio first, then depth-over-breadth roadmap policy." **Weak answer pattern:** The candidate says "product metrics are healthy so NPS must be measuring something subjective or noisy" and recommends "improving NPS survey methodology" — dismissing the divergence between engagement metrics and satisfaction as a measurement artifact rather than recognizing that B2B enterprise switching costs sustain product usage independently of satisfaction. **Interviewer follow-up that exposes it:** "DAU and feature adoption are flat or up, but NPS dropped 12 points — in a B2B enterprise product specifically, how can those two signals both be true at the same time?"'
     }
   },
 
@@ -3979,7 +3983,7 @@ export const rcaCases = [
         'Offline A/B evaluation must report performance by key user segments, not just aggregate metrics',
         'Content diversity is an emergent property of recommendation quality — a 41% collapse is a leading indicator of session length decline'
       ],
-      interviewPhrase: '"31pp offline-online gap = training data distribution mismatch. Evaluation set over-represented power users with social graphs. In production, 67% of new users have null social data — hits a popularity fallback that collapses CTR and diversity. Fix: segment-specific rollback for new users. Prevention: always report offline eval performance by user segment."'
+      interviewPhrase: '"31pp offline-online gap = training data distribution mismatch. Evaluation set over-represented power users with social graphs. In production, 67% of new users have null social data — hits a popularity fallback that collapses CTR and diversity. Fix: segment-specific rollback for new users. Prevention: always report offline eval performance by user segment." **Weak answer pattern:** The candidate says "the offline A/B test showed +12% CTR so the model is correct and the production drop must be a deployment or infrastructure bug" — accepting the offline evaluation at face value without asking whether the evaluation set population matches the production user distribution, which is the 31pp offline-online gap. **Interviewer follow-up that exposes it:** "Offline showed +12% but production shows -19% — before looking at the deployment pipeline, what would you check about the offline evaluation setup itself to explain a 31-percentage-point discrepancy?"'
     }
   }
 ];

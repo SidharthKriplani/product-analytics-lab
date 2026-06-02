@@ -290,7 +290,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
   // ── Screen 1: Setup ──────────────────────────────────────────────
   if (screen === 'setup') {
     return (
-      <div className="pal-page-enter" style={{ maxWidth: '700px', margin: '0 auto', padding: '3rem 1.5rem' }}>
+      <div className="pal-page-enter" style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         <button
           onClick={onBack}
           style={{
@@ -305,125 +305,107 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
         <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
           Interview Simulator
         </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginBottom: '2.5rem', lineHeight: 1.6 }}>
-          Individual cases build skill. Interview pressure reveals the gaps they hide. The Simulator strings real cases into a timed loop across your track — no hints mid-session, no feedback until it is over — then debriefs the full session so you see your patterns, not just your individual answers. It is the closest thing to a real loop without a recruiter on the other end.
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.75rem', lineHeight: 1.6 }}>
+          Strings real cases into a timed loop — no hints mid-session, no feedback until it is over. Debriefs the full session afterward so you see patterns, not just individual answers.
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-          {/* DS Card */}
-          <button
-            onClick={() => setRole('ds')}
-            style={{
-              background: role === 'ds' ? 'var(--surface-2)' : 'var(--surface)',
-              border: role === 'ds' ? '2px solid var(--accent)' : '2px solid var(--border)',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'border-color 0.15s, background 0.15s',
-            }}
-          >
-            <div style={{ fontSize: '1.75rem', marginBottom: '0.6rem' }}>📊</div>
-            <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text)', marginBottom: '0.4rem' }}>
-              Data / Product Analyst
-            </div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.82rem', lineHeight: 1.5 }}>
-              Stats + RCA + Metrics + Estimation + Behavioral
-            </div>
-            <div style={{ marginTop: '0.75rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-              {sessionLength} cases
-            </div>
-          </button>
-
-          {/* PM Card */}
-          <button
-            onClick={() => setRole('pm')}
-            style={{
-              background: role === 'pm' ? 'var(--surface-2)' : 'var(--surface)',
-              border: role === 'pm' ? '2px solid var(--accent)' : '2px solid var(--border)',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'border-color 0.15s, background 0.15s',
-            }}
-          >
-            <div style={{ fontSize: '1.75rem', marginBottom: '0.6rem' }}>🎯</div>
-            <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text)', marginBottom: '0.4rem' }}>
-              PM / TPM / Product Lead
-            </div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.82rem', lineHeight: 1.5 }}>
-              Product Design + Prioritization + Estimation + Behavioral + Cases
-            </div>
-            <div style={{ marginTop: '0.75rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-              {sessionLength} cases
-            </div>
-          </button>
+        {/* Role selector */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ fontWeight: 600, fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Role
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.5rem' }}>
+            {[
+              { key: 'ds', label: 'Data / Product Analyst', sub: 'Stats + RCA + Metrics + Estimation + Behavioral' },
+              { key: 'pm', label: 'PM / TPM / Product Lead', sub: 'Product Design + Prioritization + Estimation + Behavioral + Cases' },
+            ].map(r => (
+              <button
+                key={r.key}
+                onClick={() => setRole(r.key)}
+                style={{
+                  background: role === r.key ? 'var(--accent-bg, rgba(59,130,246,0.08))' : 'var(--surface-2)',
+                  border: role === r.key ? '1.5px solid var(--accent-border, rgba(59,130,246,0.4))' : '1.5px solid var(--border)',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'border-color 0.12s, background 0.12s',
+                }}
+              >
+                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: role === r.key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.2rem' }}>
+                  {r.label}
+                </div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', lineHeight: 1.4 }}>
+                  {r.sub}
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Session Length selector */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary, var(--text-muted))', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div style={{ marginBottom: '1rem' }}>
+          <div style={{ fontWeight: 600, fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Session Length
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
             {SESSION_LENGTH_OPTIONS.map(opt => (
               <button
                 key={opt.count}
                 onClick={() => setSessionLength(opt.count)}
                 style={{
-                  background: sessionLength === opt.count ? 'var(--accent)' : 'var(--surface)',
-                  border: sessionLength === opt.count ? '2px solid var(--accent)' : '2px solid var(--border)',
-                  borderRadius: '8px',
-                  padding: '0.45rem 1rem',
-                  color: sessionLength === opt.count ? '#000' : 'var(--text-muted)',
-                  fontSize: '0.85rem',
+                  background: sessionLength === opt.count ? 'var(--accent-bg, rgba(59,130,246,0.1))' : 'var(--surface-2)',
+                  border: sessionLength === opt.count ? '1.5px solid var(--accent-border, rgba(59,130,246,0.4))' : '1.5px solid var(--border)',
+                  borderRadius: '6px',
+                  padding: '0.3rem 0.75rem',
+                  color: sessionLength === opt.count ? 'var(--accent)' : 'var(--text-muted)',
+                  fontSize: '0.82rem',
                   fontWeight: sessionLength === opt.count ? 700 : 500,
                   cursor: 'pointer',
-                  transition: 'all 0.12s',
+                  transition: 'all 0.1s',
                 }}
               >
-                {opt.label} <span style={{ opacity: 0.7 }}>({opt.count}Q)</span>
+                {opt.label} ({opt.count}Q)
               </button>
             ))}
           </div>
         </div>
 
         {/* Mode selector */}
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary, var(--text-muted))', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div style={{ marginBottom: '1.75rem' }}>
+          <div style={{ fontWeight: 600, fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Mode
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
             {SESSION_MODE_OPTIONS.map(opt => (
               <button
                 key={opt.value}
                 onClick={() => setSessionMode(opt.value)}
                 style={{
-                  background: sessionMode === opt.value ? 'var(--accent)' : 'var(--surface)',
-                  border: sessionMode === opt.value ? '2px solid var(--accent)' : '2px solid var(--border)',
-                  borderRadius: '8px',
-                  padding: '0.45rem 1rem',
-                  color: sessionMode === opt.value ? '#000' : 'var(--text-muted)',
-                  fontSize: '0.85rem',
+                  background: sessionMode === opt.value ? 'var(--accent-bg, rgba(59,130,246,0.1))' : 'var(--surface-2)',
+                  border: sessionMode === opt.value ? '1.5px solid var(--accent-border, rgba(59,130,246,0.4))' : '1.5px solid var(--border)',
+                  borderRadius: '6px',
+                  padding: '0.3rem 0.75rem',
+                  color: sessionMode === opt.value ? 'var(--accent)' : 'var(--text-muted)',
+                  fontSize: '0.82rem',
                   fontWeight: sessionMode === opt.value ? 700 : 500,
                   cursor: 'pointer',
-                  transition: 'all 0.12s',
+                  transition: 'all 0.1s',
                 }}
               >
                 {opt.label}
               </button>
             ))}
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '0.5rem' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.4rem', margin: '0.4rem 0 0' }}>
             {sessionMode === 'open' && 'Write your answers to case prompts.'}
             {sessionMode === 'mcq' && 'Choose from 4 options — immediate feedback after each.'}
             {sessionMode === 'mixed' && 'Alternates: even questions = MCQ, odd questions = open-ended.'}
           </p>
         </div>
 
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-          Pick a random set of cases from your selected role. Timer starts when you begin.
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '1.25rem', lineHeight: 1.5 }}>
+          Cases are drawn randomly from your selected role. Timer starts when you begin.
         </p>
 
         <button

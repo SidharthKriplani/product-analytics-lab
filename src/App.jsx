@@ -747,7 +747,7 @@ export default function App() {
 
         {/* ── Design Room ── */}
         {page === 'design' && (
-          <DesignBrowser onSelectScenario={openDesignScenario} unlocked={unlocked} onUnlock={() => navigate('unlock')} onOpenArticle={openPlaybookArticle} />
+          <DesignBrowser onSelectScenario={openDesignScenario} unlocked={unlocked} onUnlock={() => navigate('unlock')} onOpenArticle={openPlaybookArticle} onNavigate={navigate} />
         )}
         {page === 'design-runner' && activeDesignScenarioId && (
           <DesignRunner
@@ -768,6 +768,7 @@ export default function App() {
             unlocked={unlocked}
             onUnlock={() => navigate('unlock')}
             onOpenArticle={openPlaybookArticle}
+            onNavigate={navigate}
           />
         )}
         {page === 'runner' && activeScenarioId && (

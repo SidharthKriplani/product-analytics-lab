@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { getAllCodeProgress } from '../utils/codeProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { codeModules } from '../data/codeModules.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 
 const TRACK_CONFIG = {
   sql:    { label: 'SQL',    color: 'var(--teal)',   bg: 'var(--teal-bg)',   border: 'var(--teal-border)' },
@@ -23,11 +24,19 @@ export function CodeBrowser({ onSelectModule, unlocked, onUnlock, onOpenArticle 
   const modules = codeModules;
   const [trackFilter, setTrackFilter] = useState('all');
   const [theoryActive, setTheoryActive] = useState(false);
+  const [diffFilter, setDiffFilter] = useState('all');
   const allProgress = getAllCodeProgress();
 
-  const filtered = trackFilter === 'all'
-    ? modules
-    : modules.filter(m => m.track === trackFilter);
+  const diffCounts = {
+    all: modules.length,
+    analyst: modules.filter(m => m.difficulty === 'analyst').length,
+    senior: modules.filter(m => m.difficulty === 'senior').length,
+    staff: modules.filter(m => m.difficulty === 'staff').length,
+  };
+
+  const filtered = modules
+    .filter(m => trackFilter === 'all' || m.track === trackFilter)
+    .filter(m => diffFilter === 'all' || m.difficulty === diffFilter);
 
   const sqlCount    = modules.filter(m => m.track === 'sql').length;
   const pythonCount = modules.filter(m => m.track === 'python').length;
@@ -47,7 +56,6 @@ export function CodeBrowser({ onSelectModule, unlocked, onUnlock, onOpenArticle 
         borderRadius: 'var(--radius-sm)', padding: '0.65rem 0.9rem', marginBottom: '1.25rem',
         fontSize: '0.78rem', color: 'var(--yellow-text)', lineHeight: 1.5,
       }}>
-        <span style={{ fontSize: '1rem', flexShrink: 0 }}>💻</span>
         <span>This room runs live code and is optimised for desktop. For the best experience, open on a laptop or tablet.</span>
       </div>
 
@@ -96,6 +104,11 @@ export function CodeBrowser({ onSelectModule, unlocked, onUnlock, onOpenArticle 
           );
         })}
       </div>
+
+      {/* Difficulty filter chips */}
+      {!theoryActive && (
+        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
+      )}
 
       {/* Track filter */}
       {!theoryActive && (

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { productDesignScenarios } from '../data/productDesignScenarios.js';
 import { getAllProductDesignProgress } from '../utils/productDesignProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 
 const DIFFICULTY_CONFIG = {
   medium: { label: 'Mid-Level', color: 'var(--accent)', bg: 'var(--accent-bg)', border: 'var(--accent-border)' },
@@ -42,7 +43,15 @@ function CategoryBadge({ category }) {
 
 export function ProductDesignBrowser({ onSelectScenario, unlocked, onUnlock, onOpenArticle }) {
   const [theoryActive, setTheoryActive] = useState(false);
+  const [diffFilter, setDiffFilter] = useState('all');
   const allProgress = getAllProductDesignProgress();
+
+  const diffCounts = {
+    all: productDesignScenarios.length,
+    analyst: productDesignScenarios.filter(s => s.difficulty === 'analyst').length,
+    senior: productDesignScenarios.filter(s => s.difficulty === 'senior').length,
+    staff: productDesignScenarios.filter(s => s.difficulty === 'staff').length,
+  };
 
   const completedIds = new Set(
     Object.keys(allProgress).filter(id => allProgress[id]?.completedPhaseIds?.length > 0)
@@ -117,7 +126,8 @@ export function ProductDesignBrowser({ onSelectScenario, unlocked, onUnlock, onO
       {/* Scenario cards */}
       {!theoryActive && (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-        {productDesignScenarios.map((scenario, idx) => {
+        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
+        {productDesignScenarios.filter(s => diffFilter === 'all' || s.difficulty === diffFilter).map((scenario, idx) => {
           const progress = allProgress[scenario.id];
           const result = progress?.result;
           const levelCfg = result ? LEVEL_CONFIG[result.level] : null;

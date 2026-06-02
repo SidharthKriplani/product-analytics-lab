@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { rcaCases } from '../data/rcaCases.js';
 import { getRCAProgress } from '../utils/rcaProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 
 const DIFF_CFG = {
   analyst: { label: 'Analyst', color: 'var(--accent)', bg: 'var(--accent-bg)', border: 'var(--accent-border)' },
@@ -57,11 +58,20 @@ const DIFF_ORDER = { analyst: 0, foundational: 0, intermediate: 1, senior: 1, ad
 export function RCABrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle, onNavigate }) {
   const [sortBy, setSortBy] = useState('default');
   const [theoryActive, setTheoryActive] = useState(false);
+  const [diffFilter, setDiffFilter] = useState('all');
   const completedCount = rcaCases.filter(c => getRCAProgress(c.id)).length;
 
-  const displayCases = sortBy === 'difficulty'
+  const diffCounts = {
+    all: rcaCases.length,
+    analyst: rcaCases.filter(c => c.difficulty === 'analyst').length,
+    senior: rcaCases.filter(c => c.difficulty === 'senior').length,
+    staff: rcaCases.filter(c => c.difficulty === 'staff').length,
+  };
+
+  const displayCases = (sortBy === 'difficulty'
     ? [...rcaCases].sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 1) - (DIFF_ORDER[b.difficulty] ?? 1))
-    : rcaCases;
+    : rcaCases
+  ).filter(c => diffFilter === 'all' || c.difficulty === diffFilter);
 
   const firstUnstartedId = rcaCases.find(c => !getRCAProgress(c.id))?.id;
 
@@ -145,6 +155,10 @@ export function RCABrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle, on
           );
         })}
       </div>
+
+      {!theoryActive && (
+        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
+      )}
 
       {!theoryActive && (
       <div style={{ display: 'flex', gap: 6, marginBottom: 12, justifyContent: 'flex-end' }}>
