@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getBookmarks, removeBookmark, clearBookmarks } from '../utils/bookmarks.js';
+import { Icon } from '../components/shared/Icon.jsx';
 
 // Room order and display labels
 const ROOM_ORDER = [
@@ -113,7 +114,7 @@ export function BookmarksBrowser({ onNavigate, onBack }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '1.1rem', flexShrink: 0,
           }}>
-            🔖
+            <Icon name="bookmark" size={18} color="var(--purple)" />
           </span>
           <div>
             <div style={{

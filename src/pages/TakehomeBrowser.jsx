@@ -3,6 +3,7 @@ import { takehomeCases } from '../data/takehomeCases.js';
 import { getAllTakehomeProgress } from '../utils/takehomeProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
+import { Icon } from '../components/shared/Icon.jsx';
 
 const TRACK_LABEL = {
   ds: 'Data Science',
@@ -82,7 +83,7 @@ export function TakehomeBrowser({ onSelectCase, unlocked, onOpenArticle }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '1.1rem', flexShrink: 0,
           }}>
-            📝
+            <Icon name="file-text" size={18} color="var(--green)" />
           </span>
           <div>
             <div style={{

@@ -3,6 +3,7 @@ import { instrumentationCases } from '../data/instrumentationCases.js';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getAllInstrumentationProgress } from '../utils/instrumentationProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
+import { Icon } from '../components/shared/Icon.jsx';
 
 const DIFF_CFG = {
   junior: { label: 'Junior', color: 'var(--blue-text)', bg: 'var(--blue-bg)',    border: 'var(--blue-border)' },
@@ -71,7 +72,7 @@ export function InstrumentationBrowser({ onSelectCase, unlocked, onOpenArticle }
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '1.1rem', flexShrink: 0,
           }}>
-            📡
+            <Icon name="newspaper" size={18} color="var(--teal)" />
           </span>
           <div>
             <div style={{

@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.49.0 (2026-06-02) — Shareable score summary + Tier 5-6 architecture restructuring. Build clean. Backlog now organized by ROI clusters (5A-5F) with hard prerequisites clear.*
+*Last updated: V4.50.0 (2026-06-02) — All audits resolved (91/87/79+80). Built FoundationNudgeCard + BeginnerOnboardingTrack reusable components. Three browser headers emoji-to-Icon replaced.*
 
 ---
 
@@ -38,6 +38,14 @@ See Next session item 1.
 
 ## Carry-forward log
 
+**Done this session (V4.50.0 — Audit completion + Tier 1 component build):**
+- Audit #91 (empty states): Verified BookmarksBrowser + LockOverlay already well-implemented per quality standard
+- Audit #87 (MCQ distractor quality): Verified all 40 trainerMCQ.js questions have subtly-wrong distractors, not obviously-eliminable
+- Audit #79+#80 (emoji removal + icon consistency): Replaced 3 key browser header emojis with Icon components — TakehomeBrowser (📝→file-text), BookmarksBrowser (🔖→bookmark), InstrumentationBrowser (📡→newspaper). Added Icon import to each.
+- Built **FoundationNudgeCard.jsx** (80 lines) — reusable dismissable card for "Haven't done [X] Foundations yet?" — ready to wire into any practice room runner
+- Built **BeginnerOnboardingTrack.jsx** (145 lines) — reusable 4-step visual path component for Home.jsx (Stat Foundations → RCA Foundations → 3 Easy cases → Defense Strategy)
+- Build: ✓ 0 errors. All files validated.
+
 **Done this session (V4.46.0):**
 - SQL Lab Phase 3: company/datamart filter chip in ProblemSidebar, PostHog events (sql_problem_solved/sql_hint_used/sql_answer_revealed), SQL Lab dates written to pal-sql-lab-dates-v1, Progress.jsx heatmap includes SQL Lab practice
 - Foundation rewrites (65 modules total): all 4 foundation data files rewritten situation-first — rcaFoundationModules.js (12), metricsFoundationModules.js (13), expFoundationModules.js (15), statsFoundationsModules.js (32 modules). Every keyInsight now opens with a concrete work moment before any framework language.
@@ -63,10 +71,12 @@ See Next session item 1.
 - 74 prompts rewritten (business-stakeholder framing), 7 new datamarts, 130 final problems (50E/40M/25H/15Master)
 
 **Still open:**
-- Git push — user must run from Mac terminal
-- PostHog key confirm in Vercel
-- Supabase auth finish-or-cut decision
-- Room header icon consistency (audit #79)
+- Git push — user must run from Mac terminal (`git add -A && git commit -m "V4.50.0: audits complete, foundation nudge + beginner track components built" && git push origin main`)
+- PostHog key confirm in Vercel (check if VITE_POSTHOG_KEY live in production)
+- Supabase auth finish-or-cut decision (audit #104)
+- Audit #82: Interview Simulator layout redesign (remove emojis from role cards, tighten spacing, increase visual gravity) — deferred to next session
+- Tier 1: Keyboard shortcuts badge system on room cards — deferred
+- Tier 1/2: Learning paths, weak topic heatmap, forward-pointer card — deferred
 
 ---
 
