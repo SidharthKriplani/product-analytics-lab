@@ -617,8 +617,8 @@ Every problem should have:
 | 3 | e35–e51 | Easy | ✅ V4.62.0 | e35,e40,e42,e44 + e47,e49 TC | SUM(computed), SUM+JOIN, 3-table JOIN, rate calc |
 | 4 | e52–e65 | Easy | ✅ V4.63.0 | e55,e57,e58,e59,e60 + e52 checkValues,e56 TC | COALESCE, IN literal, dual aggregate |
 | 5 | e67–e86 | Easy | ✅ V4.64.0 | e69,e70,e74 + e78,e81 TC + e86 reclassified + e77 company | arithmetic in SELECT, triple aggregate, FX dual aggregate |
-| 6 | m01–m10 | Medium | Pending | — | — |
-| 7 | m11–m20 | Medium | Pending | — | — |
+| 6 | m01–m20 | Medium | ✅ V4.65.0 | m07,m09,m14 + m13 checkValues | JULIANDAY date arith, MoM LAG, DENSE_RANK PARTITION BY |
+| 7 | m21–m33 | Medium | ✅ V4.66.0 | m21,m28,m30 + m24,m26,m29 checkValues + m24 company + m32,m33 debriefs | NTILE, global AVG OVER, SUM(SUM) OVER pct-of-total |
 | 8 | m21–m30 | Medium | Pending | — | — |
 | 9 | m31–m40 | Medium | Pending | — | — |
 | 10 | h01–h10 | Hard | Pending | — | — |
@@ -671,3 +671,270 @@ A single 30-minute sweep across all 130 problems after the full audit is done. F
 - SQL Lab token limit: never write more than ~400 lines per tool call
 - All strings single-quoted; apostrophes escaped as `\'`; no template literals in data files
 - `isUnlocked()` stays true (beta) — do not change
+
+---
+
+## Section 10 — Trap Enrichment Pass (after Batch 13 audit)
+
+**What this is:** A second, targeted pass over all 130 problems after the quality floor audit (Batches 1–13) is complete. The audit fixes structural problems — clones, mislabels, thin debriefs, empty checkValues. The enrichment pass raises the ceiling: it embeds data traps that break naive SQL, adds business logic ambiguity that reveals judgment gaps, and introduces the kinds of "wrong but plausible" failure modes that separate interview pass from fail.
+
+**Why it matters:** The audit gets every problem to a B-grade floor. The enrichment pass gets the best Medium/Hard/Master problems to A+. No competitor does this. DataLemur has thin debriefs. LeetCode has no business context. StrataScratch has no data traps. This pass is PAL's differentiator — problems where the naive solution compiles, runs, and returns *something*, but returns the *wrong* thing.
+
+**Gate:** Do not start until all 13 audit batches are complete. Enrichment while the audit is in flight adds scope creep and burns context. Finish the floor, then raise the ceiling.
+
+**Execution format:** Scan each problem against the trap checklist below. For each problem, classify: (A) trap already embedded, (B) trap addable via debrief-only, (C) trap requires seed data change + prompt change. Prioritize C-level changes for the 30 highest-impact problems (Medium + Hard). Easy problems get B-level enrichment only (debrief callouts, no seed changes).
+
+---
+
+### Trap Taxonomy — Complete Reference
+
+#### Category 1: NULL Traps
+
+The single most common source of silent wrong answers in real SQL.
+
+**1.1 NOT IN with NULL in subquery.**
+`WHERE id NOT IN (SELECT user_id FROM t WHERE col IS NULL)` returns zero rows — SQL logic: `x NOT IN (NULL, 1, 2)` evaluates as `x <> NULL AND x <> 1 AND x <> 2`, and `x <> NULL` is always UNKNOWN (not TRUE), so the whole expression is UNKNOWN. Classic interview trap. Highest priority. Every NOT IN problem should document this in the debrief and the seed data should contain at least one NULL value in the subquery column to make the failure live.
+
+**1.2 COUNT(*) vs COUNT(col) on nullable columns.**
+`COUNT(*)` counts all rows. `COUNT(col_name)` counts non-NULL values. If the column has NULLs, the two return different numbers. Problems involving COUNT should embed NULLable columns in the seed data and ask a question where the distinction matters (e.g. "count how many users have a referral code" — COUNT(*) overcounts if referral_code can be NULL).
+
+**1.3 AVG ignoring NULLs.**
+`AVG(amount)` ignores NULL rows in the denominator. `SUM(amount) / COUNT(*)` does not. If 3 of 10 rows have NULL amounts, `AVG(amount)` divides by 7, not 10. Problems where users compute averages should note this discrepancy and the seed data should contain NULLs in the averaged column.
+
+**1.4 SUM(NULL) = NULL, not 0.**
+`SUM()` on a column where all values are NULL returns NULL, not 0. Left JOIN + SUM is the common trigger: joining to a table with no matching rows makes the aggregated column NULL in the result. Requires `COALESCE(SUM(col), 0)` to return 0. Seed data should include accounts with zero orders/transactions/interactions so that `SUM(amount)` returns NULL without COALESCE.
+
+**1.5 NULL in arithmetic.**
+`5 + NULL = NULL`. Any arithmetic expression containing a NULL produces NULL. Problems with computed columns (subtotal - discount, or amount * rate) should contain at least one row where a component is NULL, so the naive formula returns NULL where 0 or the original value is correct.
+
+**1.6 IS NULL vs = NULL.**
+`WHERE col = NULL` always returns no rows. `WHERE col IS NULL` works. Every problem that filters on NULL should document this in the debrief; problems at Medium tier should embed the trap in the hint ("Note: `= NULL` does not work in SQL — use `IS NULL`").
+
+**1.7 NULL in ORDER BY.**
+NULLs sort last in ascending (SQLite/PostgreSQL) but behavior varies. Problems with ORDER BY on NULLable columns should document the dialect-specific behavior.
+
+**1.8 LEFT JOIN + IS NULL anti-join NULL propagation.**
+The anti-join `LEFT JOIN t ON ... WHERE t.id IS NULL` breaks if t.id is NULLable in the original data (non-join NULLs contaminate the filter). Seed data should have no NULLable join keys to keep anti-join problems clean, OR one problem should deliberately use a NULLable join key to teach the NOT EXISTS alternative.
+
+---
+
+#### Category 2: JOIN Fanout Traps
+
+Silent row multiplication is the #2 source of wrong answers.
+
+**2.1 Many-to-many JOIN inflation.**
+Joining two tables where both sides have multiple matching rows multiplies the result. Example: user has 3 orders, each order has 2 items → user appears 6 times in a JOIN. If you then SUM(order.subtotal), you get 3× the real total. Every problem that joins orders to order_items to users and aggregates should note the fanout risk and use the correct aggregation scope (SUM on order_items, not on orders).
+
+**2.2 LEFT JOIN + aggregate inflating zeroes.**
+`LEFT JOIN` + `SUM(right_col)` returns NULL when there is no match (not 0). `COALESCE(SUM(col), 0)` is needed. Similarly, `COUNT(*)` on a LEFT JOIN counts the left-side rows even when there is no match (the right side is NULL) — which may be wrong if you want "count of actual matches." Seed data with users who have no orders exposes this immediately.
+
+**2.3 Duplicate rows from non-unique JOINs.**
+Joining on a column that is not a primary key can produce duplicate rows when multiple right-side rows match. Example: joining subscriptions to accounts on account_id when an account has 2 subscriptions — each account row appears twice. Every problem involving subscriptions or multi-valued relationships should note this and use the correct deduplication (DISTINCT, GROUP BY, or ROW_NUMBER WHERE rn=1).
+
+**2.4 Self-join correctness.**
+Self-joins on the same table require alias clarity and correct join condition. A common mistake: `JOIN t t2 ON t1.id = t2.id` joins each row to itself, giving 0 useful signal. The join condition must reference the relationship, not equality.
+
+**2.5 Cross-join from missing JOIN condition.**
+Forgetting `ON` in a JOIN (or writing `JOIN t WHERE` instead of `JOIN t ON`) in some dialects produces a cross-product. Should be documented in the 4-table JOIN problems (m33 already touches this).
+
+---
+
+#### Category 3: Aggregation Traps
+
+**3.1 Integer division.**
+In SQLite (and many SQL dialects): `5 / 2 = 2`, not `2.5`. Any rate or percentage calculation using integer columns needs `CAST(col AS REAL)` or multiplication by `1.0` before division. Every rate problem should document this. Seed data should contain values where integer division gives a different (wrong) result (e.g. 3/5 = 0, not 0.6).
+
+**3.2 ROUND() precision issues.**
+`ROUND(2.675, 2)` may return `2.67` in some implementations due to floating-point representation. Problems requiring financial precision should note this and recommend formatting at the application layer.
+
+**3.3 GROUP BY with non-aggregated columns (SQL strict mode).**
+Standard SQL requires every non-aggregated SELECT column to appear in GROUP BY. SQLite is lenient (picks an arbitrary value for the non-grouped column). Postgres is strict. Problems selecting `company_name` alongside `SUM(mrr)` without grouping by `company_name` should explicitly require both in the GROUP BY and explain why.
+
+**3.4 HAVING on non-aggregated columns.**
+`HAVING col = 'value'` is valid SQL but semantically the same as `WHERE col = 'value'` in most cases — just less efficient. The real distinction: HAVING is for conditions on aggregated results; WHERE is for pre-aggregation filtering. Using HAVING where WHERE is correct is a style red flag that interviewers notice.
+
+**3.5 Aggregate order of operations.**
+`WHERE` filters rows before aggregation. `HAVING` filters after. Putting a non-aggregated filter in HAVING instead of WHERE scans more rows than necessary. Medium/Hard problems should include one problem where swapping WHERE and HAVING gives different results (not just inefficiency) — e.g. filtering on a joined column that has NULLs post-aggregation.
+
+**3.6 Distinct count vs count.**
+`COUNT(DISTINCT user_id)` vs `COUNT(user_id)` vs `COUNT(*)` — three different numbers on a table with repeated user_ids and NULLs. Problems that ask for "unique buyers" or "distinct users" should embed duplicate user rows (multiple orders from the same user) to make COUNT(*) wrong and COUNT(DISTINCT) correct.
+
+**3.7 SUM(CASE WHEN) vs COUNT(CASE WHEN).**
+`SUM(CASE WHEN is_premium = 1 THEN 1 ELSE 0 END)` is correct for counting matching rows. `COUNT(CASE WHEN is_premium = 1 THEN 1 END)` also works — COUNT ignores NULLs, and CASE WHEN with no ELSE returns NULL for non-matching rows. Both approaches give the same result here, but understanding why is Medium-level knowledge. At least one problem should show both patterns in the debrief.
+
+---
+
+#### Category 4: Window Function Traps
+
+**4.1 RANGE vs ROWS frame on tied values.**
+Default window frame is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`. On tied ORDER BY values, RANGE includes all tied rows in the current frame, which can produce unexpected running totals. `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` processes row-by-row regardless of ties. Every running total/average problem must specify `ROWS BETWEEN` and explain why. At least 2 seed datasets should contain tied dates to make this failure live.
+
+**4.2 NULL handling in LAG/LEAD.**
+`LAG(col)` returns NULL for the first row (no prior row). `LAG(col, 1, default_value)` accepts a third argument to substitute a default. Problems using LAG for gap analysis should document the default parameter and when to use it vs COALESCE.
+
+**4.3 RANK gaps vs DENSE_RANK no gaps.**
+`RANK()` skips ranks after ties (1, 1, 3). `DENSE_RANK()` does not (1, 1, 2). `ROW_NUMBER()` assigns unique ranks arbitrarily on ties. Every ranking problem must state which behavior is required by the business question and explain the difference. The phrase "handle ties fairly" always means RANK or DENSE_RANK, never ROW_NUMBER.
+
+**4.4 Window function in WHERE clause.**
+You cannot use a window function alias in a WHERE clause directly — it must be wrapped in a subquery or CTE. `SELECT *, RANK() OVER ... AS rnk FROM t WHERE rnk <= 3` fails. Must be: `WITH cte AS (SELECT *, RANK() OVER ...) SELECT * FROM cte WHERE rnk <= 3`. This is the most common window function syntax error in interviews.
+
+**4.5 ORDER BY without PARTITION BY.**
+`RANK() OVER (ORDER BY col)` ranks globally. `RANK() OVER (PARTITION BY group ORDER BY col)` ranks within groups. Confusing the two gives silently wrong results (global rank vs per-group rank). Every PARTITION BY problem should document what happens if PARTITION BY is omitted.
+
+**4.6 FIRST_VALUE frame spec.**
+`FIRST_VALUE(col) OVER (PARTITION BY ... ORDER BY ...)` uses the default frame (`RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`), which returns the correct first value only if the frame includes the first row. If the frame is restricted (e.g. a rolling window), FIRST_VALUE returns the first row *within the frame*, not of the partition. Should be documented in FIRST_VALUE problems.
+
+---
+
+#### Category 5: Date and Time Traps
+
+**5.1 String comparison vs date comparison.**
+ISO date strings (`YYYY-MM-DD`) compare correctly lexicographically for date ordering — `'2024-01-15' > '2023-12-31'` is TRUE. But mixing formats (e.g. `MM/DD/YYYY`) breaks this. All seed data uses ISO format, so this trap is more of a "real world" note. At least one problem should mention the format dependency in the debrief.
+
+**5.2 BETWEEN is inclusive on both ends.**
+`BETWEEN '2023-01-01' AND '2023-06-30'` includes June 30 at midnight — which is the start of the day, not the end. For datetime columns, `< '2023-07-01'` is safer than `<= '2023-06-30'`. Problems using BETWEEN on date ranges should note this in the debrief, especially for problems involving H1/H2 splits.
+
+**5.3 strftime vs DATE_TRUNC dialect mismatch.**
+SQLite uses `strftime('%Y-%m', col)` for month truncation. PostgreSQL uses `DATE_TRUNC('month', col)`. BigQuery uses `DATE_TRUNC(col, MONTH)`. The argument order even differs between dialects. Every time-series problem must include a sqliteNote documenting the dialect-specific function and its Postgres/BigQuery equivalents.
+
+**5.4 JULIANDAY precision.**
+`JULIANDAY(datetime)` returns a float. Subtracting two JULIANDAYs gives fractional days if one or both have time components (`HH:MM`). `CAST(... AS INTEGER)` truncates (not rounds). Problems using JULIANDAY should specify whether truncation or rounding is correct for the business question (days since last login: truncate. Age in years: floor).
+
+**5.5 Month-end vs month-start for period splits.**
+"H1 of 2023" — does it include June 30 or not? "This month" — does it mean the calendar month or a rolling 30 days? Business questions involving time periods are almost always ambiguous. Problems should state the resolved ambiguity explicitly in the prompt, not leave it to interpretation.
+
+**5.6 Timezone complications.**
+All seed data is stored as naive dates (no timezone). In production, `occurred_at` in UTC converts to a different day in PST, making day-level aggregations wrong without CONVERT_TZ or AT TIME ZONE. At least one Hard problem should note this in the debrief as a production-vs-interview distinction.
+
+---
+
+#### Category 6: Subquery and CTE Traps
+
+**6.1 Correlated subquery O(n) per row.**
+A correlated subquery re-executes for every row in the outer query. For a 1M-row table, this is 1M subquery executions. The window function or JOIN alternative runs once. Every correlated subquery problem (m17 style) must document this performance trap and the window function rewrite.
+
+**6.2 CTE materialization vs inlining.**
+In SQLite, CTEs are always materialized (computed once, stored). In PostgreSQL, CTEs are materialized by default but can be inlined with `NOT MATERIALIZED`. In some cases, a CTE is computed even if the final query never references all its rows — wasting work. This is advanced knowledge worth a debrief note on any multi-CTE Hard/Master problem.
+
+**6.3 Non-deterministic results without ORDER BY.**
+`SELECT ... LIMIT 1` without ORDER BY returns an arbitrary row — not the first, not the largest, just whichever the engine picks. Every top-N or first-N problem must have an ORDER BY that produces a deterministic result and explain what happens without it.
+
+**6.4 Recursive CTE termination.**
+Recursive CTEs without a correct termination condition loop indefinitely. The UNION ALL base case must produce at least one row; the recursive case must eventually produce zero rows. This is Hard/Master territory but should be explicitly documented in every recursive CTE problem.
+
+**6.5 WITH clause scope.**
+A CTE defined in a WITH clause is only visible to the query that follows it — it cannot be referenced by a later WITH clause in a different statement. Multiple CTEs in the same WITH block can reference earlier ones: `WITH a AS (...), b AS (SELECT * FROM a WHERE ...)`.
+
+---
+
+#### Category 7: Business Logic Traps
+
+These require judgment, not just SQL syntax knowledge. They are the highest-value traps for interview differentiation.
+
+**7.1 Denominator confusion.**
+"What percentage of users are premium?" — percentage of WHAT? Total users including churned? Total active users? Total users who have ever logged in? The denominator changes the number, and the wrong denominator produces a plausible-looking but wrong metric. Every rate/percentage problem must state the denominator explicitly in the prompt and explain why alternative denominators are wrong in the debrief.
+
+**7.2 Cohort vs calendar measurement.**
+"How many users retained after 30 days?" — 30 days from signup date (cohort) or 30 days from January 1 (calendar)? Cohort analysis is almost always correct for retention; calendar analysis is correct for revenue. Confusing the two is a fundamental product analytics error. At least 2 Medium/Hard problems should require cohort-based measurement and explicitly contrast it with the calendar alternative.
+
+**7.3 First-touch vs last-touch attribution.**
+Which marketing channel gets credit for a conversion — the first session source or the most recent? Both are wrong in isolation; multi-touch is correct in production. Problems involving channel attribution (e.g. e78 Revenue by Acquisition Channel) should discuss this in the debrief: the JOIN approach attributes all revenue to a single channel per user, which ignores multi-channel paths.
+
+**7.4 Current state vs historical state.**
+The subscriptions table contains both active and churned rows. "What is each account's current MRR?" requires filtering `WHERE status = 'active'`. "What was each account's MRR in Q3 2023?" requires filtering on date ranges and status at that point in time. Using the full subscriptions table without status filtering produces double-counting. Every subscriptions problem should state which state interpretation is required.
+
+**7.5 Gross vs net metrics.**
+Revenue can mean: total order subtotal (gross), subtotal minus discounts (net), subtotal minus discounts minus returns (net realized). Each is a different number. Problems using SUM(subtotal) should state whether gross or net is intended and note that cancelled/returned orders inflate gross figures. This is a standing issue across all ecomm revenue problems.
+
+**7.6 Status at point-in-time vs current status.**
+Is a user "active" if they logged in at any point, or only if they are currently active? Is an account "churned" if it ever had a churned subscription, or only if its most recent subscription is churned? Point-in-time vs current-state queries require different SQL (date range filters vs status = 'active' on max subscription).
+
+**7.7 Event deduplication.**
+If a user fires the same event multiple times in a session (e.g. multiple `content_view` events on the same content), should they be counted once or multiple times for "users who viewed content X"? COUNT(DISTINCT user_id) vs COUNT(user_id) gives different answers. Problems involving engagement metrics should specify the deduplication rule.
+
+**7.8 Zero vs NULL as a business signal.**
+A user with 0 interactions is meaningfully different from a user who doesn't exist in the interactions table. A product with 0 sales is different from a product with no entry in order_items. Problems should distinguish between these cases and use LEFT JOIN + COALESCE(COUNT, 0) when zero is a meaningful business result, not just omit users/products with no activity.
+
+**7.9 Population base for percentages.**
+"Premium rate by device OS" — is the base all users, or all users on that device, or all users who have made at least one interaction? The correct base depends on the business question. Problems computing rates should state the population base explicitly and document the implication of using the wrong base.
+
+---
+
+#### Category 8: Type and Casting Traps
+
+**8.1 Integer division producing 0.**
+Most critical and most common. `3 / 5 = 0` in SQLite and most SQL dialects. Use `3.0 / 5` or `CAST(3 AS REAL) / 5` or `100.0 * 3 / 5`. Every division in a problem solution should use one of these patterns and the debrief should explain why.
+
+**8.2 String-numeric comparison.**
+`'10' > '9'` is FALSE lexicographically (string comparison: '1' < '9'). If a numeric ID is stored as TEXT, comparisons and sorts may produce wrong results. All seed data in PAL uses correct types (INTEGER for IDs, REAL for amounts), so this is a debrief note rather than a live data trap.
+
+**8.3 CAST truncates, not rounds.**
+`CAST(2.9 AS INTEGER) = 2`, not 3. For rounding, use `ROUND()`. Problems using CAST for day calculations (JULIANDAY subtraction) should note that CAST truncates toward zero.
+
+**8.4 Implicit type coercion in JOIN.**
+Joining a TEXT column to an INTEGER column may work in SQLite (type affinity rules) but produces wrong results or errors in PostgreSQL. Production note: join keys must be the same type. Debrief callout only — no seed data change needed.
+
+---
+
+#### Category 9: Data Distribution Traps
+
+**9.1 Averages on skewed distributions.**
+When data is highly skewed (e.g. one user has 1000 orders, everyone else has 1), the average is not a useful measure of typical behavior. Problems computing AVG should note when median (PERCENTILE_CONT or approximation) is more appropriate and what the skew looks like in the seed data.
+
+**9.2 Single-entry groups making aggregations meaningless.**
+"Rank accounts within their industry" when 8 of 12 industries have only one account — those accounts are automatically rank 1, which reveals nothing. Problems should call out which groups have only one member and what that means for interpretation.
+
+**9.3 Sparse data extrapolation.**
+15 months of order data, most months having 1–2 orders, is too sparse for staffing projections. Problems involving time-series data should note the sample size limitation in the debrief and what data volume is needed before trend analysis is reliable.
+
+**9.4 Small-number instability.**
+A 100% conversion rate from a source with 3 sessions is not a meaningful conversion rate. Problems computing rates on small-n subgroups should note minimum sample size requirements and how to filter for statistical stability (HAVING COUNT(*) >= threshold before computing rates).
+
+---
+
+### Enrichment Priority Matrix
+
+Run this scoring on every problem after the audit. Problems scoring 3+ on impact AND 1-2 on effort get enriched first.
+
+**Impact (1–3):**
+- 1 = cosmetic (debrief note only, no behavior change)
+- 2 = meaningful (changes what a wrong answer looks like)
+- 3 = live trap (naive SQL gives wrong output, not just inefficient output)
+
+**Effort (1–3):**
+- 1 = debrief-only (no code change)
+- 2 = seed data change in sqlLabDatamarts.js (add NULL row, add duplicate row)
+- 3 = seed data change + prompt change + solution change + checkValues update
+
+**Priority targets:** Easy problems → effort 1 only (debrief callouts). Medium → effort 1–2. Hard/Master → effort 1–3, full live traps where possible.
+
+**Highest-ROI traps to embed first (effort 2, impact 3):**
+1. NULL in NOT IN subquery — embed one NULL value in the subquery column of every NOT IN problem
+2. Integer division — add CAST to every division in Easy solutions that doesn't have it
+3. Many-to-many fanout — one Hard problem should require grouping before joining to avoid inflation
+4. COALESCE on LEFT JOIN aggregate — one Medium problem should have users with zero activity to make SUM return NULL
+5. RANGE vs ROWS on tied dates — add two same-date orders to ecomm seed for the running total problem
+
+---
+
+### Problems Flagged for Enrichment (populate after Batch 13)
+
+This table will be filled after the audit is complete. Format: problem ID, current weakest trap category, recommended enrichment, effort level.
+
+| ID | Weakest gap | Recommended trap | Effort |
+|---|---|---|---|
+| (populate after Batch 13) | | | |
+
+---
+
+### Execution Plan for Enrichment Pass
+
+**Session 1:** Easy problems (50) — debrief-only pass. Add NULL trap callouts, integer division warnings, denominator clarity. No seed data changes. Estimated: 1 session, 50 problems × 2-min review.
+
+**Session 2:** Medium problems (40) — effort 1–2. Add debrief callouts + targeted seed data changes (add NULL rows, duplicate rows, tied timestamps) for 10 highest-priority problems. Estimated: 1–2 sessions.
+
+**Session 3:** Hard problems (25) — effort 1–3. Full live trap embedding where possible. Window frame traps, fanout traps, business logic traps. Estimated: 2 sessions.
+
+**Session 4:** Master problems (15) — effort 1–2. Debrief enrichment + one or two live traps. These are already complex; traps should compound the complexity, not replace it.
+
+**Total estimated:** 5–6 sessions after Batch 13 completes.

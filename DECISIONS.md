@@ -274,6 +274,22 @@ The best Easy SQL problems combine 2–3 naturally related concepts rather than 
 **Post-audit prompt-clarity pass is scheduled after Batch 13.**
 After all 13 batches complete, run a single 30-minute prose pass across all 130 problems to verify each prompt clearly signals the expected output shape. This is a cosmetic improvement, not a re-audit. No rubric changes. No re-scoring.
 
+**Trap enrichment pass is scheduled after Batch 13 (highest priority post-audit work).**
+The quality floor audit (Batches 1–13) gets every problem to a clean B-grade. The trap enrichment pass raises the ceiling to A+. Full taxonomy and execution plan in SQL_LAB_PLAN.md Section 10 and IDEAS.md Tier 1. Summary of the standard:
+
+A "B-grade" SQL problem teaches the correct concept with a clean solution and a real debrief. An "A-grade" SQL problem additionally embeds at least one of the following traps that make the naive solution silently wrong:
+- NULL trap (NOT IN with NULL subquery, COUNT(*) vs COUNT(col), SUM(NULL)=NULL, NULL arithmetic)
+- JOIN fanout (many-to-many row multiplication, LEFT JOIN + aggregate returning NULL not 0)
+- Integer division (3/5=0 without CAST — must be in every rate/percentage solution)
+- Window frame (RANGE vs ROWS on tied dates — every running total must specify ROWS BETWEEN)
+- Business logic ambiguity (denominator confusion, cohort vs calendar, gross vs net, current vs historical state)
+- Distribution trap (average on skewed data, single-entry groups making ranking meaningless)
+
+These traps are not cosmetic. They change what the wrong answer looks like and reveal judgment gaps. Every Medium/Hard/Master problem in the final bank should have at least one of these traps documented in the debrief (effort 1) and the highest-impact 30 problems should have it embedded live in the seed data (effort 2–3).
+
+**Standing rule: integer division is always wrong in SQL rate problems.**
+Every solution that computes a rate, percentage, or average using division must include CAST(...AS REAL) or multiply by 1.0 to avoid integer truncation. This applies retroactively to all existing solutions. Check during the enrichment pass.
+
 ---
 
 ## V4.59.0 Standing Rules Audit

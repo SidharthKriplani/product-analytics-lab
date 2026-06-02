@@ -159,13 +159,70 @@ Full rubric + process in SQL_LAB_PLAN.md Section 8.
 
 ---
 
-## Batch 6 — Medium m01–m10
-**Status:** Pending
+## Batch 6 — Medium m01–m10 (file positions 1–10: m01, m04, m07, m09, m10, m13, m14, m16, m17, m20)
+**Status:** ✅ Complete | **Audited:** 2026-06-02 | **Flagged:** 4 | **Rewritten:** 3 + 1 checkValues fix
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Approaches | Technique | Pattern | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| m01 | Detect Account Upgrades | Gainsight | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | LAG() + CTE + multi-JOIN | expansion revenue detection | ✅ Pass |
+| m04 | H1 vs H2 Order Volume | Wayfair | 4 | 4 | 4 | 3 | 4 | 4 | 4 | 27 | 2 | conditional aggregation + strftime pivot | period comparison | ✅ Pass |
+| m07 | Days to First Engagement (rewritten) | Pinterest | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | CTE + MIN + JULIANDAY date arithmetic | activation analytics | ✅ Rewritten (was anti-join, Di=2 — pattern overused from Easy) |
+| m09 | Month-over-Month Order Volume (rewritten) | Instacart | 5 | 4 | 5 | 4 | 5 | 4 | 4 | 31 | 2 | CTE + strftime + LAG window function | time series / MoM | ✅ Rewritten (was Easy-level strftime GROUP BY only, DC=2 DR=2) |
+| m10 | Accounts with High Inactivity Rate | Amplitude | 5 | 5 | 5 | 5 | 4 | 5 | 4 | 33 | 2 | conditional aggregation + HAVING on rate | at-risk account detection | ✅ Pass (best in batch) |
+| m13 | Latest Transaction Per Account | Stripe | 4 | 5 | 5 | 3 | 4 | 5 | 4 | 30 | 2 | ROW_NUMBER() + CTE deduplication | last-N-per-group | ✅ checkValues bug fixed (was empty []) |
+| m14 | Content Rank Within Category (rewritten) | Netflix | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | DENSE_RANK() OVER (PARTITION BY category) + CTE | per-category ranking | ✅ Rewritten (was 3rd conditional aggregation in batch, Di=2) |
+| m16 | Running Spend Per User | Shopify | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | SUM() OVER (PARTITION BY ORDER BY) running total | cumulative spend | ✅ Pass |
+| m17 | Above-Average Enterprise Accounts | HubSpot | 4 | 4 | 4 | 3 | 4 | 4 | 4 | 27 | 2 | correlated subquery + AVG per group | above-average pattern | ✅ Pass |
+| m20 | Top Products by Volume | Amazon | 4 | 4 | 4 | 3 | 3 | 5 | 4 | 27 | 2 | RANK() + 2-CTE pipeline | top-N with ties | ✅ Pass |
+
+### Batch 6 findings
+
+**4/10 flagged** — lower flag rate than Easy batches. Medium problems generally better differentiated; the two full rewrites were clear-cut.
+
+**Anti-join again (m07):** Medium tier opened with the same pattern family we spent 4 Easy rewrites eliminating (LEFT JOIN IS NULL / NOT IN). m07 was NOT IN with a correlated JOIN inside the subquery — legitimately more complex than Easy anti-joins, but Di=2 when the conceptual pattern is "find users with no X." Replaced with "Days to First Engagement" (Pinterest) — introduces JULIANDAY date arithmetic, a new pattern not yet seen anywhere in the audit. CTE + MIN + JULIANDAY is genuinely Medium: requires knowing how to materialize an intermediate result and how to do date arithmetic in SQLite.
+
+**Easy-level SQL mislabeled Medium (m09):** strftime GROUP BY ORDER BY is Easy. The only distinguishing feature from e32 (BETWEEN date filter), e34 (multi-column GROUP BY), or e49 (AVG + GROUP BY) was the date format function. Replaced with "Month-over-Month Order Volume" — strftime GROUP BY in a CTE + LAG() OVER for MoM change. Now genuinely Medium: requires composing two distinct SQL concepts (date aggregation + window function) where neither alone answers the question.
+
+**Conditional aggregation cluster (m14):** m04 (time pivot), m10 (NULL rate), m14 (action pivot) — three conditional aggregation problems in one batch of 10. Same pattern-clustering issue as COUNT(*) in Easy Batch 2. m14 replaced with "Content Rank Within Category" (Netflix) — DENSE_RANK() OVER (PARTITION BY category). This completes the window function coverage for Batch 6: LAG (m01), SUM OVER (m16), RANK (m20), ROW_NUMBER (m13), and now DENSE_RANK with PARTITION BY (m14). Five distinct window functions covered.
+
+**checkValues bug (m13):** Same class of issue as e52 in Batch 4. Empty checkValues means users cannot verify their answer. Fixed: account_id=1's latest transaction is txn 38 ($88.00, 2024-04-18).
+
+**Medium tier pattern coverage after Batch 6:** LAG, SUM OVER, RANK, DENSE_RANK (PARTITION BY), ROW_NUMBER, correlated subquery, conditional aggregation (×2), CTE + date arithmetic (JULIANDAY), CTE + LAG MoM — all covered at least once.
 
 ---
 
-## Batch 7 — Medium m11–m20
-**Status:** Pending
+## Batch 7 — Medium m11–m20 (file positions 11–20: m21, m23, m24, m25, m26, m28, m29, m30, m32, m33)
+**Status:** ✅ Complete | **Audited:** 2026-06-02 | **Flagged:** 7 | **Rewritten:** 3 + 3 checkValues fixes + 1 company fix + 2 debrief upgrades
+
+| ID | Title | Company | BF | CA | DC | DR | Di | IQ | TC | Total | Approaches | Technique | Pattern | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| m21 | User Engagement Quartile Segmentation (rewritten) | TikTok | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | CTE + LEFT JOIN + NTILE(4) global window | engagement segmentation | ✅ Rewritten (was ROW_NUMBER clone of m13, Di=2) |
+| m23 | Accounts with Mixed Transaction Outcomes | Robinhood | 4 | 4 | 4 | 3 | 4 | 4 | 3 | 26 | 2 | double EXISTS (AND EXISTS × 2) | compound existence check | ✅ Pass |
+| m24 | MRR Rank Within Industry | Salesforce | 4 | 4 | 4 | 3 | 3 | 4 | 4 | 26 | 2 | RANK() OVER (PARTITION BY industry) + JOIN | per-group ranking | ✅ checkValues fixed + company fix (Gainsight→Salesforce, dup with m01) |
+| m25 | Broadly Purchased Products | Shopify | 5 | 4 | 3 | 4 | 3 | 4 | 3 | 26 | 1 | COUNT(DISTINCT user_id) + HAVING + JOIN | broad-appeal detection | ✅ Pass |
+| m26 | Session Gap Analysis | Amplitude | 5 | 3 | 5 | 3 | 3 | 4 | 3 | 26 | 2 | LAG + JULIANDAY inter-session gap | churn risk / re-engagement | ✅ checkValues fixed (user 1 session gap = 73 days) |
+| m28 | Creator Engagement vs Platform Benchmark (rewritten) | YouTube | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | CTE + AVG() OVER () global window | benchmark comparison | ✅ Rewritten (was RANK clone of m20, Di=2) |
+| m29 | Next User Event | Amplitude | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 25 | 2 | LEAD() OVER (PARTITION BY) | event sequencing | ✅ checkValues fixed (event 1 next_event = 2024-01-08) |
+| m30 | Spend Share by Category (rewritten) | Brex | 5 | 4 | 5 | 4 | 5 | 5 | 4 | 32 | 2 | SUM(SUM()) OVER () global window + GROUP BY | percentage of total | ✅ Rewritten (was AVG OVER near-clone of m16, Di=2) |
+| m32 | First Transaction Benchmark | Stripe | 4 | 5 | 4 | 3 | 4 | 4 | 4 | 28 | 2 | FIRST_VALUE() OVER (PARTITION BY) | spend trajectory benchmark | ✅ Debrief upgraded (IQ+TC: was 2 sentences, now full treatment) |
+| m33 | Completed Order Detail View | Amazon | 4 | 4 | 3 | 3 | 3 | 4 | 4 | 25 | 2 | 4-table JOIN chain + WHERE filter | line-item inventory view | ✅ Debrief upgraded (TC: CTE chain alt, missing-filter failure mode) |
+
+### Batch 7 findings
+
+**7/10 flagged — worst batch since Easy Batch 2.** Three structural clones + three missing checkValues + one company duplicate.
+
+**Structural clones (m21, m28, m30):** All three had Di=2 because they used the same SQL pattern as an earlier problem on the same or identical table:
+- m21 (ROW_NUMBER first-per-group) was identical in structure to m13 (latest-per-group) — same PARTITION BY/ORDER BY/WHERE rn=1 pattern, opposite sort direction. Replaced with NTILE(4) engagement quartile segmentation — introduces NTILE, LEFT JOIN for zero-count inclusion, and the mechanical row-splitting behavior that distinguishes NTILE from value-based bucketing.
+- m28 (RANK top-3 creators) was identical in structure to m20 (RANK top-3 products) — same 2-CTE aggregate-then-rank-then-filter pipeline. Replaced with Creator Engagement vs Platform Benchmark — introduces AVG() OVER () with no PARTITION BY (global window), a distinct pattern used to compare each row against a grand aggregate.
+- m30 (AVG OVER cumulative per user on orders) was a near-clone of m16 (SUM OVER cumulative per user on orders) — same table, same PARTITION BY, same ORDER BY. Replaced with Spend Share by Category — introduces SUM(SUM()) OVER (), the nested aggregate-in-window pattern for percentage-of-total calculations.
+
+**Missing checkValues (m24, m26, m29):** Same class of bug as m13 (Batch 6) and e52 (Batch 4). Fixed: m24 (Echo Tech, Enterprise 2999, tech rank 1), m26 (user 1 session gap 73 days, 2023-02-01→2023-04-15), m29 (event 1, user 1 login, next event 2024-01-08).
+
+**Company duplicate (m24):** Gainsight already appeared in m01 (Batch 6). Changed to Salesforce — also a B2B CRM/SaaS platform where per-industry account MRR ranking is a natural CS use case.
+
+**Thin debriefs (m32, m33):** m32 had a 2-sentence debrief with no weak answer, no alternative, no follow-up. m33 had no alternatives and no failure-mode explanation. Both upgraded to full treatment.
+
+**Medium tier new patterns introduced this batch:** NTILE(4) engagement bucketing, global AVG() OVER () benchmark comparison, SUM(SUM()) OVER () percentage-of-total, FIRST_VALUE() spend anchor, double EXISTS compound check, LEAD() event sequencing.
 
 ---
 

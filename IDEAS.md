@@ -26,6 +26,40 @@ _No new features until PostHog baseline is established._
 
 ## Tier 1 — High impact, buildable now
 
+### SQL Lab — Trap Enrichment Pass (after Batch 13) [HIGHEST PRIORITY POST-AUDIT]
+**Gate:** All 13 audit batches complete. Full execution plan + complete trap taxonomy in SQL_LAB_PLAN.md Section 10.
+
+The audit (Batches 1–13) gets every problem to a clean floor — no clones, correct labels, real debriefs. This pass raises the ceiling: it embeds data traps that break naive SQL silently, adds business logic ambiguity that reveals judgment gaps, and introduces the failure modes that separate interview pass from fail. No competitor does this. This is PAL's differentiator.
+
+**Nine trap categories (full detail in SQL_LAB_PLAN.md Section 10):**
+
+NULL traps: NOT IN footgun (returns 0 rows when subquery contains NULL), COUNT(*) vs COUNT(col) on nullable columns, AVG ignoring NULLs in denominator, SUM(NULL)=NULL not 0, NULL arithmetic propagation (5+NULL=NULL), IS NULL vs =NULL, NULL in ORDER BY dialect differences, LEFT JOIN IS NULL anti-join contamination.
+
+JOIN fanout traps: many-to-many join row multiplication (user × orders × order_items inflates SUM), LEFT JOIN + aggregate returns NULL not 0 without COALESCE, duplicate rows from non-unique join keys, self-join correctness, cross-join from missing ON clause.
+
+Aggregation traps: integer division (3/5=0 not 0.6 — needs CAST or 1.0 multiply), ROUND() floating-point precision, GROUP BY with non-aggregated columns (SQLite lenient, Postgres strict), HAVING on non-aggregated columns, aggregate order-of-operations (WHERE filters before, HAVING after), COUNT DISTINCT vs COUNT on duplicate rows, SUM(CASE WHEN) vs COUNT(CASE WHEN) equivalence.
+
+Window function traps: RANGE vs ROWS frame on tied ORDER BY values (RANGE includes all ties in frame, ROWS is row-by-row — running totals differ on tied dates), NULL in LAG/LEAD (default returns NULL for first row, use third-argument default), RANK gaps (1,1,3) vs DENSE_RANK no gaps (1,1,2) vs ROW_NUMBER arbitrary tie-break, window function alias in WHERE clause fails (must CTE), PARTITION BY omission gives global rank not per-group, FIRST_VALUE frame spec restriction.
+
+Date/time traps: BETWEEN is inclusive on both ends (June 30 at midnight not June 30 at 23:59), strftime('%Y-%m') vs DATE_TRUNC('month') vs DATE_TRUNC(col, MONTH) — three different dialects three different argument orders, JULIANDAY precision (fractional days when time component present, CAST truncates not rounds), cohort vs calendar measurement (30 days from signup vs 30 days from Jan 1), timezone complications (UTC to PST shifts day boundaries), month-end vs month-start ambiguity in period splits.
+
+Subquery/CTE traps: correlated subquery runs N times (one per outer row, O(n) — window function runs once), CTE materialization (SQLite always materializes, Postgres inlines by default), non-deterministic results without ORDER BY (LIMIT 1 with no ORDER BY is arbitrary), recursive CTE termination condition required, WITH clause scope (CTEs visible only to immediate query).
+
+Business logic traps (highest interview value): denominator confusion ("% of users" — of what? total, active, ever-logged-in?), cohort vs calendar (retention measured from signup vs from Jan 1), first-touch vs last-touch attribution (all revenue credited to one channel is always wrong), current vs historical state (subscriptions table has both active and churned rows — must filter), gross vs net metrics (subtotal vs subtotal minus discount minus returns), event deduplication (user fires view event 5 times — COUNT(*) vs COUNT(DISTINCT) differ), zero vs NULL as business signal (user with 0 interactions differs from user not in table — LEFT JOIN to show zero explicitly), population base for rates (premium rate denominator = all users or users on that device?).
+
+Type/casting traps: integer division producing 0 (most common, embed CAST in every division), string-numeric comparison order ('10' < '9' lexicographically), CAST truncates toward zero not rounds, implicit type coercion in JOIN keys varies by dialect.
+
+Data distribution traps: averages on skewed data (one power-user distorts mean — note when median is correct), single-entry groups make ranking meaningless (8 of 12 industries with 1 account are all automatically rank 1), sparse data extrapolation (15 months of 1-2 orders/month is insufficient for trend analysis), small-number rate instability (100% conversion from 3 sessions is noise — add HAVING COUNT(*) >= threshold).
+
+**Enrichment effort levels:**
+- Effort 1 (debrief-only): callout in debrief, no data change. All Easy, most passing Medium.
+- Effort 2 (seed data change): add NULL row, duplicate row, or tied timestamp to datamarts. 10 highest-priority Medium problems.
+- Effort 3 (seed + prompt + solution + checkValues): live trap embedded end-to-end. Hard and Master problems.
+
+**Execution order:** Easy (50, effort 1 only) → Medium (40, effort 1-2) → Hard (25, effort 1-3) → Master (15, effort 1-2). Estimated 5–6 sessions total.
+
+**Highest-ROI traps to hit first (effort 2, impact 3):** NULL in NOT IN subquery → integer division CAST → many-to-many fanout → COALESCE on LEFT JOIN aggregate → RANGE vs ROWS on tied dates → denominator confusion on rate problems.
+
 ### SQL Lab — Post-audit prompt-clarity pass (after Batch 13)
 30-minute sweep across all 130 problems after the full 13-batch audit is complete. For each problem, verify the prompt text clearly signals the expected output shape (what columns, approximate row count, what the key insight is). Based on DataLemur benchmark research (2026-06-02): their best Easy problems show a sample input table and expected output before writing. PAL's checkValues/expectedRowCount/expectedColumns already handle the data layer — this pass tightens the prose. Not a re-audit, not rubric changes. Schedule after Batch 13.
 

@@ -17,8 +17,8 @@ Read this at the start of every build session. Do only this. Update before closi
 
 ## Next session
 
-**1. SQL Quality Audit — Batch 6 (Medium m01–m10)**
-Score full batch, fix flagged, build+verify, ship. Medium rubric: same 7 dimensions but DC and Di expectations are higher — window functions, CTEs, multi-step compositions. See SQL_QUALITY_AUDIT.md for running scores.
+**1. SQL Quality Audit — Batch 8 (Medium m21–m30)**
+Score full batch, fix flagged, build+verify, ship. See SQL_QUALITY_AUDIT.md for running scores.
 
 **2. Confirm VITE_POSTHOG_KEY live in Vercel** — check env vars dashboard, establish WAU baseline before Batch 1 outreach.
 
@@ -38,6 +38,13 @@ See Next session item 1.
 ---
 
 ## Carry-forward log
+
+**Done this session (V4.66.0):**
+- SQL Audit Batch 7 complete (m21–m33, file positions 11–20). 7/10 flagged — worst batch since Easy B2. 3 rewrites: m21 (NTILE quartile), m28 (global AVG OVER benchmark), m30 (SUM(SUM) OVER pct-of-total, fintech). 3 checkValues bugs fixed (m24,m26,m29). m24 company dup (Gainsight→Salesforce). m32+m33 debriefs upgraded. Build: ✓ 2.09s.
+
+**Done this session (V4.65.0):**
+- SQL Audit Batch 6 complete (Medium m01–m20, file positions 1–10). 4 flagged. 3 rewrites: m07 (anti-join → JULIANDAY date arithmetic, CTE+MIN), m09 (Easy-level strftime → CTE+LAG MoM), m14 (3rd conditional aggregation → DENSE_RANK PARTITION BY). m13 checkValues bug fixed. 5 distinct window functions covered.
+- Build: ✓ 1.76s, 0 errors.
 
 **Done this session (V4.64.0):**
 - SQL Audit Batch 5 complete (e67–e86, file positions 41–50). 6/10 flagged. 3 rewrites: e69 (arithmetic in SELECT + multi-condition WHERE), e70 (dual COUNT+SUM with WHERE pre-filter), e74 (triple aggregate COUNT+SUM+AVG). 2 debrief upgrades: e78 (subquery alt + zero-order LEFT JOIN), e81 (conditional aggregation split). e86 reclassified Easy→Medium (PERCENT_RANK + CTE). e77 company fixed Doximity→Athenahealth. 50 Easy problems fully audited.

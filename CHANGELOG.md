@@ -4,6 +4,42 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.66.0] — 2026-06-02 [CONTENT]
+
+### SQL Quality Audit — Batch 7 (Medium m11–m20: m21, m23, m24, m25, m26, m28, m29, m30, m32, m33)
+
+**Results:** 3/10 pass. 3 full rewrites + 3 checkValues fixes + 1 company fix + 2 debrief upgrades.
+
+- **m21 rewritten** — ROW_NUMBER first-per-group (Di=2, clone of m13 latest-per-group). Replaced with "User Engagement Quartile Segmentation" (TikTok) — CTE + LEFT JOIN + NTILE(4). Introduces NTILE, the LEFT JOIN for zero-count users, and the mechanical row-splitting behavior vs value-based bucketing.
+- **m24 company + checkValues** — Gainsight appeared in m01 (Batch 6); changed to Salesforce. checkValues was empty; added Echo Tech (tech, mrr=2999, industry_rank=1).
+- **m26 checkValues** — was empty; added user 1's session gap: 2023-02-01→2023-04-15 = 73 days.
+- **m28 rewritten** — 2-CTE aggregate+RANK top-3 (Di=2, identical structure to m20). Replaced with "Creator Engagement vs Platform Benchmark" (YouTube) — CTE + AVG() OVER () global window (no PARTITION BY). First appearance of global window for benchmark comparison.
+- **m29 checkValues** — was empty; added event 1 (user 1, login, next_event_date=2024-01-08).
+- **m30 rewritten** — AVG() OVER cumulative (Di=2, near-clone of m16 SUM() OVER on same table). Replaced with "Spend Share by Category" (Brex, fintech) — SUM(SUM(amount)) OVER () for percentage-of-total. First appearance of nested aggregate-in-window pattern.
+- **m32 debrief upgraded** — 2-sentence debrief → full treatment. Spend trajectory interpretation, MIN vs FIRST_VALUE distinction, ROW_NUMBER alternative, weak answer failure mode, follow-up question.
+- **m33 debrief upgraded** — TC=2 → TC=4. CTE chain alternative, missing status-filter failure mode, line_item_total follow-up.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `SQL_LAB_PLAN.md`
+
+---
+
+## [4.65.0] — 2026-06-02 [CONTENT]
+
+### SQL Quality Audit — Batch 6 (Medium m01–m10: m01, m04, m07, m09, m10, m13, m14, m16, m17, m20)
+
+**Results:** 6/10 pass. 3 full rewrites + 1 checkValues bug fix.
+
+- **m07 rewritten** — NOT IN anti-join (Di=2, pattern overused from Easy tier). Replaced with "Days to First Engagement" (Pinterest) — CTE + MIN(occurred_at) + JULIANDAY date arithmetic to compute days between join date and first interaction. First appearance of JULIANDAY date arithmetic in the audit. expectedRowCount: 13 (users 14/15 excluded by INNER JOIN). Fastest activating user: mike at 114 days.
+- **m09 rewritten** — strftime + GROUP BY + ORDER BY only (DC=2, DR=2 — Easy-level SQL). Replaced with "Month-over-Month Order Volume" (Instacart) — CTE + strftime GROUP BY + LAG() OVER (ORDER BY order_month) for MoM change. Genuinely Medium: two concepts composed (date aggregation + window function). First month returns NULL for prev/change (LAG with no prior row). checkValue: 2024-01 (order_count=4, prev=2, mom_change=+2).
+- **m13 checkValues fixed** — Empty checkValues[]. Added: account_id=1's latest transaction is txn 38 ($88.00, 2024-04-18).
+- **m14 rewritten** — 3rd conditional aggregation in batch (Di=2). Replaced with "Content Rank Within Category" (Netflix) — CTE + DENSE_RANK() OVER (PARTITION BY category ORDER BY interaction_count DESC). Introduces DENSE_RANK with explicit PARTITION BY — distinct from m20's RANK() (no partition) and m13's ROW_NUMBER(). Content 1 (fitness) leads at 8 interactions.
+
+**Medium tier window function coverage after Batch 6:** LAG (m01), SUM OVER (m16), RANK (m20), ROW_NUMBER (m13), DENSE_RANK+PARTITION BY (m14), MoM LAG (m09) — five distinct window functions covered in 10 problems.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_QUALITY_AUDIT.md`, `SQL_LAB_PLAN.md`
+
+---
+
 ## [4.64.0] — 2026-06-02 [CONTENT]
 
 ### SQL Quality Audit — Batch 5 (file positions 41–50: e67–e86)
