@@ -151,6 +151,12 @@ const PATHS = {
       <line x1="8" y1="18" x2="16" y2="18" />
     </>
   ),
+  'user': (
+    <>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </>
+  ),
 };
 
 export function Icon({ name, size = 16, color = 'currentColor', strokeWidth = 1.75, style, className }) {

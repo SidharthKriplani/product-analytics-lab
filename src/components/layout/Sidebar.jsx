@@ -70,6 +70,7 @@ const FLAT_GROUPS = [
   {
     label: 'TRACK',
     items: [
+      { id: 'profile',  label: 'Profile',  icon: 'user' },
       { id: 'progress', label: 'Progress', icon: 'bar-chart' },
       { id: 'pricing',  label: 'Pricing',  icon: 'credit-card' },
     ],
