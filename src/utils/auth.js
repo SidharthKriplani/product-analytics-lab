@@ -10,7 +10,18 @@ export async function signInWithEmail(email) {
 
 export async function signInWithGoogle() {
   if (!supabase) return { error: 'Supabase not configured' };
-  return supabase.auth.signInWithOAuth({ provider: 'google' });
+  return supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin },
+  });
+}
+
+export async function signInWithGitHub() {
+  if (!supabase) return { error: 'Supabase not configured' };
+  return supabase.auth.signInWithOAuth({
+    provider: 'github',
+    options: { redirectTo: window.location.origin },
+  });
 }
 
 export async function signOut() {

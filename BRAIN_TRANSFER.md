@@ -1,6 +1,6 @@
 # Brain Transfer — V4.55.0
 
-**Version:** V4.55.0 | **Build:** ✓ (1.70s, 0 errors) | **Git:** uncommitted | **Date:** 2026-06-02
+**Version:** V4.56.0 | **Build:** ✓ | **Git:** pushed | **Date:** 2026-06-02
 
 ---
 
@@ -63,29 +63,13 @@ Routes: Stats · Metrics · Design · Review · RCA · Cases · Code · Product 
 
 ---
 
-## Next action — Supabase audit #104: finish or cut
+## Next action — Confirm VITE_POSTHOG_KEY live in Vercel → Batch 1 outreach
 
-**Decision required before Batch 2 outreach.** DECISIONS.md: half-done is worse than either.
+Supabase auth is live (audit #104 ✅ resolved V4.56.0). Users can sign in via email magic link, progress syncs cross-device.
 
-**Option A (finish):** Fix PROGRESS_KEYS drift first (see below), then E2E test with real Supabase project, add auth error handling.
-**Option B (cut):** Remove `src/utils/supabase.js`, `src/utils/auth.js`, `src/utils/syncProgress.js`, `src/components/shared/AuthModal.jsx`. Strip auth state from App.jsx. Update README.
-
-**PROGRESS_KEYS drift in src/utils/syncProgress.js — fix required before Option A:**
-
-| Room | Actual key | Status in sync |
-|---|---|---|
-| Code | `pal-code-progress-v1` | missing |
-| Prioritization | `pal-pri-progress-v1` | missing |
-| Spot the Flaw | `pal-stf-progress-v1` | missing |
-| SQL Lab | `pal-sql-lab-solved-v1` + 3 more | missing |
-| Product Design | `pd-progress-*` prefix | missing |
-| Learning Paths | `pal-lp-{pathId}-v1` (4 paths) | missing |
-| Cases | `pal-cases-progress-v1` in sync | actual: `v2` |
-| RCA | `pal-rca-progress-v1` in sync | actual: `v2` |
-| Take-Home | `pal-take-home-progress-v1` in sync | actual: `pal-takehome-progress-v1` |
-| Exp Foundations | `pal-exp-foundations-progress-v1` in sync | actual: `pal-exp-foundation-progress-v1` |
-| Metrics Foundations | `pal-metrics-foundations-progress-v1` in sync | actual: `pal-metrics-foundation-progress-v1` |
-| RCA Foundations | `pal-rca-foundations-progress-v1` in sync | actual: `pal-rca-foundation-progress-v1` |
+**Remaining pre-Batch 1 user actions:**
+1. Confirm `VITE_POSTHOG_KEY` is set in Vercel env vars (same place you added Supabase keys)
+2. Git push if not done yet
 
 ---
 

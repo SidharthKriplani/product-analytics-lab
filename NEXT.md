@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.55.0 (2026-06-02) — Debrief failure mode pass complete across all 10 rooms (184 cases total). Audits #99/#100/#91 resolved. MCQ Trainer past sessions panel. Progress zero-state fixed. Build: ✓ 821 modules, 0 errors.*
+*Last updated: V4.56.0 (2026-06-02) — Supabase auth complete (audit #104 resolved). Fixed all PROGRESS_KEYS drift (32 keys). Sign-in button in sidebar. emailRedirectTo dynamic. E2E tested and working.*
 
 ---
 
@@ -17,7 +17,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 ## Next session
 
-**1. Supabase auth — finish or cut (audit #104)** `DECISION + CODE`
+**1. Confirm VITE_POSTHOG_KEY live in Vercel** — check env vars dashboard, establish WAU baseline before Batch 1 outreach.
 Decision due before Batch 2 outreach. Option A: complete to production-ready — E2E test with real Supabase project, verify `PROGRESS_KEYS` in syncProgress.js covers all current rooms (SQL Lab, all new rooms added since V4.24), add auth error handling. Option B: remove entirely, ship as localStorage-first. Half-done is worse than either.
 Note: User to handle Supabase setup/testing for Option A in next session (if chosen).
 
@@ -44,6 +44,9 @@ See Next session item 1.
 - Audit #100 — BIRunner + GrowthRunner imperative hover mutations replaced with useState. MetricDebriefPanel, RCADebriefPanel, CaseDebriefPanel already correct.
 - Audit #91 — MCQ Trainer: past sessions panel added (empty state + last 3 sessions). Progress page: zero-state now routes to stat-foundations with correct copy. BookmarksBrowser + LockOverlay confirmed.
 - Build: ✓ 821 modules, 0 errors.
+
+**Done this session (V4.56.0):**
+- Supabase auth complete (audit #104 resolved). Fixed all PROGRESS_KEYS drift — 6 wrong key names corrected, 9 missing keys added, dynamic `pd-progress-*` prefix handling for Product Design. Sign-in button added to sidebar bottom. `emailRedirectTo: window.location.origin` added so magic links land on correct URL. `.env.local` created. E2E tested — sign in works, user appears in Supabase Users table.
 
 **Done this session (V4.54.0):**
 - Debrief failure mode pass — Cases room: 20 cases (C01–C22) now have `\n\n**Weak answer:** ... **Interviewer follow-up:** ...` appended to `seniorAnswer.interviewPhrase`
