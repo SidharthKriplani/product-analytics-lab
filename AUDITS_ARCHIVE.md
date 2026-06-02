@@ -1094,8 +1094,8 @@ Full codebase audit (V4.33.2 session) found 40+ hardcoded color values in JSX fi
 
 ---
 
-### 91. ⚠️ UX Audit — Empty State Quality (Sibling lab signal)
-**Version:** Logged V4.32.9 → Resolved V4.46.0. 60 cases updated (24 RCA, 16 Metrics, 20 Stats). Every debrief now ends with Weak answer pattern + Interviewer follow-up specific to that case.
+### 91. ✅ UX Audit — Empty State Quality (Sibling lab signal)
+**Version:** Logged V4.32.9 → Resolved V4.55.0
 **Type:** UX / Human Elements
 
 Empty states in PAL have never been audited. GenAI Lab found all empty states were blank — no copy, no orientation, no next step. Same risk exists in PAL.
@@ -1108,6 +1108,8 @@ Empty states in PAL have never been audited. GenAI Lab found all empty states we
 - MCQ Trainer with no attempts yet
 
 **Fix:** Each empty state should do three things — acknowledge the state, explain what belongs here, and give a specific next action. Small copy + CTA pass, ~1 session.
+
+**Fix (V4.55.0):** MCQ Trainer: past sessions panel + empty state added. Progress page: zero-state CTA fixed to route to stat-foundations. BookmarksBrowser and LockOverlay confirmed already correct.
 
 ---
 
@@ -1162,7 +1164,7 @@ The standard for good distractors: each wrong option should be correct in a *dif
 ---
 
 ### 86. ✅ Content Quality Audit — Case Debrief Explanation Depth (Sibling lab signal)
-**Version:** Logged V4.32.9 → Resolved V4.46.0. 60 cases updated (24 RCA, 16 Metrics, 20 Stats). Every debrief now ends with Weak answer pattern + Interviewer follow-up specific to that case.
+**Version:** Logged V4.32.9 → Resolved V4.54.0–V4.55.0
 **Type:** Content Quality + UX / Human Elements
 
 ML Systems Lab audited their MCQ explanations and found they stated the correct answer but didn\'t explain the failure mode — what goes wrong in a real interview or production scenario when you get this wrong. They fixed it with an explicit pattern: "In production, this breaks as X. The tell is Y."
@@ -1175,6 +1177,8 @@ PAL\'s case debriefs almost certainly have the same gap. They explain what the r
 - Why it fails under interviewer pressure (the specific follow-up that exposes the gap)
 
 **Scope:** All case debrief fields across every room data file. High effort — full content audit. Prioritize the rooms with the highest completion rates first (RCA, Metrics, Stats based on expected usage).
+
+**Fix (V4.54.0–V4.55.0):** Debrief failure mode pass complete across all 10 rooms. V4.46.0: RCA (24), Metrics (16), Stats (20). V4.54.0: Cases (20), BI (16), Growth (8). V4.55.0: Instrumentation (12), Behavioral (30), Estimation (30), Design (8), STF (12). Total: 184 cases. Each debrief now ends with weak answer pattern + interviewer follow-up.
 
 ---
 

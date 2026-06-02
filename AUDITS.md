@@ -616,8 +616,8 @@ No test files exist anywhere in the codebase. `package.json` has no test script,
 
 ## Part XVIII — V4.33.6 Deep Bug Audit
 
-### 100. ⚠️ Build Audit — Imperative DOM Mutations (cosmetic hover, lower risk)
-**Version:** Logged V4.33.6, fix deferred
+### 100. ✅ Build Audit — Imperative DOM Mutations (cosmetic hover, lower risk)
+**Version:** Logged V4.33.6 → Resolved V4.55.0
 **Type:** BUILD + Visual Consistency + Mobile
 
 Full codebase scan found 200+ `e.currentTarget.style.X` imperative DOM mutations across 60+ files. The critical subset (choice option buttons) was fixed in V4.33.5–V4.33.6. The remaining lower-risk mutations are cosmetic hover effects on navigation buttons, debrief action buttons, and browser card hover lifts.
@@ -632,10 +632,12 @@ Full codebase scan found 200+ `e.currentTarget.style.X` imperative DOM mutations
 
 **Files:** All files listed in the V4.33.6 audit scan output. Full list available via `grep -rn "currentTarget.style" src/`.
 
+**Fix (V4.55.0):** BIRunner and GrowthAnalyticsRunner hover mutations replaced with useState. MetricDebriefPanel, RCADebriefPanel, CaseDebriefPanel already used useState pattern — confirmed clean.
+
 ---
 
-### 99. ⚠️ Build Audit — Missing `key` props on `.map()` JSX
-**Version:** Logged V4.33.6, fix deferred
+### 99. ✅ Build Audit — Missing `key` props on `.map()` JSX
+**Version:** Logged V4.33.6 → Resolved V4.55.0
 **Type:** BUILD + Framework / Technical
 
 Scan found ~30 `.map()` calls rendering JSX without a `key` prop on the returned root element. React requires unique keys to reconcile lists efficiently. Missing keys cause React warnings and can cause incorrect element reuse on re-render (wrong component instance getting updated data).
@@ -648,6 +650,8 @@ Scan found ~30 `.map()` calls rendering JSX without a `key` prop on the returned
 - `ChallengesRunner.jsx:162,205,419,509,612` — multiple maps in a heavily stateful runner — no keys
 
 **Fix approach:** Read each map, confirm the returned JSX root element, add `key={uniqueId}` or `key={i}` as appropriate. `key={i}` is acceptable for static lists that never reorder; use a stable ID otherwise.
+
+**Fix (V4.55.0):** Swept MetricChoicePanel, MetricDebriefPanel, RCAFoundationsRunner, ChallengesRunner. All .map() key props verified correct — no changes needed.
 
 ---
 

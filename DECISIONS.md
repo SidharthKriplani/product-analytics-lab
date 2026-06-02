@@ -189,17 +189,16 @@ These decisions are final through V4.x. Do not revisit without strong evidence:
 
 ---
 
-## Current priority (V4.46)
+## Current priority (V4.55)
 
-**Pre-beta gate: two things before Batch 1 invites.**
-SQL Lab is feature-complete (V4.46.0). All 4 foundation rooms rewritten situation-first (V4.46.0). Before sending Batch 1 outreach:
-1. Git push V4.43.0–V4.46.0 to Vercel (user must run from Mac terminal — sandbox cannot push)
+**Pre-Batch 1 gates (both user actions, not code):**
+1. Git push V4.55.0 to Vercel (run from Mac terminal)
 2. Confirm `VITE_POSTHOG_KEY` is live in Vercel prod
-3. About section + difficulty tags on cases — cold users need orientation and calibration before the product can be assessed fairly
 
-**Next build session: SQL Lab Phase 3** (company filter chip, hints quality review, PostHog events, streak in heatmap). See NEXT.md.
+**Pre-Batch 2 gate:**
+Supabase audit #104 — decide finish or cut before Batch 2 outreach. Half-done is worse than either. See DECISIONS.md Supabase rule above and BRAIN_TRANSFER.md for PROGRESS_KEYS drift analysis.
 
-**Feature gate that still applies:** Do not build interview experiences tab, share/routing, or mock interview revamps until PostHog confirms real usage patterns. Build against observed behavior, not assumptions.
+**Feature gate that still applies:** Do not build interview experiences tab, share/routing, or Simulator expansion until PostHog confirms real usage patterns from Batch 1. Build against observed behavior, not assumptions.
 
 ---
 

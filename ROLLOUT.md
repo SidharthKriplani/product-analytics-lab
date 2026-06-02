@@ -2,7 +2,7 @@
 
 Operational file. Tracks what goes out, in what order, to whom, and what gets checked before it does. Not a feature backlog (that's IDEAS.md). Not standing rules (that's DECISIONS.md). This is the gate between "built" and "live to testers."
 
-**Current status:** V4.49.0 ready. Batch 0 self-vet complete (V4.28.0). Pre-Batch 1 gates: (1) Git push V4.43.0–V4.49.0 (user), (2) Confirm VITE_POSTHOG_KEY live in Vercel (user).
+**Current status:** V4.55.0 ready. Batch 0 self-vet complete (V4.28.0). Pre-Batch 1 gates: (1) Git push to Vercel (user), (2) Confirm VITE_POSTHOG_KEY live in Vercel (user). Pre-Batch 2 gate: Supabase audit #104 — finish or cut.
 
 ---
 

@@ -4,6 +4,61 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.55.0] — 2026-06-02 [CONTENT + BUILD]
+
+### Debrief Failure Mode Pass — All Remaining Rooms + 3 Audits Resolved
+
+**Debrief failure mode pass — 5 rooms completed:**
+- Instrumentation (12 cases): `failureMode: { weakAnswer, interviewerFollowUp }` added to all inst01–inst12. InstrumentationRunner updated to render after leadershipNote.
+- Behavioral (30 questions): `failureMode` added to all BEH01–BEH30. BehavioralRunner updated to render after antiPatterns.
+- Estimation (30 problems): `failureMode` added to all EST01–EST30. EstimationRunner updated to render after commonMistakes.
+- Design (8 scenarios): `seniorDesign.failureMode` added to D01–D08. DesignDebriefPanel updated to render after commonMistakes.
+- Spot the Flaw (12 cases): Failure mode embedded inline at end of each `flaw` field. No runner change needed.
+- Total: 184 cases across all 10 practice rooms now have failure mode content (previously 0 rooms outside RCA/Metrics/Stats).
+
+**Audit #100 resolved — Imperative DOM mutations replaced:**
+BIRunner.jsx: `beginHovered`, `revealHovered`, `nextHovered` useState replacing `e.currentTarget.style` opacity mutations.
+GrowthAnalyticsRunner.jsx: `revealHovered`, `exportHovered` useState replacing border/color mutations.
+MetricDebriefPanel, RCADebriefPanel, CaseDebriefPanel: already used useState — confirmed clean.
+
+**Audit #99 resolved — key props verified:**
+Swept MetricChoicePanel, MetricDebriefPanel, RCAFoundationsRunner, ChallengesRunner. All `.map()` calls already had correct key props. No changes needed.
+
+**Audit #91 resolved — empty state quality pass:**
+- MCQ Trainer (Trainer.jsx): Past sessions panel added. Empty state: "No practice sessions yet. Run a drill to see your skill breakdown by category." With data: shows last 3 sessions (score, category filter, relative timestamp).
+- Progress.jsx: Zero-state fixed — CTA now routes to `stat-foundations` with correct copy. Previously routed to `growth-analytics`.
+- BookmarksBrowser + LockOverlay: confirmed already had correct empty states.
+
+**Build:** ✓ 821 modules transformed, 0 errors.
+**Files:** 5 data files, 5 runner components, DesignDebriefPanel.jsx, Trainer.jsx, Progress.jsx.
+
+---
+
+## [4.54.0] — 2026-06-02 [CONTENT]
+
+### Debrief Failure Mode Pass + Review Room Expansion + Session Protocol Rewrite
+
+**Debrief failure mode pass — 3 rooms:**
+- Cases (20 cases, C01–C22): Weak answer + interviewer follow-up embedded inline at end of `seniorAnswer.interviewPhrase`. No runner change needed.
+- BI (16 cases, BI01–BI16): `failureMode: { weakAnswer, interviewerFollowUp }` added. BIRunner updated to render red-bordered "Failure Mode" section after Leadership Lens. Chart cases BI17–BI23 skipped (different format).
+- Growth Analytics (8 cases, GA01–GA08): Same `failureMode` pattern. GrowthAnalyticsRunner updated.
+
+**Review Room expansion — 6 new scenarios (12 → 18 total):**
+- S13: cuped_variance — CUPED at r=0.21 gives 4.4% variance reduction; p-value shift from 0.08→0.02 is a technicality, not signal.
+- S14: right_censored — 7-day window captures ~15% of eventual annual conversions; cannot distinguish acceleration from net-new.
+- S15: multi_touch — 71% of treatment purchasers also received lifecycle emails; last-click overstates retargeting contribution by ~2.5x.
+- S16: b2b_constraints — 35% statistical power at n=65 accounts; p=0.09 is not evidence of no effect — standard A/B is wrong design for B2B.
+- S17: geo_holdout — Control driver earnings fell 6.2% vs baseline — SUTVA signature; user-level randomization invalid.
+- S18: switchback — No washout between weekly alternations; day-1–2 lift (+6.8%) vs day-5–7 lift (+18.1%) confirms carryover.
+
+**Session protocol rewrite:**
+BRAIN_TRANSFER.md, SESSION_KICKOFF.md, SPINE_PROTOCOL.md rewritten for token efficiency. SESSION_STARTER.md created as paste-ready session template. Key change: "read BRAIN_TRANSFER.md only at session open" replaces "read all MDs" instruction.
+
+**Build:** ✓ 821 modules transformed, 0 errors.
+**Files:** businessCases.js, biCases.js, growthAnalyticsCases.js, scenarios.js, BIRunner.jsx, GrowthAnalyticsRunner.jsx, 4 spine MD files.
+
+---
+
 ## [4.49.0] — 2026-06-02 [FEATURE + ARCHITECTURE]
 
 ### Shareable Score Summary Card + Tier 5-6 Restructuring
