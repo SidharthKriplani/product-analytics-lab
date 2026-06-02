@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { metricsFoundationModules } from '../../data/metricsFoundationModules.js';
 import { saveMetricsFoundationProgress, getMetricsFoundationProgress, getAllMetricsFoundationProgress } from '../../utils/metricsFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
+import { HowTo } from '../shared/HowTo.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -1682,6 +1683,7 @@ export function MetricsFoundationsRunner({ moduleId, onBack, onNext, unlocked, o
       </div>
 
       {/* Module content */}
+      <HowTo skill={module.subtitle} steps={['Read the situation — understand the real-world context this concept solves', 'Interact with the demo — adjust sliders, make selections, observe what changes', 'Answer the question — test your understanding before moving on']} color="var(--green)" />
       {ModuleComponent ? (
         <ModuleComponent module={module} onNext={handleNext} />
       ) : (

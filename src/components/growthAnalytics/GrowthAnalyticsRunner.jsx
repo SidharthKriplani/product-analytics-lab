@@ -3,6 +3,7 @@ import { saveGrowthAnalyticsProgress, getGrowthAnalyticsProgress } from '../../u
 import { addBookmark, removeBookmark, isBookmarked, toggleBookmark } from '../../utils/bookmarks.js';
 import { track } from '../../utils/analytics.js';
 import { growthAnalyticsCases } from '../../data/growthAnalyticsCases.js';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const ROOM_KEY = 'growth-analytics';
 const NOTES_KEY = 'pal-notes-v1';
@@ -450,7 +451,7 @@ ${takeaways}
 `;
 }
 
-export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked }) {
+export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
   const caseData = growthAnalyticsCases.find(c => c.id === caseId);
   const existing = getGrowthAnalyticsProgress(caseData.id);
   const missedKey = `growth-analytics:${caseData.id}`;
@@ -1083,6 +1084,7 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked }) {
               </button>
             )}
           </div>
+          <ForwardPointerCard room='growth-analytics' onNavigate={onNavigate} onNext={onNext} />
         </div>
       )}
     </div>

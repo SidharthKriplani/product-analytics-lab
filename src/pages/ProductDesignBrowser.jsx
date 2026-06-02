@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 import { productDesignScenarios } from '../data/productDesignScenarios.js';
 import { getAllProductDesignProgress } from '../utils/productDesignProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
@@ -63,18 +64,12 @@ export function ProductDesignBrowser({ onSelectScenario, unlocked, onUnlock, onO
 
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{
-          fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
-          color: 'var(--purple)', marginBottom: '0.4rem',
-        }}>
-          Product Design Room
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='layout' size={18} color='var(--purple)' />
+          </span>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>Product Design Practice</h1>
         </div>
-        <h1 style={{
-          fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)',
-          margin: '0 0 0.5rem', letterSpacing: '-0.02em',
-        }}>
-          Product Design Practice
-        </h1>
         <p style={{
           fontSize: '0.88rem', color: 'var(--text-secondary)',
           margin: '0 0 1rem', lineHeight: 1.6, maxWidth: '580px',

@@ -2,7 +2,8 @@
 // Sections: text | heading | callout | list | framework_box | example | table
 // Extras: reading progress bar, references section, estimated read time
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { trainerMCQ } from '../../data/trainerMCQ.js';
 
 const ROOM_CONFIG = {
   stats:                { label: 'Stats Room',             color: 'var(--accent)'    },
@@ -277,6 +278,90 @@ function ReadingProgress({ color }) {
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
+// Article category → MCQ trainer category
+const ARTICLE_TO_MCQ_CAT = {
+  'Metrics':          'Metrics & Growth',
+  'Growth Analytics': 'Metrics & Growth',
+  'BI & Reporting':   'Metrics & Growth',
+  'Experimentation':  'Experimentation',
+  'A/B Testing':      'Experimentation',
+  'Statistics':       'Statistics',
+  'RCA':              'Statistics',
+  'SQL & Python':     'Experimentation',
+  'Product Sense':    'Product & Prioritization',
+  'Prioritization':   'Product & Prioritization',
+  'PM Strategy':      'Product & Prioritization',
+  'Career':           'Product & Prioritization',
+};
+
+function seededRand(seed) {
+  let s = seed;
+  return () => { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
+}
+
+function QuizMe({ post }) {
+  const [active, setActive] = useState(false);
+  const [answers, setAnswers] = useState({});
+
+  const trainerCat = ARTICLE_TO_MCQ_CAT[post.category];
+  const questions = useMemo(() => {
+    if (!trainerCat) return [];
+    const pool = trainerMCQ.filter(q => q.category === trainerCat);
+    if (pool.length === 0) return [];
+    const rand = seededRand(post.id ? post.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) : 42);
+    const shuffled = [...pool].sort(() => rand() - 0.5);
+    return shuffled.slice(0, 3);
+  }, [post.id, trainerCat]);
+
+  if (questions.length === 0) return null;
+
+  return (
+    <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: active ? '1rem' : 0 }}>
+        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          Quiz yourself
+        </div>
+        <button
+          onClick={() => { setActive(a => !a); setAnswers({}); }}
+          style={{ background: active ? 'var(--surface-2)' : 'var(--accent-bg)', border: '1px solid ' + (active ? 'var(--border)' : 'var(--accent-border)'), borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.85rem', fontSize: '0.78rem', fontWeight: 700, color: active ? 'var(--text-muted)' : 'var(--accent)', cursor: 'pointer' }}
+        >
+          {active ? 'Hide quiz' : 'Quiz Me →'}
+        </button>
+      </div>
+      {active && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {questions.map((q, qi) => {
+            const answered = answers[qi] !== undefined;
+            const correct = answered && q.options[answers[qi]]?.correct;
+            return (
+              <div key={q.id || qi} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem' }}>
+                <p style={{ margin: '0 0 0.75rem', fontSize: '0.88rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.5 }}>{qi + 1}. {q.question}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  {q.options.map((opt, oi) => {
+                    let bg = 'var(--surface-2)', border = 'var(--border)', color = 'var(--text)';
+                    if (answered) {
+                      if (opt.correct) { bg = 'var(--green-bg)'; border = 'var(--green-border)'; color = 'var(--green)'; }
+                      else if (answers[qi] === oi) { bg = 'var(--red-bg)'; border = 'var(--red-border)'; color = 'var(--red)'; }
+                    }
+                    return (
+                      <button key={oi} disabled={answered} onClick={() => setAnswers(a => ({ ...a, [qi]: oi }))} style={{ textAlign: 'left', background: bg, border: '1px solid ' + border, borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.75rem', fontSize: '0.82rem', color, cursor: answered ? 'default' : 'pointer', fontWeight: opt.correct && answered ? 700 : 400, transition: 'all 0.1s' }}>
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {answered && q.explanation && (
+                  <p style={{ margin: '0.6rem 0 0', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.55, borderTop: '1px solid var(--border)', paddingTop: '0.5rem' }}>{q.explanation}</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function PostDetail({ post, onBack, onOpenItem }) {
   const cfg = CATEGORY_CONFIG[post.category] || {};
   const catColor = cfg.color || 'var(--accent)';
@@ -401,6 +486,9 @@ export function PostDetail({ post, onBack, onOpenItem }) {
 
         {/* References */}
         <References refs={post.references} />
+
+        {/* Quiz Me */}
+        <QuizMe post={post} />
 
         {/* Footer back */}
         <div style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-subtle)' }}>

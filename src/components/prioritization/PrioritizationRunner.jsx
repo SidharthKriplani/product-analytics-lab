@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { savePrioritizationAttempt, getPrioritizationProgress } from '../../utils/prioritizationProgress.js';
 import { track } from '../../utils/analytics.js';
 import { prioritizationScenarios } from '../../data/prioritizationScenarios.js';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -32,7 +33,7 @@ const RATING_STYLE = {
   miss:    { color: 'var(--red)',    bg: 'var(--red-bg)',    border: 'var(--red-border)' },
 };
 
-export function PrioritizationRunner({ caseId, onBack, onNext }) {
+export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
   const scenario = prioritizationScenarios.find(s => s.id === caseId);
   const existing = getPrioritizationProgress(scenario.id);
   const [response, setResponse] = useState(existing?.response || '');
@@ -380,6 +381,7 @@ export function PrioritizationRunner({ caseId, onBack, onNext }) {
               </button>
             )}
           </div>
+          <ForwardPointerCard room='prioritization' onNavigate={onNavigate} onNext={onNext} />
         </div>
       )}
     </div>

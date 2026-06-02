@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { saveChallengesProgress } from '../../utils/challengesProgress.js';
 import { track } from '../../utils/analytics.js';
 import { challengesCases } from '../../data/challengesCases.js';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -68,7 +69,7 @@ const RATING_OPTIONS = [
 ];
 
 // ─── Main Runner ─────────────────────────────────────────────────────────────
-export function ChallengesRunner({ caseId, onBack, onNext, unlocked }) {
+export function ChallengesRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
   const caseData = challengesCases.find(c => c.id === caseId);
   const [screen, setScreen] = useState('scenario'); // 'scenario' | 'question' | 'synthesis' | 'debrief'
   const [qIndex, setQIndex] = useState(0);
@@ -668,8 +669,8 @@ export function ChallengesRunner({ caseId, onBack, onNext, unlocked }) {
               Related Playbook Articles
             </div>
             <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
-              {caseData.playbookLinks.map(link => (
-                <span key={link} style={{
+              {caseData.playbookLinks.map((link, i) => (
+                <span key={link || i} style={{
                   fontSize: '0.78rem', fontWeight: 500,
                   color: 'var(--red)', background: 'var(--red-bg)', border: '1px solid var(--red-border)',
                   borderRadius: '20px', padding: '0.25rem 0.75rem',
@@ -718,6 +719,7 @@ export function ChallengesRunner({ caseId, onBack, onNext, unlocked }) {
             </button>
           )}
         </div>
+        <ForwardPointerCard room='challenges' onNavigate={onNavigate} onNext={onNext} />
 
         {/* Sticky bottom bar — shown after rating is selected */}
         {rating && (

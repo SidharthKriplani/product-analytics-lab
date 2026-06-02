@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { rcaFoundationModules } from '../../data/rcaFoundationModules.js';
 import { saveRCAFoundationProgress, getAllRCAFoundationProgress } from '../../utils/rcaFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
+import { HowTo } from '../shared/HowTo.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -2240,6 +2241,7 @@ export function RCAFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSel
       </div>
 
       {/* Module content */}
+      <HowTo skill={module.subtitle} steps={['Read the situation — understand the real-world context this concept solves', 'Interact with the demo — adjust sliders, make selections, observe what changes', 'Answer the question — test your understanding before moving on']} color="var(--teal)" />
       {ModuleComponent && <ModuleComponent onComplete={handleComplete} />}
 
       {/* Post-completion: connection + playbook links + next */}

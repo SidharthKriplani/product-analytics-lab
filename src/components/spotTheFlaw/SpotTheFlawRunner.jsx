@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { saveSTFProgress, getSTFProgress } from '../../utils/spotTheFlawProgress.js';
 import { track } from '../../utils/analytics.js';
 import { spotTheFlawCases } from '../../data/spotTheFlawCases.js';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const ROOM_KEY = 'spot-the-flaw';
 function loadNote(id) { try { const d = JSON.parse(localStorage.getItem('pal-notes-v1') || '{}'); return d[ROOM_KEY + ':' + id] || ''; } catch { return ''; } }
@@ -30,7 +31,7 @@ const STEP_SETUP  = 'setup';
 const STEP_WORK   = 'work';
 const STEP_REVEAL = 'reveal';
 
-export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked }) {
+export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
   const caseData = spotTheFlawCases.find(c => c.id === caseId);
   const existing = getSTFProgress(caseData.id);
 
@@ -556,6 +557,7 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked }) {
           </button>
         )}
       </div>
+      <ForwardPointerCard room='spot-the-flaw' onNavigate={onNavigate} onNext={onNext} />
     </div>
   );
 }

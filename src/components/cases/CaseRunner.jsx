@@ -6,6 +6,7 @@ import { CaseDebriefPanel } from './CaseDebriefPanel.jsx';
 import { saveCaseAttempt, clearCaseProgress } from '../../utils/caseProgress.js';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 
 // ─── Seeded shuffle helpers ───
 // Deterministic per caseId+phaseId so the same tester sees the same order
@@ -281,6 +282,7 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
             padding: '1.5rem', background: 'var(--surface)',
             paddingBottom: '70px',
           }}>
+            <LeadershipLens note={businessCase.leadershipNote} />
             <CaseDebriefPanel
               businessCase={businessCase}
               onRetry={handleRetry}

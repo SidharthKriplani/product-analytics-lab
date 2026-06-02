@@ -8,6 +8,7 @@ export const businessCases = [
     isFree: true,
     domain: 'marketplace',
     linkedConceptIds: ['guardrail-metric', 'segmentation', 'marketplace-interference'],
+    leadershipNote: 'A Staff analyst reframes the competitive pressure argument immediately: "competitor just announced X" is not a reason to build X — it\'s a reason to understand whether your buyer base values X. The right first question is whether same-day delivery is a demand-side constraint (buyers want it but can\'t get it) or an expectation-setting artifact (buyers don\'t miss it until someone else has it). Staff analysts would push for a 2-week buyer survey before any ops investment, and would segment by AOV — same-day on a $12 handmade candle has a fundamentally different unit economics problem than same-day on a $200 item.',
     context: {
       company: 'Crafted',
       product: 'Peer-to-peer handmade goods marketplace with 40k active sellers',
@@ -259,6 +260,7 @@ export const businessCases = [
     isFree: true,
     domain: 'retention',
     linkedConceptIds: ['cohort-analysis', 'segmentation', 'funnel-decomposition'],
+    leadershipNote: 'Staff analysts go to acquisition mix shift first, not product quality. A D30 retention drop is almost always a cohort composition problem — new user quality changed — before it\'s a product regression. They\'d check: did acquisition volume change, did the channel mix shift, did a growth campaign bring in a different buyer profile? The product regression hypothesis gets tested only after mix shift is ruled out, because the fix for each is completely different: acquisition mix requires channel strategy changes, product regression requires engineering.',
     context: {
       company: 'Orion',
       product: 'Consumer mobile app with 2.1M MAU',
@@ -509,6 +511,7 @@ export const businessCases = [
     isFree: true,
     domain: 'genai',
     linkedConceptIds: ['proxy-metric', 'guardrail-metric', 'metric-gaming'],
+    leadershipNote: 'The staff move here is to separate the automation question from the headcount question immediately. Conflating them poisons the experiment: if the team knows that good bot performance means layoffs, they\'ll measure bot performance poorly. A Staff analyst would also flag that "deflection rate" as the primary metric creates a perverse incentive to deflect tickets that shouldn\'t be deflected — the right metric is post-deflection CSAT and re-contact rate within 7 days. In B2B, a single unresolved enterprise ticket from a $2M ARR account costs more than a year of Tier-1 headcount.',
     context: {
       company: 'Threadline',
       product: 'B2B project management SaaS with 120k seats across enterprise and SMB',

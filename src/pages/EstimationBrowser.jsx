@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 import { estimationProblems } from '../data/estimationProblems.js';
 import { getAllEstimationProgress } from '../utils/estimationProgress.js';
 
@@ -103,13 +104,8 @@ export function EstimationBrowser({ onStart, unlocked }) {
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <span style={{
-            width: '36px', height: '36px', borderRadius: '9px',
-            background: 'var(--teal-bg)', border: '1px solid var(--teal-border)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.1rem', flexShrink: 0,
-          }}>
-            ~
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='calculator' size={18} color='var(--teal)' />
           </span>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
             Estimation Room

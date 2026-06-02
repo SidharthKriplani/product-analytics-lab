@@ -3,6 +3,9 @@ import { useState } from 'react';
 export function RCADebriefPanel({ rcaCase, onRetry, onBack, onNext }) {
   const { seniorDiagnosis, leadershipNote } = rcaCase;
   const [leadershipOpen, setLeadershipOpen] = useState(false);
+  const [nextHovered, setNextHovered] = useState(false);
+  const [retryHovered, setRetryHovered] = useState(false);
+  const [backHovered, setBackHovered] = useState(false);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -135,9 +138,10 @@ export function RCADebriefPanel({ rcaCase, onRetry, onBack, onNext }) {
               padding: '0.6rem 1.25rem',
               fontSize: '0.85rem', fontWeight: 700,
               cursor: 'pointer', transition: 'opacity 0.12s',
+              opacity: nextHovered ? 0.88 : 1,
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            onMouseEnter={() => setNextHovered(true)}
+            onMouseLeave={() => setNextHovered(false)}
           >
             Next case →
           </button>
@@ -145,17 +149,17 @@ export function RCADebriefPanel({ rcaCase, onRetry, onBack, onNext }) {
         <button
           onClick={onRetry}
           style={{
-            background: 'var(--yellow-bg)',
+            background: retryHovered ? 'var(--yellow)' : 'var(--yellow-bg)',
             border: '1.5px solid var(--yellow-border)',
-            color: 'var(--yellow)',
+            color: retryHovered ? '#fff' : 'var(--yellow)',
             borderRadius: 'var(--radius)',
             padding: '0.6rem 1.25rem',
             fontSize: '0.85rem', fontWeight: 700,
             cursor: 'pointer',
-            transition: 'background 0.12s',
+            transition: 'background 0.12s, color 0.12s',
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--yellow)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'var(--yellow-bg)'}
+          onMouseEnter={() => setRetryHovered(true)}
+          onMouseLeave={() => setRetryHovered(false)}
         >
           Try again
         </button>
@@ -163,7 +167,7 @@ export function RCADebriefPanel({ rcaCase, onRetry, onBack, onNext }) {
           onClick={onBack}
           style={{
             background: 'transparent',
-            border: '1.5px solid var(--border)',
+            border: '1.5px solid ' + (backHovered ? 'var(--yellow-border)' : 'var(--border)'),
             color: 'var(--text-secondary)',
             borderRadius: 'var(--radius)',
             padding: '0.6rem 1.25rem',
@@ -171,8 +175,8 @@ export function RCADebriefPanel({ rcaCase, onRetry, onBack, onNext }) {
             cursor: 'pointer',
             transition: 'border-color 0.12s',
           }}
-          onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--yellow-border)'}
-          onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+          onMouseEnter={() => setBackHovered(true)}
+          onMouseLeave={() => setBackHovered(false)}
         >
           ← Back to RCA Room
         </button>

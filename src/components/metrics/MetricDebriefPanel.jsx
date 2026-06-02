@@ -1,5 +1,7 @@
 // Senior debrief panel — shows the authoritative metric design after submission
 
+import { useState } from 'react';
+
 const ROLE_CFG = {
   primary:    { label: 'Primary',    color: 'var(--green-text)', bg: 'var(--green-bg)',   border: 'var(--green-border)' },
   diagnostic: { label: 'Diagnostic', color: 'var(--blue-text)', bg: 'var(--blue-bg)',    border: 'var(--blue-border)' },
@@ -8,6 +10,9 @@ const ROLE_CFG = {
 
 export function MetricDebriefPanel({ metricCase, onRetry, onBack, onNext, onGoToDesign, onGoToReview }) {
   const { seniorMetricDesign: smd, linkedDesignScenarioIds = [], linkedReviewScenarioIds = [] } = metricCase;
+  const [nextHovered, setNextHovered] = useState(false);
+  const [retryHovered, setRetryHovered] = useState(false);
+  const [backHovered, setBackHovered] = useState(false);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -122,9 +127,10 @@ export function MetricDebriefPanel({ metricCase, onRetry, onBack, onNext, onGoTo
               background: 'var(--green)', color: '#fff',
               border: 'none', borderRadius: 'var(--radius)', padding: '0.65rem 1.25rem',
               fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', transition: 'opacity 0.1s',
+              opacity: nextHovered ? 0.88 : 1,
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            onMouseEnter={() => setNextHovered(true)}
+            onMouseLeave={() => setNextHovered(false)}
           >
             Next case →
           </button>
@@ -132,26 +138,29 @@ export function MetricDebriefPanel({ metricCase, onRetry, onBack, onNext, onGoTo
         <button
           onClick={onRetry}
           style={{
-            background: 'var(--teal-bg)', border: '1.5px solid var(--teal-border)',
+            background: retryHovered ? 'var(--teal)' : 'var(--teal-bg)',
+            border: '1.5px solid var(--teal-border)',
             borderRadius: 'var(--radius)', padding: '0.65rem 1.25rem',
-            fontSize: '0.85rem', fontWeight: 700, color: 'var(--teal)',
+            fontSize: '0.85rem', fontWeight: 700, color: retryHovered ? '#fff' : 'var(--teal)',
             cursor: 'pointer', transition: 'all 0.1s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'var(--teal)'; e.currentTarget.style.color = '#fff'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'var(--teal-bg)'; e.currentTarget.style.color = 'var(--teal)'; }}
+          onMouseEnter={() => setRetryHovered(true)}
+          onMouseLeave={() => setRetryHovered(false)}
         >
           Try again
         </button>
         <button
           onClick={onBack}
           style={{
-            background: 'var(--surface-2)', border: '1px solid var(--border)',
+            background: 'var(--surface-2)',
+            border: '1px solid ' + (backHovered ? 'var(--teal-border)' : 'var(--border)'),
             borderRadius: 'var(--radius)', padding: '0.65rem 1.25rem',
-            fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)',
+            fontSize: '0.85rem', fontWeight: 600,
+            color: backHovered ? 'var(--text)' : 'var(--text-secondary)',
             cursor: 'pointer', transition: 'all 0.1s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--teal-border)'; e.currentTarget.style.color = 'var(--text)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+          onMouseEnter={() => setBackHovered(true)}
+          onMouseLeave={() => setBackHovered(false)}
         >
           ← Back to Metrics
         </button>
@@ -171,6 +180,7 @@ function SectionLabel({ children, color }) {
 }
 
 function Chip({ label, type, onClick }) {
+  const [hovered, setHovered] = useState(false);
   const isDesign = type === 'design';
   const baseStyle = {
     fontSize: '0.72rem', fontWeight: 600,
@@ -183,9 +193,9 @@ function Chip({ label, type, onClick }) {
     return (
       <button
         onClick={onClick}
-        style={{ ...baseStyle, cursor: 'pointer', fontFamily: 'inherit', transition: 'opacity 0.1s' }}
-        onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
-        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        style={{ ...baseStyle, cursor: 'pointer', fontFamily: 'inherit', transition: 'opacity 0.1s', opacity: hovered ? 0.75 : 1 }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
         {isDesign ? 'Design: ' : 'Review: '}{label} →
       </button>

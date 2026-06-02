@@ -417,7 +417,39 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
   const [roomProgressOpen, setRoomProgressOpen] = useState(true);
   const [studyPlanOpen, setStudyPlanOpen] = useState(true);
   const [sqlLabOpen, setSqlLabOpen] = useState(true);
+  const [challengeLogOpen, setChallengeLogOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Challenge Log — collect 10 most recent completions across all rooms
+  const recentCompletions = (() => {
+    const entries = [];
+    const ROOM_STORES = [
+      { key: 'pal-stats-progress-v1',            room: 'Stats',          page: 'stats' },
+      { key: 'pal-metrics-progress-v2',           room: 'Metrics',        page: 'metrics' },
+      { key: 'pal-rca-progress-v2',               room: 'RCA',            page: 'rca' },
+      { key: 'pal-cases-progress-v2',             room: 'Cases',          page: 'cases' },
+      { key: 'exp-lab-progress-v1',               room: 'Review',         page: 'browser' },
+      { key: 'pal-behavioral-progress-v1',        room: 'Behavioral',     page: 'behavioral' },
+      { key: 'pal-estimation-progress-v1',        room: 'Estimation',     page: 'estimation' },
+      { key: 'pal-growth-analytics-progress-v1',  room: 'Growth',         page: 'growth-analytics' },
+      { key: 'pal-bi-progress-v1',                room: 'BI',             page: 'bi' },
+      { key: 'pal-stf-progress-v1',               room: 'Spot the Flaw',  page: 'spot-the-flaw' },
+      { key: 'pal-instrumentation-progress-v1',   room: 'Instrumentation',page: 'instrumentation' },
+      { key: 'pal-prioritization-progress-v1',    room: 'Prioritization', page: 'prioritization' },
+      { key: 'pal-takehome-progress-v1',          room: 'Take-Home',      page: 'take-home' },
+    ];
+    ROOM_STORES.forEach(({ key, room, page }) => {
+      try {
+        const data = JSON.parse(localStorage.getItem(key) || '{}');
+        Object.entries(data).forEach(([id, val]) => {
+          const ts = val.completedAt || val.lastCompletedAt;
+          const rating = val.rating || val.level || null;
+          if (ts) entries.push({ id, room, page, ts, rating });
+        });
+      } catch {}
+    });
+    return entries.sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 10);
+  })();
 
   function handleClear() {
     if (window.confirm('Clear all progress across all rooms? This cannot be undone.')) {
@@ -1225,6 +1257,38 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
           </SectionCard>
         );
       })()}
+
+      {/* Challenge Log */}
+      {recentCompletions.length > 0 && (
+        <SectionCard
+          icon="📋"
+          title="Challenge Log"
+          open={challengeLogOpen}
+          onToggle={() => setChallengeLogOpen(o => !o)}
+        >
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+            Your 10 most recent completions across all rooms.
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            {recentCompletions.map((c, i) => {
+              const date = new Date(c.ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              const ratingColor = c.rating === 'strong' || c.rating === 'senior' || c.rating === 'staff' ? 'var(--green)'
+                : c.rating === 'partial' || c.rating === 'analyst' ? 'var(--yellow)'
+                : c.rating ? 'var(--text-muted)' : 'var(--text-dim)';
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.45rem 0.75rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', minWidth: 48, flexShrink: 0 }}>{date}</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent)', flexShrink: 0 }}>{c.room}</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.id}</span>
+                  {c.rating && (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: ratingColor, textTransform: 'capitalize', flexShrink: 0 }}>{c.rating}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </SectionCard>
+      )}
 
       {/* Settings Section */}
       <SectionCard

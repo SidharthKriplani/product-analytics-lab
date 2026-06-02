@@ -3,6 +3,7 @@ import { saveBIProgress, getBIProgress } from '../../utils/biProgress.js';
 import { track } from '../../utils/analytics.js';
 import { biCases } from '../../data/biCases.js';
 import { ChartScenario } from './ChartScenario.jsx';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const ROOM_KEY = 'bi';
 const NOTES_KEY = 'pal-notes-v1';
@@ -249,7 +250,7 @@ function WorkScreen({ caseData, onReveal }) {
 }
 
 // Screen 3: Reveal
-function RevealScreen({ caseData, onBack, onNext, unlocked }) {
+function RevealScreen({ caseData, onBack, onNext, unlocked, onNavigate }) {
   const existing = getBIProgress(caseData.id);
   const [rating, setRating] = useState(existing?.rating || null);
   const [checked, setChecked] = useState([false, false, false]);
@@ -544,6 +545,7 @@ function RevealScreen({ caseData, onBack, onNext, unlocked }) {
           </button>
         )}
       </div>
+      <ForwardPointerCard room='bi' onNavigate={onNavigate} onNext={onNext} />
 
       {/* Sticky bottom bar — shown after rating is selected */}
       {rating && (
@@ -592,7 +594,7 @@ function RevealScreen({ caseData, onBack, onNext, unlocked }) {
 }
 
 // Main runner — manages screen state
-export function BIRunner({ caseId, onBack, onNext, unlocked }) {
+export function BIRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
   const caseData = biCases.find(c => c.id === caseId);
   const isChartFormat = caseData?.format === 'chart';
   const [screen, setScreen] = useState(isChartFormat ? 'chart' : 'situation');
@@ -691,6 +693,7 @@ export function BIRunner({ caseId, onBack, onNext, unlocked }) {
         onBack={onBack}
         onNext={onNext}
         unlocked={unlocked}
+        onNavigate={onNavigate}
       />
     </div>
   );

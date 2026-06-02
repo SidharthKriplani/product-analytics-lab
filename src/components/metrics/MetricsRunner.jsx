@@ -4,6 +4,8 @@ import { MetricChoicePanel } from './MetricChoicePanel.jsx';
 import { MetricScoreReveal } from './MetricScoreReveal.jsx';
 import { MetricDebriefPanel } from './MetricDebriefPanel.jsx';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 import { Icon } from '../shared/Icon.jsx';
 import { saveMetricsAttempt, clearMetricsProgress } from '../../utils/metricsProgress.js';
 import { track } from '../../utils/analytics.js';
@@ -37,7 +39,7 @@ function computeScore(metricCase, fieldChoices) {
   return { score, maxScore, level, pct };
 }
 
-export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onGoToReview, onNext }) {
+export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onGoToReview, onNext, onNavigate }) {
   const metricCase = metricCases.find(m => m.id === caseId);
   const hasExisting = !!(savedProgress && savedProgress.fieldChoices);
 
@@ -207,6 +209,7 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
               }}
             >{noteSaved ? '✓ Saved' : 'Save note'}</button>
           </div>
+          <LeadershipLens note={metricCase.leadershipNote} />
           <MetricDebriefPanel
             metricCase={metricCase}
             onRetry={handleRetry}
@@ -215,6 +218,7 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
             onGoToDesign={onGoToDesign}
             onGoToReview={onGoToReview}
           />
+          <ForwardPointerCard room='metrics' onNavigate={onNavigate} onNext={onNext} />
         </div>
       )}
     </div>

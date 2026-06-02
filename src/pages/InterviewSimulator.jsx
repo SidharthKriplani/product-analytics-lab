@@ -352,6 +352,16 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.75rem', lineHeight: 1.6 }}>
           Strings real cases into a timed loop — no hints mid-session, no feedback until it is over. Debriefs the full session afterward so you see patterns, not just individual answers.
         </p>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.55rem', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
+            ~ Scripted — not live model inference
+          </span>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.55rem', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
+            Cases drawn from real PAL case bank
+          </span>
+        </div>
+        <p style={{ display: 'none' }}>
+        </p>
 
         {/* Role selector */}
         <div style={{ marginBottom: '1.25rem' }}>

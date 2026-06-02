@@ -6,6 +6,7 @@ import { DesignScoreReveal } from './DesignScoreReveal.jsx';
 import { DesignDebriefPanel } from './DesignDebriefPanel.jsx';
 import { ConceptDrawer } from '../concepts/ConceptDrawer.jsx';
 import { track } from '../../utils/analytics.js';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -30,7 +31,7 @@ import {
 
 // Three views: 'form' | 'reveal' | 'debrief'
 
-export function DesignRunner({ caseId, savedProgress, onBack, onGoToReview, onNext }) {
+export function DesignRunner({ caseId, savedProgress, onBack, onGoToReview, onNext, onNavigate }) {
   const scenario = designScenarios.find(s => s.id === caseId);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [answers, setAnswers] = useState(savedProgress?.answers || {});
@@ -263,6 +264,7 @@ export function DesignRunner({ caseId, savedProgress, onBack, onGoToReview, onNe
               }}
             />
           </div>
+          <ForwardPointerCard room='design' onNavigate={onNavigate} onNext={onNext} />
         </div>
       )}
 

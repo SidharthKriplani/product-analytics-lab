@@ -4,6 +4,7 @@ import { track } from '../../utils/analytics.js';
 import { behavioralQuestions } from '../../data/behavioralQuestions.js';
 import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const ROOM_KEY = 'behavioral';
 
@@ -51,7 +52,7 @@ const FRAME_LABEL = {
   outcome:   'Outcome',
 };
 
-export function BehavioralRunner({ caseId, onBack, onNext }) {
+export function BehavioralRunner({ caseId, onBack, onNext, onNavigate }) {
   const question = behavioralQuestions.find(q => q.id === caseId);
 
   // Guard: if question not found, bail out gracefully rather than crash
@@ -104,6 +105,36 @@ export function BehavioralRunner({ caseId, onBack, onNext }) {
   }
 
   const canReveal = response.trim().length >= 60;
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
+  const speechSupported = typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+
+  function toggleSpeech() {
+    if (!speechSupported) return;
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SR();
+    rec.continuous = true;
+    rec.interimResults = false;
+    rec.lang = 'en-US';
+    rec.onresult = e => {
+      const transcript = Array.from(e.results).map(r => r[0].transcript).join(' ');
+      setResponse(prev => (prev ? prev + ' ' : '') + transcript);
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+    rec.start();
+    recognitionRef.current = rec;
+    setListening(true);
+  }
+
+  useEffect(() => {
+    return () => { recognitionRef.current?.stop(); };
+  }, [question.id]);
 
   function handleReveal() {
     if (!canReveal) return;
@@ -260,6 +291,24 @@ export function BehavioralRunner({ caseId, onBack, onNext }) {
             <span style={{ fontSize: '0.8rem', color: response.trim().length < 60 ? 'var(--text-dim)' : 'var(--green)' }}>
               {response.trim().length < 60 ? `${response.trim().length}/60 characters to unlock` : '✓ Ready to reveal'}
             </span>
+            {speechSupported && (
+              <button
+                onClick={toggleSpeech}
+                title={listening ? 'Stop recording' : 'Speak your answer (Chrome)'}
+                style={{
+                  background: listening ? 'var(--red-bg)' : 'var(--surface-2)',
+                  border: '1px solid ' + (listening ? 'var(--red-border)' : 'var(--border)'),
+                  borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.7rem',
+                  fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer',
+                  color: listening ? 'var(--red)' : 'var(--text-muted)',
+                  display: 'flex', alignItems: 'center', gap: '0.35rem',
+                  transition: 'all 0.12s',
+                }}
+              >
+                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: listening ? 'var(--red)' : 'var(--text-muted)', animation: listening ? 'palGlowPulse 1.2s ease-in-out infinite' : 'none' }} />
+                {listening ? 'Recording...' : 'Speak answer'}
+              </button>
+            )}
           </div>
           <div className="pal-textarea-wrap" style={{ marginBottom: 16 }}>
             <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -467,6 +516,7 @@ export function BehavioralRunner({ caseId, onBack, onNext }) {
               </button>
             )}
           </div>
+          <ForwardPointerCard room='behavioral' onNavigate={onNavigate} onNext={onNext} />
         </div>
       )}
     </div>

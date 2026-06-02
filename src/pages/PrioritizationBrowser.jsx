@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 import { prioritizationScenarios } from '../data/prioritizationScenarios.js';
 import { getAllPrioritizationProgress } from '../utils/prioritizationProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
@@ -43,11 +44,11 @@ export function PrioritizationBrowser({ onStart, unlocked, onOpenArticle }) {
     <div className="pal-page-enter" style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <span style={{ fontSize: '1.5rem' }}>⚖</span>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
-            Prioritization Room
-          </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='list' size={18} color='var(--purple)' />
+          </span>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>Prioritization Room</h1>
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0, maxWidth: '600px' }}>
           The bar in prioritization interviews is not picking the right project — it is defending the tradeoff when the interviewer introduces constraints you did not plan for. This room puts you in real resource and stakeholder conflicts, then shows you how senior PMs reason through them without falling back on a framework as a shield.

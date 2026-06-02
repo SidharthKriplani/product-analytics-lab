@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { productDesignScenarios } from '../../data/productDesignScenarios.js';
 import { track } from '../../utils/analytics.js';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -288,7 +289,7 @@ function DebriefView({ scenario, responses, ratings, result, onRetry, onBack, on
 }
 
 // ─── Main Runner ──────────────────────────────────────────────────────────────
-export function ProductDesignRunner({ caseId, savedProgress, onBack, onNext }) {
+export function ProductDesignRunner({ caseId, savedProgress, onBack, onNext, onNavigate }) {
   const scenario = productDesignScenarios.find(s => s.id === caseId);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [responses, setResponses] = useState(savedProgress?.responses || {});
@@ -439,6 +440,7 @@ export function ProductDesignRunner({ caseId, savedProgress, onBack, onNext }) {
               }}
             />
           </div>
+          <ForwardPointerCard room='product-design' onNavigate={onNavigate} onNext={onNext} />
         </>
       )}
 

@@ -52,6 +52,7 @@ const BlogBrowser           = lazy(() => import('./pages/BlogBrowser.jsx').then(
 const Progress              = lazy(() => import('./pages/Progress.jsx').then(m => ({ default: m.Progress })));
 const Unlock                = lazy(() => import('./pages/Unlock.jsx').then(m => ({ default: m.Unlock })));
 const About                 = lazy(() => import('./pages/About.jsx').then(m => ({ default: m.About })));
+const RoomMap               = lazy(() => import('./pages/RoomMap.jsx').then(m => ({ default: m.RoomMap })));
 const JudgmentBank          = lazy(() => import('./pages/JudgmentBank.jsx').then(m => ({ default: m.JudgmentBank })));
 const QADashboard           = lazy(() => import('./pages/QADashboard.jsx').then(m => ({ default: m.QADashboard })));
 const Pricing               = lazy(() => import('./pages/Pricing.jsx').then(m => ({ default: m.Pricing })));
@@ -734,6 +735,7 @@ export default function App() {
             onGoToReview={id => openScenario(id)}
             onGoToDesign={id => openDesignScenario(id)}
             onNext={nextStatsModuleId ? () => { setActiveStatsModuleId(nextStatsModuleId); } : null}
+            onNavigate={navigate}
           />
         )}
 
@@ -751,6 +753,7 @@ export default function App() {
             onGoToDesign={id => openDesignScenario(id)}
             onGoToReview={id => openScenario(id)}
             onNext={nextMetricsCaseId ? () => openMetricsCase(nextMetricsCaseId) : undefined}
+            onNavigate={navigate}
           />
         )}
 
@@ -766,6 +769,7 @@ export default function App() {
             onBack={() => navigate('design')}
             onGoToReview={id => openScenario(id)}
             onNext={nextDesignScenarioId ? () => openDesignScenario(nextDesignScenarioId) : undefined}
+            onNavigate={navigate}
           />
         )}
 
@@ -788,6 +792,7 @@ export default function App() {
             onNext={nextScenarioId ? () => { openScenario(nextScenarioId); refreshProgress(); } : null}
             hasNext={!!nextScenarioId}
             onGoToDesign={openDesignScenario}
+            onNavigate={navigate}
           />
         )}
 
@@ -839,6 +844,7 @@ export default function App() {
             savedProgress={getProductDesignProgress(activePDScenarioId)}
             onBack={() => navigate('product-design')}
             onNext={nextPDScenarioId ? () => openPDScenario(nextPDScenarioId) : undefined}
+            onNavigate={navigate}
           />
         )}
 
@@ -875,6 +881,7 @@ export default function App() {
             caseId={activePrioritizationId}
             onBack={() => navigate('prioritization')}
             onNext={nextPrioritizationId ? () => openPrioritizationScenario(nextPrioritizationId) : undefined}
+            onNavigate={navigate}
           />
         )}
 
@@ -888,6 +895,7 @@ export default function App() {
             caseId={activeBehavioralId}
             onBack={() => navigate('behavioral')}
             onNext={nextBehavioralId ? () => openBehavioralQuestion(nextBehavioralId) : undefined}
+            onNavigate={navigate}
           />
         )}
 
@@ -901,6 +909,7 @@ export default function App() {
             caseId={activeEstimationId}
             onBack={() => navigate('estimation')}
             onNext={nextEstimationId ? () => openEstimationProblem(nextEstimationId) : undefined}
+            onNavigate={navigate}
           />
         )}
 
@@ -942,6 +951,7 @@ export default function App() {
             unlocked={unlocked}
             onBack={() => navigate('growth-analytics')}
             onNext={nextGrowthAnalyticsId ? () => openGrowthAnalyticsCase(nextGrowthAnalyticsId) : undefined}
+            onNavigate={navigate}
           />
         )}
 
@@ -1006,6 +1016,7 @@ export default function App() {
               onBack={() => setPage('bi')}
               onNext={() => { const n = getNextBICaseId(activeBICaseId); if (n) openBICase(n); else setPage('bi'); }}
               unlocked={unlocked}
+              onNavigate={navigate}
             />
           </Suspense>
         )}
@@ -1035,6 +1046,7 @@ export default function App() {
               onBack={() => setPage('spot-the-flaw')}
               onNext={() => { const n = getNextSTFCaseId(activeSTFCaseId); if (n) openSTFCase(n); else setPage('spot-the-flaw'); }}
               unlocked={unlocked}
+              onNavigate={navigate}
             />
           </Suspense>
         )}
@@ -1093,6 +1105,7 @@ export default function App() {
               onBack={() => navigate('instrumentation')}
               onNext={nextInstrumentationCaseId ? () => openInstrumentationCase(nextInstrumentationCaseId) : null}
               unlocked={unlocked}
+              onNavigate={navigate}
             />
           </Suspense>
         )}
@@ -1154,6 +1167,7 @@ export default function App() {
           <Unlock onUnlocked={handleUnlocked} alreadyUnlocked={unlocked} onNavigate={navigate} />
         )}
         {page === 'about' && <About />}
+        {page === 'map' && <RoomMap onNavigate={navigate} />}
         {page === 'bank' && <JudgmentBank onNavigate={navigate} />}
         {page === 'blog' && (
           <BlogBrowser onNavigate={navigate} />
@@ -1330,6 +1344,7 @@ export default function App() {
                 else setPage('challenges');
               }}
               unlocked={unlocked}
+              onNavigate={navigate}
             />
           </Suspense>
         )}

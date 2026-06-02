@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ConceptChip, ConceptsSection } from '../concepts/ConceptChip.jsx';
 
 // Debrief panel: shown after score reveal
@@ -10,6 +11,9 @@ export function DesignDebriefPanel({
   onRetry,        // clear progress and re-attempt
   onNext,         // navigate to the next design scenario
 }) {
+  const [seeResultHovered, setSeeResultHovered] = useState(false);
+  const [retryHovered, setRetryHovered] = useState(false);
+  const [nextHovered, setNextHovered] = useState(false);
   const allFields = scenario.designPhases.flatMap(p => p.fields);
   const fieldsById = Object.fromEntries(allFields.map(f => [f.id, f]));
 
@@ -162,9 +166,10 @@ export function DesignDebriefPanel({
               border: 'none', borderRadius: 'var(--radius-sm)',
               fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer',
               transition: 'opacity 0.1s',
+              opacity: seeResultHovered ? 0.88 : 1,
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            onMouseEnter={() => setSeeResultHovered(true)}
+            onMouseLeave={() => setSeeResultHovered(false)}
           >
             See the result in Review Room →
           </button>
@@ -176,13 +181,15 @@ export function DesignDebriefPanel({
         <button
           onClick={onRetry}
           style={{
-            background: 'none', border: '1px solid var(--border)',
+            background: 'none',
+            border: '1px solid ' + (retryHovered ? 'var(--accent-border)' : 'var(--border)'),
             borderRadius: 'var(--radius-sm)', padding: '0.45rem 0.9rem',
-            color: 'var(--text-muted)', fontSize: '0.78rem', cursor: 'pointer',
+            color: retryHovered ? 'var(--accent)' : 'var(--text-muted)',
+            fontSize: '0.78rem', cursor: 'pointer',
             transition: 'all 0.12s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-border)'; e.currentTarget.style.color = 'var(--accent)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+          onMouseEnter={() => setRetryHovered(true)}
+          onMouseLeave={() => setRetryHovered(false)}
         >
           ↺ Try again from scratch
         </button>
@@ -195,9 +202,10 @@ export function DesignDebriefPanel({
               borderRadius: 'var(--radius-sm)', padding: '0.5rem 1.1rem',
               fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer',
               transition: 'opacity 0.1s',
+              opacity: nextHovered ? 0.88 : 1,
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            onMouseEnter={() => setNextHovered(true)}
+            onMouseLeave={() => setNextHovered(false)}
           >
             Next scenario →
           </button>

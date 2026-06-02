@@ -1,8 +1,13 @@
 // CaseDebriefPanel — senior answer debrief view
 // Props: { businessCase, onRetry, onBack }
 
+import { useState } from 'react';
+
 export function CaseDebriefPanel({ businessCase, onRetry, onBack, onNext }) {
   const sa = businessCase.seniorAnswer;
+  const [nextHovered, setNextHovered] = useState(false);
+  const [retryHovered, setRetryHovered] = useState(false);
+  const [backHovered, setBackHovered] = useState(false);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
@@ -108,9 +113,10 @@ export function CaseDebriefPanel({ businessCase, onRetry, onBack, onNext }) {
               padding: '0.55rem 1.1rem',
               fontSize: '0.86rem', fontWeight: 700, cursor: 'pointer',
               transition: 'opacity 0.1s',
+              opacity: nextHovered ? 0.88 : 1,
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            onMouseEnter={() => setNextHovered(true)}
+            onMouseLeave={() => setNextHovered(false)}
           >
             Next case →
           </button>
@@ -123,28 +129,25 @@ export function CaseDebriefPanel({ businessCase, onRetry, onBack, onNext }) {
             padding: '0.55rem 1.1rem',
             fontSize: '0.86rem', fontWeight: 700, cursor: 'pointer',
             transition: 'opacity 0.1s',
+            opacity: retryHovered ? 0.88 : 1,
           }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          onMouseEnter={() => setRetryHovered(true)}
+          onMouseLeave={() => setRetryHovered(false)}
         >
           ↺ Try again
         </button>
         <button
           onClick={onBack}
           style={{
-            background: 'none', border: '1px solid var(--border)',
+            background: 'none',
+            border: '1px solid ' + (backHovered ? 'var(--purple-border)' : 'var(--border)'),
             borderRadius: 'var(--radius-sm)', padding: '0.55rem 1.1rem',
-            color: 'var(--text-muted)', fontSize: '0.86rem', cursor: 'pointer',
+            color: backHovered ? 'var(--purple)' : 'var(--text-muted)',
+            fontSize: '0.86rem', cursor: 'pointer',
             transition: 'all 0.12s',
           }}
-          onMouseEnter={e => {
-            e.currentTarget.style.borderColor = 'var(--purple-border)';
-            e.currentTarget.style.color = 'var(--purple)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.borderColor = 'var(--border)';
-            e.currentTarget.style.color = 'var(--text-muted)';
-          }}
+          onMouseEnter={() => setBackHovered(true)}
+          onMouseLeave={() => setBackHovered(false)}
         >
           ← Back to Cases
         </button>

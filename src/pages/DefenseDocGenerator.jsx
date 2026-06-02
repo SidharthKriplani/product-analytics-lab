@@ -83,7 +83,43 @@ var ROOM_DATA_MAP = {
   'growth-analytics': { key: 'growthAnalyticsCases',     titleField: 'title', idField: 'id' },
 };
 
-// ─── Skill → Playbook article map (Layer 4A) ─────────────────────────────────
+// ─── Skill → Verbal prompt (Layer 6) ─────────────────────────────────────────
+const SKILL_VERBAL_MAP = {
+  exp:             'Explain in 90 seconds: your PM asks you to design an experiment for a new checkout flow. Walk them through your approach.',
+  metrics:         'Explain in 90 seconds: how would you define the north star metric for a B2B SaaS product, and what guardrails would you set?',
+  rca:             'Explain in 90 seconds: DAU dropped 18% overnight. Walk me through your first 30 minutes of investigation.',
+  stats:           'Explain in 90 seconds: your experiment shows p=0.04 but the CI lower bound is near zero. What do you tell the PM?',
+  growth:          'Explain in 90 seconds: retention fell from 38% to 31% over a quarter. What\'s your first diagnostic cut?',
+  product:         'Explain in 90 seconds: you have 10 feature requests and 3 engineers for one sprint. How do you prioritize?',
+  sql:             'Explain in 90 seconds: a stakeholder asks for a report on 30-day retention by acquisition channel. What SQL approach do you use?',
+  bi:              'Explain in 90 seconds: your dashboard shows a 15% revenue spike yesterday. How do you determine if it\'s real?',
+  instrumentation: 'Explain in 90 seconds: a new feature is shipping next week. What tracking plan do you put in place before launch?',
+  behavioral:      'Explain in 90 seconds: tell me about a time you used data to change a PM\'s mind about a product decision.',
+  estimation:      'Explain in 90 seconds: estimate the number of daily active users Uber has in Mumbai.',
+};
+
+// ─── Skill → Foundation room map (Layer 4A step 2) ───────────────────────────
+const SKILL_FOUNDATION_MAP = {
+  exp:             { page: 'exp-foundations',     label: 'Exp Foundations' },
+  metrics:         { page: 'metrics-foundations', label: 'Metrics Foundations' },
+  rca:             { page: 'rca-foundations',      label: 'RCA Foundations' },
+  stats:           { page: 'stat-foundations',     label: 'Stat Foundations' },
+  growth:          { page: 'metrics-foundations',  label: 'Metrics Foundations' },
+};
+
+// ─── Skill → MCQ Trainer category map (Layer 4A step 4) ──────────────────────
+const SKILL_TRAINER_MAP = {
+  exp:             'Experimentation',
+  metrics:         'Metrics & Growth',
+  rca:             'Statistics',
+  stats:           'Statistics',
+  growth:          'Metrics & Growth',
+  product:         'Product & Prioritization',
+  bi:              'Metrics & Growth',
+  behavioral:      'Product & Prioritization',
+};
+
+// ─── Skill → Playbook article map (Layer 4A step 1) ──────────────────────────
 const SKILL_ARTICLE_MAP = {
   exp:             { id: 'end-to-end-experiment',  label: 'End-to-End A/B Testing' },
   metrics:         { id: 'north-star-metric',       label: 'North Star Metrics' },
@@ -714,21 +750,35 @@ export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocke
                             {tc.label}
                           </span>
                         </div>
-                        {/* Layer 4A: Read first — Playbook article for primary skill */}
-                        {onOpenArticle && (() => {
+                        {/* Layer 4A: micro-sequence — Read first / Review foundations / Drill */}
+                        {(() => {
                           const primaryRoom = (dayObj.rooms || [])[0];
                           const matchedSkill = SKILL_DEFS.find(s => s.rooms.includes(primaryRoom));
-                          const article = matchedSkill ? SKILL_ARTICLE_MAP[matchedSkill.id] : null;
-                          if (!article) return null;
+                          if (!matchedSkill) return null;
+                          const skillId = matchedSkill.id;
+                          const article = SKILL_ARTICLE_MAP[skillId];
+                          const foundation = SKILL_FOUNDATION_MAP[skillId];
+                          const trainerCat = SKILL_TRAINER_MAP[skillId];
+                          const hasAny = (article && onOpenArticle) || foundation || trainerCat;
+                          if (!hasAny) return null;
                           return (
-                            <div style={{ marginBottom: '0.5rem' }}>
-                              <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginRight: '0.4rem' }}>Read first</span>
-                              <button
-                                onClick={() => onOpenArticle(article.id)}
-                                style={{ background: 'none', border: 'none', padding: 0, color: 'var(--accent)', fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '2px' }}
-                              >
-                                {article.label} →
-                              </button>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.55rem', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', flexShrink: 0 }}>Session sequence</span>
+                              {article && onOpenArticle && (
+                                <button onClick={() => onOpenArticle(article.id)} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.6rem', fontSize: '0.72rem', fontWeight: 600, color: 'var(--accent)', cursor: 'pointer' }}>
+                                  1. Read: {article.label}
+                                </button>
+                              )}
+                              {foundation && onNavigate && (
+                                <button onClick={() => onNavigate(foundation.page)} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.6rem', fontSize: '0.72rem', fontWeight: 600, color: 'var(--teal)', cursor: 'pointer' }}>
+                                  2. Review: {foundation.label}
+                                </button>
+                              )}
+                              {trainerCat && onNavigate && (
+                                <button onClick={() => onNavigate('trainer')} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.6rem', fontSize: '0.72rem', fontWeight: 600, color: 'var(--purple)', cursor: 'pointer' }}>
+                                  4. Drill: MCQ Trainer ({trainerCat})
+                                </button>
+                              )}
                             </div>
                           );
                         })()}
@@ -757,6 +807,19 @@ export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocke
                           })}
                         </div>
                         {dayObj.note && <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.55 }}>{dayObj.note}</p>}
+                        {/* Layer 6: verbal simulation prompt */}
+                        {(() => {
+                          const primaryRoom = (dayObj.rooms || [])[0];
+                          const matchedSkill = SKILL_DEFS.find(s => s.rooms.includes(primaryRoom));
+                          const prompt = matchedSkill ? SKILL_VERBAL_MAP[matchedSkill.id] : null;
+                          if (!prompt) return null;
+                          return (
+                            <div style={{ marginTop: '0.65rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderLeft: '3px solid var(--purple)', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0', padding: '0.6rem 0.9rem' }}>
+                              <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--purple)', marginBottom: '0.3rem' }}>End-of-day verbal drill</div>
+                              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text)', lineHeight: 1.55 }}>{prompt}</p>
+                            </div>
+                          );
+                        })()}
                       </div>
                     );
                   })}

@@ -4,6 +4,7 @@ import { track } from '../../utils/analytics.js';
 import { instrumentationCases } from '../../data/instrumentationCases.js';
 import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const ROOM_KEY = 'instrumentation';
 const NOTES_KEY = 'pal-notes-v1';
@@ -281,7 +282,7 @@ function WorkScreen({ caseData, onReveal }) {
 }
 
 // Screen 3: Reveal
-function RevealScreen({ caseData, onBack, onNext }) {
+function RevealScreen({ caseData, onBack, onNext, onNavigate }) {
   const existing = getInstrumentationProgress(caseData.id);
   const [rating, setRating] = useState(existing?.rating || 0);
   const [leadershipOpen, setLeadershipOpen] = useState(false);
@@ -577,12 +578,13 @@ function RevealScreen({ caseData, onBack, onNext }) {
           </button>
         )}
       </div>
+      <ForwardPointerCard room='instrumentation' onNavigate={onNavigate} onNext={onNext} />
     </div>
   );
 }
 
 // Main runner
-export function InstrumentationRunner({ caseId, onBack, onNext, unlocked }) {
+export function InstrumentationRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
   const caseData = instrumentationCases.find(c => c.id === caseId);
   const [screen, setScreen] = useState('situation');
 
@@ -655,6 +657,7 @@ export function InstrumentationRunner({ caseId, onBack, onNext, unlocked }) {
         onBack={onBack}
         onNext={onNext}
         unlocked={unlocked}
+        onNavigate={onNavigate}
       />
     </div>
   );

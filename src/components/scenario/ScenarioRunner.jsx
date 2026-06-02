@@ -10,6 +10,7 @@ import { DecisionPanel } from './DecisionPanel.jsx';
 import { ScoreReveal } from './ScoreReveal.jsx';
 import { DebriefPanel } from './DebriefPanel.jsx';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { saveAttempt } from '../../utils/progress.js';
 import { track } from '../../utils/analytics.js';
 import { getScoreRank } from '../../utils/scoring.js';
@@ -64,7 +65,7 @@ const TABS = [
   { id: 'Flags',   label: 'Flags',   hint: 'Warning signs' },
 ];
 
-export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign }) {
+export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, onNavigate }) {
   const scenario = scenarios.find(s => s.id === caseId);
   const pairedDesignId = scenario ? (designScenarios.find(d => d.pairedReviewScenarioId === caseId)?.id || null) : null;
   const [leftTab, setLeftTab] = useState('Context');
@@ -442,6 +443,7 @@ export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign }
               </button>
             </div>
           )}
+          <ForwardPointerCard room='review' onNavigate={onNavigate} onNext={onNext} />
         </div>
       )}
     </div>

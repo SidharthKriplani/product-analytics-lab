@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { HowTo } from '../shared/HowTo.jsx';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { statsFoundationsModules } from '../../data/statsFoundationsModules.js';
 
 class ModuleErrorBoundary extends React.Component {
@@ -426,7 +428,11 @@ ${(module.tags || []).join(', ')}${playbookSection}`;
       {/* ── Unlocked: render module ── */}
       {!isLocked && (
         <>
+          <HowTo skill={module.subtitle} steps={['Read the situation — understand the real-world context this concept solves', 'Interact with the demo — adjust sliders, make selections, observe what changes', 'Answer the question — test your understanding before moving on']} color="var(--teal)" />
           <ModuleErrorBoundary><ModuleComponent module={module} onNext={handleNext} /></ModuleErrorBoundary>
+          <div style={{ maxWidth: 700, margin: '0 auto', padding: '0 16px', boxSizing: 'border-box' }}>
+            <ForwardPointerCard room='stats' onNavigate={onNavigate} onNext={onNext} />
+          </div>
           {/* Debrief bookmark button */}
           <div style={{ maxWidth: 700, margin: '0 auto', padding: '0 16px 32px', boxSizing: 'border-box' }}>
             <button

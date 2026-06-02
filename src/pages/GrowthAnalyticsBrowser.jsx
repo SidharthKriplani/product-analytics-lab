@@ -58,14 +58,9 @@ export function GrowthAnalyticsBrowser({ onSelectCase, unlocked, onOpenArticle, 
 
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <span style={{
-            width: '36px', height: '36px', borderRadius: '9px',
-            background: 'var(--teal-bg)', border: '1px solid var(--teal-border)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.1rem', flexShrink: 0,
-          }}>
-            ↗
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='trending-up' size={18} color='var(--accent)' />
           </span>
           <div>
             <div style={{

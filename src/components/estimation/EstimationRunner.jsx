@@ -4,6 +4,7 @@ import { track } from '../../utils/analytics.js';
 import { estimationProblems } from '../../data/estimationProblems.js';
 import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const ROOM_KEY = 'estimation';
 
@@ -58,7 +59,7 @@ const CATEGORY_LABEL = {
   'capacity':        'Capacity',
 };
 
-export function EstimationRunner({ caseId, onBack, onNext }) {
+export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
   const problem = estimationProblems.find(p => p.id === caseId);
   const existing = getEstimationProgress(problem.id);
   const [response, setResponse] = useState(existing?.response || '');
@@ -477,6 +478,7 @@ export function EstimationRunner({ caseId, onBack, onNext }) {
               </button>
             )}
           </div>
+          <ForwardPointerCard room='estimation' onNavigate={onNavigate} onNext={onNext} />
         </div>
       )}
     </div>

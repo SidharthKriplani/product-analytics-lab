@@ -3,6 +3,7 @@
 // Each post maps to a room with a "Practice this now →" CTA
 
 import { useState } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 
 const POSTS = [
 
@@ -17,6 +18,7 @@ const POSTS = [
     readMin: 6,
     room: 'metrics',
     roomLabel: 'Metrics Room',
+    related: ['five-metric-types', 'guardrails', 'metric-grain'],
     content: [
       { type: 'text', text: 'Every rate metric has a numerator and a denominator. Most analysts obsess over the numerator — purchases, clicks, sign-ups — and treat the denominator as obvious. It isn\'t. The denominator is a choice, and that choice changes what the metric measures, who it indicts, and what action it implies. Getting it wrong doesn\'t just produce a wrong number; it produces a wrong story.' },
       { type: 'heading', text: 'Three Denominators, Three Different Metrics' },
@@ -46,6 +48,7 @@ const POSTS = [
     readMin: 4,
     room: 'metrics',
     roomLabel: 'Metrics Room',
+    related: ['denominator-discipline', 'activation-metrics', 'guardrails'],
     content: [
       { type: 'text', text: 'Product teams measure dozens of things simultaneously, but not all metrics serve the same purpose. Using a diagnostic metric as a success criterion, or treating a proxy like a north star, produces decisions that look data-driven but aren\'t. There are five distinct metric types, each with a specific job. Knowing which type you\'re working with — and why — is one of the most reliable signals of analytical seniority.' },
       { type: 'heading', text: 'The Five Types' },
@@ -65,6 +68,7 @@ const POSTS = [
     readMin: 5,
     room: 'metrics',
     roomLabel: 'Metrics Room',
+    related: ['five-metric-types', 'game-proof-north-star', 'proxy-metrics'],
     content: [
       { type: 'text', text: 'North star metrics get optimized. That\'s the point. But optimization without constraint finds the shortest path to the target, which is rarely the path you intended. Guardrail metrics exist because every north star can be gamed, and game-playing looks like success until it doesn\'t. The analysts who add guardrails before the experiment runs are the ones who catch problems before they become embarrassments.' },
       { type: 'heading', text: 'Why Guardrails Exist' },
@@ -85,6 +89,7 @@ const POSTS = [
     readMin: 6,
     room: 'metrics',
     roomLabel: 'Metrics Room',
+    related: ['guardrails', 'proxy-metrics', 'metric-trees'],
     content: [
       { type: 'text', text: 'Every metric that becomes a target eventually gets gamed. This isn\'t a cynical observation — it\'s Goodhart\'s Law in action, and it applies as reliably in product analytics as anywhere else. The question isn\'t whether your north star metric can be gamed. It can. The question is whether you\'ve named the failure mode before your stakeholders discover it, and whether you\'ve built the guardrail that catches it.' },
       { type: 'heading', text: 'The Gaming Test' },
@@ -114,6 +119,7 @@ const POSTS = [
     readMin: 5,
     room: 'metrics',
     roomLabel: 'Metrics Room',
+    related: ['five-metric-types', 'denominator-discipline', 'dau-mau-ratio'],
     content: [
       { type: 'text', text: 'GMV, revenue, ARPU, and LTV are four different numbers that non-technical stakeholders often use interchangeably. Using the wrong one in an interview — or in a stakeholder meeting — signals that you don\'t understand the business model you\'re analyzing. Each metric answers a different question, and the right one depends on what decision you\'re informing.' },
       { type: 'heading', text: 'The Four Definitions' },
@@ -133,6 +139,7 @@ const POSTS = [
     readMin: 6,
     room: 'metrics',
     roomLabel: 'Metrics Room',
+    related: ['denominator-discipline', 'metric-trees', 'five-metric-types'],
     content: [
       { type: 'text', text: 'Grain is the answer to the question: "What does one row in this dataset represent?" It sounds trivial. In practice, failing to state grain explicitly is one of the most common sources of silently wrong analysis. Wrong grain produces wrong aggregations, wrong averages, and wrong rates — and the numbers look completely plausible, which is what makes it dangerous.' },
       { type: 'heading', text: 'The Fan-Out Problem' },
@@ -153,6 +160,7 @@ const POSTS = [
     readMin: 6,
     room: 'metrics',
     roomLabel: 'Metrics Room',
+    related: ['game-proof-north-star', 'guardrails', 'activation-metrics'],
     content: [
       { type: 'text', text: 'You can\'t run a 6-month retention experiment. The experiment would need to run 6 months to detect a 6-month retention difference, and by the time you have results, the team has shipped 40 other things. This is why proxy metrics exist: they let you make decisions about long-run outcomes using short-run observations. The risk is that the proxy and the real metric can decouple — the proxy moves, the real metric doesn\'t, and you\'ve shipped something that felt like a win.' },
       { type: 'heading', text: 'Selection Criteria for a Valid Proxy' },
@@ -172,6 +180,7 @@ const POSTS = [
     readMin: 5,
     room: 'metrics',
     roomLabel: 'Metrics Room',
+    related: ['five-metric-types', 'metric-grain', 'activation-metrics'],
     content: [
       { type: 'text', text: 'A metric tree is the single most useful diagnostic tool in product analytics. When a north star metric moves, a metric tree tells you which branch broke. When you\'re sizing an opportunity, it tells you which lever has the most room to move. When you\'re explaining a trend to a PM, it gives you a shared structure for the conversation. The problem is that most analysts build metric trees wrong — they make them too flat, or they mix additive and multiplicative relationships, or they stop one level too early.' },
       { type: 'heading', text: 'The Revenue Tree' },
@@ -196,6 +205,7 @@ const POSTS = [
     id: 'activation-metrics',
     category: 'Metrics',
     title: 'Activation Metrics: The Most Important Metric Nobody Defines Properly',
+    related: ['five-metric-types', 'dau-mau-ratio', 'metric-grain'],
     summary: 'When is a new user actually activated? Checklist completion isn\'t it. The right activation metric predicts long-term retention — here\'s how to find it.',
     readMin: 6,
     room: 'metrics',
@@ -218,6 +228,7 @@ const POSTS = [
     summary: 'High DAU/MAU signals habit. But the ratio compresses cohort differences and can look healthy while retention collapses. Here\'s when to trust it and when to decompose it.',
     readMin: 5,
     room: 'metrics',
+    related: ['activation-metrics', 'five-metric-types', 'denominator-discipline'],
     roomLabel: 'Metrics Room',
     content: [
       { type: 'text', text: 'DAU/MAU is the fraction of monthly active users who return on any given day. If your product has 1M MAU and 310K DAU, the ratio is 31% — meaning roughly a third of your monthly users engage daily. The ratio measures habit formation at the population level. A rising DAU/MAU means users are finding reasons to return more frequently. A falling ratio means engagement is becoming less habitual, even if raw DAU is growing because of new user acquisition.' },
@@ -1707,7 +1718,7 @@ const CATEGORIES = Object.keys(CATEGORY_CONFIG);
 // ─────────────────────────────────────────────────────────────
 // Post reader — renders a single post's content array
 // ─────────────────────────────────────────────────────────────
-function PostReader({ post, cfg, onBack, onNavigate }) {
+function PostReader({ post, cfg, onBack, onNavigate, onRead }) {
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '2rem 1rem' }}>
 
@@ -1871,6 +1882,31 @@ function PostReader({ post, cfg, onBack, onNavigate }) {
           return null;
         })}
       </div>
+
+      {/* Keep reading */}
+      {post.related && post.related.length > 0 && (() => {
+        const relatedPosts = post.related
+          .map(id => POSTS.find(p => p.id === id))
+          .filter(Boolean)
+          .slice(0, 3);
+        if (relatedPosts.length === 0) return null;
+        return (
+          <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>Keep reading</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              {relatedPosts.map(rp => (
+                <button
+                  key={rp.id}
+                  onClick={() => onRead(rp)}
+                  style={{ textAlign: 'left', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.5rem 0.8rem', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text)' }}
+                >
+                  {rp.title} →
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -1892,6 +1928,7 @@ export function BlogBrowser({ onNavigate }) {
         cfg={cfg}
         onBack={() => setSelectedPost(null)}
         onNavigate={onNavigate}
+        onRead={setSelectedPost}
       />
     );
   }
@@ -1901,15 +1938,12 @@ export function BlogBrowser({ onNavigate }) {
 
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{
-          fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
-          color: 'var(--accent)', marginBottom: '0.4rem',
-        }}>
-          Learn
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='file-text' size={18} color='var(--accent)' />
+          </span>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>deep dives</h1>
         </div>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: '0 0 0.5rem', letterSpacing: '-0.02em' }}>
-          deep dives
-        </h1>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: '580px', margin: '0 0 0.9rem' }}>
           Interviewers test concepts indirectly — they give you a scenario and watch whether the right mental model surfaces on its own. These deep dives are written to build that instinct: each one targets a specific pattern, shows where candidates get it wrong, and links directly to the practice cases where it shows up live. Read, then practice — the sequence matters.
         </p>

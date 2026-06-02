@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { expFoundationModules } from '../../data/expFoundationModules.js';
 import { saveExpFoundationProgress, getAllExpFoundationProgress } from '../../utils/expFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
+import { HowTo } from '../shared/HowTo.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -2602,6 +2603,7 @@ export function ExpFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSel
       </div>
 
       {/* Module content */}
+      <HowTo skill={module.subtitle} steps={['Read the situation — understand the real-world context this concept solves', 'Interact with the demo — adjust sliders, make selections, observe what changes', 'Answer the question — test your understanding before moving on']} color="var(--accent)" />
       {ModuleComponent && <ModuleComponent onComplete={handleComplete} />}
 
       {/* Post-completion: connection + next */}

@@ -11,6 +11,7 @@ export const metricCases = [
     linkedConceptIds: ['proxy-metric', 'metric-gaming', 'guardrail-metric', 'primary-metric'],
     linkedDesignScenarioIds: ['d05-search-ranking-test'],
     linkedReviewScenarioIds: ['s09-clickbait-ranking-win'],
+    leadershipNote: 'A Staff analyst immediately spots the circular validation trap: you cannot use CTR to evaluate a model trained on CTR. But they\'d go further — they\'d ask what the second-order failure mode is if the new metric is adopted. Post-purchase satisfaction as a search quality signal sounds correct, but it creates a 7-14 day feedback loop that will slow iteration velocity. Staff-level metric design accounts for both validity and cadence: the right metric needs to be both correct and fast enough to actually be usable.',
     context: {
       company: 'Vela',
       product: 'Search ranking',
@@ -285,6 +286,7 @@ export const metricCases = [
     linkedConceptIds: ['activation', 'metric-gaming', 'retention'],
     linkedDesignScenarioIds: ['d08-onboarding-checklist-test'],
     linkedReviewScenarioIds: ['s12-checklist-completion-illusion'],
+    leadershipNote: 'Staff analysts define activation in terms of the minimum viable habit, not a milestone. The question is not "did the user complete onboarding?" but "did the user do the thing that predicts they\'ll stay?" For B2B SaaS, that\'s usually a team-level event — first collaboration, first shared artifact — not a solo checklist completion. They\'d also flag that a checklist completion metric in B2B creates a perverse incentive: you can hit 100% activation with users who will churn in week 3 because they never did the thing that makes the product sticky.',
     context: {
       company: 'Loopwise',
       product: 'Onboarding checklist',
@@ -548,6 +550,7 @@ export const metricCases = [
     linkedConceptIds: ['proxy-metric', 'metric-gaming', 'guardrail-metric'],
     linkedDesignScenarioIds: ['d06-notification-timing-test'],
     linkedReviewScenarioIds: ['s10-push-open-rate-trap'],
+    leadershipNote: 'Notifications are a borrowed resource, not a free marketing channel. A Staff analyst would set a hard opt-out rate guardrail before the experiment launches — not as a nice-to-have but as a kill switch. They\'d also push for incrementality testing: open rate only tells you that people clicked, not that the notification caused a session they wouldn\'t have had anyway. Without a holdout group, every notification "win" is potentially just cannibalizing organic opens.',
     context: {
       company: 'Orion',
       product: 'Push notification timing model',

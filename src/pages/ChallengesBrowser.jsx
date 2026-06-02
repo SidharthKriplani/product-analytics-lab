@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 import { challengesCases } from '../data/challengesCases.js';
 import { getAllChallengesProgress } from '../utils/challengesProgress.js';
 
@@ -61,18 +62,13 @@ export function ChallengesBrowser({ onSelectChallenge, unlocked }) {
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <span style={{
-            width: '36px', height: '36px', borderRadius: '9px',
-            background: 'var(--red-bg)', border: '1px solid var(--red-border)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '0.85rem', fontWeight: 700, color: 'var(--red)', flexShrink: 0,
-          }}>
-            X
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='zap' size={18} color='var(--yellow)' />
           </span>
           <div>
             <div style={{
               fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
-              letterSpacing: '0.1em', color: 'var(--red)', marginBottom: '0.15rem',
+              letterSpacing: '0.1em', color: 'var(--yellow)', marginBottom: '0.15rem',
             }}>
               Cross-Room Challenges
             </div>

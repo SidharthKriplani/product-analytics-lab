@@ -8,6 +8,8 @@ import { saveStatsAttempt, clearStatsProgress } from '../../utils/statsProgress.
 import { track } from '../../utils/analytics.js';
 import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 
 // views: 'question' | 'reveal' | 'debrief'
 
@@ -36,7 +38,7 @@ const DIFFICULTY_CFG = {
   staff:        { label: 'Staff',        color: 'var(--red)',       bg: 'var(--red-bg)',     border: 'var(--red-border)' },
 };
 
-export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoToDesign, onNext }) {
+export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoToDesign, onNext, onNavigate }) {
   const module = statsModules.find(m => m.id === caseId);
   const [view, setView] = useState(savedProgress?.selectedOptionId ? 'debrief' : 'question');
   const [selectedId, setSelectedId] = useState(savedProgress?.selectedOptionId || null);
@@ -246,6 +248,7 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
             onGoToDesign={onGoToDesign}
             onRetry={handleRetry}
           />
+          <LeadershipLens note={module.leadershipNote} />
           {userNote && (
             <div style={{ marginTop: 16, padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 6 }}>Your notes</div>
@@ -267,6 +270,7 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
               </button>
             </div>
           )}
+          <ForwardPointerCard room='stats' onNavigate={onNavigate} onNext={onNext} />
         </div>
       )}
 

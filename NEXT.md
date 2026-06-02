@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.51.0 (2026-06-02) — 15 product features built: FoundationNudgeCard + BeginnerOnboardingTrack integrated, Simulator redesign, Defense Strategy Layer 4A (Playbook links per skill), SQL Lab study plan modal, Trainer skill heatmap, ForwardPointerCard, Progress export/import, Behavioral keyboard shortcuts, and more.*
+*Last updated: V4.52.0 (2026-06-02) — Second 15-feature session: ForwardPointerCard on all 13 runners + foundation rooms, StaffLayer on Stats/Metrics/Cases + 9 leadership notes, icon/emoji audits complete (#79+#80), Defense Strategy micro-sequence + Layer 6 verbal prompts, Quiz Me on Playbook articles, What\'s New + streak on Home, room map (/map), verbal practice (Web Speech API), HowTo on all 4 foundation runners, Challenge Log on Progress, Deep Dives related arrays + Keep reading, Fidelity badges on Simulator.*
 
 ---
 
@@ -37,6 +37,24 @@ See Next session item 1.
 ---
 
 ## Carry-forward log
+
+**Done this session (V4.52.0 — 15 high-ROI features from sibling repo analysis + PAL backlog):**
+- ForwardPointerCard wired into ALL 13 runners (Stats, Metrics, Design, Review, Behavioral, Estimation, Growth, BI, STF, Instrumentation, Prioritization, ProductDesign, Challenges) + App.jsx onNavigate wired to all
+- StaffLayer / LeadershipLens shared component built + wired into Stats, Metrics, Cases runners + 9 leadership notes written (3 per room: STAT01-03, M01-03, C01-03)
+- Audit #79 complete: 8 browsers standardized to 36×36 icon box pattern (Growth, Challenges, Prioritization, ProductDesign, Estimation, Playbook, Blog, others)
+- Audit #80 complete: emoji removal finished across all remaining browsers
+- Defense Strategy micro-sequence Layer 4A fully complete: Foundation module link + MCQ Trainer category link added alongside Playbook link
+- Defense Strategy Layer 6: verbal articulation prompt at end of every day card (skill-specific, 90-second format)
+- Quiz Me on Playbook articles: QuizMe component in PostDetail with 3 MCQs drawn from trainerMCQ by category
+- What's New card + daily streak badge on Home.jsx
+- Room relationship map: new /map route + RoomMap.jsx showing all 3 tracks + tools layer
+- Verbal Practice (Web Speech API) in BehavioralRunner: mic toggle, continuous transcription, degrades gracefully
+- Audit #99 + #100: key props fixed, imperative DOM mutations replaced with React hover state in 4 debrief panels
+- HowTo shared component built + wired into all 4 foundation runners
+- Challenge Log on Progress page: 10 most recent completions across all rooms with date, room, id, rating
+- Audit #90: related[] arrays on first 10 Deep Dives posts + Keep reading strip in PostReader
+- ForwardPointerCard on StatsFoundationsRunner + HowTo block added
+- Build: ✓ 816 modules, 0 errors.
 
 **Done this session (V4.51.0 — 15 product features):**
 - FoundationNudgeCard integrated into RCABrowser, MetricsBrowser, CasesBrowser, DesignBrowser, ScenarioBrowser (replaces inline non-dismissable nudges with proper dismissable + foundation-completion-aware component)

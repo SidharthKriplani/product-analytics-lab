@@ -19,6 +19,7 @@ export const statsModules = [
     linkedConceptIds: ['p-value', 'confidence-interval', 'guardrail-metric'],
     linkedScenarioIds: ['s01-checkout-trap'],
     linkedDesignIds: ['d01-checkout-test'],
+    leadershipNote: 'A Staff analyst reframes the question before anyone looks at the p-value: what was our pre-committed decision rule, and does this readout meet it? They\'d flag that p=0.03 with a degraded guardrail and a CI spanning near-zero is a weak evidential signal, not a launch decision. The staff move is to hold the line on decision quality even when Q4 pressure says ship — and to document the pre-committed criteria so the post-mortem isn\'t a negotiation.',
     sfPrerequisites: [{ id: 'sf11', title: 'Hypothesis Testing' }, { id: 'sf10', title: 'Confidence Intervals' }],
 
     situation: {
@@ -95,6 +96,7 @@ export const statsModules = [
     linkedScenarioIds: ['s01-checkout-trap'],
     linkedDesignIds: [],
     sfPrerequisites: [{ id: 'sf10', title: 'Confidence Intervals' }, { id: 'sf08', title: 'Standard Error' }],
+    leadershipNote: 'Staff analysts focus on the CI lower bound first, not the point estimate. A +3.2% lift with a CI of [+0.1%, +6.3%] means the realistic downside scenario is near-zero impact — and they\'d ask whether near-zero is acceptable given the rollout risk and opportunity cost. They\'d also push for a business magnitude framing: what does +0.1% actually mean in revenue terms, and is that worth the engineering maintenance of this feature?',
 
     situation: {
       company: 'Meridian Health',
@@ -170,6 +172,7 @@ export const statsModules = [
     linkedScenarioIds: ['s08-false-rigor'],
     linkedDesignIds: [],
     sfPrerequisites: [{ id: 'sf12', title: 'Power & Effect Size' }, { id: 'sf13', title: 'Experiment Design Lab' }],
+    leadershipNote: 'The staff move here is to ask the power question before the experiment runs, not after. An underpowered null result is noise, not information — and rolling back based on it is a policy error. Staff analysts also think about the opportunity cost of waiting: if the effect size is genuinely small (below MDE), the right question is whether the feature is worth maintaining regardless of significance, not whether it worked in this underpowered window.',
 
     situation: {
       company: 'Loopwise',

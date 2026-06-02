@@ -320,8 +320,47 @@ export function Home({ onNavigate }) {
   const sectionLabel = visitedRooms.length > 0 ? 'Jump back in' : 'Start here';
 
   const todaysCase = getTodaysCase();
-
   const todayDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  // Daily streak from heatmap data
+  const streak = (() => {
+    try {
+      const allKeys = [
+        'pal-stats-progress-v1', 'pal-metrics-progress-v2', 'pal-rca-progress-v2',
+        'pal-cases-progress-v2', 'pal-growth-analytics-progress-v1',
+        'pal-bi-progress-v1', 'pal-behavioral-progress-v1', 'pal-estimation-progress-v1',
+        'pal-sql-lab-dates-v1',
+      ];
+      const dates = new Set();
+      allKeys.slice(0, -1).forEach(k => {
+        try {
+          const d = JSON.parse(localStorage.getItem(k) || '{}');
+          Object.values(d).forEach(v => { if (v.completedAt) dates.add(new Date(v.completedAt).toISOString().slice(0, 10)); });
+        } catch {}
+      });
+      try {
+        const sqlD = JSON.parse(localStorage.getItem('pal-sql-lab-dates-v1') || '{}');
+        Object.keys(sqlD).forEach(d => dates.add(d));
+      } catch {}
+      let count = 0;
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(today); d.setDate(d.getDate() - i);
+        if (dates.has(d.toISOString().slice(0, 10))) count++;
+        else if (i > 0) break;
+      }
+      return count;
+    } catch { return 0; }
+  })();
+
+  // What's New — hardcoded recent additions (update when new content ships)
+  const WHATS_NEW = [
+    { label: 'SQL Lab study plan modal', detail: 'Build a personalised daily SQL queue' },
+    { label: 'Leadership Lens on Stats, Metrics, Cases', detail: 'Staff-level read on every case' },
+    { label: 'Quiz Me on Playbook articles', detail: 'Test yourself after reading any article' },
+    { label: 'Progress export / import', detail: 'Back up and restore your progress as JSON' },
+    { label: 'Defense Strategy verbal drills', detail: 'End-of-day articulation prompts per skill' },
+  ];
 
   return (
     <div className="pal-page-enter" style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem 5rem', width: '100%', boxSizing: 'border-box' }}>
@@ -510,9 +549,16 @@ export function Home({ onNavigate }) {
 
       {/* ── Page header ─────────────────────────────────────────────────── */}
       <div style={{ marginBottom: '1.75rem', paddingBottom: '1.1rem', borderBottom: '1px solid var(--border-subtle)' }}>
-        <h1 className="pal-gradient-text" style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.035em', margin: 0, display: 'inline-block' }}>
-          Today
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <h1 className="pal-gradient-text" style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.035em', margin: 0, display: 'inline-block' }}>
+            Today
+          </h1>
+          {streak > 1 && (
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--yellow)', background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.15rem 0.55rem', letterSpacing: '0.02em' }}>
+              {streak}-day streak
+            </span>
+          )}
+        </div>
         <div style={{ fontSize: '0.81rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
           {todayDate}
         </div>
@@ -722,6 +768,25 @@ export function Home({ onNavigate }) {
         <BeginnerOnboardingTrack onNavigate={onNavigate} />
       )}
 
+      {/* ── What's New ──────────────────────────────────────────────────── */}
+      {visitedRooms.length > 0 && (
+        <div style={{ marginBottom: '2rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>
+            What's New
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            {WHATS_NEW.map((item, i) => (
+              <div key={i} style={{ display: 'flex', gap: '0.5rem', alignItems: 'baseline', fontSize: '0.82rem' }}>
+                <span style={{ color: 'var(--accent)', fontWeight: 700, flexShrink: 0 }}>+</span>
+                <span style={{ color: 'var(--text)', fontWeight: 600 }}>{item.label}</span>
+                <span style={{ color: 'var(--text-muted)' }}>—</span>
+                <span style={{ color: 'var(--text-muted)' }}>{item.detail}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Guided paths ────────────────────────────────────────────────── */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
@@ -774,6 +839,11 @@ export function Home({ onNavigate }) {
 
       {/* ── Sister labs footer ───────────────────────────────────────────── */}
       <div style={{ textAlign: 'center', padding: '2rem 1.5rem 1.5rem', marginTop: '1rem', borderTop: '1px solid var(--border)' }}>
+        <div style={{ marginBottom: '0.75rem' }}>
+          <button onClick={() => onNavigate('map')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: '0.78rem', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+            View room map →
+          </button>
+        </div>
         <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
           Also by the same team:{' '}
           <a href="https://ml-systems-lab-v9xe.vercel.app/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'underline', textUnderlineOffset: '3px' }}>ML Systems Lab</a>
