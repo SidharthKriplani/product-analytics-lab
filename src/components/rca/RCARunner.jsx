@@ -9,6 +9,7 @@ import { TimerButton } from '../shared/TimerButton.jsx';
 import { saveRCAAttempt } from '../../utils/rcaProgress.js';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 
 const ROOM_KEY = 'rca';
 
@@ -176,6 +177,12 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
       >
         <Icon name="arrow-left" size={14} color="currentColor" />RCA Room
       </button>
+
+      <Breadcrumb crumbs={[
+        { label: 'PAL', onClick: onBack },
+        { label: 'RCA Room', onClick: onBack },
+        { label: caseId },
+      ]} />
 
       {/* Case title */}
       <div style={{ marginBottom: '1.25rem' }}>

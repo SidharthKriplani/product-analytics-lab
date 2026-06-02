@@ -10,6 +10,7 @@ import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
+import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 
 // views: 'question' | 'reveal' | 'debrief'
 
@@ -115,6 +116,12 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
         >
           <Icon name="arrow-left" size={14} color="currentColor" />Stats Room
         </button>
+
+        <Breadcrumb crumbs={[
+          { label: 'PAL', onClick: onBack },
+          { label: 'Stats Room', onClick: onBack },
+          { label: caseId },
+        ]} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
           <span style={{

@@ -203,7 +203,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When a metric drops the same day as a deployment, the deployment is guilty until proven innocent — I check error logs before I open the analytics dashboard.'
     },
-    leadershipNote: 'A Staff DS treats a major metric drop as a test of the monitoring infrastructure, not just the product. Before presenting the RCA, they ask: why did it take us X hours to detect this, and what alert would have caught it within 30 minutes? The post-mortem output is always a monitoring improvement, not just a root cause document. **Weak answer pattern:** The candidate says "I\'d check all the dashboards and look for unusual patterns in user behavior" — starting broad instead of immediately cross-referencing the Tuesday deployment with the Visa error logs. **Interviewer follow-up that exposes it:** "You mentioned checking dashboards first — what specifically would you look at, and why would you start there rather than the payment provider\'s error API?"',
+    leadershipNote: 'Staff analysts separate the data quality question from the product question immediately. The Visa error spike on web-only is almost certainly a payment provider misconfiguration — not a product regression. The staff move is to get payment engineering on a call within the hour, not to run further segmentation. The business impact framing matters: $140k/day means every hour of delay has a dollar value, and that number belongs in the escalation message.',
   },
 
   {
@@ -408,7 +408,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'Zero results is a coverage problem, not a ranking problem — before touching the algorithm, I check whether the index even has the items the query is looking for.'
     },
-    leadershipNote: 'A Senior Analytics Manager would require a "launch readiness checklist" for any experiment that includes traffic normalization checks, guardrail metric pre-registration, and an on-call engineer for the first 48 hours. This RCA is a process failure as much as a technical failure. **Weak answer pattern:** The candidate says "I\'d check for a demand shift toward unusual queries" — ignoring the 2am pipeline run and diving into user behavior without first checking the most proximate system change. **Interviewer follow-up that exposes it:** "The catalog re-ingestion ran two hours before the spike — why would you investigate demand shifts before checking the pipeline output?"',
+    leadershipNote: 'Staff analysts treat a post-ingestion search degradation as an indexing integrity question first, not a query behavior question. The synonym mapping gap in new categories is a systemic process failure — it means no pre-launch search coverage check exists in the catalog pipeline. The forward-looking ask is not just a fix but a guardrail: every catalog update should gate on synonym coverage before the index goes live.',
   },
 
   {
@@ -613,7 +613,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'In marketplace cancellation analysis, reason codes are your fastest diagnostic tool — "not as described" tells you this is a supply quality problem, not a demand problem, before you pull a single additional query.'
     },
-    leadershipNote: 'At the leadership level, an RCA on a data pipeline failure triggers a data reliability SLA review — not just a fix. A Staff DS would ask: what is our MTTD (mean time to detect) and MTTR (mean time to recover) for data incidents, and how do we improve both by 50%? **Weak answer pattern:** The candidate segments by buyer cohort or acquisition channel, reasoning that "new buyers might have higher expectations" — missing that the reason codes already name seller-side failures, making buyer-side hypotheses irrelevant until seller quality is ruled out. **Interviewer follow-up that exposes it:** "The cancellation reason code says \'item not as described\' — whose failure does that implicate, and how does that change which segment you\'d cut first?"',
+    leadershipNote: 'Staff analysts ask who is losing when a marketplace metric breaks — buyer or seller, demand or supply. The cancellation spike concentrated in three high-density cities is a supply quality problem, not a demand problem, and reason codes tell that story before any additional segmentation. The stakeholder communication challenge is framing this to the seller operations team without triggering defensiveness — the ask is operational improvement, not blame assignment.',
   },
 
   {
@@ -818,7 +818,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'Open rate is a proxy — when I see high open rates and declining retention, I immediately check opt-out rate and task completion per session, because the campaign might be training users to ignore the app, not return to it.'
     },
-    leadershipNote: 'Leadership-level RCA considers the second-order effect: after the fix, what should change about how the team builds features to prevent recurrence? A Staff DS drives a retrospective that produces process changes, not just a ticket. **Weak answer pattern:** The candidate points to the 34% open rate as evidence the campaign is working and blames D7 retention on "seasonal user quality" or "app bugs" — accepting the proxy metric at face value while ignoring the 4.5x opt-out spike that directly names the mechanism. **Interviewer follow-up that exposes it:** "Open rate went up to 34% — is that a good sign or a bad sign in this context, and how does the 18% opt-out rate change your interpretation?"',
+    leadershipNote: 'Staff analysts treat open rate as a vanity metric when session depth and retention tell the opposite story. High open rates on a re-engagement campaign with declining D7 retention means the notifications are being used as a dismiss reflex, not as genuine re-engagement triggers. The forward implication is a campaign design rule: every notification strategy must have an opt-out rate and session-depth guardrail before it scales.',
   },
 
   {
@@ -1023,7 +1023,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'Revenue growth with margin compression usually means you are selling to the wrong mix of customers or the right customers at the wrong price — I build a cohort P&L to see the unit economics by segment before I recommend any pricing or cost changes.'
     },
-    leadershipNote: 'An Analytics Director would treat this as evidence of insufficient experiment review governance. The output is not just a rollback — it is a new rule in the experiment design checklist that prevents future launches with this failure mode. **Weak answer pattern:** The candidate builds a revenue growth analysis and recommends "cutting costs broadly" without segmenting by customer cohort — missing that 71% gross margin on enterprise vs. 61% on SMB requires a tiered pricing fix, not a blunt cost reduction. **Interviewer follow-up that exposes it:** "Revenue grew 18% and margin compressed — before recommending any action, how would you figure out whether this is a pricing problem, a cost problem, or a customer mix problem?"',
+    leadershipNote: 'Staff analysts read revenue growth with margin compression as a customer mix story first, not a cost story. The question juniors miss is: which segment is growing fastest, and what is its contribution margin? The forward implication for leadership is a tiered pricing review — because if the fastest-growing segment has the worst margin, scaling it is actively destroying value and the board will ask why no one caught it sooner.',
   },
 
   {
@@ -1229,7 +1229,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'For any AI support system, I always ask: does our deflection metric measure non-escalation or actual resolution? Because if it\'s the former, we\'re probably celebrating the bot closing tickets the user didn\'t feel were worth escalating — not tickets that were actually resolved.'
     },
-    leadershipNote: 'A Staff DS presenting this RCA to leadership emphasizes not just the root cause but the detection gap: how long was this broken before we noticed, and what is the customer impact of that detection latency? The recommendation includes a monitoring SLA. **Weak answer pattern:** The candidate proposes "A/B testing different bot response templates to improve resolution quality" — jumping to optimization when the root issue is that the deflection metric never measured resolution at all, meaning there\'s no baseline to optimize against. **Interviewer follow-up that exposes it:** "Deflection rate is near target — why would you say the bot is underperforming, and what specific metric would you build to confirm your suspicion before recommending any changes?"',
+    leadershipNote: 'Staff analysts ask what the metric is actually measuring before declaring it healthy. Deflection rate measures non-escalation, not resolution — a bot can deflect by exhausting users into abandonment, which is not a product success. The escalation to leadership should include a proposed metric redefinition: replace deflection rate with resolution-confirmed rate, and set a repeat-contact rate ceiling as the primary quality guardrail.',
   },
 
   {
@@ -1434,7 +1434,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When fraud spikes simultaneously with a new low-friction onboarding flow, I assume an organized ring found the gap before we did — my first question is whether seller and buyer accounts were created in the same infrastructure cluster, not whether individual orders look suspicious.',
     },
-    leadershipNote: 'Leadership-level RCA on a supply-side problem requires cross-functional ownership — operations, engineering, and product all need to align on the fix. A Staff DS brokers that alignment, not just writes the analysis. **Weak answer pattern:** The candidate investigates individual suspicious orders one by one, looking for behavioral anomalies in buyer patterns — treating this as a single-account fraud problem rather than immediately checking for coordinated infrastructure signals like shared IP clusters or synchronized account creation timing. **Interviewer follow-up that exposes it:** "The fraud rate tripled in 72 hours — does that pace suggest individual bad actors or an organized operation, and how does your diagnosis method change depending on the answer?"',
+    leadershipNote: 'Staff analysts read a 3x fraud spike in 72 hours as a coordinated attack signal, not individual bad actors — the velocity alone rules out opportunistic fraud. Juniors segment by order characteristics; Staff analysts immediately ask whether the new onboarding flow created an exploitable registration gap and check for infrastructure clustering. The payment processor escalation risk is the business-critical framing: sustained elevated fraud rates can trigger processing fee increases or account suspension, making this a finance conversation, not just a trust-and-safety ticket.',
   },
 
   {
@@ -1639,7 +1639,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'On content platforms, I always track session depth and return frequency together — a feature that increases one while suppressing the other is a trade-off, not a win, and session length without D1 retention is a vanity metric.',
     },
-    leadershipNote: 'A Director of Analytics uses this case as evidence for investing in an automated anomaly detection system. The root cause is identified, but the meta-lesson is: manual detection of metric anomalies at scale is not sustainable. The leadership recommendation is a monitoring infrastructure investment. **Weak answer pattern:** The candidate immediately recommends "rolling back the Auto-Play feature" without first segmenting by user type or checking whether session depth changed — conflating a DAU drop with the feature being bad when the actual mechanism (passive consumption replacing active sessions) requires a different fix. **Interviewer follow-up that exposes it:** "DAU dropped after Auto-Play launched — before recommending a rollback, what\'s the one metric you\'d check to determine whether users are watching more but returning less often?"',
+    leadershipNote: 'Staff analysts distinguish between engagement depth and engagement frequency — a feature that increases session length while suppressing return rate is a trade-off, not a win, and DAU-based businesses always pay that cost eventually. The launch governance failure here is equally important: a 100% rollout with no holdout group means the causal effect can only be estimated, not measured cleanly. The forward implication is a launch policy: any feature touching session behavior requires a retained holdout for at least 14 days.',
   },
 
   {
@@ -1844,7 +1844,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When MRR growth decelerates without a drop in new bookings, I go straight to the waterfall — expansion and contraction tell you whether your existing customers believe in the product, and NRR by segment tells you which part of your business is structurally sound.',
     },
-    leadershipNote: 'A VP of Revenue Operations uses this case to reinforce that blended NRR is a vanity metric in a multi-segment SaaS business — it averages a healthy enterprise book with a structurally eroding SMB book, hiding the problem until it is too late to address. **Weak answer pattern:** The candidate says "new customer signups are flat so acquisition is the problem" — looking at the top of the funnel when the entire signal is in the existing customer base, where expansion collapsed from $42k to $18k and contraction doubled. **Interviewer follow-up that exposes it:** "New MRR is flat, not declining — why would you focus on acquisition, and what does the MRR waterfall tell you about where the actual problem is?"',
+    leadershipNote: 'Staff analysts immediately decompose MRR into new, expansion, contraction, and churn when growth decelerates — because flat new MRR with declining net retention means the existing book is eroding, not the top of the funnel. The segment-level NRR split is the key move juniors miss: blended NRR hides the structural difference between a healthy enterprise book and a structurally declining SMB book. The leadership framing is forward trajectory — at 82% SMB NRR, that segment loses half its value in four years, which belongs in the board update.',
   },
 
   {
@@ -2049,7 +2049,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When churn spikes in a single month, I immediately check whether a pricing change just hit a billing cycle — the 30-day renewal cadence creates a predictable lag between price changes and churn events that analysts often miss.',
     },
-    leadershipNote: 'A Director of Finance uses this case to illustrate that pricing changes are natural experiments — the billing cycle creates a predictable lag that analysts can use to measure price elasticity even without a formal A/B test. **Weak answer pattern:** The candidate cites "increased competition" or "product dissatisfaction" as the primary hypothesis, noting the 29% exit survey response saying "found alternative" — without noticing the 6-week lag that cleanly maps the spike to the billing cycle renewal date after the price increase. **Interviewer follow-up that exposes it:** "67% of exits said \'price too high\' and 78% of churners were month-to-month — what does that combination tell you about whether this is a product problem or a pricing problem?"',
+    leadershipNote: 'Staff analysts know that pricing changes create a predictable churn lag tied to billing cycle renewal dates — a 2x churn spike six weeks after a price increase is the billing cycle firing, not a sudden product failure. Juniors look for causes in the week of the spike; Staff analysts look six weeks back. The recommendation to leadership requires a price elasticity model: the question is not whether to roll back the price increase but whether the incremental revenue from retained accounts at the old price exceeds the ARR lost to churn at the new price.',
   },
 
   {
@@ -2253,7 +2253,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When fill rate drops and CPM rises simultaneously, I know supply is being removed from the auction — I look for any recent content classification, filtering, or policy change that could be suppressing inventory before I look at advertiser demand.',
     },
-    leadershipNote: 'A Head of Monetization uses this case to institutionalize cross-functional impact reviews for any content policy change — because a trust and safety decision can crater ad revenue before the ad ops team even knows a filter was deployed. **Weak answer pattern:** The candidate diagnoses the revenue drop as "advertiser demand softening" and recommends "outbound sales to refill the ad pipeline" — reasoning from the 22% revenue decline without checking whether CPM moved opposite to fill rate, which is the diagnostic signature of a supply constraint rather than demand collapse. **Interviewer follow-up that exposes it:** "CPM is up 4% but revenue is down 22% — what does that combination tell you about whether this is a demand problem or a supply problem?"',
+    leadershipNote: 'Staff analysts read CPM up with revenue down as a supply constraint signature — advertisers are bidding harder on less available inventory, which is the opposite of demand softening. The cross-functional implication is the key move: a trust-and-safety filter deployment that happened without ad monetization sign-off is a governance gap, not just a bug. The forward recommendation is a cross-functional impact review requirement for any content policy change that touches monetizable inventory.',
   },
 
   {
@@ -2457,7 +2457,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'Ranking algorithms optimized for engagement quality create cold-start traps for new supply — any new creator, seller, or contributor starts with structurally worse signals than incumbents, so my first question when new-side retention drops is always whether a ranking change just made the gap bigger.',
     },
-    leadershipNote: 'A Head of Creator Growth uses this case to establish a standing rule: any ranking algorithm change must include a new-creator impact assessment before deployment, because the cold-start population is structurally invisible in aggregate creator retention metrics until the supply compression lags into consumer DAU weeks later. **Weak answer pattern:** The candidate recommends "reverting the completion-rate algorithm because new creators have lower completion rates" — treating this as a content quality problem rather than a bootstrapping structural gap, and missing that established creator retention is unchanged, which rules out a global quality regression. **Interviewer follow-up that exposes it:** "Established creator retention is still 84% and new creator retention dropped 30% — does that pattern suggest the algorithm is broken, or that it\'s working correctly for established creators but failing for a specific subset?"',
+    leadershipNote: 'Staff analysts distinguish between an algorithm that is broken and an algorithm that is working correctly but penalizing a cold-start population. New creators structurally cannot match established-creator completion rates in week one — a ranking change that rewards completion creates a bootstrapping trap for new supply. The business-critical forward implication is a lagged DAU consequence: creator supply compression takes four to eight weeks to manifest in consumer DAU, so the damage is already compounding by the time it becomes visible in top-line metrics.',
   },
 
   // ─────────────────────────────────────────────

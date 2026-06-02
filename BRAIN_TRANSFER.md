@@ -132,7 +132,7 @@
 ### Template 1: Default (USE THIS — single line)
 
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.52.0: 30 features across 2 sessions. ForwardPointerCard all runners. StaffLayer Stats+Metrics+Cases. Audits 79+80+99+100 done. Defense Layer 4A+6. Quiz Me on articles. Room map. Verbal practice. HowTo foundations. Challenge Log. Deep Dives related. What's New+streak." && git push origin main
+cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.53.0: Interview Q&A Bank (26 questions, 3-tier answers). Defense auto-detection. Learning Paths + checkpoints. Breadcrumb nav. All RCA leadership notes. Analytics Failures catalog (25 patterns). 821 modules." && git push origin main
 ```
 
 **Just change:** Version (V4.50.0) and description, then paste into Mac terminal.

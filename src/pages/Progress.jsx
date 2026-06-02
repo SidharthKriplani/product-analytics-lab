@@ -42,6 +42,7 @@ import { rcaFoundationModules } from '../data/rcaFoundationModules.js';
 import { getAllExpFoundationProgress } from '../utils/expFoundationProgress.js';
 import { expFoundationModules } from '../data/expFoundationModules.js';
 import { learningPaths } from '../data/learningPaths.js';
+import { LEARNING_PATHS } from '../data/learningPathDefs.js';
 import { GuidedPathCard } from '../components/paths/GuidedPathCard.jsx';
 import { scenarios } from '../data/scenarios.js';
 
@@ -418,7 +419,24 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
   const [studyPlanOpen, setStudyPlanOpen] = useState(true);
   const [sqlLabOpen, setSqlLabOpen] = useState(true);
   const [challengeLogOpen, setChallengeLogOpen] = useState(true);
+  const [learningPathsOpen, setLearningPathsOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Learning path checkpoint progress
+  function getLPProgress(pathId) {
+    try { return JSON.parse(localStorage.getItem('pal-lp-' + pathId + '-v1') || '[]'); } catch { return []; }
+  }
+  function markLPStep(pathId, stepId) {
+    const done = getLPProgress(pathId);
+    if (!done.includes(stepId)) {
+      const next = [...done, stepId];
+      localStorage.setItem('pal-lp-' + pathId + '-v1', JSON.stringify(next));
+    }
+  }
+  function unmarkLPStep(pathId, stepId) {
+    const done = getLPProgress(pathId).filter(id => id !== stepId);
+    localStorage.setItem('pal-lp-' + pathId + '-v1', JSON.stringify(done));
+  }
 
   // Challenge Log — collect 10 most recent completions across all rooms
   const recentCompletions = (() => {
@@ -1257,6 +1275,57 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
           </SectionCard>
         );
       })()}
+
+      {/* Learning Paths */}
+      <SectionCard
+        icon="🗺"
+        title="Learning Paths"
+        open={learningPathsOpen}
+        onToggle={() => setLearningPathsOpen(o => !o)}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {LEARNING_PATHS.map(path => {
+            const done = getLPProgress(path.id);
+            const pct = path.steps.length > 0 ? Math.round((done.length / path.steps.length) * 100) : 0;
+            return (
+              <div key={path.id} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderLeft: '3px solid ' + path.color, borderRadius: 'var(--radius)', padding: '1rem 1.1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' }}>{path.title}</div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>{path.estimatedWeeks} weeks · {path.steps.length} steps</div>
+                  </div>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: path.color }}>{pct}%</span>
+                </div>
+                <div style={{ height: 4, background: 'var(--surface)', borderRadius: 99, overflow: 'hidden', marginBottom: '0.85rem' }}>
+                  <div style={{ height: '100%', width: pct + '%', background: path.color, borderRadius: 99, transition: 'width 0.3s' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  {path.steps.map(step => {
+                    const isDone = done.includes(step.id);
+                    return (
+                      <div key={step.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <button
+                          onClick={() => { isDone ? unmarkLPStep(path.id, step.id) : markLPStep(path.id, step.id); window.location.reload(); }}
+                          style={{ width: 16, height: 16, borderRadius: 4, border: '2px solid ' + (isDone ? path.color : 'var(--border)'), background: isDone ? path.color : 'transparent', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          {isDone && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}
+                        </button>
+                        <button
+                          onClick={() => onNavigate && onNavigate(step.nav)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0, flex: 1 }}
+                        >
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: isDone ? 'var(--text-muted)' : 'var(--text)', textDecoration: isDone ? 'line-through' : 'none' }}>{step.label}</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginLeft: '0.5rem' }}>{step.detail}</span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </SectionCard>
 
       {/* Challenge Log */}
       {recentCompletions.length > 0 && (

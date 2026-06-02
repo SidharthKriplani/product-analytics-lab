@@ -60,6 +60,8 @@ const FLAT_GROUPS = [
     label: 'TOOLS',
     items: [
       { id: 'trainer',        label: 'MCQ Quiz',      icon: 'target' },
+      { id: 'interview-qa',   label: 'Interview Q&A', icon: 'message-square' },
+      { id: 'failures',       label: 'Failure Patterns', icon: 'alert-triangle' },
       { id: 'company-tracks', label: 'Companies',     icon: 'building-2' },
       { id: 'defense-doc',    label: 'Defense Strategy',   icon: 'shield' },
       { id: 'bookmarks',      label: 'Saved',         icon: 'bookmark' },
@@ -95,6 +97,8 @@ function getIsActive(itemId, currentPage) {
     || (itemId === 'bookmarks'       && currentPage === 'bookmarks')
     || (itemId === 'consult'         && currentPage === 'consult')
     || (itemId === 'trainer'         && currentPage === 'trainer')
+    || (itemId === 'interview-qa'    && currentPage === 'interview-qa')
+    || (itemId === 'failures'        && currentPage === 'failures')
     || (itemId === 'company-tracks'  && currentPage === 'company-tracks')
     || (itemId === 'challenges'      && (currentPage === 'challenges' || currentPage === 'challenges-runner'))
     || (itemId === 'bi'              && (currentPage === 'bi' || currentPage === 'bi-runner'))

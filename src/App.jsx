@@ -53,6 +53,7 @@ const Progress              = lazy(() => import('./pages/Progress.jsx').then(m =
 const Unlock                = lazy(() => import('./pages/Unlock.jsx').then(m => ({ default: m.Unlock })));
 const About                 = lazy(() => import('./pages/About.jsx').then(m => ({ default: m.About })));
 const RoomMap               = lazy(() => import('./pages/RoomMap.jsx').then(m => ({ default: m.RoomMap })));
+const FailuresCatalog       = lazy(() => import('./pages/FailuresCatalog.jsx').then(m => ({ default: m.FailuresCatalog })));
 const JudgmentBank          = lazy(() => import('./pages/JudgmentBank.jsx').then(m => ({ default: m.JudgmentBank })));
 const QADashboard           = lazy(() => import('./pages/QADashboard.jsx').then(m => ({ default: m.QADashboard })));
 const Pricing               = lazy(() => import('./pages/Pricing.jsx').then(m => ({ default: m.Pricing })));
@@ -82,6 +83,7 @@ const BookmarksBrowser        = lazy(() => import('./pages/BookmarksBrowser.jsx'
 const ConsultationSpace = lazy(() => import('./pages/ConsultationSpace.jsx').then(m => ({ default: m.ConsultationSpace })));
 const Trainer           = lazy(() => import('./pages/Trainer.jsx').then(m => ({ default: m.Trainer })));
 const CompanyTracks     = lazy(() => import('./pages/CompanyTracks.jsx').then(m => ({ default: m.CompanyTracks })));
+const InterviewQABrowser = lazy(() => import('./pages/InterviewQABrowser.jsx').then(m => ({ default: m.InterviewQABrowser })));
 const ChallengesBrowser = lazy(() => import('./pages/ChallengesBrowser.jsx').then(m => ({ default: m.ChallengesBrowser })));
 const ChallengesRunner  = lazy(() => import('./components/challenges/ChallengesRunner.jsx').then(m => ({ default: m.ChallengesRunner })));
 const BIBrowser        = lazy(() => import('./pages/BIBrowser.jsx').then(m => ({ default: m.BIBrowser })));
@@ -496,6 +498,7 @@ export default function App() {
     { key: 'p', action: () => navigate('progress') },
     { key: 'h', action: () => setPage('home') },
     { key: 't', action: () => navigate('trainer') },
+    { key: 'i', action: () => navigate('interview-qa') },
     { key: 'c', action: () => navigate('consult') },
     { key: 'x', action: () => navigate('challenges') },
     { key: 'b', action: () => navigate('bi') },
@@ -1167,7 +1170,11 @@ export default function App() {
           <Unlock onUnlocked={handleUnlocked} alreadyUnlocked={unlocked} onNavigate={navigate} />
         )}
         {page === 'about' && <About />}
+        {page === 'interview-qa' && (
+          <InterviewQABrowser unlocked={unlocked} onBack={() => navigate('home')} />
+        )}
         {page === 'map' && <RoomMap onNavigate={navigate} />}
+        {page === 'failures' && <FailuresCatalog onNavigate={navigate} />}
         {page === 'bank' && <JudgmentBank onNavigate={navigate} />}
         {page === 'blog' && (
           <BlogBrowser onNavigate={navigate} />

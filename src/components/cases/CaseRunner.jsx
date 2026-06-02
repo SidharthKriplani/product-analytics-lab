@@ -7,6 +7,7 @@ import { saveCaseAttempt, clearCaseProgress } from '../../utils/caseProgress.js'
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
+import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 
 // ─── Seeded shuffle helpers ───
 // Deterministic per caseId+phaseId so the same tester sees the same order
@@ -170,6 +171,12 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
       >
         ← Cases Room
       </button>
+
+      <Breadcrumb crumbs={[
+        { label: 'PAL', onClick: onBack },
+        { label: 'Cases Room', onClick: onBack },
+        { label: caseId },
+      ]} />
 
       {/* Case header */}
       <div style={{ marginBottom: '1.25rem' }}>

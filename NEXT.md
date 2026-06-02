@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.52.0 (2026-06-02) — Second 15-feature session: ForwardPointerCard on all 13 runners + foundation rooms, StaffLayer on Stats/Metrics/Cases + 9 leadership notes, icon/emoji audits complete (#79+#80), Defense Strategy micro-sequence + Layer 6 verbal prompts, Quiz Me on Playbook articles, What\'s New + streak on Home, room map (/map), verbal practice (Web Speech API), HowTo on all 4 foundation runners, Challenge Log on Progress, Deep Dives related arrays + Keep reading, Fidelity badges on Simulator.*
+*Last updated: V4.53.0 (2026-06-02) — Third session: Interview Q&A Bank (26 questions, 3-tier answers, new room), Defense Strategy auto-detection (resume-plan banner), Learning Paths with checkpoint tracking on Progress, Breadcrumb nav on 4 major runners, Leadership notes expanded to all 12 RCA cases, Analytics Failures catalog (25 patterns, new Learn room). Build: ✓ 821 modules, 0 errors.*
 
 ---
 
@@ -37,6 +37,15 @@ See Next session item 1.
 ---
 
 ## Carry-forward log
+
+**Done this session (V4.53.0 — 6 high-value features):**
+- **Interview Q&A Bank** — new room at `/interview-qa` (shortcut `i`). 26 analytical PA/PM questions across 7 categories (Experimentation, Metrics, RCA, Product Sense, Statistics, SQL, Growth, BI, Instrumentation) with Analyst/Senior/Staff model answers. QuestionViewer with tier selector, think-first prompt, explanation of what separates each tier.
+- **Defense Strategy auto-detection** — resume-plan banner on input screen: shows "X% complete, Y cases done, Z days ago" with progress bar and "Resume plan →" / "Start fresh" actions.
+- **Learning Paths with checkpoint tracking** — 4 paths (Analytics Ready 6-week, Metrics Mastery, SQL Track, PM Track) as SectionCard on Progress page. Each step has a checkbox, "mark complete" interaction, and direct nav link. Progress tracked in localStorage per path.
+- **Breadcrumb nav** — PAL → Room → CaseID breadcrumb added to RCARunner, StatsRunner, MetricsRunner, CaseRunner.
+- **Leadership notes for all 12 RCA cases** — all RCA01–RCA12 now have Staff-level leadershipNote. GA cases were already complete.
+- **Analytics Failures catalog** — 25 named failure patterns at `/failures` (Failure Patterns in sidebar). Each failure has: symptom, root cause, detection method, fix, and a "Practice this in PAL" link to the relevant room. Categories: Instrumentation, SQL, Experimentation, Analysis, Metrics, Measurement.
+- Build: ✓ 821 modules, 0 errors.
 
 **Done this session (V4.52.0 — 15 high-ROI features from sibling repo analysis + PAL backlog):**
 - ForwardPointerCard wired into ALL 13 runners (Stats, Metrics, Design, Review, Behavioral, Estimation, Growth, BI, STF, Instrumentation, Prioritization, ProductDesign, Challenges) + App.jsx onNavigate wired to all

@@ -495,6 +495,38 @@ export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocke
       {/* ── STEP 1: JD Input ── */}
       {step === 'input' && (
         <div style={{ maxWidth: 640 }}>
+          {/* Resume saved plan banner */}
+          {planSteps.length > 0 && (() => {
+            const done = planSteps.filter(s => isCaseDone(s.roomId, s.caseId)).length;
+            const pct = Math.round((done / planSteps.length) * 100);
+            const savedMeta = (() => { try { const s = JSON.parse(localStorage.getItem(PLAN_KEY) || '{}'); return s; } catch { return {}; } })();
+            const daysAgo = savedMeta.generatedAt ? Math.floor((Date.now() - savedMeta.generatedAt) / (1000 * 60 * 60 * 24)) : null;
+            return (
+              <div style={{ background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', borderRadius: 'var(--radius)', padding: '0.9rem 1.1rem', marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--purple)', marginBottom: '0.3rem' }}>
+                  Previous plan active — {pct}% complete
+                </div>
+                <p style={{ margin: '0 0 0.65rem', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  {done} of {planSteps.length} cases done{daysAgo !== null ? ` · generated ${daysAgo === 0 ? 'today' : daysAgo + (daysAgo === 1 ? ' day ago' : ' days ago')}` : ''}.
+                </p>
+                <div style={{ height: 5, background: 'var(--surface-2)', borderRadius: 99, overflow: 'hidden', marginBottom: '0.65rem' }}>
+                  <div style={{ height: '100%', width: pct + '%', background: 'var(--purple)', borderRadius: 99, transition: 'width 0.3s' }} />
+                </div>
+                <button
+                  onClick={() => setStep('plan')}
+                  style={{ background: 'var(--purple)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.9rem', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Resume plan →
+                </button>
+                <button
+                  onClick={() => { localStorage.removeItem(PLAN_KEY); setPlanSteps([]); }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer', marginLeft: '0.75rem' }}
+                >
+                  Start fresh
+                </button>
+              </div>
+            );
+          })()}
           <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', color: 'var(--text)', marginBottom: '0.6rem' }}>
             Job description
           </label>

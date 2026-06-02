@@ -9,6 +9,7 @@ import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 import { Icon } from '../shared/Icon.jsx';
 import { saveMetricsAttempt, clearMetricsProgress } from '../../utils/metricsProgress.js';
 import { track } from '../../utils/analytics.js';
+import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 
 const ROOM_KEY = 'metrics';
 const NOTES_KEY = 'pal-notes-v1';
@@ -93,6 +94,12 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
       >
         <Icon name="arrow-left" size={14} color="currentColor" />Metrics Room
       </button>
+
+      <Breadcrumb crumbs={[
+        { label: 'PAL', onClick: onBack },
+        { label: 'Metrics Room', onClick: onBack },
+        { label: caseId },
+      ]} />
 
       {/* Case header */}
       <div style={{ marginBottom: '1.5rem' }}>
