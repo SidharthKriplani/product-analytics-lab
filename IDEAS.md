@@ -33,13 +33,13 @@ The audit got every problem to B-grade floor. This pass raises the ceiling to S-
 
 **Layer 1 (data pass, executing now):** For every problem, add to the debrief: (1) FV — the specific wrong query that runs cleanly but measures the wrong thing, what it actually produces, and how to catch it; (2) FA — a sanity check query + the conditions under which the answer would be wrong; (3) MJ — the assumption a senior analyst would state before writing SQL, and where multiple valid interpretations exist, show all of them and explain which to use and why.
 
-**Layer 2 (product sprint, next sprint — requires UI work):** Four new problem format types that need new schema fields and runner components:
-- **Forensic format** — present a broken query that's been running in production; candidate finds the error, explains what it measures vs what was intended, writes the fix
-- **Impossible format** — a business question the data genuinely cannot answer (survivorship bias, tracking gaps, GDPR deletions, missing population); correct answer is "I cannot answer this reliably and here's why"
-- **Cascade format** — multi-part problem where a Part 1 error propagates through Part 2 and Part 3; platform reveals at the end which error compounded
-- **Code review format** — colleague's query is presented; candidate identifies what's wrong, explains what it actually measures, rewrites it
+**Layer 2 — Forensic format: IN PROGRESS (V4.77.0+)**
+Forensic problems live in SQL Lab as a new `difficulty: 'Forensic'` tier alongside Easy/Medium/Hard/Master. A broken query is shown upfront in a red-bordered block — the bug is the problem, not optional debrief reading. User identifies the error and writes the corrected query. Target: ~25 problems total, curated not exhaustive — only where the wrong query produces plausible output that would fool a real analyst. New schema fields: `format: 'forensic'`, `brokenQuery`, `brokenOutputNote`. Full spec in SQL_LAB_PLAN.md Section 12.
 
-Layer 2 requires: new schema fields (wrongSolution, sanityCheck, ambiguousInterpretations, forensicQuery), new runner UI components, new routing logic. Own sprint. Do not start until Layer 1 is fully shipped.
+**Layer 2 — Remaining formats (deferred, own sprint after forensic ships):**
+- **Impossible format** — business question the data cannot answer reliably; correct answer is "I can't, here's why, here's what I'd need"
+- **Cascade format** — multi-part; Part 1 error propagates; platform shows compounded impact at the end
+- **Code review format** — colleague's query; identify bug, explain what it measures, rewrite it
 
 ### SQL Lab — Trap Enrichment Pass (after Batch 13) [HIGHEST PRIORITY POST-AUDIT]
 **Gate:** All 13 audit batches complete. Full execution plan + complete trap taxonomy in SQL_LAB_PLAN.md Section 10.

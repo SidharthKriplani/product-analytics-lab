@@ -3,7 +3,7 @@ import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { datamarts } from '../data/sqlLabDatamarts.js';
 import { track } from '../utils/analytics.js';
 
-const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3 };
+const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3, Forensic: 5 };
 
 function renderDebrief(text) {
   if (!text) return null;
@@ -24,10 +24,11 @@ function renderDebrief(text) {
 const SORTED_PROBLEMS = [...sqlLabProblems].sort((a, b) => DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty]);
 
 const DIFF_COLOR = {
-  Easy:   { bg: 'var(--green-bg,  rgba(16,185,129,0.08))',  text: 'var(--green)',  border: 'var(--green-border,  rgba(16,185,129,0.25))' },
-  Medium: { bg: 'var(--yellow-bg, rgba(245,158,11,0.08))',  text: 'var(--yellow)', border: 'var(--yellow-border, rgba(245,158,11,0.25))' },
-  Hard:   { bg: 'var(--red-bg,    rgba(239,68,68,0.08))',   text: 'var(--red)',    border: 'var(--red-border,    rgba(239,68,68,0.25))' },
-  Master: { bg: 'var(--purple-bg, rgba(139,92,246,0.08))',  text: 'var(--purple)', border: 'var(--purple-border, rgba(139,92,246,0.25))' },
+  Easy:     { bg: 'var(--green-bg,  rgba(16,185,129,0.08))',  text: 'var(--green)',  border: 'var(--green-border,  rgba(16,185,129,0.25))' },
+  Medium:   { bg: 'var(--yellow-bg, rgba(245,158,11,0.08))',  text: 'var(--yellow)', border: 'var(--yellow-border, rgba(245,158,11,0.25))' },
+  Hard:     { bg: 'var(--red-bg,    rgba(239,68,68,0.08))',   text: 'var(--red)',    border: 'var(--red-border,    rgba(239,68,68,0.25))' },
+  Master:   { bg: 'var(--purple-bg, rgba(139,92,246,0.08))',  text: 'var(--purple)', border: 'var(--purple-border, rgba(139,92,246,0.25))' },
+  Forensic: { bg: 'rgba(234,88,12,0.10)',                     text: '#ea580c',       border: 'rgba(234,88,12,0.35)' },
 };
 
 function Badge({ label, style }) {
@@ -187,7 +188,7 @@ function ProblemSidebar({ problems, currentIdx, solved, filterDiff, onFilterDiff
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.875rem' }}>
         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Difficulty</div>
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-          {[null, 'Easy', 'Medium', 'Hard', 'Master'].map(d => {
+          {[null, 'Easy', 'Medium', 'Hard', 'Master', 'Forensic'].map(d => {
             const label = d || 'All';
             const active = filterDiff === d;
             const ds = d ? DIFF_COLOR[d] : null;
@@ -669,6 +670,21 @@ export function SqlLabPage({ onBack }) {
             </div>
             <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.6rem', color: 'var(--text)' }}>{problem.title}</h2>
             <p style={{ fontSize: '0.83rem', lineHeight: 1.65, color: 'var(--text-muted)', margin: 0 }}>{problem.prompt}</p>
+
+            {problem.format === 'forensic' && (
+              <div style={{ marginTop: '0.75rem', border: '1.5px solid rgba(234,88,12,0.45)', borderRadius: '8px', overflow: 'hidden' }}>
+                <div style={{ padding: '0.35rem 0.75rem', background: 'rgba(234,88,12,0.12)', fontSize: '0.68rem', fontWeight: 700, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid rgba(234,88,12,0.2)' }}>
+                  ⚠ Broken query — in production
+                </div>
+                <pre style={{ margin: 0, padding: '0.75rem', background: 'var(--surface-2)', fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: 1.6, color: 'var(--text)', overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{problem.brokenQuery}</pre>
+                {problem.brokenOutputNote && (
+                  <div style={{ padding: '0.4rem 0.75rem', background: 'rgba(234,88,12,0.06)', fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px solid rgba(234,88,12,0.15)', fontStyle: 'italic' }}>
+                    {problem.brokenOutputNote}
+                  </div>
+                )}
+              </div>
+            )}
+
             <SchemaAccordion dm={dm} open={schemaOpen} onToggle={() => setSchemaOpen(o => !o)} />
 
             {/* Expected output */}
@@ -745,7 +761,7 @@ export function SqlLabPage({ onBack }) {
                 onChange={e => { startTimer(); setQuery(e.target.value); }}
                 onKeyDown={handleKeyDown}
                 spellCheck={false}
-                placeholder={'-- Write your SQL here\n-- Ctrl+Enter to run'}
+                placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Ctrl+Enter to run' : '-- Write your SQL here\n-- Ctrl+Enter to run'}
                 style={{
                   width: '100%', minHeight: 280, resize: 'vertical', fontFamily: 'monospace',
                   fontSize: '0.82rem', lineHeight: 1.6, padding: '0.75rem',

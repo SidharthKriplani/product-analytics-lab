@@ -15,11 +15,14 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ## Next session
 
-**1. S-Grade Upgrade Pass — Batch 3 (Easy e21–e30)**
-Batches 1–2 done (e01–e20). Continue FV+FA additions. Scores in SQL_UPGRADE_PASS.md.
+**1. Forensic Format — Batch 2 (f11–f20)**
+Batch 1 (f01–f10) shipped. Next: average of averages, JOIN fanout, wrong JOIN type, temporal ordering, ambiguous metric definition. Same format: broken query upfront, user fixes it.
 
-**2. S-Grade Upgrade Pass — Batches 4–5 (Easy e31–e50)**
-Complete all 50 Easy before moving to Medium.
+**2. Forensic Format — Batch 2 (f11–f20)**
+Average of averages, fanout, HAVING missing, wrong JOIN, temporal ordering.
+
+**3. S-grade debrief pass (Batches 4–13) — paused**
+Resume after forensic Batches 1–3 ship. Structural improvement takes priority over documentation additions.
 
 **3. S-Grade Upgrade Pass — Medium through Master (Batches 6–13)**
 Medium+ gets full MJ/FV/FA treatment + live trap embedding in seed data for top 30 problems.

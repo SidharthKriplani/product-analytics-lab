@@ -280,7 +280,9 @@ The B-grade audit (Batches 1–13) established the floor. The S-grade pass raise
 
 **The trap enrichment taxonomy (9 categories) remains the reference for FV additions.** See SQL_LAB_PLAN.md Section 10 for all 43 named traps. The six highest-ROI traps to embed live in seed data: NULL in NOT IN, integer division, many-to-many fanout, COALESCE on LEFT JOIN aggregate, RANGE vs ROWS on tied dates, denominator confusion.
 
-**Layer 2 (new problem formats) is logged in IDEAS.md and requires a product sprint.** Do not start until Layer 1 (data pass) is complete across all 130 problems.
+**Forensic format is now a standing product decision (V4.77.0+).** Forensic problems live in SQL Lab as `difficulty: 'Forensic'` — a new tier alongside Easy/Medium/Hard/Master. Schema: `format: 'forensic'`, `brokenQuery` (the broken SQL shown upfront), `brokenOutputNote` (what it returns and why it looks plausible). Target ~25 problems total — only problems where the wrong query produces output plausible enough to fool a real analyst. Not a shadow copy of every standard problem. Full spec in SQL_LAB_PLAN.md Section 12.
+
+**Remaining Layer 2 formats (Impossible, Cascade, Code Review) are deferred** — own sprint after forensic ships. Logged in IDEAS.md.
 
 **Standing rule: integer division is always wrong in SQL rate problems.**
 Every solution that computes a rate, percentage, or average using division must include CAST(...AS REAL) or multiply by 1.0 to avoid integer truncation. This applies retroactively to all existing solutions. Check during the enrichment pass.

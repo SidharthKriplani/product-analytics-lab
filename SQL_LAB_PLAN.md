@@ -988,6 +988,64 @@ For problems with ≥2 valid interpretations, show all of them: what each SQL pr
 
 Target per problem: MJ ≥ 3, FV ≥ 4, FA ≥ 4 → new dimensions total ≥ 11. Combined with existing B-grade score (avg 29/35 after audit), S-grade total target ≥ 40/50.
 
-Layer 2 (forensic/impossible/cascade/code-review formats) is logged in IDEAS.md Tier 1. Requires product sprint with new schema fields and UI components. Do not start until Layer 1 complete.
+Layer 2 forensic format is now in progress (V4.77.0+). See Section 12.
 
 **Total estimated:** 5–6 sessions after Batch 13 completes.
+
+---
+
+## Section 12 — Forensic Format (V4.77.0+)
+
+**Status:** In progress. Batch 1 (f01–f10) building now.
+
+### What forensic problems are
+
+A broken query is shown upfront — the candidate has to identify the bug and write the corrected version. The failure mode is unavoidable. This tests reading SQL critically, not writing it from scratch.
+
+Standard format: "Here's what the stakeholder wants. Write the query."
+Forensic format: "This query has been running in production. Here's what it returns. Find what's wrong."
+
+### When a problem qualifies for forensic
+
+The broken query must:
+1. Run without errors
+2. Return a plausible-looking result (not obviously wrong at a glance)
+3. Measure something meaningfully different from what the stakeholder thinks it measures
+4. Have a business consequence if undetected
+
+Weak forensic: `ORDER BY ASC LIMIT 3` → immediately obvious from the numbers. Not worth making.
+Strong forensic: Integer division → every provider shows 0.0% no-show rate. Looks like good news. Dashboard sits for 3 months.
+
+### Schema fields
+
+```js
+{
+  format: 'forensic',          // triggers forensic UI rendering
+  difficulty: 'Forensic',      // new tier — appears in difficulty filter
+  brokenQuery: 'SELECT ...',   // the broken SQL shown in the red block
+  brokenOutputNote: '...',     // what it returns and why it looks plausible
+  // all standard fields still apply: prompt, solution, debrief, datamartId, etc.
+}
+```
+
+### UI rendering (SqlLabPage.jsx)
+
+When `problem.format === 'forensic'`:
+- After the prompt, render a red-bordered block: `BROKEN QUERY — IN PRODUCTION` + the broken SQL + `brokenOutputNote`
+- Change the editor label/placeholder to "Write the corrected query"
+- Difficulty badge uses `var(--red)` colour
+- Everything else (schema accordion, expected output, SQL engine, debrief) unchanged
+
+### Target count and source
+
+~25 total forensic problems. Not a shadow copy of every standard problem — only the ~25 cases where the wrong query produces output plausible enough to fool a real analyst.
+
+Source: the FV wrong-answers documented in the S-grade debrief pass are the strongest candidates. Forensic format promotes them from "optional reading" to "the actual problem."
+
+### Batch map
+
+| Batch | IDs | Source traps | Status |
+|---|---|---|---|
+| 1 | f01–f10 | Integer division, NULL trap, COUNT vs COUNT DISTINCT, missing filter, wrong denominator | In progress |
+| 2 | f11–f20 | Average of averages, fanout, HAVING missing, wrong JOIN type, temporal ordering | Pending |
+| 3 | f21–f25 | Staff-level: compounding errors, metric definition mismatch, survivorship bias | Pending |

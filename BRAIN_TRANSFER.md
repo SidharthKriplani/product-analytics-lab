@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.75.0 | **Build:** ✓ (1.96s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.77.0 | **Build:** ✓ (2.16s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -50,6 +50,10 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V4.77.0** — Forensic format shipped. New `difficulty: 'Forensic'` tier in SQL Lab. 10 forensic problems (f01–f10): integer division, missing quantity, COUNT DISTINCT, = NULL × 2, missing HAVING, re-subscriber churn, COUNT vs COUNT(DISTINCT zip), wrong GROUP BY dimension, off-by-one formula. DIFF_COLOR + filter chip + broken query block UI added to SqlLabPage.jsx. Spec in SQL_LAB_PLAN.md Section 12. Build ✓ 2.16s.
+
+**V4.76.0** — S-Grade Upgrade Pass Batch 3 (Easy e21–e30) complete. FV+FA additions to all 10 problems + MJ/assumption statement on e27+e29. Standouts: e27 integer division all-zero trap (FV=5), e30 COUNT(*) vs COUNT(DISTINCT) returning 187% activation rate (FV=5), e28 churn-with-active-sub business judgment check. Build ✓ 1.61s.
+
 **V4.75.0** — renderDebrief() fix + S-Grade Upgrade Pass Batch 2 (Easy e11–e20) complete. renderDebrief() renders **bold** and paragraph breaks in all debriefs — without this, all FV/FA/MJ additions were invisible (literal asterisks, wall of text). e11–e20 all get FV+FA additions. SQL_UPGRADE_PASS.md Batch 2 scored. Build ✓ 1.96s.
 
 **V4.74.0** — S-Grade Upgrade Pass infrastructure locked + Batch 1 (Easy e01–e10) complete. New 10-dimension rubric (adds MJ/FV/FA) in DECISIONS.md. Section 11 added to SQL_LAB_PLAN.md. SQL_UPGRADE_PASS.md created as tracking artifact. Layer 2 (forensic/impossible/cascade/code-review formats) logged in IDEAS.md Tier 1. No build needed (MD-only changes + debrief additions to sqlLabProblems.js).
@@ -66,9 +70,9 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — S-Grade Upgrade Pass Batch 3 (Easy e21–e30)
+## Next action — Forensic Format Batch 2 (f11–f20)
 
-**S-Grade Upgrade Pass — in progress.** Batches 1–2 done (Easy e01–e20). 11 batches remaining.
+**Forensic format — in progress.** New `difficulty: 'Forensic'` tier in SQL Lab. Broken query shown upfront, user finds bug + writes fix. Target ~25 problems. Batch 1 (f01–f10) building now. Spec in SQL_LAB_PLAN.md Section 12. S-grade debrief pass (Batches 4–13) paused — forensic is the structural improvement, debrief pass was documentation.
 
 New rubric: 10 dimensions (MJ + FV + FA added), max 50, flag < 30 or any dim < 3. Rubric in DECISIONS.md. Batch map in SQL_LAB_PLAN.md Section 11. Scores in SQL_UPGRADE_PASS.md.
 

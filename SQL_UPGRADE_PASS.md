@@ -53,7 +53,23 @@ Easy problems stay at MJ=2-3 by design. e13 earns FA=5 (the +1 formula error is 
 ---
 
 ## Batch 3 — Easy e21–e30
-**Status:** Pending
+**Status:** ✅ Complete | **Date:** 2026-06-03
+
+| ID | Title | MJ | FV | FA | Total | Status |
+|---|---|---|---|---|---|---|
+| e21 | Revenue by Product Category | 2 | 4 | 4 | 10 | ✅ |
+| e22 | Top 3 Most Expensive Products | 2 | 4 | 4 | 10 | ✅ |
+| e23 | Events per Account | 2 | 4 | 4 | 10 | ✅ |
+| e24 | Repeat Buyers | 2 | 4 | 4 | 10 | ✅ |
+| e25 | Total Balance per User | 2 | 4 | 4 | 10 | ✅ |
+| e26 | Large Account Plan Distribution | 2 | 4 | 4 | 10 | ✅ |
+| e27 | Premium Rate by Device OS | 3 | 5 | 5 | 13 | ✅ |
+| e28 | Churned Subscription Log | 2 | 4 | 4 | 10 | ✅ |
+| e29 | Avg Session Duration by Source | 3 | 4 | 4 | 11 | ✅ |
+| e30 | Distinct Buyers Count | 2 | 5 | 4 | 11 | ✅ |
+
+### Batch 3 findings
+e27 (Premium Rate by Device OS) scores highest: integer division trap produces all-zero rates (FV=5), manual iOS verification query (FA=5), denominator definition question (MJ=3). e30 (Distinct Buyers Count) earns FV=5 — COUNT(*) vs COUNT(DISTINCT) is the sharpest wrong-answer in the Easy tier: returns 28 instead of 12, buyer activation rate becomes 187%, immediately credibility-destroying. e28 (Churn Log) gets the most valuable business-judgment addition: the churn-with-active-subscription check that prevents win-back campaigns targeting current customers.
 
 ---
 
