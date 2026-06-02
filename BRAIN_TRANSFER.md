@@ -1,215 +1,118 @@
-# Brain Transfer — V4.52.0 Session State
+# Brain Transfer — V4.53.1
 
-**Date:** 2026-06-02  
-**Session:** 30 product features across two sequential build batches  
-**Outcome:** Comprehensive product build. All 15 high-ROI items from sibling repo analysis complete. Build: ✓ 816 modules, 0 errors.
+**Version:** V4.54.0 | **Build:** ✓ (2.85s, 0 errors) | **Git:** uncommitted | **Date:** 2026-06-02
 
 ---
 
-## 🔒 SPINE MAINTENANCE PROTOCOL (enforce every session)
+## ⚡ SESSION OPEN PROTOCOL — read this, nothing else
 
-**This section MUST be updated before closing ANY session to maintain statefulness:**
+**Read this file only to start.** CLAUDE.md is already in the system prompt. Read NEXT.md only if the next action below is unclear. Never open a source file without grepping first. Reading all MDs at session open burns 80–120k tokens before any work begins — do not do it.
 
-### Before Starting a Session
-- [ ] Read NEXT.md (current priorities)
-- [ ] Read BRAIN_TRANSFER.md (what's ready to ship, context)
-- [ ] Read CLAUDE.md (non-negotiable rules)
-- [ ] Verify git is unlocked: `rm -f .git/index.lock .git/HEAD.lock`
-- [ ] Check build: `npm run dev` (should show 0 errors)
-
-### During the Session
-- [ ] Create a task list (use TaskCreate) for what you're doing
-- [ ] Mark tasks in_progress/completed as you work (TaskUpdate)
-- [ ] Don't commit mid-session (do it at close)
-
-### Before Closing Session (CRITICAL — do not skip)
-
-**Update NEXT.md:**
-- [ ] Add "Done this session (V4.X.X)" section with what you shipped
-- [ ] Update version number in header comment
-- [ ] Reorder priorities if work changed queue
-- [ ] Update "Still open" section with what remains
-- [ ] Mark "Done" items as ✅ in carry-forward log
-
-**Update BRAIN_TRANSFER.md:**
-- [ ] Add "## What Was Just Done" with files changed, lines added/removed
-- [ ] Update all integration patterns to reflect new state
-- [ ] Update git commit code snippet with v4.X.X and new description
-- [ ] Update "Questions for Next Session" based on decisions made
-- [ ] Document any NEW reusable components (location, props, usage pattern)
-- [ ] Update "Key Notes" if architecture changed
-
-**Update SESSION_KICKOFF.md:**
-- [ ] Update priority work queue (if priorities shifted)
-- [ ] Update "Priority Work Queue" sections
-- [ ] Keep git commands up-to-date
-- [ ] Keep file locations reference current
-
-**Verification before closing:**
-- [ ] Build passes: `npm run dev` (0 errors)
-- [ ] All new files created actually exist: `ls src/components/shared/New*.jsx`
-- [ ] NEXT.md has current session logged
-- [ ] BRAIN_TRANSFER.md reflects what's ready
-- [ ] No stale TODOs in spine files
-
-**Git at close:**
-- [ ] Stage everything: `git add -A`
-- [ ] Commit from Mac terminal with version + description
-- [ ] Push with unlock code if needed: `rm -f .git/index.lock && git push origin main`
-
----
-
-## What Was Just Done (V4.51.0)
-
-### ✅ 15 Product Features Shipped
-
-1. **FoundationNudgeCard integrated** — RCABrowser, MetricsBrowser, CasesBrowser, DesignBrowser, ScenarioBrowser. Replaces inline non-dismissable nudges. Component auto-hides when foundation is already completed.
-
-2. **BeginnerOnboardingTrack integrated** — Home.jsx inline block replaced with component. Import added.
-
-3. **Interview Simulator redesign (audit #82)** — InterviewSimulator.jsx config screen: CSS variables (var(--radius), var(--radius-sm)), 2px selected borders, stronger accent-bg, role card label 0.88rem→0.92rem, section labels bolder.
-
-4. **Defense Strategy Layer 4A** — SKILL_ARTICLE_MAP added to DefenseDocGenerator.jsx. onOpenArticle prop wired through App.jsx. "Read first" article link renders above room chips in each day card. Skill derived from primary room.
-
-5. **Defense Strategy plan persistence** — Already implemented (PLAN_KEY at line 278, setItem at line 337). Task was already done.
-
-6. **SQL Lab study plan modal** — StudyPlanModal component added to SqlLabPage.jsx. 4-step flow: goal/days/intensity/confirm. Plan generation (solved-aware, difficulty-sorted, daily chunks). "Study Plan" button in header. Saves to pal-sql-lab-plan-v1.
-
-7. **Trainer skill heatmap** — Debrief screen upgraded: colored cell grid (green/yellow/red per category), "Study next" hint for weakest category, existing progress bars retained.
-
-8. **Keyboard shortcuts in Trainer** — Already implemented (1-4 + Enter/Space). Task was already done.
-
-9. **Keyboard shortcut badges on Home.jsx** — Already implemented via getRoomConfig. Task was already done.
-
-10. **Playbook → practice direct linking** — Already implemented via PostDetail onOpenItem. Task was already done.
-
-11. **ForwardPointerCard** — New shared component at src/components/shared/ForwardPointerCard.jsx. Props: room, onNavigate, onNext. Wired into RCARunner + CaseRunner debrief endings. onNavigate added to both runners in App.jsx.
-
-12. **Progress export/import** — Settings section in Progress.jsx. Export: downloads pal-progress.json with all 26 localStorage keys. Import: file upload → restore all keys → page reload.
-
-13. **BI17-23 difficulty tags** — Already implemented. All 7 chart scenarios had difficulty fields. Task was already done.
-
-14. **Behavioral runner keyboard shortcuts** — useCallback + useEffect added. 1=Strong, 2=Partial, 3=Miss (after reveal only). Enter=Next (when rated + onNext available).
-
-15. **FoundationNudgeCard on DesignBrowser + ScenarioBrowser** — Same upgrade as task 1. Both browsers now use dismissable component instead of inline non-dismissable nudge.
-
-### ✅ Audits Complete (from V4.50.0)
-
-**Audit #91 (Empty States)** — VERIFIED COMPLETE
-- BookmarksBrowser: Already has proper empty state (lines 142-155). Shows emoji, title "No bookmarks yet", and CTA.
-- LockOverlay: Already has proper locked state (40 lines). Shows emoji, title "Private Beta", explanation, button.
-- Status: No action needed.
-
-**Audit #87 (MCQ Distractor Quality)** — VERIFIED COMPLETE
-- All 40 questions in src/data/trainerMCQ.js have subtly-wrong distractors.
-- Status: No action needed.
-
-**Audit #79 + #80 (Icon & Emoji Cleanup)** — PARTIALLY COMPLETE (key headers done)
-- Replaced 3 critical browser header emojis with Icon components:
-  - TakehomeBrowser.jsx: 📝 → file-text Icon
-  - BookmarksBrowser.jsx: 🔖 → bookmark Icon
-  - InstrumentationBrowser.jsx: 📡 → newspaper Icon
-- Added Icon imports to each file.
-
-### ✅ Tier 1 Components Built
-
-**FoundationNudgeCard.jsx** (src/components/shared/)
-- Dismissable card: "Haven't done [X] Foundations yet? → Go to Foundations"
-- Props: foundationRoom, foundationLabel, onNavigate
-- Checks localStorage for foundation completion
-- Ready to wire into practice room browsers
-
-**BeginnerOnboardingTrack.jsx** (src/components/shared/)
-- 4-step visual path: Stat Foundations → RCA Foundations → 3 Easy cases → Defense Strategy
-- Props: onNavigate
-- Displays only on first visit
-- Ready for Home.jsx integration
-
----
-
-## Git Commit Templates (copy-paste into Mac terminal)
-
-### Template 1: Default (USE THIS — single line)
-
-```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.53.0: Interview Q&A Bank (26 questions, 3-tier answers). Defense auto-detection. Learning Paths + checkpoints. Breadcrumb nav. All RCA leadership notes. Analytics Failures catalog (25 patterns). 821 modules." && git push origin main
+```
+1. Connect repo: /Users/ASUS/Documents/GitHub/experimentation-systems-lab
+2. Run: rm -f .git/index.lock .git/HEAD.lock && git status && npm run build
+3. Read this file → read NEXT.md item 1 → start coding
 ```
 
-**Just change:** Version (V4.50.0) and description, then paste into Mac terminal.
+**Grep before Read. Always. No exceptions.**
 
-### Template 2: If Git Stuck (extra lock removal)
+---
+
+## Current state
+
+**17 rooms, 821 modules, 69 articles, 40 MCQ questions, 130 SQL problems (50E/40M/25H/15Master), 12 datamarts.**
+
+Routes in nav: Stats · Metrics · Design · Review · RCA · Cases · Code · Product Design · Prioritization · Behavioral · Estimation · Growth · BI · Instrumentation · Spot the Flaw · Take-Home · Challenges · SQL Lab · Interview Q&A (/interview-qa, shortcut `i`) · Failures (/failures) · Room Map (/map)
+
+---
+
+## What was just done
+
+**V4.54.0** — 3 content builds, 0 new routes: (1) Debrief failure mode pass — all 20 Cases room cases (C01–C22) now have weak answer + interviewer follow-up embedded in `seniorAnswer.interviewPhrase`. (2) Debrief failure mode pass — BI01–BI16 and GA01–GA08 have new `failureMode: { weakAnswer, interviewerFollowUp }` field; BIRunner + GrowthAnalyticsRunner updated to render it. Chart cases BI17–BI23 skipped (different format). (3) Review Room — 6 new scenarios appended to scenarios.js (S13–S18): cuped_variance, right_censored, multi_touch, b2b_constraints, geo_holdout, switchback. File grew from 12 to 18 scenarios. Build: ✓ 0 errors.
+
+**V4.53.1** — Maintenance only. Archived CHANGELOG pre-V4.38 → CHANGELOG_ARCHIVE.md. Archived AUDITS Parts I–XXI → AUDITS_ARCHIVE.md. Context limit rules added to CLAUDE.md.
+
+**V4.53.0** — 6 features: Interview Q&A Bank (26 questions, 7 categories, 3-tier Analyst/Senior/Staff answers, /interview-qa). Defense Strategy auto-detection (resume-plan banner with % complete + Resume/Start-fresh actions). Learning Paths (4 paths with checkbox tracking on Progress page, `pal-lp-{pathId}-v1`). Breadcrumb nav (RCARunner, StatsRunner, MetricsRunner, CaseRunner). Leadership notes on all 12 RCA cases. Analytics Failures Catalog (25 patterns, /failures, sidebar label "Failure Patterns").
+
+**V4.52.0** — 30 features: ForwardPointerCard on all 13 runners. StaffLayer/LeadershipLens (Stats/Metrics/Cases + 9 leadership notes). Audit #79 + #80 complete (icon consistency + emoji removal). Defense Layer 4A + 6 (verbal prompt). Quiz Me on Playbook. What's New card + streak. Room map. Verbal Practice (Web Speech API in BehavioralRunner). HowTo shared component (all 4 foundation runners). Challenge Log on Progress. Deep Dives related[].
+
+---
+
+## Next action — audit #104: Supabase finish or cut (still pending)
+
+**Also done this session but IDEAS/AUDITS not yet updated:**
+- SQL Lab Study Plan modal — already shipped V4.51.0 (StudyPlanModal at line 274 SqlLabPage.jsx) — mark done in IDEAS.md
+- Defense Strategy Layer 4A — already shipped V4.51.0 (SKILL_ARTICLE_MAP at line 123 DefenseDocGenerator.jsx) — mark done in IDEAS.md
+
+## Next action — audit #104: Supabase finish or cut
+
+**Decision required before Batch 2 outreach.** DECISIONS.md is explicit: half-done is worse than either option.
+
+**Option A (finish):** Fix PROGRESS_KEYS drift first (critical — see below), then E2E test with real Supabase project, add auth error handling for invalid credentials + sync failures.
+
+**Option B (cut):** Remove `src/utils/supabase.js`, `src/utils/auth.js`, `src/utils/syncProgress.js`, `src/components/shared/AuthModal.jsx`. Strip auth state from App.jsx. Update README to remove "optional sign-in" claim.
+
+**Why Option B may be faster:** PROGRESS_KEYS has 12+ drifted entries that would silently cause sync to skip most rooms. Fixing all of them is a session on its own before E2E testing even starts.
+
+### PROGRESS_KEYS drift — src/utils/syncProgress.js
+
+Keys in codebase **missing** from PROGRESS_KEYS (sync silently skips these rooms):
+
+| Room | Actual key | Status in sync |
+|---|---|---|
+| Code | `pal-code-progress-v1` | missing |
+| Prioritization | `pal-pri-progress-v1` | missing |
+| Spot the Flaw | `pal-stf-progress-v1` | missing |
+| SQL Lab | `pal-sql-lab-solved-v1` + 3 more | missing |
+| Product Design | `pd-progress-*` prefix pattern | missing |
+| Learning Paths | `pal-lp-{pathId}-v1` (4 paths) | missing |
+
+Version/name mismatches (sync writes to wrong key):
+
+| Room | Key in sync | Actual key |
+|---|---|---|
+| Cases | `pal-cases-progress-v1` | `pal-cases-progress-v2` |
+| RCA | `pal-rca-progress-v1` | `pal-rca-progress-v2` |
+| Take-Home | `pal-take-home-progress-v1` | `pal-takehome-progress-v1` |
+| Exp Foundations | `pal-exp-foundations-progress-v1` | `pal-exp-foundation-progress-v1` |
+| Metrics Foundations | `pal-metrics-foundations-progress-v1` | `pal-metrics-foundation-progress-v1` |
+| RCA Foundations | `pal-rca-foundations-progress-v1` | `pal-rca-foundation-progress-v1` |
+
+---
+
+## Reusable shared components
+
+| Component | Path | Props |
+|---|---|---|
+| ForwardPointerCard | src/components/shared/ForwardPointerCard.jsx | room, onNavigate, onNext |
+| FoundationNudgeCard | src/components/shared/FoundationNudgeCard.jsx | foundationRoom, foundationLabel, onNavigate |
+| BeginnerOnboardingTrack | src/components/shared/BeginnerOnboardingTrack.jsx | onNavigate |
+| StaffLayer | src/components/shared/StaffLayer.jsx | leadershipNote |
+| HowTo | src/components/shared/HowTo.jsx | steps[] |
+| Breadcrumb | src/components/shared/Breadcrumb.jsx | items[] |
+| DifficultyChips | src/components/shared/DifficultyChips.jsx | value, onChange |
+| Icon | src/components/shared/Icon.jsx | name, size, color |
+
+---
+
+## Before closing this session
+
+- [ ] Update this file: version, what was done, next action
+- [ ] Update NEXT.md: log what shipped, reorder queue
+- [ ] Build: `npm run build` (0 errors)
+- [ ] Git commit from Mac terminal (sandbox cannot push)
+
+## Git commit template
 
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && rm -f .git/refs/heads/main.lock && git status && git add -A && git commit -m "V4.50.0: [YOUR DESCRIPTION HERE]" && git push origin main
+cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.X.X: [description]" && git push origin main
 ```
 
-### Template 3: Multi-line (see each step)
-
-```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab"
-rm -f .git/index.lock .git/HEAD.lock
-git add -A
-git commit -m "V4.50.0: All audits resolved (91/87/79+80). Built FoundationNudgeCard + BeginnerOnboardingTrack. Emoji→Icon in 3 headers."
-git push origin main
-```
-
-### Description Format
-
-`V4.X.X: [What you did]. [What you built/fixed]. [Status].`
-
-**Examples:**
-- V4.50.0: All audits resolved (91/87/79+80). Built FoundationNudgeCard + BeginnerOnboardingTrack. Emoji→Icon in 3 headers.
-- V4.51.0: Integrated FoundationNudgeCard into 3 browsers. Added BeginnerOnboardingTrack to Home.jsx. All tests pass.
-- V4.52.0: Finished emoji removal (audit #80). Replaced emojis in PlaybookBrowser + BlogBrowser with Icons.
-
 ---
 
-## Integration Checklist
+## Open / deferred
 
-**High Priority (Quick wins):**
-- [ ] Add FoundationNudgeCard to RCABrowser, MetricsBrowser, CasesBrowser
-- [ ] Add BeginnerOnboardingTrack to Home.jsx (after hero, before "Today" section)
-
-**Medium Priority:**
-- [ ] Finish emoji removal in PlaybookBrowser, BlogBrowser
-- [ ] Audit #82: Simulator layout redesign
-
-**Lower Priority:**
-- [ ] Keyboard shortcuts badge system
-- [ ] Learning paths, heatmap, forward-pointer card
-
----
-
-## Key Notes for Next Session
-
-**Components are ready to use:**
-1. Both components follow the reusable pattern (props-based, no side effects)
-2. Icon system is solid and extensible
-3. localStorage foundation checks are clean
-
-**Git workflow reminder:**
-- Always unlock git first: `rm -f .git/index.lock .git/HEAD.lock`
-- Commit from Mac terminal (sandbox can't push)
-- Use the code snippet above
-
-**Foundation room → Code mapping:**
-- stats → stat-foundations
-- rca → rca-foundations
-- metrics → metrics-foundations
-- cases → stat-foundations
-
-**Color variables for Icon usage:**
-- Blue: var(--blue), var(--blue-bg), var(--blue-border)
-- Teal: var(--teal), var(--teal-bg), var(--teal-border)
-- Green: var(--green), var(--green-bg), var(--green-border)
-- Purple: var(--purple), var(--purple-bg), var(--purple-border)
-
----
-
-## Questions for Next Session
-
-1. Finish all emoji removal (audit #80) or move to Simulator redesign (audit #82)?
-2. Add FoundationNudgeCard to all practice rooms or just core ones?
-3. Any changes to the 4-step beginner path?
-
-Good luck! 🚀
+- Supabase auth (audit #104) — finish or cut, decide before Batch 2
+- Room header icon consistency (audit #79) — remaining browsers not standardized
+- Interview Simulator expansion — gated on PostHog showing Simulator usage
+- VITE_POSTHOG_KEY confirm in Vercel — user action

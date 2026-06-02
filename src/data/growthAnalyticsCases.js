@@ -38,6 +38,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'growth-accounting', label: 'Growth Accounting' }, { id: 'cohort-retention-curves', label: 'Cohort Retention' }],
     leadershipNote: 'A Staff DS would not wait for a stakeholder to ask this question — they would have a recurring DAU decomposition report running weekly with automated alerts on any component moving more than 2pp. The leadership skill is building the measurement infrastructure before the crisis, not diagnosing it after.',
+    failureMode: {
+      weakAnswer: 'The candidate sides with the CEO — acquisition is flat so that must be hurting DAU — without doing any math. They propose doubling the paid acquisition budget, never applying the growth accounting identity to show that new users are stable at 45k/week and cannot explain a 200k DAU drop when retention is the collapsing component.',
+      interviewerFollowUp: '"Show me the math: if you double acquisition budget and new users rise from 45k to 90k per week while weekly retention stays at 58%, how many additional retained DAU does that generate — and how does that compare to the 200k gap you\'re trying to close?"',
+    },
   },
 
   {
@@ -79,6 +83,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'growth-accounting', label: 'Growth Accounting' }, { id: 'notification-driven-dau', label: 'Notification-Driven DAU' }],
     leadershipNote: 'An Analytics Director would immediately ask: "What is our stickiness target and why?" Before segmenting, they would establish whether the current DAU/MAU is above or below the product\'s natural cadence. The framing matters: a weekly-use product at 30% is healthy; a daily-use product at 30% is a crisis.',
+    failureMode: {
+      weakAnswer: 'The candidate confirms the VP\'s concern at face value — "DAU/MAU fell from 22% to 18%, that\'s a real engagement problem" — and recommends the 2-month core loop redesign without decomposing the ratio by user segment. They treat the aggregate metric as diagnostic rather than asking whether the mix of users in the denominator changed.',
+      interviewerFollowUp: '"Power user stickiness is unchanged at 38% and the casual user cohort doubled in size due to a paid campaign. Can you compute what the aggregate DAU/MAU would be under the new mix even if every segment\'s stickiness held constant — and what does that number tell you about whether to launch the engagement initiative?"',
+    },
   },
 
   {
@@ -120,6 +128,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'cohort-retention-curves', label: 'Cohort Retention Curves' }, { id: 'acquisition-quality', label: 'Acquisition Quality' }],
     leadershipNote: 'A Staff DS would build a retention model that automatically flags when a new cohort\'s Day-7 curve falls outside the historical confidence band — not just report the numbers. They would also have pre-written the "retention dropped" communication template so the response time from detection to stakeholder briefing is under 2 hours.',
+    failureMode: {
+      weakAnswer: 'The candidate sees two cohorts with different retention curves and diagnoses a product regression — "something broke between January and March." They recommend a product audit without first profiling the two cohorts by acquisition method, ACV, or switching costs, and they never model the LTV differential that makes the March cohort economically irrelevant despite having 50% more accounts.',
+      interviewerFollowUp: '"No product changes shipped between January and March, and M1 retention is nearly identical for both cohorts. If the product didn\'t change and activation worked equally well, what is the most parsimonious explanation for why the curves diverge sharply at M3 — and what one data cut confirms or refutes it?"',
+    },
   },
 
   {
@@ -161,6 +173,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'funnel-analysis-framework', label: 'Funnel Analysis' }, { id: 'acquisition-quality', label: 'Acquisition Quality' }],
     leadershipNote: 'Leadership-level funnel analysis includes the counterfactual: if we fix the biggest drop-off step, what is the business impact in revenue and DAU? A Staff DS translates every funnel gap into a dollar figure and a headcount justification, making it easy for PMs and engineers to prioritize the fix.',
+    failureMode: {
+      weakAnswer: 'The candidate agrees with the growth team lead — "profile completion is the bottleneck at 28% dropout" — because it is the first step with the highest absolute user loss. They recommend fixing onboarding without running the gap analysis against benchmarks or calculating how many incremental purchases each fix actually generates, missing that Browse→Purchase is catastrophically below benchmark and delivers 5–8x more purchase impact per improvement.',
+      interviewerFollowUp: '"If fixing profile completion from 72% to 80% adds 8,000 more profilers who then flow through the existing 13% Browse→Purchase rate, how many additional first purchases does that generate per week — and how does that compare to the purchase impact of fixing Browse→Purchase from 13% to 25%?"',
+    },
   },
 
   {
@@ -202,6 +218,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'ltv-payback-period', label: 'LTV & Payback Period' }, { id: 'acquisition-quality', label: 'Acquisition Quality' }],
     leadershipNote: 'A Director of Analytics would flag a CAC/LTV imbalance as a finance-level risk, not just a metrics observation. They would ensure the finding reaches the CFO and VP of Growth with a clear payback period calculation and a recommendation on whether to pause acquisition spend — not just surface it in a product review.',
+    failureMode: {
+      weakAnswer: 'The candidate computes LTV:CAC ratios correctly but then hedges — "paid social is below benchmark but the head of growth thinks targeting will improve, so maybe keep a portion running." They never set a concrete gate (e.g., LTV must reach $55 at 12 months or cut the channel), leaving the recommendation vague enough that the head of growth can ignore it and keep spending.',
+      interviewerFollowUp: '"Paid social is at 0.84 LTV:CAC today. The head of growth says LTV will improve with creative optimization. What specific LTV number at what time horizon would you require before allowing the paid social budget to increase — and what happens if that gate isn\'t met in the next two quarters?"',
+    },
   },
 
   {
@@ -243,6 +263,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'notification-driven-dau', label: 'Notification-Driven DAU' }, { id: 'growth-accounting', label: 'Growth Accounting' }],
     leadershipNote: 'At the Staff level, this analysis becomes a policy recommendation: define a "notification health" guardrail metric (e.g., notification-driven DAU must not exceed X% of total DAU) and build it into the launch criteria for any notification-heavy feature. The leadership move is preventing the pattern from recurring, not just diagnosing the current instance.',
+    failureMode: {
+      weakAnswer: 'The candidate takes the 12% DAU increase at face value, noting the notification campaign as the cause, and supports the CEO\'s conclusion that it\'s a success. They don\'t compare session lengths between notification-sourced and organic users, don\'t apply D7 retention to project what DAU looks like next week, and never compute the quality-adjusted engaged DAU.',
+      interviewerFollowUp: '"Notification-sourced sessions average 1.2 minutes vs 8.4 minutes for organic. Apply D7 retention of 23% to the notification cohort and 61% to the organic cohort — what does total DAU look like in seven days if you keep sending notifications at the same volume, and what does it look like if you stop?"',
+    },
   },
 
   {
@@ -284,6 +308,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'organic-growth-quality', label: 'Organic vs Paid Growth' }, { id: 'acquisition-quality', label: 'Acquisition Quality' }],
     leadershipNote: 'A Staff DS would track organic/paid DAU ratio as a leading indicator of brand health and product-market fit, separate from the growth team\'s attribution reporting. They would build a "growth quality index" — a single score combining organic share, Day-30 retention by channel, and CAC payback — and present it monthly to the leadership team.',
+    failureMode: {
+      weakAnswer: 'The candidate accepts the paid acquisition team\'s argument — "growth is growth, 8% MoM is hitting targets" — without decomposing whether organic share is declining. They calculate LTV:CAC at the blended level, notice it\'s worsening, and recommend optimizing paid creative, completely missing the K-factor collapse and the structural implication that Nova is on a treadmill burning ever more budget to stay at the same growth rate.',
+      interviewerFollowUp: '"CAC has gone from $18 to $41 and K-factor from 0.31 to 0.14 over six months. If CAC keeps growing at the same rate, at what point does it cross the LTV ceiling — and what happens to the growth rate when Nova hits that ceiling and can\'t increase the paid budget further?"',
+    },
   },
 
   {
@@ -325,6 +353,10 @@ export const growthAnalyticsCases = [
     ],
     playbookLinks: [{ id: 'cohort-retention-curves', label: 'Cohort Retention Curves' }, { id: 'funnel-analysis-framework', label: 'Funnel Analysis' }],
     leadershipNote: 'A Director of Analytics would use geo cohort analysis as the primary input to the market expansion scorecard — not a one-off analysis. They would build a standardized "market maturity" framework that automatically classifies each market as Early/Growth/Mature/Declining based on cohort curves, and use it to direct resource allocation across markets.',
+    failureMode: {
+      weakAnswer: 'The candidate sides with the regional growth lead — "we\'re only 6 months in, retention will improve as the flywheel builds" — without running the unit economics. They treat low retention as a natural early-market phenomenon, never check first-session purchase conversion as a PMF signal, and never identify that 82% of LatAm users literally cannot complete a purchase because the only payment method available has 18% penetration.',
+      interviewerFollowUp: '"If credit card penetration in the LatAm target demographic is 18%, what is the theoretical maximum first-session purchase conversion rate you could achieve without adding any additional payment methods — and how does that compare to the 8% you\'re actually seeing?"',
+    },
   },
 
   {

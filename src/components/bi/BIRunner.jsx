@@ -413,6 +413,32 @@ function RevealScreen({ caseData, onBack, onNext, unlocked, onNavigate }) {
         </p>
       </div>
 
+      {/* Failure Mode */}
+      {caseData.failureMode && (
+        <div style={{
+          background: 'var(--red-bg, #fff5f5)', border: '1px solid var(--border)',
+          borderLeft: '3px solid var(--red, #e53e3e)',
+          borderRadius: '0 10px 10px 0',
+          padding: '1.1rem 1.25rem',
+          marginBottom: '1rem',
+        }}>
+          <div style={{
+            fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase',
+            letterSpacing: '0.07em', color: 'var(--red, #e53e3e)', marginBottom: '0.75rem',
+          }}>
+            Failure Mode
+          </div>
+          <div style={{ marginBottom: '0.65rem' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>Weak answer pattern</div>
+            <p style={{ margin: 0, fontSize: '0.86rem', color: 'var(--text-secondary)', lineHeight: 1.65 }}>{caseData.failureMode.weakAnswer}</p>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>Interviewer follow-up that exposes it</div>
+            <p style={{ margin: 0, fontSize: '0.86rem', color: 'var(--text)', lineHeight: 1.65, fontStyle: 'italic' }}>{caseData.failureMode.interviewerFollowUp}</p>
+          </div>
+        </div>
+      )}
+
       {/* Key Takeaways */}
       <div style={{
         background: 'var(--surface)', border: '1px solid var(--border)',

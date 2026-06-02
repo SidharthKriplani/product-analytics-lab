@@ -2304,6 +2304,924 @@ export const scenarios = [
     relatedConcepts: ["proxy metric", "activation", "retention", "gamification effect", "checklist gaming"],
     scenarioFamily: "proxy_metric",
     tags: ["onboarding", "activation", "checklist", "SaaS", "B2B", "proxy metric"]
+  },
+
+  // ─────────────────────────────────────────────
+  // SCENARIO 17 — The CUPED Shortcut
+  // Theme: cuped_variance
+  // ─────────────────────────────────────────────
+  {
+    id: 's17-cuped-shortcut',
+    title: 'The CUPED Shortcut',
+    subtitle: 'Raw result was p=0.08. CUPED made it p=0.02. Someone just asked if that\'s valid.',
+    isFree: false,
+    industry: 'ecommerce',
+    difficulty: 'senior',
+    theme: 'cuped_variance',
+
+    context: {
+      company: 'Fieldstone Commerce',
+      product: 'Direct-to-consumer outdoor gear e-commerce — $120M ARR, 800K monthly active buyers',
+      team: 'Experimentation Platform team',
+      background: 'Fieldstone ran a 21-day checkout flow experiment testing a new one-page checkout (treatment) versus the existing multi-step flow (control). The primary metric was order completion rate. The raw result came back p=0.08 — marginal, not significant. The experiment platform team applied CUPED using pre-experiment purchase rate (30-day window before experiment start) as the covariate. After adjustment, the reported p-value dropped to 0.02 and the team shipped.\n\nThree weeks post-launch, a Staff DS on the Data Science Review Board is questioning the adjustment. She pulled the covariate correlation and it\'s r=0.21 between pre-experiment purchase rate and order completion rate during the experiment. The CUPED adjustment was applied. The feature is live.',
+      businessPressure: 'The feature has been live for three weeks. Rolling it back would mean reverting a checkout redesign that engineering spent six weeks on. The PM is citing the p=0.02 in the Q2 wins deck. The Data Science Review Board meeting is tomorrow.'
+    },
+
+    hypothesis: 'A one-page checkout flow will reduce drop-off and increase order completion rate compared to the existing multi-step flow.',
+
+    experimentDesign: {
+      type: 'a/b',
+      allocation: '50/50',
+      runtime: '21 days',
+      targetPopulation: 'All users who reached the checkout page, excluding first-time visitors with no purchase history',
+      primaryMetric: 'Order completion rate (CUPED-adjusted)',
+      guardrailMetrics: ['Revenue per session', 'Support contact rate'],
+      sampleSizeContext: '~45,000 users per arm. Pre-experiment covariate: 30-day purchase rate before experiment start. Reported CUPED-adjusted p=0.02, raw p=0.08.'
+    },
+
+    metricReadout: [
+      {
+        metric: 'Order completion rate (raw)',
+        type: 'primary',
+        direction: 'up',
+        delta: '+1.1pp (12.1% → 13.2%)',
+        pValue: 0.08,
+        confidenceInterval: '[-0.1pp, +2.3pp]',
+        significant: false,
+        note: 'Raw result is not significant at α=0.05. CI crosses zero.'
+      },
+      {
+        metric: 'Order completion rate (CUPED-adjusted)',
+        type: 'primary',
+        direction: 'up',
+        delta: '+1.1pp adjusted',
+        pValue: 0.02,
+        confidenceInterval: '[+0.2pp, +2.0pp]',
+        significant: true,
+        note: 'CUPED-adjusted result. The point estimate is identical — variance reduction narrowed the CI and shifted the p-value below 0.05. Covariate: 30-day pre-experiment purchase rate.'
+      },
+      {
+        metric: 'Revenue per session',
+        type: 'guardrail',
+        direction: 'neutral',
+        delta: '-0.4%',
+        pValue: 0.61,
+        confidenceInterval: '[-2.1%, +1.3%]',
+        significant: false,
+        note: 'PASS. No significant revenue impact.'
+      },
+      {
+        metric: 'Support contact rate',
+        type: 'guardrail',
+        direction: 'up',
+        delta: '+4.2%',
+        pValue: 0.19,
+        confidenceInterval: '[-2.1%, +10.5%]',
+        significant: false,
+        note: 'PASS. Not significant, but directionally worth watching.'
+      },
+      {
+        metric: 'Covariate-outcome correlation (r)',
+        type: 'diagnostic',
+        direction: 'neutral',
+        delta: 'r=0.21',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: 'The correlation between the CUPED covariate (pre-experiment purchase rate) and the outcome metric (order completion rate during experiment) is r=0.21. CUPED variance reduction is proportional to r². At r=0.21, the theoretical variance reduction is approximately 4.4% — negligible. This is the number that determines whether the CUPED adjustment was meaningful.'
+      }
+    ],
+
+    warningFlags: [
+      {
+        id: 'wf-low-covariate-correlation',
+        label: 'r=0.21 covariate correlation renders CUPED variance reduction negligible',
+        description: 'CUPED reduces variance by a factor of (1 - r²). At r=0.21, the variance reduction is approximately 4.4%. This is statistically and practically negligible. The adjusted CI is not materially narrower than the raw CI. The p-value shift from 0.08 to 0.02 is mostly noise in the adjustment, not genuine signal recovery. A valid CUPED application requires r≥0.3 to produce meaningful variance reduction; r≥0.5 is typical in well-designed applications.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-point-estimate-unchanged',
+        label: 'Point estimate is identical before and after CUPED — the effect size did not change',
+        description: 'CUPED adjusts variance, not the point estimate. The +1.1pp effect is the same in both the raw and adjusted result. If the raw result was too small to be confident in at n=45,000, the CUPED adjustment with r=0.21 did not generate new evidence — it just narrowed the CI by 4%. The team shipped on a technicality.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-ship-decision-premature',
+        label: 'Ship decision was made on CUPED-adjusted result without validating covariate quality',
+        description: 'The standard practice is to verify r≥0.3 before reporting a CUPED-adjusted result as the primary decision metric. The covariate here (30-day purchase rate) may be a weak predictor of order completion rate during a specific experiment window — particularly if the experiment attracted new or lapsed users who have no prior purchase history. Covariate quality should be part of the pre-analysis plan.',
+        severity: 'warning'
+      }
+    ],
+
+    decisions: [
+      {
+        id: 'ship_valid',
+        label: 'The ship was correct — CUPED is a valid variance reduction technique and p=0.02 is significant.',
+        description: 'CUPED is an approved method. The adjusted result is significant. The decision was sound.',
+        score: 'junior_miss',
+        feedback: 'CUPED is only valid when the covariate is sufficiently correlated with the outcome. At r=0.21, the variance reduction is approximately 4.4% — far below the threshold where CUPED meaningfully changes the inference. The p-value shifted from 0.08 to 0.02 on negligible variance reduction. This is not a legitimate significance finding — it is a marginal result that crossed a threshold because of a poorly chosen covariate. Shipping based on this CUPED result was premature.'
+      },
+      {
+        id: 'rollback',
+        label: 'Rollback — the CUPED adjustment inflated the result and the feature should not be live.',
+        description: 'The CUPED adjustment was invalid. Revert the feature.',
+        score: 'analyst_ready',
+        feedback: 'Rollback may be overcorrecting. The raw effect (+1.1pp) is directionally real and the guardrails are clean. The problem is not that the effect is zero — it\'s that the evidence crossing p=0.05 was driven by a weak covariate adjustment, not by genuine precision. The more correct path is: acknowledge the ship was based on insufficient CUPED validation, run a proper power-sized experiment with a pre-committed covariate quality threshold, and treat the current live state as an early-read deployment rather than a validated result.'
+      },
+      {
+        id: 'investigate-covariate',
+        label: 'Acknowledge the ship was premature. Audit the covariate correlation. Run a confirmatory experiment with a pre-committed r threshold.',
+        description: 'The covariate quality was not validated. Run a proper confirmatory study.',
+        score: 'senior_ready',
+        feedback: 'This is the right response. The feature is live, the guardrails are clean, and the directional effect is plausible. But the CUPED decision was made without checking r. Going forward: (1) document that the ship was conditional on an invalidated CUPED adjustment, (2) run a confirmatory experiment with a pre-specified covariate (ideally r≥0.5), and (3) add a covariate quality gate (r threshold check) to the experiment platform before CUPED results are used in decisions. The analytical standard failed, not necessarily the feature.'
+      },
+      {
+        id: 'extend',
+        label: 'Run the experiment longer to get a clean raw result.',
+        description: 'More runtime will cross p=0.05 on the raw metric.',
+        score: 'junior_miss',
+        feedback: 'Extending after the experiment has already been stopped and shipped is peeking and post-hoc extension — a different class of analytical error. The question on the table is whether the CUPED adjustment used to justify the original ship was valid. That question is answered by examining r, not by running longer. Running longer would also conflate the current live state (100% of users on new checkout) with an experiment.'
+      }
+    ],
+
+    idealDecision: 'investigate-covariate',
+    secondBestDecision: 'rollback',
+
+    juniorMistake: 'Defends the ship by citing p=0.02 without checking whether CUPED was appropriately applied. Treats any p<0.05 as valid regardless of the variance reduction mechanism. Does not know that CUPED validity depends on covariate-outcome correlation.',
+
+    seniorFlags: [
+      'The first thing to check on any CUPED result is r. At r=0.21, the variance reduction is (1 - 0.21²) = 95.6% of original variance — meaning CUPED reduced variance by only 4.4%. That\'s noise, not signal. The p-value shift from 0.08 to 0.02 on 4.4% variance reduction is not a meaningful precision gain.',
+      'The point estimate is identical in both the raw and adjusted result. When CUPED is working well (r≥0.5), the adjusted estimate should be materially similar to the raw but with tighter CIs. Here, the CI narrowed by 4% — the lower bound shifted from -0.1pp to +0.2pp. That 0.3pp shift crossed zero and crossed 0.05. That is the entire basis for the ship decision.',
+      'CUPED covariate selection should be pre-specified in the analysis plan, not chosen after seeing the raw p-value. Using a 30-day purchase rate as the covariate for an order completion rate outcome is reasonable in principle — but the correlation needs to be validated before the adjustment is applied to a decision.'
+    ],
+
+    staffFlags: [
+      'Would have caught this in design by requiring a covariate quality check (r≥0.3 minimum, r≥0.5 preferred) as a platform-level gate before CUPED results surface in readouts. The experiment platform should compute and display r alongside the adjusted p-value.',
+      'Would have noted that 30-day pre-experiment purchase rate may be a weak covariate for checkout completion specifically because experiment traffic skews toward lapsed or new users who have sparse history — exactly the segment where the new checkout might have the most impact, and where the covariate has the least predictive power.'
+    ],
+
+    debrief: 'CUPED is a variance reduction technique, not a significance manufacturing technique.\n\nHere is what CUPED actually does: it removes the portion of outcome variance that is explained by a pre-experiment covariate. If that covariate is strongly correlated with the outcome (r≥0.5), you get a materially narrower confidence interval and a more precise estimate of the treatment effect. If the covariate is weakly correlated (r<0.3), the variance reduction is negligible and the adjusted result is functionally identical to the raw result.\n\nAt r=0.21, the variance reduction from CUPED is (1 - r²) = 4.4%. The adjusted CI narrowed by 4%. The lower bound shifted from -0.1pp to +0.2pp. That 0.3pp shift is what took the result from p=0.08 to p=0.02 and justified a ship decision.\n\nThat is not a real precision gain. That is a marginal result crossing a threshold because of a poorly validated covariate.\n\nThe point estimate never changed: +1.1pp in both the raw and adjusted result. CUPED does not create evidence of an effect that the raw data doesn\'t contain. It only sharpens precision when the covariate earns it.\n\nThe correct response to a raw p=0.08 is not to find a covariate that tightens the CI enough to cross 0.05. The correct response is: the experiment was not powered to detect this effect size, or the effect is real but small, and the decision should account for that uncertainty.\n\nGoing forward: covariate quality (minimum r threshold) should be a platform gate, not a post-hoc check. Every CUPED readout should display r alongside the adjusted p-value. And any decision based on a CUPED-adjusted result where the raw result did not cross significance should be flagged as conditional on that adjustment\'s validity.',
+
+    interviewTakeaway: 'CUPED validity depends on covariate-outcome correlation. At r=0.21, variance reduction is 4.4% — negligible. A p-value shift from 0.08 to 0.02 on negligible variance reduction is not genuine signal recovery. Always check r before trusting a CUPED-adjusted result.',
+
+    relatedConcepts: ['cuped', 'variance reduction', 'pre-experiment covariate', 'covariate selection', 'regression adjustment'],
+    scenarioFamily: 'cuped_variance',
+    tags: ['cuped', 'variance reduction', 'covariate correlation', 'ecommerce', 'checkout', 'experiment platform']
+  },
+
+  // ─────────────────────────────────────────────
+  // SCENARIO 18 — The 7-Day Annual Conversion Window
+  // Theme: right_censored
+  // ─────────────────────────────────────────────
+  {
+    id: 's18-right-censored-annual',
+    title: 'The 7-Day Annual Conversion Window',
+    subtitle: 'Annual plan conversion is up +3.2pp at 7 days. Most annual plan decisions take 30–60 days.',
+    isFree: false,
+    industry: 'saas',
+    difficulty: 'senior',
+    theme: 'right_censored',
+
+    context: {
+      company: 'Vantage HQ',
+      product: 'B2C productivity SaaS — 1.4M monthly active users, monthly and annual plan tiers',
+      team: 'Growth team',
+      background: 'Vantage HQ ran a 14-day experiment testing a new annual plan upsell prompt that appears on the billing settings page after a user\'s third login in a 7-day window. Treatment shows a contextual modal with annual plan savings. Control shows no modal.\n\nThe primary metric was pre-specified as annual plan conversion rate measured at 7 days post-experiment enrollment. Results at day 14 of the experiment: treatment shows +3.2pp annual plan conversion (p=0.04, CI: [+0.2pp, +6.2pp]).\n\nThe PM wants to ship. The analyst is about to sign off.',
+      businessPressure: 'Annual plan revenue is a board metric. The Head of Revenue has been asking for an annual conversion win for two quarters. The PM framed this as "we finally have the data." The CI just barely clears zero. The analyst has a 48-hour window before the ship decision gets made without her.'
+    },
+
+    hypothesis: 'Showing a contextual annual plan upsell modal after a user\'s third login in 7 days will increase annual plan conversion rate.',
+
+    experimentDesign: {
+      type: 'a/b',
+      allocation: '50/50',
+      runtime: '14 days',
+      targetPopulation: 'Monthly plan subscribers who triggered their third login in a 7-day window during the experiment',
+      primaryMetric: 'Annual plan conversion rate at 7 days post-enrollment',
+      guardrailMetrics: ['Monthly plan cancellation rate', 'Support contact rate'],
+      sampleSizeContext: '~18,000 users per arm. Measurement window: 7 days post-enrollment. Experiment runtime: 14 days. Annual plan decisions at Vantage HQ have a historical median conversion lag of 34 days from first exposure to purchase.'
+    },
+
+    metricReadout: [
+      {
+        metric: 'Annual plan conversion rate (7-day window)',
+        type: 'primary',
+        direction: 'up',
+        delta: '+3.2pp (4.1% → 7.3%)',
+        pValue: 0.04,
+        confidenceInterval: '[+0.2pp, +6.2pp]',
+        significant: true,
+        note: 'Significant at α=0.05, but CI lower bound is +0.2pp — barely above zero. The measurement window is 7 days. Historical data shows the median annual plan conversion lag at Vantage HQ is 34 days from first upsell exposure.'
+      },
+      {
+        metric: 'Monthly plan cancellation rate',
+        type: 'guardrail',
+        direction: 'neutral',
+        delta: '+0.3pp',
+        pValue: 0.41,
+        confidenceInterval: '[-0.4pp, +1.0pp]',
+        significant: false,
+        note: 'PASS. No significant increase in monthly cancellations.'
+      },
+      {
+        metric: 'Support contact rate',
+        type: 'guardrail',
+        direction: 'neutral',
+        delta: '+1.1%',
+        pValue: 0.29,
+        confidenceInterval: '[-0.9%, +3.1%]',
+        significant: false,
+        note: 'PASS.'
+      },
+      {
+        metric: 'Historical annual conversion lag (diagnostic)',
+        type: 'diagnostic',
+        direction: 'neutral',
+        delta: 'Median 34 days, P75 = 58 days',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: 'Pre-experiment data on all voluntary annual plan conversions in the past 90 days. Median conversion lag from first billing page visit to annual plan purchase is 34 days. 75% of annual conversions occur within 58 days. The 7-day measurement window captures approximately 15% of the eventual annual conversion volume.'
+      }
+    ],
+
+    warningFlags: [
+      {
+        id: 'wf-right-censored-window',
+        label: '7-day measurement window captures ~15% of eventual annual conversions — results are right-censored',
+        description: 'Annual plan decisions are deliberate. The historical median conversion lag is 34 days. At 7 days, treatment users who will ultimately convert at day 20, 35, or 50 are counted as non-converters in the denominator. This right-censoring creates measurement bias — the 7-day result is not a stable estimate of the true treatment effect. The direction of bias depends on whether the modal accelerates conversion timing (treatment converts faster but same users eventually convert) or creates net new conversions (treatment users who would never have converted do so). These have very different ROI implications.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-thin-ci',
+        label: 'CI lower bound is +0.2pp — the result is statistically significant but not practically stable',
+        description: 'A CI of [+0.2pp, +6.2pp] is very wide for a 3.2pp point estimate. The range of plausible effects spans from negligible to 2x the point estimate. This is partly caused by the right-censoring: at 7 days, the conversion denominator is large but the event count is small, inflating variance.',
+        severity: 'warning'
+      },
+      {
+        id: 'wf-acceleration-vs-net-new',
+        label: 'Cannot distinguish conversion acceleration from net new conversion at 7 days',
+        description: 'If treatment users simply upgraded sooner (and would have upgraded anyway by day 60), the actual revenue lift is zero — the modal moved the timing but not the volume. If treatment users are genuinely net new annual conversions, the lift is real. You cannot distinguish these two interpretations at 7 days. You need a 60-day measurement window.',
+        severity: 'critical'
+      }
+    ],
+
+    decisions: [
+      {
+        id: 'ship',
+        label: 'Ship — annual conversion is up 3.2pp with p=0.04. The result is significant.',
+        description: 'Significant result, clean guardrails. Ship to 100%.',
+        score: 'junior_miss',
+        feedback: 'The result is statistically significant at 7 days, but the measurement window captures only ~15% of the eventual conversion volume. The effect estimate is based on the fastest-converting users — who are not representative of all annual plan converters. The +3.2pp could be entirely timing acceleration (treatment users converting at day 5 instead of day 35) with zero net revenue lift. Shipping on a 7-day window for a metric with a 34-day median conversion lag is a measurement design error, not a business win.'
+      },
+      {
+        id: 'rollback',
+        label: 'Rollback — the right-censoring means the result is meaningless.',
+        description: 'The 7-day window invalidates the result entirely.',
+        score: 'analyst_ready',
+        feedback: 'Rollback is too strong. The experiment is live, the guardrails are clean, and there is a real signal worth investigating. Right-censoring does not mean the result is zero — it means the result is unstable and possibly biased. The correct response is to extend the measurement window to 60 days while keeping the feature live, not to revert a potentially beneficial upsell prompt. Rollback based on a methodological concern without evidence of harm would be overcorrection.'
+      },
+      {
+        id: 'extend-measurement',
+        label: 'Do not ship yet. Extend the measurement window to 60 days. Distinguish conversion acceleration from net new conversion before making a scaling decision.',
+        description: 'The measurement window is too short for this metric. Wait for the 60-day read.',
+        score: 'senior_ready',
+        feedback: 'This is the right call. Keep the feature live (guardrails are clean, no harm signal), but do not declare a win or scale to 100% until the 60-day measurement window closes. At 60 days, you\'ll have a stable estimate of whether the modal created net new annual conversions or simply moved timing. If the treatment effect persists at 60 days, ship with confidence. If the effect attenuates (control catches up), the modal accelerated conversions but didn\'t change total volume — very different ROI.'
+      },
+      {
+        id: 'extend-runtime',
+        label: 'Re-run the experiment for 60 days to get more statistical power.',
+        description: 'The experiment needs more time.',
+        score: 'analyst_ready',
+        feedback: 'This conflates two different problems. The issue is not runtime (the experiment enrolled 18,000 users per arm in 14 days — that\'s adequate) — it\'s the measurement window for the outcome metric. A longer runtime enrolls more users but doesn\'t fix the right-censoring problem if the measurement window is still capped at 7 days. The fix is extending the outcome measurement window for the users already enrolled, not re-running the experiment.'
+      }
+    ],
+
+    idealDecision: 'extend-measurement',
+    secondBestDecision: 'rollback',
+
+    juniorMistake: 'Ships on p=0.04 without asking what percentage of annual conversions occur within 7 days. Treats "statistically significant at the pre-specified window" as equivalent to "valid measurement of the treatment effect." Does not think about conversion timing distributions.',
+
+    seniorFlags: [
+      'The first question for any conversion metric is: what is the typical conversion lag? If the measurement window is shorter than the P50 conversion lag, the result is right-censored and potentially biased. Here, the 7-day window versus 34-day median is a factor-of-5 mismatch.',
+      'Right-censoring creates a specific bias risk: the treatment and control groups may have different censoring patterns. If the modal accelerates decision-making for treatment users (they decide faster), treatment looks better at 7 days even if total conversion rates are identical by day 60. The 7-day result conflates "converts faster" with "converts more."',
+      'The CI of [+0.2pp, +6.2pp] is telling you the experiment is underpowered for the metric as specified. At a 34-day median lag, a 7-day window has a small event count relative to the denominator — which is why the CI is so wide. More events will come in; you just haven\'t waited for them.'
+    ],
+
+    staffFlags: [
+      'Would have caught this in design by asking what the historical conversion lag distribution looks like before pre-specifying the measurement window. The measurement window should be at least P75 of the historical conversion lag — in this case, 58 days.',
+      'Would have added a secondary metric: "annual plan conversion rate at 60 days" alongside the 7-day primary metric, pre-specified as the confirmatory window. The 7-day result is an early signal only.'
+    ],
+
+    debrief: 'This is a right-censoring problem, not a statistical power problem.\n\nRight-censoring occurs when your measurement window closes before all outcome events have had a chance to occur. In clinical trials, this happens when patients leave the study before the endpoint. In subscription SaaS, it happens when your measurement window for a conversion metric is shorter than the typical conversion timeline.\n\nAt Vantage HQ, the median annual plan conversion lag is 34 days. At 7 days, you have observed approximately 15% of the eventual annual conversions that will occur from this experiment cohort. The other 85% are still pending — their outcome is censored by the measurement window.\n\nHere is why this creates a bias risk, not just imprecision: the treatment and control groups may have different censoring patterns. If the modal prompts users to decide faster (but doesn\'t change who ultimately converts), treatment users disproportionately complete their conversion within the 7-day window. Control users who would have converted by day 35 are counted as non-converts. Treatment looks better at day 7 even if the eventual 60-day conversion rates are identical.\n\nIf that\'s what\'s happening, shipping produces no incremental annual revenue — you just observed the first 15% of a process that would have completed anyway.\n\nThe correct action: keep the feature live (guardrails are clean, the modal isn\'t hurting anything), wait for the 60-day measurement window to close, and make the ship decision on the stable result. If the effect persists at 60 days, the modal is generating net new annual conversions and the business case is real. If treatment and control converge, you have evidence of acceleration but not net new revenue.',
+
+    interviewTakeaway: 'Right-censoring occurs when the measurement window is shorter than the conversion lag distribution. At 7 days for a 34-day median conversion, you are measuring the fastest 15% of converters — a biased sample. Extend the measurement window to P75 of the historical conversion lag before making a ship decision on conversion metrics.',
+
+    relatedConcepts: ['right-censored measurement', 'conversion lag', 'survival analysis', 'measurement window', 'selection bias'],
+    scenarioFamily: 'right_censored',
+    tags: ['subscription saas', 'annual conversion', 'right-censored', 'measurement window', 'upsell', 'LTV']
+  },
+
+  // ─────────────────────────────────────────────
+  // SCENARIO 19 — The Last-Click Mirage
+  // Theme: multi_touch
+  // ─────────────────────────────────────────────
+  {
+    id: 's19-last-click-mirage',
+    title: 'The Last-Click Mirage',
+    subtitle: 'Retargeting ads show +18% revenue lift. The lifecycle email campaign touched the same users. Attribution hasn\'t been sorted out.',
+    isFree: false,
+    industry: 'consumer_app',
+    difficulty: 'senior',
+    theme: 'multi_touch',
+
+    context: {
+      company: 'Evergreen Collective',
+      product: 'Consumer subscription e-commerce — curated home goods, 620K active subscribers, $88M ARR',
+      team: 'Performance Marketing team',
+      background: 'Evergreen Collective ran a 21-day retargeting ad campaign experiment. Treatment: lapsed users (no purchase in 45–90 days) received Facebook and Instagram retargeting ads. Control: lapsed users received no paid retargeting.\n\nLast-click attribution in the reporting dashboard shows treatment users generated 18% more revenue over the experiment period (p=0.01). The Performance Marketing lead is preparing a budget increase proposal to scale retargeting by 3x.\n\nBefore the proposal reaches the CMO, the analytics team flagged that during the same 21-day window, the Lifecycle team ran an email re-engagement campaign that also targeted lapsed users in the 45–90-day window — the same population as the retargeting experiment. The email campaign was not coordinated with the retargeting experiment.',
+      businessPressure: 'The Performance Marketing lead has a board meeting in 10 days where she plans to present the 18% lift as proof that retargeting ROI justifies a $2M budget increase. The Lifecycle email team is simultaneously claiming the revenue recovery was driven by their campaign. Both teams are using the same 18% lift number.'
+    },
+
+    hypothesis: 'Retargeting lapsed users (45–90 days since last purchase) with paid social ads will recover purchase revenue compared to no retargeting.',
+
+    experimentDesign: {
+      type: 'a/b',
+      allocation: '50/50',
+      runtime: '21 days',
+      targetPopulation: 'Lapsed users with no purchase in 45–90 days at experiment start',
+      primaryMetric: 'Revenue per user over 21-day experiment window (last-click attributed)',
+      guardrailMetrics: ['Unsubscribe rate', 'Ad spend per recovered dollar'],
+      sampleSizeContext: '~28,000 users per arm. Last-click attribution. During the same window, the Lifecycle email team sent a 3-email re-engagement sequence to the same lapsed user population — not segmented by experiment arm.'
+    },
+
+    metricReadout: [
+      {
+        metric: 'Revenue per user (last-click attributed, 21 days)',
+        type: 'primary',
+        direction: 'up',
+        delta: '+18.3% ($12.40 → $14.67 per user)',
+        pValue: 0.01,
+        confidenceInterval: '[+4.2%, +32.4%]',
+        significant: true,
+        note: 'Last-click attribution assigns 100% of revenue credit to the last touchpoint before purchase. In this experiment, that is the retargeting ad for any user who clicked an ad before purchasing. However, the lifecycle email campaign ran concurrently for the same user population.'
+      },
+      {
+        metric: 'Unsubscribe rate',
+        type: 'guardrail',
+        direction: 'up',
+        delta: '+0.4pp',
+        pValue: 0.21,
+        confidenceInterval: '[-0.2pp, +1.0pp]',
+        significant: false,
+        note: 'PASS. Not significant.'
+      },
+      {
+        metric: 'Attribution overlap (diagnostic)',
+        type: 'diagnostic',
+        direction: 'neutral',
+        delta: '71% of treatment purchasers also received at least one lifecycle email in the same window',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: '71% of treatment users who made a purchase during the experiment window also received at least one lifecycle email during the same period. Under data-driven attribution, the email campaign receives an estimated 58–62% of revenue credit for overlapping conversions. The retargeting ad\'s standalone contribution under time-decay attribution is estimated at 38–42% of the last-click number.'
+      },
+      {
+        metric: 'Email-only conversion rate (control users who received email)',
+        type: 'diagnostic',
+        direction: 'neutral',
+        delta: 'Control email recipients: $13.89 per user vs. $11.21 for control non-email recipients',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: 'Descriptive only. Control users who received lifecycle emails spent approximately 24% more than control users who did not receive emails. This is confounded (email targeting may have selected higher-intent users) but directionally suggests the email campaign had independent lift.'
+      }
+    ],
+
+    warningFlags: [
+      {
+        id: 'wf-concurrent-campaign-overlap',
+        label: 'Lifecycle email campaign ran concurrently on the same user population — 71% overlap',
+        description: 'The retargeting experiment and the lifecycle email campaign were not coordinated. 71% of treatment purchasers received both retargeting ads and lifecycle emails in the same 21-day window. Last-click attribution assigns all credit to the final touchpoint (the ad click, if the user clicked an ad before purchasing). This systematically overstates the retargeting ad\'s contribution and understates the email campaign\'s contribution.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-last-click-overattribution',
+        label: 'Last-click attribution in a multi-touch environment systematically overattributes to the final paid touchpoint',
+        description: 'Last-click attribution is designed for single-channel environments. When users receive multiple marketing touches (email + paid ads) in the same conversion window, last-click awards 100% of credit to whichever channel the user interacted with immediately before purchasing. This creates a structural bias toward paid channels, which have more measurable click events than email-assisted conversions.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-roi-calculation-inflated',
+        label: '3x budget increase is being proposed on a lift that may be 2.5x overstated',
+        description: 'Under data-driven or time-decay attribution, the retargeting ad\'s standalone contribution is estimated at 38–42% of the last-click revenue lift. Scaling ad spend by 3x on a lift that is actually 38–42% of the reported number produces a negative ROAS.',
+        severity: 'critical'
+      }
+    ],
+
+    decisions: [
+      {
+        id: 'approve_budget',
+        label: 'Approve the 3x budget increase — +18% revenue lift with p=0.01 is definitive.',
+        description: 'The experiment is significant. Scale retargeting.',
+        score: 'junior_miss',
+        feedback: 'The +18% lift is real in the data — but it cannot be cleanly attributed to retargeting ads alone. 71% of treatment purchasers also received lifecycle emails. Under last-click attribution, the ad gets 100% of the credit for any user who clicked an ad as their final touch — even if three emails preceded it and created the intent. Scaling ad spend by 3x on a lift that is 38–42% retargeting-driven produces a negative ROAS. This budget proposal needs attribution analysis before it goes to the CMO.'
+      },
+      {
+        id: 'reject_result',
+        label: 'Reject the experiment result entirely — the concurrent email campaign makes it uninterpretable.',
+        description: 'The campaign overlap invalidates the result.',
+        score: 'analyst_ready',
+        feedback: 'Rejecting entirely overcorrects. The retargeting ad does have some causal contribution — the question is how much. A partial-credit attribution model (data-driven or time-decay) can estimate the retargeting contribution, even imperfectly. The result isn\'t uninterpretable — it\'s last-click-attributed, which overstates the ad contribution. The right move is to quantify the multi-touch adjustment before making a budget decision, not to discard the experiment.'
+      },
+      {
+        id: 'investigate-attribution',
+        label: 'Block the budget proposal. Run multi-touch attribution analysis across both campaigns before any scaling decision. Redesign future experiments with campaign isolation.',
+        description: 'The last-click number is not trustworthy for a budget scaling decision.',
+        score: 'senior_ready',
+        feedback: 'This is the right call. Apply data-driven or time-decay attribution to the conversion data to separate the retargeting and email contributions. Even imperfect multi-touch attribution will materially change the ROAS estimate. If the retargeting contribution under multi-touch attribution still justifies increased spend, bring the adjusted number to the CMO — with the methodology disclosed. Additionally, require campaign isolation in future experiments: if retargeting and lifecycle email target the same population, they need separate experimental arms or coordinated holdouts.'
+      },
+      {
+        id: 'split_credit',
+        label: 'Split the revenue credit 50/50 between retargeting and email and recalculate ROAS.',
+        description: 'Divide the lift equally between the two channels.',
+        score: 'analyst_ready',
+        feedback: 'Arbitrary 50/50 credit splitting is not an attribution methodology — it\'s a guess. The actual contribution of each channel depends on conversion timing, touchpoint sequencing, and channel-specific click data. Data-driven attribution uses conversion path data and counterfactual modeling to estimate each touchpoint\'s contribution. Use the available data, not an arbitrary split.'
+      }
+    ],
+
+    idealDecision: 'investigate-attribution',
+    secondBestDecision: 'reject_result',
+
+    juniorMistake: 'Ships the budget proposal based on last-click attribution without asking about concurrent campaigns or what fraction of converters were touched by both channels. Treats p=0.01 as sufficient to recommend a $2M budget increase.',
+
+    seniorFlags: [
+      'The first question after seeing a large revenue lift in a retargeting experiment is: what else was running on the same population? Campaign isolation is the most common source of attribution errors in performance marketing experiments.',
+      'Last-click attribution in a multi-touch environment is not a neutral measurement choice — it systematically favors paid channels that generate click events over email and organic channels that assist conversions without receiving the final click. Any budget decision based on last-click attribution in a multi-touch environment is structurally biased toward paid channels.',
+      '71% overlap between retargeting experiment and lifecycle email is not a footnote — it is the dominant fact in this readout. A 71% overlap means the vast majority of treatment conversions are joint retargeting + email conversions, not pure retargeting conversions.'
+    ],
+
+    staffFlags: [
+      'Would have required campaign isolation at experiment design: either coordinate holdout populations across teams, or create four experimental arms (retargeting only, email only, both, neither) to isolate the individual and combined lift of each channel.',
+      'Would have flagged that the retargeting experiment design has a confounding risk by construction: treatment users received both ads and emails, control users received only emails. The experiment is not measuring "retargeting vs. no retargeting" — it is measuring "retargeting + email vs. email alone," which is a different and more limited question.'
+    ],
+
+    debrief: 'Last-click attribution is a legal fiction in multi-touch environments.\n\nHere is what last-click attribution actually computes: whichever channel the user interacted with immediately before purchasing receives 100% of the revenue credit. If a user received three lifecycle emails over 14 days, clicked on a retargeting ad on day 15, and purchased on day 15 — the ad gets full credit. The emails get nothing.\n\nThis is not a description of how the user made their decision. It is a description of which channel happened to fire last.\n\nIn this experiment, 71% of treatment purchasers received both retargeting ads and lifecycle emails in the same 21-day window. For most of those users, the conversion was the result of multiple touchpoints working together — the emails rebuilt intent, the ad provided the final trigger. Last-click attribution awards all credit to the final trigger and zero to the intent-building.\n\nWhen data-driven attribution is applied (which uses conversion path data to estimate each touchpoint\'s counterfactual contribution), the retargeting ad\'s estimated contribution drops to approximately 38–42% of the last-click number. The email campaign claims the remaining 58–62%.\n\nA 3x budget increase in retargeting based on a +18% last-click lift translates to a 3x budget increase on what is actually a +7–8% retargeting-attributable lift. Depending on the marginal cost per impression, that produces a negative ROAS.\n\nThe fix going forward is campaign isolation: future retargeting experiments must either (1) coordinate holdout populations with the lifecycle email team so the experimental and control populations receive different treatments, or (2) use a 2x2 experimental design with four arms — retargeting only, email only, both, neither — to isolate the individual and combined lift of each channel.',
+
+    interviewTakeaway: 'Last-click attribution assigns 100% of credit to the final touchpoint in a multi-touch conversion path. When paid ads and email campaigns run concurrently on the same population, last-click systematically overattributes to paid channels. Always ask what else was running on the same population before approving budget scaling decisions.',
+
+    relatedConcepts: ['last-click attribution', 'multi-touch attribution', 'data-driven attribution', 'campaign isolation', 'ROAS', 'incrementality testing'],
+    scenarioFamily: 'multi_touch',
+    tags: ['attribution', 'multi-touch', 'retargeting', 'email', 'performance marketing', 'last-click']
+  },
+
+  // ─────────────────────────────────────────────
+  // SCENARIO 20 — The 65-Account Experiment
+  // Theme: b2b_constraints
+  // ─────────────────────────────────────────────
+  {
+    id: 's20-sixty-five-account-experiment',
+    title: 'The 65-Account Experiment',
+    subtitle: '+12pp activation in 65 enterprise accounts, p=0.09. The team is debating whether to ship.',
+    isFree: false,
+    industry: 'saas',
+    difficulty: 'senior',
+    theme: 'b2b_constraints',
+
+    context: {
+      company: 'Meridian Ops',
+      product: 'Enterprise operations SaaS — 65 active enterprise accounts, $24M ARR, 18-month average sales cycle',
+      team: 'Product and Customer Success team',
+      background: 'Meridian Ops tested a redesigned onboarding flow with enterprise accounts that signed in the last 90 days. Treatment received the new flow (structured guided setup with a dedicated CSM touchpoint at day 3). Control received the existing flow (self-serve documentation and email drip).\n\nThe experiment ran for 6 weeks. 32 accounts in treatment, 33 in control. Primary metric: meaningful activation rate at 30 days (defined as: at least 3 users per account using the core workflow feature at least twice in the first 30 days). Results: treatment 70.6% activated, control 58.6% activated. Absolute difference: +12pp. p=0.09.\n\nThe Head of Product wants to ship the new onboarding flow. The analyst is being asked to sign off.',
+      businessPressure: 'Enterprise churn in the first 90 days is the company\'s single largest revenue risk. Two enterprise accounts churned in the last quarter within 60 days of signing — both cited "poor onboarding" in exit interviews. The board has asked leadership to demonstrate improvement in onboarding quality by next quarter. The Head of Product is presenting the experiment results at the all-hands tomorrow.'
+    },
+
+    hypothesis: 'A structured guided onboarding flow with a dedicated CSM touchpoint at day 3 will increase meaningful activation rate at 30 days for new enterprise accounts.',
+
+    experimentDesign: {
+      type: 'a/b',
+      allocation: '~50/50',
+      runtime: '6 weeks',
+      targetPopulation: 'Enterprise accounts signed in the 90 days prior to experiment start',
+      primaryMetric: 'Meaningful activation rate at 30 days (3+ users using core workflow feature 2+ times)',
+      guardrailMetrics: ['90-day churn rate', 'CSM time per account'],
+      sampleSizeContext: '32 treatment accounts, 33 control accounts. Pre-specified MDE: 15pp (based on power analysis at 65 accounts). Observed effect: +12pp. Statistical power at 12pp MDE with n=65 accounts is approximately 32–35%.'
+    },
+
+    metricReadout: [
+      {
+        metric: 'Meaningful activation rate at 30 days',
+        type: 'primary',
+        direction: 'up',
+        delta: '+12pp (58.6% → 70.6%)',
+        pValue: 0.09,
+        confidenceInterval: '[-2pp, +26pp]',
+        significant: false,
+        note: 'Not significant at α=0.05. Pre-specified MDE was 15pp. The observed effect of 12pp is below the MDE the experiment was powered to detect. At n=65 accounts, statistical power to detect a 12pp effect is approximately 32–35% — meaning this experiment had a 65–68% chance of returning p>0.05 even if the true effect is 12pp. The non-significant p-value is not evidence that the feature does not work.'
+      },
+      {
+        metric: '90-day churn rate',
+        type: 'guardrail',
+        direction: 'neutral',
+        delta: '0% in both arms (no churns during experiment)',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: 'PASS. No churn events in either arm during the 6-week window. Baseline is too low and window too short to measure this reliably.'
+      },
+      {
+        metric: 'CSM time per account',
+        type: 'guardrail',
+        direction: 'up',
+        delta: '+4.1 hours per account',
+        pValue: 0.004,
+        confidenceInterval: '[+1.4h, +6.8h]',
+        significant: true,
+        note: 'GUARDRAIL NOTE. Treatment requires significantly more CSM time. At scale (65 accounts × 4.1h), this is a material operational cost. If the new flow were applied to all new accounts, CSM capacity would need to increase.'
+      }
+    ],
+
+    warningFlags: [
+      {
+        id: 'wf-underpowered-design',
+        label: 'Power at 12pp MDE is 32–35% — the experiment cannot distinguish a real effect from noise',
+        description: 'With 65 accounts and a 12pp observed effect, the experiment had approximately a 35% chance of detecting the effect even if it is real. A p=0.09 result in an experiment with 35% power is expected — it does not constitute evidence that the feature is ineffective. The correct interpretation: this experiment is consistent with a real effect of 8–20pp, but it cannot confirm or rule out an effect below 15pp.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-ci-spans-zero',
+        label: 'CI of [-2pp, +26pp] is extremely wide — the range of plausible effects includes harm',
+        description: 'A 95% CI of [-2pp, +26pp] includes effects from slight harm to very large benefit. This is not a result that supports confident decision-making in either direction. At 65 accounts, the experiment simply does not have the statistical resolution to answer the question.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-csm-cost-signal',
+        label: 'CSM time is significantly elevated — operational cost is real and must be in the ROI calculation',
+        description: 'Treatment accounts required 4.1 additional CSM hours on average. If applied to all new enterprise accounts, this is a meaningful operational cost. The activation lift (real but uncertain) needs to be weighed against the confirmed CSM cost. This is a capacity and unit economics decision, not just a product decision.',
+        severity: 'warning'
+      }
+    ],
+
+    decisions: [
+      {
+        id: 'ship',
+        label: 'Ship the new onboarding flow — +12pp activation is a large and meaningful effect even if p=0.09.',
+        description: 'The effect size is large. Ship.',
+        score: 'analyst_ready',
+        feedback: 'The effect size is directionally compelling, but shipping based on p=0.09 from a 35%-powered experiment creates a real risk: you cannot distinguish a 12pp true effect from a 3–4pp true effect with noise at this sample size. The CI spans from -2pp to +26pp. Shipping also scales the CSM cost (confirmed at +4.1 hours per account) without confirmed activation benefit. The right move is not to ship on this data, but also not to abandon the feature — instrument a full rollout with pre-committed 6-month success criteria.'
+      },
+      {
+        id: 'rollback',
+        label: 'Rollback and abandon the new onboarding — p=0.09 is not significant.',
+        description: 'The experiment failed. Revert.',
+        score: 'junior_miss',
+        feedback: 'This is the most common error in underpowered B2B experiments: treating "not significant" as "no effect." With 35% power, a non-significant result tells you almost nothing about whether the feature works. The experiment is consistent with a real 12pp effect — it just cannot confirm it at α=0.05. Abandoning a feature with a plausible large effect because of an underpowered test is leaving a potentially important product improvement on the table. The correct analytical response is to acknowledge the underpowering, not to conclude the feature failed.'
+      },
+      {
+        id: 'instrument-rollout',
+        label: 'Do not ship based on this experiment. Apply the new flow to all new enterprise accounts going forward. Pre-commit to 6-month activation and retention success criteria. Measure at scale.',
+        description: 'The experiment cannot answer the question at 65 accounts. Instrument a full rollout with pre-committed criteria.',
+        score: 'senior_ready',
+        feedback: 'This is the correct B2B response. Standard A/B testing cannot be done reliably at n=65 accounts — you will never have enough accounts in a short window for clean statistical inference. The right framework: apply the best-current-hypothesis onboarding to all new accounts, define specific 6-month success criteria (activation rate, 90-day retention, NPS) in advance, and measure at the cohort level. This is not "shipping without evidence" — it is acknowledging the limits of small-n experimentation and adopting a measurement framework that matches the business context.'
+      },
+      {
+        id: 'rerun_longer',
+        label: 'Rerun the experiment for 6 months to accumulate more accounts and reach statistical significance.',
+        description: 'More accounts over more time will give the statistical power needed.',
+        score: 'analyst_ready',
+        feedback: 'This is technically sound but organizationally impractical. At Meridian Ops\'s growth rate, accumulating enough enterprise accounts for 80% power on a 12pp MDE would take 18–24 months. The company cannot wait that long for an onboarding decision. The correct response to the B2B small-N constraint is not "run longer" — it is to adopt a different evidence-gathering framework (staged rollout with pre-committed success criteria) that generates actionable evidence within the business\'s timeline.'
+      }
+    ],
+
+    idealDecision: 'instrument-rollout',
+    secondBestDecision: 'ship',
+
+    juniorMistake: 'Treats p=0.09 as a failed experiment and recommends abandoning the feature. Does not understand that a non-significant result in a 35%-powered test carries almost no evidential weight in either direction. Applies consumer product statistical norms to a 65-account B2B context.',
+
+    seniorFlags: [
+      'Statistical power is the critical context for interpreting any p-value. At 35% power, p=0.09 is fully consistent with a true 12pp effect. "Not significant" means "insufficient power to detect at this MDE" — not "no effect." The CI [-2pp, +26pp] is the honest summary of what the data can say.',
+      'The B2B small-N problem is structural, not fixable by running longer (within a reasonable business timeline). The correct experimental framework for 65 enterprise accounts is a staged rollout with pre-committed success criteria — not a randomized experiment that will never reach 80% power on a 30-day cohort window.',
+      'The CSM cost signal is actually the most actionable finding from this experiment. Treatment requires 4.1 more hours per account — confirmed, significant. Any ship decision needs a unit economics model: what is the activation lift worth in retention and expansion revenue, and does it justify the CSM cost at scale?'
+    ],
+
+    staffFlags: [
+      'Would have identified the N constraint before designing the experiment. At 65 accounts, a standard A/B test is underpowered for almost any realistic effect size on a 30-day metric. The design should have been a staged rollout with pre-committed success criteria, not a randomized experiment.',
+      'Would have flagged that "apply new flow to all accounts" is not the only alternative to A/B testing. Quasi-experimental methods (difference-in-differences on cohorts, synthetic control) may be applicable if there is sufficient historical data. The question is not "A/B test or nothing" — it is "what is the best available evidence framework for 65 accounts?"'
+    ],
+
+    debrief: 'This is not an experiment failure. It is an experiment design failure.\n\nWith 65 enterprise accounts, a 6-week window, and a 12pp observed effect, the statistical power was approximately 35%. That means this experiment had a 65% chance of returning p>0.09 even if the true activation lift is exactly 12pp. The p=0.09 result is exactly what you would expect from a 35%-powered experiment testing a real effect.\n\n"Not significant" does not mean "the feature doesn\'t work." It means the experiment cannot tell you whether the feature works. Those are completely different claims.\n\nThe correct analytical response to underpowered B2B experiments is not to treat them as null results. It is to explicitly state the power constraint, characterize the range of plausible effects (here: -2pp to +26pp), acknowledge that the experiment cannot distinguish signal from noise at this sample size, and recommend a framework that can generate actionable evidence within the business\'s constraints.\n\nFor 65 enterprise accounts, that framework is almost never a randomized A/B test. It is a staged rollout with pre-committed success criteria: apply the best-current-hypothesis onboarding to all new accounts, define the specific activation and retention benchmarks that would constitute success, and measure at 3, 6, and 12 months. This generates real-world evidence from the actual deployment without requiring statistical power you will never have.\n\nThe CSM cost finding is real and should be part of the decision. Treatment accounts required 4.1 additional CSM hours — that is a confirmed, significant cost that scales linearly with account growth. The decision to apply the new onboarding flow at scale is not just a product decision — it is a capacity and unit economics decision that the Customer Success team needs to be part of.',
+
+    interviewTakeaway: 'Standard A/B testing is not appropriate for enterprise B2B at small N. With 35% power, p=0.09 is not evidence of no effect — it is evidence of an underpowered experiment. The correct framework for 65 enterprise accounts is staged rollout with pre-committed success criteria, not a randomized test that will never reach adequate power within a practical timeline.',
+
+    relatedConcepts: ['statistical power', 'underpowered experiment', 'B2B experimentation', 'small N', 'staged rollout', 'MDE'],
+    scenarioFamily: 'b2b_constraints',
+    tags: ['B2B', 'enterprise SaaS', 'statistical power', 'underpowered', 'small N', 'onboarding']
+  },
+
+  // ─────────────────────────────────────────────
+  // SCENARIO 21 — The Spillover City
+  // Theme: geo_holdout
+  // ─────────────────────────────────────────────
+  {
+    id: 's21-spillover-city',
+    title: 'The Spillover City',
+    subtitle: 'Driver bonus experiment shows +8% ride completion. Half the drivers in the same city are the control group.',
+    isFree: false,
+    industry: 'marketplace',
+    difficulty: 'senior',
+    theme: 'geo_holdout',
+
+    context: {
+      company: 'Velora',
+      product: 'Rideshare two-sided marketplace — 18 cities, 340K active drivers, 2.1M weekly riders',
+      team: 'Driver Supply team',
+      background: 'Velora\'s Driver Supply team ran a 4-week experiment testing a new driver completion bonus: drivers who completed 8+ rides in a single day received a $12 end-of-day bonus. The team used user-level randomization — 50% of drivers in all 18 cities were randomly assigned to treatment (eligible for the bonus), and 50% were assigned to control (no bonus).\n\nPrimary metric: ride completion rate (rides completed / rides accepted). Results: treatment drivers show 8.4% higher ride completion rate (p=0.02). The experiment passed SRM check. The team is preparing to ship.\n\nA Staff DS on the experimentation review team is flagging a SUTVA violation before the ship meeting.',
+      businessPressure: 'Driver supply is Velora\'s top operational constraint. The CEO has said publicly that improving driver completion rates is a Q3 priority. The Driver Supply team has been waiting 6 weeks for experiment results. The business case for the bonus is strong if the lift is real.'
+    },
+
+    hypothesis: 'A per-day ride completion bonus ($12 for 8+ completed rides in a day) will increase driver ride completion rate by incentivizing drivers to complete accepted rides rather than cancel.',
+
+    experimentDesign: {
+      type: 'a/b',
+      allocation: '50/50',
+      runtime: '4 weeks',
+      targetPopulation: 'All active drivers in 18 cities (active = at least 1 ride in prior 30 days)',
+      primaryMetric: 'Ride completion rate (rides completed / rides accepted)',
+      guardrailMetrics: ['Rider cancellation rate', 'Driver earnings per hour', 'Platform contribution margin per ride'],
+      sampleSizeContext: '~170,000 drivers per arm across 18 cities. User-level (driver-level) randomization. Control and treatment drivers coexist in the same cities and compete for the same rider demand.'
+    },
+
+    metricReadout: [
+      {
+        metric: 'Ride completion rate',
+        type: 'primary',
+        direction: 'up',
+        delta: '+8.4% (76.2% → 82.6%)',
+        pValue: 0.02,
+        confidenceInterval: '[+1.3%, +15.5%]',
+        significant: true,
+        note: 'Significant. But SUTVA is violated — treatment and control drivers compete for the same rider demand in the same cities. When treatment drivers complete more rides, control drivers in the same city complete fewer rides (demand is being absorbed). This means the control group\'s behavior is directly affected by treatment assignment, violating the stable unit treatment value assumption.'
+      },
+      {
+        metric: 'Rider cancellation rate',
+        type: 'guardrail',
+        direction: 'down',
+        delta: '-1.1pp',
+        pValue: 0.08,
+        confidenceInterval: '[-2.3pp, +0.1pp]',
+        significant: false,
+        note: 'Trending positive (fewer rider cancellations) but not significant. Could be a real benefit or a result of treatment drivers absorbing demand faster than control drivers.'
+      },
+      {
+        metric: 'Driver earnings per hour (control group)',
+        type: 'diagnostic',
+        direction: 'down',
+        delta: '-6.2% in control vs. pre-experiment baseline',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: 'Control driver earnings per hour declined 6.2% compared to the 4-week pre-experiment baseline. In a demand-equilibrium two-sided market, treatment drivers absorbing more rides directly reduces the rides available to control drivers. This is the SUTVA spillover signature.'
+      },
+      {
+        metric: 'Rides per driver per day (control group)',
+        type: 'diagnostic',
+        direction: 'down',
+        delta: '-4.8% in control vs. pre-experiment baseline',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: 'Control drivers are completing fewer rides than pre-experiment. If control drivers were unaffected by treatment assignment, their ride volume should be flat versus baseline. A 4.8% decline in the control group is direct evidence of demand-side spillover from treatment to control.'
+      }
+    ],
+
+    warningFlags: [
+      {
+        id: 'wf-sutva-violation',
+        label: 'SUTVA violated — treatment and control drivers compete for the same ride demand in the same city',
+        description: 'SUTVA (Stable Unit Treatment Value Assumption) requires that the outcome for any unit is unaffected by the treatment assignment of other units. In a two-sided marketplace, driver-level randomization in the same city violates SUTVA: when treatment drivers complete more rides, they absorb demand that would have gone to control drivers. Control driver completion rate is depressed not because the bonus doesn\'t work, but because treatment drivers are taking their rides. The measured +8.4% lift overstates the true population effect.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-control-group-harmed',
+        label: 'Control group earnings and ride volume are declining vs. baseline — direct spillover signature',
+        description: 'Control driver earnings per hour fell 6.2% and rides per driver per day fell 4.8% versus pre-experiment baseline. In a valid experiment with no spillover, control group metrics should be stable versus baseline. These declines are the signature of demand absorption by the treatment group.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-measured-lift-inflated',
+        label: 'The +8.4% lift includes a spillover inflation component — true lift at full deployment is unknown',
+        description: 'At full deployment (100% of drivers receive the bonus), the demand-absorption effect disappears — all drivers are equally incentivized. The +8.4% lift measured in the experiment includes the artificial advantage treatment drivers had over control drivers. The true incremental lift of giving the bonus to all drivers is lower than +8.4%, by an unknown amount.',
+        severity: 'critical'
+      }
+    ],
+
+    decisions: [
+      {
+        id: 'ship',
+        label: 'Ship — p=0.02 is significant and the bonus produces a real driver behavior change.',
+        description: 'The lift is real and significant. Ship to all drivers.',
+        score: 'junior_miss',
+        feedback: 'The +8.4% lift includes a spillover inflation component from SUTVA violation. Treatment drivers performed better partly because control drivers in the same city were completing fewer rides — demand was being absorbed by treatment drivers, making more rides available to them. At full deployment, this within-city demand absorption effect vanishes. The true completion rate lift at full deployment is lower than +8.4%. Shipping on the experimental result without accounting for the SUTVA violation overstates the expected platform-level benefit.'
+      },
+      {
+        id: 'rollback',
+        label: 'The result is untrustworthy — SUTVA violation means the experiment tells us nothing.',
+        description: 'The SUTVA violation makes the experiment results meaningless.',
+        score: 'analyst_ready',
+        feedback: 'The SUTVA violation makes the result unreliable, not meaningless. The bonus almost certainly has some positive effect on completion rate — treatment drivers changed their behavior in response to the incentive. The question is whether the effect size at scale is large enough to justify the bonus cost. The experiment overstates that effect. The correct response is to redesign as a geographic holdout experiment to get a clean estimate, not to abandon the bonus concept entirely.'
+      },
+      {
+        id: 'geo-holdout',
+        label: 'Block the ship. Redesign as a geographic holdout: 9 cities treatment, 9 cities control. Re-run for 4 weeks.',
+        description: 'User-level randomization violates SUTVA in a two-sided marketplace. Geographic randomization is the correct design.',
+        score: 'senior_ready',
+        feedback: 'This is the correct call. Geographic randomization removes the within-city SUTVA violation by ensuring treatment and control drivers do not compete for the same rider demand. In a 9-city / 9-city design, treatment cities have all drivers on the bonus and control cities have no drivers on the bonus. The measured lift reflects the true population effect of the bonus, including its impact on city-level supply equilibrium. The cost is a smaller city-level N (9 vs. 170,000 drivers), which requires longer runtime or city-level covariate adjustment for clean inference.'
+      },
+      {
+        id: 'apply-correction',
+        label: 'Apply a statistical correction for the SUTVA violation and use the corrected estimate for the ship decision.',
+        description: 'Adjust the effect estimate for spillover.',
+        score: 'analyst_ready',
+        feedback: 'Spillover correction methods exist (e.g., bipartite interference models, network exposure models) but are complex and their assumptions are strong. Applying a post-hoc correction to a SUTVA-violated experiment is not standard practice — the corrected estimate will have wide uncertainty. The cleaner and more defensible path is to re-run with geographic randomization. Post-hoc correction is acceptable when re-running is impossible; here, a 4-week geo holdout is feasible.'
+      }
+    ],
+
+    idealDecision: 'geo-holdout',
+    secondBestDecision: 'apply-correction',
+
+    juniorMistake: 'Ships based on p=0.02 without asking whether treatment and control units are independent. Does not know what SUTVA is or when it is violated. Does not check control group trends versus pre-experiment baseline.',
+
+    seniorFlags: [
+      'The SUTVA check for marketplace experiments is mandatory and should be part of the experiment design review, not post-hoc analysis. For any two-sided marketplace experiment, ask immediately: do treatment and control units compete for the same supply or demand? If yes, user-level randomization is invalid. The correct unit of randomization is the market (city, region, time window).',
+      'The signature of SUTVA violation in a supply-competition experiment is a declining control group. If control driver metrics are declining versus pre-experiment baseline while treatment driver metrics are rising, demand is being transferred from control to treatment — not created by treatment. That is the spillover pattern.',
+      'The true platform-level effect of giving the bonus to all drivers is not the +8.4% measured in the experiment. At 100% deployment, all drivers are equally incentivized. The demand absorption advantage treatment drivers had over control drivers disappears. The actual completion rate lift at scale is determined by the behavioral incentive effect alone, stripped of the spillover inflation.'
+    ],
+
+    staffFlags: [
+      'Would have required a two-sided marketplace SUTVA assessment at experiment design. The standard question: "Does treatment of any driver change the outcome for any other driver?" In a ride-matching system with shared demand, the answer is obviously yes. User-level randomization was never appropriate.',
+      'Would have suggested adding a pre-registered power analysis for the geographic holdout design before running either experiment. At 18 cities, a 9/9 geographic split provides limited degrees of freedom — pre-experiment variance in city-level completion rates is high, and the geo holdout may also need covariate adjustment (synthetic control or DiD) to achieve adequate precision.'
+    ],
+
+    debrief: 'SUTVA — the Stable Unit Treatment Value Assumption — is the foundation of valid A/B experimentation. It requires that the potential outcome for any unit depends only on that unit\'s treatment assignment, not on the treatment assignment of other units.\n\nIn a two-sided marketplace, user-level randomization almost always violates SUTVA. When treatment drivers and control drivers share the same rider demand pool in the same city, any change in treatment driver behavior directly affects control driver outcomes. Treatment drivers completing more rides means fewer rides are available to control drivers. The control group\'s completion rate is being artificially depressed — not by the absence of the bonus, but by the presence of the bonus in the treatment group.\n\nThe diagnostic is clear: control driver earnings and ride volume declined versus pre-experiment baseline during the experiment. In a valid experiment, the control group should be a stable reference. A declining control is the signature of spillover.\n\nThe +8.4% lift is a measurement of "treatment drivers versus disadvantaged control drivers in the same demand pool." It is not a measurement of "what happens to completion rates when the bonus is applied to all drivers." Those are different questions with different answers.\n\nAt full deployment (100% of drivers on the bonus), the demand absorption dynamic disappears — all drivers are equally incentivized and there is no control group to absorb demand from. The true platform-level effect is the behavioral incentive effect alone, which is likely positive but smaller than +8.4%.\n\nThe correct experimental design for this question is a geographic holdout: 9 cities where all drivers receive the bonus, versus 9 cities where no drivers receive the bonus. Rider demand does not flow between cities, so SUTVA is satisfied at the city level. The measured city-level completion rate difference reflects the true treatment effect.',
+
+    interviewTakeaway: 'In two-sided marketplaces, user-level randomization violates SUTVA when treatment and control units compete for the same supply or demand. The correct unit of randomization is the market (city, region). A declining control group versus pre-experiment baseline is the empirical signature of within-market SUTVA spillover.',
+
+    relatedConcepts: ['SUTVA', 'interference', 'geo holdout', 'two-sided marketplace', 'network effects', 'experimental unit'],
+    scenarioFamily: 'geo_holdout',
+    tags: ['two-sided marketplace', 'SUTVA', 'spillover', 'geo holdout', 'rideshare', 'driver incentives']
+  },
+
+  // ─────────────────────────────────────────────
+  // SCENARIO 22 — The Washout You Skipped
+  // Theme: switchback
+  // ─────────────────────────────────────────────
+  {
+    id: 's22-washout-skipped',
+    title: 'The Washout You Skipped',
+    subtitle: 'Switchback experiment shows +14% revenue. Eight weeks of alternating periods. No washout between them.',
+    isFree: false,
+    industry: 'marketplace',
+    difficulty: 'senior',
+    theme: 'switchback',
+
+    context: {
+      company: 'Driftline',
+      product: 'Food delivery two-sided marketplace — 28 cities, 180K active couriers, 3.8M monthly orders',
+      team: 'Pricing and Algorithms team',
+      background: 'Driftline\'s Pricing team tested a new surge pricing algorithm using a switchback experiment design. The experiment alternated weekly: odd weeks used the new surge algorithm (treatment), even weeks used the existing pricing (control). The experiment ran for 8 weeks (4 treatment weeks, 4 control weeks) in all 28 cities simultaneously.\n\nResults: treatment weeks showed +14.2% revenue per city per day and +3.2% cancellation rate compared to control weeks. The team is preparing to ship the new surge algorithm.\n\nA Staff DS reviewing the results asks: "What was the washout period between alternating periods?" Answer: none. The team switched directly from control to treatment and back at midnight on Sunday.',
+      businessPressure: 'Driftline\'s revenue per order has been flat for three quarters. The new surge algorithm is the Pricing team\'s flagship project. The VP of Marketplace has allocated engineering resources for a full deployment. The +14.2% revenue result is already in the leadership OKR tracker.'
+    },
+
+    hypothesis: 'A new surge pricing algorithm that dynamically prices based on real-time supply-demand imbalance will increase revenue per city per day compared to the existing surge pricing logic.',
+
+    experimentDesign: {
+      type: 'switchback',
+      allocation: 'Weekly alternation (odd weeks = treatment, even weeks = control)',
+      runtime: '8 weeks (4 treatment weeks, 4 control weeks)',
+      targetPopulation: 'All 28 cities, all couriers and customers',
+      primaryMetric: 'Revenue per city per day',
+      guardrailMetrics: ['Cancellation rate', 'Courier earnings per hour', 'Customer satisfaction score (weekly)'],
+      sampleSizeContext: '4 treatment weeks vs. 4 control weeks. No washout period between alternating weeks. Courier behavior (acceptance patterns, hours worked) adapts to pricing regime and may persist 24–72 hours after a regime change.'
+    },
+
+    metricReadout: [
+      {
+        metric: 'Revenue per city per day',
+        type: 'primary',
+        direction: 'up',
+        delta: '+14.2%',
+        pValue: 0.03,
+        confidenceInterval: '[+1.8%, +26.6%]',
+        significant: true,
+        note: 'Significant. But the absence of a washout period means treatment periods include up to 72 hours of carryover from the preceding control period (and vice versa). Courier supply patterns, platform liquidity, and customer ordering behavior adapt to the pricing regime and do not reset instantly at midnight. Without washout, the treatment periods\' first 2–3 days reflect a mix of the new algorithm\'s direct effect and behavioral residue from the prior week\'s control conditions.'
+      },
+      {
+        metric: 'Cancellation rate',
+        type: 'guardrail',
+        direction: 'up',
+        delta: '+3.2pp',
+        pValue: 0.04,
+        confidenceInterval: '[+0.3pp, +6.1pp]',
+        significant: true,
+        note: 'GUARDRAIL BREACH. Cancellation rate is significantly elevated in treatment periods. Some of this may be a direct effect of higher surge prices (customers cancel when surge is high). Some may be carryover from courier supply adjustments in the transition from control to treatment weeks.'
+      },
+      {
+        metric: 'Courier earnings per hour',
+        type: 'guardrail',
+        direction: 'up',
+        delta: '+4.8%',
+        pValue: 0.06,
+        confidenceInterval: '[-0.2%, +9.8%]',
+        significant: false,
+        note: 'Directionally positive (couriers earn more in surge conditions) but not significant. This is expected if surge pricing creates more high-value orders per courier hour.'
+      },
+      {
+        metric: 'Day-1 vs. Day-7 revenue within treatment periods (carryover diagnostic)',
+        type: 'diagnostic',
+        direction: 'neutral',
+        delta: 'Day 1–2 of treatment periods: +6.8% vs. control baseline. Day 5–7 of treatment periods: +18.1% vs. control baseline.',
+        pValue: null,
+        confidenceInterval: null,
+        significant: false,
+        note: 'Revenue lift within treatment periods is lower in the first 2 days and significantly higher in days 5–7. This is the carryover signature: the first days of a new period are contaminated by the prior period\'s behavioral state. Couriers and customers haven\'t fully adapted to the new regime yet. The "steady state" treatment effect (days 5–7) is higher than the blended average. Conversely, the first days of control periods may be elevated by prior treatment carryover — meaning the control baseline is also contaminated.'
+      }
+    ],
+
+    warningFlags: [
+      {
+        id: 'wf-no-washout',
+        label: 'No washout period between alternating weeks — carryover contaminates both treatment and control periods',
+        description: 'Switchback experiments require washout periods between alternating conditions to allow behavioral state to reset. Courier supply decisions (when to come online, how many hours to work), customer order habits, and platform liquidity all adapt to the pricing regime over multiple days. Without a 48–72 hour washout period, the first days of each new period reflect the prior period\'s behavioral residue. Treatment periods that follow control weeks start with supply-constrained conditions (couriers haven\'t yet responded to higher surge prices). Control periods that follow treatment weeks start with supply-inflated conditions (couriers are still working extra hours from the prior surge week).',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-inflation-in-treatment',
+        label: 'Day-1–2 vs. Day-5–7 within-period revenue divergence confirms carryover',
+        description: 'Revenue lift within treatment periods is +6.8% in days 1–2 and +18.1% in days 5–7. A valid switchback without carryover should show consistent lift across all days of a period (assuming no novelty effect). The lower-than-average lift in the first days of treatment periods and the higher-than-average lift in later days is the signature of behavioral carryover: early days are blended with prior-period behavior, late days reflect the new regime\'s steady state.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-cancellation-confounded',
+        label: 'Cancellation rate breach may be partly carryover artifact — direct effect size unknown',
+        description: 'The +3.2pp cancellation rate increase in treatment periods is a confirmed guardrail breach. However, the cancellation rate in the first 2 days of treatment periods (when carryover is highest) versus days 5–7 has not been isolated. If cancellations spike in the transition period (customers encountering sudden surge pricing before courier supply has adjusted), the breach may attenuate in steady-state. This does not eliminate the concern — but it affects how to interpret the magnitude.',
+        severity: 'warning'
+      }
+    ],
+
+    decisions: [
+      {
+        id: 'ship',
+        label: 'Ship the new surge algorithm — +14.2% revenue with p=0.03 is significant.',
+        description: 'The result is significant. Ship.',
+        score: 'junior_miss',
+        feedback: 'The +14.2% revenue lift is upward-biased by carryover contamination. The day-1–2 versus day-5–7 within-period analysis shows that early treatment days (contaminated by control carryover) show only +6.8% lift while late treatment days (approaching steady state) show +18.1%. The blended +14.2% is a mix of contaminated and clean periods. The true steady-state lift may be higher than +14.2% — but it may also be driven partly by artificially low control-period baselines (contaminated by prior treatment carryover). You cannot separate these effects without a washout. Shipping on a carryover-contaminated result risks deploying the wrong version of the algorithm or miscalibrating the expected revenue impact.'
+      },
+      {
+        id: 'rollback',
+        label: 'Rollback — the cancellation rate breach and carryover contamination mean the result is untrustworthy.',
+        description: 'The experiment is invalid. Abandon the new algorithm.',
+        score: 'analyst_ready',
+        feedback: 'The result is contaminated, not invalid. The surge algorithm has a real effect — the question is whether the true steady-state effect is large enough to justify the cancellation rate cost. Abandoning a Pricing team flagship project because of a methodological flaw in the experiment design is overcorrection. The correct response is to re-run with a properly designed switchback experiment (48–72h washout between periods) to get a clean estimate of both the revenue lift and the cancellation rate impact.'
+      },
+      {
+        id: 'investigate-carryover',
+        label: 'Block the ship. Run a carryover analysis. If contamination is material, re-run the switchback with a 48–72h washout period.',
+        description: 'The absence of washout means the result is upward-biased. Quantify the bias before deciding.',
+        score: 'senior_ready',
+        feedback: 'This is the right call. First, quantify the carryover contamination: compare the average treatment effect in days 1–2 of each treatment period versus days 5–7. If the day-1–2 lift is materially different from the day-5–7 lift, carryover is meaningful and the blended estimate is biased. If the day-1–2 and day-5–7 lifts are similar, carryover is minimal and the result may be defensible. If contamination is material, re-run with 48–72h washout periods excluded from analysis. This takes 12–14 weeks to run properly, but delivers a clean result that can support a reliable shipping decision.'
+      },
+      {
+        id: 'extend',
+        label: 'Run the switchback for 4 more weeks to increase power and smooth out the carryover.',
+        description: 'More periods will average out the carryover effect.',
+        score: 'analyst_ready',
+        feedback: 'More periods do not fix the carryover problem — they average it across more contaminated observations. If every period transition involves 2 days of carryover and the period length is 7 days, extending to 8 more periods still gives you 2/7 contaminated days per period. The fix is to either exclude the washout days from each period\'s analysis or to add explicit washout periods between alternating conditions. Adding more contaminated observations does not reduce the bias; it just averages it over more data points.'
+      }
+    ],
+
+    idealDecision: 'investigate-carryover',
+    secondBestDecision: 'rollback',
+
+    juniorMistake: 'Ships based on p=0.03 without asking about washout periods or checking within-period temporal patterns. Does not understand that switchback experiments require behavioral state to reset between conditions. Treats the cancellation rate breach as a minor caveat.',
+
+    seniorFlags: [
+      'The first question for any switchback experiment result is: what was the washout period, and how long does behavioral adaptation take for this metric? If adaptation time is longer than the washout, the result is contaminated. For courier supply behavior, adaptation takes 24–72 hours. A zero-washout weekly switchback is contaminated by construction.',
+      'The within-period temporal diagnostic (days 1–2 vs. days 5–7) is the standard carryover detection test for switchback experiments. A valid experiment should show consistent lift across all days of a period. A rising lift pattern within treatment periods (6.8% → 18.1%) indicates the treatment period starts from a carryover-depressed baseline — control-period courier supply hasn\'t fully wound down when the treatment period begins.',
+      'The cancellation rate guardrail breach should be interpreted carefully in the carryover context. If cancellations spike during the first 1–2 days of surge periods (customers encountering surge pricing before courier supply has adjusted to the new incentive), the breach is partly a transition artifact. The steady-state cancellation rate under the new algorithm may be lower than the blended +3.2pp. But this doesn\'t make the breach go away — it means the carryover analysis needs to be done before any ship decision.'
+    ],
+
+    staffFlags: [
+      'Would have required washout periods at experiment design. Standard practice for switchback experiments in two-sided marketplaces is 48–72h washout between alternating conditions, with washout days excluded from analysis. This reduces usable data but eliminates the carryover contamination.',
+      'Would have pre-registered the within-period temporal diagnostic as part of the analysis plan: confirm that the treatment effect is stable across all days of a period before treating the blended average as a valid estimate. For any metric involving behavioral adaptation (supply, demand, pricing response), the steady-state effect and the transition effect are different quantities and should be analyzed separately.'
+    ],
+
+    debrief: 'Switchback experiments are time-series experiments. They work by alternating between treatment and control conditions over time and attributing outcome differences to the condition active during each period. The validity assumption is that the conditions are independent — the outcome in period T depends only on the condition in period T, not on the history of prior conditions.\n\nCarryover violates that assumption.\n\nIn a food delivery marketplace, courier supply decisions are adaptive. When surge pricing is active, couriers learn to come online more frequently and work longer hours because the returns are higher. When surge pricing turns off, those supply behaviors don\'t reset instantly at midnight — couriers wind down gradually over 24–72 hours. Similarly, customers\' ordering patterns shift in response to pricing and take time to normalize.\n\nWhen the experiment switches from treatment (surge) to control (standard pricing) at midnight Sunday with no washout, the first days of the control week start with elevated courier supply inherited from the surge week. Control revenue may be artificially high. When the experiment switches from control back to treatment, the first days of the treatment week start with below-average courier supply. Treatment revenue may be artificially low at the start of each period.\n\nThe within-period diagnostic is the evidence: days 1–2 of treatment periods show +6.8% lift; days 5–7 show +18.1%. If there were no carryover, this gradient should be flat. It is not flat. Treatment periods are starting from contaminated baselines and building toward steady state.\n\nThe blended +14.2% is an average across contaminated early days and cleaner late days. The true steady-state treatment effect may be closer to +18%, but the control baseline during the same experiment may also be inflated by prior treatment carryover — making the true net effect unknown.\n\nThe correct path: run the carryover diagnostic first, quantify the contamination, and if material, re-run with 48–72h washout periods excluded from analysis.',
+
+    interviewTakeaway: 'Switchback experiments require behavioral washout between alternating periods. Carryover occurs when behavioral adaptation to one condition persists into the next. The diagnostic is a within-period temporal analysis: if treatment effect grows from early days to late days within each period, the early days are contaminated by prior-period carryover. Always specify the washout period at experiment design for any metric involving behavioral adaptation.',
+
+    relatedConcepts: ['switchback experiment', 'carryover effect', 'washout period', 'time-series experiment', 'behavioral adaptation', 'interference'],
+    scenarioFamily: 'switchback',
+    tags: ['switchback', 'carryover', 'washout', 'surge pricing', 'two-sided marketplace', 'food delivery']
   }
 
 ];

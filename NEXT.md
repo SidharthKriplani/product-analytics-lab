@@ -4,7 +4,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.53.0 (2026-06-02) — Third session: Interview Q&A Bank (26 questions, 3-tier answers, new room), Defense Strategy auto-detection (resume-plan banner), Learning Paths with checkpoint tracking on Progress, Breadcrumb nav on 4 major runners, Leadership notes expanded to all 12 RCA cases, Analytics Failures catalog (25 patterns, new Learn room). Build: ✓ 821 modules, 0 errors.*
+*Last updated: V4.54.0 (2026-06-02) — Debrief failure mode pass (Cases 20 cases, BI 16 cases, Growth 8 cases). BIRunner + GrowthRunner updated to render failureMode field. 6 new Review Room scenarios (cuped_variance, right_censored, multi_touch, b2b_constraints, geo_holdout, switchback). Session protocol files rewritten for token efficiency. Build: ✓ 0 errors.*
 
 ---
 
@@ -37,6 +37,14 @@ See Next session item 1.
 ---
 
 ## Carry-forward log
+
+**Done this session (V4.54.0):**
+- Debrief failure mode pass — Cases room: 20 cases (C01–C22) now have `\n\n**Weak answer:** ... **Interviewer follow-up:** ...` appended to `seniorAnswer.interviewPhrase`
+- Debrief failure mode pass — BI room: BI01–BI16 have `failureMode: { weakAnswer, interviewerFollowUp }` field. BIRunner renders it after leadershipNote.
+- Debrief failure mode pass — Growth room: GA01–GA08 have `failureMode` field. GrowthAnalyticsRunner renders it after leadershipNote.
+- Review Room — 6 new scenarios: S13 (cuped_variance), S14 (right_censored), S15 (multi_touch), S16 (b2b_constraints), S17 (geo_holdout), S18 (switchback). scenarios.js: 12 → 18 scenarios.
+- Session protocol files rewritten (BRAIN_TRANSFER.md, SESSION_KICKOFF.md, SPINE_PROTOCOL.md, SESSION_STARTER.md) for token efficiency.
+- Build: ✓ 0 errors.
 
 **Done this session (V4.53.0 — 6 high-value features):**
 - **Interview Q&A Bank** — new room at `/interview-qa` (shortcut `i`). 26 analytical PA/PM questions across 7 categories (Experimentation, Metrics, RCA, Product Sense, Statistics, SQL, Growth, BI, Instrumentation) with Analyst/Senior/Staff model answers. QuestionViewer with tier selector, think-first prompt, explanation of what separates each tier.

@@ -26,6 +26,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'A senior analytics lead would have pre-built the seasonality-adjusted view as a standing dashboard component, not as a last-minute correction. They would also have had a recurring "exceptions log" for one-time items. The leadership skill here is proactive instrumentation of context — not just data, but the interpretive frame.',
+    failureMode: {
+      weakAnswer: 'The candidate reads the 22% YoY headline and focuses on how to communicate the good news, never decomposing the number into organic + seasonal + one-time components. They tell the CEO "growth is strong" and suggest minor framing tweaks, completely missing that 19pp of the 22% is not repeatable.',
+      interviewerFollowUp: '"If I strip out the $18M enterprise deal and apply seasonal adjustment, what growth rate am I actually looking at — and why does that number matter for the all-hands narrative?"',
+    },
     keyTakeaways: [
       'Always decompose headline metrics before presenting to leadership: organic + seasonal + one-time is the standard decomposition for revenue and growth numbers.',
       'Dashboards that show only favorable aggregates without guardrail context are marketing decks, not analytics tools — build the context into the default view.',
@@ -60,6 +64,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'An analytics director would also set alert thresholds on each metric at launch and define "what constitutes a crisis vs a trend" in writing before the first Monday review — not after. They would own the escalation framework, not just the metrics.',
+    failureMode: {
+      weakAnswer: 'The candidate lists GOV and a few consumer metrics but treats the marketplace as a single-sided product. They name 6–8 metrics without structuring them into a hierarchy, skip supply-side leading indicators entirely, and never explain how to diagnose which side caused a GOV drop.',
+      interviewerFollowUp: '"If GOV drops 15% on Tuesday morning, how do you determine in the first 30 minutes whether the problem is on the consumer side, the dasher side, or the restaurant side using only the metrics you just described?"',
+    },
     keyTakeaways: [
       'Design KPI hierarchies as diagnostic trees: each top-level metric should map to 2–3 supporting metrics that explain why it moved.',
       'In a two-sided marketplace, every health metric must be decomposable by supply-side and demand-side contributions — without this, you cannot prescribe the right intervention.',
@@ -94,6 +102,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'A mature analytics organization has an agreed attribution model written into its measurement charter before campaigns launch. The dispute itself is a sign of missing governance. A senior analytics manager would use this dispute as leverage to establish a cross-functional attribution working group with a defined standard — preventing the same argument from recurring every quarter.',
+    failureMode: {
+      weakAnswer: 'The candidate picks a side — usually defending multi-touch because it "sounds more sophisticated" — without explaining what either model actually measures. They recommend switching to multi-touch and call it a day, never framing the analysis around the CFO\'s actual decision (what to fund and what to cut) or proposing a path to prevent the dispute from recurring.',
+      interviewerFollowUp: '"If you show the CFO all three models side-by-side and she asks which one to use for next quarter\'s budget allocation, what exactly do you recommend and what is your single strongest argument for that choice?"',
+    },
     keyTakeaways: [
       'Last-touch and first-touch attribution are both biased in predictable directions — always present multiple models with plain-language explanations rather than picking one without context.',
       'Frame attribution analysis for the CFO around the decision it enables: channel allocation and budget cuts, not model correctness.',
@@ -128,6 +140,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'A data lead in the go/no-go review should not have to ask for these — they should be in the template. The job is to build review templates that prevent this pattern structurally, not to correct it case by case.',
+    failureMode: {
+      weakAnswer: 'The candidate notes that guardrail metrics are missing and asks for a longer time window, but stops there. They accept the 8% DAU lift and 22% CTR as meaningful signals without asking about novelty effects, segment-level harms, or statistical significance. They frame the dashboard as "incomplete" rather than diagnosing it as systematically self-serving.',
+      interviewerFollowUp: '"Walk me through exactly what a complete go/no-go readout for this feature looks like — what five things does it contain that this dashboard does not, and what could each one reveal that changes the launch decision?"',
+    },
     keyTakeaways: [
       'Every feature performance dashboard should include: pre-launch baseline, guardrail metrics, segment breakdowns, full time window (including pre-launch), and statistical significance for any claimed lifts.',
       'The absence of guardrail metrics in a positive-looking dashboard is a red flag, not an oversight — always ask what tradeoff metrics were excluded.',
@@ -162,6 +178,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'A $230M discrepancy 3 weeks before earnings is a P0 incident, not a data quality ticket. A senior analytics leader would immediately escalate to the CFO, put a freeze on both numbers being shared externally, and assign a dedicated reconciliation owner with daily check-ins. The measurement framework and audit trail should have prevented this.',
+    failureMode: {
+      weakAnswer: 'The candidate jumps straight to row-level reconciliation — trying to match individual records between systems — without first generating structured hypotheses. They spend time on a data pull before articulating what they\'re looking for, and they miss the most common drivers (FX timing, gross vs net treatment) because they never enumerate possibilities before investigating.',
+      interviewerFollowUp: '"Before you touch a single row of data, rank your top five hypotheses for this discrepancy in order of likelihood and tell me what one targeted query per hypothesis would either confirm or rule it out."',
+    },
     keyTakeaways: [
       'The five most common causes of CRM-vs-warehouse revenue discrepancies are: FX timing, revenue recognition timing, gross/net treatment, un-synced manual adjustments, and missing channel coverage — always check these before doing row-level reconciliation.',
       'A $230M discrepancy 3 weeks before earnings is a P0 incident requiring CFO escalation and a number freeze, not a data quality backlog item.',
@@ -196,6 +216,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'When you redefine a North Star metric, the political challenge is as large as the analytical one. A senior analytics manager would model the impact of the redefinition, prepare a "before/after" narrative for leadership, and propose a 30-day transition period where both metrics are reported in parallel — allowing the org to calibrate expectations before the old number disappears from dashboards.',
+    failureMode: {
+      weakAnswer: 'The candidate says "yes the metric is broken" and proposes a tighter DAU definition, but jumps immediately to the technical fix without addressing the organizational consequence. They don\'t model the 31% reported drop, don\'t propose a transition period, and leave the interviewer wondering how leadership will react when the headline DAU number falls by nearly a third overnight.',
+      interviewerFollowUp: '"You\'ve proposed the redefinition — now walk me through exactly how you communicate this to leadership so that a 31% reported drop in DAU doesn\'t trigger a board-level panic or a loss of confidence in the analytics team."',
+    },
     keyTakeaways: [
       'North Star metrics must be definitionally aligned with the product\'s core value — a metric that includes zero-value interactions will cause teams to optimize for the wrong behavior.',
       'The test for a good DAU definition: would you be comfortable saying "a user is active if they did X" in a board presentation? If not, the definition needs work.',
@@ -230,6 +254,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'Senior analytics leaders at Netflix are expected to own the "so what" completely — not just the data. A board slide that shows complex cohort charts without a clear recommendation is a junior mistake. The board cannot make a decision from raw analysis. Your job is to have already made the recommendation and be seeking approval to act on it.',
+    failureMode: {
+      weakAnswer: 'The candidate describes the cohort study faithfully — explains the 89% vs 34% retention gap and suggests simplifying the chart — but never translates the finding into a revenue or subscriber number and never articulates a specific ask. They present information to the board instead of a recommendation, leaving the decision unmade.',
+      interviewerFollowUp: '"Slide 3 needs a specific ask with a success metric and a scale estimate. What exactly are you asking the board to approve, how will you know if it worked, and what is the revenue upside if it does?"',
+    },
     keyTakeaways: [
       'The three-slide board structure (insight → scale → ask) works for virtually any data-driven recommendation — master this format.',
       'Translate every analytical finding into business scale (revenue, subscribers, or cost) before presenting to a board or CFO — the number that matters to them is always a business number, not a metric number.',
@@ -264,6 +292,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'A data lead would have the seasonal decomposition running as an automated weekly report — so that when a spike occurs, the framework for interpreting it already exists and no manual investigation is required. Every product analytics team should have a "spike triage" playbook: a 30-minute standard operating procedure for evaluating whether a metric movement is real.',
+    failureMode: {
+      weakAnswer: 'The candidate validates the content team\'s celebration immediately, saying the 28% WoW spike is "likely real" because of the exclusive series launch. They mention seasonality in passing but never run the YoY comparison, never check whether the spike is depth (existing listeners) or breadth (new listeners), and skip the day-of-week composition check entirely.',
+      interviewerFollowUp: '"If the same calendar week last year also showed a 20–25% WoW spike with no exclusive launch, what does that tell you — and how does your interpretation of this week\'s number change?"',
+    },
     keyTakeaways: [
       'Any weekly metric spike requires a five-check triage before attribution: YoY comparison, content/feature isolation, day-of-week composition, external events, and new vs existing user cohort split.',
       'Day-of-week composition is a frequently overlooked confounder in weekly comparisons — a week containing an extra weekend day will show higher engagement than a week-over-week comparison implies.',
@@ -298,6 +330,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'At staff level, the question is whether this dashboard changes host behavior at scale. I\'d instrument every dashboard interaction (which metric did they click, did they update their listing within 48h of viewing) and run a holdout: 50% of hosts get the dashboard, 50% don\'t. After 90 days, compare listing quality score improvement. Dashboard design is product design — it must be measured like a feature.',
+    failureMode: {
+      weakAnswer: 'The candidate lists a large set of metrics for a single dashboard without differentiating by host type, mixing operational daily metrics with strategic trend views on the same screen. They never ask what action each metric enables for a casual host with one listing, and they don\'t address how to measure whether the dashboard actually changes host behavior.',
+      interviewerFollowUp: '"A casual host with one listing opens this dashboard. They see 12 metrics. Which single metric do you show them first, and what specific action do you want them to take within 48 hours of seeing it?"',
+    },
     keyTakeaways: [
       'Dashboard metrics must be actionable, benchmarked, and audience-segmented',
       'Instrument the dashboard itself to measure whether it drives behavior change',
@@ -331,6 +367,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'Staff-level answer includes building a funnel monitoring system: automated alerts when any step drops >3% week-over-week, a real-time dashboard during high-traffic periods (lunch rush), and a funnel SLA that the infra team owns. One-off analyses don\'t scale — you want the funnel to self-report.',
+    failureMode: {
+      weakAnswer: 'The candidate looks at the overall 72% → 65% conversion rate and focuses on the step with the highest relative percentage drop rather than the step with the most absolute users lost. They skip device and user-type segmentation entirely, missing that the most common checkout failures are mobile-specific bugs that appear invisible in aggregate numbers.',
+      interviewerFollowUp: '"Payment Entry shows a 9pp step-conversion drop. Walk me through every segmentation cut you run before concluding whether this is a product bug, a UX issue, or a fraud prevention change — and what data would let you rule each one in or out within an hour?"',
+    },
     keyTakeaways: [
       'Waterfall + segmentation (device, user type, date) is the standard funnel diagnosis framework',
       'Prioritize by absolute user loss times fix confidence, not just relative drop-off rate',
@@ -364,6 +404,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'The institutional insight is that cohort retention is a leading indicator of LTV, and you want it on a weekly executive dashboard broken by channel. If paid acquisition cohorts start underperforming organic by >5pp at month 3, that\'s a signal to cut paid spend or change targeting — before it shows up in revenue. Build the early warning system, not just the retrospective analysis.',
+    failureMode: {
+      weakAnswer: 'The candidate builds a single aggregate survival curve comparing Q3 last year to Q3 two years ago and concludes "content quality declined" because the recent cohort churns faster. They never segment by acquisition channel, never check whether the channel mix shifted between the two cohorts, and treat the aggregate curve as if it represents a homogeneous population.',
+      interviewerFollowUp: '"If paid acquisition doubled as a share of the recent Q3 cohort compared to two years ago, and paid cohorts historically retain 8pp worse at month 3, how much of the observed retention decline would that channel mix shift explain — and what is left over to attribute to content?"',
+    },
     keyTakeaways: [
       'Segment cohort retention by channel to separate acquisition quality from product quality',
       'Content calendar and mix-shift effects must be controlled for before drawing product conclusions',
@@ -397,6 +441,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'At Director level, variance in driver earnings is a marketplace health metric that should have automated monitoring — alert if SD/mean (coefficient of variation) increases >20% week-over-week in any market. Sustained high variance degrades driver satisfaction and supply, which eventually hurts rider experience. This is a systemic risk metric, not just an analytics curiosity.',
+    failureMode: {
+      weakAnswer: 'The candidate focuses on mean earnings and concludes "no problem — mean is unchanged." They never decompose the distribution to check whether the tails widened, never segment by market or time-of-day, and treat the unchanged mean as exonerating evidence rather than as a reason to investigate redistribution effects within the distribution.',
+      interviewerFollowUp: '"Mean earnings are flat but variance jumped 40% in 3 markets. What does that distribution shape change tell you about what actually happened to drivers — and what is the first data cut you run to distinguish a localized supply shock from an algorithm change?"',
+    },
     keyTakeaways: [
       'Decompose variance by time, geography, and driver cohort before concluding root cause',
       'High earnings variance with unchanged mean signals redistribution — audit surge zone concentration',
@@ -430,6 +478,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'A staff data engineer or analytics lead pushes back on "we want real-time for everything" requests by asking: "What decision will you make differently if you see this metric 2 minutes vs 4 hours later?" That question reframes cost as a decision-quality question, not a technical one. The right answer is almost always a tiered architecture — not a blanket real-time or batch choice.',
+    failureMode: {
+      weakAnswer: 'The candidate treats this as a purely technical question and recommends either "real-time for everything" to make stakeholders happy or "batch is fine" to save cost, without applying a decision-latency framework to individual metrics. They never separate operational metrics (where seconds matter) from strategic metrics (where daily is sufficient), and they can\'t justify the 8x cost multiplier with a business case.',
+      interviewerFollowUp: '"Pick three specific metrics from the Uber Eats dashboard — one that absolutely needs sub-2-minute refresh, one that is fine with 15-minute micro-batch, and one that daily batch is completely sufficient for. For each, tell me exactly what decision it drives and why that decision latency matches the refresh cadence you chose."',
+    },
     keyTakeaways: [
       'Match refresh cadence to decision latency, not to "freshness feels good." The test: would a dispatcher act differently in the next 2 minutes with this data?',
       'Tiered architecture (stream + micro-batch + daily batch) is the standard solution — real-time for operational metrics, batch for strategic.',
@@ -464,6 +516,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'Staff analytics engineers do not just fix the immediate inconsistency — they ship the governance infrastructure that prevents it from recurring. The Metric Registry is not a nice-to-have; it is the prerequisite for any self-serve analytics program to work at scale. At Airbnb, this kind of work became the dbt Semantic Layer and the internal metric store — foundational infrastructure, not a one-off cleanup.',
+    failureMode: {
+      weakAnswer: 'The candidate picks one team\'s definition as "the right one" — usually the product team\'s 90-day version — and tells the other teams to align to it. They focus entirely on the immediate fix and never address the governance gap that caused the problem: no metric ownership, no certification process, and no mechanism to prevent the same fragmentation from recurring across the other 199 Looker Explores.',
+      interviewerFollowUp: '"You\'ve aligned the teams on one canonical definition for this quarter. Six months from now, three new teams have created their own variants of the same metric in Looker. What structural process do you put in place today to prevent that from happening — and who owns enforcing it?"',
+    },
     keyTakeaways: [
       'Metric inconsistency is a governance failure, not a tooling failure. Canonical definitions with a Metric Registry and certification tiers are the structural solution.',
       'Certified vs Community vs Experimental tiers prevent all metrics from being treated as equally authoritative — a critical distinction in any large self-serve environment.',
@@ -498,6 +554,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'A staff analytics lead would have instrumented incrementality experiments (geo holdouts, PSA tests) alongside attribution models from the start — because attribution models measure correlation, not causation. The right long-run answer is: attribution for tactical optimization, incrementality tests for strategic budget decisions. A model switch alone does not answer the causal question.',
+    failureMode: {
+      weakAnswer: 'The candidate recommends switching to multi-touch attribution because it is "more accurate" and immediately suggests cutting podcast ad budgets based on the drop from 38% to 12%. They treat the model output as causal impact rather than correlation, never raise the possibility of an incrementality test, and don\'t address how to communicate the change without invalidating two years of decisions made under last-touch.',
+      interviewerFollowUp: '"Multi-touch shows podcast ads at 12% of attributed conversions. Before you cut the podcast budget, what would an incrementality test for podcast ads look like — and what result would it need to show to justify keeping or cutting the spend?"',
+    },
     keyTakeaways: [
       'Attribution models measure correlation, not causal impact — they answer "who was present at conversion," not "who caused it." Incrementality tests are required for causal budget decisions.',
       'Never frame a model switch as "the old model was wrong." Use complementary model views and reconciliation slides to communicate differences without invalidating prior work.',
@@ -532,6 +592,10 @@ export const biCases = [
       ],
     },
     leadershipNote: 'A staff analyst would productionize this as a dbt model with configurable cohort_grain (daily, weekly, or monthly) and an event_type filter parameter, so any team can run retention analysis on any event without rewriting SQL from scratch. The pattern is reusable across the entire product — new user retention, feature adoption cohorts, subscription renewal cohorts.',
+    failureMode: {
+      weakAnswer: 'The candidate uses total user count as the denominator for each cohort\'s retention percentage instead of the week-0 count for that specific cohort. The resulting percentages are all wrong — cohorts acquired in low-volume weeks appear to have extraordinarily high retention, and no week is 100% at week 0. They submit without noticing the sanity check failure.',
+      interviewerFollowUp: '"Your week-0 retention column shows values between 60% and 85% instead of 100% for every cohort. Walk me through exactly what went wrong in your denominator logic and how you fix it in one targeted change to the query."',
+    },
     keyTakeaways: [
       'Cohort retention SQL pattern: first-touch CTE for cohort assignment, activity join for all events, DATEDIFF for week offset, window function MAX(COUNT) OVER (PARTITION BY cohort) for the retention denominator.',
       'Week 0 = 100% by definition — any other value means your cohort assignment logic is wrong. Always use this as your first sanity check.',

@@ -1,95 +1,39 @@
 # SPINE PROTOCOL — Session State Enforcement Card
 
-**Print this. Enforce it. Never skip it.**
-
 ---
 
 ## START OF SESSION
 
-```
-git pull origin main
-npm run dev  # Verify 0 errors
+```bash
+rm -f .git/index.lock .git/HEAD.lock && git status --short && npm run build
 ```
 
-Read in order:
-1. NEXT.md
-2. BRAIN_TRANSFER.md
-3. CLAUDE.md
+**Read BRAIN_TRANSFER.md only.** CLAUDE.md is in system prompt. NEXT.md only if next action is unclear. No other files at open — costs 80–120k tokens for zero gain.
+
+**Grep before Read. Always.**
 
 ---
 
-## END OF SESSION (CRITICAL)
+## END OF SESSION
 
-**Before you close, update these three files:**
+Update **BRAIN_TRANSFER.md** — version, what was done (2–3 lines per feature), next action, any new components.
 
-### 1. NEXT.md
-```
-Add new section:
-**Done this session (V4.X.X):**
-- What you built
-- What you fixed
-- Build status
-
-Update version in header
-Reorder priorities if changed
-Update "Still open" section
-```
-
-### 2. BRAIN_TRANSFER.md
-```
-Add "## What Was Just Done"
-Update git commit code with v4.X.X
-Update integration patterns if new components
-Add "Questions for Next Session"
-Document NEW components (location, props, usage)
-```
-
-### 3. SESSION_KICKOFF.md
-```
-Update priority work queue
-Update file locations if changed
-Keep git commands current
-```
-
----
-
-## GIT AT CLOSE
+Update **NEXT.md** — add "Done this session (V4.X.X)" block, reorder queue, update version in header.
 
 ```bash
-# From Mac terminal (sandbox can't push)
+# From Mac terminal (sandbox cannot push)
 cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab"
-
-# Unlock if stuck
 rm -f .git/index.lock .git/HEAD.lock
-
-# Commit + push
 git add -A
-git commit -m "V4.X.X: [what you did]"
+git commit -m "V4.X.X: [description]"
 git push origin main
 ```
 
 ---
 
-## VERIFICATION CHECKLIST
+## CLOSE CHECKLIST
 
-- [ ] Build passes: `npm run dev` (0 errors)
-- [ ] New files exist: `ls src/components/shared/New*.jsx`
-- [ ] NEXT.md updated with session
-- [ ] BRAIN_TRANSFER.md reflects new state
-- [ ] SESSION_KICKOFF.md is current
-- [ ] No stale TODOs in spine files
-- [ ] Git commit message includes version + description
-- [ ] Pushed from Mac terminal
-
----
-
-## WHAT BREAKS IF YOU SKIP THIS
-
-❌ Next session won't know what was built  
-❌ Components won't be documented  
-❌ Integration patterns will be stale  
-❌ Brain transfer loses continuity  
-❌ Someone else can't pick up your work  
-
-**Do it. Always.**
-
+- [ ] `npm run build` passes (0 errors)
+- [ ] BRAIN_TRANSFER.md updated (version + next action current)
+- [ ] NEXT.md updated (session logged, queue reordered)
+- [ ] Git committed and pushed from Mac terminal

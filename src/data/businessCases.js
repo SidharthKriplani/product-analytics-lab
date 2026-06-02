@@ -249,7 +249,7 @@ export const businessCases = [
         'Conflating "buyers want it" with "it will be profitable"',
       ],
       interviewPhrase:
-        '"Before I model the impact, I want to separate the pilot decision from the full-build decision — they need different analyses. For the pilot, the gate is contribution margin positive at the city level, not GMV alone."',
+        '"Before I model the impact, I want to separate the pilot decision from the full-build decision — they need different analyses. For the pilot, the gate is contribution margin positive at the city level, not GMV alone.\n\n**Weak answer:** The candidate says same-day delivery is worth building because the competitor just launched it, and recommends rolling it out to all top-10 cities immediately to close the gap. **Interviewer follow-up that exposes it:** \'If same-day delivery costs $8 per order in last-mile fees and your average order value on handmade goods is $35, what contribution margin are you left with after platform fees and seller payout, and how does that change your rollout recommendation?\'"',
     },
   },
   {
@@ -500,7 +500,7 @@ export const businessCases = [
         'Asking for an experiment when observational RCA is the right tool',
       ],
       interviewPhrase:
-        '"Before I pull any data, I want to confirm whether that 38→31 is measured per cohort or as a blended snapshot — because if it\'s blended, the first thing I\'d check is acquisition mix shift, not product regression."',
+        '"Before I pull any data, I want to confirm whether that 38→31 is measured per cohort or as a blended snapshot — because if it\'s blended, the first thing I\'d check is acquisition mix shift, not product regression.\n\n**Weak answer:** The candidate jumps straight to recommending an onboarding redesign or a win-back email campaign because retention dropped, without questioning whether the 38→31 figure is a cohort measurement or a blended snapshot. **Interviewer follow-up that exposes it:** \'If your Q3 acquisition cohort was 60% paid-channel users who historically retain at 25%, and your Q2 cohort was 60% organic users who retain at 45%, how much of the 38→31 drop is explained by acquisition mix before you ever look at the product?\'"',
     },
   },
   {
@@ -755,7 +755,7 @@ export const businessCases = [
         'Confusing "deflected" with "resolved"',
       ],
       interviewPhrase:
-        '"Before I design toward the 60% deflection target, I want to reframe the success metric — deflection rate can be gamed by a bot that auto-closes tickets. The right gate is resolved contact rate at human-quality baseline, and the right pilot segment is SMB low-complexity intents, not enterprise accounts."',
+        '"Before I design toward the 60% deflection target, I want to reframe the success metric — deflection rate can be gamed by a bot that auto-closes tickets. The right gate is resolved contact rate at human-quality baseline, and the right pilot segment is SMB low-complexity intents, not enterprise accounts.\n\n**Weak answer:** The candidate recommends deploying the GenAI bot across all support tiers at once, using deflection rate as the primary success metric, and points to the 60% target as proof of ROI without questioning whether deflected tickets are actually resolved. **Interviewer follow-up that exposes it:** \'If the bot achieves 65% deflection but post-chat surveys show 40% of those users re-contacted support within 48 hours through a different channel, what does your deflection rate actually measure, and how do you restate the ROI case?\'"',
     },
   },
   {
@@ -1006,7 +1006,7 @@ export const businessCases = [
         'Ignoring capacity utilization as a filter for identifying responsive sellers',
       ],
       interviewPhrase:
-        '"Before designing the incentive allocation, I want to reframe the question from \'which sellers?\' to \'where is marginal uplift per dollar highest?\' — because top sellers are already at capacity, so incentivizing them is pure budget waste. And any marketplace incentive experiment has to use geo-holdout to avoid SUTVA violation."',
+        '"Before designing the incentive allocation, I want to reframe the question from \'which sellers?\' to \'where is marginal uplift per dollar highest?\' — because top sellers are already at capacity, so incentivizing them is pure budget waste. And any marketplace incentive experiment has to use geo-holdout to avoid SUTVA violation.\n\n**Weak answer:** The candidate recommends targeting the top-GMV seller segment with the highest incentive budget because they drive the most revenue, assuming that more incentive to top sellers means proportionally more GMV growth. **Interviewer follow-up that exposes it:** \'If your top 10% of sellers are already running at 95% inventory utilization during peak periods, what incremental GMV can an additional $200 cash incentive actually unlock, and where would that same $200 produce more marginal lift?\'"',
     },
   },
   {
@@ -1252,7 +1252,7 @@ export const businessCases = [
         'Failing to pre-commit a churn threshold before rolling out the SMB increase',
       ],
       interviewPhrase:
-        '"Before I model the revenue impact, I want to check whether the margin gap is a pricing problem or a cost problem — and if it is pricing, I\'d segment the increase by tier because enterprise and SMB have very different elasticities. A blanket 20% to SMB without elasticity data is how you overshoot and trigger churn that costs more than the revenue you gain."',
+        '"Before I model the revenue impact, I want to check whether the margin gap is a pricing problem or a cost problem — and if it is pricing, I\'d segment the increase by tier because enterprise and SMB have very different elasticities. A blanket 20% to SMB without elasticity data is how you overshoot and trigger churn that costs more than the revenue you gain.\n\n**Weak answer:** The candidate models the 20% price increase as a straight revenue multiplication — takes current MRR, applies 1.2x, and presents the output as the expected revenue gain without estimating how many customers will churn in response. **Interviewer follow-up that exposes it:** \'If your SMB segment has 200 customers paying $500/month and historical data shows a 15% voluntary churn rate when you raised prices 10% two years ago, what net revenue impact does a 20% increase produce, and at what churn rate does it become revenue-negative?\'"',
     },
   },
   {
@@ -1499,7 +1499,7 @@ export const businessCases = [
         'Failing to include an escape clause in the vendor contract',
       ],
       interviewPhrase:
-        '"Before I evaluate build vs. buy, I want to step back and ask whether recommendation quality is actually the conversion bottleneck — because if buyers are abandoning for pricing or trust reasons, we\'d be investing in the wrong solution. Assuming it is the bottleneck, I\'d stage the commitment: vendor first with a 6-month escape clause, measure conversion lift at 90 days, and use that data to decide whether to renew or spec the in-house build."',
+        '"Before I evaluate build vs. buy, I want to step back and ask whether recommendation quality is actually the conversion bottleneck — because if buyers are abandoning for pricing or trust reasons, we\'d be investing in the wrong solution. Assuming it is the bottleneck, I\'d stage the commitment: vendor first with a 6-month escape clause, measure conversion lift at 90 days, and use that data to decide whether to renew or spec the in-house build.\n\n**Weak answer:** The candidate recommends building the in-house recommendation engine immediately because it gives full control and avoids ongoing vendor fees, framing the build cost as a one-time investment without validating that recommendation quality is the actual conversion bottleneck. **Interviewer follow-up that exposes it:** \'Your checkout funnel data shows 68% of cart abandonment happens at the payment step, not the product browsing step — how does that change your confidence that a better recommendation engine is the right place to invest $800k?\'"',
     },
   },
   {
@@ -1746,7 +1746,7 @@ export const businessCases = [
         'Assuming that strong product-market fit in the US transfers to SEA without localization testing',
       ],
       interviewPhrase:
-        '"Before sizing the SEA market, I want to build the unit economics model — because SEA CPMs are 80–90% lower than US, which means even 5M DAU may not generate enough revenue to cover the infrastructure and localization cost. The question isn\'t how many users we can get, it\'s what the break-even revenue per DAU is and whether we can hit it."',
+        '"Before sizing the SEA market, I want to build the unit economics model — because SEA CPMs are 80–90% lower than US, which means even 5M DAU may not generate enough revenue to cover the infrastructure and localization cost. The question isn\'t how many users we can get, it\'s what the break-even revenue per DAU is and whether we can hit it.\n\n**Weak answer:** The candidate sizes the SEA opportunity by multiplying the regional internet population by the US ARPU, projects 5M users at US revenue rates, and declares the market attractive without adjusting for the CPM differential or infrastructure cost. **Interviewer follow-up that exposes it:** \'If SEA CPMs average $0.80 versus your US benchmark of $6.50, and your current US infrastructure cost per DAU is $0.18/year, what DAU do you need in SEA to reach breakeven on the infrastructure investment alone, and how does that compare to your market entry projection?\'"',
     },
   },
   {
@@ -1992,7 +1992,7 @@ export const businessCases = [
         'Framing the cuts as cost pressure rather than unit economics optimization in investor communications',
       ],
       interviewPhrase:
-        '"Before I identify specific cuts, I want to map every cost category against its DAU or revenue contribution — because cutting costs that drive growth is false economy, especially 6 months before a fundraise. The right sequence is infrastructure optimization first, then low-ROI marketing pruning, then vendor rationalization — and headcount only if those three are insufficient."',
+        '"Before I identify specific cuts, I want to map every cost category against its DAU or revenue contribution — because cutting costs that drive growth is false economy, especially 6 months before a fundraise. The right sequence is infrastructure optimization first, then low-ROI marketing pruning, then vendor rationalization — and headcount only if those three are insufficient.\n\n**Weak answer:** The candidate recommends cutting the two smallest cost-center teams by headcount first because headcount is the largest line item and the math gets to $2M fastest, without modeling whether those teams are driving the acquisition or retention that supports the fundraise narrative. **Interviewer follow-up that exposes it:** \'The growth marketing team you flagged for a 30% headcount cut runs the paid acquisition channel responsible for 45% of new user signups — if cutting that team reduces monthly signups by 3,000 users, what does that do to your Series B DAU growth story in the 6 months before the raise?\'"',
     },
   },
   {
@@ -2238,7 +2238,7 @@ export const businessCases = [
         'Conflating new deal win rate risk with existing customer churn risk (they operate on different timelines)',
       ],
       interviewPhrase:
-        '"Before designing a competitive response, I want to separate signal from noise — 2 lost deals in a week is not a trend. I\'d implement 90-day structured win/loss tracking with loss-reason logging and set a decision threshold before the window closes. In the interim, arm the sales team with a differentiation playbook. We should not touch pricing until the data shows a structural shift."',
+        '"Before designing a competitive response, I want to separate signal from noise — 2 lost deals in a week is not a trend. I\'d implement 90-day structured win/loss tracking with loss-reason logging and set a decision threshold before the window closes. In the interim, arm the sales team with a differentiation playbook. We should not touch pricing until the data shows a structural shift.\n\n**Weak answer:** The candidate recommends matching the competitor\'s 30% price cut immediately across all plans to stop deal losses, reasoning that price parity removes the objection without analyzing whether those 2 lost deals were lost on price or on feature gaps, and without modeling the margin impact of a blanket cut. **Interviewer follow-up that exposes it:** \'If those 2 lost deals cited pricing but your win/loss notes from the last 6 months show that 70% of losses cited integration limitations, not price — what\'s the actual decision you\'re making when you cut price, and what does it cost you in annual gross margin?\'"',
     },
   },
   {
@@ -2486,7 +2486,7 @@ export const businessCases = [
         'Sunsetting before completing the retention and GMV analysis because of CFO timeline pressure',
       ],
       interviewPhrase:
-        '"Before I evaluate whether to sunset, I want to understand who these 2,400 sellers actually are — specifically their GMV concentration and retention rate vs. platform average. A 6% adoption rate says nothing about value. If they represent 15% of GMV and have 2x retention, the $1.2M saving comes at a much higher expected cost. Then I\'d look at a minimum viable event-discovery feature before recommending a full sunset."',
+        '"Before I evaluate whether to sunset, I want to understand who these 2,400 sellers actually are — specifically their GMV concentration and retention rate vs. platform average. A 6% adoption rate says nothing about value. If they represent 15% of GMV and have 2x retention, the $1.2M saving comes at a much higher expected cost. Then I\'d look at a minimum viable event-discovery feature before recommending a full sunset.\n\n**Weak answer:** The candidate recommends sunsetting Local Events immediately because 6% adoption is low and the $1.2M saving is real, treating low adoption as evidence of low value without segmenting the 2,400 users by GMV or checking whether event-hosting sellers churn at a different rate after the feature is removed. **Interviewer follow-up that exposes it:** \'If the 2,400 sellers using Local Events account for $4.8M of the platform\'s $32M annual GMV and their 12-month retention rate is 84% versus the platform average of 61%, what\'s the expected GMV at risk if even 20% of them churn after sunset, and how does that compare to the $1.2M you\'re saving?\'"',
     },
   },
 
@@ -2608,7 +2608,7 @@ export const businessCases = [
         'Assuming competitor surge success applies to your market without checking driver supply response data',
         'Using total driver hours as the success metric when ride completion is the actual problem',
       ],
-      interviewPhrase: '"Before recommending surge pricing, I want to confirm three things: how elastic rider demand is to price increases in peak periods, whether driver supply actually responds to higher rates or is already supply-constrained for other reasons, and whether the wait time problem is severe enough to justify the brand risk of visible price increases. The success metric for a pilot is peak-hour ride completion rate, with guardrails on rider NPS and repeat ridership."',
+      interviewPhrase: '"Before recommending surge pricing, I want to confirm three things: how elastic rider demand is to price increases in peak periods, whether driver supply actually responds to higher rates or is already supply-constrained for other reasons, and whether the wait time problem is severe enough to justify the brand risk of visible price increases. The success metric for a pilot is peak-hour ride completion rate, with guardrails on rider NPS and repeat ridership.\n\n**Weak answer:** The candidate recommends rolling out surge pricing immediately because the competitor reported a 31% improvement in peak-hour completions, assuming the same result will apply to Waypath without testing whether Waypath\'s driver supply is elastic to price or whether riders in Waypath\'s markets will tolerate visible price increases. **Interviewer follow-up that exposes it:** \'Your competitor operates primarily in high-income urban cores where riders have low price sensitivity, while 60% of Waypath\'s peak rides are in suburban markets where riders have documented higher price sensitivity — how does that segmentation change whether surge pricing achieves a 31% completion improvement or causes ride abandonment instead?\'"',
     },
   },
 
@@ -2730,7 +2730,7 @@ export const businessCases = [
         'Ignoring cannibalization risk when the existing trial-to-paid funnel already works well',
         'Designing a free tier for both goals (viral spread and paid conversion) simultaneously, resulting in one that serves neither',
       ],
-      interviewPhrase: '"Before recommending a free tier, I need to understand two things: what goal the free tier is supposed to serve (top-of-funnel reach vs. conversion optimization), and what the cannibalization risk is from the existing paid funnel. The success metric is incremental paid conversion — new customers who wouldn\'t have paid without the free tier — not free user signups."',
+      interviewPhrase: '"Before recommending a free tier, I need to understand two things: what goal the free tier is supposed to serve (top-of-funnel reach vs. conversion optimization), and what the cannibalization risk is from the existing paid funnel. The success metric is incremental paid conversion — new customers who wouldn\'t have paid without the free tier — not free user signups.\n\n**Weak answer:** The candidate recommends launching a free tier because the competitor has one and it would increase top-of-funnel volume, measuring success by the number of free signups in the first 90 days without modeling how many existing trial users will switch to free instead of converting to paid. **Interviewer follow-up that exposes it:** \'Your current trial-to-paid conversion rate is 34%. If 40% of users who would have converted from the trial instead stay on the free tier permanently, what is the net impact on paid revenue in month 12, and at what free-to-paid upgrade rate does the free tier become revenue-positive?\'"',
     },
   },
 
@@ -2852,7 +2852,7 @@ export const businessCases = [
         'Ignoring cold-start users when evaluating personalization quality',
         'Not measuring creator reach diversity — a feed that concentrates views on top creators degrades supply quality over time',
       ],
-      interviewPhrase: '"Before recommending personalization, I want to define what \'better\' means for a social product — not session length, but retention and social graph health. The A/B test should run for at least 4 weeks to capture D30 retention, with guardrails on follow formation rate and creator reach diversity. I\'d also want to understand cold-start handling for new users before committing to an ML approach."',
+      interviewPhrase: '"Before recommending personalization, I want to define what \'better\' means for a social product — not session length, but retention and social graph health. The A/B test should run for at least 4 weeks to capture D30 retention, with guardrails on follow formation rate and creator reach diversity. I\'d also want to understand cold-start handling for new users before committing to an ML approach.\n\n**Weak answer:** The candidate recommends shipping personalization immediately because session length is up 18% in early tests, treating higher session time as the primary proof of success without checking whether users are spending more time on content they\'re passively scrolling past rather than actively engaging with, or whether D30 retention is actually improving. **Interviewer follow-up that exposes it:** \'Session length increased 18% but follow formation rate — the rate at which users follow new creators during a session — dropped 22% in the same test group. What does that combination tell you about whether the personalized feed is building social graph health or just maximizing passive scroll time, and which of those outcomes is more durable?\'"',
     },
   },
 
@@ -2974,7 +2974,7 @@ export const businessCases = [
         'Building enterprise features without ring-fencing them from the core roadmap',
         'Failing to establish explicit go/no-go criteria before the pilot begins'
       ],
-      interviewPhrase: '"Three inbound requests is a hypothesis, not a market. I\'d qualify each against willingness to pay a real premium and product fit without heavy customization. If they qualify, I\'d recommend a 6-month ring-fenced pilot with 2-3 customers and explicit go/no-go criteria — not a full enterprise product investment based on 3 data points."',
+      interviewPhrase: '"Three inbound requests is a hypothesis, not a market. I\'d qualify each against willingness to pay a real premium and product fit without heavy customization. If they qualify, I\'d recommend a 6-month ring-fenced pilot with 2-3 customers and explicit go/no-go criteria — not a full enterprise product investment based on 3 data points.\n\n**Weak answer:** The candidate recommends building SSO, admin dashboards, and compliance features immediately to capture the 3 inbound enterprise leads, treating 3 unsolicited requests as sufficient market validation and committing the core product roadmap to an enterprise feature set before running a single manual sales cycle. **Interviewer follow-up that exposes it:** \'You\'ve committed 4 months of engineering to SSO and admin features based on 3 leads. Two of those leads drop out after 6 weeks because their procurement process requires SOC 2 compliance you can\'t deliver in this timeline — how do you evaluate whether enterprise was the right bet, and what would a cheaper validation approach have looked like?\'"',
     },
   },
 
@@ -3096,7 +3096,7 @@ export const businessCases = [
         'Not quantifying the GMV concentration of crossover users before making the decision',
         'Designing a unified interface without role separation'
       ],
-      interviewPhrase: '"5% of users as crossover but 28% of GMV changes the analysis significantly. I\'d recommend consolidation with role-based navigation — buyer default for single-role buyers, seller dashboard for sellers, seamless context-switch for crossover users. Success metrics: crossover user retention (did it help them?) and single-role session quality (did it hurt them?)."',
+      interviewPhrase: '"5% of users as crossover but 28% of GMV changes the analysis significantly. I\'d recommend consolidation with role-based navigation — buyer default for single-role buyers, seller dashboard for sellers, seamless context-switch for crossover users. Success metrics: crossover user retention (did it help them?) and single-role session quality (did it hurt them?).\n\n**Weak answer:** The candidate recommends building a single unified interface optimized for the majority single-role use case, reasoning that 5% crossover users is too small a segment to design around, without recognizing that those 5% drive 28% of GMV and that degrading their experience creates disproportionate revenue risk. **Interviewer follow-up that exposes it:** \'If the 5% of crossover users who drive 28% of GMV experience a 15% retention drop from the new unified interface because context-switching between buyer and seller modes is now slower, what is the GMV at risk, and how does that compare to the UX improvement you\'re delivering to the 95% who only use one mode?\'"',
     },
   },
 
@@ -3218,7 +3218,7 @@ export const businessCases = [
         'Treating false positive rate as a quality metric rather than a business risk metric',
         'Deploying full automation before testing triage-only deployment'
       ],
-      interviewPhrase: '"8% false positive rate on creator content removal is too high for full automation — at scale, that\'s thousands of wrongful removals per day that appeals can\'t process. The right architecture is AI-as-triage: AI flags and prioritizes, humans make removal decisions. This scales moderation capacity without exposing creators to automated wrongful removal. It also generates labeled training data to improve the model toward a threshold where full automation becomes safe."',
+      interviewPhrase: '"8% false positive rate on creator content removal is too high for full automation — at scale, that\'s thousands of wrongful removals per day that appeals can\'t process. The right architecture is AI-as-triage: AI flags and prioritizes, humans make removal decisions. This scales moderation capacity without exposing creators to automated wrongful removal. It also generates labeled training data to improve the model toward a threshold where full automation becomes safe.\n\n**Weak answer:** The candidate recommends full AI automation immediately because the 92% accuracy looks strong and the headcount savings are compelling, treating accuracy as a product-quality metric rather than a business risk metric without calculating how many wrongful creator removals 8% false positives produces at the platform\'s actual daily content volume. **Interviewer follow-up that exposes it:** \'Your platform processes 500,000 pieces of creator content per day. At 8% false positive rate, how many creators experience wrongful content removal daily, what\'s the appeals queue capacity needed to process those within 24 hours, and what happens to creator supply if even 2% of wrongfully-removed creators permanently leave the platform?\'"',
     },
   },
 
@@ -3371,7 +3371,7 @@ export const businessCases = [
         'Competing on price against entrenched enterprise incumbents',
         'Not segmenting enterprise (500-employee vs. 50,000-employee companies have completely different requirements)',
       ],
-      interviewPhrase: '"Before recommending the enterprise move, I\'d close the three inbound leads manually — no product changes — to see the actual sales cycle length, ACV, and close rate. If enterprise LTV:CAC exceeds our SMB benchmarks after 4 deals, hire one enterprise sales rep. Don\'t build SSO and compliance until deal velocity proves the demand is real."',
+      interviewPhrase: '"Before recommending the enterprise move, I\'d close the three inbound leads manually — no product changes — to see the actual sales cycle length, ACV, and close rate. If enterprise LTV:CAC exceeds our SMB benchmarks after 4 deals, hire one enterprise sales rep. Don\'t build SSO and compliance until deal velocity proves the demand is real.\n\n**Weak answer:** The candidate recommends hiring a full enterprise sales team and building out SSO, audit logs, and compliance features before closing a single enterprise deal, reasoning that having the features ready will accelerate conversion without first establishing that enterprise buyers will close at an ACV that justifies the investment. **Interviewer follow-up that exposes it:** \'You\'ve spent $400k on enterprise product features and hired 2 enterprise sales reps before closing a deal. Your first 4 enterprise prospects each have a 6-month sales cycle — how do you determine at month 3 whether enterprise is tracking to exceed your SMB LTV:CAC benchmark, and what\'s your exit criteria if it isn\'t?\'"',
     },
   },
 
@@ -3524,7 +3524,7 @@ export const businessCases = [
         'Anchoring on competitor adoption rates without running Crafted\'s own seller unit economics',
         'Using MRR from subscriptions as the success metric rather than net revenue impact',
       ],
-      interviewPhrase: '"The key risk in Crafted Plus is that high-GMV sellers — the ones paying the most in fees — adopt at the highest rate. If a seller paying $800/year in fees signs up for $120/year subscription, I\'ve lost $680 per seller. The pilot needs to track adoption rate by GMV tier, not just overall adoption. Net revenue impact by segment is the decision metric, not MRR."',
+      interviewPhrase: '"The key risk in Crafted Plus is that high-GMV sellers — the ones paying the most in fees — adopt at the highest rate. If a seller paying $800/year in fees signs up for $120/year subscription, I\'ve lost $680 per seller. The pilot needs to track adoption rate by GMV tier, not just overall adoption. Net revenue impact by segment is the decision metric, not MRR.\n\n**Weak answer:** The candidate recommends launching Crafted Plus broadly because MRR from subscriptions is a predictable revenue stream and the $120/year price looks attractive, calculating total expected MRR from adoption rate projections without modeling how much transaction fee revenue is displaced when high-GMV sellers switch from paying per transaction to the flat subscription. **Interviewer follow-up that exposes it:** \'Your top 20% of sellers by GMV currently generate $2.4M annually in transaction fees. If 60% of them adopt Crafted Plus at $120/year, what is the net revenue impact on that segment alone, and at what subscription price does the bundle become revenue-neutral for sellers in the $1,000–$2,000 annual fee tier?\'"',
     },
   },
 
@@ -3677,7 +3677,7 @@ export const businessCases = [
         'Not modeling the investment phase economics separately from steady-state economics',
         'Letting investor narrative pressure override strategic analysis',
       ],
-      interviewPhrase: '"Before recommending full SEA entry, I\'d test the specific corridor (Jakarta airport) where Grab\'s coverage is thinnest, with a defined $500k budget and 90-day contribution margin target. If the pilot can\'t reach unit economics, the full expansion won\'t either — and I\'d rather find that out for $500k than $15M."',
+      interviewPhrase: '"Before recommending full SEA entry, I\'d test the specific corridor (Jakarta airport) where Grab\'s coverage is thinnest, with a defined $500k budget and 90-day contribution margin target. If the pilot can\'t reach unit economics, the full expansion won\'t either — and I\'d rather find that out for $500k than $15M.\n\n**Weak answer:** The candidate recommends full SEA market entry because Grab has weak coverage in Indonesia and the addressable market is large, building the business case around market size projections and board timeline pressure without first defining the unit economics required for the expansion to be viable at the pilot level. **Interviewer follow-up that exposes it:** \'Your pilot in the Jakarta airport corridor runs for 90 days, spending $500k, and achieves a contribution margin of -$0.40 per ride. Grab is dominant in the rest of the city. At what contribution margin per ride does your SEA expansion model break even across the planned $15M investment, and what\'s the realistic path from -$0.40 to that threshold?\'"',
     },
   },
 
@@ -3830,7 +3830,7 @@ export const businessCases = [
         'Sunsetting a high-revenue feature based on engagement trends without running a structured experiment',
         'Treating product team preference for the growing format as an analytical argument',
       ],
-      interviewPhrase: '"Before recommending sunset, I\'d run two analyses. First: session decomposition — are users who reduce Trending Clips time going to Personalized Feed or leaving the app? Second: CPM analysis — if Trending Clips commands a 40% higher CPM than Personalized Feed, I cannot lose that impression inventory without a revenue impact. Both analyses use existing data. Only after those inform the hypothesis do I design a 10% sunset experiment."',
+      interviewPhrase: '"Before recommending sunset, I\'d run two analyses. First: session decomposition — are users who reduce Trending Clips time going to Personalized Feed or leaving the app? Second: CPM analysis — if Trending Clips commands a 40% higher CPM than Personalized Feed, I cannot lose that impression inventory without a revenue impact. Both analyses use existing data. Only after those inform the hypothesis do I design a 10% sunset experiment.\n\n**Weak answer:** The candidate recommends sunsetting Trending Clips immediately because engagement is declining and the product team prefers Personalized Feed, treating falling engagement time as sufficient evidence that the feature is dying without checking whether users are migrating to Personalized Feed within the app or leaving the app entirely, and without pricing the CPM differential. **Interviewer follow-up that exposes it:** \'Trending Clips engagement time is down 25% but Trending Clips inventory still commands a $4.80 CPM versus $3.40 for Personalized Feed. If you sunset Trending Clips and shift that impression volume to Personalized Feed, what is the annual advertising revenue impact, and how does that compare to the engineering cost of maintaining the feature?\'"',
     },
   },
 ];
