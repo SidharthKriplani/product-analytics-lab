@@ -4,13 +4,13 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **Rule:** Max 5 items, ordered by priority. Never a dump — if it grows past 5, something doesn't belong here. When done, cross off, reorder, add what carries forward.
 
-*Last updated: V4.46.0 (2026-06-02) — SQL Lab Phase 3 + all 4 foundations rewritten situation-first (65 modules) + emoji pass + debrief failure modes (60 cases). Build clean.*
+*Last updated: V4.47.0 (2026-06-02) — BI chart interpretation scenarios added (7 visual cases, BI17–BI23). Build clean.*
 
 ---
 
 ## Pre-beta gates (do before Batch 1 invites)
 
-1. **Git push V4.43.0–V4.46.0** — run from Mac terminal (sandbox cannot push)
+1. **Git push V4.43.0–V4.47.0** — run from Mac terminal (sandbox cannot push)
 2. **Confirm `VITE_POSTHOG_KEY` is live in Vercel** — check env vars in Vercel dashboard
 
 ---
@@ -19,9 +19,7 @@ Read this at the start of every build session. Do only this. Update before closi
 
 **1. Supabase auth — finish or cut (audit #104)** `DECISION + CODE`
 Decision due before Batch 2 outreach. Option A: complete to production-ready — E2E test with real Supabase project, verify `PROGRESS_KEYS` in syncProgress.js covers all current rooms (SQL Lab, all new rooms added since V4.24), add auth error handling. Option B: remove entirely, ship as localStorage-first. Half-done is worse than either.
-
-**2. BI chart interpretation scenarios** `CONTENT + CODE`
-Highest new feature ROI. Add a visual chart sub-format to the BI room — Chart.js renders inline, user answers "what's wrong / what do you conclude?" No backend needed. ~10 scenarios, one new component. Own session.
+Note: User to handle Supabase setup/testing for Option A in next session (if chosen).
 
 ---
 

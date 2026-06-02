@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { saveBIProgress, getBIProgress } from '../../utils/biProgress.js';
 import { track } from '../../utils/analytics.js';
 import { biCases } from '../../data/biCases.js';
+import { ChartScenario } from './ChartScenario.jsx';
 
 const ROOM_KEY = 'bi';
 const NOTES_KEY = 'pal-notes-v1';
@@ -593,16 +594,22 @@ function RevealScreen({ caseData, onBack, onNext, unlocked }) {
 // Main runner — manages screen state
 export function BIRunner({ caseId, onBack, onNext, unlocked }) {
   const caseData = biCases.find(c => c.id === caseId);
-  const [screen, setScreen] = useState('situation');
+  const isChartFormat = caseData?.format === 'chart';
+  const [screen, setScreen] = useState(isChartFormat ? 'chart' : 'situation');
 
   function handleBegin() {
-    setScreen('work');
+    setScreen(isChartFormat ? 'chart' : 'work');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function handleReveal() {
     setScreen('reveal');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function handleChartRate(confidence) {
+    saveBIProgress(caseData.id, confidence);
+    track('case_completed', { room: 'bi', id: caseData.id, rating: confidence, format: 'chart' });
   }
 
   if (screen === 'situation') {
@@ -621,6 +628,26 @@ export function BIRunner({ caseId, onBack, onNext, unlocked }) {
           </button>
         </div>
         <SituationScreen caseData={caseData} onBegin={handleBegin} />
+      </div>
+    );
+  }
+
+  if (screen === 'chart') {
+    return (
+      <div>
+        <div style={{ maxWidth: '820px', margin: '0 auto', padding: '1rem 1.5rem 0' }}>
+          <button
+            onClick={onBack}
+            style={{
+              background: 'none', border: 'none', color: 'var(--text-muted)',
+              cursor: 'pointer', fontSize: '0.85rem', padding: 0,
+              display: 'flex', alignItems: 'center', gap: '0.3rem',
+            }}
+          >
+            ← BI &amp; Reporting Room
+          </button>
+        </div>
+        <ChartScenario caseData={caseData} onBack={onBack} onNext={onNext} onRate={handleChartRate} />
       </div>
     );
   }

@@ -4,6 +4,31 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.47.0] — 2026-06-02 [FEATURE]
+
+### BI Chart Interpretation Scenarios
+
+**New chart-format cases (7 scenarios, BI17–BI23) — `src/data/biCases.js`:**
+Added visual chart interpretation scenarios to the BI room. Each scenario displays an interactive recharts visualization with a deceptive or misleading pattern, asks the user to identify the issue, and reveals the model answer + key insights. Cases cover common BI pitfalls:
+- BI17: Misleading y-axis scaling (data is flat, chart zooms in to exaggerate noise)
+- BI18: Simpson's Paradox (aggregate declines while every segment improves due to mix shift)
+- BI19: Dual-axis deception (independent y-axis scaling creates false correlation)
+- BI20: Cherry-picked time window (3-month recovery masks year-long decline)
+- BI21: Aggregation hiding divergence (power users churn masked by new user acquisition)
+- BI22: Missing seasonal baseline (15% growth is 98% seasonality)
+- BI23: Omitted zero baseline (bar chart amplifies small differences)
+
+**New ChartScenario component — `src/components/bi/ChartScenario.jsx`:**
+Renders chart visualization (LineChart, BarChart, AreaChart, ComposedChart via recharts), displays multiple-choice question, reveals model answer + key insights, tracks confidence rating. Integrates with existing BIRunner and saves progress via `saveBIProgress`.
+
+**Modified BIRunner — `src/components/bi/BIRunner.jsx`:**
+Added format detection: cases with `format: 'chart'` route directly to ChartScenario (skips work/textarea screen). Chart cases flow: situation → chart interaction → complete. Text cases flow unchanged: situation → work/textarea → reveal.
+
+**Build:** ✓ 0 errors. biCases.js PASS. Chart rendering tested with recharts (already in dependencies).
+**Files:** 1 new component, 1 modified runner, 1 extended data file. Total new content: 7 chart scenarios + 100 lines of component code.
+
+---
+
 ## [4.46.0] — 2026-06-02 [FEATURE + CONTENT]
 
 ### SQL Lab Phase 3 + Foundation Rewrites + Emoji Pass + Debrief Failure Modes
