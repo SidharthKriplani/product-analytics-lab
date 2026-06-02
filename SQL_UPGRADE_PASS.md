@@ -32,7 +32,23 @@ Easy problems get MJ=2-3 by design (Easy prompts are intentionally specified). F
 ---
 
 ## Batch 2 — Easy e11–e20
-**Status:** Pending
+**Status:** ✅ Complete | **Date:** 2026-06-03
+
+| ID | Title | MJ | FV | FA | Total | Status |
+|---|---|---|---|---|---|---|
+| e11 | Never-Ordered Products | 2 | 4 | 4 | 10 | ✅ |
+| e12 | Never-Logged-In Users | 2 | 4 | 4 | 10 | ✅ |
+| e13 | Total Medication Coverage | 3 | 4 | 5 | 12 | ✅ |
+| e14 | Accounts with All Active Users | 3 | 4 | 4 | 11 | ✅ |
+| e15 | Verified Low-Risk Active Accounts | 2 | 4 | 4 | 10 | ✅ |
+| e16 | Avg Transaction by Category | 3 | 4 | 4 | 11 | ✅ |
+| e17 | Available Providers by Clinic | 2 | 4 | 4 | 10 | ✅ |
+| e18 | May Appointments Count | 2 | 4 | 4 | 10 | ✅ |
+| e19 | Transaction Volume by Category | 3 | 4 | 4 | 11 | ✅ |
+| e20 | Premium Breakdown by Country | 2 | 4 | 4 | 10 | ✅ |
+
+### Batch 2 findings
+Easy problems stay at MJ=2-3 by design. e13 earns FA=5 (the +1 formula error is exactly the kind of off-by-one that passes silently and compounds across calculations). e16 raises MJ=3 via the baseline definition question (should disputed/failed transactions be in a fraud baseline?). Pattern holds: FV wrong-answer showcases are the primary value — every wrong query documented with its actual output and detection method.
 
 ---
 

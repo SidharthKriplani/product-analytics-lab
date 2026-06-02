@@ -15,11 +15,11 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ## Next session
 
-**1. S-Grade Upgrade Pass — Batch 2 (Easy e11–e20)**
-Batch 1 (e01–e10) complete. Add MJ + FV + FA debrief additions to next 10 Easy problems. Scores tracked in SQL_UPGRADE_PASS.md. Rubric in DECISIONS.md. Full plan in SQL_LAB_PLAN.md Section 11.
+**1. S-Grade Upgrade Pass — Batch 3 (Easy e21–e30)**
+Batches 1–2 done (e01–e20). Continue FV+FA additions. Scores in SQL_UPGRADE_PASS.md.
 
-**2. S-Grade Upgrade Pass — Batches 3–5 (remaining Easy)**
-Complete all 50 Easy problems before moving to Medium. Easy = MJ minimal, FV+FA standard additions.
+**2. S-Grade Upgrade Pass — Batches 4–5 (Easy e31–e50)**
+Complete all 50 Easy before moving to Medium.
 
 **3. S-Grade Upgrade Pass — Medium through Master (Batches 6–13)**
 Medium+ gets full MJ/FV/FA treatment + live trap embedding in seed data for top 30 problems.

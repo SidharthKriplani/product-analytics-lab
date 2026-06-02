@@ -5,6 +5,22 @@ import { track } from '../utils/analytics.js';
 
 const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3 };
 
+function renderDebrief(text) {
+  if (!text) return null;
+  return text.split('\n\n').map((para, i) => {
+    const parts = para.split(/(\*\*[^*]+\*\*)/g);
+    return (
+      <p key={i} style={{ margin: i === 0 ? 0 : '0.6rem 0 0 0' }}>
+        {parts.map((part, j) =>
+          part.startsWith('**') && part.endsWith('**')
+            ? <strong key={j}>{part.slice(2, -2)}</strong>
+            : part
+        )}
+      </p>
+    );
+  });
+}
+
 const SORTED_PROBLEMS = [...sqlLabProblems].sort((a, b) => DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty]);
 
 const DIFF_COLOR = {
@@ -834,7 +850,7 @@ export function SqlLabPage({ onBack }) {
                 padding: '0.85rem 1rem',
                 fontSize: '0.83rem', lineHeight: 1.65, color: 'var(--text)',
               }}>
-                {problem.debrief}
+                {renderDebrief(problem.debrief)}
               </div>
               <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem' }}>
                 <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Model solution</div>

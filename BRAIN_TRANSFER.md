@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.74.0 | **Build:** ✓ (2.21s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.75.0 | **Build:** ✓ (1.96s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -50,6 +50,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V4.75.0** — renderDebrief() fix + S-Grade Upgrade Pass Batch 2 (Easy e11–e20) complete. renderDebrief() renders **bold** and paragraph breaks in all debriefs — without this, all FV/FA/MJ additions were invisible (literal asterisks, wall of text). e11–e20 all get FV+FA additions. SQL_UPGRADE_PASS.md Batch 2 scored. Build ✓ 1.96s.
+
 **V4.74.0** — S-Grade Upgrade Pass infrastructure locked + Batch 1 (Easy e01–e10) complete. New 10-dimension rubric (adds MJ/FV/FA) in DECISIONS.md. Section 11 added to SQL_LAB_PLAN.md. SQL_UPGRADE_PASS.md created as tracking artifact. Layer 2 (forensic/impossible/cascade/code-review formats) logged in IDEAS.md Tier 1. No build needed (MD-only changes + debrief additions to sqlLabProblems.js).
 
 **V4.73.0** — SQL Quality Audit COMPLETE. Batch 13 (final 7 Master problems): 6/7 flagged. 3 rewrites: master18→Seller Scorecard (Etsy, marketplace, conditional aggregation + RANK), master19→Driver On-Time (DHL, logistics, SLA analytics), master25→Post Engagement (Reddit, social_network, ROW_NUMBER PARTITION BY). 3 debrief upgrades: master12 (3-CTE coverage formula + tie-break), master14 (active-account filter caveat), master26 (recursive chain explanation). master27 clean. Build ✓ 2.21s. **THE 13-BATCH SQL QUALITY AUDIT IS COMPLETE.**
@@ -64,9 +66,9 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — S-Grade Upgrade Pass Batch 2 (Easy e11–e20)
+## Next action — S-Grade Upgrade Pass Batch 3 (Easy e21–e30)
 
-**S-Grade Upgrade Pass — in progress.** Batch 1 done (Easy e01–e10). 12 batches remaining.
+**S-Grade Upgrade Pass — in progress.** Batches 1–2 done (Easy e01–e20). 11 batches remaining.
 
 New rubric: 10 dimensions (MJ + FV + FA added), max 50, flag < 30 or any dim < 3. Rubric in DECISIONS.md. Batch map in SQL_LAB_PLAN.md Section 11. Scores in SQL_UPGRADE_PASS.md.
 
