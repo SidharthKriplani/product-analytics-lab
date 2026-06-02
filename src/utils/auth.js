@@ -2,7 +2,10 @@ import { supabase } from './supabase.js';
 
 export async function signInWithEmail(email) {
   if (!supabase) return { error: 'Supabase not configured' };
-  return supabase.auth.signInWithOtp({ email });
+  return supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.origin },
+  });
 }
 
 export async function signInWithGoogle() {
