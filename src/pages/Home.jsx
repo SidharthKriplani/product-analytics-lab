@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { learningPaths } from '../data/learningPaths.js';
 import { Icon } from '../components/shared/Icon.jsx';
 import { BeginnerOnboardingTrack } from '../components/shared/BeginnerOnboardingTrack.jsx';
@@ -852,8 +853,8 @@ export function Home({ onNavigate }) {
         </span>
       </div>
 
-      {/* ── Onboarding modal ──────────────────────────────────────────────── */}
-      {showOnboardingModal && (
+      {/* ── Onboarding modal — rendered via portal so position:fixed is viewport-relative ── */}
+      {showOnboardingModal && createPortal(
         <div style={{ position: 'fixed', inset: 0, background: 'var(--overlay)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '2rem', maxWidth: 420, width: '90%', position: 'relative', boxShadow: 'var(--shadow-xl)' }}>
             <button
@@ -896,7 +897,7 @@ export function Home({ onNavigate }) {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
     </div>
   );
