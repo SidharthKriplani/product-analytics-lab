@@ -204,6 +204,7 @@ export const rcaCases = [
       interviewPhrase: 'When a metric drops the same day as a deployment, the deployment is guilty until proven innocent — I check error logs before I open the analytics dashboard.'
     },
     leadershipNote: 'Staff analysts separate the data quality question from the product question immediately. The Visa error spike on web-only is almost certainly a payment provider misconfiguration — not a product regression. The staff move is to get payment engineering on a call within the hour, not to run further segmentation. The business impact framing matters: $140k/day means every hour of delay has a dollar value, and that number belongs in the escalation message. In an interview, \'I would look at the payment data\' is not an answer. The standard is specificity: name the table, the filter, and the expected signal — \'I would query payment_transactions filtered to platform=web and method=Visa for the past 24 hours, group by error_code, and compare the error rate to the prior 7-day baseline\' is a complete next step.',
+    spokenSummary: 'CVR dropped but only on web, only for Visa — that\'s a platform-method intersection, not a product regression. My hypothesis is a payment provider misconfiguration on the web checkout path. I\'d query payment_transactions for web Visa in the past 24 hours, group by error_code, and compare the error rate to the prior 7-day baseline. If error rate spiked, I\'m calling payment engineering immediately — not running more segmentation. At $140k per day, every hour of delay has a dollar value, and that number belongs in the escalation message.',
   },
 
   {
@@ -409,6 +410,7 @@ export const rcaCases = [
       interviewPhrase: 'Zero results is a coverage problem, not a ranking problem — before touching the algorithm, I check whether the index even has the items the query is looking for.'
     },
     leadershipNote: 'Staff analysts treat a post-ingestion search degradation as an indexing integrity question first, not a query behavior question. The synonym mapping gap in new categories is a systemic process failure — it means no pre-launch search coverage check exists in the catalog pipeline. The forward-looking ask is not just a fix but a guardrail: every catalog update should gate on synonym coverage before the index goes live.',
+    spokenSummary: 'Zero-result rate spiked the same day as a catalog ingestion — that\'s a coverage problem, not a ranking problem. I\'d query zero-result rate by category and compare pre- versus post-ingestion. If it\'s concentrated in newly added categories, the ingestion pipeline didn\'t carry over the synonym mappings. Fix is operational: rebuild the index for those categories with synonym coverage. The structural fix is a pre-ingestion gate — no catalog update goes live without a synonym coverage check.',
   },
 
   {
@@ -614,6 +616,7 @@ export const rcaCases = [
       interviewPhrase: 'In marketplace cancellation analysis, reason codes are your fastest diagnostic tool — "not as described" tells you this is a supply quality problem, not a demand problem, before you pull a single additional query.'
     },
     leadershipNote: 'Staff analysts ask who is losing when a marketplace metric breaks — buyer or seller, demand or supply. The cancellation spike concentrated in three high-density cities is a supply quality problem, not a demand problem, and reason codes tell that story before any additional segmentation. The stakeholder communication challenge is framing this to the seller operations team without triggering defensiveness — the ask is operational improvement, not blame assignment. Never say \'I would investigate the cancellations further\' — always specify the query: \'I would pull order_cancellations grouped by cancellation_reason_code, filtered to the three flagged cities, versus the prior 4-week baseline in those same cities.\' Reason code distribution is the single data point that routes the entire investigation.',
+    spokenSummary: 'Cancellations spiked in three cities but buyer traffic is flat — so this is supply-side, not demand-side. My first move is reason codes: pull order_cancellations grouped by cancellation_reason_code for those cities versus the prior 4-week baseline. If I see \'not as described\' or \'wrong item\' dominating, this is a seller catalog quality problem. The fix is a targeted seller quality audit in those three cities — not a platform-wide policy change. When framing it to seller ops, the ask is operational improvement, not blame.',
   },
 
   {
@@ -819,6 +822,7 @@ export const rcaCases = [
       interviewPhrase: 'Open rate is a proxy — when I see high open rates and declining retention, I immediately check opt-out rate and task completion per session, because the campaign might be training users to ignore the app, not return to it.'
     },
     leadershipNote: 'Staff analysts treat open rate as a vanity metric when session depth and retention tell the opposite story. High open rates on a re-engagement campaign with declining D7 retention means the notifications are being used as a dismiss reflex, not as genuine re-engagement triggers. The forward implication is a campaign design rule: every notification strategy must have an opt-out rate and session-depth guardrail before it scales.',
+    spokenSummary: 'Open rate is up but D7 retention is down — that\'s the contradiction I\'d focus on. High opens with low retention means users are tapping the notification to dismiss it, not to actually use the app. I\'d segment by notification frequency bucket: users getting 3+ notifications per day almost certainly show higher opt-out rates and lower session depth than users getting 1. The fix is frequency reduction, not better copy. Guardrail going forward: any notification campaign needs an opt-out rate ceiling and a session-depth minimum — not just open rate.',
   },
 
   {
@@ -3985,6 +3989,255 @@ export const rcaCases = [
       ],
       interviewPhrase: '"31pp offline-online gap = training data distribution mismatch. Evaluation set over-represented power users with social graphs. In production, 67% of new users have null social data — hits a popularity fallback that collapses CTR and diversity. Fix: segment-specific rollback for new users. Prevention: always report offline eval performance by user segment." **Weak answer pattern:** The candidate says "the offline A/B test showed +12% CTR so the model is correct and the production drop must be a deployment or infrastructure bug" — accepting the offline evaluation at face value without asking whether the evaluation set population matches the production user distribution, which is the 31pp offline-online gap. **Interviewer follow-up that exposes it:** "Offline showed +12% but production shows -19% — before looking at the deployment pipeline, what would you check about the offline evaluation setup itself to explain a 31-percentage-point discrepancy?"'
     }
+  },
+
+  {
+    id: 'RCA25',
+    title: 'Seller Active Rate Declined, Buyer Traffic Flat',
+    difficulty: 'senior',
+    tags: ['marketplace', 'supply-side RCA', 'seller churn', 'T&S', 'unit economics'],
+    context: {
+      businessContext: 'Two-sided marketplace. Monthly health review flagged seller active rate declining while buyer-side metrics are stable.',
+      metricMovement: 'Seller active rate (sellers with ≥1 fulfilled order in past 30 days) dropped 14% MoM. New seller registrations: flat.',
+      businessImpact: 'Supply compression takes 6–8 weeks to manifest in buyer CVR. If the drop is structural, catalog quality and search relevance will degrade next quarter.',
+      timeWindow: '30-day rolling window vs prior 30-day period.',
+      knownFacts: [
+        'Buyer traffic, GMV, and CVR are flat — no buyer-side signal yet',
+        'New seller registrations are flat — the drop is in active rate, not registration',
+        'A Trust & Safety enforcement sweep ran 45 days ago, removing policy-violating accounts',
+        'No fulfillment fee or commission changes in the period',
+        'No new competing marketplace launched in the primary categories'
+      ]
+    },
+    diagnosisSteps: [
+      {
+        id: 'decomp',
+        stepNumber: 1,
+        label: 'First Decomposition',
+        prompt: 'Seller active rate dropped 14% MoM. New registrations are flat. What is your first decomposition?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Decompose by seller vintage: new sellers (0–3 months) vs established sellers (3+ months). Compare drop rates by cohort — they signal completely different root causes.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct framing. A new seller drop signals an onboarding or early-activation failure. An established seller drop signals economics or platform policy friction. Running both in aggregate obscures which problem you have — and the fix is different for each.'
+          },
+          {
+            id: 'b',
+            label: 'Compare GMV per seller before and after to understand if economics worsened — sellers may find the platform less profitable.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Useful but secondary. GMV per seller tells you whether remaining active sellers are doing more or less volume — it does not tell you why inactive sellers stopped. Start with the cohort decomposition to separate the churn population, then look at their economics.'
+          },
+          {
+            id: 'c',
+            label: 'Check if buyer demand dropped in specific categories where sellers may have exited — attribute seller drop-off to demand softening.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'Buyer traffic and GMV are explicitly flat in the known facts. Demand softening is ruled out. Starting here wastes investigation time on a signal that does not exist in the data.'
+          }
+        ]
+      },
+      {
+        id: 'ts_context',
+        stepNumber: 2,
+        label: 'T&S Context',
+        prompt: 'A T&S enforcement sweep ran 45 days ago. How does this change your diagnosis?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Confirm what % of the 14% drop is accounted for by enforcement-removed accounts. If those accounts were already low-GMV and policy-violating, this is healthy churn — not a structural problem.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. The timing match is strong enough to be the primary hypothesis, but timing alone is not confirmation. Pull the list of removed accounts, check their overlap with the churned-active-seller population, and check their GMV contribution. If 80% of the drop is enforcement-driven and those sellers were low-GMV violators, the headline metric drop is misleading — the platform is healthier, not weaker.'
+          },
+          {
+            id: 'b',
+            label: 'The timing is obvious — assume the drop is entirely T&S-driven and close the investigation.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'Timing is a hypothesis, not a conclusion. If 40% of the drop is not enforcement-driven, you have missed a genuine structural problem. Always quantify the T&S overlap before closing the investigation.'
+          },
+          {
+            id: 'c',
+            label: 'Escalate to T&S to reverse the enforcement action and restore churned sellers.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'Premature and backwards. The sellers removed were policy violators. Reversing enforcement to recover a vanity metric is the wrong direction. Validate the cause first — if it is T&S, the "problem" may be intentional.'
+          }
+        ]
+      },
+      {
+        id: 'residual',
+        stepNumber: 3,
+        label: 'Residual Drop',
+        prompt: '40% of the drop is not explained by T&S removal. What is the most likely remaining cause and how do you validate?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Mid-tier sellers (50–200 orders/month) facing economics pressure — high RTO burden on COD at their volume erodes margin. Pull orders per seller and RTO rate for this cohort vs prior period.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct target. Mid-tier sellers have high enough volume to be affected by RTO economics but not enough scale to absorb reverse logistics costs. If their per-order contribution margin went negative or near-zero, exit is rational. This is a fee or RTO policy conversation, not a product fix.'
+          },
+          {
+            id: 'b',
+            label: 'New seller onboarding funnel broke — check listing completion rate and time-to-first-order for cohorts joining in the past 2 months.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Valid hypothesis but lower likelihood here. New registrations are flat, which means the top of the onboarding funnel is working. If the onboarding funnel broke, you would expect new registrations to decline or time-to-first-order to increase for recent cohorts. Worth a quick check but not the primary hypothesis.'
+          },
+          {
+            id: 'c',
+            label: 'Run a seller survey to understand why they reduced activity.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'Surveys are slow, have low response rates among churned users, and produce self-reported data that may not reflect actual behavior drivers. You have order-level data — pull the economics story directly before resorting to a survey.'
+          }
+        ]
+      }
+    ],
+    seniorDiagnosis: {
+      reasoning: 'The T&S enforcement sweep 45 days ago is the primary hypothesis and must be quantified before drawing any other conclusion. Context-matching timing is a basic investigation discipline. For the residual unexplained drop, mid-tier seller economics is the most likely structural cause: COD return rates erode per-order margin for sellers who do not have the volume to absorb it. This is a unit economics problem, not a product problem — the conversation belongs with the pricing and fee policy team.',
+      commonMistakes: [
+        'Treating all seller decline as a product problem without checking T&S enforcement context',
+        'Jumping to acquisition solutions (more onboarding incentives) when the problem is in retention economics',
+        'Not separating new vs established seller cohorts — the diagnosis and fix are completely different',
+        'Treating the headline metric drop as alarming before quantifying what fraction is healthy enforcement churn'
+      ],
+      interviewPhrase: 'When seller active rate drops, I ask two questions before anything else: was there a T&S action in the past 60 days, and is the drop concentrated in new or established sellers? The answer to those two questions determines whether this is a health signal or a platform problem.'
+    },
+    leadershipNote: 'Staff analysts know that seller active rate is a leading indicator of buyer CVR with a 6–8 week lag — supply compression does not show up in buyer metrics immediately. The T&S context question is the most important data read: if enforcement drove the drop, it is intentional and healthy. If mid-tier seller economics drove the rest, that opens a fee and RTO policy review conversation with leadership, not a product fix. The key framing is: are we losing the sellers we want to keep?',
+    spokenSummary: 'Seller active rate down 14% while buyer traffic is flat. First move: decompose by vintage — new vs established sellers tell completely different stories. Second: a T&S sweep ran 45 days ago, so I\'d quantify what fraction of the churned accounts were enforcement-removed. If that explains 80%, this is healthy churn and the headline metric is misleading. For the residual, I\'d check mid-tier seller economics — orders per seller and RTO burden for the 50–200 orders/month cohort versus prior period. Guardrail: don\'t launch blanket retention incentives before ruling out T&S as the driver.',
+  },
+
+  {
+    id: 'RCA26',
+    title: 'Net Revenue Declined Despite Stable Order Volume',
+    difficulty: 'senior',
+    tags: ['unit economics', 'per-order P&L', 'revenue decomposition', 'discount burn', 'RTO', 'marketplace'],
+    context: {
+      businessContext: 'E-commerce marketplace, monthly revenue review. Volume growth is on track but finance flagged a net revenue miss.',
+      metricMovement: 'Net revenue down 18% MoM. Gross orders: +1% MoM (essentially flat). AOV down 8% (Rs 298 → Rs 274).',
+      businessImpact: 'Unit economics deterioration at this scale is material. A sustained 18% net revenue miss with flat orders means per-order profitability is eroding.',
+      timeWindow: 'Current month vs prior month.',
+      knownFacts: [
+        'Gross orders: +1% MoM',
+        'AOV: down 8% (Rs 298 → Rs 274)',
+        'A new coupon campaign launched this month targeting first-time repeat buyers',
+        'No fulfillment fee or commission rate changes',
+        'COD share: 72% (stable)',
+        'Logistics cost per order: flat'
+      ]
+    },
+    diagnosisSteps: [
+      {
+        id: 'formula',
+        stepNumber: 1,
+        label: 'Revenue Formula Decomposition',
+        prompt: 'Net revenue is down 18% but orders are flat. What is the right first decomposition?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Revenue per order = Fulfillment fee + Ad revenue − Logistics cost − Discount − RTO loss. Pull per-order P&L for current vs prior month and identify which component changed.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. This is the only decomposition that separates the levers. Orders are flat, so the problem is entirely in revenue per order. Decomposing the P&L directly names the mechanism — you will know within one query whether this is discount burn, RTO cost, fee compression, or a combination.'
+          },
+          {
+            id: 'b',
+            label: 'Decompose by category to find where revenue declined most — if one category is driving it, investigate that category\'s pricing.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Category segmentation is a useful second step but not the first decomposition. It tells you where the problem is concentrated geographically, not what mechanism is causing it. Pull the P&L formula first, then slice by category to identify concentration.'
+          },
+          {
+            id: 'c',
+            label: 'Calculate total GMV trend since AOV is down 8% — use GMV movement to explain the revenue decline.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'GMV declining with orders flat is a symptom, not a root cause. It tells you that revenue per transaction is down — which you already know. The P&L decomposition tells you why.'
+          }
+        ]
+      },
+      {
+        id: 'drivers',
+        stepNumber: 2,
+        label: 'Isolate the Driver',
+        prompt: 'Per-order P&L shows: avg discount per order doubled this month, RTO rate up 3pp (18% → 21%), logistics cost flat. What do you investigate first?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Discount burn first — it doubled and a new coupon campaign launched this month. Pull discount_amount grouped by coupon_code to confirm the campaign is driving it.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct prioritization. Discount doubling with a concurrent campaign launch is a near-certain causal link — one query on coupon_code confirms it in minutes. This is your dominant lever. RTO up 3pp is material but secondary — it takes longer to diagnose and the discount explanation is already in front of you.'
+          },
+          {
+            id: 'b',
+            label: 'RTO rate first — a 3pp increase at this order volume is always material in absolute cost.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'True that 3pp RTO increase is material at scale. But discount per order doubled with a known campaign trigger — that is a stronger, faster-to-confirm signal. Sequence your investigation by Impact × Ease: discount is equally high impact and faster to validate. Investigate RTO as the second step, not the first.'
+          },
+          {
+            id: 'c',
+            label: 'Logistics cost — even flat per-order logistics matters when order volume is this high.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'Logistics cost per order is explicitly stated as flat in the known facts. Investigating a flat metric when two other metrics are moving is a waste of investigation time.'
+          }
+        ]
+      },
+      {
+        id: 'recommendation',
+        stepNumber: 3,
+        label: 'Recommendation',
+        prompt: 'Discount burn confirmed as primary driver (campaign-driven). RTO up 3pp is secondary. What is the right recommendation?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Tighten coupon eligibility — cap redemptions per user per month and limit to genuinely new repeat buyers. Model conversion impact before cutting. Separately, investigate RTO by pincode and payment method, and run prepaid nudges in high-RTO zones.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct structure: fix the primary driver with a conversion model (not a blind cut), and address RTO as a parallel workstream. The guardrail is critical — price-sensitive COD users may churn if discount disappears entirely. The model answers: what is the net contribution margin impact if conversion drops X% but discount burn drops Y%?'
+          },
+          {
+            id: 'b',
+            label: 'Pause the coupon campaign immediately to stop the discount burn.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Stops the bleeding but incomplete. No conversion impact model means you might be cutting revenue and users as well as cost. And the RTO increase gets no action. A pause without a model and without addressing RTO is a reactive fix, not a recommendation.'
+          },
+          {
+            id: 'c',
+            label: 'Raise fulfillment fees to recover the margin compressed by discount burn — sellers absorb the cost.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'This shifts the problem rather than fixing it. Higher fulfillment fees hurt seller economics, which reduces supply, which hurts buyer CVR. It also does nothing to reduce discount burn or RTO costs — those are still being incurred. This is a cost-shifting move disguised as a recommendation.'
+          }
+        ]
+      }
+    ],
+    seniorDiagnosis: {
+      reasoning: 'Net revenue declining with orders flat is always a per-order economics story. The P&L formula decomposition immediately isolates the mechanism. Discount doubling with a concurrent campaign launch is the clearest signal — one coupon_code query confirms it. The RTO increase is a parallel concern: 3pp at this volume is hundreds of crores annually in reverse logistics, and it warrants its own investigation and prepaid nudge program.',
+      commonMistakes: [
+        'Treating AOV decline as the root cause rather than a symptom of discount burn',
+        'Not decomposing the full P&L formula — jumping to category or channel segmentation before identifying the mechanism',
+        'Recommending a discount cut without modeling conversion impact on price-sensitive COD users',
+        'Missing that discount burn and RTO can compound — a discounted order that also returns incurs both costs simultaneously'
+      ],
+      interviewPhrase: 'Orders stable, net revenue down 18% — this is per-order economics. Revenue per order equals fee plus ad revenue minus logistics, discount, and RTO loss. Discount doubled and a campaign launched — one query on coupon_code tells me if the campaign is the cause before I open any other table.'
+    },
+    leadershipNote: 'Staff analysts read net revenue declining with orders stable as a P&L mechanics problem and go straight to the formula. The coupon campaign is the obvious hypothesis but it must be confirmed with data — campaign launches and metric changes co-occurring are sometimes coincidental. The RTO increase is the second concern: 3pp sounds small but at scale it is material, and it compounds with discount burn on the same orders. The leadership framing is unit economics trajectory — is this a one-month campaign overspend (fixable) or a structural mix shift toward lower-margin orders (strategic)?',
+    spokenSummary: 'Orders are flat but net revenue is down 18% — so this is a per-order economics problem. Revenue per order equals fulfillment fee plus ad revenue minus logistics, discount, and RTO loss. Logistics is flat, so I\'m looking at discount burn and RTO. Discount per order doubled and a coupon campaign just launched this month — I\'d pull discount by coupon_code to confirm the campaign is driving it. RTO up 3pp is secondary but material at scale. Fix: tighten coupon eligibility with a conversion impact model, and run prepaid nudges in high-RTO pincodes. Guardrail: don\'t cut discounts without modeling what happens to conversion for COD users.',
   }
 ];
 

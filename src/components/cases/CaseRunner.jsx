@@ -102,6 +102,7 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
   const [result, setResult] = useState(null);
   const [note, setNote] = useState(() => getNotes('cases', businessCase.id));
   const [answerFeedback, setAnswerFeedback] = useState('');
+  const [spokenOpen, setSpokenOpen] = useState(false);
   useEffect(() => { setNote(getNotes('cases', businessCase.id)); }, [businessCase.id]);
 
   // Shuffle answer options per phase — seeded so same user sees same order,
@@ -315,6 +316,46 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
                 }}
               />
             </div>
+
+            {/* 30-second spoken version */}
+            {businessCase.spokenSummary && (
+              <div style={{ marginTop: '1rem' }}>
+                <button
+                  onClick={() => setSpokenOpen(o => !o)}
+                  style={{
+                    width: '100%', textAlign: 'left',
+                    background: spokenOpen ? 'var(--teal-bg)' : 'var(--surface)',
+                    border: spokenOpen ? '1px solid var(--teal-border)' : '1px solid var(--border)',
+                    borderRadius: 'var(--radius)',
+                    padding: '0.65rem 1rem',
+                    cursor: 'pointer',
+                    color: spokenOpen ? 'var(--teal)' : 'var(--text-muted)',
+                    fontSize: '0.84rem', fontWeight: 600,
+                    display: 'flex', alignItems: 'center', gap: '0.4rem',
+                    transition: 'all 0.12s',
+                  }}
+                >
+                  <span>{spokenOpen ? '▾' : '▸'}</span>
+                  <span>🎙 30-Second Answer</span>
+                </button>
+                {spokenOpen && (
+                  <div style={{
+                    borderLeft: '3px solid var(--teal)',
+                    background: 'var(--teal-bg)',
+                    borderRadius: '0 var(--radius) var(--radius) 0',
+                    padding: '0.9rem 1.1rem',
+                    marginTop: '0.25rem',
+                  }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--teal)', marginBottom: '0.45rem' }}>
+                      How to say this in a 30-second spoken answer
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text)', lineHeight: 1.7, fontStyle: 'italic' }}>
+                      &quot;{businessCase.spokenSummary}&quot;
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Sticky bottom bar — always shown in debrief */}

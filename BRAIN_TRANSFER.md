@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.86.0 | **Build:** ✓ (1.48s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.87.0 | **Build:** ✓ (1.50s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -50,6 +50,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V4.87.0** — Meesho prep signal extracted + applied. (1) spokenSummary field: rendering infrastructure added to RCADebriefPanel.jsx and CaseRunner.jsx — teal collapsible "30-Second Answer" toggle, shown when field exists. RCA01–RCA04 populated. (2) RCA25 "Seller Active Rate Declined": supply-side marketplace RCA, 3 phases (vintage decomp → T&S context → residual economics), senior difficulty, spokenSummary. (3) RCA26 "Net Revenue Declined, Orders Stable": per-order P&L decomposition (Revenue/order = fee + ad − logistics − discount − RTO), 3 phases, discount burn + RTO compound analysis, spokenSummary. Build ✓ 1.50s.
+
 **V4.86.0** — Full Jatin feedback sequence complete. (1) rcaCases.js L3145 distractor fixed (DAU-down option replaced with plausible demand-side conflation). (2) Stats Foundations persistence: `statsFoundationsState.js` utility created; M01/M21/M23/M24/M25 now save/restore exercise state — 16 slider/visual modules correctly skipped (no exercise state to lose); M27/M28/M32 are stubs, skipped. (3) rf15 Hypothesis Ranking module: 3 scenarios (DAU drop/AOV drop/checkout CVR), user ranks 4 hypotheses per scenario by Impact × Likelihood × Ease, reveal shows expert ranking + per-hypothesis rationale + rubric reference table. Persist/restore. (4) "Never say I would look at the data" injected into RCA case leadershipNotes for C01 (checkout CVR), C03 (marketplace cancellations), C07 (fraud spike) — each with a domain-specific query example. Build ✓ 1.48s.
 
 **V4.85.0** — rf14 Dominant Lever + Pruning module shipped. 3 scenarios (Revenue = Users × CVR × AOV, DAU = New + Retained + Resurrected, Checkout CVR funnel). 2-phase exercise: identify dominant lever → apply pruning rule. Persist/restore state. Reference table on completion. Wired into MODULE_COMPONENTS. businessCases.js C01 Phase 4 option C distractor rewritten (was "segment by demographics" — obviously wrong; now a plausible delivery-time benchmark cut with targeted feedback). Build ✓ 1.31s.
@@ -92,7 +94,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — Forensic Batch 3 (f21–f25, staff-level) or S-grade debrief pass Batches 4–13
+## Next action — Forensic Batch 3 (f21–f25), then S-grade debrief pass Batches 4–13, then room header icon consistency (audit #79)
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

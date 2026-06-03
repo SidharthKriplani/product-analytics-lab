@@ -18,7 +18,7 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 **1. Forensic Format — Batch 3 (f21–f25)**
 Staff-level problems: compounding errors, metric definition mismatch, survivorship bias. Read SQL_LAB_PLAN.md Section 12 Batch 3 spec before building.
 
-**Note (V4.85.0–V4.86.0):** Full Jatin feedback sequence complete. rf14 Dominant Lever + rf15 Hypothesis Ranking shipped. Stats Foundations persistence live on 5 exercise modules (M01/M21/M23/M24/M25). Practice room MCQ audit complete — one fix (rcaCases.js ad-revenue distractor). "Never say I would look at the data" injected into RCA leadershipNotes for C01, C03, C07.
+**Note (V4.85.0–V4.87.0):** Full Jatin feedback + Meesho signal sequence complete. rf14/rf15 shipped. Stats Foundations persistence live. spokenSummary field live in RCA + Business runners — RCA01–04 populated, RCA25 + RCA26 built with spokenSummary. Remaining RCA/Business cases can be backfilled gradually.
 
 **2. S-grade debrief pass (Batches 4–13) — paused**
 Resume after forensic Batches 1–3 ship.
