@@ -46,3 +46,15 @@ export function getStoredCode() {
     return null;
   }
 }
+
+// Tier system — three levels:
+// 'anonymous' : not signed in. Can browse rooms, cannot run any content.
+// 'free'      : signed in, no access code. isFree cases + Foundations + Easy SQL.
+// 'premium'   : signed in + access code (DAI2026) or future Stripe subscription.
+//               Full access to all rooms, all SQL tiers, all company tracks.
+// When Stripe goes live: isUnlocked() will also accept a valid subscription token.
+export function getAccessTier(user) {
+  if (isUnlocked()) return 'premium';
+  if (user) return 'free';
+  return 'anonymous';
+}

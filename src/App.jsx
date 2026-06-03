@@ -145,6 +145,27 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
 
+  // Auth gate — anonymous users cannot access runners or SQL Lab.
+  // Browsing room browsers and Foundations is open to all.
+  // Sign-in unlocks the free tier (isFree cases + Easy SQL).
+  // Access code (DAI2026) + future Stripe = premium tier.
+  const AUTH_REQUIRED_PAGES = new Set([
+    'sql-lab',
+    'stats-runner', 'design-runner', 'runner', 'metrics-runner', 'rca-runner',
+    'cases-runner', 'code-runner', 'prioritization-runner', 'behavioral-runner',
+    'estimation-runner', 'growth-runner', 'bi-runner', 'stf-runner',
+    'instrumentation-runner', 'sql-runner',
+    'stat-foundations-runner', 'metrics-foundations-runner',
+    'rca-foundations-runner', 'exp-foundations-runner',
+  ]);
+
+  useEffect(() => {
+    if (!user && AUTH_REQUIRED_PAGES.has(page)) {
+      setPage('home');
+      setShowAuth(true);
+    }
+  }, [page, user]);
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
     try { localStorage.setItem('exp-lab-theme', theme); } catch (e) {}

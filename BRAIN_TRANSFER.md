@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.79.0 | **Build:** ✓ (2.02s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.80.0 | **Build:** ✓ (2.19s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V4.80.0** — 3-tier monetization gate implemented. Anonymous users intercepted from all runners + SQL Lab via AUTH_REQUIRED_PAGES useEffect in App.jsx. getAccessTier() added to unlock.js. 27 Easy SQL problems updated to isFree: true. MONETIZATION.md created (full business model, tier spec, pricing, B2B path). DECISIONS.md monetization standing rules locked. Build ✓ 2.19s.
 
 **V4.79.0** — Full signed-out/signed-in UX split. Home.jsx rewritten as clean full-screen landing (no sidebar, ghost analytics snippets, staggered entrance, glow-pulse CTA "Sign in to analyze →"). Signed-in: Progress is home, Progress removed from sidebar nav, logo navigates to progress. signed-out CSS class hides sidebar + resets margin. Build ✓ 2.02s.
 

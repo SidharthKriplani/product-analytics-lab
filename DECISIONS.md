@@ -135,6 +135,25 @@ Desktop: Header.jsx right slot. Mobile: mobile topbar right slot. Do not add a s
 
 ---
 
+## Monetization — standing decisions (V4.80.0)
+
+**Three tiers: anonymous / free / premium.** Full spec in MONETIZATION.md.
+- Anonymous: landing + browse rooms. No content execution.
+- Free (signed in): all Foundations + `isFree: true` cases (3/room) + Easy SQL. Progress sync via Supabase.
+- Premium (signed in + `DAI2026` or future Stripe): everything.
+
+**Pricing target: $29-39/month or $249-299/year.** PAL is a professional development platform, not a commodity prep tool. Do not underprice.
+
+**`isUnlocked()`** in unlock.js checks access code. Returns true only if valid code or (future) Stripe subscription present. Never hardcode to true again — that was beta only.
+
+**`getAccessTier(user)`** is the canonical tier check. Use it for tier-aware UI.
+
+**Sign-in gate** enforced via `AUTH_REQUIRED_PAGES` useEffect in App.jsx. Covers all runners and SQL Lab. Browsing and Foundations open to all.
+
+**Easy SQL = free tier.** All Easy SQL problems have `isFree: true`. Medium/Hard/Master/Forensic have `isFree: false` and require premium.
+
+**B2B path exists but is medium-term.** Do not build team features until B2C is profitable.
+
 ## Paywall + monetization
 
 **Access code gate is live as of V4.29.0. `isUnlocked()` reads localStorage.**
