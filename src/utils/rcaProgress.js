@@ -35,3 +35,15 @@ export function clearRCAProgress(caseId) {
   delete store[caseId];
   writeStore(store);
 }
+
+// ── Mid-case draft ──
+var DRAFT_KEY = 'pal-rca-draft-v1';
+function readDrafts() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); } catch { return {}; } }
+
+export function saveRCADraft(caseId, state) {
+  try { var d = readDrafts(); d[caseId] = state; localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); } catch {}
+}
+export function loadRCADraft(caseId) { return readDrafts()[caseId] || null; }
+export function clearRCADraft(caseId) {
+  try { var d = readDrafts(); delete d[caseId]; localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); } catch {}
+}

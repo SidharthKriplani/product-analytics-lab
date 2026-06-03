@@ -35,3 +35,15 @@ export function clearCaseProgress(caseId) {
   delete store[caseId];
   writeStore(store);
 }
+
+// ── Mid-case draft (separate key — survives navigation, cleared on complete/retry) ──
+var DRAFT_KEY = 'pal-cases-draft-v1';
+function readDrafts() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); } catch { return {}; } }
+
+export function saveCaseDraft(caseId, state) {
+  try { var d = readDrafts(); d[caseId] = state; localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); } catch {}
+}
+export function loadCaseDraft(caseId) { return readDrafts()[caseId] || null; }
+export function clearCaseDraft(caseId) {
+  try { var d = readDrafts(); delete d[caseId]; localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); } catch {}
+}

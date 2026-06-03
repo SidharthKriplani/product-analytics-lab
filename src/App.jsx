@@ -181,12 +181,17 @@ export default function App() {
 
   useEffect(() => {
     const { data } = onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        pushProgressToSupabase(session.user);
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && session?.user) {
         pullProgressFromSupabase(session.user).then(() => {
           setUser(session.user);
           refreshProgress();
-          setPage(p => p === 'home' ? 'progress' : p);
+          if (event === 'SIGNED_IN') {
+            pushProgressToSupabase(session.user);
+            setPage(p => p === 'home' ? 'progress' : p);
+          }
+          if (event === 'INITIAL_SESSION') {
+            setPage(p => p === 'home' ? 'progress' : p);
+          }
         });
       } else if (event === 'SIGNED_OUT') {
         setUser(null);

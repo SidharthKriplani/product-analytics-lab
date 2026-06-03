@@ -15,8 +15,10 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ## Next session
 
-**1. Forensic Format — Batch 3 (f21–f25)**
-Staff-level problems: compounding errors, metric definition mismatch, survivorship bias. Read SQL_LAB_PLAN.md Section 12 Batch 3 spec before building.
+**1. Room header icon consistency (audit #79)**
+Standardize remaining room browser headers to 36×36 colored box pattern with Icon component. Visual polish.
+
+**Note (V4.90.0):** S-grade debrief pass COMPLETE — all 130 SQL problems now have FV + FA additions. SQL_UPGRADE_PASS.md + SQL_LAB_PLAN.md Section 11 marked complete.
 
 **Note (V4.85.0–V4.87.0):** Full Jatin feedback + Meesho signal sequence complete. rf14/rf15 shipped. Stats Foundations persistence live. spokenSummary field live in RCA + Business runners — RCA01–04 populated, RCA25 + RCA26 built with spokenSummary. Remaining RCA/Business cases can be backfilled gradually.
 

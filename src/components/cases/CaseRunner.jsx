@@ -3,7 +3,7 @@ import { businessCases } from '../../data/businessCases.js';
 import { CaseStepPanel } from './CaseStepPanel.jsx';
 import { CaseScoreReveal } from './CaseScoreReveal.jsx';
 import { CaseDebriefPanel } from './CaseDebriefPanel.jsx';
-import { saveCaseAttempt, clearCaseProgress } from '../../utils/caseProgress.js';
+import { saveCaseAttempt, clearCaseProgress, saveCaseDraft, loadCaseDraft, clearCaseDraft } from '../../utils/caseProgress.js';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
@@ -95,10 +95,17 @@ function computeScore(businessCase, phaseChoices) {
 
 export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, onNavigate }) {
   const businessCase = businessCases.find(b => b.id === caseId);
-  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+  const _draft = !savedProgress ? loadCaseDraft(businessCase.id) : null;
+  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(_draft ? (_draft.currentPhaseIndex || 0) : 0);
   const [phaseChoices, setPhaseChoices] = useState({});          // phaseId → optionId (pending)
-  const [submittedChoices, setSubmittedChoices] = useState({});  // phaseId → optionId (confirmed)
+  const [submittedChoices, setSubmittedChoices] = useState(_draft ? (_draft.submittedChoices || {}) : {});  // phaseId → optionId (confirmed)
   const [view, setView] = useState(savedProgress ? 'debrief' : 'analysis');
+
+  useEffect(function() {
+    if (view === 'analysis') {
+      saveCaseDraft(businessCase.id, { currentPhaseIndex: currentPhaseIndex, submittedChoices: submittedChoices });
+    }
+  }, [currentPhaseIndex, submittedChoices, view, businessCase.id]);
   const [result, setResult] = useState(null);
   const [note, setNote] = useState(() => getNotes('cases', businessCase.id));
   const [answerFeedback, setAnswerFeedback] = useState('');
@@ -138,6 +145,7 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
       const finalChoices = { ...submittedChoices, [currentPhase.id]: phaseChoices[currentPhase.id] };
       const scored = computeScore(businessCase, finalChoices);
       saveCaseAttempt(businessCase.id, finalChoices, scored, scored.level);
+      clearCaseDraft(businessCase.id);
       track('case_completed', { room: 'cases', id: businessCase.id, rating: scored.level });
       setResult({ ...scored, phaseChoices: finalChoices });
       setView('reveal');
@@ -150,6 +158,7 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
 
   function handleRetry() {
     clearCaseProgress(businessCase.id);
+    clearCaseDraft(businessCase.id);
     setPhaseChoices({});
     setSubmittedChoices({});
     setCurrentPhaseIndex(0);

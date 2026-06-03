@@ -40,3 +40,15 @@ export function clearMetricsProgress(caseId) {
   delete store[caseId];
   writeStore(store);
 }
+
+// ── Mid-case draft (partial field selections, cleared on submit/retry) ──
+var DRAFT_KEY = 'pal-metrics-draft-v1';
+function readDrafts() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); } catch { return {}; } }
+
+export function saveMetricsDraft(caseId, fieldChoices) {
+  try { var d = readDrafts(); d[caseId] = fieldChoices; localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); } catch {}
+}
+export function loadMetricsDraft(caseId) { return readDrafts()[caseId] || null; }
+export function clearMetricsDraft(caseId) {
+  try { var d = readDrafts(); delete d[caseId]; localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); } catch {}
+}

@@ -33,11 +33,17 @@ import {
 
 export function DesignRunner({ caseId, savedProgress, onBack, onGoToReview, onNext, onNavigate }) {
   const scenario = designScenarios.find(s => s.id === caseId);
-  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
-  const [answers, setAnswers] = useState(savedProgress?.answers || {});
-  const [completedPhaseIds, setCompletedPhaseIds] = useState(savedProgress?.completedPhaseIds || []);
-  const [view, setView] = useState('form');
-  const [result, setResult] = useState(null);
+  const _phases = scenario.designPhases;
+  const _savedAnswers = savedProgress?.answers || {};
+  const _savedCompleted = savedProgress?.completedPhaseIds || [];
+  const _resumeIdx = Math.min(_savedCompleted.length, _phases.length - 1);
+  const _hasResult = savedProgress?.lastScore != null;
+  const _restoredResult = _hasResult ? computeDesignScore(scenario, _savedAnswers) : null;
+  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(_resumeIdx);
+  const [answers, setAnswers] = useState(_savedAnswers);
+  const [completedPhaseIds, setCompletedPhaseIds] = useState(_savedCompleted);
+  const [view, setView] = useState(_hasResult ? 'debrief' : 'form');
+  const [result, setResult] = useState(_restoredResult);
   const [openConceptId, setOpenConceptId] = useState(null);
   const [note, setNote] = useState(() => getNotes('design', scenario.id));
   useEffect(() => { setNote(getNotes('design', scenario.id)); }, [scenario.id]);

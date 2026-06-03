@@ -941,7 +941,7 @@ This table will be filled after the audit is complete. Format: problem ID, curre
 
 ## Section 11 — S-Grade Upgrade Pass (V4.74.0+)
 
-**Status:** In progress. Tracking artifact: SQL_UPGRADE_PASS.md. Rubric locked in DECISIONS.md.
+**Status:** ✅ Complete (2026-06-03). All 13 batches done. Tracking artifact: SQL_UPGRADE_PASS.md. Rubric locked in DECISIONS.md.
 
 ### What this pass adds to every problem
 
@@ -991,6 +991,8 @@ Target per problem: MJ ≥ 3, FV ≥ 4, FA ≥ 4 → new dimensions total ≥ 11
 Layer 2 forensic format is now in progress (V4.77.0+). See Section 12.
 
 **Total estimated:** 5–6 sessions after Batch 13 completes.
+
+**Actual completion:** Batches 1–7 completed in one session (2026-06-03 morning). Batches 8–13 completed in a second session (2026-06-03). All 130 Medium/Hard/Master problems upgraded. Build clean. Pass closed.
 
 ---
 
@@ -1048,4 +1050,4 @@ Source: the FV wrong-answers documented in the S-grade debrief pass are the stro
 |---|---|---|---|
 | 1 | f01–f10 | Integer division, NULL trap, COUNT vs COUNT DISTINCT, missing filter, wrong denominator | ✅ Shipped V4.77.0 |
 | 2 | f11–f20 | Average of averages, JOIN fanout, wrong JOIN type, strftime year missing, ROW_NUMBER direction, NULL in AVG, granularity, UNION ALL duplicates, wrong denominator, WHERE kills LEFT JOIN | ✅ Shipped V4.81.0 |
-| 3 | f21–f25 | Staff-level: compounding errors, metric definition mismatch, survivorship bias | Pending |
+| 3 | f21–f25 | Staff-level: compounding errors, metric definition mismatch, survivorship bias | ✅ Shipped V4.88.0 |

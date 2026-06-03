@@ -6,7 +6,7 @@ import { RCADebriefPanel } from './RCADebriefPanel.jsx';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
 import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
-import { saveRCAAttempt } from '../../utils/rcaProgress.js';
+import { saveRCAAttempt, saveRCADraft, loadRCADraft, clearRCADraft } from '../../utils/rcaProgress.js';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
@@ -69,16 +69,24 @@ const SQL_RATINGS = [
 // ─── Main Runner ─────────────────────────────────────────────────────────────
 export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onNavigate }) {
   const rcaCase = rcaCases.find(r => r.id === caseId);
+  const _rcaDraft = !savedProgress ? loadRCADraft(caseId) : null;
   const startView = savedProgress ? 'debrief' : 'diagnosis';
   const [view, setView] = useState(startView);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [stepChoices, setStepChoices] = useState(savedProgress?.stepChoices || {});
+  const [currentStepIndex, setCurrentStepIndex] = useState(_rcaDraft ? (_rcaDraft.currentStepIndex || 0) : 0);
+  const [stepChoices, setStepChoices] = useState(_rcaDraft ? (_rcaDraft.stepChoices || {}) : (savedProgress?.stepChoices || {}));
   const [pendingChoice, setPendingChoice] = useState(null); // selected but not yet submitted
   const [submittedSteps, setSubmittedSteps] = useState(
-    savedProgress
+    _rcaDraft ? (_rcaDraft.submittedSteps || {})
+    : savedProgress
       ? Object.fromEntries(Object.keys(savedProgress.stepChoices || {}).map(k => [k, true]))
       : {}
   );
+
+  useEffect(function() {
+    if (view === 'diagnosis') {
+      saveRCADraft(caseId, { currentStepIndex: currentStepIndex, stepChoices: stepChoices, submittedSteps: submittedSteps });
+    }
+  }, [currentStepIndex, stepChoices, submittedSteps, view, caseId]);
   const [scoreResult, setScoreResult] = useState(null);
 
   // SQL step state
@@ -124,6 +132,7 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
   const currentStepSubmitted = submittedSteps[currentStep?.id];
 
   function handleRetry() {
+    clearRCADraft(rcaCase.id);
     setView('diagnosis');
     setCurrentStepIndex(0);
     setStepChoices({});
@@ -151,6 +160,7 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
       const result = computeScore(rcaCase, stepChoices);
       setScoreResult(result);
       saveRCAAttempt(rcaCase.id, stepChoices, result.score, result.level);
+      clearRCADraft(rcaCase.id);
       track('case_completed', { room: 'rca', id: rcaCase.id, rating: result.level });
       setView('reveal');
     } else {

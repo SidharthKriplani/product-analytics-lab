@@ -7,7 +7,7 @@ import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 import { Icon } from '../shared/Icon.jsx';
-import { saveMetricsAttempt, clearMetricsProgress } from '../../utils/metricsProgress.js';
+import { saveMetricsAttempt, clearMetricsProgress, saveMetricsDraft, loadMetricsDraft, clearMetricsDraft } from '../../utils/metricsProgress.js';
 import { track } from '../../utils/analytics.js';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 
@@ -43,11 +43,16 @@ function computeScore(metricCase, fieldChoices) {
 export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onGoToReview, onNext, onNavigate }) {
   const metricCase = metricCases.find(m => m.id === caseId);
   const hasExisting = !!(savedProgress && savedProgress.fieldChoices);
+  const _draft = !hasExisting ? loadMetricsDraft(metricCase.id) : null;
 
   const [fieldChoices, setFieldChoices] = useState(
-    hasExisting ? savedProgress.fieldChoices : {}
+    hasExisting ? savedProgress.fieldChoices : (_draft || {})
   );
   const [view, setView] = useState(hasExisting ? 'debrief' : 'question');
+
+  useEffect(function() {
+    if (!hasExisting) saveMetricsDraft(metricCase.id, fieldChoices);
+  }, [fieldChoices, hasExisting, metricCase.id]);
   const [submitted, setSubmitted] = useState(hasExisting);
   const [scoreResult, setScoreResult] = useState(
     hasExisting
@@ -68,6 +73,7 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
     const result = computeScore(metricCase, fieldChoices);
     setScoreResult(result);
     setSubmitted(true);
+    clearMetricsDraft(metricCase.id);
     saveMetricsAttempt(metricCase.id, fieldChoices, result.score, result.level);
     track('case_completed', { room: 'metrics', id: metricCase.id, rating: result.level });
     setView('reveal');
@@ -76,6 +82,7 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
 
   function handleRetry() {
     clearMetricsProgress(metricCase.id);
+    clearMetricsDraft(metricCase.id);
     setFieldChoices({});
     setSubmitted(false);
     setScoreResult(null);
