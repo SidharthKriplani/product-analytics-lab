@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 import { behavioralQuestions } from '../data/behavioralQuestions.js';
 import { getAllBehavioralProgress } from '../utils/behavioralProgress.js';
 
@@ -101,10 +102,17 @@ export function BehavioralBrowser({ onStart, unlocked }) {
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <span style={{ fontSize: '1.5rem' }}>🗣</span>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
-            Behavioral & Leadership
-          </h1>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='mic' size={18} color='var(--purple)' />
+          </span>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--purple)', marginBottom: '0.15rem' }}>
+              Behavioral Room
+            </div>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
+              Behavioral & Leadership
+            </h1>
+          </div>
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0, maxWidth: '640px' }}>
           Behavioral questions are the ones most candidates underestimate. A weak STAR answer gets marked down even if your technical thinking is strong — interviewers are assessing ownership, judgment, and communication, not just what happened. This room covers 30 real questions across influence, conflict, prioritization, and failure, with model answers that show what strong actually looks like.

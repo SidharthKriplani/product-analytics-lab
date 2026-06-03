@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 import { ScenarioCard } from '../components/scenario/ScenarioCard.jsx';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { scenarios } from '../data/scenarios.js';
@@ -39,9 +40,19 @@ export function ScenarioBrowser({ allProgress, onSelect, unlocked, onUnlock, onO
 
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.025em', marginBottom: '0.35rem' }}>
-          Experiment Review Room
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='flask' size={18} color='var(--accent)' />
+          </span>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', marginBottom: '0.15rem' }}>
+              Review Room
+            </div>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)', margin: 0, letterSpacing: '-0.025em' }}>
+              Experiment Review Room
+            </h1>
+          </div>
+        </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '0 0 0.5rem' }}>
           {completedCount} of {scenarios.length} completed
         </p>

@@ -50,6 +50,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V4.91.0** — Audit #79 complete. Room header icon consistency. 6 rooms upgraded to the 36×36 colored box + Icon pattern: RCABrowser (search/yellow), MetricsBrowser (bar-chart/green), BehavioralBrowser (mic/purple + Icon import added), CasesBrowser (clipboard/purple), ScenarioBrowser (flask/accent + Icon import added + "Review Room" label added), CodeBrowser (target/yellow + Icon import added). Build ✓ 2.04s.
+
 **V4.90.0** — S-grade debrief pass COMPLETE. All 130 non-forensic SQL Lab problems (50E/40M/25H/15M) upgraded with FV (Forensic Value — wrong query + wrong output + why plausible) and FA (Falsifiability — sanity check cross-query) in Batches 4–13. SQL_UPGRADE_PASS.md complete, SQL_LAB_PLAN.md Section 11 marked ✅. Standout FV=5 problems: e54 (IS NOT NULL vs != NULL returns zero rows), e62 (COUNT vs SUM on binary flag → 100% conversion rate), m01 (missing PARTITION BY in LAG → cross-account contamination), m16 (missing PARTITION BY → global running total), m21 (DESC vs ASC in NTILE inverts quartiles silently), master07 (NOT IN with NULL subquery returns 0 rows — complete silent failure). Build ✓ 1.67s.
 
 **V4.89.0** — Auth persistence fix + statefulness completion. (1) Auth: INITIAL_SESSION event now handled alongside SIGNED_IN — fixes sign-out-on-refresh bug caused by Supabase v2 firing INITIAL_SESSION (not SIGNED_IN) when a session already exists. TOKEN_REFRESHED also handled. (2) DesignRunner: currentPhaseIndex now restores from completedPhaseIds.length; view restores to 'debrief' if lastScore exists; result recomputed on restore. (3) MetricsRunner: fieldChoices draft saved to pal-metrics-draft-v1 on every selection change; restored on mount if no completed attempt; cleared on submit and retry. Build ✓ 1.64s.
@@ -100,7 +102,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — Room header icon consistency (audit #79). Then Interview Simulator expansion (gated on PostHog data — check first).
+## Next action — Interview Simulator expansion (gated on PostHog data — check first). If PostHog not yet live, move to spokenSummary backfill across remaining RCA cases.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

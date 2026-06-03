@@ -50,15 +50,19 @@ export function MetricsBrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle
 
       {/* Header */}
       <div style={{ marginBottom: '1.75rem' }}>
-        <div style={{
-          fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
-          color: 'var(--green)', marginBottom: '0.4rem',
-        }}>
-          Metrics Room
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--green-bg)', border: '1px solid var(--green-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='bar-chart' size={18} color='var(--green)' />
+          </span>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--green)', marginBottom: '0.15rem' }}>
+              Metrics Room
+            </div>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
+              Metric Design
+            </h1>
+          </div>
         </div>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: '0 0 0.5rem', letterSpacing: '-0.02em' }}>
-          Metric Design
-        </h1>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '540px' }}>
           The most common interview failure is picking the obvious metric and defending it under pressure — but interviewers want to see you spot the metric that games, the denominator that shifts, the guardrail you forgot. This room trains the full decision: not just what to measure, but why that specific metric and what breaks if you get it wrong.
         </p>

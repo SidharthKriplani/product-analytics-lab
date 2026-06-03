@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 import { getAllCodeProgress } from '../utils/codeProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { codeModules } from '../data/codeModules.js';
@@ -61,12 +62,19 @@ export function CodeBrowser({ onSelectModule, unlocked, onUnlock, onOpenArticle 
 
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--yellow)', marginBottom: '0.4rem' }}>
-          Code Room
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='target' size={18} color='var(--yellow)' />
+          </span>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--yellow)', marginBottom: '0.15rem' }}>
+              Code Room
+            </div>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.1rem)', fontWeight: 800, color: 'var(--text)', margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>
+              Analytics code in product context.
+            </h1>
+          </div>
         </div>
-        <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.1rem)', fontWeight: 800, color: 'var(--text)', margin: '0 0 0.6rem', letterSpacing: '-0.03em', lineHeight: 1.15 }}>
-          Analytics code in product context.
-        </h1>
         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.65, maxWidth: '560px', margin: '0 0 1.25rem' }}>
           SQL and Python are not the bar in product analytics interviews — the bar is whether you can translate a business question into the right query without being told what to look for. Most candidates can write syntactically correct SQL; what trips them is the analytical reasoning underneath: which table, which grain, which join, and what does the output actually mean for the decision. Every module here starts with the product situation, not the schema.
         </p>

@@ -24,15 +24,19 @@ export function CasesBrowser({ onSelectCase, unlocked, onUnlock, onNavigate }) {
 
       {/* Header */}
       <div style={{ marginBottom: '1.75rem' }}>
-        <div style={{
-          fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
-          color: 'var(--purple)', marginBottom: '0.4rem',
-        }}>
-          Business Cases
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='clipboard' size={18} color='var(--purple)' />
+          </span>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--purple)', marginBottom: '0.15rem' }}>
+              Business Cases
+            </div>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
+              Cases Room
+            </h1>
+          </div>
         </div>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: '0 0 0.5rem', letterSpacing: '-0.02em' }}>
-          Cases Room
-        </h1>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '540px' }}>
           The most common interview opener is deceptively simple: "How would you measure success for X?" Most candidates jump straight to metrics. Strong candidates pause, clarify the question, and build a structured answer. This room trains that habit — constraint, clarity, then answer — across the ambiguous business and product scenarios that show up most in interviews.
         </p>

@@ -81,15 +81,19 @@ export function RCABrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle, on
 
       {/* Header */}
       <div style={{ marginBottom: '1.75rem' }}>
-        <div style={{
-          fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
-          color: 'var(--yellow)', marginBottom: '0.4rem',
-        }}>
-          RCA Room
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='search' size={18} color='var(--yellow)' />
+          </span>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--yellow)', marginBottom: '0.15rem' }}>
+              RCA Room
+            </div>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
+              Root Cause Analysis
+            </h1>
+          </div>
         </div>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: '0 0 0.5rem', letterSpacing: '-0.02em' }}>
-          Root Cause Analysis
-        </h1>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '540px' }}>
           The most common RCA failure is jumping to an explanation before ruling out data issues, external factors, or mix shift — then defending it when the interviewer pushes back. This room builds the diagnostic instinct: given a metric movement and raw context, what do you check first, in what order, and why does each cut either confirm or eliminate a hypothesis?
         </p>
