@@ -290,6 +290,9 @@ Family 6 — Data Traps (across all): divide-by-zero, integer division, duplicat
 
 ## Tier 2 — High impact, more effort
 
+### Auth — Linked accounts (Google + GitHub)
+Users who sign up with GitHub on desktop then try Google on mobile get a duplicate account. Supabase Identity Linking API handles this natively — low effort, real pain point. Scope: link Google + GitHub to same account, show linked providers on Profile. LinkedIn is NOT part of this — it's not a native Supabase provider and PAL doesn't use LinkedIn data for anything yet. If we ever personalize by role/company/YOE, revisit LinkedIn as a separate feature then.
+
 ### SQL Lab — PostgreSQL migration (V5 consideration)
 The SQL Lab currently runs on sql.js (SQLite in-browser). Interviews use PostgreSQL. The gap matters: PERCENTILE_CONT, DATE_TRUNC, window function syntax, CTEs with RETURNING, and EXPLAIN ANALYZE are all Postgres-only. Migration requires: hosted query execution API, sandboxed Postgres instances per session, backend auth, query timeout/safety layer. Estimated 3–4 weeks minimum. The right model is API-backed execution (similar to DataLemur). Not a session task — needs architectural planning. Gate: forensic Batch 3 complete, PostHog shows SQL Lab is core usage driver.
 
