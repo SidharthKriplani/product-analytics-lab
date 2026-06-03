@@ -84,7 +84,7 @@ export function Module01_WhatIsData({ module, onNext }) {
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Explanation */}
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Every experiment metric is a numerical variable measured on each user — but knowing the type shapes how you summarize and test it.
+        Statistics is the toolkit that lets analysts draw reliable conclusions from noisy data — deciding whether an observed difference is real or random, how confident to be in a measurement, and how large a sample is needed to detect a true effect. Every A/B test, every experiment result, every metric significance call relies on these foundations. Every experiment metric is a numerical variable measured on each user — but knowing the type shapes how you summarize and test it.
       </p>
 
       {/* Instructions */}

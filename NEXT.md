@@ -2,7 +2,7 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V4.82.0 (2026-06-03)*
+*Last updated: V4.84.0 (2026-06-03)*
 
 ---
 
@@ -24,7 +24,7 @@ Sudden vs gradual → completely different investigation paths. Not covered anyw
 **1c. RCA Foundations — Adaptive re-testing (Jatin feedback)**
 If user scores <50% on a module, surface 2-3 supplemental questions. Requires writing ~20 questions across 8 modules FIRST (separate content session), THEN implementing the adaptive logic. Do NOT combine into one session. See IDEAS.md Tier 1 for full spec.
 
-**Note:** Answer persistence (Jatin feedback #3) is now LIVE — rf01–rf12 all save/restore state via localStorage. Item arrays in rf01/rf02/rf04/rf10/rf11 shuffle on first visit and persist the order. BLUF exercise added to rf06. These are V4.83.0.
+**Note (V4.83.0–V4.84.0):** Answer persistence is now LIVE across RCA, Exp, and Metrics Foundations. Item arrays shuffle on first visit in all three rooms. rf13 Routing Gate shipped. Stats Foundations Module01 intro anchored. Stats persistence deferred — separate 32-file architecture needs its own approach (see IDEAS.md).
 
 **2. S-grade debrief pass (Batches 4–13) — paused**
 Resume after forensic Batches 1–3 ship.

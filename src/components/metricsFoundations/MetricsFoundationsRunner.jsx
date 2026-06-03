@@ -1,8 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { metricsFoundationModules } from '../../data/metricsFoundationModules.js';
 import { saveMetricsFoundationProgress, getMetricsFoundationProgress, getAllMetricsFoundationProgress } from '../../utils/metricsFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
 import { HowTo } from '../shared/HowTo.jsx';
+
+// ── Persistence helpers ──────────────────────────────────────────────────────
+function saveMFState(id, state) {
+  try { localStorage.setItem('pal-mf-' + id + '-v1', JSON.stringify(state)); } catch(e) {}
+}
+function loadMFState(id) {
+  try { var raw = localStorage.getItem('pal-mf-' + id + '-v1'); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+}
+function shuffleMF(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -61,7 +77,7 @@ function MCQOption({ label, selected, correct, revealed, onClick }) {
 
 // ─── Module 1: Metrics Hierarchy ─────────────────────────────────────────────
 
-const HIERARCHY_ITEMS = [
+const MF01_ITEMS_DEFAULT = [
   { id: 'dau',        label: 'Daily Active Users (Facebook)',       correct: 'north-star' },
   { id: 'session',    label: 'Avg session depth per user',          correct: 'l1' },
   { id: 'feed-ctr',   label: 'Feed click-through rate',             correct: 'l2' },
@@ -80,11 +96,17 @@ const TIERS = [
 ];
 
 function Module_MF01({ module, onNext }) {
-  const [placements, setPlacements] = useState({});
-  const [checked, setChecked] = useState(false);
+  const saved = useMemo(function() { return loadMFState('mf01'); }, []);
+  const [items, setItems] = useState(function() { return saved && saved.items ? saved.items : shuffleMF(MF01_ITEMS_DEFAULT); });
+  const [placements, setPlacements] = useState(function() { return saved && saved.placements ? saved.placements : {}; });
+  const [checked, setChecked] = useState(function() { return saved && saved.checked ? saved.checked : false; });
 
-  const allPlaced = HIERARCHY_ITEMS.every(i => placements[i.id]);
-  const score = checked ? HIERARCHY_ITEMS.filter(i => placements[i.id] === i.correct).length : null;
+  useEffect(function() {
+    saveMFState('mf01', { items: items, placements: placements, checked: checked });
+  }, [items, placements, checked]);
+
+  const allPlaced = items.every(function(i) { return placements[i.id]; });
+  const score = checked ? items.filter(function(i) { return placements[i.id] === i.correct; }).length : null;
 
   function cycle(id) {
     if (checked) return;
@@ -112,9 +134,7 @@ function Module_MF01({ module, onNext }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.92rem' }}>
-        Every product has a <strong>metrics hierarchy</strong>: a single North Star that captures delivered value,
-        L1 metrics that explain <em>why</em> it moves, L2 metrics that pinpoint <em>where</em>,
-        and guardrails that protect what you must not break.
+        Metrics analytics is how analysts translate a product strategy into measurable signals — choosing the right numbers to track, understand why they move, and decide whether a change is an improvement. Picking the wrong metric is one of the most common and costly mistakes in product development: teams optimize hard for a number that doesn&apos;t actually represent user value. Every product has a <strong>metrics hierarchy</strong>: a single North Star that captures delivered value, L1 metrics that explain <em>why</em> it moves, L2 metrics that pinpoint <em>where</em>, and guardrails that protect what you must not break.
       </p>
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.85rem 1.1rem' }}>
         <p style={{ margin: 0, fontSize: '0.83rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
@@ -133,7 +153,7 @@ function Module_MF01({ module, onNext }) {
         <strong>What to do:</strong> Click each metric chip to cycle through North Star, L1 Supporting, L2 Operational, and Guardrail. Assign all 8 metrics before hitting Check answers.
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-        {HIERARCHY_ITEMS.map(item => (
+        {items.map(item => (
           <span key={item.id} style={itemStyle(item)} onClick={() => cycle(item.id)}>
             {checked && (placements[item.id] === item.correct ? '✓ ' : '✗ ')}
             {item.label}
@@ -155,7 +175,7 @@ function Module_MF01({ module, onNext }) {
       </div>
       <div style={{ display: 'flex', gap: '0.75rem' }}>
         <button onClick={() => allPlaced && !checked && setChecked(true)} disabled={!allPlaced || checked} style={{ padding: '0.5rem 1.2rem', borderRadius: 'var(--radius-sm)', border: 'none', background: allPlaced && !checked ? 'var(--accent)' : 'var(--border)', color: allPlaced && !checked ? '#fff' : 'var(--text-muted)', fontWeight: 600, fontSize: '0.85rem', cursor: allPlaced && !checked ? 'pointer' : 'not-allowed' }}>Check answers</button>
-        <button onClick={() => { setPlacements({}); setChecked(false); }} style={{ padding: '0.5rem 0.9rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', fontSize: '0.82rem', cursor: 'pointer' }}>Reset</button>
+        <button onClick={() => { setPlacements({}); setChecked(false); setItems(shuffleMF(MF01_ITEMS_DEFAULT)); }} style={{ padding: '0.5rem 0.9rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', fontSize: '0.82rem', cursor: 'pointer' }}>Reset</button>
       </div>
       <InsightBox label="Key Insight" color="var(--green)" bg="var(--green-bg)" border="var(--green-border)">{module.keyInsight}</InsightBox>
       <InsightBox label="Connects to Experiments" color="var(--accent)" bg="var(--accent-bg)" border="var(--accent-border)">{module.connection}</InsightBox>
@@ -182,19 +202,24 @@ const QUALITY_CRITERIA = [
 ];
 
 function Module_MF02({ module, onNext }) {
-  const [selected, setSelected] = useState(null);
-  const [answered, setAnswered] = useState(false);
+  const saved02 = useMemo(function() { return loadMFState('mf02'); }, []);
+  const [selected, setSelected] = useState(function() { return saved02 ? saved02.selected : null; });
+  const [answered, setAnswered] = useState(function() { return saved02 ? saved02.answered : false; });
+
+  useEffect(function() {
+    saveMFState('mf02', { selected: selected, answered: answered });
+  }, [selected, answered]);
 
   const Q = {
     question: 'A PM proposes using "App install count" as the primary metric for a feature that improves new-user onboarding. What is the strongest objection?',
     options: [
       { id: 'a', text: 'It is not measurable — install data is unreliable across platforms.' },
       { id: 'b', text: 'It is not predictive — an install does not mean a user received value. It can be inflated by incentivised campaigns without any real onboarding improvement.' },
-      { id: 'c', text: 'It is not movable — a product change cannot affect install counts.' },
+      { id: 'c', text: 'It is not sensitive — install counts are too noisy (driven by seasonality, ads, and competition) to detect the small effects of onboarding improvements reliably.' },
       { id: 'd', text: 'It is not trustworthy — engineering teams will manipulate the data.' },
     ],
     correct: 'b',
-    explanation: 'Installs are measurable and movable (run an ad campaign, installs spike). The failure mode is predictiveness — an install does not mean a user opened the app, completed onboarding, or derived any value. Any campaign that drives low-quality installs will move the metric without improving the underlying outcome.',
+    explanation: 'Installs are measurable and movable (run an ad campaign, installs spike). Option C is real — install counts are noisy — but noise affects sensitivity, not validity. The deeper failure is predictiveness: an install does not mean a user opened the app, completed onboarding, or derived any value. Any campaign that drives low-quality installs will move the metric without improving the underlying outcome.',
   };
 
   return (
@@ -241,9 +266,14 @@ function Module_MF02({ module, onNext }) {
 // ─── Module 3: Ratio Metrics ─────────────────────────────────────────────────
 
 function Module_MF03({ module, onNext }) {
-  const [step, setStep] = useState(0);
-  const [selected, setSelected] = useState(null);
-  const [answered, setAnswered] = useState(false);
+  const saved03 = useMemo(function() { return loadMFState('mf03'); }, []);
+  const [step, setStep] = useState(function() { return saved03 ? saved03.step : 0; });
+  const [selected, setSelected] = useState(function() { return saved03 ? saved03.selected : null; });
+  const [answered, setAnswered] = useState(function() { return saved03 ? saved03.answered : false; });
+
+  useEffect(function() {
+    saveMFState('mf03', { step: step, selected: selected, answered: answered });
+  }, [step, selected, answered]);
 
   const Q = {
     question: 'Overall CVR fell from 4.2% to 3.9% after a redesign. But desktop CVR rose (4.1%→4.5%) and mobile CVR rose (2.8%→3.2%). How is this possible?',
@@ -325,12 +355,18 @@ function Module_MF03({ module, onNext }) {
 
 // ─── Module 4: Metric Decomposition ──────────────────────────────────────────
 
-const DECOMP_OPTIONS = ['New users', 'Retained users', 'Resurrected users', 'Churned users', 'Power users', 'Organic users'];
+const MF04_OPTIONS_DEFAULT = ['New users', 'Retained users', 'Resurrected users', 'Churned users', 'Power users', 'Organic users'];
 const DECOMP_CORRECT = ['New users', 'Retained users', 'Resurrected users'];
 
 function Module_MF04({ module, onNext }) {
-  const [picked, setPicked] = useState([]);
-  const [checked, setChecked] = useState(false);
+  const saved04 = useMemo(function() { return loadMFState('mf04'); }, []);
+  const [options, setOptions] = useState(function() { return saved04 && saved04.options ? saved04.options : shuffleMF(MF04_OPTIONS_DEFAULT); });
+  const [picked, setPicked] = useState(function() { return saved04 && saved04.picked ? saved04.picked : []; });
+  const [checked, setChecked] = useState(function() { return saved04 ? saved04.checked : false; });
+
+  useEffect(function() {
+    saveMFState('mf04', { options: options, picked: picked, checked: checked });
+  }, [options, picked, checked]);
 
   function toggle(opt) {
     if (checked) return;
@@ -353,7 +389,7 @@ function Module_MF04({ module, onNext }) {
           <strong>What to do:</strong> Click exactly three user segment labels that together make up DAU on any given day, then click Check to verify your decomposition.
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.5rem' }}>
-          {DECOMP_OPTIONS.map(opt => {
+          {options.map(opt => {
             const sel = picked.includes(opt);
             const isCorrect = DECOMP_CORRECT.includes(opt);
             let bg = sel ? 'var(--accent-bg)' : 'var(--surface)', border = sel ? 'var(--accent)' : 'var(--border)', color = sel ? 'var(--accent)' : 'var(--text-muted)';
@@ -395,18 +431,24 @@ function Module_MF04({ module, onNext }) {
 
 // ─── Module 5: Counter Metrics ────────────────────────────────────────────────
 
-const COUNTER_PAIRS = [
+const MF05_PAIRS_DEFAULT = [
   { primary: 'Push notification send volume', correct: 'notif-opt-out', options: ['notif-opt-out', 'dau', 'session-length'], labels: { 'notif-opt-out': 'Notification opt-out rate', 'dau': 'DAU', 'session-length': 'Session length' } },
   { primary: 'Ads shown per session', correct: 'ad-hide', options: ['ad-hide', 'page-load', 'revenue'], labels: { 'ad-hide': 'Ad hide / negative feedback rate', 'page-load': 'Page load time', 'revenue': 'Ad revenue' } },
   { primary: 'Search ranking aggressiveness (more results)', correct: 'zero-click', options: ['zero-click', 'query-count', 'ctr'], labels: { 'zero-click': 'Zero-click rate (query abandoned)', 'query-count': 'Total search queries', 'ctr': 'Result click-through rate' } },
 ];
 
 function Module_MF05({ module, onNext }) {
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState(false);
+  const saved05 = useMemo(function() { return loadMFState('mf05'); }, []);
+  const [pairs, setPairs] = useState(function() { return saved05 && saved05.pairs ? saved05.pairs : shuffleMF(MF05_PAIRS_DEFAULT); });
+  const [answers, setAnswers] = useState(function() { return saved05 && saved05.answers ? saved05.answers : {}; });
+  const [checked, setChecked] = useState(function() { return saved05 ? saved05.checked : false; });
 
-  const allAnswered = COUNTER_PAIRS.every((_, i) => answers[i] !== undefined);
-  const score = checked ? COUNTER_PAIRS.filter((p, i) => answers[i] === p.correct).length : null;
+  useEffect(function() {
+    saveMFState('mf05', { pairs: pairs, answers: answers, checked: checked });
+  }, [pairs, answers, checked]);
+
+  const allAnswered = pairs.every(function(_, i) { return answers[i] !== undefined; });
+  const score = checked ? pairs.filter(function(p, i) { return answers[i] === p.correct; }).length : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -418,7 +460,7 @@ function Module_MF05({ module, onNext }) {
       <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--green)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> For each primary metric, select the counter metric that would catch the most important unintended harm if the primary metric is blindly optimised.
       </div>
-      {COUNTER_PAIRS.map((pair, i) => (
+      {pairs.map((pair, i) => (
         <div key={i} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.9rem 1.1rem' }}>
           <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>Primary metric</div>
           <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.88rem', marginBottom: '0.6rem' }}>{pair.primary}</div>
@@ -450,7 +492,7 @@ function Module_MF05({ module, onNext }) {
       )}
       {checked && (
         <div className="pal-reveal-in" style={{ background: score === 3 ? 'var(--green-bg)' : 'var(--yellow-bg)', border: '1px solid ' + (score === 3 ? 'var(--green-border)' : 'var(--yellow-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-          {score === 3 ? '✓ All correct. Opt-out rate catches notification fatigue. Ad hide rate catches ad quality degradation. Zero-click rate catches search quality degradation.' : score + '/3. Counter metrics protect the quality of the user experience that isn\'t captured in the primary optimisation signal.'}
+          {score === pairs.length ? '✓ All correct. Opt-out rate catches notification fatigue. Ad hide rate catches ad quality degradation. Zero-click rate catches search quality degradation.' : score + '/' + pairs.length + '. Counter metrics protect the quality of the user experience that isn\'t captured in the primary optimisation signal.'}
         </div>
       )}
       <InsightBox label="Key Insight" color="var(--green)" bg="var(--green-bg)" border="var(--green-border)">{module.keyInsight}</InsightBox>
@@ -462,7 +504,7 @@ function Module_MF05({ module, onNext }) {
 
 // ─── Module 6: Leading vs Lagging ────────────────────────────────────────────
 
-const LEADING_ITEMS = [
+const MF06_ITEMS_DEFAULT = [
   { id: 'rev',      label: 'Monthly revenue',                    correct: 'lagging',  reason: 'Confirms past performance. No signal about what drove it or what\'s coming.' },
   { id: 'd7ret',    label: 'D7 retention rate',                  correct: 'leading',  reason: 'Predicts LTV and long-term DAU trajectory. Fast-moving and sensitive.' },
   { id: 'sub',      label: 'Total subscriber count',             correct: 'lagging',  reason: 'Accumulates over time. Slow to reflect product changes.' },
@@ -472,11 +514,17 @@ const LEADING_ITEMS = [
 ];
 
 function Module_MF06({ module, onNext }) {
-  const [placements, setPlacements] = useState({});
-  const [checked, setChecked] = useState(false);
+  const saved06 = useMemo(function() { return loadMFState('mf06'); }, []);
+  const [items06, setItems06] = useState(function() { return saved06 && saved06.items ? saved06.items : shuffleMF(MF06_ITEMS_DEFAULT); });
+  const [placements, setPlacements] = useState(function() { return saved06 && saved06.placements ? saved06.placements : {}; });
+  const [checked, setChecked] = useState(function() { return saved06 ? saved06.checked : false; });
 
-  const allPlaced = LEADING_ITEMS.every(i => placements[i.id]);
-  const score = checked ? LEADING_ITEMS.filter(i => placements[i.id] === i.correct).length : null;
+  useEffect(function() {
+    saveMFState('mf06', { items: items06, placements: placements, checked: checked });
+  }, [items06, placements, checked]);
+
+  const allPlaced = items06.every(function(i) { return placements[i.id]; });
+  const score = checked ? items06.filter(function(i) { return placements[i.id] === i.correct; }).length : null;
 
   function cycle(id) {
     if (checked) return;
@@ -513,7 +561,7 @@ function Module_MF06({ module, onNext }) {
           <strong>What to do:</strong> Click each metric chip once to mark it as Leading, again to mark it as Lagging, and a third time to clear it. Label all six before checking your answers.
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-          {LEADING_ITEMS.map(item => (
+          {items06.map(item => (
             <span key={item.id} style={chipStyle(item)} onClick={() => cycle(item.id)}>
               {checked && (placements[item.id] === item.correct ? '✓ ' : '✗ ')}
               {item.label}
@@ -524,7 +572,7 @@ function Module_MF06({ module, onNext }) {
       </div>
       {checked && (
         <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.85rem 1.1rem' }}>
-          {LEADING_ITEMS.map(item => (
+          {items06.map(item => (
             <div key={item.id} style={{ fontSize: '0.83rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', lineHeight: 1.5 }}>
               <strong style={{ color: placements[item.id] === item.correct ? 'var(--green)' : 'var(--red)' }}>
                 {item.label}
@@ -551,8 +599,13 @@ function Module_MF06({ module, onNext }) {
 // ─── Module 7: North Star Design ─────────────────────────────────────────────
 
 function Module_MF07({ module, onNext }) {
-  const [selected, setSelected] = useState(null);
-  const [answered, setAnswered] = useState(false);
+  const saved07 = useMemo(function() { return loadMFState('mf07'); }, []);
+  const [selected, setSelected] = useState(function() { return saved07 ? saved07.selected : null; });
+  const [answered, setAnswered] = useState(function() { return saved07 ? saved07.answered : false; });
+
+  useEffect(function() {
+    saveMFState('mf07', { selected: selected, answered: answered });
+  }, [selected, answered]);
 
   const Q = {
     question: 'Spotify is choosing its North Star metric. Which candidate best captures delivered value to users — not extracted value for the company?',
@@ -614,8 +667,13 @@ function Module_MF07({ module, onNext }) {
 // ─── Module 8: Metric Sensitivity ────────────────────────────────────────────
 
 function Module_MF08({ module, onNext }) {
-  const [selected, setSelected] = useState(null);
-  const [answered, setAnswered] = useState(false);
+  const saved08 = useMemo(function() { return loadMFState('mf08'); }, []);
+  const [selected, setSelected] = useState(function() { return saved08 ? saved08.selected : null; });
+  const [answered, setAnswered] = useState(function() { return saved08 ? saved08.answered : false; });
+
+  useEffect(function() {
+    saveMFState('mf08', { selected: selected, answered: answered });
+  }, [selected, answered]);
 
   const Q = {
     question: 'A team is running an A/B test on checkout flow. Their primary metric is "revenue per user" (RPU), which has a standard deviation of $45 and a mean of $12. Their MDE is 5% lift ($0.60). After 4 weeks they have 50,000 users per arm and p=0.21. What is the most likely root cause?',
@@ -703,9 +761,14 @@ const MF09_MCQ = {
 };
 
 function Module_MF09({ module, onNext }) {
-  const [scenario, setScenario] = useState('baseline');
-  const [selected, setSelected] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const saved09 = useMemo(function() { return loadMFState('mf09'); }, []);
+  const [scenario, setScenario] = useState(function() { return saved09 && saved09.scenario ? saved09.scenario : 'baseline'; });
+  const [selected, setSelected] = useState(function() { return saved09 ? saved09.selected : null; });
+  const [revealed, setRevealed] = useState(function() { return saved09 ? saved09.revealed : false; });
+
+  useEffect(function() {
+    saveMFState('mf09', { scenario: scenario, selected: selected, revealed: revealed });
+  }, [scenario, selected, revealed]);
 
   const counts = FUNNEL_SCENARIOS[scenario];
   const maxCount = counts[0];
@@ -889,12 +952,17 @@ const MF10_MCQ = {
 };
 
 function Module_MF10({ module, onNext }) {
-  const [mobileSessions, setMobileSessions] = useState(6000);
-  const [mobileRPS, setMobileRPS] = useState(1.20);
-  const [desktopSessions, setDesktopSessions] = useState(4000);
-  const [desktopRPS, setDesktopRPS] = useState(3.50);
-  const [selected, setSelected] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const saved10 = useMemo(function() { return loadMFState('mf10'); }, []);
+  const [mobileSessions, setMobileSessions] = useState(function() { return saved10 && saved10.mobileSessions !== undefined ? saved10.mobileSessions : 6000; });
+  const [mobileRPS, setMobileRPS] = useState(function() { return saved10 && saved10.mobileRPS !== undefined ? saved10.mobileRPS : 1.20; });
+  const [desktopSessions, setDesktopSessions] = useState(function() { return saved10 && saved10.desktopSessions !== undefined ? saved10.desktopSessions : 4000; });
+  const [desktopRPS, setDesktopRPS] = useState(function() { return saved10 && saved10.desktopRPS !== undefined ? saved10.desktopRPS : 3.50; });
+  const [selected, setSelected] = useState(function() { return saved10 ? saved10.selected : null; });
+  const [revealed, setRevealed] = useState(function() { return saved10 ? saved10.revealed : false; });
+
+  useEffect(function() {
+    saveMFState('mf10', { mobileSessions: mobileSessions, mobileRPS: mobileRPS, desktopSessions: desktopSessions, desktopRPS: desktopRPS, selected: selected, revealed: revealed });
+  }, [mobileSessions, mobileRPS, desktopSessions, desktopRPS, selected, revealed]);
 
   const totalSessions = mobileSessions + desktopSessions;
   const totalRevenue = mobileSessions * mobileRPS + desktopSessions * desktopRPS;
@@ -1084,11 +1152,16 @@ function Module_MF10({ module, onNext }) {
 // ─── Module 11: Composite Metrics ────────────────────────────────────────────
 
 function Module_MF11({ module, onNext }) {
-  const [wA, setWA] = useState(40);
-  const [wB, setWB] = useState(35);
-  const [wC, setWC] = useState(25);
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const saved11 = useMemo(function() { return loadMFState('mf11'); }, []);
+  const [wA, setWA] = useState(function() { return saved11 && saved11.wA !== undefined ? saved11.wA : 40; });
+  const [wB, setWB] = useState(function() { return saved11 && saved11.wB !== undefined ? saved11.wB : 35; });
+  const [wC, setWC] = useState(function() { return saved11 && saved11.wC !== undefined ? saved11.wC : 25; });
+  const [answer, setAnswer] = useState(function() { return saved11 && saved11.answer !== undefined ? saved11.answer : null; });
+  const [revealed, setRevealed] = useState(function() { return saved11 ? saved11.revealed : false; });
+
+  useEffect(function() {
+    saveMFState('mf11', { wA: wA, wB: wB, wC: wC, answer: answer, revealed: revealed });
+  }, [wA, wB, wC, answer, revealed]);
 
   // Three component metrics with fixed underlying values
   // A: Engagement (score 0-100, currently 72)
@@ -1102,9 +1175,9 @@ function Module_MF11({ module, onNext }) {
   var compositeDisplay = Math.round(composite * 10) / 10;
 
   var mcqOptions = [
-    { label: 'A. Composite metrics move too slowly to detect experiment effects.', correct: false },
+    { label: 'A. Composite metrics introduce double-counting — if components are correlated, the composite overstates their combined signal.', correct: false },
     { label: 'B. A component metric can quietly degrade while the composite stays flat — the composite masks individual signal.', correct: true },
-    { label: 'C. Composite metrics are always arbitrary and should never be used.', correct: false },
+    { label: 'C. Teams optimizing for the composite learn to move the highest-weight component and neglect the rest, gaming the OEC without real improvement.', correct: false },
     { label: 'D. They require more statistical samples than individual metrics.', correct: false },
   ];
 
@@ -1207,7 +1280,7 @@ function Module_MF11({ module, onNext }) {
         {revealed && (
           <div className="pal-reveal-in">
             <div style={{ marginTop: '0.5rem', padding: '0.65rem 0.85rem', background: mcqOptions[answer] && mcqOptions[answer].correct ? 'var(--teal-bg)' : 'var(--red-bg)', border: '1px solid ' + (mcqOptions[answer] && mcqOptions[answer].correct ? 'var(--teal-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5 }}>
-              Composite metrics can mask individual signal. If retention drops 20% but engagement and revenue surge, the OEC may stay flat or even improve — signaling a healthy product when one foundational metric is collapsing. This is why guardrail metrics exist: to catch what the OEC cannot.
+              Composite metrics can mask individual signal. If retention drops 20% but engagement and revenue surge, the OEC may stay flat or even improve — signaling a healthy product when one foundational metric is collapsing. Option A (double-counting) is a real concern when components are correlated, but it is a calibration problem — fixable by choosing orthogonal components or adjusting weights. Option C (gaming) is also real, but it is a secondary risk. The primary structural weakness is masking: a composite hides what its components are individually doing. This is why guardrail metrics exist: to catch what the OEC cannot.
             </div>
             <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem', marginTop: '1.25rem' }}>
               <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.4rem' }}>Key Insight</div>
@@ -1228,11 +1301,17 @@ function Module_MF11({ module, onNext }) {
 // ─── Module 12: Guardrail Metrics ─────────────────────────────────────────────
 
 function Module_MF12({ module, onNext }) {
-  const [decisions, setDecisions] = useState({});
-  const [explanations, setExplanations] = useState({});
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
-  const [allDone, setAllDone] = useState(false);
+  const saved12 = useMemo(function() { return loadMFState('mf12'); }, []);
+  const [decisions, setDecisions] = useState(function() { return saved12 && saved12.decisions ? saved12.decisions : {}; });
+  const [explanations, setExplanations] = useState(function() { return saved12 && saved12.explanations ? saved12.explanations : {}; });
+  const [answer, setAnswer] = useState(function() { return saved12 && saved12.answer !== undefined ? saved12.answer : null; });
+  const [revealed, setRevealed] = useState(function() { return saved12 ? saved12.revealed : false; });
+  var scenariosCount = 4;
+  const [allDone, setAllDone] = useState(function() { return saved12 && saved12.decisions ? Object.keys(saved12.decisions).length >= scenariosCount : false; });
+
+  useEffect(function() {
+    saveMFState('mf12', { decisions: decisions, explanations: explanations, answer: answer, revealed: revealed });
+  }, [decisions, explanations, answer, revealed]);
 
   var scenarios = [
     {
@@ -1399,9 +1478,14 @@ function Module_MF12({ module, onNext }) {
 // ─── Module 13: Metric Sensitivity ───────────────────────────────────────────
 
 function Module_MF13({ module, onNext }) {
-  const [cv, setCv] = useState(1.2);
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const saved13 = useMemo(function() { return loadMFState('mf13'); }, []);
+  const [cv, setCv] = useState(function() { return saved13 && saved13.cv !== undefined ? saved13.cv : 1.2; });
+  const [answer, setAnswer] = useState(function() { return saved13 && saved13.answer !== undefined ? saved13.answer : null; });
+  const [revealed, setRevealed] = useState(function() { return saved13 ? saved13.revealed : false; });
+
+  useEffect(function() {
+    saveMFState('mf13', { cv: cv, answer: answer, revealed: revealed });
+  }, [cv, answer, revealed]);
 
   // Sample size approximation: n ~ (z_alpha + z_beta)^2 * sigma^2 / delta^2
   // Simplified: n ~ CV^2 * constant (holding delta/mean fixed)

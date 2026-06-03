@@ -4,6 +4,22 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.84.0] — 2026-06-03 [FEATURE + CONTENT QUALITY]
+
+### Cross-foundations quality pass + rf13 Routing Gate
+
+**rf13 — The Routing Gate (new module):** 6-scenario routing exercise. Given a metric drop with a time signature, route the investigation to the correct starting branch (sanity/data pipeline, external/market, internal tech, product erosion/behaviour, segment isolation). Shuffled scenarios, persistence, reference table revealed post-answer. Added to rcaFoundationModules.js + RCAFoundationsRunner.jsx. RCA Foundations now 13 modules.
+
+**Exp Foundations — full persistence + shuffle + distractor fixes:** All 15 modules (ef01–ef15) now save/restore state. EF02/EF04/EF11/EF14 item arrays shuffle on first visit. EF01 distractors rewritten — "sample size too small" and "not statistically significant" replaced with "seasonal effects could explain the gap" and "may not be practically significant" (require analytical reasoning to dismiss). EF01 explanation updated.
+
+**Metrics Foundations — full persistence + shuffle + distractor fixes + intro anchor:** All 13 modules (mf01–mf13) now save/restore state. mf01/mf04/mf05/mf06 item arrays shuffle. mf02 option C rewritten — "not movable" replaced with "not sensitive — noisy due to external factors" (requires knowledge of measurement tradeoffs). mf11 options A and C rewritten — "moves too slowly" → "introduces double-counting when components correlated"; "never use composites" → "teams optimize the highest-weight component, gaming the OEC without real improvement." mf01 intro anchored with "what is metrics analytics" sentence.
+
+**Stats Foundations — intro anchor:** Module01 intro anchored with 2-sentence "what is statistics" definition. Persistence deferred — Stats Foundations uses a separate 32-file module architecture; applying persistence requires a different approach than the single-runner-file pattern used in RCA/Exp/Metrics. Logged in NEXT.md.
+
+Files: `src/data/rcaFoundationModules.js`, `src/components/rcaFoundations/RCAFoundationsRunner.jsx`, `src/components/expFoundations/ExpFoundationsRunner.jsx`, `src/components/metricsFoundations/MetricsFoundationsRunner.jsx`, `src/components/statsFoundations/modules/Module01_WhatIsData.jsx`
+
+---
+
 ## [4.83.0] — 2026-06-03 [FEATURE + CONTENT]
 
 ### RCA Foundations — Full Jatin feedback implementation (V4.83.0)

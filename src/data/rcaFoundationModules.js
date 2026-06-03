@@ -194,4 +194,20 @@ export const rcaFoundationModules = [
       { id: 'metric-decomposition', label: 'Metric Decomposition' },
     ],
   },
+  {
+    id: 'rf13',
+    index: 13,
+    title: 'The Routing Gate',
+    subtitle: 'How the time signature of a drop determines where you start',
+    difficulty: 'Intermediate',
+    tags: ['routing gate', 'sudden vs gradual', 'time signature', 'investigation sequence', 'structured diagnosis'],
+    estimatedMin: 7,
+    isFree: true,
+    keyInsight: 'The first question in any RCA is not "what broke?" — it is "how did it break?" A sudden cliff at 3:14 AM looks nothing like an 11-week gradual decline. The time signature routes the entire investigation: cliffs point to instrumentation or deploys, gradual declines point to product erosion or mix shift, cyclical patterns point to seasonality. Jumping to the fault tree before reading the time signature means you start in the wrong branch every time.',
+    connection: 'The routing gate is the same skill in experiment analysis. A sudden D1 drop after treatment exposure points to a technical regression. A gradual treatment-vs-control divergence over days points to a real behavioural change. Reading the time signature of a metric movement is the entry skill for both RCA and A/B test debugging.',
+    playbookLinks: [
+      { id: 'rca-framework', label: 'RCA Framework' },
+      { id: 'external-factors', label: 'External Factors in Analysis' },
+    ],
+  },
 ];

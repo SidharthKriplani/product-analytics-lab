@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { expFoundationModules } from '../../data/expFoundationModules.js';
 import { saveExpFoundationProgress, getAllExpFoundationProgress } from '../../utils/expFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
@@ -97,18 +97,37 @@ function InstructionBox({ children }) {
   );
 }
 
+// ── Persistence helpers ──────────────────────────────────────────────────────
+function saveEFState(id, state) {
+  try { localStorage.setItem('pal-ef-' + id + '-v1', JSON.stringify(state)); } catch(e) {}
+}
+function loadEFState(id) {
+  try { var raw = localStorage.getItem('pal-ef-' + id + '-v1'); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+}
+function shuffleEF(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
 // ── Module EF01: Why We Experiment ─────────────────────────────────────────
 function Module_EF01({ onComplete }) {
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const _saved01 = useMemo(function() { return loadEFState('ef01'); }, []);
+  const [answer, setAnswer] = useState(_saved01 ? _saved01.answer : null);
+  const [revealed, setRevealed] = useState(_saved01 ? _saved01.revealed : false);
+
+  useEffect(function() { saveEFState('ef01', { answer: answer, revealed: revealed }); }, [answer, revealed]);
 
   const question = 'A PM notices checkout rate is 12% for users who see the new CTA, vs 9% for others. They conclude the CTA causes higher conversion. What\'s wrong?';
 
   const options = [
-    { label: 'A. Sample size too small', correct: false },
+    { label: 'A. The comparison period is too short — seasonal effects could explain the 3pp difference', correct: false },
     { label: 'B. Correlation is not causation — users who see the CTA may differ systematically from those who don\'t', correct: true },
-    { label: 'C. 12% is not statistically significant', correct: false },
-    { label: 'D. The metric is wrong', correct: false },
+    { label: 'C. The 12% vs 9% gap may not be practically significant for the business even if it\'s statistically real', correct: false },
+    { label: 'D. The sample needs to be stratified by user segment before any comparison is valid', correct: false },
   ];
 
   return (
@@ -158,9 +177,7 @@ function Module_EF01({ onComplete }) {
             border: '1px solid ' + (options[answer] && options[answer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
             borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5,
           }}>
-            Users who see the new CTA are not a random sample — they may be more engaged, further in the funnel,
-            or on a specific device. The higher checkout rate may reflect who they are, not what the CTA did.
-            This is selection bias, and it is why observational comparisons cannot establish causality.
+            Users who see the new CTA are not a random sample — they may be more engaged, further in the funnel, or on a specific device. The higher checkout rate may reflect who they are, not what the CTA did. This is selection bias, and it is why observational comparisons cannot establish causality. Option A (seasonality) and D (stratification) both identify real issues that matter in experiment design — but they are not the primary flaw in an observational comparison. Option C (practical significance) would be a relevant concern after confirming causality, not before.
           </div>
           <InsightBox>
             Observational comparisons confound treatment with selection bias. Only random assignment breaks
@@ -174,6 +191,29 @@ function Module_EF01({ onComplete }) {
   );
 }
 
+var SCENARIOS_EF02 = [
+  {
+    text: 'Testing a new checkout flow',
+    correct: 'user',
+    explanation: 'User-level: a user should see the same checkout flow across all sessions, or the experience is inconsistent and you cannot attribute conversion changes to the variant.',
+  },
+  {
+    text: 'Testing a sponsored post ranking algorithm on a social feed',
+    correct: 'user',
+    explanation: 'User-level: social network effects mean friends influence each other. Session-level randomization would cause the same user to see different ranking logic across sessions, contaminating the result.',
+  },
+  {
+    text: 'Testing a page load speed optimization',
+    correct: 'page',
+    explanation: 'Page/request-level: load speed has no user-state dependency — each request is independent. This allows faster ramp-up and higher statistical power with no spillover risk.',
+  },
+  {
+    text: 'Testing a referral program',
+    correct: 'cluster',
+    explanation: 'Cluster/household-level: referral programs have strong spillover — a user in control can receive an invite from a user in treatment. Randomizing at cluster level prevents this contamination.',
+  },
+];
+
 // ── Module EF02: The Unit of Randomization ─────────────────────────────────
 function Module_EF02({ onComplete }) {
   const UNITS = [
@@ -183,39 +223,22 @@ function Module_EF02({ onComplete }) {
     { id: 'cluster', label: 'Cluster/household-level' },
   ];
 
-  const SCENARIOS = [
-    {
-      text: 'Testing a new checkout flow',
-      correct: 'user',
-      explanation: 'User-level: a user should see the same checkout flow across all sessions, or the experience is inconsistent and you cannot attribute conversion changes to the variant.',
-    },
-    {
-      text: 'Testing a sponsored post ranking algorithm on a social feed',
-      correct: 'user',
-      explanation: 'User-level: social network effects mean friends influence each other. Session-level randomization would cause the same user to see different ranking logic across sessions, contaminating the result.',
-    },
-    {
-      text: 'Testing a page load speed optimization',
-      correct: 'page',
-      explanation: 'Page/request-level: load speed has no user-state dependency — each request is independent. This allows faster ramp-up and higher statistical power with no spillover risk.',
-    },
-    {
-      text: 'Testing a referral program',
-      correct: 'cluster',
-      explanation: 'Cluster/household-level: referral programs have strong spillover — a user in control can receive an invite from a user in treatment. Randomizing at cluster level prevents this contamination.',
-    },
-  ];
+  const _saved02 = useMemo(function() { return loadEFState('ef02'); }, []);
+  const [scenarios02, setScenarios02] = useState(function() {
+    return _saved02 && _saved02.scenarios ? _saved02.scenarios : shuffleEF(SCENARIOS_EF02);
+  });
+  const [assignments, setAssignments] = useState(_saved02 ? _saved02.assignments : {});
+  const [revealed, setRevealed] = useState(_saved02 ? _saved02.revealed : false);
 
-  const [assignments, setAssignments] = useState({});
-  const [revealed, setRevealed] = useState(false);
+  useEffect(function() { saveEFState('ef02', { scenarios: scenarios02, assignments: assignments, revealed: revealed }); }, [scenarios02, assignments, revealed]);
 
   function assign(idx, unitId) {
     if (revealed) return;
     setAssignments(prev => ({ ...prev, [idx]: unitId }));
   }
 
-  const allAssigned = SCENARIOS.every((_, i) => assignments[i]);
-  const correctCount = SCENARIOS.filter((s, i) => assignments[i] === s.correct).length;
+  const allAssigned = scenarios02.every((_, i) => assignments[i]);
+  const correctCount = scenarios02.filter((s, i) => assignments[i] === s.correct).length;
 
   return (
     <div>
@@ -238,7 +261,7 @@ function Module_EF02({ onComplete }) {
       </InstructionBox>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
-        {SCENARIOS.map((s, i) => {
+        {scenarios02.map((s, i) => {
           const picked = assignments[i];
           const isCorrect = picked === s.correct;
           return (
@@ -305,12 +328,12 @@ function Module_EF02({ onComplete }) {
         <div>
           <div style={{
             marginTop: '0.75rem', padding: '0.65rem 0.85rem',
-            background: correctCount === SCENARIOS.length ? 'var(--teal-bg)' : 'var(--yellow-bg)',
-            border: '1px solid ' + (correctCount === SCENARIOS.length ? 'var(--teal-border)' : 'var(--yellow-border)'),
-            color: correctCount === SCENARIOS.length ? 'var(--teal)' : 'var(--yellow)',
+            background: correctCount === scenarios02.length ? 'var(--teal-bg)' : 'var(--yellow-bg)',
+            border: '1px solid ' + (correctCount === scenarios02.length ? 'var(--teal-border)' : 'var(--yellow-border)'),
+            color: correctCount === scenarios02.length ? 'var(--teal)' : 'var(--yellow)',
             fontWeight: 700, fontSize: '0.88rem', borderRadius: 'var(--radius-sm)',
           }}>
-            {correctCount}/{SCENARIOS.length} correct
+            {correctCount}/{scenarios02.length} correct
           </div>
           <InsightBox>
             The randomization unit must match the unit of analysis and eliminate spillover. Network effects
@@ -327,10 +350,13 @@ function Module_EF02({ onComplete }) {
 
 // ── Module EF03: Statistical Power and MDE ─────────────────────────────────
 function Module_EF03({ onComplete }) {
-  const [part1Answer, setPart1Answer] = useState(null);
-  const [part1Revealed, setPart1Revealed] = useState(false);
-  const [part2Answer, setPart2Answer] = useState(null);
-  const [part2Revealed, setPart2Revealed] = useState(false);
+  const _saved03 = useMemo(function() { return loadEFState('ef03'); }, []);
+  const [part1Answer, setPart1Answer] = useState(_saved03 ? _saved03.part1Answer : null);
+  const [part1Revealed, setPart1Revealed] = useState(_saved03 ? _saved03.part1Revealed : false);
+  const [part2Answer, setPart2Answer] = useState(_saved03 ? _saved03.part2Answer : null);
+  const [part2Revealed, setPart2Revealed] = useState(_saved03 ? _saved03.part2Revealed : false);
+
+  useEffect(function() { saveEFState('ef03', { part1Answer: part1Answer, part1Revealed: part1Revealed, part2Answer: part2Answer, part2Revealed: part2Revealed }); }, [part1Answer, part1Revealed, part2Answer, part2Revealed]);
 
   const part1Options = [
     { label: 'A. 2 days', correct: false },
@@ -471,28 +497,34 @@ function Module_EF03({ onComplete }) {
   );
 }
 
+var STATEMENTS_EF04 = [
+  {
+    text: 'A p-value of 0.03 means there is a 3% chance the null hypothesis is true.',
+    correct: false,
+    explanation: 'FALSE. A p-value is the probability of observing data this extreme (or more) assuming the null is true — it is NOT the probability that the null is true. The probability of the null being true requires Bayesian reasoning and a prior.',
+  },
+  {
+    text: 'A 95% CI that excludes zero means the result is practically significant.',
+    correct: false,
+    explanation: 'FALSE. Statistical significance (CI excludes zero) says the effect is distinguishable from zero with the given sample size. It says nothing about whether the effect is large enough to matter. A +0.001pp lift can be statistically significant with a large enough sample.',
+  },
+  {
+    text: 'If p > 0.05, the experiment should be considered inconclusive — not proof of no effect.',
+    correct: true,
+    explanation: 'TRUE. Absence of evidence is not evidence of absence. A non-significant result may mean the effect is real but smaller than your MDE, or that you were underpowered. "We did not detect an effect" is very different from "there is no effect."',
+  },
+];
+
 // ── Module EF04: p-values, CIs, and What They Actually Mean ───────────────
 function Module_EF04({ onComplete }) {
-  const STATEMENTS = [
-    {
-      text: 'A p-value of 0.03 means there is a 3% chance the null hypothesis is true.',
-      correct: false,
-      explanation: 'FALSE. A p-value is the probability of observing data this extreme (or more) assuming the null is true — it is NOT the probability that the null is true. The probability of the null being true requires Bayesian reasoning and a prior.',
-    },
-    {
-      text: 'A 95% CI that excludes zero means the result is practically significant.',
-      correct: false,
-      explanation: 'FALSE. Statistical significance (CI excludes zero) says the effect is distinguishable from zero with the given sample size. It says nothing about whether the effect is large enough to matter. A +0.001pp lift can be statistically significant with a large enough sample.',
-    },
-    {
-      text: 'If p > 0.05, the experiment should be considered inconclusive — not proof of no effect.',
-      correct: true,
-      explanation: 'TRUE. Absence of evidence is not evidence of absence. A non-significant result may mean the effect is real but smaller than your MDE, or that you were underpowered. "We did not detect an effect" is very different from "there is no effect."',
-    },
-  ];
+  const _saved04 = useMemo(function() { return loadEFState('ef04'); }, []);
+  const [statements04] = useState(function() {
+    return _saved04 && _saved04.statements ? _saved04.statements : shuffleEF(STATEMENTS_EF04);
+  });
+  const [answers, setAnswers] = useState(_saved04 ? _saved04.answers : {});
+  const [revealed, setRevealed] = useState(_saved04 ? _saved04.revealed : {});
 
-  const [answers, setAnswers] = useState({});
-  const [revealed, setRevealed] = useState({});
+  useEffect(function() { saveEFState('ef04', { statements: statements04, answers: answers, revealed: revealed }); }, [statements04, answers, revealed]);
 
   function answer(idx, val) {
     if (revealed[idx]) return;
@@ -503,8 +535,8 @@ function Module_EF04({ onComplete }) {
     setRevealed(prev => ({ ...prev, [idx]: true }));
   }
 
-  const allRevealed = STATEMENTS.every((_, i) => revealed[i]);
-  const correctCount = STATEMENTS.filter((s, i) => answers[i] === s.correct).length;
+  const allRevealed = statements04.every((_, i) => revealed[i]);
+  const correctCount = statements04.filter((s, i) => answers[i] === s.correct).length;
 
   return (
     <div>
@@ -524,7 +556,7 @@ function Module_EF04({ onComplete }) {
         measures before answering — do not rely on intuition about what "significant" sounds like.
       </InstructionBox>
 
-      {STATEMENTS.map((s, i) => {
+      {statements04.map((s, i) => {
         const picked = answers[i];
         const isRevealed = revealed[i];
         const isCorrect = picked === s.correct;
@@ -586,12 +618,12 @@ function Module_EF04({ onComplete }) {
         <div>
           <div style={{
             padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm)', marginTop: '0.5rem',
-            background: correctCount === STATEMENTS.length ? 'var(--teal-bg)' : 'var(--yellow-bg)',
-            border: '1px solid ' + (correctCount === STATEMENTS.length ? 'var(--teal-border)' : 'var(--yellow-border)'),
-            color: correctCount === STATEMENTS.length ? 'var(--teal)' : 'var(--yellow)',
+            background: correctCount === statements04.length ? 'var(--teal-bg)' : 'var(--yellow-bg)',
+            border: '1px solid ' + (correctCount === statements04.length ? 'var(--teal-border)' : 'var(--yellow-border)'),
+            color: correctCount === statements04.length ? 'var(--teal)' : 'var(--yellow)',
             fontWeight: 700, fontSize: '0.88rem',
           }}>
-            {correctCount}/{STATEMENTS.length} correct
+            {correctCount}/{statements04.length} correct
           </div>
           <InsightBox>
             The three failure modes: (1) treating p-value as the probability the null is true (it is not —
@@ -608,8 +640,11 @@ function Module_EF04({ onComplete }) {
 
 // ── Module EF05: Sample Ratio Mismatch ─────────────────────────────────────
 function Module_EF05({ onComplete }) {
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const _saved05 = useMemo(function() { return loadEFState('ef05'); }, []);
+  const [answer, setAnswer] = useState(_saved05 ? _saved05.answer : null);
+  const [revealed, setRevealed] = useState(_saved05 ? _saved05.revealed : false);
+
+  useEffect(function() { saveEFState('ef05', { answer: answer, revealed: revealed }); }, [answer, revealed]);
 
   const options = [
     { label: 'A. Proceed — the split is close enough to 50/50', correct: false },
@@ -729,8 +764,11 @@ function Module_EF05({ onComplete }) {
 
 // ── Module EF06: Novelty Effects and Long-Run Validity ─────────────────────
 function Module_EF06({ onComplete }) {
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const _saved06 = useMemo(function() { return loadEFState('ef06'); }, []);
+  const [answer, setAnswer] = useState(_saved06 ? _saved06.answer : null);
+  const [revealed, setRevealed] = useState(_saved06 ? _saved06.revealed : false);
+
+  useEffect(function() { saveEFState('ef06', { answer: answer, revealed: revealed }); }, [answer, revealed]);
 
   const options = [
     { label: 'A. The algorithm degraded over time', correct: false },
@@ -824,10 +862,13 @@ function Module_EF06({ onComplete }) {
 
 // ── Module EF07: Multiple Testing and Guardrails ────────────────────────────
 function Module_EF07({ onComplete }) {
-  const [q1Answer, setQ1Answer] = useState(null);
-  const [q1Revealed, setQ1Revealed] = useState(false);
-  const [q2Answer, setQ2Answer] = useState(null);
-  const [q2Revealed, setQ2Revealed] = useState(false);
+  const _saved07 = useMemo(function() { return loadEFState('ef07'); }, []);
+  const [q1Answer, setQ1Answer] = useState(_saved07 ? _saved07.q1Answer : null);
+  const [q1Revealed, setQ1Revealed] = useState(_saved07 ? _saved07.q1Revealed : false);
+  const [q2Answer, setQ2Answer] = useState(_saved07 ? _saved07.q2Answer : null);
+  const [q2Revealed, setQ2Revealed] = useState(_saved07 ? _saved07.q2Revealed : false);
+
+  useEffect(function() { saveEFState('ef07', { q1Answer: q1Answer, q1Revealed: q1Revealed, q2Answer: q2Answer, q2Revealed: q2Revealed }); }, [q1Answer, q1Revealed, q2Answer, q2Revealed]);
 
   const q1Options = [
     { label: 'A. 0 — if there is truly no effect, you will never get a false positive', correct: false },
@@ -970,8 +1011,11 @@ function Module_EF07({ onComplete }) {
 
 // ── Module EF08: A/A Testing ────────────────────────────────────────────────
 function Module_EF08({ onComplete }) {
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const _saved08 = useMemo(function() { return loadEFState('ef08'); }, []);
+  const [answer, setAnswer] = useState(_saved08 ? _saved08.answer : null);
+  const [revealed, setRevealed] = useState(_saved08 ? _saved08.revealed : false);
+
+  useEffect(function() { saveEFState('ef08', { answer: answer, revealed: revealed }); }, [answer, revealed]);
 
   // Pre-generate 30 deterministic p-values — seeded formula, clamped 0.01–0.95
   const pValues = Array.from({ length: 30 }, function(_, i) {
@@ -1189,10 +1233,13 @@ function Module_EF08({ onComplete }) {
 
 // ── Module EF09: CUPED / Variance Reduction ─────────────────────────────────
 function Module_EF09({ onComplete }) {
-  const [cupedOn, setCupedOn] = useState(false);
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
-  const [showExplainer, setShowExplainer] = useState(false);
+  const _saved09 = useMemo(function() { return loadEFState('ef09'); }, []);
+  const [cupedOn, setCupedOn] = useState(_saved09 ? _saved09.cupedOn : false);
+  const [answer, setAnswer] = useState(_saved09 ? _saved09.answer : null);
+  const [revealed, setRevealed] = useState(_saved09 ? _saved09.revealed : false);
+  const [showExplainer, setShowExplainer] = useState(_saved09 ? _saved09.showExplainer : false);
+
+  useEffect(function() { saveEFState('ef09', { cupedOn: cupedOn, answer: answer, revealed: revealed, showExplainer: showExplainer }); }, [cupedOn, answer, revealed, showExplainer]);
 
   // Deterministic scatter points: 30 users, pre vs post metric
   var N = 30;
@@ -1467,8 +1514,11 @@ function Module_EF09({ onComplete }) {
 
 // ── Module EF10: Sequential Testing ─────────────────────────────────────────
 function Module_EF10({ onComplete }) {
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const _saved10 = useMemo(function() { return loadEFState('ef10'); }, []);
+  const [answer, setAnswer] = useState(_saved10 ? _saved10.answer : null);
+  const [revealed, setRevealed] = useState(_saved10 ? _saved10.revealed : false);
+
+  useEffect(function() { saveEFState('ef10', { answer: answer, revealed: revealed }); }, [answer, revealed]);
 
   // Pre-computed p-value trajectory over 20 days:
   // dips below 0.05 on day 7 (index 6, p=0.031) and day 12 (index 11, p=0.042), ends at 0.09
@@ -1715,45 +1765,51 @@ function Module_EF10({ onComplete }) {
   );
 }
 
+var SCENARIOS_EF11 = [
+  {
+    text: 'Testing a new search ranking algorithm on a B2B SaaS tool where users work independently.',
+    options: ['SUTVA holds — standard A/B OK', 'SUTVA violated — use cluster randomization', 'SUTVA violated — use geo experiment'],
+    correct: 0,
+    explanation: 'B2B SaaS users querying independently have no mechanism to affect each other\'s search results. SUTVA holds — standard user-level A/B is appropriate.',
+  },
+  {
+    text: 'Testing a referral bonus for a ride-sharing app where treated drivers may be dispatched to control riders.',
+    options: ['SUTVA holds — standard A/B OK', 'SUTVA violated — use cluster randomization', 'SUTVA violated — use geo experiment'],
+    correct: 2,
+    explanation: 'Driver and rider pools are shared — a treated driver dispatched to a control rider creates direct spillover across arms. Geo experiment isolates markets so supply and demand stay within a single arm.',
+  },
+  {
+    text: 'Testing a newsfeed ranking change on a social network where users see each other\'s activity.',
+    options: ['SUTVA holds — standard A/B OK', 'SUTVA violated — use cluster randomization', 'SUTVA violated — use geo experiment'],
+    correct: 1,
+    explanation: 'Social activity (likes, comments, shares) crosses treatment arms — a control user\'s feed is affected by content their treated friends generate. Cluster randomization groups socially connected users into the same arm.',
+  },
+  {
+    text: 'Testing a checkout flow change on an e-commerce site where users browse and purchase independently.',
+    options: ['SUTVA holds — standard A/B OK', 'SUTVA violated — use cluster randomization', 'SUTVA violated — use geo experiment'],
+    correct: 0,
+    explanation: 'E-commerce checkout is a solo action with no cross-user interaction. Each user\'s outcome depends only on their own treatment assignment — SUTVA holds and standard A/B is valid.',
+  },
+];
+
 // ── Module EF11: Network Effects in Experiments ──────────────────────────────
 function Module_EF11({ onComplete }) {
-  var SCENARIOS = [
-    {
-      text: 'Testing a new search ranking algorithm on a B2B SaaS tool where users work independently.',
-      options: ['SUTVA holds — standard A/B OK', 'SUTVA violated — use cluster randomization', 'SUTVA violated — use geo experiment'],
-      correct: 0,
-      explanation: 'B2B SaaS users querying independently have no mechanism to affect each other\'s search results. SUTVA holds — standard user-level A/B is appropriate.',
-    },
-    {
-      text: 'Testing a referral bonus for a ride-sharing app where treated drivers may be dispatched to control riders.',
-      options: ['SUTVA holds — standard A/B OK', 'SUTVA violated — use cluster randomization', 'SUTVA violated — use geo experiment'],
-      correct: 2,
-      explanation: 'Driver and rider pools are shared — a treated driver dispatched to a control rider creates direct spillover across arms. Geo experiment isolates markets so supply and demand stay within a single arm.',
-    },
-    {
-      text: 'Testing a newsfeed ranking change on a social network where users see each other\'s activity.',
-      options: ['SUTVA holds — standard A/B OK', 'SUTVA violated — use cluster randomization', 'SUTVA violated — use geo experiment'],
-      correct: 1,
-      explanation: 'Social activity (likes, comments, shares) crosses treatment arms — a control user\'s feed is affected by content their treated friends generate. Cluster randomization groups socially connected users into the same arm.',
-    },
-    {
-      text: 'Testing a checkout flow change on an e-commerce site where users browse and purchase independently.',
-      options: ['SUTVA holds — standard A/B OK', 'SUTVA violated — use cluster randomization', 'SUTVA violated — use geo experiment'],
-      correct: 0,
-      explanation: 'E-commerce checkout is a solo action with no cross-user interaction. Each user\'s outcome depends only on their own treatment assignment — SUTVA holds and standard A/B is valid.',
-    },
-  ];
+  var _saved11 = useMemo(function() { return loadEFState('ef11'); }, []);
+  var [scenarios11, setScenarios11] = useState(function() {
+    return _saved11 && _saved11.scenarios ? _saved11.scenarios : shuffleEF(SCENARIOS_EF11);
+  });
+  var [answers, setAnswers] = useState(_saved11 ? _saved11.answers : {});
+  var [revealed, setRevealed] = useState(_saved11 ? _saved11.revealed : false);
 
-  var [answers, setAnswers] = useState({});
-  var [revealed, setRevealed] = useState(false);
+  useEffect(function() { saveEFState('ef11', { scenarios: scenarios11, answers: answers, revealed: revealed }); }, [scenarios11, answers, revealed]);
 
   function pick(idx, choice) {
     if (revealed) return;
     setAnswers(function(prev) { return Object.assign({}, prev, { [idx]: choice }); });
   }
 
-  var allAnswered = SCENARIOS.every(function(_, i) { return answers[i] !== undefined; });
-  var correctCount = SCENARIOS.filter(function(s, i) { return answers[i] === s.correct; }).length;
+  var allAnswered = scenarios11.every(function(_, i) { return answers[i] !== undefined; });
+  var correctCount = scenarios11.filter(function(s, i) { return answers[i] === s.correct; }).length;
 
   return (
     <div>
@@ -1775,7 +1831,7 @@ function Module_EF11({ onComplete }) {
       </InstructionBox>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
-        {SCENARIOS.map(function(s, i) {
+        {scenarios11.map(function(s, i) {
           var picked = answers[i];
           var isCorrect = picked === s.correct;
           return (
@@ -1837,12 +1893,12 @@ function Module_EF11({ onComplete }) {
         <div>
           <div style={{
             marginTop: '0.75rem', padding: '0.65rem 0.85rem',
-            background: correctCount === SCENARIOS.length ? 'var(--teal-bg)' : 'var(--yellow-bg)',
-            border: '1px solid ' + (correctCount === SCENARIOS.length ? 'var(--teal-border)' : 'var(--yellow-border)'),
-            color: correctCount === SCENARIOS.length ? 'var(--teal)' : 'var(--yellow)',
+            background: correctCount === scenarios11.length ? 'var(--teal-bg)' : 'var(--yellow-bg)',
+            border: '1px solid ' + (correctCount === scenarios11.length ? 'var(--teal-border)' : 'var(--yellow-border)'),
+            color: correctCount === scenarios11.length ? 'var(--teal)' : 'var(--yellow)',
             fontWeight: 700, fontSize: '0.88rem', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem',
           }}>
-            {correctCount} / {SCENARIOS.length} correct
+            {correctCount} / {scenarios11.length} correct
           </div>
 
           <InsightBox>
@@ -1865,9 +1921,12 @@ function Module_EF11({ onComplete }) {
 
 // ── Module EF12: Holdout Groups ──────────────────────────────────────────────
 function Module_EF12({ onComplete }) {
-  const [showLift, setShowLift] = useState(false);
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const _saved12 = useMemo(function() { return loadEFState('ef12'); }, []);
+  const [showLift, setShowLift] = useState(_saved12 ? _saved12.showLift : false);
+  const [answer, setAnswer] = useState(_saved12 ? _saved12.answer : null);
+  const [revealed, setRevealed] = useState(_saved12 ? _saved12.revealed : false);
+
+  useEffect(function() { saveEFState('ef12', { showLift: showLift, answer: answer, revealed: revealed }); }, [showLift, answer, revealed]);
 
   // Deterministic 28-day trajectory (no Math.random)
   var days = 28;
@@ -2011,9 +2070,12 @@ function Module_EF12({ onComplete }) {
 
 // ── Module EF13: Multi-Armed Bandits ─────────────────────────────────────────
 function Module_EF13({ onComplete }) {
-  const [round, setRound] = useState(0);
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const _saved13 = useMemo(function() { return loadEFState('ef13'); }, []);
+  const [round, setRound] = useState(_saved13 ? _saved13.round : 0);
+  const [answer, setAnswer] = useState(_saved13 ? _saved13.answer : null);
+  const [revealed, setRevealed] = useState(_saved13 ? _saved13.revealed : false);
+
+  useEffect(function() { saveEFState('ef13', { round: round, answer: answer, revealed: revealed }); }, [round, answer, revealed]);
 
   // Pre-computed epsilon-greedy allocation after each round (deterministic)
   // 3 variants: A, B, C. B is the winner. Starts equal, converges toward B.
@@ -2161,39 +2223,45 @@ function Module_EF13({ onComplete }) {
   );
 }
 
+var SCENARIOS_EF14 = [
+  {
+    id: 'a',
+    desc: 'Testing a new checkout flow on an e-commerce website. Users log in, are randomly assigned, and their sessions are independent.',
+    correct: 'User',
+    explanation: 'Users are independent and can be individually tracked. Standard user-level A/B test.',
+  },
+  {
+    id: 'b',
+    desc: 'Testing a dynamic pricing algorithm for a food delivery marketplace. Charging treated drivers higher base pay affects supply available to all users in the city.',
+    correct: 'Geo',
+    explanation: 'Supply and demand are city-level — treating individual users creates spillover. Geo experiment randomizes at the city level.',
+  },
+  {
+    id: 'c',
+    desc: 'Testing a new feature on a social platform where users interact with each other. Users who adopt the feature create social pressure on connected non-users.',
+    correct: 'Cluster',
+    explanation: 'Social graph creates within-cluster interference. Cluster randomization (e.g. by friend group or region) isolates units.',
+  },
+  {
+    id: 'd',
+    desc: 'Testing a TV advertising campaign in select markets. There is no way to measure which specific users saw the ad.',
+    correct: 'Geo',
+    explanation: 'TV advertising cannot be measured at the user level. Geo holdout compares treated markets to matched control markets.',
+  },
+];
+
 // ── Module EF14: Geo Experiments ─────────────────────────────────────────────
 function Module_EF14({ onComplete }) {
-  const [selections, setSelections] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [answer, setAnswer] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const _saved14 = useMemo(function() { return loadEFState('ef14'); }, []);
+  const [scenarios14] = useState(function() {
+    return _saved14 && _saved14.scenarios ? _saved14.scenarios : shuffleEF(SCENARIOS_EF14);
+  });
+  const [selections, setSelections] = useState(_saved14 ? _saved14.selections : {});
+  const [checked, setChecked] = useState(_saved14 ? _saved14.checked : false);
+  const [answer, setAnswer] = useState(_saved14 ? _saved14.answer : null);
+  const [revealed, setRevealed] = useState(_saved14 ? _saved14.revealed : false);
 
-  var scenarios = [
-    {
-      id: 'a',
-      desc: 'Testing a new checkout flow on an e-commerce website. Users log in, are randomly assigned, and their sessions are independent.',
-      correct: 'User',
-      explanation: 'Users are independent and can be individually tracked. Standard user-level A/B test.',
-    },
-    {
-      id: 'b',
-      desc: 'Testing a dynamic pricing algorithm for a food delivery marketplace. Charging treated drivers higher base pay affects supply available to all users in the city.',
-      correct: 'Geo',
-      explanation: 'Supply and demand are city-level — treating individual users creates spillover. Geo experiment randomizes at the city level.',
-    },
-    {
-      id: 'c',
-      desc: 'Testing a new feature on a social platform where users interact with each other. Users who adopt the feature create social pressure on connected non-users.',
-      correct: 'Cluster',
-      explanation: 'Social graph creates within-cluster interference. Cluster randomization (e.g. by friend group or region) isolates units.',
-    },
-    {
-      id: 'd',
-      desc: 'Testing a TV advertising campaign in select markets. There is no way to measure which specific users saw the ad.',
-      correct: 'Geo',
-      explanation: 'TV advertising cannot be measured at the user level. Geo holdout compares treated markets to matched control markets.',
-    },
-  ];
+  useEffect(function() { saveEFState('ef14', { scenarios: scenarios14, selections: selections, checked: checked, answer: answer, revealed: revealed }); }, [scenarios14, selections, checked, answer, revealed]);
 
   var options = ['User', 'Cluster', 'Geo'];
 
@@ -2206,7 +2274,7 @@ function Module_EF14({ onComplete }) {
     });
   }
 
-  var allSelected = scenarios.every(function(s) { return selections[s.id]; });
+  var allSelected = scenarios14.every(function(s) { return selections[s.id]; });
 
   var mcqOptions = [
     { label: 'A. Geo experiments require a different statistical test that is less powerful.', correct: false },
@@ -2228,7 +2296,7 @@ function Module_EF14({ onComplete }) {
         For each scenario, classify the right experiment design: User-level A/B, Cluster randomization, or Geo experiment. Then click Check to see results.
       </InstructionBox>
 
-      {scenarios.map(function(s) {
+      {scenarios14.map(function(s) {
         var sel = selections[s.id];
         var isCorrect = sel === s.correct;
         return (
@@ -2326,9 +2394,12 @@ function Module_EF14({ onComplete }) {
 
 // ── Module EF15: Switchback Experiments ──────────────────────────────────────
 function Module_EF15({ onComplete }) {
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [revealed, setRevealed] = useState({});
+  const _saved15 = useMemo(function() { return loadEFState('ef15'); }, []);
+  const [step, setStep] = useState(_saved15 ? _saved15.step : 0);
+  const [answers, setAnswers] = useState(_saved15 ? _saved15.answers : {});
+  const [revealed, setRevealed] = useState(_saved15 ? _saved15.revealed : {});
+
+  useEffect(function() { saveEFState('ef15', { step: step, answers: answers, revealed: revealed }); }, [step, answers, revealed]);
 
   var questions = [
     {

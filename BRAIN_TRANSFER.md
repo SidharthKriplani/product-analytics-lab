@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.83.0 | **Build:** ✓ (1.98s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.84.0 | **Build:** ✓ (1.93s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -50,6 +50,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V4.84.0** — Cross-foundations quality pass. (1) rf13 Routing Gate new module: 6 scenario routing exercise, reference table, persistence, shuffle. (2) Exp Foundations (ef01–ef15): all 15 modules persist + restore state; EF02/EF04/EF11/EF14 item arrays shuffle on first visit; EF01 distractors rewritten with plausible wrong options; intro already had foundational context. (3) Metrics Foundations (mf01–mf13): all 13 modules persist; mf01/mf04/mf05/mf06 item arrays shuffle; mf02 option C and mf11 options A+C rewritten; mf01 intro anchored with "what is metrics analytics." (4) Stats Foundations: different architecture (separate module files — 32 files); Module01 intro anchored with "what is statistics" sentence; persistence not applied (separate-file architecture requires different approach — logged). Build ✓ 1.93s.
+
 **V4.83.0** — Full Jatin feedback implementation. (1) Answer persistence: all 12 RCA Foundation modules (rf01–rf12) now save/restore state via localStorage (`pal-rca-{id}-v1`). On re-opening any module, assignments, selections, MCQ answers, and revealed states are all restored. (2) Item shuffling: ITEMS (rf01), DECOMPS (rf02), FACTORS (rf04), SYMPTOMS (rf10), EVENTS (rf11) all shuffle on first visit and persist the shuffled order. (3) BLUF exercise: rf06 now has a 5-field BLUF practice exercise after the walkthrough — user picks correct phrasing per field, explanation reveals on selection, Complete button gated behind all 5 answers. (4) Remaining items logged: adaptive re-testing (IDEAS.md Tier 1, 2-session project) and new rf13 Routing Gate module (NEXT.md item 1b) with full session-ready specs. Build ✓ 1.98s.
 
 **V4.82.0** — RCA Foundations quality pass (Jatin feedback). (1) rf01 intro: prepended 2-sentence "what is RCA" definition anchor. (2) Distractor rewrite: rf03 Q1 options C+D, rf03 Q2 options A+D, rf05 MCQ options A+C, rf07 Q1 option A, rf08 MCQ option C — all replaced with plausible misconceptions rather than obviously wrong filler. Explanations updated to distinguish correct answer from new distractors. (3) IDEAS.md: logged three new Tier 1 RCA module concepts from Jatin's v4.1 framework doc — Routing Gate, Dominant Lever + Pruning Rule, BLUF Conclusion. Build ✓ 1.99s.
@@ -86,7 +88,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — Forensic Batch 3 (f21–f25), or rf13 Routing Gate module
+## Next action — Stats Foundations persistence (separate-file architecture) or Forensic Batch 3 (f21–f25)
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 
