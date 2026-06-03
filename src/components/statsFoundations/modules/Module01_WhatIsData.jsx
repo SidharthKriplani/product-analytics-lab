@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { loadSFState, saveSFState } from '../../../utils/statsFoundationsState.js';
 
 const VARIABLES = [
   { id: 'purchases', label: 'Number of purchases', correct: 'numerical', subtype: 'discrete' },
@@ -12,8 +13,13 @@ const VARIABLES = [
 ];
 
 export function Module01_WhatIsData({ module, onNext }) {
-  const [placements, setPlacements] = useState({}); // id -> 'numerical' | 'categorical'
-  const [checked, setChecked] = useState(false);
+  var _saved = loadSFState('sf01');
+  const [placements, setPlacements] = useState(function() { return _saved ? (_saved.placements || {}) : {}; }); // id -> 'numerical' | 'categorical'
+  const [checked, setChecked] = useState(function() { return _saved ? !!_saved.checked : false; });
+
+  useEffect(function() {
+    saveSFState('sf01', { placements: placements, checked: checked });
+  }, [placements, checked]);
 
   const unplaced = VARIABLES.filter(v => !placements[v.id]);
   const numerical = VARIABLES.filter(v => placements[v.id] === 'numerical');

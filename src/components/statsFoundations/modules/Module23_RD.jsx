@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { loadSFState, saveSFState } from '../../../utils/statsFoundationsState.js';
 
 const MCQ_RD = {
   question: 'A loyalty program gives a bonus reward to customers who spend over $500 in a month. You want to estimate the causal effect of the reward on next-month retention. Why is regression discontinuity valid here?',
@@ -75,10 +76,15 @@ function genDensity(hasBunching) {
 }
 
 export function Module23_RD({ module, onNext }) {
-  const [showManipulation, setShowManipulation] = useState(false);
-  const [view, setView] = useState('outcome'); // 'outcome' | 'density'
-  const [mcqAnswer, setMcqAnswer] = useState(null);
-  const [mcqRevealed, setMcqRevealed] = useState(false);
+  var _saved = loadSFState('sf23');
+  const [showManipulation, setShowManipulation] = useState(function() { return _saved ? !!_saved.showManipulation : false; });
+  const [view, setView] = useState(function() { return _saved ? (_saved.view || 'outcome') : 'outcome'; }); // 'outcome' | 'density'
+  const [mcqAnswer, setMcqAnswer] = useState(function() { return _saved ? (_saved.mcqAnswer || null) : null; });
+  const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved ? !!_saved.mcqRevealed : false; });
+
+  useEffect(function() {
+    saveSFState('sf23', { showManipulation: showManipulation, view: view, mcqAnswer: mcqAnswer, mcqRevealed: mcqRevealed });
+  }, [showManipulation, view, mcqAnswer, mcqRevealed]);
 
   function handleMcq(optId) {
     if (mcqRevealed) return;

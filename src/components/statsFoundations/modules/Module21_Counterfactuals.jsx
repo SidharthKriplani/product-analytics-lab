@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { loadSFState, saveSFState } from '../../../utils/statsFoundationsState.js';
 
 const MCQ = {
   id: 'ad_counterfactual',
@@ -50,10 +51,15 @@ const SCENARIOS = [
 ];
 
 export function Module21_Counterfactuals({ module, onNext }) {
-  const [answers, setAnswers] = useState({});
-  const [revealed, setRevealed] = useState({});
-  const [mcqAnswer, setMcqAnswer] = useState(null);
-  const [mcqRevealed, setMcqRevealed] = useState(false);
+  var _saved = loadSFState('sf21');
+  const [answers, setAnswers] = useState(function() { return _saved ? (_saved.answers || {}) : {}; });
+  const [revealed, setRevealed] = useState(function() { return _saved ? (_saved.revealed || {}) : {}; });
+  const [mcqAnswer, setMcqAnswer] = useState(function() { return _saved ? (_saved.mcqAnswer || null) : null; });
+  const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved ? !!_saved.mcqRevealed : false; });
+
+  useEffect(function() {
+    saveSFState('sf21', { answers: answers, revealed: revealed, mcqAnswer: mcqAnswer, mcqRevealed: mcqRevealed });
+  }, [answers, revealed, mcqAnswer, mcqRevealed]);
 
   function handleAnswer(id, verdict) {
     if (revealed[id]) return;

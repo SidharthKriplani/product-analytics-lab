@@ -203,7 +203,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When a metric drops the same day as a deployment, the deployment is guilty until proven innocent — I check error logs before I open the analytics dashboard.'
     },
-    leadershipNote: 'Staff analysts separate the data quality question from the product question immediately. The Visa error spike on web-only is almost certainly a payment provider misconfiguration — not a product regression. The staff move is to get payment engineering on a call within the hour, not to run further segmentation. The business impact framing matters: $140k/day means every hour of delay has a dollar value, and that number belongs in the escalation message.',
+    leadershipNote: 'Staff analysts separate the data quality question from the product question immediately. The Visa error spike on web-only is almost certainly a payment provider misconfiguration — not a product regression. The staff move is to get payment engineering on a call within the hour, not to run further segmentation. The business impact framing matters: $140k/day means every hour of delay has a dollar value, and that number belongs in the escalation message. In an interview, \'I would look at the payment data\' is not an answer. The standard is specificity: name the table, the filter, and the expected signal — \'I would query payment_transactions filtered to platform=web and method=Visa for the past 24 hours, group by error_code, and compare the error rate to the prior 7-day baseline\' is a complete next step.',
   },
 
   {
@@ -613,7 +613,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'In marketplace cancellation analysis, reason codes are your fastest diagnostic tool — "not as described" tells you this is a supply quality problem, not a demand problem, before you pull a single additional query.'
     },
-    leadershipNote: 'Staff analysts ask who is losing when a marketplace metric breaks — buyer or seller, demand or supply. The cancellation spike concentrated in three high-density cities is a supply quality problem, not a demand problem, and reason codes tell that story before any additional segmentation. The stakeholder communication challenge is framing this to the seller operations team without triggering defensiveness — the ask is operational improvement, not blame assignment.',
+    leadershipNote: 'Staff analysts ask who is losing when a marketplace metric breaks — buyer or seller, demand or supply. The cancellation spike concentrated in three high-density cities is a supply quality problem, not a demand problem, and reason codes tell that story before any additional segmentation. The stakeholder communication challenge is framing this to the seller operations team without triggering defensiveness — the ask is operational improvement, not blame assignment. Never say \'I would investigate the cancellations further\' — always specify the query: \'I would pull order_cancellations grouped by cancellation_reason_code, filtered to the three flagged cities, versus the prior 4-week baseline in those same cities.\' Reason code distribution is the single data point that routes the entire investigation.',
   },
 
   {
@@ -1434,7 +1434,7 @@ export const rcaCases = [
       ],
       interviewPhrase: 'When fraud spikes simultaneously with a new low-friction onboarding flow, I assume an organized ring found the gap before we did — my first question is whether seller and buyer accounts were created in the same infrastructure cluster, not whether individual orders look suspicious.',
     },
-    leadershipNote: 'Staff analysts read a 3x fraud spike in 72 hours as a coordinated attack signal, not individual bad actors — the velocity alone rules out opportunistic fraud. Juniors segment by order characteristics; Staff analysts immediately ask whether the new onboarding flow created an exploitable registration gap and check for infrastructure clustering. The payment processor escalation risk is the business-critical framing: sustained elevated fraud rates can trigger processing fee increases or account suspension, making this a finance conversation, not just a trust-and-safety ticket.',
+    leadershipNote: 'Staff analysts read a 3x fraud spike in 72 hours as a coordinated attack signal, not individual bad actors — the velocity alone rules out opportunistic fraud. Juniors segment by order characteristics; Staff analysts immediately ask whether the new onboarding flow created an exploitable registration gap and check for infrastructure clustering. The payment processor escalation risk is the business-critical framing: sustained elevated fraud rates can trigger processing fee increases or account suspension, making this a finance conversation, not just a trust-and-safety ticket. The specificity rule applies to every fraud investigation step: \'I would look at the fraud data\' is never sufficient. \'I would query orders placed in the past 72 hours where seller_created_at > Express Seller launch date, group by device_fingerprint and ip_subnet, and flag any subnet with 3+ flagged orders\' is the correct level of precision for an interview answer.',
   },
 
   {
@@ -3142,10 +3142,10 @@ export const rcaCases = [
           },
           {
             id: 'c',
-            label: 'Why is DAU down? The consumer base must have shifted.',
+            label: 'CPM dropped 5% and Q4 advertiser budgets ended January 1 — the anomaly is a demand-side shortfall that compressed both CPM and impression volume together.',
             isCorrect: false,
             level: 'wrong',
-            feedback: 'Video consumption is UP 8%. Revenue fell despite more users watching more content. Audience decline is not the cause.'
+            feedback: 'This conflates two different signals. CPM is down 5% and impressions are down 18% — but video consumption is UP 8%. A demand-side shortfall would reduce CPM and fill rate, but it cannot explain why impressions fell sharply while consumption rose. The key anomaly is the divergence: more users watching more content, yet fewer ads served. That divergence points to a supply-side inventory constraint (fill rate, frequency cap), not advertiser demand.'
           }
         ]
       },

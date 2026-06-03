@@ -226,4 +226,20 @@ export const rcaFoundationModules = [
       { id: 'rca-framework', label: 'RCA Framework' },
     ],
   },
+  {
+    id: 'rf15',
+    index: 15,
+    title: 'Hypothesis Ranking',
+    subtitle: 'Sequence your investigation by Impact × Likelihood × Ease — not gut feel',
+    difficulty: 'Advanced',
+    tags: ['hypothesis ranking', 'investigation priority', 'impact likelihood ease', 'structured RCA', 'fault tree'],
+    estimatedMin: 8,
+    isFree: true,
+    keyInsight: 'After pruning the fault tree to relevant branches, you still have multiple competing hypotheses. The correct move is to rank them by three dimensions: Impact (how much of the drop would this explain?), Likelihood (how probable given the symptoms and timing?), and Ease (how quickly can you rule it in or out?). The first hypothesis you test should be the one that, if confirmed, explains the most — and costs the least time to validate. High Ease hypotheses are worth investigating early even when Impact is moderate, because ruling them out is cheap.',
+    connection: 'The same ranking logic applies in experiment analysis. When a primary metric moves unexpectedly, you form competing hypotheses (interaction effect, SRM, novelty effect, segment heterogeneity) and investigate the cheapest-to-validate ones first. Impact × Likelihood × Ease is not an RCA concept — it is a general investigation protocol.',
+    playbookLinks: [
+      { id: 'rca-framework', label: 'RCA Framework' },
+      { id: 'metric-decomposition', label: 'Metric Decomposition' },
+    ],
+  },
 ];

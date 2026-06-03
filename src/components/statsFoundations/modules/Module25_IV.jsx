@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { loadSFState, saveSFState } from '../../../utils/statsFoundationsState.js';
 
 const CONDITIONS = [
   {
@@ -46,8 +47,13 @@ const CONDITIONS = [
 ];
 
 export function Module25_IV({ module, onNext }) {
-  const [answers, setAnswers] = useState({});
-  const [revealed, setRevealed] = useState({});
+  var _saved = loadSFState('sf25');
+  const [answers, setAnswers] = useState(function() { return _saved ? (_saved.answers || {}) : {}; });
+  const [revealed, setRevealed] = useState(function() { return _saved ? (_saved.revealed || {}) : {}; });
+
+  useEffect(function() {
+    saveSFState('sf25', { answers: answers, revealed: revealed });
+  }, [answers, revealed]);
 
   function handleAnswer(condId, optId) {
     if (revealed[condId]) return;

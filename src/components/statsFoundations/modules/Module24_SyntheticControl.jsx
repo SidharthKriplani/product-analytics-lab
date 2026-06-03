@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { loadSFState, saveSFState } from '../../../utils/statsFoundationsState.js';
 
 const MCQ_SC = {
   question: 'One state bans a product. You want to estimate the sales impact. No other state implemented the same ban. Which method is most appropriate?',
@@ -108,10 +109,15 @@ function buildPath(pts, minY, maxY) {
 }
 
 export function Module24_SyntheticControl({ module, onNext }) {
-  const [selected, setSelected] = useState(null);
-  const [revealed, setRevealed] = useState(false);
-  const [mcqAnswer, setMcqAnswer] = useState(null);
-  const [mcqRevealed, setMcqRevealed] = useState(false);
+  var _saved = loadSFState('sf24');
+  const [selected, setSelected] = useState(function() { return _saved ? (_saved.selected || null) : null; });
+  const [revealed, setRevealed] = useState(function() { return _saved ? !!_saved.revealed : false; });
+  const [mcqAnswer, setMcqAnswer] = useState(function() { return _saved ? (_saved.mcqAnswer || null) : null; });
+  const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved ? !!_saved.mcqRevealed : false; });
+
+  useEffect(function() {
+    saveSFState('sf24', { selected: selected, revealed: revealed, mcqAnswer: mcqAnswer, mcqRevealed: mcqRevealed });
+  }, [selected, revealed, mcqAnswer, mcqRevealed]);
 
   function handleSelect(id) {
     if (revealed) return;

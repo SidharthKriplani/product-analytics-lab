@@ -2772,6 +2772,304 @@ function Module_RF14({ onComplete }) {
   );
 }
 
+// ── Module rf15: Hypothesis Ranking ─────────────────────────────────────────
+
+var SCENARIOS_RF15 = [
+  {
+    id: 0,
+    context: 'DAU is down 18% WoW. Dominant lever identified: retained users (-17%). A product deploy shipped 36 hours ago. Push notification opt-in rate was stable. No marketing changes this week.',
+    hypotheses: [
+      {
+        id: 'h1',
+        label: 'Product regression in the 36-hour deploy broke session initialization for returning users',
+        eImpact: 'high', eLikelihood: 'high', eEase: 'high',
+        rank: 1,
+        rationale: 'Temporal correlation + verifiable in minutes via crash and error rate logs. Deploys are the first thing to rule in or out — they are the cheapest hypothesis to validate when timing aligns.',
+      },
+      {
+        id: 'h2',
+        label: 'Push notification delivery failure reduced re-engagement for lapsed returning users',
+        eImpact: 'medium', eLikelihood: 'medium', eEase: 'high',
+        rank: 2,
+        rationale: 'Delivery metrics are fast to check but impact is bounded — notifications affect a subset of retained users, not all of them.',
+      },
+      {
+        id: 'h3',
+        label: 'Content feed ranking algorithm degraded — users finding less relevant content on return visits',
+        eImpact: 'high', eLikelihood: 'low', eEase: 'low',
+        rank: 3,
+        rationale: 'High impact if true, but no algorithm change is logged and validation requires cohort analysis (hours, not minutes). Investigate after faster hypotheses are ruled out.',
+      },
+      {
+        id: 'h4',
+        label: 'A competitor launched a major feature drawing retained users away',
+        eImpact: 'medium', eLikelihood: 'low', eEase: 'low',
+        rank: 4,
+        rationale: 'Competitive migration is gradual — an 18% WoW drop is too fast for organic churn to a competitor. Low likelihood and slow to validate.',
+      },
+    ],
+    keyInsight: 'The deploy hypothesis scores highest on all three dimensions simultaneously. When Impact, Likelihood, and Ease are all high, investigate immediately — do not even start the next hypothesis before checking deploy error rates.',
+  },
+  {
+    id: 1,
+    context: 'Revenue down 15% WoW. Dominant lever: AOV dropped 14%. No pricing changes logged. Weekend timing. Product category mix appears roughly stable at first glance.',
+    hypotheses: [
+      {
+        id: 'h1',
+        label: 'A coupon aggregator site published a leaked promo code, applying unexpected discounts at checkout',
+        eImpact: 'high', eLikelihood: 'high', eEase: 'high',
+        rank: 1,
+        rationale: 'Discount usage data is queryable in minutes. Leaked promo codes produce an exact AOV signature: order volume stable, per-order value drops by the discount amount. Check discount_code field on orders immediately.',
+      },
+      {
+        id: 'h2',
+        label: 'Product mix within the dominant category shifted toward lower-priced SKUs this weekend',
+        eImpact: 'high', eLikelihood: 'medium', eEase: 'medium',
+        rank: 2,
+        rationale: 'Mix shift can fully explain an AOV drop without any pricing change. Requires a category × revenue breakdown — takes 15-30 minutes.',
+      },
+      {
+        id: 'h3',
+        label: 'Dynamic pricing algorithm under-priced high-AOV items in a specific subcategory due to a bug',
+        eImpact: 'high', eLikelihood: 'medium', eEase: 'low',
+        rank: 3,
+        rationale: 'High impact if true but requires a pricing audit across subcategories. Do not start here — rule out the faster hypotheses first.',
+      },
+      {
+        id: 'h4',
+        label: 'New user acquisition this week skewed toward lower-intent buyers who placed smaller first orders',
+        eImpact: 'medium', eLikelihood: 'low', eEase: 'low',
+        rank: 4,
+        rationale: 'This hypothesis is almost prunable — the dominant lever is AOV, not acquisition volume. Acquisition mix would cause lower CVR, not lower AOV. Investigate last.',
+      },
+    ],
+    keyInsight: 'The leaked promo code hypothesis is high on all three dimensions AND has a single queryable data point that confirms or eliminates it immediately. Prioritize hypotheses where a single query rules them in or out.',
+  },
+  {
+    id: 2,
+    context: 'Checkout CVR down 10% WoW. Dominant lever: checkout-to-purchase rate (-9.5%). Payment gateway monitoring shows error rate at 11% vs. normal 1.5%. New checkout UI shipped 48 hours ago.',
+    hypotheses: [
+      {
+        id: 'h1',
+        label: 'Payment gateway error rate spike is failing transactions at the final payment step',
+        eImpact: 'high', eLikelihood: 'high', eEase: 'high',
+        rank: 1,
+        rationale: 'The payment gateway already shows 11% errors — this is not a hypothesis, it is a confirmed signal. Investigate root cause of the gateway errors immediately.',
+      },
+      {
+        id: 'h2',
+        label: 'New checkout UI introduced a form bug or UX friction specifically at the payment input step',
+        eImpact: 'high', eLikelihood: 'high', eEase: 'high',
+        rank: 2,
+        rationale: 'The UI deploy is temporally correlated and could compound or cause the payment errors. Check the UI diff for payment form changes — 10 minutes.',
+      },
+      {
+        id: 'h3',
+        label: 'New mandatory email verification before purchase is causing abandonment at checkout',
+        eImpact: 'medium', eLikelihood: 'medium', eEase: 'medium',
+        rank: 3,
+        rationale: 'A friction-adding change at checkout is plausible but impact is bounded and takes longer to diagnose via funnel analysis.',
+      },
+      {
+        id: 'h4',
+        label: 'Removal of comparison pricing from the checkout page reduced purchase confidence',
+        eImpact: 'medium', eLikelihood: 'low', eEase: 'low',
+        rank: 4,
+        rationale: 'Behavioral/psychological effect. Plausible as a long-term driver but does not explain a sudden 10% WoW drop. Low likelihood and slow to validate.',
+      },
+    ],
+    keyInsight: 'When monitoring data already shows a signal for one hypothesis (gateway error rate), investigate that one first — it is not really a hypothesis anymore. External confirming signals collapse the uncertainty and make ranking obvious.',
+  },
+];
+
+var RANK_LABELS = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th' };
+var SCORE_MAP = { high: 3, medium: 2, low: 1 };
+
+function RF15RankBadge(props) {
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      width: '1.5rem', height: '1.5rem', borderRadius: '50%',
+      background: props.active ? 'var(--teal)' : 'var(--surface-2)',
+      border: '1.5px solid ' + (props.active ? 'var(--teal)' : 'var(--border)'),
+      color: props.active ? '#fff' : 'var(--text-muted)',
+      fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', flexShrink: 0,
+      transition: 'all 0.1s',
+    }} onClick={props.onClick}>{props.n}</span>
+  );
+}
+
+function Module_RF15({ onComplete }) {
+  var _saved15 = useMemo(function() { return loadRCAState('rf15'); }, []);
+  var [scenarioIdx, setScenarioIdx] = useState(function() { return _saved15 && _saved15.scenarioIdx != null ? _saved15.scenarioIdx : 0; });
+  var [userRanks, setUserRanks] = useState(function() { return _saved15 ? (_saved15.userRanks || {}) : {}; });
+  var [revealed, setRevealed] = useState(function() { return _saved15 ? !!_saved15.revealed : false; });
+  var [allDone, setAllDone] = useState(function() { return _saved15 ? !!_saved15.allDone : false; });
+
+  useEffect(function() {
+    saveRCAState('rf15', { scenarioIdx: scenarioIdx, userRanks: userRanks, revealed: revealed, allDone: allDone });
+  }, [scenarioIdx, userRanks, revealed, allDone]);
+
+  var scenario = SCENARIOS_RF15[scenarioIdx];
+  var hyps = scenario.hypotheses;
+
+  function assignRank(hypId, rank) {
+    if (revealed) return;
+    setUserRanks(function(prev) {
+      var next = Object.assign({}, prev);
+      // Remove this rank from any other hypothesis
+      Object.keys(next).forEach(function(k) { if (next[k] === rank) delete next[k]; });
+      // Toggle off if same
+      if (prev[hypId] === rank) { delete next[hypId]; } else { next[hypId] = rank; }
+      return next;
+    });
+  }
+
+  var allRanked = hyps.every(function(h) { return userRanks[h.id] != null; });
+
+  function advanceScenario() {
+    if (scenarioIdx < SCENARIOS_RF15.length - 1) {
+      setScenarioIdx(scenarioIdx + 1);
+      setUserRanks({});
+      setRevealed(false);
+    } else {
+      setAllDone(true);
+    }
+  }
+
+  function scoreLabel(lvl) {
+    if (lvl === 'high') return 'High (3)';
+    if (lvl === 'medium') return 'Medium (2)';
+    return 'Low (1)';
+  }
+
+  function dimColor(lvl) {
+    if (lvl === 'high') return 'var(--teal)';
+    if (lvl === 'medium') return 'var(--yellow)';
+    return 'var(--text-muted)';
+  }
+
+  if (allDone) {
+    return (
+      <div>
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', marginBottom: '1.25rem' }}>
+          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.65rem' }}>
+            The ranking rubric
+          </div>
+          {[
+            { dim: 'Impact', desc: 'How much of the metric drop would this hypothesis explain if true? High = could fully explain it. Low = explains a small fraction.' },
+            { dim: 'Likelihood', desc: 'How probable is this cause given the symptoms, timing, and known facts? High = strong corroborating signals. Low = plausible but no supporting evidence.' },
+            { dim: 'Ease', desc: 'How quickly can you rule this in or out? High = single query or log check, minutes. Low = cohort analysis, survey, or days of data collection.' },
+          ].map(function(row) {
+            return (
+              <div key={row.dim} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--teal)', minWidth: '5.5rem', flexShrink: 0 }}>{row.dim}</span>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>{row.desc}</span>
+              </div>
+            );
+          })}
+          <div style={{ marginTop: '0.6rem', padding: '0.45rem 0.7rem', background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+            Tie-breaking rule: when two hypotheses score equally, investigate the one with higher Ease first. Cheap validation is always worth doing before expensive validation.
+          </div>
+        </div>
+        <InsightBox>
+          Hypothesis ranking is not about being right on the first try. It is about minimizing wasted investigation time. An analyst who investigates in Impact × Likelihood × Ease order will almost always reach the root cause faster than one who starts with the most interesting hypothesis.
+        </InsightBox>
+        <NextBtn onClick={onComplete} label="Complete module →" />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
+        After pruning the fault tree, you still have competing hypotheses. Rank them by investigation priority using Impact (how much of the drop does this explain?), Likelihood (how probable given the symptoms?), and Ease (how fast can you validate it?).
+      </p>
+
+      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '1rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+        <strong>Scenario {scenarioIdx + 1} of {SCENARIOS_RF15.length}:</strong> {scenario.context}
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
+        Assign investigation order — click the rank buttons next to each hypothesis
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.85rem' }}>
+        {hyps.map(function(h) {
+          var userRank = userRanks[h.id];
+          var expertScore = SCORE_MAP[h.eImpact] * SCORE_MAP[h.eLikelihood] * SCORE_MAP[h.eEase];
+          var isTopExpert = h.rank === 1;
+          var revealBg = revealed ? (h.rank <= 2 ? 'var(--teal-bg)' : 'var(--surface)') : 'var(--surface)';
+          var revealBorder = revealed ? (h.rank <= 2 ? 'var(--teal-border)' : 'var(--border)') : (userRank ? 'var(--accent-border)' : 'var(--border)');
+          return (
+            <div key={h.id} style={{
+              padding: '0.65rem 0.8rem', background: revealBg,
+              border: '1.5px solid ' + revealBorder,
+              borderRadius: 'var(--radius-sm)', transition: 'all 0.15s',
+            }}>
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', gap: '0.3rem', flexShrink: 0, paddingTop: '0.1rem' }}>
+                  {[1,2,3,4].map(function(n) {
+                    return <RF15RankBadge key={n} n={n} active={userRank === n} onClick={function() { assignRank(h.id, n); }} />;
+                  })}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.84rem', color: 'var(--text)', lineHeight: 1.5 }}>{h.label}</div>
+                  {userRank && !revealed && (
+                    <div style={{ fontSize: '0.72rem', color: 'var(--accent)', marginTop: '0.2rem', fontWeight: 600 }}>
+                      Assigned: {RANK_LABELS[userRank]}
+                    </div>
+                  )}
+                  {revealed && (
+                    <div style={{ marginTop: '0.4rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.3rem' }}>
+                        {[
+                          { label: 'Impact', val: h.eImpact },
+                          { label: 'Likelihood', val: h.eLikelihood },
+                          { label: 'Ease', val: h.eEase },
+                        ].map(function(d) {
+                          return (
+                            <span key={d.label} style={{ fontSize: '0.71rem', padding: '0.1rem 0.45rem', borderRadius: '20px', background: 'var(--surface-2)', color: dimColor(d.val), fontWeight: 600, border: '1px solid var(--border)' }}>
+                              {d.label}: {d.val}
+                            </span>
+                          );
+                        })}
+                        <span style={{ fontSize: '0.71rem', padding: '0.1rem 0.45rem', borderRadius: '20px', background: 'var(--teal-bg)', color: 'var(--teal)', fontWeight: 700, border: '1px solid var(--teal-border)' }}>
+                          Investigate {RANK_LABELS[h.rank]}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5, fontStyle: 'italic' }}>
+                        {h.rationale}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {!revealed && allRanked && (
+        <button onClick={function() { setRevealed(true); }} style={{ padding: '0.45rem 1rem', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', marginBottom: '0.75rem' }}>
+          Reveal expert ranking
+        </button>
+      )}
+
+      {revealed && (
+        <div>
+          <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.75rem', fontSize: '0.82rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+            <strong>Key insight:</strong> {scenario.keyInsight}
+          </div>
+          <button onClick={advanceScenario} style={{ padding: '0.45rem 1.1rem', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}>
+            {scenarioIdx < SCENARIOS_RF15.length - 1 ? 'Next scenario →' : 'See summary →'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Module registry ─────────────────────────────────────────────────────────
 const MODULE_COMPONENTS = {
   rf01: Module_RF01,
@@ -2788,6 +3086,7 @@ const MODULE_COMPONENTS = {
   rf12: Module_RF12,
   rf13: Module_RF13,
   rf14: Module_RF14,
+  rf15: Module_RF15,
 };
 
 // ── Runner shell ────────────────────────────────────────────────────────────

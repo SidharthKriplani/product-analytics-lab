@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.85.0 | **Build:** ✓ (1.31s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.86.0 | **Build:** ✓ (1.48s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -50,6 +50,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V4.86.0** — Full Jatin feedback sequence complete. (1) rcaCases.js L3145 distractor fixed (DAU-down option replaced with plausible demand-side conflation). (2) Stats Foundations persistence: `statsFoundationsState.js` utility created; M01/M21/M23/M24/M25 now save/restore exercise state — 16 slider/visual modules correctly skipped (no exercise state to lose); M27/M28/M32 are stubs, skipped. (3) rf15 Hypothesis Ranking module: 3 scenarios (DAU drop/AOV drop/checkout CVR), user ranks 4 hypotheses per scenario by Impact × Likelihood × Ease, reveal shows expert ranking + per-hypothesis rationale + rubric reference table. Persist/restore. (4) "Never say I would look at the data" injected into RCA case leadershipNotes for C01 (checkout CVR), C03 (marketplace cancellations), C07 (fraud spike) — each with a domain-specific query example. Build ✓ 1.48s.
+
 **V4.85.0** — rf14 Dominant Lever + Pruning module shipped. 3 scenarios (Revenue = Users × CVR × AOV, DAU = New + Retained + Resurrected, Checkout CVR funnel). 2-phase exercise: identify dominant lever → apply pruning rule. Persist/restore state. Reference table on completion. Wired into MODULE_COMPONENTS. businessCases.js C01 Phase 4 option C distractor rewritten (was "segment by demographics" — obviously wrong; now a plausible delivery-time benchmark cut with targeted feedback). Build ✓ 1.31s.
 
 **V4.84.0** — Cross-foundations quality pass. (1) rf13 Routing Gate new module: 6 scenario routing exercise, reference table, persistence, shuffle. (2) Exp Foundations (ef01–ef15): all 15 modules persist + restore state; EF02/EF04/EF11/EF14 item arrays shuffle on first visit; EF01 distractors rewritten with plausible wrong options; intro already had foundational context. (3) Metrics Foundations (mf01–mf13): all 13 modules persist; mf01/mf04/mf05/mf06 item arrays shuffle; mf02 option C and mf11 options A+C rewritten; mf01 intro anchored with "what is metrics analytics." (4) Stats Foundations: different architecture (separate module files — 32 files); Module01 intro anchored with "what is statistics" sentence; persistence not applied (separate-file architecture requires different approach — logged). Build ✓ 1.93s.
@@ -90,7 +92,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — Practice room MCQ audit (C01 done; remaining rooms), then Stats Foundations persistence, hypothesis ranking module, RCA debrief "never say I would look at the data" injections
+## Next action — Forensic Batch 3 (f21–f25, staff-level) or S-grade debrief pass Batches 4–13
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 
