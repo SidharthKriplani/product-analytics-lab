@@ -106,7 +106,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — All open audits closed. Next: spokenSummary backfill (RCA05–RCA24 + all Business cases) as subagent writing pass, OR Interview Simulator expansion (needs PostHog WAU data first).
+## Next action — Statefulness confirmed complete across ALL runners (GrowthAnalytics/Stats/Code already stateful — no gaps). Next session: spokenSummary backfill (RCA05–RCA24 + all Business cases) as subagent writing pass, OR Interview Simulator expansion (needs PostHog WAU data first).
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

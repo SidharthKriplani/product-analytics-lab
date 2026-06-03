@@ -15,7 +15,10 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ## Next session
 
-**1. Interview Simulator expansion**
+**1. spokenSummary backfill**
+RCA05–RCA24 + all Business cases need spokenSummary populated. Infrastructure already live (V4.87.0). Delegate as subagent writing pass — ~40 cases, 30-second spoken answers per case.
+
+**2. Interview Simulator expansion**
 Gate: confirm PostHog WAU data first. If live, check Simulator usage. If usage warrants it, split DS/PM modes into specific roles (Product Analyst, Business Analyst, Data Analyst, PM) with Senior/Staff tiers.
 
 **Note (V4.90.0):** S-grade debrief pass COMPLETE — all 130 SQL problems now have FV + FA additions. SQL_UPGRADE_PASS.md + SQL_LAB_PLAN.md Section 11 marked complete.
