@@ -76,15 +76,15 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — Forensic Format Batch 2 (f11–f20)
+## Next action — Verify tier gates in production, then Forensic Batch 2 (f11–f20)
 
-**Forensic format — in progress.** New `difficulty: 'Forensic'` tier in SQL Lab. Broken query shown upfront, user finds bug + writes fix. Target ~25 problems. Batch 1 (f01–f10) building now. Spec in SQL_LAB_PLAN.md Section 12. S-grade debrief pass (Batches 4–13) paused — forensic is the structural improvement, debrief pass was documentation.
+**Forensic format — Batch 1 shipped (f01–f10).** Batch 2 (f11–f20) is next. Target ~25 total. Spec in SQL_LAB_PLAN.md Section 12. S-grade debrief pass (Batches 4–13) paused — forensic is the structural improvement.
 
-New rubric: 10 dimensions (MJ + FV + FA added), max 50, flag < 30 or any dim < 3. Rubric in DECISIONS.md. Batch map in SQL_LAB_PLAN.md Section 11. Scores in SQL_UPGRADE_PASS.md.
+**3-tier monetization gate live.** Anonymous blocked from all runners + SQL Lab via AUTH_REQUIRED_PAGES useEffect in App.jsx. Free tier = isFree cases + Foundations + Easy SQL. Premium = DAI2026 code. Full business model in MONETIZATION.md. Stripe is the next monetization milestone.
 
-Active reference for this pass: `SQL_UPGRADE_PASS.md` → current batch + scores. Read it, not this file, for batch state.
+**Landing page shipped.** Signed-out = full-screen landing (ghost analytics, stagger animation, "Sign in to analyze →" CTA). Signed-in = Progress as home. Sidebar Progress item removed.
 
-Layer 2 (forensic/impossible/cascade formats) logged in IDEAS.md — own product sprint, do not start yet.
+**Verify in production before next session:** sign out → try opening a case → auth modal should appear. Sign in (no code) → try Medium SQL → unlock page. Sign in with DAI2026 → everything works.
 
 ---
 

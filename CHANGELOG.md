@@ -4,6 +4,117 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.80.0] — 2026-06-03 [PRODUCT + CONTENT + UX]
+
+### 3-Tier Monetization Gate + Business Model
+
+**Vision locked:** PAL is a professional development platform for analytics careers, not an interview prep tool. Full strategy in new `MONETIZATION.md`. Pricing target $29-39/month or $249-299/year. B2B path documented. Standing rules added to DECISIONS.md.
+
+**Three tiers implemented:**
+- **Anonymous:** can browse room browsers, cannot run any content. `AUTH_REQUIRED_PAGES` useEffect in App.jsx intercepts all runners + SQL Lab and shows auth modal.
+- **Free (signed in):** all Foundations + `isFree: true` cases (3/room) + Easy SQL + progress sync.
+- **Premium (signed in + DAI2026 or future Stripe):** everything. `isUnlocked()` in unlock.js checks access code.
+
+**`getAccessTier(user)`** added to unlock.js — returns `'anonymous'` | `'free'` | `'premium'`. Canonical tier check for all future tier-aware UI.
+
+**27 Easy SQL problems** updated to `isFree: true` (mass update via Python script). Medium/Hard/Master/Forensic stay `isFree: false`.
+
+Files: `src/App.jsx`, `src/utils/unlock.js`, `src/data/sqlLabProblems.js`, `MONETIZATION.md`, `DECISIONS.md`, `BRAIN_TRANSFER.md`, `NEXT.md`
+
+---
+
+## [4.79.0] — 2026-06-03 [UX]
+
+### Signed-out / Signed-in UX Split
+
+**Home.jsx completely rewritten** as a full-screen signed-out landing page. No sidebar for signed-out users (`signed-out` CSS class hides sidebar and resets margin-left). Background animated gradient orbs. Ghost analytics snippets (`p = 0.04`, `DAU ↓ 31%`, `SRM detected`, `retention: 67%`...) float at edges suggesting data waiting to be unlocked. Staggered entrance animations with `palLandingIn` keyframe. Primary CTA: "Sign in to analyze →" with continuous indigo glow pulse (`palLandingGlow`). Secondary: "Explore without signing in" → stat-foundations.
+
+**Sidebar changes:** Logo navigates to `progress` for signed-in users, `home` for signed-out. `Progress` nav item removed — Progress is now home for signed-in users.
+
+**App.jsx changes:** `signed-out` CSS class on layout root when `!user`. Home renders with `onShowAuth` prop. Mobile topbar logo navigates to `progress` when signed in.
+
+Files: `src/pages/Home.jsx`, `src/components/layout/Sidebar.jsx`, `src/App.jsx`, `src/index.css`
+
+---
+
+## [4.78.1] — 2026-06-03 [BUG FIX]
+
+### Onboarding Modal Portal Fix
+
+Modal was scrolling with the page instead of staying viewport-fixed. Root cause: `pal-page-enter` animation uses `both` fill mode which retains `transform: translateY(0)` after animation completes — even a zero transform creates a CSS stacking context, making `position: fixed` descendants relative to that element rather than the viewport. Fix: `createPortal(modal, document.body)` in Home.jsx renders the modal outside the transformed element entirely.
+
+Files: `src/pages/Home.jsx`
+
+---
+
+## [4.78.0] — 2026-06-03 [UX]
+
+### Signed-in Users Land on Progress
+
+Returning signed-in users now land on the Progress page instead of the marketing landing page. One-line change in the SIGNED_IN auth handler: `setPage(p => p === 'home' ? 'progress' : p)`. Also logged 8 backlog items across AUDITS.md (#144-146) and IDEAS.md (FV/FA UI, RCA/Metrics content, Postgres migration, MCQ revamp, Simulator customization, Pandas).
+
+Files: `src/App.jsx`, `AUDITS.md`, `IDEAS.md`, `NEXT.md`, `BRAIN_TRANSFER.md`
+
+---
+
+## [4.77.1] — 2026-06-03 [BUG FIX]
+
+### Forensic checkValues Float Formatting
+
+SQLite REAL values that are whole numbers return as JS integers (40.0 → 40). The validator does `String(row[i]) === String(val)`, so checkValues using `'40.0'` never matched. Fixed: f01 `no_show_pct: '40.0' → '40'`, f04 `amount: '3500.0' → '3500'`, f09 `premium_pct: '50.0' → '50'`. Also fixed f01 `expectedRowCount: 3 → 6` (health datamart has 6 providers, not 3). Logged as AUDITS.md #144 for remaining forensic problems to audit.
+
+Files: `src/data/sqlLabProblems.js`
+
+---
+
+## [4.77.0] — 2026-06-03 [PRODUCT]
+
+### Forensic Format — Batch 1 (f01–f10)
+
+New `difficulty: 'Forensic'` tier in SQL Lab. Broken query shown upfront in an orange-bordered block labelled "⚠ Broken query — in production" with `brokenOutputNote` explaining what it returns and why it looks plausible. User identifies the bug and writes the corrected query. SQL engine, schema, and validation all unchanged — the challenge is reading broken code, not writing from scratch.
+
+**UI changes (SqlLabPage.jsx):** `DIFF_ORDER.Forensic = 5`, `DIFF_COLOR.Forensic` (orange), `'Forensic'` added to difficulty filter chips, forensic block rendered between prompt and schema accordion when `problem.format === 'forensic'`, editor placeholder changes to "Write the corrected query here".
+
+**10 forensic problems (f01–f10):**
+- f01: Integer division — no-show rate (all providers 0.0%)
+- f02: Missing quantity in revenue formula (electronics $569 vs $1,719)
+- f03: COUNT(*) vs COUNT(DISTINCT) for buyer count (28 vs 12)
+- f04: `= NULL` returns 0 rows — open dispute queue invisible to compliance
+- f05: `= NULL` on never-logged-in users — CS team misses churn signal
+- f06: Missing HAVING — all buyers labeled power buyers
+- f07: Churn win-back list includes re-subscribers (emailing your best customer)
+- f08: COUNT(*) vs COUNT(DISTINCT zip) for geographic coverage
+- f09: GROUP BY wrong dimension (country vs device_os)
+- f10: Off-by-one in medication coverage formula (days_supply × refills vs × (1+refills))
+
+Also logged: AUDITS.md #144 (remaining checkValue audit), SQL_LAB_PLAN.md Section 12 (forensic format spec), IDEAS.md Layer 2 updated (forensic IN PROGRESS, remaining formats deferred).
+
+Files: `src/pages/SqlLabPage.jsx`, `src/data/sqlLabProblems.js`, `src/index.css`, `SQL_LAB_PLAN.md`, `DECISIONS.md`, `IDEAS.md`, `SQL_UPGRADE_PASS.md`, `BRAIN_TRANSFER.md`, `NEXT.md`
+
+---
+
+## [4.76.0] — 2026-06-03 [CONTENT]
+
+### S-Grade Upgrade Pass — Batch 3 (Easy e21–e30)
+
+FV + FA additions to all 10 problems. MJ assumption statements on e27 (integer division denominator) and e29 (AVG vs median for skewed distributions). Standouts: e27 integer division produces all-zero rates (FV=5), e30 COUNT(*) vs COUNT(DISTINCT) returns 187% activation rate (FV=5), e28 churn-with-active-subscription business judgment check. SQL_UPGRADE_PASS.md Batch 3 scored.
+
+Files: `src/data/sqlLabProblems.js`, `SQL_UPGRADE_PASS.md`, `BRAIN_TRANSFER.md`, `NEXT.md`
+
+---
+
+## [4.75.0] — 2026-06-03 [CONTENT + BUG FIX]
+
+### renderDebrief() Fix + S-Grade Upgrade Pass Batch 2 (Easy e11–e20)
+
+**Critical product bug fixed:** `{problem.debrief}` was rendering as plain text — all FV/FA/MJ additions from Batch 1 (committed in V4.74.0) were displaying as one wall of text with literal `**asterisks**`. Fixed: `renderDebrief(text)` function added to SqlLabPage.jsx — splits on `\n\n` into paragraphs, renders `**text**` as `<strong>`. All existing debriefs also benefit.
+
+**Batch 2 — Easy e11–e20:** FV + FA additions to all 10 problems. e13 earns FA=5 (medication coverage +1 formula — off-by-one compounds per prescription). e16 raises MJ=3 via baseline definition question (should disputed transactions be in a fraud baseline?). SQL_UPGRADE_PASS.md Batch 2 scored.
+
+Files: `src/pages/SqlLabPage.jsx`, `src/data/sqlLabProblems.js`, `SQL_UPGRADE_PASS.md`, `BRAIN_TRANSFER.md`, `NEXT.md`
+
+---
+
 ## [4.74.0] — 2026-06-03 [CONTENT]
 
 ### S-Grade Upgrade Pass — Infrastructure + Batch 1 (Easy e01–e10)

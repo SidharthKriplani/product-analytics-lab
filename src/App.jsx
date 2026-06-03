@@ -145,9 +145,10 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
 
-  // Auth gate — anonymous users cannot access runners or SQL Lab.
-  // Browsing room browsers and Foundations is open to all.
-  // Sign-in unlocks the free tier (isFree cases + Easy SQL).
+  // Auth gate — anonymous users cannot access practice runners or SQL Lab.
+  // Foundations (stat/metrics/rca/exp) are open to ALL users — they are top-of-funnel.
+  // Room browsers (browsing case lists) are open to all.
+  // Sign-in unlocks the free tier (isFree cases + Foundations + Easy SQL).
   // Access code (DAI2026) + future Stripe = premium tier.
   const AUTH_REQUIRED_PAGES = new Set([
     'sql-lab',
@@ -155,14 +156,21 @@ export default function App() {
     'cases-runner', 'code-runner', 'prioritization-runner', 'behavioral-runner',
     'estimation-runner', 'growth-runner', 'bi-runner', 'stf-runner',
     'instrumentation-runner', 'sql-runner',
-    'stat-foundations-runner', 'metrics-foundations-runner',
-    'rca-foundations-runner', 'exp-foundations-runner',
   ]);
 
+  // Block anonymous users from practice runners — show sign-in prompt
   useEffect(() => {
     if (!user && AUTH_REQUIRED_PAGES.has(page)) {
       setPage('home');
       setShowAuth(true);
+    }
+  }, [page, user]);
+
+  // Redirect signed-in users away from landing page → Progress
+  // Handles both: initial auth fire AND back-navigation to 'home'
+  useEffect(() => {
+    if (user && page === 'home') {
+      setPage('progress');
     }
   }, [page, user]);
 
