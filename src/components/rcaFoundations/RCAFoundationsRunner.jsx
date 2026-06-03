@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { rcaFoundationModules } from '../../data/rcaFoundationModules.js';
 import { saveRCAFoundationProgress, getAllRCAFoundationProgress } from '../../utils/rcaFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
@@ -73,7 +73,32 @@ function MCQOption({ label, selected, correct, revealed, onClick }) {
   );
 }
 
+// ── Persistence helpers ─────────────────────────────────────────────────────
+function saveRCAState(id, state) {
+  try { localStorage.setItem('pal-rca-' + id + '-v1', JSON.stringify(state)); } catch(e) {}
+}
+function loadRCAState(id) {
+  try { var raw = localStorage.getItem('pal-rca-' + id + '-v1'); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+}
+function shuffleArr(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
 // ── Module rf01: The RCA Framework ─────────────────────────────────────────
+const ITEMS_RF01 = [
+  { text: 'Event logging stopped firing on iOS 17.2', layer: 'dq' },
+  { text: 'Christmas week — all consumer apps see a traffic spike', layer: 'ext' },
+  { text: 'Pushed a nav redesign that buried the share button', layer: 'prod' },
+  { text: 'New paid-acquisition cohort has lower baseline engagement', layer: 'beh' },
+  { text: 'Data warehouse pipeline had a 6-hour backfill delay', layer: 'dq' },
+  { text: 'Competitor launched a free tier matching our core feature set', layer: 'ext' },
+];
+
 function Module_RF01({ onComplete }) {
   const LAYERS = [
     {
@@ -102,31 +127,26 @@ function Module_RF01({ onComplete }) {
     },
   ];
 
-  const ITEMS = [
-    { text: 'Event logging stopped firing on iOS 17.2', layer: 'dq' },
-    { text: 'Christmas week — all consumer apps see a traffic spike', layer: 'ext' },
-    { text: 'Pushed a nav redesign that buried the share button', layer: 'prod' },
-    { text: 'New paid-acquisition cohort has lower baseline engagement', layer: 'beh' },
-    { text: 'Data warehouse pipeline had a 6-hour backfill delay', layer: 'dq' },
-    { text: 'Competitor launched a free tier matching our core feature set', layer: 'ext' },
-  ];
-
-  const [assignments, setAssignments] = useState({});
-  const [revealed, setRevealed] = useState(false);
+  const _saved01 = useMemo(function() { return loadRCAState('rf01'); }, []);
+  const [items01] = useState(function() { return _saved01 && _saved01.items ? _saved01.items : shuffleArr(ITEMS_RF01); });
+  const [assignments, setAssignments] = useState(function() { return _saved01 && _saved01.assignments ? _saved01.assignments : {}; });
+  const [revealed, setRevealed] = useState(function() { return _saved01 ? !!_saved01.revealed : false; });
   const [expanded, setExpanded] = useState(null);
+
+  useEffect(function() { saveRCAState('rf01', { items: items01, assignments: assignments, revealed: revealed }); }, [items01, assignments, revealed]);
 
   function assign(itemIdx, layerId) {
     if (revealed) return;
     setAssignments(prev => ({ ...prev, [itemIdx]: layerId }));
   }
 
-  const allAssigned = ITEMS.every((_, i) => assignments[i]);
-  const correctCount = ITEMS.filter((item, i) => assignments[i] === item.layer).length;
+  const allAssigned = items01.every((_, i) => assignments[i]);
+  const correctCount = items01.filter((item, i) => assignments[i] === item.layer).length;
 
   return (
     <div>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-        Every metric movement belongs to one of four diagnostic layers. The order is not arbitrary — it is sorted by investigation cost and frequency of false alarms. Data quality is the most common false alarm and takes 10 minutes to rule out. User behaviour shifts can take weeks. Work top-to-bottom, always.
+        RCA — Root Cause Analysis — is how analysts answer the question: "Our key metric dropped. Why?" It is the most common ambiguity problem in product analytics interviews and one of the highest-leverage skills in a working analyst&apos;s toolkit. Every metric movement belongs to one of four diagnostic layers. The order is not arbitrary — it is sorted by investigation cost and frequency of false alarms. Data quality is the most common false alarm and takes 10 minutes to rule out. User behaviour shifts can take weeks. Work top-to-bottom, always.
       </p>
 
       {/* Visual ordered framework */}
@@ -206,7 +226,7 @@ function Module_RF01({ onComplete }) {
 
       {/* Item list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-        {ITEMS.map((item, i) => {
+        {items01.map((item, i) => {
           const asgn = assignments[i];
           const aLayer = LAYERS.find(l => l.id === asgn);
           const isCorrect = revealed && asgn === item.layer;
@@ -263,12 +283,12 @@ function Module_RF01({ onComplete }) {
         <div>
           <div style={{
             padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', marginTop: '0.75rem', marginBottom: '1.25rem',
-            background: correctCount === ITEMS.length ? 'var(--teal-bg)' : 'var(--yellow-bg)',
-            border: '1px solid ' + (correctCount === ITEMS.length ? 'var(--teal-border)' : 'var(--yellow-border)'),
-            color: correctCount === ITEMS.length ? 'var(--teal)' : 'var(--yellow)',
+            background: correctCount === items01.length ? 'var(--teal-bg)' : 'var(--yellow-bg)',
+            border: '1px solid ' + (correctCount === items01.length ? 'var(--teal-border)' : 'var(--yellow-border)'),
+            color: correctCount === items01.length ? 'var(--teal)' : 'var(--yellow)',
             fontWeight: 700, fontSize: '0.88rem',
           }}>
-            {correctCount}/{ITEMS.length} correct{correctCount < ITEMS.length ? ' — review the highlighted items' : ' — perfect'}
+            {correctCount}/{items01.length} correct{correctCount < items01.length ? ' — review the highlighted items' : ' — perfect'}
           </div>
 
           {/* Why this order — compact cost table */}
@@ -303,20 +323,24 @@ function Module_RF01({ onComplete }) {
 }
 
 // ── Module rf02: Decompose Before Diagnose ──────────────────────────────────
+const DECOMPS_RF02 = [
+  { id: 'new',   label: 'New user installs',        correct: true,  explanation: 'New user acquisition failure = marketing or app store change.' },
+  { id: 'ret',   label: 'D1/D7/D30 retention rate', correct: true,  explanation: 'Retention collapse = product or notification change.' },
+  { id: 'res',   label: 'Resurrected users',         correct: true,  explanation: 'Resurr drop = re-engagement campaign stopped or push notifications disabled.' },
+  { id: 'rev',   label: 'Revenue per user',          correct: false, explanation: 'Revenue is a lagging output metric, not a DAU driver. This does not explain the drop.' },
+  { id: 'churn', label: 'Churned user rate',          correct: true,  explanation: 'Churn spike = product problem or external pressure causing users to leave.' },
+  { id: 'sess',  label: 'Session count per user',    correct: false, explanation: 'Sessions per user explains engagement depth, not DAU headcount. Useful after decomposing DAU.' },
+];
+
 function Module_RF02({ onComplete }) {
   const SCENARIO = 'WhatsApp DAU drops 18% week-over-week, from 42M to 34.4M. Your PM asks: "What happened?"';
 
-  const DECOMPS = [
-    { id: 'new',   label: 'New user installs',        correct: true,  explanation: 'New user acquisition failure = marketing or app store change.' },
-    { id: 'ret',   label: 'D1/D7/D30 retention rate', correct: true,  explanation: 'Retention collapse = product or notification change.' },
-    { id: 'res',   label: 'Resurrected users',         correct: true,  explanation: 'Resurr drop = re-engagement campaign stopped or push notifications disabled.' },
-    { id: 'rev',   label: 'Revenue per user',          correct: false, explanation: 'Revenue is a lagging output metric, not a DAU driver. This does not explain the drop.' },
-    { id: 'churn', label: 'Churned user rate',          correct: true,  explanation: 'Churn spike = product problem or external pressure causing users to leave.' },
-    { id: 'sess',  label: 'Session count per user',    correct: false, explanation: 'Sessions per user explains engagement depth, not DAU headcount. Useful after decomposing DAU.' },
-  ];
+  const _saved02 = useMemo(function() { return loadRCAState('rf02'); }, []);
+  const [decomps02] = useState(function() { return _saved02 && _saved02.decomps ? _saved02.decomps : shuffleArr(DECOMPS_RF02); });
+  const [selected, setSelected] = useState(function() { return new Set(_saved02 && _saved02.selected ? _saved02.selected : []); });
+  const [revealed, setRevealed] = useState(function() { return _saved02 ? !!_saved02.revealed : false; });
 
-  const [selected, setSelected] = useState(new Set());
-  const [revealed, setRevealed] = useState(false);
+  useEffect(function() { saveRCAState('rf02', { decomps: decomps02, selected: Array.from(selected), revealed: revealed }); }, [decomps02, selected, revealed]);
 
   function toggle(id) {
     if (revealed) return;
@@ -327,7 +351,7 @@ function Module_RF02({ onComplete }) {
     });
   }
 
-  const correctIds = new Set(DECOMPS.filter(d => d.correct).map(d => d.id));
+  const correctIds = new Set(decomps02.filter(d => d.correct).map(d => d.id));
 
   return (
     <div>
@@ -351,7 +375,7 @@ function Module_RF02({ onComplete }) {
         Before diagnosing root cause, you must decompose DAU. Select all metrics that belong in the DAU decomposition:
       </p>
 
-      {DECOMPS.map(d => {
+      {decomps02.map(d => {
         const sel = selected.has(d.id);
         let bg = sel ? 'var(--teal-bg)' : 'var(--surface-2)';
         let border = sel ? 'var(--teal-border)' : 'var(--border)';
@@ -415,25 +439,28 @@ function Module_RF03({ onComplete }) {
       options: [
         { label: 'A. Check if we shipped a product change to Android last week', correct: false },
         { label: 'B. Check if the Android SDK version or tracking library changed', correct: true },
-        { label: 'C. Check if a competitor launched on Android', correct: false },
-        { label: 'D. Check if Android users have different engagement patterns', correct: false },
+        { label: 'C. Check if the latest Android OS update restricted background event permissions', correct: false },
+        { label: 'D. Check if a data pipeline partition filter accidentally excluded Android rows', correct: false },
       ],
-      explanation: 'Platform-specific drops (Android only, iOS flat) almost always indicate an SDK or tracking change, not a product problem. Data quality is the first hypothesis — and it\'s cheap to rule out.',
+      explanation: 'Platform-specific drops (Android only, iOS flat) almost always indicate an SDK or tracking change, not a product problem. Both C and D are plausible data quality hypotheses — but an OS permission change (C) affects multiple apps system-wide, and you\'d expect broader event degradation. A pipeline partition error (D) would not be Android-specific unless the schema change was tied to a device field. The SDK version or tracking library is the most targeted, most verifiable cause. Data quality is the first hypothesis — and it\'s cheap to rule out.',
     },
     {
       q: 'Revenue per user drops 25% but order count is flat and AOV is flat. What is most likely?',
       options: [
-        { label: 'A. Users are spending less per order', correct: false },
+        { label: 'A. A new user acquisition campaign inflated the user count in the denominator without corresponding spend', correct: false },
         { label: 'B. A data pipeline aggregation bug is double-counting orders in the denominator', correct: true },
         { label: 'C. A new cohort of lower-value users joined last week', correct: false },
-        { label: 'D. A promotion reduced pricing across the board', correct: false },
+        { label: 'D. Refund volume increased, reducing net revenue in the numerator', correct: false },
       ],
-      explanation: 'If RPU drops but both components (order count and AOV) are flat, the ratio arithmetic is broken. The most likely cause is a denominator inflation bug in the pipeline. Data quality first.',
+      explanation: 'If RPU drops but both order count and AOV are flat, the ratio arithmetic is broken — there is no legitimate business explanation. Option A (new users without spend) would inflate the denominator but would also show as a user count spike in the data. Option C (lower-value cohort) would show in AOV or order count. Option D (refunds) would show in net revenue but would not leave order count and AOV simultaneously flat. The only explanation that fits is a pipeline bug double-counting the denominator. Data quality first.',
     },
   ];
 
-  const [answers, setAnswers] = useState({});
-  const [revealed, setRevealed] = useState({});
+  const _saved03 = useMemo(function() { return loadRCAState('rf03'); }, []);
+  const [answers, setAnswers] = useState(function() { return _saved03 && _saved03.answers ? _saved03.answers : {}; });
+  const [revealed, setRevealed] = useState(function() { return _saved03 && _saved03.revealed ? _saved03.revealed : {}; });
+
+  useEffect(function() { saveRCAState('rf03', { answers: answers, revealed: revealed }); }, [answers, revealed]);
 
   function select(qi, oi) {
     if (revealed[qi]) return;
@@ -511,25 +538,29 @@ function Module_RF03({ onComplete }) {
 }
 
 // ── Module rf04: Seasonality and External Factors ───────────────────────────
-function Module_RF04({ onComplete }) {
-  const FACTORS = [
-    { text: 'Monday — lower engagement vs Friday on a consumer social app', type: 'seasonal', label: 'Day-of-week' },
-    { text: 'Thanksgiving week — US DAU spikes for recipe apps', type: 'seasonal', label: 'Holiday' },
-    { text: 'Major competitor launches a free tier matching our core features', type: 'external', label: 'Competitor' },
-    { text: 'Apple changes App Store search ranking algorithm', type: 'external', label: 'Platform' },
-    { text: 'Marketing budget cut 60% in Q4 vs Q3', type: 'external', label: 'Marketing' },
-    { text: 'January — fitness app signups spike after New Year resolutions', type: 'seasonal', label: 'Seasonal trend' },
-  ];
+const FACTORS_RF04 = [
+  { text: 'Monday — lower engagement vs Friday on a consumer social app', type: 'seasonal', label: 'Day-of-week' },
+  { text: 'Thanksgiving week — US DAU spikes for recipe apps', type: 'seasonal', label: 'Holiday' },
+  { text: 'Major competitor launches a free tier matching our core features', type: 'external', label: 'Competitor' },
+  { text: 'Apple changes App Store search ranking algorithm', type: 'external', label: 'Platform' },
+  { text: 'Marketing budget cut 60% in Q4 vs Q3', type: 'external', label: 'Marketing' },
+  { text: 'January — fitness app signups spike after New Year resolutions', type: 'seasonal', label: 'Seasonal trend' },
+];
 
-  const [selected, setSelected] = useState({});
-  const [revealed, setRevealed] = useState(false);
+function Module_RF04({ onComplete }) {
+  const _saved04 = useMemo(function() { return loadRCAState('rf04'); }, []);
+  const [factors04] = useState(function() { return _saved04 && _saved04.factors ? _saved04.factors : shuffleArr(FACTORS_RF04); });
+  const [selected, setSelected] = useState(function() { return _saved04 && _saved04.selected ? _saved04.selected : {}; });
+  const [revealed, setRevealed] = useState(function() { return _saved04 ? !!_saved04.revealed : false; });
+
+  useEffect(function() { saveRCAState('rf04', { factors: factors04, selected: selected, revealed: revealed }); }, [factors04, selected, revealed]);
 
   function assign(i, type) {
     if (revealed) return;
     setSelected(prev => ({ ...prev, [i]: type }));
   }
 
-  const allAssigned = FACTORS.every((_, i) => selected[i]);
+  const allAssigned = factors04.every((_, i) => selected[i]);
 
   return (
     <div>
@@ -546,7 +577,7 @@ function Module_RF04({ onComplete }) {
         <strong>What to do:</strong> For each factor, click Seasonal or External — ask yourself whether a calendar alone could predict this event, or whether it required something outside your control to happen.
       </div>
 
-      {FACTORS.map((f, i) => {
+      {factors04.map((f, i) => {
         const sel = selected[i];
         const correct = f.type;
         let rowBg = 'var(--surface-2)';
@@ -615,9 +646,10 @@ function Module_RF05({ onComplete }) {
   const CAMPAIGN_RETENTION = 14;
   const BASELINE_NEW_PCT = 18;
 
-  const [newUserPct, setNewUserPct] = useState(BASELINE_NEW_PCT);
-  const [mcqAnswer, setMcqAnswer] = useState(null);
-  const [mcqRevealed, setMcqRevealed] = useState(false);
+  const _saved05 = useMemo(function() { return loadRCAState('rf05'); }, []);
+  const [newUserPct, setNewUserPct] = useState(function() { return _saved05 && _saved05.newUserPct != null ? _saved05.newUserPct : BASELINE_NEW_PCT; });
+  const [mcqSel, setMcqSel] = useState(function() { return _saved05 && _saved05.mcqSel != null ? _saved05.mcqSel : null; });
+  const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved05 ? !!_saved05.mcqRevealed : false; });
 
   const existingPct = 100 - newUserPct;
   const aggregate = Math.round((existingPct / 100) * EXISTING_RETENTION + (newUserPct / 100) * CAMPAIGN_RETENTION);
@@ -629,11 +661,13 @@ function Module_RF05({ onComplete }) {
   function retToX(r) { return (r / retMax) * barWidth; }
 
   const options = [
-    { label: 'A. The product experience degraded — investigate recent product changes', correct: false },
+    { label: 'A. Retained users from the previous cohort are churning faster — investigate product quality in each market', correct: false },
     { label: 'B. The new acquisition cohort has lower baseline retention, pulling the aggregate down (mix shift)', correct: true },
-    { label: 'C. The acquisition campaign targeted the wrong geography', correct: false },
+    { label: 'C. A new geography was added to the aggregate with structurally lower retention, diluting the overall rate', correct: false },
     { label: 'D. D7 retention calculation is incorrect — check the pipeline', correct: false },
   ];
+
+  useEffect(function() { saveRCAState('rf05', { newUserPct: newUserPct, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [newUserPct, mcqSel, mcqRevealed]);
 
   const sliderInteracted = newUserPct !== BASELINE_NEW_PCT;
 
@@ -758,13 +792,13 @@ function Module_RF05({ onComplete }) {
             <MCQOption
               key={i}
               label={opt.label}
-              selected={mcqAnswer === i}
+              selected={mcqSel === i}
               correct={opt.correct}
               revealed={mcqRevealed}
-              onClick={() => !mcqRevealed && setMcqAnswer(i)}
+              onClick={() => !mcqRevealed && setMcqSel(i)}
             />
           ))}
-          {mcqAnswer !== null && !mcqRevealed && (
+          {mcqSel !== null && !mcqRevealed && (
             <button onClick={() => setMcqRevealed(true)} style={{
               marginTop: '0.5rem', padding: '0.5rem 1.1rem',
               background: 'var(--teal)', color: '#fff', border: 'none',
@@ -775,8 +809,8 @@ function Module_RF05({ onComplete }) {
             <div>
               <div style={{
                 marginTop: '0.5rem', padding: '0.65rem 0.85rem',
-                background: options[mcqAnswer]?.correct ? 'var(--teal-bg)' : 'var(--red-bg)',
-                border: '1px solid ' + (options[mcqAnswer]?.correct ? 'var(--teal-border)' : 'var(--red-border)'),
+                background: options[mcqSel]?.correct ? 'var(--teal-bg)' : 'var(--red-bg)',
+                border: '1px solid ' + (options[mcqSel]?.correct ? 'var(--teal-border)' : 'var(--red-border)'),
                 borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5,
               }}>
                 When you run a large acquisition campaign, you add a wave of users who have not yet proven they will retain. The aggregate D7 retention drops not because existing users retained less, but because the mix shifted toward a lower-retaining cohort. Always segment by acquisition cohort before concluding there is a product problem.
@@ -799,7 +833,56 @@ function Module_RF05({ onComplete }) {
   );
 }
 
-// ── Module rf06: From Diagnosis to Recommendation ──────────────────────────
+/// ── Module rf06: From Diagnosis to Recommendation ──────────────────────────
+
+const BLUF_FIELDS_RF06 = [
+  {
+    field: 'Primary cause is',
+    options: [
+      { label: 'iOS users are less engaged following our recent product changes — investigate all Nov release changes', correct: false },
+      { label: 'The Nov 3rd push notification permission prompt change — opt-in rate dropped 27pp (61%→34%), confirmed by segment analysis showing 22pp lower D7 retention for non-opted-in users', correct: true },
+      { label: 'An unidentified iOS release change caused a 6pp D7 retention drop across all users', correct: false },
+    ],
+    explanation: 'A BLUF cause statement names the specific mechanism, not just the symptom. The correct answer identifies the exact change, the exact metric impact on opt-in rate, and the confirmation method. "Something changed" is a symptom description, not a root cause.',
+  },
+  {
+    field: 'Confidence level',
+    options: [
+      { label: 'Low — more investigation needed before conclusions can be drawn', correct: false },
+      { label: 'High — segment analysis directly confirms the retention gap correlates with opt-in status, and the timing aligns exactly with the Nov 3rd deploy', correct: true },
+      { label: 'Medium — correlation is clear but causation requires a prospective A/B test to confirm', correct: false },
+    ],
+    explanation: 'When direct segment evidence aligns with timing evidence, confidence is high. "Medium" is for circumstantial evidence. A/B testing is for measuring effects prospectively — not for confirming a past root cause that already has segment-level confirmation.',
+  },
+  {
+    field: 'Business impact',
+    options: [
+      { label: 'Significant — a large number of users are experiencing degraded retention', correct: false },
+      { label: 'Approximately 2.1M iOS users affected; non-opted-in users show 22pp lower D7 retention (10% vs 32%)', correct: true },
+      { label: 'D7 retention dropped 6pp overall — from 38% to 32%', correct: false },
+    ],
+    explanation: 'Business impact must be quantified. "Significant" is not a number. Option C gives the aggregate drop but not the causal segment breakdown. The correct answer gives both the affected population size and the mechanism — the two pieces a decision-maker needs.',
+  },
+  {
+    field: 'Recommended action',
+    options: [
+      { label: 'Investigate why iOS users are disabling push notifications and address the underlying cause', correct: false },
+      { label: 'Revert notification prompt to control copy by Nov 7th (iOS team owner); design a softer permission request flow for Q1 A/B test', correct: true },
+      { label: 'Pause all iOS feature releases until retention recovers to baseline', correct: false },
+    ],
+    explanation: 'A recommendation must be specific (what), time-bound (by when), and owned (by whom). "Investigate" is analysis, not a recommendation — the cause is already confirmed. Pausing all iOS releases is disproportionate to a single prompt copy change.',
+  },
+  {
+    field: 'Open risk',
+    options: [
+      { label: 'None — the cause is confirmed and the fix is targeted', correct: false },
+      { label: 'If the same prompt ships to Android in the upcoming release, the same opt-in drop may occur before the fix is validated', correct: true },
+      { label: 'Users may permanently churn due to the retention degradation over the past week', correct: false },
+    ],
+    explanation: 'An open risk is something that could worsen the situation or invalidate your conclusion despite the fix. "None" is always overconfident. The Android risk is specific and immediately actionable — block the prompt from the Android release. Churn risk is real but not specific to the fix decision.',
+  },
+];
+
 function Module_RF06({ onComplete }) {
   const STEPS = [
     { id: 'what',    label: '1. What dropped',        example: 'D7 retention dropped 6pp (38% → 32%) in the week of Nov 4th, affecting iOS users only.' },
@@ -809,8 +892,13 @@ function Module_RF06({ onComplete }) {
     { id: 'monitor', label: '5. Ongoing monitoring',   example: 'Weekly alert if push opt-in rate drops >5pp from baseline. Add to the iOS release checklist: verify notification opt-in rate 48h post-release.' },
   ];
 
-  const [current, setCurrent] = useState(0);
-  const [seen, setSeen] = useState(new Set());
+  const _saved06 = useMemo(function() { return loadRCAState('rf06'); }, []);
+  const [current, setCurrent] = useState(function() { return _saved06 && _saved06.current != null ? _saved06.current : 0; });
+  const [seen, setSeen] = useState(function() { return new Set(_saved06 && _saved06.seen ? _saved06.seen : []); });
+  const [blufAnswers, setBlufAnswers] = useState(function() { return _saved06 && _saved06.blufAnswers ? _saved06.blufAnswers : {}; });
+  const [blufRevealed, setBlufRevealed] = useState(function() { return _saved06 && _saved06.blufRevealed ? _saved06.blufRevealed : {}; });
+
+  useEffect(function() { saveRCAState('rf06', { current: current, seen: Array.from(seen), blufAnswers: blufAnswers, blufRevealed: blufRevealed }); }, [current, seen, blufAnswers, blufRevealed]);
 
   function advance() {
     setSeen(prev => new Set([...prev, current]));
@@ -896,7 +984,77 @@ function Module_RF06({ onComplete }) {
           <InsightBox>
             Steps 4 and 5 are what separate junior analysts from senior ones. Anyone can find the root cause. The senior move is pre-committing to a success metric (step 4) — so you know if the fix worked — and adding monitoring (step 5) — so the problem cannot silently recur without being caught.
           </InsightBox>
-          <NextBtn onClick={onComplete} label="Complete module →" />
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+              BLUF Practice — Write the conclusion
+            </div>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '0.6rem' }}>
+              BLUF (Bottom Line Up Front) is how senior analysts close an RCA — a single structured paragraph that gives a decision-maker everything they need. Using the iOS scenario above, select the correct phrasing for each of the five fields.
+            </p>
+            <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '1rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+              <strong>What to do:</strong> Click the option that a senior analyst would write for each field — wrong options represent common framing mistakes.
+            </div>
+
+            {BLUF_FIELDS_RF06.map(function(field, fi) {
+              var ans = blufAnswers[fi];
+              var isRevealed = !!blufRevealed[fi];
+              return (
+                <div key={fi} style={{ marginBottom: '1rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.9rem 1rem' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.55rem' }}>
+                    {field.field}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    {field.options.map(function(opt, oi) {
+                      var isSelected = ans === oi;
+                      var isCorrect = opt.correct;
+                      var bg = 'var(--surface)';
+                      var border = 'var(--border)';
+                      var color = 'var(--text)';
+                      if (isRevealed && isSelected && isCorrect) { bg = 'var(--teal-bg)'; border = 'var(--teal-border)'; color = 'var(--teal)'; }
+                      else if (isRevealed && isSelected && !isCorrect) { bg = 'var(--red-bg)'; border = 'var(--red-border)'; color = 'var(--red)'; }
+                      else if (isRevealed && !isSelected && isCorrect) { bg = 'var(--teal-bg)'; border = 'var(--teal-border)'; color = 'var(--teal)'; }
+                      return (
+                        <button
+                          key={oi}
+                          onClick={function() {
+                            if (isRevealed) return;
+                            setBlufAnswers(function(prev) { var n = Object.assign({}, prev); n[fi] = oi; return n; });
+                            setBlufRevealed(function(prev) { var n = Object.assign({}, prev); n[fi] = true; return n; });
+                          }}
+                          style={{
+                            textAlign: 'left', width: '100%', padding: '0.6rem 0.8rem',
+                            background: bg, border: '1.5px solid ' + border,
+                            borderRadius: 'var(--radius-sm)', color: color,
+                            fontSize: '0.84rem', lineHeight: 1.5,
+                            cursor: isRevealed ? 'default' : 'pointer',
+                            transition: 'all 0.1s',
+                            fontWeight: (isRevealed && isCorrect) ? 600 : 400,
+                          }}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {isRevealed && (
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.55, marginTop: '0.65rem', fontStyle: 'italic' }}>
+                      {field.explanation}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {Object.keys(blufAnswers).length >= BLUF_FIELDS_RF06.length && (
+              <div>
+                <InsightBox>
+                  The BLUF template — cause, confidence, impact, action, open risk — forces completeness. Most RCAs end at "we found the bug." BLUF adds the business translation and the forward commitment. That is what makes an RCA actionable rather than just documented.
+                </InsightBox>
+                <NextBtn onClick={onComplete} label="Complete module →" />
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -987,7 +1145,7 @@ const RF07_QUESTIONS = [
     id: 'q1',
     prompt: 'DAU fell 15%. Your metric tree shows: New users -2%, Retained users -18%, Resurrected users -5%. Where do you focus first?',
     options: [
-      'New users — any new-user drop signals top-of-funnel acquisition problems',
+      'New users — a new-user drop compounds over time as each cohort feeds future retained users',
       'Retained users — the largest absolute contributor to the drop',
       'Resurrected users — re-engagement is cheapest to fix',
       'All three equally — you cannot prioritize without more data',
@@ -1025,9 +1183,12 @@ const RF07_QUESTIONS = [
 const RF07_HIGHLIGHT = { q1: 'ret', q2: 'dayn', q3: null };
 
 function Module_RF07({ onComplete }) {
-  const [qIdx, setQIdx] = useState(0);
-  const [selections, setSelections] = useState({});
-  const [revealed, setRevealed] = useState({});
+  const _saved07 = useMemo(function() { return loadRCAState('rf07'); }, []);
+  const [qIdx, setQIdx] = useState(function() { return _saved07 && _saved07.qIdx != null ? _saved07.qIdx : 0; });
+  const [selections, setSelections] = useState(function() { return _saved07 && _saved07.selections ? _saved07.selections : {}; });
+  const [revealed, setRevealed] = useState(function() { return _saved07 && _saved07.revealed ? _saved07.revealed : {}; });
+
+  useEffect(function() { saveRCAState('rf07', { qIdx: qIdx, selections: selections, revealed: revealed }); }, [qIdx, selections, revealed]);
 
   const currentQ = RF07_QUESTIONS[qIdx];
   const currentSelected = selections[currentQ.id] || null;
@@ -1219,17 +1380,20 @@ function Module_RF08({ onComplete }) {
     options: [
       'Join events to user profiles to identify affected user segments',
       'Time-series the raw event count by day to confirm the drop and identify when it started',
-      'Compare conversion rates across experiment variants to isolate the cause',
+      'Segment the metric by new vs returning users to find which cohort is driving the change',
       'Pull funnel drop-off rates at each step for the affected event',
     ],
     correct: 1,
     explanation: 'Time-series the raw event count by day is always first. It confirms the drop is real (not a dashboard filter issue), shows when it started, and reveals whether it is a step change or a gradual drift — all before you touch more complex joins.',
   };
 
-  const [step, setStep] = useState(0);
-  const [ranSteps, setRanSteps] = useState({});
-  const [mcqSel, setMcqSel] = useState(null);
-  const [mcqRevealed, setMcqRevealed] = useState(false);
+  const _saved08 = useMemo(function() { return loadRCAState('rf08'); }, []);
+  const [step, setStep] = useState(function() { return _saved08 && _saved08.step != null ? _saved08.step : 0; });
+  const [ranSteps, setRanSteps] = useState(function() { return _saved08 && _saved08.ranSteps ? _saved08.ranSteps : {}; });
+  const [mcqSel, setMcqSel] = useState(function() { return _saved08 && _saved08.mcqSel != null ? _saved08.mcqSel : null; });
+  const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved08 ? !!_saved08.mcqRevealed : false; });
+
+  useEffect(function() { saveRCAState('rf08', { step: step, ranSteps: ranSteps, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [step, ranSteps, mcqSel, mcqRevealed]);
 
   const allStepsRan = STEPS.every((_, i) => ranSteps[i]);
 
@@ -1383,9 +1547,12 @@ function Module_RF09({ onComplete }) {
     explanation: 'When the current drop matches last year\'s drop in the same week, the pattern is almost certainly seasonal. The correct response is to confirm YoY alignment, set a seasonality-adjusted baseline, and close the investigation — not to open a bug or launch an engineering investigation.',
   };
 
-  const [showYoY, setShowYoY] = useState(false);
-  const [mcqSel, setMcqSel] = useState(null);
-  const [mcqRevealed, setMcqRevealed] = useState(false);
+  const _saved09 = useMemo(function() { return loadRCAState('rf09'); }, []);
+  const [showYoY, setShowYoY] = useState(function() { return _saved09 ? !!_saved09.showYoY : false; });
+  const [mcqSel, setMcqSel] = useState(function() { return _saved09 && _saved09.mcqSel != null ? _saved09.mcqSel : null; });
+  const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved09 ? !!_saved09.mcqRevealed : false; });
+
+  useEffect(function() { saveRCAState('rf09', { showYoY: showYoY, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [showYoY, mcqSel, mcqRevealed]);
 
   // SVG chart constants
   const W = 500;
@@ -1540,6 +1707,27 @@ function Module_RF09({ onComplete }) {
 }
 
 // ── Module rf10: Data Quality First (Advanced) ─────────────────────────────
+const SYMPTOMS_RF10 = [
+  {
+    id: 'A',
+    symptom: 'iOS event count drops -40% starting Monday. Android and Web are stable. All event types on iOS are affected equally — session_start, checkout, add_to_cart all down the same proportion.',
+    correct: 'SDK change',
+    explanation: 'When one platform is uniformly affected across all event types, the instrumentation layer is broken — not a specific feature. SDK updates, library version changes, or OS-level permission changes cause exactly this pattern.',
+  },
+  {
+    id: 'B',
+    symptom: 'All platforms show normal event volumes for every event type except checkout_complete, which dropped 90% on Wednesday. session_start, add_to_cart, product_view are all normal.',
+    correct: 'Logging bug',
+    explanation: 'When a single event type drops across all platforms while all others are healthy, someone broke the specific event\'s instrumentation — a parameter rename, a missing trigger condition, or a typo in the event name.',
+  },
+  {
+    id: 'C',
+    symptom: 'All platforms affected, all event types dropped simultaneously at 3:14 AM. Raw table row counts are near zero from 3:14 AM onward. Downstream dashboards show flatlines.',
+    correct: 'Pipeline failure',
+    explanation: 'A simultaneous drop across all platforms and all events, with near-zero raw table rows, is a data engineering failure — an ingestion job, ETL pipeline, or Kafka consumer stopped processing. No product or SDK change produces this pattern.',
+  },
+];
+
 function Module_RF10({ onComplete }) {
   const DIAGNOSES = ['SDK change', 'Logging bug', 'Pipeline failure'];
   const DIAGNOSIS_COLORS = {
@@ -1547,27 +1735,6 @@ function Module_RF10({ onComplete }) {
     'Logging bug': { bg: 'var(--accent-bg)', border: 'var(--accent-border)', text: 'var(--accent)' },
     'Pipeline failure': { bg: 'var(--red-bg)', border: 'var(--red-border)', text: 'var(--red)' },
   };
-
-  const SYMPTOMS = [
-    {
-      id: 'A',
-      symptom: 'iOS event count drops -40% starting Monday. Android and Web are stable. All event types on iOS are affected equally — session_start, checkout, add_to_cart all down the same proportion.',
-      correct: 'SDK change',
-      explanation: 'When one platform is uniformly affected across all event types, the instrumentation layer is broken — not a specific feature. SDK updates, library version changes, or OS-level permission changes cause exactly this pattern.',
-    },
-    {
-      id: 'B',
-      symptom: 'All platforms show normal event volumes for every event type except checkout_complete, which dropped 90% on Wednesday. session_start, add_to_cart, product_view are all normal.',
-      correct: 'Logging bug',
-      explanation: 'When a single event type drops across all platforms while all others are healthy, someone broke the specific event\'s instrumentation — a parameter rename, a missing trigger condition, or a typo in the event name.',
-    },
-    {
-      id: 'C',
-      symptom: 'All platforms affected, all event types dropped simultaneously at 3:14 AM. Raw table row counts are near zero from 3:14 AM onward. Downstream dashboards show flatlines.',
-      correct: 'Pipeline failure',
-      explanation: 'A simultaneous drop across all platforms and all events, with near-zero raw table rows, is a data engineering failure — an ingestion job, ETL pipeline, or Kafka consumer stopped processing. No product or SDK change produces this pattern.',
-    },
-  ];
 
   const RF10_MCQ = {
     question: 'Why should data quality be checked before product hypotheses in an RCA?',
@@ -1581,13 +1748,17 @@ function Module_RF10({ onComplete }) {
     explanation: 'Data quality checks take minutes and are the most frequent cause of false RCA alarms. SDK check logs, pipeline run history, and event counts by platform are fast queries. If you skip to product hypotheses first, you risk pulling engineers into a multi-day investigation for a 5-minute logging fix.',
   };
 
-  const [selections, setSelections] = useState({});
-  const [revealed, setRevealed] = useState({});
-  const [mcqSel, setMcqSel] = useState(null);
-  const [mcqRevealed, setMcqRevealed] = useState(false);
+  const _saved10 = useMemo(function() { return loadRCAState('rf10'); }, []);
+  const [symptoms10] = useState(function() { return _saved10 && _saved10.symptoms ? _saved10.symptoms : shuffleArr(SYMPTOMS_RF10); });
+  const [selections, setSelections] = useState(function() { return _saved10 && _saved10.selections ? _saved10.selections : {}; });
+  const [revealed, setRevealed] = useState(function() { return _saved10 && _saved10.revealed ? _saved10.revealed : {}; });
+  const [mcqSel, setMcqSel] = useState(function() { return _saved10 && _saved10.mcqSel != null ? _saved10.mcqSel : null; });
+  const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved10 ? !!_saved10.mcqRevealed : false; });
 
-  const allCorrect = SYMPTOMS.every(function(s) { return revealed[s.id] && selections[s.id] === s.correct; });
-  const allRevealed = SYMPTOMS.every(function(s) { return revealed[s.id]; });
+  useEffect(function() { saveRCAState('rf10', { symptoms: symptoms10, selections: selections, revealed: revealed, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [symptoms10, selections, revealed, mcqSel, mcqRevealed]);
+
+  const allCorrect = symptoms10.every(function(s) { return revealed[s.id] && selections[s.id] === s.correct; });
+  const allRevealed = symptoms10.every(function(s) { return revealed[s.id]; });
 
   function selectDiagnosis(symptomId, diagnosis) {
     if (revealed[symptomId]) return;
@@ -1619,7 +1790,7 @@ function Module_RF10({ onComplete }) {
         <strong>What to do:</strong> For each symptom pattern, click the diagnosis that fits — an explanation reveals after your selection.
       </div>
 
-      {SYMPTOMS.map(function(s) {
+      {symptoms10.map(function(s) {
         const sel = selections[s.id];
         const isRevealed = !!revealed[s.id];
         const isCorrect = sel === s.correct;
@@ -1713,6 +1884,39 @@ function Module_RF10({ onComplete }) {
 }
 
 // ── Module rf11: External Factor Identification ────────────────────────────
+const EVENTS_RF11 = [
+  {
+    id: 0,
+    text: 'DAU drops every Sunday vs Saturday consistently across 12 weeks',
+    correct: 'Seasonal',
+    explanation: 'Predictable, repeating calendar pattern — day-of-week seasonality. No external event required.',
+  },
+  {
+    id: 1,
+    text: 'A competitor launched a feature identical to your core product last Tuesday',
+    correct: 'Competitor',
+    explanation: 'A one-off market event outside your control. Check product news and app store reviews around the launch date.',
+  },
+  {
+    id: 2,
+    text: 'App Store rejected your update last week, reducing new install volume',
+    correct: 'Platform',
+    explanation: 'A platform policy or review decision — not a product regression, not seasonal. Check your App Store Connect dashboard.',
+  },
+  {
+    id: 3,
+    text: 'Central bank raised interest rates — users in your fintech app are reducing discretionary spend',
+    correct: 'Macro',
+    explanation: 'Macroeconomic shifts affect user behavior across the whole market. No product fix exists — this requires monitoring and potentially an adjusted forecast.',
+  },
+  {
+    id: 4,
+    text: 'Revenue drops every December 25-26 on your B2B productivity tool',
+    correct: 'Seasonal',
+    explanation: 'A predictable holiday pattern. B2B tools always see drops when businesses are closed. Expected and not actionable.',
+  },
+];
+
 function Module_RF11({ onComplete }) {
   const CATEGORIES = ['Seasonal', 'Competitor', 'Platform', 'Macro'];
   const CAT_COLORS = {
@@ -1721,39 +1925,6 @@ function Module_RF11({ onComplete }) {
     'Platform':   { bg: 'var(--accent-bg)', border: 'var(--accent-border)', text: 'var(--accent)' },
     'Macro':      { bg: 'var(--red-bg)',    border: 'var(--red-border)',    text: 'var(--red)' },
   };
-
-  const EVENTS = [
-    {
-      id: 0,
-      text: 'DAU drops every Sunday vs Saturday consistently across 12 weeks',
-      correct: 'Seasonal',
-      explanation: 'Predictable, repeating calendar pattern — day-of-week seasonality. No external event required.',
-    },
-    {
-      id: 1,
-      text: 'A competitor launched a feature identical to your core product last Tuesday',
-      correct: 'Competitor',
-      explanation: 'A one-off market event outside your control. Check product news and app store reviews around the launch date.',
-    },
-    {
-      id: 2,
-      text: 'App Store rejected your update last week, reducing new install volume',
-      correct: 'Platform',
-      explanation: 'A platform policy or review decision — not a product regression, not seasonal. Check your App Store Connect dashboard.',
-    },
-    {
-      id: 3,
-      text: 'Central bank raised interest rates — users in your fintech app are reducing discretionary spend',
-      correct: 'Macro',
-      explanation: 'Macroeconomic shifts affect user behavior across the whole market. No product fix exists — this requires monitoring and potentially an adjusted forecast.',
-    },
-    {
-      id: 4,
-      text: 'Revenue drops every December 25-26 on your B2B productivity tool',
-      correct: 'Seasonal',
-      explanation: 'A predictable holiday pattern. B2B tools always see drops when businesses are closed. Expected and not actionable.',
-    },
-  ];
 
   const RF11_MCQ = {
     question: 'A major competitor launched a clone of your core feature 3 days before your A/B test result read-out. What should you do?',
@@ -1767,12 +1938,16 @@ function Module_RF11({ onComplete }) {
     explanation: 'A competitor launch during an experiment window is a confound — it affects treatment and control differently if it changes user behavior directionally. The correct response is to document it, assess whether the effect size was borderline or decisive, and flag it in the experiment writeup. Do not simply cancel or ignore it.',
   };
 
-  const [selections, setSelections] = useState({});
-  const [revealed, setRevealed] = useState({});
-  const [mcqSel, setMcqSel] = useState(null);
-  const [mcqRevealed, setMcqRevealed] = useState(false);
+  const _saved11 = useMemo(function() { return loadRCAState('rf11'); }, []);
+  const [events11] = useState(function() { return _saved11 && _saved11.events ? _saved11.events : shuffleArr(EVENTS_RF11); });
+  const [selections, setSelections] = useState(function() { return _saved11 && _saved11.selections ? _saved11.selections : {}; });
+  const [revealed, setRevealed] = useState(function() { return _saved11 && _saved11.revealed ? _saved11.revealed : {}; });
+  const [mcqSel, setMcqSel] = useState(function() { return _saved11 && _saved11.mcqSel != null ? _saved11.mcqSel : null; });
+  const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved11 ? !!_saved11.mcqRevealed : false; });
 
-  const allRevealed = EVENTS.every(function(e) { return !!revealed[e.id]; });
+  useEffect(function() { saveRCAState('rf11', { events: events11, selections: selections, revealed: revealed, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [events11, selections, revealed, mcqSel, mcqRevealed]);
+
+  const allRevealed = events11.every(function(e) { return !!revealed[e.id]; });
 
   function selectCat(id, cat) {
     if (revealed[id]) return;
@@ -1805,7 +1980,7 @@ function Module_RF11({ onComplete }) {
         <strong>What to do:</strong> For each event below, select the category that best explains it — Seasonal, Competitor, Platform, or Macro — then click Check to confirm your classification.
       </div>
 
-      {EVENTS.map(function(ev) {
+      {events11.map(function(ev) {
         const sel = selections[ev.id];
         const isRevealed = !!revealed[ev.id];
         const isCorrect = sel === ev.correct;
@@ -1958,9 +2133,12 @@ function Module_RF12({ onComplete }) {
     explanation: 'An RCA is complete when every percentage point of the delta is attributed — and when you can logically demonstrate that removing each cause would restore the metric. Stopping at the first large cause leaves hidden regressions in production and produces misleading post-mortems.',
   };
 
-  const [active, setActive] = useState({ pipeline: true, seasonal: true, regression: true });
-  const [mcqSel, setMcqSel] = useState(null);
-  const [mcqRevealed, setMcqRevealed] = useState(false);
+  const _saved12 = useMemo(function() { return loadRCAState('rf12'); }, []);
+  const [active, setActive] = useState(function() { return _saved12 && _saved12.active ? _saved12.active : { pipeline: true, seasonal: true, regression: true }; });
+  const [mcqSel, setMcqSel] = useState(function() { return _saved12 && _saved12.mcqSel != null ? _saved12.mcqSel : null; });
+  const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved12 ? !!_saved12.mcqRevealed : false; });
+
+  useEffect(function() { saveRCAState('rf12', { active: active, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [active, mcqSel, mcqRevealed]);
 
   function toggle(id) {
     setActive(function(prev) { return Object.assign({}, prev, { [id]: !prev[id] }); });

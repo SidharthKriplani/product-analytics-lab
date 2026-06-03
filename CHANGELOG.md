@@ -4,6 +4,85 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.83.0] — 2026-06-03 [FEATURE + CONTENT]
+
+### RCA Foundations — Full Jatin feedback implementation (V4.83.0)
+
+Complete implementation of all actionable feedback from Jatin's user test (June 2026).
+
+**Answer persistence (all 12 modules):** Every RCA Foundation module now saves and restores its interactive state via localStorage under `pal-rca-{id}-v1`. Navigating to another module and returning restores MCQ selections, assignment choices, slider values, query step progress, and reveal state exactly as left. Agent-implemented using `saveRCAState()` / `loadRCAState()` / `shuffleArr()` utility functions added to the runner. All `useState` initializers updated with saved fallbacks; `useEffect` added per module to save on any state change.
+
+**Item shuffling (5 modules):** The item arrays in rf01 (6 items), rf02 (6 items), rf04 (6 items), rf10 (3 items), rf11 (5 items) shuffle on first visit using Fisher-Yates. The shuffled order is persisted so the same order is restored on re-visit — preventing a reshuffle that would orphan saved answers. This breaks the "answer order mirrors concept order" issue Jatin identified.
+
+**BLUF exercise in rf06:** After the 5-step walkthrough, a new "BLUF Practice" section appears with 5 fields (cause, confidence, impact, action, open risk). Each field has 3 options — one correct, two representing common framing mistakes (vague language, wrong confidence calibration, unquantified impact, non-specific actions, "no risk" overconfidence). Auto-reveals on selection with explanation. Complete module button gated behind all 5 fields answered.
+
+**Remaining items logged:** Adaptive re-testing (IDEAS.md Tier 1 — needs ~20 new questions + adaptive logic, 2 sessions minimum) and Routing Gate new module rf13 (NEXT.md item 1b — session-ready spec).
+
+Files: `src/components/rcaFoundations/RCAFoundationsRunner.jsx`, `IDEAS.md`, `NEXT.md`, `BRAIN_TRANSFER.md`
+
+---
+
+## [4.82.0] — 2026-06-03 [CONTENT QUALITY]
+
+### RCA Foundations — Distractor quality pass + intro fix + IDEAS logging
+
+**Trigger:** Jatin user feedback (June 2026) — MCQ distractors too obviously wrong, Module 1 intro assumes RCA knowledge.
+
+Three changes:
+
+1. **rf01 intro anchor** — Prepended "RCA — Root Cause Analysis — is how analysts answer the question: 'Our key metric dropped. Why?'" + context sentence before the four-layer explanation. Addresses new users who haven't encountered the term before.
+
+2. **Distractor rewrites** — 6 sets of options replaced across 5 modules. Previous wrong options were either directly contradicted by the question premise (AOV is flat but option says "users spending less"), or too obviously wrong by common sense (competitor launch for a platform-specific SDK drop). New distractors represent plausible misconceptions that require actual analytical reasoning to dismiss:
+   - rf03 Q1: "OS permission change" and "pipeline partition filter" replace "competitor launch" and "engagement patterns"
+   - rf03 Q2: "user count inflation from campaign" and "refund volume" replace premise-contradicted options
+   - rf05: "retained users churning faster" and "new geography with lower retention" replace "product degraded" (contradicted by slider) and "wrong geography"
+   - rf07 Q1: "new users compound over time" replaces weak "top-of-funnel" framing
+   - rf08: "segment by new vs returning" replaces "compare experiment variants" (assumed an experiment)
+   - rf03 Q1+Q2 explanations updated to explain why new distractors are wrong
+
+3. **IDEAS.md** — Three new Tier 1 RCA module concepts logged from Jatin's Universal RCA Framework v4.1: Routing Gate (sudden vs gradual routing), Dominant Lever + Pruning Rule, BLUF Conclusion format.
+
+Files: `src/components/rcaFoundations/RCAFoundationsRunner.jsx`, `IDEAS.md`, `BRAIN_TRANSFER.md`, `NEXT.md`
+
+---
+
+## [4.81.0] — 2026-06-03 [CONTENT]
+
+### Forensic Batch 2 (f11–f20)
+
+10 new forensic SQL problems covering the second batch of trap types. All verified against datamart data with correct checkValues.
+
+| ID | Title | Datamart | Trap |
+|---|---|---|---|
+| f11 | Average Order Value | food_delivery | Average of averages — per-customer avg vs true AOV |
+| f12 | Total Revenue | ecomm | JOIN fanout — order_items duplication inflates SUM |
+| f13 | Seller GMV Report | marketplace | Wrong JOIN type — INNER drops zero-transaction seller |
+| f14 | Monthly Order Trends | food_delivery | strftime missing year — two Marches merged |
+| f15 | First Session Duration | gaming | ROW_NUMBER ORDER BY DESC returns last not first |
+| f16 | ARPU | gaming | NULL in AVG — COALESCE missing, denominator shrinks |
+| f17 | Level Engagement | gaming | COUNT(*) counts attempts, not unique players |
+| f18 | Campaign Reach | ecomm | UNION ALL duplicates multi-channel users |
+| f19 | On-Time Delivery Rate | food_delivery | Wrong denominator — cancelled orders in base |
+| f20 | User Activity 2024 | ecomm | WHERE after LEFT JOIN converts to INNER JOIN |
+
+SQL problem total: 140 (50E/40M/25H/15Master/20Forensic). Forensic Batch 3 (f21–f25, staff-level) is next.
+
+Files: `src/data/sqlLabProblems.js`, `BRAIN_TRANSFER.md`, `NEXT.md`
+
+---
+
+## [4.80.2] — 2026-06-03 [BUG FIX + AUDIT]
+
+### Foundations Access Fix (Committed) + Forensic checkValues Audit Closed
+
+**Foundations fix (uncommitted from previous session, now committed):** All 4 foundation open functions in `App.jsx` had residual paywall checks (`if (!m.isFree && !unlocked) → setPage('unlock')`) that were blocking anonymous users from running any foundation module even after the AUTH_REQUIRED_PAGES fix in V4.80.1. Removed. Also confirmed all foundation modules across all 4 data files have `isFree: true` — any that had `isFree: false` were updated.
+
+**Forensic checkValues audit (AUDITS #144) closed:** Audited f02, f03, f05–f08, f10 for whole-number REAL formatting issues (the bug where `ROUND()` returns `40.0` → JS `40` → String `'40'`, not `'40.0'`). All confirmed correct: f02 uses a genuine 2-decimal value (1719.87), f03/f06/f07/f08/f10 check integer columns, f05 checks string columns. No additional fixes required. Audit item marked ✅.
+
+Files: `src/App.jsx`, `src/data/expFoundationModules.js`, `src/data/metricsFoundationModules.js`, `src/data/rcaFoundationModules.js`, `src/data/statsFoundationsModules.js`, `AUDITS.md`, `BRAIN_TRANSFER.md`, `NEXT.md`
+
+---
+
 ## [4.80.1] — 2026-06-03 [BUG FIX]
 
 ### Auth Gate Corrections

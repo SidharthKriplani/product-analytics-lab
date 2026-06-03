@@ -47,6 +47,26 @@ When a user has an active session, the app redirects from the landing page to Pr
 ### FV/FA debrief sections — structured rendering [Audit #146]
 The wrong-answer showcase, sanity check, and assumption statement sections need distinct visual treatment — coloured left-border block per section, scannable labels. Currently rendered as plain paragraphs. Medium effort: either extend renderDebrief() to detect section headers (**Wrong answer**, **Sanity check**) and render them as styled blocks, or split debrief into separate schema fields and render them individually. See AUDITS.md #146.
 
+### RCA Foundations — Adaptive re-testing (Jatin feedback)
+**Gate:** Need a bank of extra questions per module (2-3 per module that has MCQs). Currently no extra question bank exists.
+
+**What it is:** After a user completes a module and has >50% wrong answers, surface 2-3 additional questions from a supplemental bank. "Learn → Practice → Check → Retry if weak."
+
+**Implementation:** (1) Add `supplementalQuestions: [...]` to each module's data or runner component — 2-3 questions beyond the current set, covering edge cases or harder variants. (2) Track per-module score in localStorage (already possible since persistence is now live). (3) After reveal: if score < 50%, show a "Try 2 more" button that surfaces the supplemental questions. (4) Module only marks complete after the supplemental round OR after a passing score.
+
+**Modules that need supplemental banks:** rf01 (assignment exercise), rf02 (decomposition selector), rf03 (2 MCQs), rf04 (classification), rf07 (3 MCQs), rf08 (SQL MCQ), rf10 (3 scenarios + MCQ), rf11 (5 events + MCQ). That's 8 modules needing 2-3 extra questions each = ~20 questions to write.
+
+**Effort:** 1 full session (write questions) + 1 session (add adaptive logic + new state). Do not combine — write questions first, review quality, then implement.
+
+### RCA Foundations — Three new module concepts (Routing Gate, Dominant Lever, BLUF)
+Source: Jatin's field feedback (June 2026) + Universal RCA Framework v4.1 doc. These three concepts are genuinely missing from PAL's RCA coverage and are interview-differentiating.
+
+**1. Routing Gate (sudden vs gradual)** — Before running any RCA, the time signature of the drop routes the entire investigation. Sudden (last 1–6 hrs) → suspect instrumentation or deploy. 2–7 days → A/B test regression or marketing change. Weeks of gradual decline → product erosion, mix shift, competitor. Cyclical → seasonality. Only one segment affected → start inside that segment's sub-tree. This is not in any current module and makes investigations dramatically more efficient. Estimated 1 module, 6–7 min, Intermediate.
+
+**2. Dominant Lever + Pruning Rule** — Decompose the metric formula first, then identify WHICH component actually moved before building the fault tree. If CVR is flat but AOV dropped 18%, the entire tree should focus on pricing, mix-shift, and discount policy — not acquisition or tech friction. Hard rule: ignore all branches unrelated to the dominant lever completely. This is the single fix for "scattered thinking," which Jatin's doc calls the primary failure mode of smart analysts. Estimated 1 module, 7–8 min, Advanced.
+
+**3. BLUF Conclusion format** — "The primary cause of the [metric] decline is [X], driven by [specific segment or event]. My confidence is [high/medium] based on [specific data signal]. Business impact: [quantified]. Recommended action: [specific, time-bound]. Open risk: [what could change this conclusion]." Analysts who use this template close the loop on RCA without rambling. Currently covered at a surface level in rf06 (From Diagnosis to Recommendation) but BLUF as a distinct template with all five fields is not practiced. Could extend rf06 or add as a new module. Estimated: extend rf06, 30 min effort.
+
 ### RCA Foundations + Metrics Foundations — content research pass
 Both foundations need content that "clicks instantly" — the kind that makes the concept obvious the first time. Current modules are correct but not memorable. Needs: (1) research pass on what practitioners say actually made concepts click for them; (2) rewrite modules with better anchors, worked examples, and contrast pairs (right vs wrong framing). Gate: research first, write second. Do not rewrite without a clear "better anchor" identified per module.
 

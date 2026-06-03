@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.80.1 | **Build:** ✓ (2.17s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.83.0 | **Build:** ✓ (1.98s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -40,7 +40,7 @@ Read these only when specifically needed — never at session open:
 
 ## Current state
 
-**17 rooms, 821 modules, 69 articles, 40 MCQ questions, 130 SQL problems (50E/40M/25H/15Master), 12 datamarts.**
+**17 rooms, 821 modules, 69 articles, 40 MCQ questions, 140 SQL problems (50E/40M/25H/15Master/10Forensic Batch1/10Forensic Batch2), 12 datamarts.**
 
 Auth: Email magic link ✅ · Google OAuth ✅ · GitHub OAuth ✅ · Cross-device sync ✅
 
@@ -49,6 +49,14 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V4.83.0** — Full Jatin feedback implementation. (1) Answer persistence: all 12 RCA Foundation modules (rf01–rf12) now save/restore state via localStorage (`pal-rca-{id}-v1`). On re-opening any module, assignments, selections, MCQ answers, and revealed states are all restored. (2) Item shuffling: ITEMS (rf01), DECOMPS (rf02), FACTORS (rf04), SYMPTOMS (rf10), EVENTS (rf11) all shuffle on first visit and persist the shuffled order. (3) BLUF exercise: rf06 now has a 5-field BLUF practice exercise after the walkthrough — user picks correct phrasing per field, explanation reveals on selection, Complete button gated behind all 5 answers. (4) Remaining items logged: adaptive re-testing (IDEAS.md Tier 1, 2-session project) and new rf13 Routing Gate module (NEXT.md item 1b) with full session-ready specs. Build ✓ 1.98s.
+
+**V4.82.0** — RCA Foundations quality pass (Jatin feedback). (1) rf01 intro: prepended 2-sentence "what is RCA" definition anchor. (2) Distractor rewrite: rf03 Q1 options C+D, rf03 Q2 options A+D, rf05 MCQ options A+C, rf07 Q1 option A, rf08 MCQ option C — all replaced with plausible misconceptions rather than obviously wrong filler. Explanations updated to distinguish correct answer from new distractors. (3) IDEAS.md: logged three new Tier 1 RCA module concepts from Jatin's v4.1 framework doc — Routing Gate, Dominant Lever + Pruning Rule, BLUF Conclusion. Build ✓ 1.99s.
+
+**V4.81.0** — Forensic Batch 2 (f11–f20) shipped. 10 new forensic problems covering: average of averages (AOV, ARPU), JOIN fanout, wrong JOIN type, strftime year missing, ROW_NUMBER wrong ORDER BY direction, NULL in AVG with COALESCE, COUNT vs COUNT(DISTINCT) granularity, UNION ALL duplicates, wrong denominator, WHERE-after-LEFT-JOIN anti-pattern. All 10 use verified checkValues. Build ✓ 2.37s.
+
+**V4.80.2** — Foundations access fix committed + forensic checkValues audit closed. All 4 foundation open functions had paywall checks removed (App.jsx); all foundation modules across all 4 data files confirmed `isFree: true`. Anonymous users can now access all Foundations content freely. Forensic checkValues audit (AUDITS #144): f02–f10 all confirmed correct — no additional fixes needed. Audit item closed as ✅.
 
 **V4.80.1** — Auth gate bug fixes. Foundations runners removed from AUTH_REQUIRED_PAGES (Foundations are open to all — top-of-funnel). Second useEffect added: signed-in users redirected from 'home' to 'progress' reactively (fixes back-button from SQL Lab showing landing page). Build ✓ 2.17s.
 
@@ -78,15 +86,13 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — Verify tier gates in production, then Forensic Batch 2 (f11–f20)
+## Next action — Forensic Batch 3 (f21–f25), or rf13 Routing Gate module
 
-**Forensic format — Batch 1 shipped (f01–f10).** Batch 2 (f11–f20) is next. Target ~25 total. Spec in SQL_LAB_PLAN.md Section 12. S-grade debrief pass (Batches 4–13) paused — forensic is the structural improvement.
+**Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 
-**3-tier monetization gate live.** Anonymous blocked from all runners + SQL Lab via AUTH_REQUIRED_PAGES useEffect in App.jsx. Free tier = isFree cases + Foundations + Easy SQL. Premium = DAI2026 code. Full business model in MONETIZATION.md. Stripe is the next monetization milestone.
+**3-tier monetization gate live + foundations fully open.** Anonymous → Foundations fully accessible (no paywall check, all isFree: true). Anonymous → practice runners → auth modal. Signed-in + DAI2026 → everything unlocked.
 
-**Landing page shipped.** Signed-out = full-screen landing (ghost analytics, stagger animation, "Sign in to analyze →" CTA). Signed-in = Progress as home. Sidebar Progress item removed.
-
-**Verify in production before next session:** sign out → try opening a case → auth modal should appear. Sign in (no code) → try Medium SQL → unlock page. Sign in with DAI2026 → everything works.
+**Landing page shipped.** Signed-out = full-screen landing. Signed-in = Progress as home.
 
 ---
 

@@ -1046,6 +1046,6 @@ Source: the FV wrong-answers documented in the S-grade debrief pass are the stro
 
 | Batch | IDs | Source traps | Status |
 |---|---|---|---|
-| 1 | f01–f10 | Integer division, NULL trap, COUNT vs COUNT DISTINCT, missing filter, wrong denominator | In progress |
-| 2 | f11–f20 | Average of averages, fanout, HAVING missing, wrong JOIN type, temporal ordering | Pending |
+| 1 | f01–f10 | Integer division, NULL trap, COUNT vs COUNT DISTINCT, missing filter, wrong denominator | ✅ Shipped V4.77.0 |
+| 2 | f11–f20 | Average of averages, JOIN fanout, wrong JOIN type, strftime year missing, ROW_NUMBER direction, NULL in AVG, granularity, UNION ALL duplicates, wrong denominator, WHERE kills LEFT JOIN | ✅ Shipped V4.81.0 |
 | 3 | f21–f25 | Staff-level: compounding errors, metric definition mismatch, survivorship bias | Pending |

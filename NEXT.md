@@ -2,7 +2,7 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V4.69.0 (2026-06-02)*
+*Last updated: V4.82.0 (2026-06-03)*
 
 ---
 
@@ -15,23 +15,19 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ## Next session
 
-**0. Verify tier gates work in production (V4.80.1)**
-Anonymous: "Explore without signing in" → Foundations should fully open. Click a practice case → auth modal. Signed-in: SQL Lab back button → Progress (not landing). Sign in with DAI2026 → all content unlocked.
+**1. Forensic Format — Batch 3 (f21–f25)**
+Batch 2 (f11–f20) shipped. Staff-level problems: compounding errors, metric definition mismatch, survivorship bias. Read SQL_LAB_PLAN.md Section 12 Batch 3 spec before building.
 
-**1. Forensic checkValues bug audit (f01–f10)**
-Audit all 10 forensic problems for whole-number REAL checkValues that need '.0' stripped. Pattern: ROUND() returning 40.0 → JS 40 → String '40', not '40.0'. Fixed f01/f04/f09. Check f02, f03, f05–f08, f10. See AUDITS.md #144.
+**1b. RCA Foundations — Routing Gate module (new, rf13)**
+Sudden vs gradual → completely different investigation paths. Not covered anywhere in current modules. See IDEAS.md for full spec. Interactive format: given a metric drop scenario + time signature, route the investigation to the correct starting layer. Estimated 1 module, Intermediate, 6–7 min.
 
-**2. Forensic Format — Batch 2 (f11–f20)**
-Batch 1 shipped. Next: average of averages, JOIN fanout, wrong JOIN type, temporal ordering, ambiguous metric definition.
+**1c. RCA Foundations — Adaptive re-testing (Jatin feedback)**
+If user scores <50% on a module, surface 2-3 supplemental questions. Requires writing ~20 questions across 8 modules FIRST (separate content session), THEN implementing the adaptive logic. Do NOT combine into one session. See IDEAS.md Tier 1 for full spec.
 
-**2. Forensic Format — Batch 2 (f11–f20)**
-Average of averages, fanout, HAVING missing, wrong JOIN, temporal ordering.
+**Note:** Answer persistence (Jatin feedback #3) is now LIVE — rf01–rf12 all save/restore state via localStorage. Item arrays in rf01/rf02/rf04/rf10/rf11 shuffle on first visit and persist the order. BLUF exercise added to rf06. These are V4.83.0.
 
-**3. S-grade debrief pass (Batches 4–13) — paused**
-Resume after forensic Batches 1–3 ship. Structural improvement takes priority over documentation additions.
-
-**3. S-Grade Upgrade Pass — Medium through Master (Batches 6–13)**
-Medium+ gets full MJ/FV/FA treatment + live trap embedding in seed data for top 30 problems.
+**2. S-grade debrief pass (Batches 4–13) — paused**
+Resume after forensic Batches 1–3 ship.
 
 **3. Confirm VITE_POSTHOG_KEY live in Vercel**
 Establish WAU baseline before Batch 1 outreach.

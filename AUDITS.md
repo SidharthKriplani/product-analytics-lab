@@ -41,8 +41,8 @@ Start here when running an audit. Add rows as new types emerge.
 
 ## Part XXX — V4.77.x Open Items (2026-06-03)
 
-### 144. ⚠️ Build Audit — Forensic checkValues float formatting (f01–f10)
-SQLite REAL values that are whole numbers (40.0, 25.0, 50.0, 3500.0) return as JS integers (40, 25, 50, 3500). The validator does `String(row[i]) === String(val)`, so checkValues using '40.0' will never match. Fixed f01 (no_show_pct), f04 (amount), f09 (premium_pct) in V4.77.1. Remaining f02–f10 checkValues should be audited before Batch 2 ships. Pattern: any REAL column value that is a whole number needs the string checkValue without '.0'.
+### 144. ✅ Build Audit — Forensic checkValues float formatting (f01–f10)
+SQLite REAL values that are whole numbers (40.0, 25.0, 50.0, 3500.0) return as JS integers (40, 25, 50, 3500). The validator does `String(row[i]) === String(val)`, so checkValues using '40.0' will never match. Fixed f01 (no_show_pct), f04 (amount), f09 (premium_pct) in V4.77.1. Audited f02–f10 in V4.80.2: all remaining checkValues confirmed correct — f02 has a true decimal (1719.87), f03/f06/f07/f08/f10 use integer columns with correct string values, f05 checks string columns only. No additional fixes required.
 
 **Files:** `src/data/sqlLabProblems.js` — forensic problems f01–f10
 
