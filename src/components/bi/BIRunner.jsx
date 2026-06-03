@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import { saveBIProgress, getBIProgress } from '../../utils/biProgress.js';
+import { saveBIProgress, getBIProgress, saveBIDraft, loadBIDraft, clearBIDraft } from '../../utils/biProgress.js';
+const BI_TEXT_KEY = 'pal-bi-text-v1';
+function loadBIText(id) { try { return JSON.parse(localStorage.getItem(BI_TEXT_KEY) || '{}')[id] || ''; } catch { return ''; } }
+function saveBIText(id, text) { try { var d = JSON.parse(localStorage.getItem(BI_TEXT_KEY) || '{}'); d[id] = text; localStorage.setItem(BI_TEXT_KEY, JSON.stringify(d)); } catch {} }
+function clearBIText(id) { try { var d = JSON.parse(localStorage.getItem(BI_TEXT_KEY) || '{}'); delete d[id]; localStorage.setItem(BI_TEXT_KEY, JSON.stringify(d)); } catch {} }
 import { track } from '../../utils/analytics.js';
 import { biCases } from '../../data/biCases.js';
 import { ChartScenario } from './ChartScenario.jsx';
@@ -189,9 +193,13 @@ function SituationScreen({ caseData, onBegin }) {
 
 // Screen 2: Work
 function WorkScreen({ caseData, onReveal }) {
-  const [text, setText] = useState('');
+  const [text, setText] = useState(() => loadBIText(caseData.id));
   const [revealHovered, setRevealHovered] = useState(false);
   const canReveal = text.trim().length >= 50;
+
+  useEffect(() => { saveBIText(caseData.id, text); }, [text]); // eslint-disable-line
+
+  function handleReveal() { clearBIText(caseData.id); onReveal(); }
 
   return (
     <div style={{ maxWidth: '820px', margin: '0 auto', padding: '2rem 1.5rem' }}>
@@ -232,7 +240,7 @@ function WorkScreen({ caseData, onReveal }) {
       </div>
 
       <button
-        onClick={() => canReveal && onReveal(text)}
+        onClick={() => canReveal && handleReveal()}
         disabled={!canReveal}
         onMouseEnter={() => setRevealHovered(true)}
         onMouseLeave={() => setRevealHovered(false)}
@@ -629,7 +637,12 @@ function RevealScreen({ caseData, onBack, onNext, unlocked, onNavigate }) {
 export function BIRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
   const caseData = biCases.find(c => c.id === caseId);
   const isChartFormat = caseData?.format === 'chart';
-  const [screen, setScreen] = useState(isChartFormat ? 'chart' : 'situation');
+  const _biDraft = loadBIDraft(caseData.id);
+  const [screen, setScreen] = useState(_biDraft?.screen || (isChartFormat ? 'chart' : 'situation'));
+
+  useEffect(() => {
+    if (screen !== 'reveal') saveBIDraft(caseData.id, { screen });
+  }, [screen]); // eslint-disable-line
 
   function handleBegin() {
     setScreen(isChartFormat ? 'chart' : 'work');
@@ -637,11 +650,13 @@ export function BIRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
   }
 
   function handleReveal() {
+    clearBIDraft(caseData.id);
     setScreen('reveal');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function handleChartRate(confidence) {
+    clearBIDraft(caseData.id);
     saveBIProgress(caseData.id, confidence);
     track('case_completed', { room: 'bi', id: caseData.id, rating: confidence, format: 'chart' });
   }

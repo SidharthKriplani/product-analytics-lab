@@ -16,6 +16,11 @@ import { track } from '../../utils/analytics.js';
 import { getScoreRank } from '../../utils/scoring.js';
 
 const NOTES_KEY = 'pal-notes-v1';
+const SCENARIO_DRAFT_KEY = 'pal-scenario-draft-v1';
+function readScenarioDrafts() { try { return JSON.parse(localStorage.getItem(SCENARIO_DRAFT_KEY) || '{}'); } catch { return {}; } }
+function saveScenarioDraft(id, state) { try { var d = readScenarioDrafts(); d[id] = state; localStorage.setItem(SCENARIO_DRAFT_KEY, JSON.stringify(d)); } catch {} }
+function loadScenarioDraft(id) { return readScenarioDrafts()[id] || null; }
+function clearScenarioDraft(id) { try { var d = readScenarioDrafts(); delete d[id]; localStorage.setItem(SCENARIO_DRAFT_KEY, JSON.stringify(d)); } catch {} }
 
 function getNotes(room, caseId) {
   try {
@@ -68,14 +73,19 @@ const TABS = [
 export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, onNavigate }) {
   const scenario = scenarios.find(s => s.id === caseId);
   const pairedDesignId = scenario ? (designScenarios.find(d => d.pairedReviewScenarioId === caseId)?.id || null) : null;
+  const _draft = loadScenarioDraft(scenario.id);
   const [leftTab, setLeftTab] = useState('Context');
-  const [selectedDecision, setSelectedDecision] = useState(null);
-  const [checkedFlags, setCheckedFlags] = useState([]);
+  const [selectedDecision, setSelectedDecision] = useState(_draft?.selectedDecision || null);
+  const [checkedFlags, setCheckedFlags] = useState(_draft?.checkedFlags || []);
   const [submitted, setSubmitted] = useState(false);
   const [showDebrief, setShowDebrief] = useState(false);
   const [answerFeedback, setAnswerFeedback] = useState('');
   const [note, setNote] = useState(() => getNotes('review', scenario.id));
   useEffect(() => { setNote(getNotes('review', scenario.id)); }, [scenario.id]);
+
+  useEffect(() => {
+    if (!submitted) saveScenarioDraft(scenario.id, { selectedDecision, checkedFlags });
+  }, [selectedDecision, checkedFlags]); // eslint-disable-line
 
   function handleFlagToggle(flagId) {
     setCheckedFlags(prev =>
@@ -85,6 +95,7 @@ export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, 
 
   function handleSubmit() {
     if (!selectedDecision) return;
+    clearScenarioDraft(scenario.id);
     const decision = scenario.decisions.find(d => d.id === selectedDecision);
     const isCorrect = getScoreRank(decision.score) >= 3;
     setAnswerFeedback(isCorrect ? 'pal-success-ring' : 'pal-shake');
@@ -99,6 +110,7 @@ export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, 
   }
 
   function handleReplay() {
+    clearScenarioDraft(scenario.id);
     setSelectedDecision(null);
     setCheckedFlags([]);
     setSubmitted(false);

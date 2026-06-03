@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { saveSTFProgress, getSTFProgress } from '../../utils/spotTheFlawProgress.js';
+import { saveSTFProgress, getSTFProgress, saveSTFDraft, loadSTFDraft, clearSTFDraft } from '../../utils/spotTheFlawProgress.js';
 import { track } from '../../utils/analytics.js';
 import { spotTheFlawCases } from '../../data/spotTheFlawCases.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
@@ -37,12 +37,16 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
 
   const [step, setStep]           = useState(existing?.rating ? STEP_REVEAL : STEP_SETUP);
   const [hintsOpen, setHintsOpen] = useState(false);
-  const [answer, setAnswer]       = useState('');
+  const [answer, setAnswer]       = useState(() => loadSTFDraft(caseData.id)?.answer || '');
   const [rating, setRating]       = useState(existing?.rating || null);
   const [userNote, setUserNote]   = useState(() => loadNote(caseData.id));
   const [noteSaved, setNoteSaved] = useState(false);
 
   useEffect(() => { setUserNote(loadNote(caseData.id)); setNoteSaved(false); }, [caseData.id]);
+
+  useEffect(() => {
+    if (step === STEP_SETUP) saveSTFDraft(caseData.id, { answer });
+  }, [answer]); // eslint-disable-line
 
   const diffCfg = DIFF_CFG[caseData.difficulty] || DIFF_CFG.analyst;
 
@@ -50,12 +54,14 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
   const setupParagraphs = caseData.setup.split('\n\n').filter(Boolean);
 
   function handleRate(r) {
+    clearSTFDraft(caseData.id);
     setRating(r);
     saveSTFProgress(caseData.id, r);
     track('case_completed', { room: 'spot-the-flaw', id: caseData.id, rating: r });
   }
 
   function handleRetry() {
+    clearSTFDraft(caseData.id);
     setStep(STEP_SETUP);
     setHintsOpen(false);
     setAnswer('');

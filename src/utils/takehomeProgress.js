@@ -28,3 +28,10 @@ export function clearTakehomeProgress(caseId) {
   delete d[caseId];
   localStorage.setItem(KEY, JSON.stringify(d));
 }
+
+// ── Mid-case draft ──
+var THDRAFT_KEY = 'pal-takehome-draft-v1';
+function readTHDrafts() { try { return JSON.parse(localStorage.getItem(THDRAFT_KEY) || '{}'); } catch { return {}; } }
+export function saveTakehomeDraft(id, state) { try { var d = readTHDrafts(); d[id] = state; localStorage.setItem(THDRAFT_KEY, JSON.stringify(d)); } catch {} }
+export function loadTakehomeDraft(id) { return readTHDrafts()[id] || null; }
+export function clearTakehomeDraft(id) { try { var d = readTHDrafts(); delete d[id]; localStorage.setItem(THDRAFT_KEY, JSON.stringify(d)); } catch {} }

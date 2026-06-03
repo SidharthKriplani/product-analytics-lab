@@ -27,3 +27,10 @@ export function clearSTFProgress(caseId) {
   delete d[caseId];
   localStorage.setItem(KEY, JSON.stringify(d));
 }
+
+// ── Mid-case draft ──
+var STFDRAFT_KEY = 'pal-stf-draft-v1';
+function readSTFDrafts() { try { return JSON.parse(localStorage.getItem(STFDRAFT_KEY) || '{}'); } catch { return {}; } }
+export function saveSTFDraft(id, state) { try { var d = readSTFDrafts(); d[id] = state; localStorage.setItem(STFDRAFT_KEY, JSON.stringify(d)); } catch {} }
+export function loadSTFDraft(id) { return readSTFDrafts()[id] || null; }
+export function clearSTFDraft(id) { try { var d = readSTFDrafts(); delete d[id]; localStorage.setItem(STFDRAFT_KEY, JSON.stringify(d)); } catch {} }

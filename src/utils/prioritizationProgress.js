@@ -23,3 +23,10 @@ export function clearPrioritizationProgress(scenarioId) {
   delete data[scenarioId];
   localStorage.setItem(KEY, JSON.stringify(data));
 }
+
+// ── Mid-case draft ──
+var PDRAFT_KEY = 'pal-prioritization-draft-v1';
+function readPDrafts() { try { return JSON.parse(localStorage.getItem(PDRAFT_KEY) || '{}'); } catch { return {}; } }
+export function savePrioritizationDraft(id, state) { try { var d = readPDrafts(); d[id] = state; localStorage.setItem(PDRAFT_KEY, JSON.stringify(d)); } catch {} }
+export function loadPrioritizationDraft(id) { return readPDrafts()[id] || null; }
+export function clearPrioritizationDraft(id) { try { var d = readPDrafts(); delete d[id]; localStorage.setItem(PDRAFT_KEY, JSON.stringify(d)); } catch {} }

@@ -43,3 +43,10 @@ export function clearBehavioralProgress(questionId) {
   delete data[questionId];
   localStorage.setItem(KEY, JSON.stringify(data));
 }
+
+// ── Mid-case draft ──
+var BDRAFT_KEY = 'pal-behavioral-draft-v1';
+function readBDrafts() { try { return JSON.parse(localStorage.getItem(BDRAFT_KEY) || '{}'); } catch { return {}; } }
+export function saveBehavioralDraft(id, state) { try { var d = readBDrafts(); d[id] = state; localStorage.setItem(BDRAFT_KEY, JSON.stringify(d)); } catch {} }
+export function loadBehavioralDraft(id) { return readBDrafts()[id] || null; }
+export function clearBehavioralDraft(id) { try { var d = readBDrafts(); delete d[id]; localStorage.setItem(BDRAFT_KEY, JSON.stringify(d)); } catch {} }

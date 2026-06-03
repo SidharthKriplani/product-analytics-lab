@@ -50,6 +50,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V4.92.0** — Full statefulness pass complete. All 9 remaining runners now persist mid-case state. (1) Behavioral/Estimation/Prioritization: response text drafts saved on every keystroke, restored on mount from draft if no prior rating, cleared on rate/retry. (2) SpotTheFlaw: answer text draft saved while in STEP_SETUP, cleared on rate/retry. (3) ScenarioRunner: selectedDecision + checkedFlags persisted inline (uses shared progress.js — draft helpers added inline), cleared on submit/replay. (4) TakehomeRunner: phase + writeup + checkedRubric persisted, restored on mount, cleared on rate. (5) ChallengesRunner: all 5 state vars (screen, qIndex, answers, revealed, checkedPoints) persisted — Sets serialized to arrays for JSON, restored as Sets on mount, cleared on rate. (6) BIRunner/InstrumentationRunner: WorkScreen text persisted per-case with dedicated text key; outer screen state restored from draft, cleared on reveal. Build ✓ 2.05s.
+
 **V4.91.0** — Audit #79 complete. Room header icon consistency. 6 rooms upgraded to the 36×36 colored box + Icon pattern: RCABrowser (search/yellow), MetricsBrowser (bar-chart/green), BehavioralBrowser (mic/purple + Icon import added), CasesBrowser (clipboard/purple), ScenarioBrowser (flask/accent + Icon import added + "Review Room" label added), CodeBrowser (target/yellow + Icon import added). Build ✓ 2.04s.
 
 **V4.90.0** — S-grade debrief pass COMPLETE. All 130 non-forensic SQL Lab problems (50E/40M/25H/15M) upgraded with FV (Forensic Value — wrong query + wrong output + why plausible) and FA (Falsifiability — sanity check cross-query) in Batches 4–13. SQL_UPGRADE_PASS.md complete, SQL_LAB_PLAN.md Section 11 marked ✅. Standout FV=5 problems: e54 (IS NOT NULL vs != NULL returns zero rows), e62 (COUNT vs SUM on binary flag → 100% conversion rate), m01 (missing PARTITION BY in LAG → cross-account contamination), m16 (missing PARTITION BY → global running total), m21 (DESC vs ASC in NTILE inverts quartiles silently), master07 (NOT IN with NULL subquery returns 0 rows — complete silent failure). Build ✓ 1.67s.
@@ -102,7 +104,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — Interview Simulator expansion (gated on PostHog data — check first). If PostHog not yet live, move to spokenSummary backfill across remaining RCA cases.
+## Next action — Statefulness complete across all runners. Next: Interview Simulator expansion (gated on PostHog data) OR spokenSummary backfill for remaining RCA + Business cases (RCA05–RCA26 minus already-done, all Business cases).
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

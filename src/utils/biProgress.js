@@ -27,3 +27,10 @@ export function clearBIProgress(caseId) {
   delete d[caseId];
   localStorage.setItem(KEY, JSON.stringify(d));
 }
+
+// ── Mid-case draft ──
+var BIDRAFT_KEY = 'pal-bi-draft-v1';
+function readBIDrafts() { try { return JSON.parse(localStorage.getItem(BIDRAFT_KEY) || '{}'); } catch { return {}; } }
+export function saveBIDraft(id, state) { try { var d = readBIDrafts(); d[id] = state; localStorage.setItem(BIDRAFT_KEY, JSON.stringify(d)); } catch {} }
+export function loadBIDraft(id) { return readBIDrafts()[id] || null; }
+export function clearBIDraft(id) { try { var d = readBIDrafts(); delete d[id]; localStorage.setItem(BIDRAFT_KEY, JSON.stringify(d)); } catch {} }

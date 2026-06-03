@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { saveTakehomeProgress } from '../../utils/takehomeProgress.js';
+import { saveTakehomeProgress, saveTakehomeDraft, loadTakehomeDraft, clearTakehomeDraft } from '../../utils/takehomeProgress.js';
 import { track } from '../../utils/analytics.js';
 import { takehomeCases } from '../../data/takehomeCases.js';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
@@ -40,18 +40,23 @@ function countWords(text) {
 
 export function TakehomeRunner({ caseId, onBack, onNext, unlocked }) {
   const caseData = takehomeCases.find(c => c.id === caseId);
-  const [phase, setPhase] = useState('brief');
+  const _thdraft = loadTakehomeDraft(caseData.id);
+  const [phase, setPhase] = useState(_thdraft?.phase || 'brief');
   const [timeLeft, setTimeLeft] = useState(caseData.durationMin * 60);
   const [timerActive, setTimerActive] = useState(false);
   const [startTime, setStartTime] = useState(null);
-  const [writeup, setWriteup] = useState('');
-  const [checkedRubric, setCheckedRubric] = useState({});
+  const [writeup, setWriteup] = useState(_thdraft?.writeup || '');
+  const [checkedRubric, setCheckedRubric] = useState(_thdraft?.checkedRubric || {});
   const [outlineExpanded, setOutlineExpanded] = useState(false);
   const [rating, setRating] = useState(null);
   const [saved, setSaved] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [note, setNote] = useState(() => getNotes('take-home', caseData.id));
   useEffect(() => { setNote(getNotes('take-home', caseData.id)); }, [caseData.id]);
+
+  useEffect(() => {
+    if (!rating) saveTakehomeDraft(caseData.id, { phase, writeup, checkedRubric });
+  }, [phase, writeup, checkedRubric]); // eslint-disable-line
 
   useEffect(() => {
     if (!timerActive) return;
@@ -84,6 +89,7 @@ export function TakehomeRunner({ caseId, onBack, onNext, unlocked }) {
   }
 
   function handleRate(r) {
+    clearTakehomeDraft(caseData.id);
     setRating(r);
     const completedAt = new Date().toISOString();
     saveTakehomeProgress(caseData.id, {

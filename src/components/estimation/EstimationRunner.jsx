@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { saveEstimationAttempt, getEstimationProgress } from '../../utils/estimationProgress.js';
+import { saveEstimationAttempt, getEstimationProgress, saveEstimationDraft, loadEstimationDraft, clearEstimationDraft } from '../../utils/estimationProgress.js';
 import { track } from '../../utils/analytics.js';
 import { estimationProblems } from '../../data/estimationProblems.js';
 import { Icon } from '../shared/Icon.jsx';
@@ -62,7 +62,10 @@ const CATEGORY_LABEL = {
 export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
   const problem = estimationProblems.find(p => p.id === caseId);
   const existing = getEstimationProgress(problem.id);
-  const [response, setResponse] = useState(existing?.response || '');
+  const [response, setResponse] = useState(() => {
+    if (existing?.response) return existing.response;
+    return loadEstimationDraft(problem.id)?.response || '';
+  });
   const [revealed, setRevealed] = useState(!!existing?.rating);
   const [rating, setRating] = useState(existing?.rating || null);
   const [frameworkOpen, setFrameworkOpen] = useState(false);
@@ -78,6 +81,10 @@ export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
     setElapsed(0);
     setPaused(false);
   }, [problem.id]);
+
+  useEffect(() => {
+    if (!existing?.rating && !revealed) saveEstimationDraft(problem.id, { response });
+  }, [response]); // eslint-disable-line
 
   useEffect(() => {
     if (paused) {
@@ -107,12 +114,14 @@ export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
   }
 
   function handleRate(r) {
+    clearEstimationDraft(problem.id);
     setRating(r);
     saveEstimationAttempt(problem.id, response, r);
     track('case_completed', { room: 'estimation', id: problem.id, rating: r });
   }
 
   function handleRetry() {
+    clearEstimationDraft(problem.id);
     setResponse('');
     setRevealed(false);
     setRating(null);

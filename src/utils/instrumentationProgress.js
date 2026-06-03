@@ -21,3 +21,10 @@ export function saveInstrumentationProgress(id, data) {
 export function clearInstrumentationProgress() {
   localStorage.removeItem(KEY);
 }
+
+// ── Mid-case draft ──
+var INDRAFT_KEY = 'pal-instrumentation-draft-v1';
+function readINDrafts() { try { return JSON.parse(localStorage.getItem(INDRAFT_KEY) || '{}'); } catch { return {}; } }
+export function saveInstrumentationDraft(id, state) { try { var d = readINDrafts(); d[id] = state; localStorage.setItem(INDRAFT_KEY, JSON.stringify(d)); } catch {} }
+export function loadInstrumentationDraft(id) { return readINDrafts()[id] || null; }
+export function clearInstrumentationDraft(id) { try { var d = readINDrafts(); delete d[id]; localStorage.setItem(INDRAFT_KEY, JSON.stringify(d)); } catch {} }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { saveChallengesProgress } from '../../utils/challengesProgress.js';
+import { saveChallengesProgress, getChallengesProgress, saveChallengesDraft, loadChallengesDraft, clearChallengesDraft } from '../../utils/challengesProgress.js';
 import { track } from '../../utils/analytics.js';
 import { challengesCases } from '../../data/challengesCases.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
@@ -71,15 +71,30 @@ const RATING_OPTIONS = [
 // ─── Main Runner ─────────────────────────────────────────────────────────────
 export function ChallengesRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
   const caseData = challengesCases.find(c => c.id === caseId);
-  const [screen, setScreen] = useState('scenario'); // 'scenario' | 'question' | 'synthesis' | 'debrief'
-  const [qIndex, setQIndex] = useState(0);
-  const [answers, setAnswers] = useState({}); // { [qId]: string }
-  const [revealed, setRevealed] = useState({}); // { [qId]: bool }
-  const [checkedPoints, setCheckedPoints] = useState({}); // { [qId]: Set<number> }
-  const [rating, setRating] = useState(null);
+  const existingCh = getChallengesProgress(caseData.id);
+  const _chdraft = !existingCh?.rating ? loadChallengesDraft(caseData.id) : null;
+  const [screen, setScreen] = useState(_chdraft?.screen || 'scenario');
+  const [qIndex, setQIndex] = useState(_chdraft?.qIndex || 0);
+  const [answers, setAnswers] = useState(_chdraft?.answers || {});
+  const [revealed, setRevealed] = useState(_chdraft?.revealed || {});
+  const [checkedPoints, setCheckedPoints] = useState(() => {
+    if (!_chdraft?.checkedPoints) return {};
+    // Restore Sets from serialized arrays
+    return Object.fromEntries(Object.entries(_chdraft.checkedPoints).map(([k, v]) => [k, new Set(v)]));
+  });
+  const [rating, setRating] = useState(existingCh?.rating || null);
   const [hintOpen, setHintOpen] = useState({});
   const [note, setNote] = useState(() => getNotes('challenges', caseData.id));
   useEffect(() => { setNote(getNotes('challenges', caseData.id)); }, [caseData.id]);
+
+  // Save draft on every state change (skip if already rated)
+  useEffect(() => {
+    if (!existingCh?.rating && !rating) {
+      // Serialize Sets to arrays for JSON storage
+      const cpSerial = Object.fromEntries(Object.entries(checkedPoints).map(([k, v]) => [k, Array.from(v)]));
+      saveChallengesDraft(caseData.id, { screen, qIndex, answers, revealed, checkedPoints: cpSerial });
+    }
+  }, [screen, qIndex, answers, revealed, checkedPoints]); // eslint-disable-line
 
   const subQs = caseData.subQuestions;
   const totalQs = subQs.length;
@@ -119,6 +134,7 @@ export function ChallengesRunner({ caseId, onBack, onNext, unlocked, onNavigate 
   }
 
   function handleRate(r) {
+    clearChallengesDraft(caseData.id);
     setRating(r);
     saveChallengesProgress(caseData.id, r);
     track('case_completed', { room: 'challenges', id: caseData.id, rating: r });

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { saveBehavioralAttempt, getBehavioralProgress } from '../../utils/behavioralProgress.js';
+import { saveBehavioralAttempt, getBehavioralProgress, saveBehavioralDraft, loadBehavioralDraft, clearBehavioralDraft } from '../../utils/behavioralProgress.js';
 import { track } from '../../utils/analytics.js';
 import { behavioralQuestions } from '../../data/behavioralQuestions.js';
 import { Icon } from '../shared/Icon.jsx';
@@ -68,7 +68,10 @@ export function BehavioralRunner({ caseId, onBack, onNext, onNavigate }) {
   }
 
   const existing = getBehavioralProgress(question.id);
-  const [response, setResponse] = useState(existing?.response || '');
+  const [response, setResponse] = useState(() => {
+    if (existing?.response) return existing.response;
+    return loadBehavioralDraft(question.id)?.response || '';
+  });
   const [revealed, setRevealed] = useState(!!existing?.rating);
   const [rating, setRating] = useState(existing?.rating || null);
   const [frameOpen, setFrameOpen] = useState(false);
@@ -83,6 +86,13 @@ export function BehavioralRunner({ caseId, onBack, onNext, onNavigate }) {
     setElapsed(0);
     setPaused(false);
   }, [question.id]);
+
+  // Draft persistence — save response while in-progress, clear on rate/retry
+  useEffect(() => {
+    if (!existing?.rating && !revealed) {
+      saveBehavioralDraft(question.id, { response });
+    }
+  }, [response]); // eslint-disable-line
 
   useEffect(() => {
     if (paused) {
@@ -142,12 +152,14 @@ export function BehavioralRunner({ caseId, onBack, onNext, onNavigate }) {
   }
 
   function handleRate(r) {
+    clearBehavioralDraft(question.id);
     setRating(r);
     saveBehavioralAttempt(question.id, response, r);
     track('case_completed', { room: 'behavioral', id: question.id, rating: r });
   }
 
   function handleRetry() {
+    clearBehavioralDraft(question.id);
     setResponse('');
     setRevealed(false);
     setRating(null);

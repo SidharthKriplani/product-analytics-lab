@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { savePrioritizationAttempt, getPrioritizationProgress } from '../../utils/prioritizationProgress.js';
+import { savePrioritizationAttempt, getPrioritizationProgress, savePrioritizationDraft, loadPrioritizationDraft, clearPrioritizationDraft } from '../../utils/prioritizationProgress.js';
 import { track } from '../../utils/analytics.js';
 import { prioritizationScenarios } from '../../data/prioritizationScenarios.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
@@ -36,13 +36,20 @@ const RATING_STYLE = {
 export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
   const scenario = prioritizationScenarios.find(s => s.id === caseId);
   const existing = getPrioritizationProgress(scenario.id);
-  const [response, setResponse] = useState(existing?.response || '');
+  const [response, setResponse] = useState(() => {
+    if (existing?.response) return existing.response;
+    return loadPrioritizationDraft(scenario.id)?.response || '';
+  });
   const [revealed, setRevealed] = useState(!!existing?.rating);
   const [rating, setRating] = useState(existing?.rating || null);
   const [hintsOpen, setHintsOpen] = useState(false);
   const [frameworkOpen, setFrameworkOpen] = useState(false);
   const [note, setNote] = useState(() => getNotes('prioritization', scenario.id));
   useEffect(() => { setNote(getNotes('prioritization', scenario.id)); }, [scenario.id]);
+
+  useEffect(() => {
+    if (!existing?.rating && !revealed) savePrioritizationDraft(scenario.id, { response });
+  }, [response]); // eslint-disable-line
 
   const canReveal = response.trim().length >= 40;
 
@@ -52,12 +59,14 @@ export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
   }
 
   function handleRate(r) {
+    clearPrioritizationDraft(scenario.id);
     setRating(r);
     savePrioritizationAttempt(scenario.id, response, r);
     track('case_completed', { room: 'prioritization', id: scenario.id, rating: r });
   }
 
   function handleRetry() {
+    clearPrioritizationDraft(scenario.id);
     setResponse('');
     setRevealed(false);
     setRating(null);

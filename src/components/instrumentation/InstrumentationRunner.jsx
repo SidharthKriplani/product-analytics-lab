@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { saveInstrumentationProgress, getInstrumentationProgress } from '../../utils/instrumentationProgress.js';
+import { saveInstrumentationProgress, getInstrumentationProgress, saveInstrumentationDraft, loadInstrumentationDraft, clearInstrumentationDraft } from '../../utils/instrumentationProgress.js';
+const IN_TEXT_KEY = 'pal-in-text-v1';
+function loadINText(id) { try { return JSON.parse(localStorage.getItem(IN_TEXT_KEY) || '{}')[id] || ''; } catch { return ''; } }
+function saveINText(id, text) { try { var d = JSON.parse(localStorage.getItem(IN_TEXT_KEY) || '{}'); d[id] = text; localStorage.setItem(IN_TEXT_KEY, JSON.stringify(d)); } catch {} }
+function clearINText(id) { try { var d = JSON.parse(localStorage.getItem(IN_TEXT_KEY) || '{}'); delete d[id]; localStorage.setItem(IN_TEXT_KEY, JSON.stringify(d)); } catch {} }
 import { track } from '../../utils/analytics.js';
 import { instrumentationCases } from '../../data/instrumentationCases.js';
 import { Icon } from '../shared/Icon.jsx';
@@ -178,8 +182,12 @@ function SituationScreen({ caseData, onBegin }) {
 
 // Screen 2: Work
 function WorkScreen({ caseData, onReveal }) {
-  const [text, setText] = useState('');
+  const [text, setText] = useState(() => loadINText(caseData.id));
   const [hintsOpen, setHintsOpen] = useState(false);
+
+  useEffect(() => { saveINText(caseData.id, text); }, [text]); // eslint-disable-line
+
+  function handleReveal() { clearINText(caseData.id); onReveal(); }
   const [elapsed, setElapsed] = useState(0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef(null);
@@ -271,7 +279,7 @@ function WorkScreen({ caseData, onReveal }) {
       </div>
 
       <button
-        onClick={() => canReveal && onReveal(text)}
+        onClick={() => canReveal && handleReveal()}
         disabled={!canReveal}
         className="pal-cta"
       >
@@ -601,7 +609,12 @@ function RevealScreen({ caseData, onBack, onNext, onNavigate }) {
 // Main runner
 export function InstrumentationRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
   const caseData = instrumentationCases.find(c => c.id === caseId);
-  const [screen, setScreen] = useState('situation');
+  const _inDraft = loadInstrumentationDraft(caseData.id);
+  const [screen, setScreen] = useState(_inDraft?.screen || 'situation');
+
+  useEffect(() => {
+    if (screen !== 'reveal') saveInstrumentationDraft(caseData.id, { screen });
+  }, [screen]); // eslint-disable-line
 
   function handleBegin() {
     setScreen('work');
@@ -609,6 +622,7 @@ export function InstrumentationRunner({ caseId, onBack, onNext, unlocked, onNavi
   }
 
   function handleReveal() {
+    clearInstrumentationDraft(caseData.id);
     setScreen('reveal');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
