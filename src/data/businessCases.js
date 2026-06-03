@@ -151,11 +151,11 @@ export const businessCases = [
           },
           {
             id: 'c',
-            label: 'Segment by buyer demographics (age, income) to identify target market.',
+            label: 'Segment by current average delivery time per city — cities where our delivery is slowest are where same-day would provide the most uplift.',
             isCorrect: false,
             level: 'wrong',
             feedback:
-              'Demographics are not the relevant cut here. The decision hinges on operational feasibility (can sellers fulfill?) and behavioral signal (are buyers abandoning due to delivery time?). Demographics won\'t tell you either.',
+              'This measures our performance gap, not buyer willingness or seller feasibility. A city where our average delivery is 7 days might have no sellers who can fulfill same-day, and buyers there may not be abandoning due to delivery time at all. The relevant cuts are behavioral (are buyers signaling demand in checkout exits?) and operational (can sellers actually fulfill?). Delivery time benchmarks don\'t answer either question.',
           },
         ],
       },

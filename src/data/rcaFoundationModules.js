@@ -210,4 +210,20 @@ export const rcaFoundationModules = [
       { id: 'external-factors', label: 'External Factors in Analysis' },
     ],
   },
+  {
+    id: 'rf14',
+    index: 14,
+    title: 'Dominant Lever and Pruning',
+    subtitle: 'Focus the fault tree on what actually moved — ignore everything else',
+    difficulty: 'Advanced',
+    tags: ['dominant lever', 'pruning rule', 'metric decomposition', 'fault tree', 'structured RCA'],
+    estimatedMin: 8,
+    isFree: true,
+    keyInsight: 'Decomposing a metric into components and then building a hypothesis tree for every component is structural brain-dump. The senior move is to decompose first, identify which component actually moved, and then prune every unrelated branch completely. If CVR is flat but AOV dropped 18%, acquisition funnels and checkout UX are irrelevant — they are not the dominant lever. Scattered investigation is the primary failure mode of smart analysts.',
+    connection: 'Dominant lever identification is the same skill in experiment analysis. When a primary metric moves unexpectedly in an A/B test, decomposing by component immediately narrows the investigation: if only one cohort segment drove the result, ignore the rest. The pruning instinct transfers directly.',
+    playbookLinks: [
+      { id: 'metric-decomposition', label: 'Metric Decomposition' },
+      { id: 'rca-framework', label: 'RCA Framework' },
+    ],
+  },
 ];
