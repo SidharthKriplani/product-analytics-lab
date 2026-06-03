@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.80.0 | **Build:** ✓ (2.19s, 0 errors) | **Date:** 2026-06-03
+**Version:** V4.80.1 | **Build:** ✓ (2.17s, 0 errors) | **Date:** 2026-06-03
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V4.80.1** — Auth gate bug fixes. Foundations runners removed from AUTH_REQUIRED_PAGES (Foundations are open to all — top-of-funnel). Second useEffect added: signed-in users redirected from 'home' to 'progress' reactively (fixes back-button from SQL Lab showing landing page). Build ✓ 2.17s.
 
 **V4.80.0** — 3-tier monetization gate implemented. Anonymous users intercepted from all runners + SQL Lab via AUTH_REQUIRED_PAGES useEffect in App.jsx. getAccessTier() added to unlock.js. 27 Easy SQL problems updated to isFree: true. MONETIZATION.md created (full business model, tier spec, pricing, B2B path). DECISIONS.md monetization standing rules locked. Build ✓ 2.19s.
 

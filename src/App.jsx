@@ -388,7 +388,7 @@ export default function App() {
   function openStatFoundationsModule(id) {
     const m = statsFoundationsIndex.find(m => m.id === id);
     if (!m) return;
-    if (!m.isFree && !unlocked) { track('paywall_hit', { room: 'stat-foundations', id }); setPage('unlock'); return; }
+    // Foundations are always free — no paywall check
     track('case_opened', { room: 'stat-foundations', id, title: m.title });
     setActiveStatFoundationsId(id);
     setPage('stat-foundations-runner');
@@ -480,7 +480,7 @@ export default function App() {
   function openRCAFoundationModule(id) {
     const m = rcaFoundationIndex.find(m => m.id === id);
     if (!m) return;
-    if (!m.isFree && !unlocked) { track('paywall_hit', { room: 'rca-foundations', id }); setPage('unlock'); return; }
+    // Foundations are always free — no paywall check
     track('case_opened', { room: 'rca-foundations', id, title: m.title });
     setActiveRCAFoundationId(id);
     setPage('rca-foundations-runner');
@@ -490,7 +490,7 @@ export default function App() {
   function openMetricsFoundationModule(id) {
     const m = metricsFoundationIndex.find(m => m.id === id);
     if (!m) return;
-    if (!m.isFree && !unlocked) { track('paywall_hit', { room: 'metrics-foundations', id }); setPage('unlock'); return; }
+    // Foundations are always free — no paywall check
     track('case_opened', { room: 'metrics-foundations', id, title: m.title });
     setActiveMetricsFoundationId(id);
     setPage('metrics-foundations-runner');
@@ -631,7 +631,7 @@ export default function App() {
   function openExpFoundationModule(id) {
     const m = expFoundationIndex.find(m => m.id === id);
     if (!m) return;
-    if (!m.isFree && !unlocked) { track('paywall_hit', { room: 'exp-foundations', id }); setPage('unlock'); return; }
+    // Foundations are always free — no paywall check
     track('case_opened', { room: 'exp-foundations', id, title: m.title });
     setActiveExpFoundationId(id);
     setPage('exp-foundations-runner');

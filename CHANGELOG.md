@@ -4,6 +4,20 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.80.1] — 2026-06-03 [BUG FIX]
+
+### Auth Gate Corrections
+
+Two bugs in the V4.80.0 auth gate implementation:
+
+1. **Foundations incorrectly gated for anonymous users.** `stat-foundations-runner`, `metrics-foundations-runner`, `rca-foundations-runner`, `exp-foundations-runner` were in `AUTH_REQUIRED_PAGES`, blocking anonymous users from accessing Foundations content. Per the business model (MONETIZATION.md), Foundations are top-of-funnel and must be open to everyone. Removed from gate.
+
+2. **Signed-in users saw landing page on back-navigation.** The `setPage('home' → 'progress')` redirect only fired on the SIGNED_IN auth event (once per session). If a signed-in user pressed back from SQL Lab (which calls `navigate('home')`), they'd briefly see the landing page. Fixed by adding a second useEffect: `if (user && page === 'home') setPage('progress')` — fires reactively whenever page becomes 'home' for a signed-in user.
+
+Files: `src/App.jsx`, `BRAIN_TRANSFER.md`, `NEXT.md`
+
+---
+
 ## [4.80.0] — 2026-06-03 [PRODUCT + CONTENT + UX]
 
 ### 3-Tier Monetization Gate + Business Model

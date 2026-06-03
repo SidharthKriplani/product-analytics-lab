@@ -15,8 +15,8 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ## Next session
 
-**0. Verify tier gates work in production**
-Sign out → try opening any case → should see auth modal. Sign in without code → try Medium SQL → should see unlock page. Sign in with DAI2026 → everything should work. Verify before next session.
+**0. Verify tier gates work in production (V4.80.1)**
+Anonymous: "Explore without signing in" → Foundations should fully open. Click a practice case → auth modal. Signed-in: SQL Lab back button → Progress (not landing). Sign in with DAI2026 → all content unlocked.
 
 **1. Forensic checkValues bug audit (f01–f10)**
 Audit all 10 forensic problems for whole-number REAL checkValues that need '.0' stripped. Pattern: ROUND() returning 40.0 → JS 40 → String '40', not '40.0'. Fixed f01/f04/f09. Check f02, f03, f05–f08, f10. See AUDITS.md #144.
