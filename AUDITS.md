@@ -46,15 +46,15 @@ SQLite REAL values that are whole numbers (40.0, 25.0, 50.0, 3500.0) return as J
 
 **Files:** `src/data/sqlLabProblems.js` — forensic problems f01–f10
 
-### 145. ⚠️ UX Audit — SQL Lab Study Plan not working
-User-reported: Study Plan button in SQL Lab is not functioning. Root cause unknown — not yet diagnosed. Needs: open SqlLabPage.jsx, find Study Plan handler, reproduce the failure, fix.
+### 145. ✅ UX Audit — SQL Lab Study Plan not working
+**Fixed V4.93.0.** Root cause: StudyPlanModal was rendered inside `.sql-lab-main-panel` (position: fixed; z-index: 5), which creates a stacking context. The modal's z-index: 200 was scoped to that context — `.sql-lab-problem-panel` (z-index: 5, later in DOM) painted over it. Fix: moved modal render outside both panels to the root fragment, placing it at the root stacking context where z-index: 200 is unobstructed.
 
 **Files:** `src/pages/SqlLabPage.jsx`
 
-### 146. ⚠️ Content/Visual Audit — FV/FA debrief sections need structured rendering
-The wrong-answer showcase, sanity check, and assumption statement sections added in the S-grade pass are plain paragraphs in the debrief text. They visually blend together. Need distinct visual blocks (coloured left border, section label) to make each section scannable. Currently rendered via renderDebrief() which only handles bold + paragraph breaks. Needs a more structured renderer or separate schema fields.
+### 146. ✅ Content/Visual Audit — FV/FA debrief sections need structured rendering
+**Fixed V4.93.0.** renderDebrief() replaced with structured paragraph parser. DEBRIEF_BLOCKS config detects 4 section types: Wrong Answer (red), Forensic Trap (orange), Sanity Check (teal), Analyst Judgment (yellow). Each renders as colored left-border block with section label. 30 WA + 94 FT + 124 SC + 10 AJ blocks rendered across 155 problems.
 
-**Files:** `src/pages/SqlLabPage.jsx` — renderDebrief(), and optionally `src/data/sqlLabProblems.js` schema
+**Files:** `src/pages/SqlLabPage.jsx`
 
 ---
 

@@ -50,6 +50,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V4.93.0** — Audits #145 + #146 closed. (1) Audit #146: renderDebrief() replaced with structured paragraph parser — 4 block types detected by leading `**Header:**` pattern: Wrong Answer (red), Forensic Trap (orange), Sanity Check (teal), Analyst Judgment (yellow). Each renders as colored left-border block with section label. (2) Audit #145: StudyPlanModal stacking context bug fixed — modal was inside .sql-lab-main-panel (z-index: 5 stacking context), scoping its z-index: 200 within that context; .sql-lab-problem-panel (z-index: 5, later DOM) rendered over it. Fix: moved modal outside both panels to root fragment. Build ✓ 2.07s.
+
 **V4.92.0** — Full statefulness pass complete. All 9 remaining runners now persist mid-case state. (1) Behavioral/Estimation/Prioritization: response text drafts saved on every keystroke, restored on mount from draft if no prior rating, cleared on rate/retry. (2) SpotTheFlaw: answer text draft saved while in STEP_SETUP, cleared on rate/retry. (3) ScenarioRunner: selectedDecision + checkedFlags persisted inline (uses shared progress.js — draft helpers added inline), cleared on submit/replay. (4) TakehomeRunner: phase + writeup + checkedRubric persisted, restored on mount, cleared on rate. (5) ChallengesRunner: all 5 state vars (screen, qIndex, answers, revealed, checkedPoints) persisted — Sets serialized to arrays for JSON, restored as Sets on mount, cleared on rate. (6) BIRunner/InstrumentationRunner: WorkScreen text persisted per-case with dedicated text key; outer screen state restored from draft, cleared on reveal. Build ✓ 2.05s.
 
 **V4.91.0** — Audit #79 complete. Room header icon consistency. 6 rooms upgraded to the 36×36 colored box + Icon pattern: RCABrowser (search/yellow), MetricsBrowser (bar-chart/green), BehavioralBrowser (mic/purple + Icon import added), CasesBrowser (clipboard/purple), ScenarioBrowser (flask/accent + Icon import added + "Review Room" label added), CodeBrowser (target/yellow + Icon import added). Build ✓ 2.04s.
@@ -104,7 +106,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — Statefulness complete across all runners. Next: Interview Simulator expansion (gated on PostHog data) OR spokenSummary backfill for remaining RCA + Business cases (RCA05–RCA26 minus already-done, all Business cases).
+## Next action — All open audits closed. Next: spokenSummary backfill (RCA05–RCA24 + all Business cases) as subagent writing pass, OR Interview Simulator expansion (needs PostHog WAU data first).
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

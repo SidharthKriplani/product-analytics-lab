@@ -5,17 +5,76 @@ import { track } from '../utils/analytics.js';
 
 const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3, Forensic: 5 };
 
+function renderInline(text) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
+    part.startsWith('**') && part.endsWith('**')
+      ? <strong key={j}>{part.slice(2, -2)}</strong>
+      : part
+  );
+}
+
+const DEBRIEF_BLOCKS = [
+  {
+    pattern: /^\*\*(Wrong answer[^*]*)\*\*:?/,
+    label: 'Wrong Answer',
+    color: 'var(--red)',
+    bg: 'var(--red-bg)',
+    border: 'var(--red-border)',
+  },
+  {
+    pattern: /^\*\*(Forensic trap[^*]*)\*\*:?/,
+    label: 'Forensic Trap',
+    color: '#ea580c',
+    bg: 'rgba(234,88,12,0.07)',
+    border: 'rgba(234,88,12,0.3)',
+  },
+  {
+    pattern: /^\*\*(Sanity check[^*]*)\*\*:?/,
+    label: 'Sanity Check',
+    color: 'var(--teal)',
+    bg: 'var(--teal-bg)',
+    border: 'var(--teal-border)',
+  },
+  {
+    pattern: /^\*\*(Before writing[^*]*)\*\*:?/,
+    label: 'Analyst Judgment',
+    color: 'var(--yellow)',
+    bg: 'var(--yellow-bg)',
+    border: 'var(--yellow-border)',
+  },
+];
+
 function renderDebrief(text) {
   if (!text) return null;
   return text.split('\n\n').map((para, i) => {
-    const parts = para.split(/(\*\*[^*]+\*\*)/g);
+    const trimmed = para.trim();
+    for (const block of DEBRIEF_BLOCKS) {
+      if (block.pattern.test(trimmed)) {
+        const body = trimmed.replace(block.pattern, '').replace(/^:\s*/, '').trim();
+        return (
+          <div key={i} style={{
+            borderLeft: '3px solid ' + block.border,
+            background: block.bg,
+            borderRadius: '0 6px 6px 0',
+            padding: '0.6rem 0.85rem',
+            margin: '0.8rem 0 0',
+          }}>
+            <div style={{
+              fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase',
+              letterSpacing: '0.09em', color: block.color, marginBottom: '0.3rem',
+            }}>
+              {block.label}
+            </div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.65 }}>
+              {renderInline(body)}
+            </div>
+          </div>
+        );
+      }
+    }
     return (
       <p key={i} style={{ margin: i === 0 ? 0 : '0.6rem 0 0 0' }}>
-        {parts.map((part, j) =>
-          part.startsWith('**') && part.endsWith('**')
-            ? <strong key={j}>{part.slice(2, -2)}</strong>
-            : part
-        )}
+        {renderInline(para)}
       </p>
     );
   });
@@ -639,8 +698,6 @@ export function SqlLabPage({ onBack }) {
           Study Plan
         </button>
       </div>
-      {showPlanModal && <StudyPlanModal solved={solved} onClose={() => setShowPlanModal(false)} onApply={() => setShowPlanModal(false)} />}
-
       {/* Scrollable content */}
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '1.5rem' }}>
 
@@ -898,6 +955,8 @@ export function SqlLabPage({ onBack }) {
     </div>
 
     {/* Problem list — independent fixed panel, scrolls on its own */}
+    {showPlanModal && <StudyPlanModal solved={solved} onClose={() => setShowPlanModal(false)} onApply={() => setShowPlanModal(false)} />}
+
     <div className="sql-lab-problem-panel">
       <ProblemSidebar
         problems={SORTED_PROBLEMS}
