@@ -4,6 +4,116 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [4.93.0] — 2026-06-03 [BUG FIX + VISUAL]
+
+### Audits #145 + #146 closed
+
+**Audit #146 — FV/FA structured rendering:** `renderDebrief()` in SqlLabPage.jsx replaced with a structured paragraph parser. `DEBRIEF_BLOCKS` config detects 4 section types by leading `**Header:**` pattern: Wrong Answer (red), Forensic Trap (orange), Sanity Check (teal), Analyst Judgment (yellow). Each renders as a colored left-border block with a section label badge. `renderInline()` extracted for shared bold rendering. Hits: 30 WA + 94 FT + 124 SC + 10 AJ blocks across 155 problems.
+
+**Audit #145 — Study Plan modal not working:** Root cause: `StudyPlanModal` rendered inside `.sql-lab-main-panel` (`position: fixed; z-index: 5`), scoping its `z-index: 200` within that stacking context. `.sql-lab-problem-panel` (also `z-index: 5`, later in DOM) painted over it. Fix: moved modal render outside both panels to the root JSX fragment.
+
+Files: `src/pages/SqlLabPage.jsx`, `AUDITS.md`
+
+---
+
+## [4.92.0] — 2026-06-03 [FEATURE]
+
+### Full statefulness pass — all remaining runners
+
+Mid-case draft persistence wired to 9 remaining runners. Pattern: save on every state change, restore on mount if no prior completion, clear on submit/retry. Draft functions added to 8 util files.
+
+- **Behavioral/Estimation/Prioritization:** `response` text draft, cleared on `handleRate` + `handleRetry`.
+- **SpotTheFlawRunner:** `answer` text draft saved while in `STEP_SETUP`.
+- **ScenarioRunner:** Inline draft helpers (uses shared `progress.js`). `selectedDecision` + `checkedFlags` persisted.
+- **TakehomeRunner:** `phase` + `writeup` + `checkedRubric` persisted.
+- **ChallengesRunner:** All 5 state vars (`screen`, `qIndex`, `answers`, `revealed`, `checkedPoints`). Sets serialized to arrays for JSON, restored as Sets on mount.
+- **BIRunner/InstrumentationRunner:** `WorkScreen` text per-case key + outer `screen` state. Both cleared on reveal.
+- GrowthAnalyticsRunner, StatsRunner, CodeRunner confirmed already stateful — no changes needed.
+
+Files: 8 progress utils, `BehavioralRunner.jsx`, `EstimationRunner.jsx`, `PrioritizationRunner.jsx`, `SpotTheFlawRunner.jsx`, `ScenarioRunner.jsx`, `TakehomeRunner.jsx`, `ChallengesRunner.jsx`, `BIRunner.jsx`, `InstrumentationRunner.jsx`
+
+---
+
+## [4.91.0] — 2026-06-03 [VISUAL]
+
+### Audit #79 — Room header icon consistency
+
+6 room browsers upgraded to the standard 36×36 colored box + Icon pattern: RCABrowser (`search`/yellow), MetricsBrowser (`bar-chart`/green), BehavioralBrowser (`mic`/purple), CasesBrowser (`clipboard`/purple), ScenarioBrowser (`flask`/accent), CodeBrowser (`target`/yellow). Icon import added to Behavioral, Scenario, Code browsers. Room labels added where missing.
+
+Files: `src/pages/RCABrowser.jsx`, `MetricsBrowser.jsx`, `BehavioralBrowser.jsx`, `CasesBrowser.jsx`, `ScenarioBrowser.jsx`, `CodeBrowser.jsx`, `AUDITS.md`
+
+---
+
+## [4.90.0] — 2026-06-03 [CONTENT QUALITY]
+
+### S-grade debrief pass complete (Batches 4–13)
+
+All 130 non-forensic SQL Lab problems upgraded with FV (wrong query + wrong output + why plausible) and FA (sanity check cross-query) in Batches 4–13. Completes the full 13-batch pass started in V4.74.0. `SQL_UPGRADE_PASS.md` complete. Standout FV=5: e54 (IS NOT NULL vs != NULL), e62 (COUNT vs SUM → 100% CVR), m01 (missing PARTITION BY in LAG), m16 (global running total), m21 (DESC vs ASC in NTILE), master07 (NOT IN with NULL → 0 rows).
+
+Files: `src/data/sqlLabProblems.js`, `SQL_UPGRADE_PASS.md`, `SQL_LAB_PLAN.md`
+
+---
+
+## [4.89.0] — 2026-06-03 [BUG FIX + FEATURE]
+
+### Auth persistence fix + DesignRunner + MetricsRunner statefulness
+
+**Auth fix:** `INITIAL_SESSION` and `TOKEN_REFRESHED` events now handled in `onAuthStateChange`. Fixes sign-out-on-refresh — Supabase v2 fires `INITIAL_SESSION` on load when session exists, not `SIGNED_IN`. Both redirect `page === 'home'` → `'progress'`.
+
+**DesignRunner:** `currentPhaseIndex` restores from `completedPhaseIds.length`; `view` restores to `'debrief'` if `lastScore` exists; `result` recomputed on restore.
+
+**MetricsRunner:** `fieldChoices` draft saved to `pal-metrics-draft-v1` on every selection. Restored on mount if no prior attempt. Cleared on submit and retry.
+
+Files: `src/App.jsx`, `src/components/design/DesignRunner.jsx`, `src/components/metrics/MetricsRunner.jsx`, `src/utils/metricsProgress.js`
+
+---
+
+## [4.88.0] — 2026-06-03 [FEATURE + CONTENT]
+
+### Mid-case statefulness (CaseRunner + RCARunner) + Forensic Batch 3
+
+**Statefulness:** CaseRunner + RCARunner save draft state (`currentPhaseIndex`, `submittedChoices`, `stepChoices`) on every change. Restored on reopen. Cleared on completion/retry. Draft functions added to `caseProgress.js` and `rcaProgress.js`.
+
+**Forensic Batch 3 (f21–f25):** f21 compounding fee deductions, f22 linear vs compound growth (missing POWER), f23 SaaS churn denominator (end-of-period inflates rate), f24 prep time includes delivery, f25 seller survivorship bias (zero-sale sellers excluded).
+
+Files: `src/components/cases/CaseRunner.jsx`, `src/components/rca/RCARunner.jsx`, `src/utils/caseProgress.js`, `src/utils/rcaProgress.js`, `src/data/sqlLabProblems.js`, `SQL_LAB_PLAN.md`
+
+---
+
+## [4.87.0] — 2026-06-03 [FEATURE + CONTENT]
+
+### spokenSummary infrastructure + RCA25 + RCA26
+
+**spokenSummary field:** Teal collapsible "30-Second Answer" toggle added to `RCADebriefPanel.jsx` and `CaseRunner.jsx`. Shown when field exists. RCA01–RCA04 populated.
+
+**RCA25 — Seller Active Rate Declined:** Supply-side marketplace RCA. 3 phases: vintage decomp → T&S context → mid-tier economics. Senior difficulty.
+
+**RCA26 — Net Revenue Declined, Orders Stable:** Per-order P&L decomposition (fee + ad − logistics − discount − RTO). Discount burn + RTO compound analysis. 3 phases.
+
+Files: `src/components/rca/RCADebriefPanel.jsx`, `src/components/cases/CaseRunner.jsx`, `src/data/rcaCases.js`
+
+---
+
+## [4.86.0] — 2026-06-03 [FEATURE + CONTENT]
+
+### Full Jatin feedback sequence
+
+Stats Foundations persistence (M01/M21/M23/M24/M25 + `statsFoundationsState.js`). rf15 Hypothesis Ranking module (3 scenarios, Impact × Likelihood × Ease ranking, persist/restore). rcaCases.js distractor fix (C01 ad-revenue option). "Never say I would look at the data" rule injected into leadershipNotes for C01/C03/C07 with domain-specific example queries.
+
+Files: `src/data/rcaCases.js`, `src/utils/statsFoundationsState.js`, `src/data/rcaFoundationModules.js`, `src/components/rcaFoundations/RCAFoundationsRunner.jsx`
+
+---
+
+## [4.85.0] — 2026-06-03 [FEATURE + CONTENT]
+
+### rf14 Dominant Lever + Pruning module + C01 distractor fix
+
+rf14: 3 scenarios, 2-phase exercise (identify dominant lever → apply pruning rule), persist/restore, reference table. C01 Phase 4 option C distractor rewritten from "segment by demographics" to plausible delivery-time benchmark cut.
+
+Files: `src/data/rcaFoundationModules.js`, `src/components/rcaFoundations/RCAFoundationsRunner.jsx`, `src/data/businessCases.js`
+
+---
+
 ## [4.84.0] — 2026-06-03 [FEATURE + CONTENT QUALITY]
 
 ### Cross-foundations quality pass + rf13 Routing Gate
