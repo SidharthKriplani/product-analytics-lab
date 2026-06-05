@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { codeModules } from '../../data/codeModules.js';
 import { saveCodeAttempt } from '../../utils/codeProgress.js';
 import { track } from '../../utils/analytics.js';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -31,7 +32,7 @@ const TRACK_COLOR = {
   python: 'var(--purple)',
 };
 
-export function CodeRunner({ caseId, savedProgress, onBack, onNext }) {
+export function CodeRunner({ caseId, savedProgress, onBack, onNext, onNavigate }) {
   const module = codeModules.find(m => m.id === caseId);
   const [view, setView]           = useState(savedProgress ? 'reveal' : 'writing');
   const [response, setResponse]   = useState(savedProgress?.response || '');
@@ -245,6 +246,9 @@ export function CodeRunner({ caseId, savedProgress, onBack, onNext }) {
           note={note}
           onNoteChange={text => { setNote(text); saveNote('code', module.id, text); }}
         />
+      )}
+      {revealed && (
+        <ForwardPointerCard room='code' onNavigate={onNavigate} onNext={onNext} />
       )}
     </div>
   );

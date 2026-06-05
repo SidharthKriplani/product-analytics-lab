@@ -291,7 +291,9 @@ Family 6 — Data Traps (across all): divide-by-zero, integer division, duplicat
 ### PM critique items (June 2026 audit)
 
 **Sign-in tier value expansion**
-Current: signed-in free users get the same ~3 free cases as guests (just with progress saved). Weak offer — not enough to build a habit before the conversion ask. Fix: increase `isFree: true` case count from ~3 to ~8 per room for signed-in users. Guests still see 3; signing in meaningfully expands access. This is a data-file change only (no component changes) — set `isFree: true` on cases 4–8 per room, conditioned on sign-in state in the runner. Medium effort: ~15 data file edits + one gating logic tweak.
+Current model is binary: `isFree: true` passes both guests AND signed-in users equally — no code-level distinction between the two tiers. Signing in gives progress tracking but not more cases. Assessed June 2026: do NOT hack isFree across all data files.
+
+Correct model: add `guestPreview: true` to the first 1–2 cases per room. Keep `isFree: true` on all cases accessible to signed-in free users (target 5–8 per room). Logic change: guests pass only if `guestPreview: true`; signed-in free users pass if `isFree: true`. Implementation: (1) add `guestPreview: true` to first 1–2 cases in 17 room data files; (2) change `requireUser(isFree, room)` to `requireUser(guestPreview, isFree, room)` with guest blocked if `!guestPreview`; (3) update 17 call sites in App.jsx. Effort: 1 session.
 
 **Progress home next-suggestion card**
 Progress is the signed-in home page but it doesn't direct users to their next action. Add a persistent "Continue where you left off" card at the top of Progress.jsx: last-active room, last incomplete case, one-click to resume. Not a recommendation engine — just surface the `pal-last-visited-*` localStorage keys already being written. Low effort: read last-visited room, find first incomplete case, render a card. High retention impact.

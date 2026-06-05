@@ -41,30 +41,30 @@ const ROOM_SUBGROUPS = [
 
 const FLAT_GROUPS = [
   {
-    label: 'PRACTICE',
+    label: 'DRILLS',
     items: [
-      { id: 'challenges',     label: 'Challenges',      icon: 'zap' },
-      { id: 'take-home',      label: 'Take-Home',       icon: 'file-text' },
-      { id: 'simulator',      label: 'Mock Interview',  icon: 'mic' },
-      { id: 'ab-interpreter', label: 'Stats Calc',      icon: 'calculator' },
+      { id: 'challenges', label: 'Challenges',     icon: 'zap' },
+      { id: 'take-home',  label: 'Take-Home',      icon: 'file-text' },
+      { id: 'simulator',  label: 'Mock Interview', icon: 'mic' },
     ],
   },
   {
     label: 'LEARN',
     items: [
-      { id: 'blog',     label: 'Deep Dives',  icon: 'book-open' },
-      { id: 'playbook', label: 'Frameworks',  icon: 'layout' },
+      { id: 'blog',         label: 'Deep Dives',       icon: 'book-open' },
+      { id: 'playbook',     label: 'Frameworks',       icon: 'layout' },
+      { id: 'interview-qa', label: 'Interview Q&A',    icon: 'message-square' },
+      { id: 'failures',     label: 'Failure Patterns', icon: 'alert-triangle' },
     ],
   },
   {
     label: 'TOOLS',
     items: [
-      { id: 'trainer',        label: 'MCQ Quiz',      icon: 'target' },
-      { id: 'interview-qa',   label: 'Interview Q&A', icon: 'message-square' },
-      { id: 'failures',       label: 'Failure Patterns', icon: 'alert-triangle' },
-      { id: 'company-tracks', label: 'Companies',     icon: 'building-2' },
-      { id: 'defense-doc',    label: 'Defense Strategy',   icon: 'shield' },
-      { id: 'bookmarks',      label: 'Saved',         icon: 'bookmark' },
+      { id: 'trainer',        label: 'MCQ Quiz',         icon: 'target' },
+      { id: 'ab-interpreter', label: 'Stats Calc',       icon: 'calculator' },
+      { id: 'company-tracks', label: 'Companies',        icon: 'building-2' },
+      { id: 'defense-doc',    label: 'Defense Strategy', icon: 'shield' },
+      { id: 'bookmarks',      label: 'Saved',            icon: 'bookmark' },
     ],
   },
   {
@@ -406,8 +406,8 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
           <NavItem id="rca-foundations" />
           <NavItem id="exp-foundations" />
 
-          {/* PRACTICE ROOMS (accordion) */}
-          <SectionLabel label="PRACTICE ROOMS" />
+          {/* ROOMS (accordion) */}
+          <SectionLabel label="ROOMS" />
           {ROOM_SUBGROUPS.map(sg => {
             const isExpanded = expandedSubGroups.has(sg.id);
             const hasActive = sg.items.some(item => getIsActive(item.id, currentPage));

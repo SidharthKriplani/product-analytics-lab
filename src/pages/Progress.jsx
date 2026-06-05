@@ -492,6 +492,43 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
         </p>
       </div>
 
+      {/* Returning user next-suggestion card — shown when user has prior activity */}
+      {totalCompleted > 0 && nextSuggested && (
+        <div className="pal-card-enter" style={{
+          border: '1px solid var(--border)',
+          background: 'var(--surface)',
+          borderRadius: '12px',
+          padding: '1rem 1.25rem',
+          marginBottom: '1.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          flexWrap: 'wrap',
+        }}>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
+              Continue where you left off
+            </div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)' }}>
+              {nextSuggested.room} — {nextSuggested.label}
+            </div>
+          </div>
+          <button
+            onClick={() => onNavigate && onNavigate(nextSuggested.nav)}
+            style={{
+              background: 'var(--accent)', color: '#fff',
+              border: 'none', borderRadius: '8px',
+              padding: '0.5rem 1.1rem', fontSize: '0.875rem',
+              fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Continue →
+          </button>
+        </div>
+      )}
+
       {/* Day-1 empty state — shown when user has never completed anything */}
       {totalCompleted === 0 && (
         <div className="pal-card-enter" style={{
@@ -505,7 +542,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
           gap: '0.75rem',
         }}>
           <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>
-            You haven\'t practiced yet — pick a room and start.
+            You haven't practiced yet — pick a room and start.
           </div>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
             PAL puts you in the decision, not a reading situation. Metrics and RCA are the two rooms that show up most in product analytics interviews — start with either.
@@ -973,10 +1010,10 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                 {totalCompleted === 0 ? (
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text)', marginBottom: '0.35rem' }}>
-                      You haven\'t completed any cases yet
+                      You haven't completed any cases yet
                     </div>
                     <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.55 }}>
-                      Start with Stat Foundations — it\'s the floor that every other room builds on. Your progress across all rooms will appear here once you begin.
+                      Start with Stat Foundations — it's the floor that every other room builds on. Your progress across all rooms will appear here once you begin.
                     </div>
                     {onNavigate && (
                       <button
@@ -993,7 +1030,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
                     <div style={{ fontSize: '0.85rem', color: 'var(--green)', fontWeight: 600 }}>
-                      You\'re crushing it! Keep the streak going.
+                      You're crushing it! Keep the streak going.
                     </div>
                     {onNavigate && (
                       <button
@@ -1004,7 +1041,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                           color: 'var(--green)', fontSize: '0.78rem', fontWeight: 700,
                           cursor: 'pointer', whiteSpace: 'nowrap',
                         }}
-                      >Take Today\'s Drill →</button>
+                      >Take Today's Drill →</button>
                     )}
                   </div>
                 )}

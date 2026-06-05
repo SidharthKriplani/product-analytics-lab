@@ -93,7 +93,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
           How you want to practice
         </h1>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', margin: 0 }}>
-          Try a real case for free. Sign in to build a practice habit. Unlock to prep like you\'re already in the room.
+          Try a real case for free. Sign in to build a practice habit. Unlock to prep like you're already in the room.
         </p>
       </div>
 
@@ -150,7 +150,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
             Build your practice habit
           </div>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 0.75rem', lineHeight: 1.55 }}>
-            Every case you complete gets saved. Return any day and pick up where you left off — the streak tells you whether you\'re actually being consistent.
+            Every case you complete gets saved. Return any day and pick up where you left off — the streak tells you whether you're actually being consistent.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', marginBottom: 'auto' }}>
             <Row text="Everything in Guest" available accent="var(--accent)" />
@@ -182,7 +182,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
                 fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
-              Sign in — it\'s free →
+              Sign in — it's free →
             </button>
           )}
         </div>
@@ -193,7 +193,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
             Full Lab
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            Prep like you\'re in the room
+            Prep like you're in the room
           </div>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 0.75rem', lineHeight: 1.55 }}>
             One access code unlocks everything — the case depth, difficulty progression, and company-specific patterns that show up in real L4–L6 interviews.

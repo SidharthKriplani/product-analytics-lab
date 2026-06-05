@@ -151,6 +151,8 @@ export default function App() {
 
   // Helper: call at top of any open handler that requires sign-in.
   // Returns true if the user is not signed in (caller should return early).
+  const gateRoomRef = useRef(null);
+
   function requireUser(isFree = false, room = null) {
     if (!user && !isFree) {
       gateRoomRef.current = room;
@@ -160,10 +162,85 @@ export default function App() {
     return false;
   }
 
+  const ROOM_GATE_COPY = {
+    metrics: {
+      title: 'Sign in to keep practicing Metrics',
+      body: 'The full Metrics bank covers tradeoffs, guardrail failures, and the framing questions that show up at Senior level — not just metric definitions.',
+    },
+    rca: {
+      title: 'Sign in to keep practicing RCA',
+      body: 'The full RCA bank has 28 cases — GMV decompositions, supply-side attribution, multi-cause diagnosis. The Staff debriefs show what separates a good answer from a hired one.',
+    },
+    cases: {
+      title: 'Sign in to keep practicing Cases',
+      body: 'The full Cases bank has 25 business cases at Analyst, Senior, and Staff difficulty — the decision calls that separate data analysts from senior ICs.',
+    },
+    review: {
+      title: 'Sign in to keep practicing the Review Room',
+      body: 'The Review Room has 28 experiment readouts covering SRM, cannibalization, right-censoring, and multi-variant traps. The free cases showed you the pattern — the rest test whether you spot it under pressure.',
+    },
+    stats: {
+      title: 'Sign in to keep practicing Stats',
+      body: 'The full Stats bank covers power calculations, p-value traps, and the statistical judgment calls that interviewers probe once you give an answer.',
+    },
+    design: {
+      title: 'Sign in to keep practicing A/B Design',
+      body: 'The full Design bank covers unit of randomisation, guardrail selection, and the experiment design mistakes that kill test validity before data is collected.',
+    },
+    sql: {
+      title: 'Sign in to access SQL Lab',
+      body: 'SQL Lab has 140 problems across Easy, Forensic, Medium, Hard, and Master tiers — with trap detection training that goes beyond what DataLemur or StrataScratch cover.',
+    },
+    behavioral: {
+      title: 'Sign in to keep practicing Behavioral',
+      body: 'The full Behavioral bank covers leadership, conflict, and cross-functional judgment at Staff level — including the follow-up probes that catch candidates who prepared surface answers.',
+    },
+    prioritization: {
+      title: 'Sign in to keep practicing Prioritization',
+      body: 'The full Prioritization bank covers the tradeoff and stakeholder judgment calls that separate analysts who give recommendations from ones who give data.',
+    },
+    estimation: {
+      title: 'Sign in to keep practicing Estimation',
+      body: 'The full Estimation bank covers Fermi problems and back-of-envelope reasoning calibrated to the range interviewers actually ask at L4–L5.',
+    },
+    'growth-analytics': {
+      title: 'Sign in to keep practicing Growth Analytics',
+      body: 'The full Growth bank covers growth decomposition, loop analysis, and the acquisition vs retention calls that define senior growth analyst interviews.',
+    },
+    'product-design': {
+      title: 'Sign in to keep practicing Product Design',
+      body: 'The full Product Design bank covers user journey framing, metric selection, and the product judgment calls that show up in PM and APM interviews.',
+    },
+    challenges: {
+      title: 'Sign in to keep practicing Challenges',
+      body: 'Challenges are cross-room problems that require chaining metrics, RCA, and product judgment in a single case — the format closest to a real onsite.',
+    },
+    bi: {
+      title: 'Sign in to keep practicing BI & Reporting',
+      body: 'The full BI bank covers dashboard design, chart interpretation, and the reporting judgment calls that show up in analytics engineer and BI analyst interviews.',
+    },
+    'spot-the-flaw': {
+      title: 'Sign in to keep practicing Spot the Flaw',
+      body: 'The full Spot the Flaw bank covers the analytical errors that smart candidates miss — the kind of flaw that an interviewer plants to see if you push back.',
+    },
+    'take-home': {
+      title: 'Sign in to keep practicing Take-Home',
+      body: 'Take-Home cases replicate the full assignment format — a business brief, a data framing question, and a structured write-up that mirrors what companies actually send.',
+    },
+    instrumentation: {
+      title: 'Sign in to keep practicing Instrumentation',
+      body: 'The full Instrumentation bank covers event taxonomy, tracking plans, and the data quality judgment calls that senior analytics engineers and PMs face in real instrumention reviews.',
+    },
+  };
+
+  const DEFAULT_GATE_COPY = {
+    title: 'Sign in to practice',
+    body: 'Create a free account to save your progress, build a streak, and access more cases across all rooms.',
+  };
+
   // Page-transition effect: detect runner → browser transitions.
   // Anonymous user leaving a runner: show sign-in nudge ("your progress wasn't saved").
   // Signed-in free user leaving a runner: show "Progress saved" toast (2.5s auto-dismiss).
-  const gateRoomRef = useRef(null);
   const prevPageRef = useRef(page);
   useEffect(() => {
     const prev = prevPageRef.current;
@@ -375,7 +452,7 @@ export default function App() {
   function openRCACase(id) {
     const c = rcaCaseIndex.find(r => r.id === id);
     if (!c) return;
-    if (requireUser(c.isFree)) return;
+    if (requireUser(c.isFree, 'rca')) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'rca', id }); setPage('plans'); return; }
     track('case_opened', { room: 'rca', id, title: c.title });
     setActiveRCACaseId(id);
@@ -386,7 +463,7 @@ export default function App() {
   function openBusinessCase(id) {
     const c = businessCaseIndex.find(b => b.id === id);
     if (!c) return;
-    if (requireUser(c.isFree)) return;
+    if (requireUser(c.isFree, 'cases')) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'cases', id }); setPage('plans'); return; }
     track('case_opened', { room: 'cases', id, title: c.title });
     setActiveBusinessCaseId(id);
@@ -397,7 +474,7 @@ export default function App() {
   function openCodeModule(id) {
     const m = codeModuleIndex.find(m => m.id === id);
     if (!m) return;
-    if (requireUser(m.isFree)) return;
+    if (requireUser(m.isFree, 'code')) return;
     if (!m.isFree && !unlocked) { track('paywall_hit', { room: 'code', id }); setPage('plans'); return; }
     track('case_opened', { room: 'code', id, title: m.title });
     setActiveCodeModuleId(id);
@@ -408,7 +485,7 @@ export default function App() {
   function openPrioritizationScenario(id) {
     const s = prioritizationIndex.find(s => s.id === id);
     if (!s) return;
-    if (requireUser(s.isFree)) return;
+    if (requireUser(s.isFree, 'prioritization')) return;
     if (!s.isFree && !unlocked) { track('paywall_hit', { room: 'prioritization', id }); setPage('plans'); return; }
     track('case_opened', { room: 'prioritization', id, title: s.title });
     setActivePrioritizationId(id);
@@ -419,7 +496,7 @@ export default function App() {
   function openBehavioralQuestion(id) {
     const q = behavioralIndex.find(q => q.id === id);
     if (!q) return;
-    if (requireUser(q.isFree)) return;
+    if (requireUser(q.isFree, 'behavioral')) return;
     if (!q.isFree && !unlocked) { track('paywall_hit', { room: 'behavioral', id }); setPage('plans'); return; }
     track('case_opened', { room: 'behavioral', id, title: q.title });
     setActiveBehavioralId(id);
@@ -430,7 +507,7 @@ export default function App() {
   function openEstimationProblem(id) {
     const p = estimationIndex.find(p => p.id === id);
     if (!p) return;
-    if (requireUser(p.isFree)) return;
+    if (requireUser(p.isFree, 'estimation')) return;
     if (!p.isFree && !unlocked) { track('paywall_hit', { room: 'estimation', id }); setPage('plans'); return; }
     track('case_opened', { room: 'estimation', id, title: p.title });
     setActiveEstimationId(id);
@@ -451,7 +528,7 @@ export default function App() {
   function openGrowthAnalyticsCase(id) {
     const c = growthAnalyticsIndex.find(c => c.id === id);
     if (!c) return;
-    if (requireUser(c.isFree)) return;
+    if (requireUser(c.isFree, 'growth-analytics')) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'growth-analytics', id }); setPage('plans'); return; }
     track('case_opened', { room: 'growth-analytics', id, title: c.title });
     setActiveGrowthAnalyticsId(id);
@@ -462,7 +539,7 @@ export default function App() {
   function openChallenge(id) {
     const c = challengesIndex.find(c => c.id === id);
     if (!c) return;
-    if (requireUser(c.isFree)) return;
+    if (requireUser(c.isFree, 'challenges')) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'challenges', id }); setPage('plans'); return; }
     setActiveChallengeId(id);
     track('open_challenge', { id, title: c.title });
@@ -477,7 +554,7 @@ export default function App() {
   function openBICase(id) {
     const c = biCaseIndex.find(c => c.id === id);
     if (!c) return;
-    if (requireUser(c.isFree)) return;
+    if (requireUser(c.isFree, 'bi')) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'bi', id }); setPage('plans'); return; }
     track('case_opened', { room: 'bi', id, title: c.title });
     setActiveBICaseId(id);
@@ -492,7 +569,7 @@ export default function App() {
   function openSTFCase(id) {
     const c = stfCaseIndex.find(c => c.id === id);
     if (!c) return;
-    if (requireUser(c.isFree)) return;
+    if (requireUser(c.isFree, 'spot-the-flaw')) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'spot-the-flaw', id }); setPage('plans'); return; }
     track('case_opened', { room: 'spot-the-flaw', id, title: c.title });
     setActiveSTFCaseId(id);
@@ -507,7 +584,7 @@ export default function App() {
   function openTakehomeCase(id) {
     const c = takehomeCaseIndex.find(c => c.id === id);
     if (!c) return;
-    if (requireUser(c.isFree)) return;
+    if (requireUser(c.isFree, 'take-home')) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'take-home', id }); setPage('plans'); return; }
     track('case_opened', { room: 'take-home', id, title: c.title });
     setActiveTakehomeCaseId(id);
@@ -528,7 +605,7 @@ export default function App() {
   function openInstrumentationCase(id) {
     const c = instrumentationIndex.find(c => c.id === id);
     if (!c) return;
-    if (requireUser(c.isFree)) return;
+    if (requireUser(c.isFree, 'instrumentation')) return;
     if (!unlocked && !c.isFree) { navigate('unlock'); return; }
     track('case_opened', { room: 'instrumentation', id, title: c.title });
     setActiveInstrumentationCaseId(id);
@@ -559,7 +636,7 @@ export default function App() {
   function openPDScenario(id) {
     const s = productDesignIndex.find(s => s.id === id);
     if (!s) return;
-    if (requireUser(s.isFree)) return;
+    if (requireUser(s.isFree, 'product-design')) return;
     if (!s.isFree && !unlocked) { track('paywall_hit', { room: 'product-design', id }); setPage('plans'); return; }
     track('case_opened', { room: 'product-design', id, title: s.title });
     setActivePDScenarioId(id);
@@ -958,6 +1035,7 @@ export default function App() {
             savedProgress={getCodeProgress(activeCodeModuleId)}
             onBack={() => navigate('code')}
             onNext={nextCodeModuleId ? () => openCodeModule(nextCodeModuleId) : undefined}
+            onNavigate={navigate}
           />
         )}
 
@@ -1169,6 +1247,7 @@ export default function App() {
               caseId={activeTakehomeCaseId}
               onBack={() => setPage('take-home')}
               onNext={() => { const n = getNextTakehomeCaseId(activeTakehomeCaseId); if (n) openTakehomeCase(n); else setPage('take-home'); }}
+              onNavigate={navigate}
               unlocked={unlocked}
             />
           </Suspense>
@@ -1560,16 +1639,19 @@ export default function App() {
     )}
 
     {/* Auth gate — shown when anonymous user tries to open a case OR leaves a runner */}
-    {authGate && !user && (
-      <GateOverlay
-        title="Sign in to save your progress"
-        body="Create a free account to track your prep, build a streak, and save every case you complete. Foundations are always free."
-        ctaLabel="Sign in — it\'s free →"
-        onCTA={() => { setAuthGate(false); setShowAuth(true); }}
-        secondaryLabel="See what\'s included"
-        onSecondary={() => { setAuthGate(false); setPage('plans'); }}
-      />
-    )}
+    {authGate && !user && (() => {
+      const copy = (gateRoomRef.current && ROOM_GATE_COPY[gateRoomRef.current]) || DEFAULT_GATE_COPY;
+      return (
+        <GateOverlay
+          title={copy.title}
+          body={copy.body}
+          ctaLabel="Sign in — it's free →"
+          onCTA={() => { setAuthGate(false); setShowAuth(true); }}
+          secondaryLabel="See what's included"
+          onSecondary={() => { setAuthGate(false); setPage('plans'); }}
+        />
+      );
+    })()}
 
     {/* Progress saved toast — shown briefly when signed-in user leaves a runner */}
     {progressSaved && (

@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.0.0 | **Build:** ✓ (2.28s, 0 errors) | **Date:** 2026-06-05
+**Version:** V5.1.0 | **Build:** ✓ (2.14s, 0 errors) | **Date:** 2026-06-05
 
 ---
 
@@ -49,6 +49,10 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.1.0** — V5.1 sprint complete. (1) Backslash bug: all `\'` in JSX text content fixed across Plans.jsx, Progress.jsx, App.jsx — ctaLabel, secondaryLabel, and JSX text nodes now render clean apostrophes. (2) ForwardPointerCard (Audit #147 ✅): CodeRunner + TakehomeRunner were the only two missing it — both wired, onNavigate prop added to call sites in App.jsx. All 17 runners now have ForwardPointerCard at debrief. (3) Forensic SQL gate split (Audit #148 ✅): f01–f10 stay isFree: true; f11–f25 set to isFree: false. 15 problems now gated. (4) Progress next-suggestion card: returning users (totalCompleted > 0) see a "Continue where you left off" card using getNextSuggested() — room + case name + one-click Continue button. Shown above empty-state card, both conditional. (5) Sidebar TOOLS/LEARN cleanup: Interview Q&A and Failure Patterns moved from TOOLS to LEARN; Stats Calc moved from DRILLS to TOOLS and removed from DRILLS. LEARN = reference; TOOLS = active utilities; DRILLS = format drills. (6) Sign-in tier expansion: assessed — current binary isFree model has no guest vs. signed-in distinction. Model designed (guestPreview field + requireUser signature change), logged in IDEAS.md Tier 1. Not built — clean 1-session project. Build ✓ 2.14s.
+
+**V5.0.2** — Sidebar vocabulary + contextual GateOverlay copy. Sidebar.jsx: "PRACTICE ROOMS" → "ROOMS", "PRACTICE" flat group → "DRILLS" — eliminates the two-sections-both-called-practice confusion for new users. App.jsx: `requireUser(isFree, room)` now accepts a room key; `gateRoomRef` tracks which room triggered the gate; `ROOM_GATE_COPY` map (17 rooms) + `DEFAULT_GATE_COPY` fallback added; GateOverlay render reads contextual `{ title, body }` per room — each with outcome-framed copy specific to what\'s behind that gate. Build ✓ 1.94s.
 
 **V5.0.0** — PM audit sprint: guest demo path + empty state onboarding + Plans copy. (1) P0.1: `requireUser(isFree)` now accepts the case\'s isFree flag — guests can open and complete any isFree case in any room without signing in. Safety-net useEffect narrowed to only redirect `sql-lab` (not all runners). All 17 open handlers reordered: find item first, then `requireUser(item.isFree)`. (2) P0.2: Progress.jsx day-1 empty state — accent-bordered card shown when `totalCompleted === 0`, with "Start Metrics", "Start RCA", "Try SQL Lab" CTAs. Replaces the empty progress dashboard dead-end. (3) P0.3: Plans.jsx full copy pass — all tier descriptions and feature rows now outcome-framed: Guest "Try it, no account", Free Account "Build your practice habit", Full Lab "Prep like you\'re in the room." Feature rows rewritten from feature lists to outcome statements. MD spine updated: NEXT/IDEAS/DECISIONS/AUDITS/METRICS all reflect PM audit findings. Build ✓ 2.28s.
 
@@ -120,7 +124,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.0.0 P0 sprint complete. P1 next: ForwardPointerCard wired at all debriefs (Audit #147), then Forensic SQL gate split f11–f25 → isFree: false (Audit #148). Both are low-effort data/wiring passes.
+## Next action — V5.1.0 complete. Audits #147 + #148 closed. Next: sign-in tier expansion (guestPreview model, 1 session — spec in IDEAS.md Tier 1), or spokenSummary backfill (subagent writing pass).
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

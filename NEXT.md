@@ -26,13 +26,13 @@ Progress is the signed-in home — correct for returning users, broken for day-1
 **3. Plans.jsx copy pass**
 Current tier descriptions are feature-listed, not outcome-framed. Every row and tier description needs one revision pass before launch. Rule is in DECISIONS.md: outcome-framed copy only. No code changes — copy-only edit in Plans.jsx.
 
-**P1 — Important, build after P0**
+**P1 — Shipped V5.1.0**
 
-**4. ForwardPointerCard wired at every debrief** (Audit #147)
-Component exists at `src/components/shared/ForwardPointerCard.jsx`. Not consistently wired at case debrief exit. After every debrief, user should see "Next →" suggestion. Fixes the session-continuity drop-off at the highest-engagement moment. Wire across all runners that don't yet have it.
+**4. ForwardPointerCard wired at every debrief** ✅ (Audit #147 closed)
+CodeRunner + TakehomeRunner were missing it. Both wired. All 17 runners now have ForwardPointerCard at debrief exit.
 
-**5. Forensic SQL gate split** (Audit #148)
-Forensic Batch 1 (f01–f10) stays free — sufficient to demonstrate the format. Batch 2 (f11–f20) and Batch 3 (f21–f25) move behind the access gate: set `isFree: false` on problems f11–f25 in sqlLabProblems.js. Restores the most distinctive SQL Lab content as a premium differentiator.
+**5. Forensic SQL gate split** ✅ (Audit #148 closed)
+f01–f10 isFree: true. f11–f25 isFree: false. 15 problems gated.
 
 ---
 

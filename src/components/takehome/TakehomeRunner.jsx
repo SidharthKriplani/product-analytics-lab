@@ -3,6 +3,7 @@ import { saveTakehomeProgress, saveTakehomeDraft, loadTakehomeDraft, clearTakeho
 import { track } from '../../utils/analytics.js';
 import { takehomeCases } from '../../data/takehomeCases.js';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
+import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -38,7 +39,7 @@ function countWords(text) {
   return text.trim().split(/\s+/).length;
 }
 
-export function TakehomeRunner({ caseId, onBack, onNext, unlocked }) {
+export function TakehomeRunner({ caseId, onBack, onNext, onNavigate, unlocked }) {
   const caseData = takehomeCases.find(c => c.id === caseId);
   const _thdraft = loadTakehomeDraft(caseData.id);
   const [phase, setPhase] = useState(_thdraft?.phase || 'brief');
@@ -580,6 +581,7 @@ export function TakehomeRunner({ caseId, onBack, onNext, unlocked }) {
               Next Challenge →
             </button>
           )}
+          <ForwardPointerCard room='take-home' onNavigate={onNavigate} onNext={onNext} />
         </div>
       )}
     </div>

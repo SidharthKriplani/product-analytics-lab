@@ -56,7 +56,7 @@ SQLite REAL values that are whole numbers (40.0, 25.0, 50.0, 3500.0) return as J
 
 **Files:** `src/pages/SqlLabPage.jsx`
 
-### 147. ⚠️ UX Audit — ForwardPointerCard not wired at all case debriefs
+### 147. ✅ UX Audit — ForwardPointerCard not wired at all case debriefs
 **Type:** UX / Navigation & Discoverability
 **Status:** Open — V4.99.0
 
@@ -64,7 +64,7 @@ SQLite REAL values that are whole numbers (40.0, 25.0, 50.0, 3500.0) return as J
 
 **Files to check:** All runner components in `src/components/[room]/[Room]Runner.jsx` — verify ForwardPointerCard renders at debrief/completion state.
 
-### 148. ⚠️ Product Audit — Forensic SQL over-exposed (all 25 isFree)
+### 148. ✅ Product Audit — Forensic SQL over-exposed (all 25 isFree)
 **Type:** Creativity / Product — access model
 **Status:** Open — V4.99.0
 
