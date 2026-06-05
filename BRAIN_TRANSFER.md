@@ -126,7 +126,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.2.0 complete. 3-tier access model live. Next candidates: (1) spokenSummary backfill RCA05–RCA26 + C01–C25 (subagent writing pass), (2) sign-in tier expansion — increase isFree case count beyond current ~3 per room to give signed-in free tier more content, (3) PostHog event wiring for gate_shown / gate_converted / debrief_viewed.
+## Next action — V5.0–V5.2 MVP coherence pass complete. PAL is ready for private test (3–5 people). See PRIVATE_TEST.md. Public distribution blocked until private-test feedback. Do not build new features before running the test.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

@@ -2,13 +2,19 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V4.86.0 (2026-06-03)*
+*Last updated: V5.2.0 (2026-06-05)*
 
 ---
 
+## Status — V5.0–V5.2 MVP coherence pass complete
+
+PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
+
+**Public distribution is blocked until private-test feedback is collected.** The next decision after private test: either one more coherence sprint (if testers find navigation or gate confusion) or controlled public launch prep.
+
 ## Pre-beta gates (user actions, not code)
 
-1. **Git push from Mac terminal** — see BRAIN_TRANSFER.md git commit section
+1. **Run private test** — send to 3–5 qualified testers per PRIVATE_TEST.md
 2. **Confirm `VITE_POSTHOG_KEY` live in Vercel** — check env vars dashboard, establish WAU baseline
 
 ---
@@ -42,9 +48,17 @@ f01–f10 isFree: true. f11–f25 isFree: false. 15 problems gated.
 
 ---
 
-## Deferred (own sessions, not blocking)
+## Deferred — do not build until after private test feedback
 
-**spokenSummary backfill** — RCA05–RCA26 + C01–C25. Subagent writing pass.
+**Sign-in tier expansion Phase 2** — Increase isFree case count from ~3 to ~6–8 per room. Spec in IDEAS.md Tier 1. Gate: private test must confirm sign-in feels worth it; if it does, this deepens it.
+
+**spokenSummary backfill** — RCA05–RCA26 + C01–C25. Subagent writing pass. Non-blocking.
+
+**PostHog event wiring** — gate_shown, gate_converted, debrief_viewed, forward_pointer_clicked. Needed for real funnel data. Non-blocking for private test.
+
+**Stripe / payment** — Post-private test. No timeline.
+
+**Interview Simulator expansion** — Gate: PostHog WAU data first.
 
 **Sign-in tier value expansion** — Increase `isFree` case count from ~3 to ~8 per room for signed-in users. Gives free tier genuine value before conversion ask. See IDEAS.md Tier 1.
 
