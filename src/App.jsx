@@ -151,14 +151,19 @@ export default function App() {
 
   // Helper: call at top of any open handler that requires sign-in.
   // Returns true if the user is not signed in (caller should return early).
-  function requireUser(isFree = false) {
-    if (!user && !isFree) { setAuthGate(true); return true; }
+  function requireUser(isFree = false, room = null) {
+    if (!user && !isFree) {
+      gateRoomRef.current = room;
+      setAuthGate(true);
+      return true;
+    }
     return false;
   }
 
   // Page-transition effect: detect runner → browser transitions.
   // Anonymous user leaving a runner: show sign-in nudge ("your progress wasn't saved").
   // Signed-in free user leaving a runner: show "Progress saved" toast (2.5s auto-dismiss).
+  const gateRoomRef = useRef(null);
   const prevPageRef = useRef(page);
   useEffect(() => {
     const prev = prevPageRef.current;
@@ -326,7 +331,7 @@ export default function App() {
   function openStatsModule(id) {
     const module = statsModuleIndex.find(m => m.id === id);
     if (!module) return;
-    if (requireUser(module.isFree)) return;
+    if (requireUser(module.isFree, 'stats')) return;
     if (!module.isFree && !unlocked) { track('paywall_hit', { room: 'stats', id }); setPage('plans'); return; }
     track('case_opened', { room: 'stats', id, title: module.title });
     setActiveStatsModuleId(id);
@@ -337,7 +342,7 @@ export default function App() {
   function openDesignScenario(id) {
     const scenario = designScenarioIndex.find(s => s.id === id);
     if (!scenario) return;
-    if (requireUser(scenario.isFree)) return;
+    if (requireUser(scenario.isFree, 'design')) return;
     if (!scenario.isFree && !unlocked) { track('paywall_hit', { room: 'design', id }); setPage('plans'); return; }
     track('case_opened', { room: 'design', id, title: scenario.title });
     setActiveDesignScenarioId(id);
@@ -348,7 +353,7 @@ export default function App() {
   function openScenario(id) {
     const scenario = scenarioIndex.find(s => s.id === id);
     if (!scenario) return;
-    if (requireUser(scenario.isFree)) return;
+    if (requireUser(scenario.isFree, 'review')) return;
     if (!scenario.isFree && !unlocked) { track('paywall_hit', { room: 'review', id }); setPage('plans'); return; }
     track('case_opened', { room: 'review', id, title: scenario.title });
     setActiveScenarioId(id);
@@ -359,7 +364,7 @@ export default function App() {
   function openMetricsCase(id) {
     const c = metricCaseIndex.find(m => m.id === id);
     if (!c) return;
-    if (requireUser(c.isFree)) return;
+    if (requireUser(c.isFree, 'metrics')) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'metrics', id }); setPage('plans'); return; }
     track('case_opened', { room: 'metrics', id, title: c.title });
     setActiveMetricsCaseId(id);
