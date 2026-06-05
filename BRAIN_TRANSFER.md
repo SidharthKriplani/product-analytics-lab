@@ -50,6 +50,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V4.99.0** — Guest routing fix. `signed-out` CSS class (hides sidebar) now only applied when `!user && page === 'home'` — not on all non-signed-in pages. Previously guests were sidebar-less everywhere after clicking "Explore", trapping them in one room with no navigation. Now sidebar is visible on all non-home pages regardless of auth state. "Explore without signing in" now navigates to `'foundations'` (FoundationHub) instead of directly to `'stat-foundations'`. Build ✓ 2.16s.
+
 **V4.98.0** — Metric Universe Atlas panel. MetricsBrowser.jsx: ATLAS_CATEGORIES const (6 categories: Growth, Conversion/Funnel, Revenue/Monetization, Marketplace Health, Quality/Trust/Returns, Engagement; 3 metrics each with formula/decomposition/guardrails/interview angles). MetricAtlasPanel component (sticky right panel, category tabs, expandable metric cards). Toggle button in MetricsBrowser header (book-open icon, green when active). Layout widens to 1160px when atlas open. Sign-in free — no paywall check. Build ✓ 1.98s.
 
 **V4.97.0** — Free-tier polish. (1) All 25 Forensic SQL problems set isFree: true (data-only change). (2) progressSaved toast: signed-in users leaving any runner page see a 2.5s "Progress saved" toast (teal, bottom-center, auto-dismiss). (3) Sign-in nudge on runner exit: anonymous users leaving any runner page see GateOverlay "Sign in to save your progress" with "Sign in — it\'s free →" CTA. Page-transition effect in App.jsx using prevPageRef tracks runner→browser transitions. Build ✓ 2.63s.

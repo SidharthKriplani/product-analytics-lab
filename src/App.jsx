@@ -738,7 +738,7 @@ export default function App() {
   const isFocusMode = page === 'runner' || page.endsWith('-runner');
 
   return (
-    <div className={`app-layout${isFocusMode ? ' focus-mode' : ''}${page === 'sql-lab' ? ' sql-lab-mode' : ''}${!user ? ' signed-out' : ''}`} style={{ color: 'var(--text)' }}>
+    <div className={`app-layout${isFocusMode ? ' focus-mode' : ''}${page === 'sql-lab' ? ' sql-lab-mode' : ''}${!user && page === 'home' ? ' signed-out' : ''}`} style={{ color: 'var(--text)' }}>
       <Sidebar
         currentPage={page}
         onNavigate={navigate}

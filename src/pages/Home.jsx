@@ -173,7 +173,7 @@ export function Home({ onNavigate, onShowAuth }) {
           </button>
 
           <button
-            onClick={() => onNavigate && onNavigate('stat-foundations')}
+            onClick={() => onNavigate && onNavigate('foundations')}
             style={{
               padding: '0.6rem 1.5rem',
               fontSize: '0.875rem',
