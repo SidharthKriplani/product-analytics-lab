@@ -1,5 +1,285 @@
 import { Icon } from '../components/shared/Icon.jsx';
 import { useState } from 'react';
+
+// ── Metric Universe Atlas data ────────────────────────────────────────────────
+const ATLAS_CATEGORIES = [
+  {
+    id: 'growth',
+    label: 'Growth',
+    color: 'var(--accent)',
+    metrics: [
+      {
+        name: 'DAU / WAU / MAU',
+        formula: 'COUNT(DISTINCT user_id) per day/week/month with at least 1 qualifying event',
+        decomposition: 'New + Retained + Resurrected users',
+        guardrails: ['Define "active" explicitly — one event type, not all events', 'Watch for mix-shift: MAU growth driven by low-stickiness cohorts deflates DAU/MAU ratio'],
+        interviewAngles: ['Why did DAU drop while MAU held?', 'DAU/MAU fell — is this a retention problem or a mix-shift artifact?'],
+      },
+      {
+        name: 'D7 / D30 Retention',
+        formula: 'Users active on day N / users who first opened on day 0 (same cohort)',
+        decomposition: 'By acquisition channel, device, cohort vintage',
+        guardrails: ['Denominator must be the DAY-0 cohort, not all users', 'D7 can look strong if most churn happens day 8-14'],
+        interviewAngles: ['D7 retention improved — is it real or did the acquisition cohort change?', 'What does the retention curve shape tell you?'],
+      },
+      {
+        name: 'Stickiness (DAU/MAU)',
+        formula: 'DAU / MAU — percentage of monthly users who return daily',
+        decomposition: 'Segment by power users vs. casual users',
+        guardrails: ['Composite metric — can fall without any user getting worse (mix shift)', 'Power-user stickiness vs. aggregate stickiness can diverge'],
+        interviewAngles: ['Stickiness fell 3pp — is this engagement regression or cohort mix shift?', 'What is an acceptable stickiness target for this product type?'],
+      },
+    ],
+  },
+  {
+    id: 'conversion',
+    label: 'Conversion & Funnel',
+    color: 'var(--yellow)',
+    metrics: [
+      {
+        name: 'Conversion Rate (CVR)',
+        formula: 'Orders / Sessions (or Users) — specify grain explicitly',
+        decomposition: 'Session CVR vs. user CVR; by device, channel, segment',
+        guardrails: ['Session CVR inflated by power users with many sessions', 'User CVR hides session-level funnel issues'],
+        interviewAngles: ['CVR dropped — where in the funnel is the breakpoint?', 'Session CVR up but user CVR flat — what does that mean?'],
+      },
+      {
+        name: 'Add-to-Cart Rate',
+        formula: 'ATC events / Product Detail Page views',
+        decomposition: 'By product category, price tier, device, new vs. returning',
+        guardrails: ['A proxy for intent, not purchase — ATC rate can improve while CVR falls', 'Category mix shift changes aggregate ATC rate without any product change'],
+        interviewAngles: ['ATC up but orders flat — what is the abandonment point?', 'Should ATC rate be a primary or guardrail metric?'],
+      },
+      {
+        name: 'Funnel Falloff Rate',
+        formula: '(Users at step N − Users at step N+1) / Users at step N per stage',
+        decomposition: 'Per stage: browse → PDP → ATC → checkout → payment → order',
+        guardrails: ['Multi-step attribution loses users to multi-session journeys', 'Absolute drop counts matter more than percentages at low-volume stages'],
+        interviewAngles: ['Which funnel stage explains the most absolute order loss?', 'How do you distinguish a UX problem from a pricing problem at the PDP→ATC step?'],
+      },
+    ],
+  },
+  {
+    id: 'revenue',
+    label: 'Revenue & Monetization',
+    color: 'var(--green)',
+    metrics: [
+      {
+        name: 'GMV (Gross Merchandise Value)',
+        formula: 'SUM(order_value) — before returns, cancellations, and platform fees',
+        decomposition: 'GMV = Orders × AOV; segment by category, cohort, geography',
+        guardrails: ['GMV is gross — cancellations and returns inflate it vs. net revenue', 'AOV and orders can offset: watch both, not just GMV'],
+        interviewAngles: ['GMV up but net revenue flat — what changed?', 'Is GMV the right north star for a marketplace?'],
+      },
+      {
+        name: 'Take Rate / Platform Fee',
+        formula: 'Net revenue / GMV — percentage the platform retains',
+        decomposition: 'By seller tier, category, promotional activity',
+        guardrails: ['Discounts and incentives reduce effective take rate even if nominal rate is unchanged', 'Category mix shift changes blended take rate without any pricing change'],
+        interviewAngles: ['Take rate fell 1pp — is this mix shift or pricing erosion?', 'What is the right take rate for a two-sided marketplace?'],
+      },
+      {
+        name: 'Contribution Margin per Order',
+        formula: 'Revenue per order − COGS − logistics − discount − returns cost',
+        decomposition: 'Positive vs. negative margin orders by segment; margin-at-risk from RTO',
+        guardrails: ['Optimize CVR without this and you fill the funnel with negative-margin orders', 'Discount campaigns can improve CVR while destroying contribution margin'],
+        interviewAngles: ['CVR up but contribution margin down — what is the mechanism?', 'What guardrail prevents search optimization from degrading margin?'],
+      },
+    ],
+  },
+  {
+    id: 'marketplace',
+    label: 'Marketplace Health',
+    color: 'var(--purple)',
+    metrics: [
+      {
+        name: 'Fill Rate',
+        formula: 'Orders successfully fulfilled / Orders placed — tracks supply-side delivery ability',
+        decomposition: 'By seller tier, category, geography',
+        guardrails: ['Low fill rate signals catalog thinness or seller reliability problems, not demand issues', 'Fill rate can look healthy in aggregate while a specific category is broken'],
+        interviewAngles: ['Fill rate dropped — supply-side or demand-side problem?', 'What is the causal chain from fill rate to buyer LTV?'],
+      },
+      {
+        name: 'Seller Health Score',
+        formula: 'Composite of: response time, order fill rate, listing quality, return rate, ratings',
+        decomposition: 'By seller vintage, GMV tier, category',
+        guardrails: ['Composite scores hide which dimension is driving change', 'Gaming risk: sellers optimize for the score, not for actual quality'],
+        interviewAngles: ['How do you weight the components of a seller health score?', 'Seller health improved — did buyer experience improve too?'],
+      },
+      {
+        name: 'Catalog Depth / OOS Rate',
+        formula: 'Active SKUs available vs. out-of-stock SKUs; OOS = unavailable / total listed',
+        decomposition: 'By category, season, price tier',
+        guardrails: ['High SKU count with low-quality listings is worse than fewer quality listings', 'OOS rate spikes can cause CVR drops that look like product problems'],
+        interviewAngles: ['Sessions flat, orders down — is OOS rate a suspect?', 'How does catalog depth drive search zero-result rate?'],
+      },
+    ],
+  },
+  {
+    id: 'quality',
+    label: 'Quality, Trust & Returns',
+    color: 'var(--red)',
+    metrics: [
+      {
+        name: 'Return Rate',
+        formula: 'Items returned / Items sold — track by category, seller, channel',
+        decomposition: 'Reason codes: wrong item, quality defect, changed mind, never arrived',
+        guardrails: ['High-consideration categories (furniture, apparel) have structurally higher return rates', 'Easy checkout can inflate return rate by reducing purchase consideration'],
+        interviewAngles: ['CVR improved but return rate spiked — is the checkout change causing impulse buys?', 'What is an acceptable return rate for this product category?'],
+      },
+      {
+        name: 'RTO Rate (Return to Origin)',
+        formula: 'Orders returned to seller undelivered / Orders shipped — Indian e-commerce KPI',
+        decomposition: 'By city tier, carrier, COD vs. prepaid, delivery attempt count',
+        guardrails: ['COD orders have structurally higher RTO than prepaid', 'Carrier quality varies by tier; aggregate RTO hides carrier-level problems'],
+        interviewAngles: ['RTO up in Tier 2/3 — carrier problem or buyer behavior shift?', 'What is the unit economics impact of a 1pp RTO increase?'],
+      },
+      {
+        name: 'Fraud Rate',
+        formula: 'Fraudulent orders / Total orders; or chargebacks / Total payment volume',
+        decomposition: 'By payment method, device, geography, user vintage',
+        guardrails: ['Fraud rate is a lagging indicator — current fraud is detected weeks later', 'Reducing fraud aggressively can increase false positive rate and harm legitimate buyers'],
+        interviewAngles: ['Fraud rate tripled in 72 hours — what is your first investigation step?', 'False positive rate vs. fraud rate: how do you set the right threshold?'],
+      },
+    ],
+  },
+  {
+    id: 'engagement',
+    label: 'Engagement',
+    color: 'var(--teal)',
+    metrics: [
+      {
+        name: 'Session Depth / Pages per Session',
+        formula: 'AVG(page_views or events per session) — measures within-session engagement',
+        decomposition: 'By entry point, device, new vs. returning user',
+        guardrails: ['More pages per session can mean better engagement OR harder navigation', 'Session depth and session duration can diverge — specify which you mean'],
+        interviewAngles: ['Session depth increased after a redesign — is this engagement or confusion?', 'What is the relationship between session depth and conversion in this product?'],
+      },
+      {
+        name: 'Feature Adoption Rate',
+        formula: 'Users who triggered feature at least once / Total active users in period',
+        decomposition: 'By cohort, segment; track adoption curve over weeks',
+        guardrails: ['One-time adoption ≠ habit formation — track weekly active feature users, not ever-used', 'Novelty effect inflates adoption in weeks 1-2; stable adoption is the real signal'],
+        interviewAngles: ['Feature adoption is high but retention is flat — is the feature adding real value?', 'How do you distinguish novelty-driven adoption from genuine utility?'],
+      },
+      {
+        name: 'Notification Engagement',
+        formula: 'Open rate = opens / sent; effective rate = downstream action / sent',
+        decomposition: 'By notification type, timing, user segment, permission status',
+        guardrails: ['Open rate is a proxy — optimize for it and you send at 6am when users pick up phones, not when they engage', 'Opt-out rate and uninstall rate are the correct guardrails; track them pre-declared'],
+        interviewAngles: ['Open rate up but session rate flat — what is the diagnosis?', 'How do you set the guardrails before running a notification timing experiment?'],
+      },
+    ],
+  },
+];
+
+// ── MetricAtlasPanel component ────────────────────────────────────────────────
+function MetricAtlasPanel({ activeCategory, onSetCategory, onClose }) {
+  const [expanded, setExpanded] = useState(null);
+  const cat = ATLAS_CATEGORIES.find(c => c.id === activeCategory) || ATLAS_CATEGORIES[0];
+
+  return (
+    <div style={{
+      width: 300, flexShrink: 0,
+      borderLeft: '1px solid var(--border)',
+      background: 'var(--surface)',
+      borderRadius: '10px',
+      padding: '1.1rem',
+      maxHeight: 'calc(100vh - 6rem)',
+      overflowY: 'auto',
+      position: 'sticky',
+      top: '1.5rem',
+      alignSelf: 'flex-start',
+    }}>
+      {/* Panel header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+        <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--green)' }}>
+          Metric Atlas
+        </div>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.1rem 0.3rem', fontSize: '1rem', lineHeight: 1 }}>×</button>
+      </div>
+
+      {/* Category tabs */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.9rem' }}>
+        {ATLAS_CATEGORIES.map(c => (
+          <button
+            key={c.id}
+            onClick={() => { onSetCategory(c.id); setExpanded(null); }}
+            style={{
+              fontSize: '0.7rem', fontWeight: 600, padding: '0.2rem 0.55rem',
+              borderRadius: '4px', border: '1px solid ' + (c.id === activeCategory ? c.color : 'var(--border)'),
+              background: c.id === activeCategory ? 'var(--surface-2)' : 'none',
+              color: c.id === activeCategory ? c.color : 'var(--text-muted)',
+              cursor: 'pointer',
+            }}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Metric cards */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+        {cat.metrics.map((m, i) => (
+          <div
+            key={i}
+            style={{
+              border: '1px solid var(--border)', borderRadius: '8px',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Card header — always visible */}
+            <button
+              onClick={() => setExpanded(expanded === i ? null : i)}
+              style={{
+                width: '100%', textAlign: 'left', background: 'var(--surface-2)',
+                border: 'none', cursor: 'pointer', padding: '0.6rem 0.75rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}
+            >
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>{m.name}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', transform: expanded === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
+            </button>
+
+            {/* Card body — expanded */}
+            {expanded === i && (
+              <div style={{ padding: '0.65rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                {/* Formula */}
+                <div>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Formula</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text)', lineHeight: 1.5 }}>{m.formula}</div>
+                </div>
+                {/* Decomposition */}
+                <div>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Decomposition</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text)', lineHeight: 1.5 }}>{m.decomposition}</div>
+                </div>
+                {/* Guardrails */}
+                <div>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Guardrails</div>
+                  {m.guardrails.map((g, j) => (
+                    <div key={j} style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.5, paddingLeft: '0.6rem', borderLeft: '2px solid var(--border)', marginBottom: j < m.guardrails.length - 1 ? '0.25rem' : 0 }}>
+                      {g}
+                    </div>
+                  ))}
+                </div>
+                {/* Interview angles */}
+                <div style={{ background: 'var(--surface-2)', borderRadius: '6px', padding: '0.5rem 0.6rem' }}>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--green)', marginBottom: '0.25rem' }}>Interview angles</div>
+                  {m.interviewAngles.map((a, j) => (
+                    <div key={j} style={{ fontSize: '0.76rem', color: 'var(--text)', lineHeight: 1.5, marginBottom: j < m.interviewAngles.length - 1 ? '0.2rem' : 0, fontStyle: 'italic' }}>
+                      "{a}"
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 import { metricCases } from '../data/metricCases.js';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getMetricsProgress } from '../utils/metricsProgress.js';
@@ -28,6 +308,8 @@ export function MetricsBrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle
   const [sortBy, setSortBy] = useState('default');
   const [theoryActive, setTheoryActive] = useState(false);
   const [diffFilter, setDiffFilter] = useState('all');
+  const [atlasOpen, setAtlasOpen] = useState(false);
+  const [atlasCategory, setAtlasCategory] = useState('growth');
   const completedCount = metricCases.filter(c => getMetricsProgress(c.id)).length;
 
   const diffCounts = {
@@ -46,7 +328,9 @@ export function MetricsBrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle
   const firstUnstartedId = metricCases.find(mc => !getMetricsProgress(mc.id))?.id;
 
   return (
-    <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
+    <div className="pal-page-enter" style={{ maxWidth: atlasOpen ? '1160px' : '800px', margin: '0 auto', padding: '2rem 1rem', transition: 'max-width 0.2s' }}>
+    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+    <div style={{ flex: 1, minWidth: 0 }}>
 
       {/* Header */}
       <div style={{ marginBottom: '1.75rem' }}>
@@ -68,6 +352,22 @@ export function MetricsBrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
           <RoomBadge />
+          <button
+            onClick={() => setAtlasOpen(o => !o)}
+            style={{
+              marginLeft: 'auto',
+              display: 'flex', alignItems: 'center', gap: '0.35rem',
+              background: atlasOpen ? 'var(--green-bg)' : 'var(--surface-2)',
+              border: '1px solid ' + (atlasOpen ? 'var(--green-border)' : 'var(--border)'),
+              borderRadius: '6px', padding: '0.28rem 0.65rem',
+              fontSize: '0.73rem', fontWeight: 600,
+              color: atlasOpen ? 'var(--green)' : 'var(--text-muted)',
+              cursor: 'pointer',
+            }}
+          >
+            <Icon name='book-open' size={12} color={atlasOpen ? 'var(--green)' : 'var(--text-muted)'} />
+            Metric Atlas
+          </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div style={{ width: 96, height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: `${Math.min(100, Math.round(completedCount / metricCases.length * 100))}%`, background: 'var(--green)', borderRadius: 2, transition: 'width 0.4s' }} />
@@ -257,7 +557,19 @@ export function MetricsBrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle
         </div>
       )}
 
+    </div>{/* end main content column */}
+
+    {/* Metric Atlas Panel */}
+    {atlasOpen && (
+      <MetricAtlasPanel
+        activeCategory={atlasCategory}
+        onSetCategory={setAtlasCategory}
+        onClose={() => setAtlasOpen(false)}
+      />
+    )}
+
     </div>
+  </div>
   );
 }
 

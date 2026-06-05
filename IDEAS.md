@@ -290,6 +290,24 @@ Family 6 — Data Traps (across all): divide-by-zero, integer division, duplicat
 
 ## Tier 2 — High impact, more effort
 
+### One-active-session logic
+Users should have 1 active session at a time. New device sign-in invalidates the previous session. Supabase's `signOut({ scope: 'others' })` partially handles this but true automatic invalidation requires a custom `sessions` table + server-side token check on each page load. Skip for v1 — access code model has low sharing-abuse risk currently. Gate: post-Stripe, when paid accounts are active.
+
+### Experiment Design phase in Review Room
+Review Room is currently readout-only. "Design the test" is a distinct interview question type (how would you design this A/B? What's the unit of randomization? What are the guardrails?) that PAL doesn't train at all. Three design cases already identified (search ranking A/B, prepaid nudge A/B, checkout flow A/B). Requires structural runner change — adding a "Design" phase before the readout — plus 3 new cases authored from the T1–T5 Wayfair materials in the PDF archive.
+
+### Analyst product sense subsection
+PAL's Product Design room is PM-oriented (user journey, feature ideation). Analyst product sense is different: anchor to user problem → frame as analytical question → prioritize by impact → align to goal → define metrics. The `product_sense_ds_packet.pdf` is ready source material. Implement as a new section in Cases room or a new set of cases tagged "Analyst Product Sense." Covers the DS-vs-PM role distinction PAL currently elides.
+
+### Six-fix trust check sequence case
+The T1–T5 + Wayfair_DS2 PDF series teaches experimentation through a consistent spine of 6 statistical fixes: grain check → SRM → guardrail pre-declaration → multiple comparisons → right censoring → novelty detection. PAL's Review Room tests each issue in isolation. A single "full sequence" case where the analyst must work through all 6 checks is a senior-level preparation gap. Source: Wayfair_DS2_CaseStudy_v2_Corrected.pdf (end-to-end mock with full annotation).
+
+### Lead magnets (free downloadable content)
+Free PDF/HTML downloads to drive funnel: SQL cheat sheet (PAL format, FV/FA explained), forensic breakdown PDF (the 25 forensic trap patterns), metric reference guide (condensed Atlas), RCA cheat sheet, case prep guide. Gate: none — these are free giveaways. Distribution: Plans page + signed-out home page. Build after the Metric Universe Atlas is live (Atlas content can be repurposed directly).
+
+### Start Here pinned articles
+3 curated "Start Here" articles visible on the signed-out home page. Requires a `pinned: true` field on blog article data + home page rendering change. Content candidates: RCA framework intro, experimentation fundamentals, "how to use PAL" guide. Low-effort content change, medium-effort home page change. Don't build until home page redesign is scoped.
+
 ### Auth — Linked accounts (Google + GitHub)
 Users who sign up with GitHub on desktop then try Google on mobile get a duplicate account. Supabase Identity Linking API handles this natively — low effort, real pain point. Scope: link Google + GitHub to same account, show linked providers on Profile. LinkedIn is NOT part of this — it's not a native Supabase provider and PAL doesn't use LinkedIn data for anything yet. If we ever personalize by role/company/YOE, revisit LinkedIn as a separate feature then.
 

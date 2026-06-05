@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { GateOverlay } from '../components/shared/GateOverlay.jsx';
 import { companyTracks } from '../data/companyTracks.js';
 
 const ROOM_LABELS = {
@@ -494,33 +495,16 @@ export function CompanyTracks({ onNavigate, onBack, unlocked }) {
     setSelectedTrack(null);
   }
 
-  // Company Tracks are fully premium — no free tier
-  if (!unlocked) {
-    return (
-      <div style={{ maxWidth: '480px', margin: '4rem auto', padding: '2rem 1.5rem', textAlign: 'center' }}>
-        <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🔒</div>
-        <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.5rem' }}>
-          Company Tracks — Full Access Only
-        </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-          Company-specific prep tracks are part of full access. Enter your access code to unlock them alongside all other premium content.
-        </p>
-        <button
-          onClick={() => onNavigate('unlock')}
-          style={{
-            background: 'var(--accent)', color: '#fff', border: 'none',
-            borderRadius: '6px', padding: '0.6rem 1.5rem',
-            fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer',
-          }}
-        >
-          Enter Access Code →
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="pal-page-enter" style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+    {!unlocked && (
+      <GateOverlay
+        title="Company Tracks"
+        body="Curated prep paths calibrated to what specific employers actually test — case selection, question weighting, and difficulty sequencing by company."
+        ctaLabel="Unlock the full lab →"
+        onCTA={() => onNavigate('unlock')}
+      />
+    )}
       {/* Page header */}
       <div style={{
         maxWidth: view === 'detail' ? '800px' : '960px',

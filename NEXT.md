@@ -13,30 +13,35 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ---
 
-## Next session
+## Active build queue (V4.94.0 sprint)
 
-**1. spokenSummary backfill**
-RCA05–RCA24 + all Business cases need spokenSummary populated. Infrastructure already live (V4.87.0). Delegate as subagent writing pass — ~40 cases, 30-second spoken answers per case.
+**Note (V4.94–4.98):** Full sprint complete. GateOverlay, Plans.jsx, 8 new cases, forensic isFree, progress saved/sign-in nudge, Metric Universe Atlas — all shipped. Build ✓.
 
-**2. Interview Simulator expansion**
-Gate: confirm PostHog WAU data first. If live, check Simulator usage. If usage warrants it, split DS/PM modes into specific roles (Product Analyst, Business Analyst, Data Analyst, PM) with Senior/Staff tiers.
+**1. spokenSummary backfill** ← delegate as subagent writing pass
+Create `src/components/shared/GateOverlay.jsx`. Fix App.jsx: anonymous users hitting gated pages see GateOverlay, not a redirect to home. Migrate CompanyTracks.jsx + InterviewSimulator.jsx inline gates to GateOverlay. DECISIONS.md gate copy table is the source of truth for copy.
 
-**Note (V4.90.0):** S-grade debrief pass COMPLETE — all 130 SQL problems now have FV + FA additions. SQL_UPGRADE_PASS.md + SQL_LAB_PLAN.md Section 11 marked complete.
+**2. Plans.jsx — unified tier page**
+Merge `Pricing.jsx` + `Unlock.jsx` into `Plans.jsx`. Three-tier layout: Guest / Free / Premium. Access code input prominent in Premium column. Wire to App.jsx + Sidebar.jsx. All "Unlock →" CTAs in app route to `'plans'`, not `'unlock'`.
 
-**Note (V4.85.0–V4.87.0):** Full Jatin feedback + Meesho signal sequence complete. rf14/rf15 shipped. Stats Foundations persistence live. spokenSummary field live in RCA + Business runners — RCA01–04 populated, RCA25 + RCA26 built with spokenSummary. Remaining RCA/Business cases can be backfilled gradually.
+**3. 8 new cases (content authoring)**
+RCA27 orders-down/sessions-stable · RCA28 RTO-spike-tier2/3 · C21 prepaid-adoption · C22 restrict-high-RTO-COD · C23 CVR-vs-contribution-tradeoff · s30 CTR-up/margin-down (check s09 first) · s31 CVR-up/return-rate-up · s32 SRM+segment-harm. All go in existing runners — no runner changes. See gap analysis in MSL_STRUCTURE_BRIEF.md for case specs.
 
-**2. S-grade debrief pass (Batches 4–13) — paused**
-Resume after forensic Batches 1–3 ship.
+**4. Free-tier polish**
+Mark all 25 forensic SQL problems `isFree: true` (data change only). Add "Progress saved" micro-confirmation for signed-in free users. Add sign-in prompt at demo case debrief for anonymous users.
 
-**3. Confirm VITE_POSTHOG_KEY live in Vercel**
-Establish WAU baseline before Batch 1 outreach.
+**5. Metric Universe Atlas panel**
+New `MetricAtlasPanel` component in MetricsBrowser.jsx. Toggle button in header. 6 v1 categories: Growth, Conversion/Funnel, Revenue/Monetization, Marketplace Health, Quality/Trust/Returns, Engagement. ~4 cards each. Sign-in free access.
 
 ---
 
 ## Deferred (own sessions, not blocking)
 
-**Room header icon consistency (audit #79)**
-Standardize remaining room browser headers to the 36×36 colored box pattern with Icon component.
+**spokenSummary backfill** — RCA05–RCA24 + all Business cases. Subagent writing pass.
 
-**Interview Simulator expansion**
-Split DS/PM modes into specific roles (Product Analyst, Business Analyst, Data Analyst, PM) with Senior/Staff tiers. Gate: PostHog confirms Simulator usage worth investing in.
+**Experiment Design phase** — Add "design the test" phase to Review Room runner. Structural runner change, separate sprint.
+
+**Analyst product sense** — New subsection in Cases room or Product Design. product_sense_ds_packet is ready source material.
+
+**Interview Simulator expansion** — Gate: confirm PostHog WAU data first.
+
+**Start Here pinned articles** — Requires `pinned` field in blog data + home page changes. Separate session.

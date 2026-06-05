@@ -72,7 +72,7 @@ const FLAT_GROUPS = [
     items: [
       { id: 'profile',  label: 'Profile',  icon: 'user' },
       { id: 'progress', label: 'Progress', icon: 'bar-chart' },
-      { id: 'pricing',  label: 'Plans',    icon: 'credit-card' },
+      { id: 'plans',    label: 'Plans',    icon: 'credit-card' },
     ],
   },
 ];
@@ -347,7 +347,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                   <Icon name="user" size={13} color="currentColor" style={{ opacity: 0.7, flexShrink: 0 }} />
                   <span>Sign In</span>
                 </button>
-                <NavItem id="pricing" />
+                <NavItem id="plans" />
               </>
             ) : (
               <>
@@ -394,7 +394,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                     </button>
                   );
                 })()}
-                <NavItem id="pricing" />
+                <NavItem id="plans" />
               </>
             )}
           </div>

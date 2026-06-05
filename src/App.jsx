@@ -1,4 +1,5 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { GateOverlay } from './components/shared/GateOverlay.jsx';
 import { ErrorBoundary } from './components/shared/ErrorBoundary.jsx';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import { track } from './utils/analytics.js';
@@ -58,6 +59,7 @@ const FailuresCatalog       = lazy(() => import('./pages/FailuresCatalog.jsx').t
 const JudgmentBank          = lazy(() => import('./pages/JudgmentBank.jsx').then(m => ({ default: m.JudgmentBank })));
 const QADashboard           = lazy(() => import('./pages/QADashboard.jsx').then(m => ({ default: m.QADashboard })));
 const Pricing               = lazy(() => import('./pages/Pricing.jsx').then(m => ({ default: m.Pricing })));
+const Plans                 = lazy(() => import('./pages/Plans.jsx').then(m => ({ default: m.Plans })));
 
 // Runners — lazy-loaded
 const ScenarioRunner        = lazy(() => import('./components/scenario/ScenarioRunner.jsx').then(m => ({ default: m.ScenarioRunner })));
@@ -144,6 +146,33 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [authGate, setAuthGate] = useState(false);
+  const [progressSaved, setProgressSaved] = useState(false); // "Progress saved" toast for signed-in free users
+
+  // Helper: call at top of any open handler that requires sign-in.
+  // Returns true if the user is not signed in (caller should return early).
+  function requireUser() {
+    if (!user) { setAuthGate(true); return true; }
+    return false;
+  }
+
+  // Page-transition effect: detect runner → browser transitions.
+  // Anonymous user leaving a runner: show sign-in nudge ("your progress wasn't saved").
+  // Signed-in free user leaving a runner: show "Progress saved" toast (2.5s auto-dismiss).
+  const prevPageRef = useRef(page);
+  useEffect(() => {
+    const prev = prevPageRef.current;
+    const leftRunner = AUTH_REQUIRED_PAGES.has(prev) && !AUTH_REQUIRED_PAGES.has(page);
+    if (leftRunner) {
+      if (!user) {
+        setAuthGate(true); // nudge with sign-in copy
+      } else {
+        setProgressSaved(true);
+        setTimeout(() => setProgressSaved(false), 2500);
+      }
+    }
+    prevPageRef.current = page;
+  }, [page]); // eslint-disable-line
 
   // Auth gate — anonymous users cannot access practice runners or SQL Lab.
   // Foundations (stat/metrics/rca/exp) are open to ALL users — they are top-of-funnel.
@@ -158,11 +187,12 @@ export default function App() {
     'instrumentation-runner', 'sql-runner',
   ]);
 
-  // Block anonymous users from practice runners — show sign-in prompt
+  // Safety-net: if an anonymous user somehow reaches a runner page via direct navigation,
+  // show the auth gate and fall back to home. In normal usage the open handlers intercept first.
   useEffect(() => {
     if (!user && AUTH_REQUIRED_PAGES.has(page)) {
+      setAuthGate(true);
       setPage('home');
-      setShowAuth(true);
     }
   }, [page, user]);
 
@@ -233,6 +263,7 @@ export default function App() {
       pricing: 'Pricing — Product Analytics Lab',
       progress: 'My Progress — Product Analytics Lab',
       unlock: 'Unlock Access — Product Analytics Lab',
+      plans:  'Plans — Product Analytics Lab',
       'simulator':      'Interview Simulator — Product Analytics Lab',
       'ab-interpreter': 'A/B Test Interpreter — Product Analytics Lab',
       'search':    'Search — Analytics Lab',
@@ -272,6 +303,8 @@ export default function App() {
   }
 
   function navigate(target) {
+    // SQL Lab requires sign-in — intercept here before navigation
+    if (target === 'sql-lab' && !user) { setAuthGate(true); return; }
     track('page_viewed', { page: target });
     setPage(target);
     setSidebarOpen(false);
@@ -291,9 +324,10 @@ export default function App() {
   }
 
   function openStatsModule(id) {
+    if (requireUser()) return;
     const module = statsModuleIndex.find(m => m.id === id);
     if (!module) return;
-    if (!module.isFree && !unlocked) { track('paywall_hit', { room: 'stats', id }); setPage('unlock'); return; }
+    if (!module.isFree && !unlocked) { track('paywall_hit', { room: 'stats', id }); setPage('plans'); return; }
     track('case_opened', { room: 'stats', id, title: module.title });
     setActiveStatsModuleId(id);
     setPage('stats-runner');
@@ -301,9 +335,10 @@ export default function App() {
   }
 
   function openDesignScenario(id) {
+    if (requireUser()) return;
     const scenario = designScenarioIndex.find(s => s.id === id);
     if (!scenario) return;
-    if (!scenario.isFree && !unlocked) { track('paywall_hit', { room: 'design', id }); setPage('unlock'); return; }
+    if (!scenario.isFree && !unlocked) { track('paywall_hit', { room: 'design', id }); setPage('plans'); return; }
     track('case_opened', { room: 'design', id, title: scenario.title });
     setActiveDesignScenarioId(id);
     setPage('design-runner');
@@ -311,9 +346,10 @@ export default function App() {
   }
 
   function openScenario(id) {
+    if (requireUser()) return;
     const scenario = scenarioIndex.find(s => s.id === id);
     if (!scenario) return;
-    if (!scenario.isFree && !unlocked) { track('paywall_hit', { room: 'review', id }); setPage('unlock'); return; }
+    if (!scenario.isFree && !unlocked) { track('paywall_hit', { room: 'review', id }); setPage('plans'); return; }
     track('case_opened', { room: 'review', id, title: scenario.title });
     setActiveScenarioId(id);
     setPage('runner');
@@ -321,9 +357,10 @@ export default function App() {
   }
 
   function openMetricsCase(id) {
+    if (requireUser()) return;
     const c = metricCaseIndex.find(m => m.id === id);
     if (!c) return;
-    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'metrics', id }); setPage('unlock'); return; }
+    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'metrics', id }); setPage('plans'); return; }
     track('case_opened', { room: 'metrics', id, title: c.title });
     setActiveMetricsCaseId(id);
     setPage('metrics-runner');
@@ -331,9 +368,10 @@ export default function App() {
   }
 
   function openRCACase(id) {
+    if (requireUser()) return;
     const c = rcaCaseIndex.find(r => r.id === id);
     if (!c) return;
-    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'rca', id }); setPage('unlock'); return; }
+    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'rca', id }); setPage('plans'); return; }
     track('case_opened', { room: 'rca', id, title: c.title });
     setActiveRCACaseId(id);
     setPage('rca-runner');
@@ -341,9 +379,10 @@ export default function App() {
   }
 
   function openBusinessCase(id) {
+    if (requireUser()) return;
     const c = businessCaseIndex.find(b => b.id === id);
     if (!c) return;
-    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'cases', id }); setPage('unlock'); return; }
+    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'cases', id }); setPage('plans'); return; }
     track('case_opened', { room: 'cases', id, title: c.title });
     setActiveBusinessCaseId(id);
     setPage('cases-runner');
@@ -351,9 +390,10 @@ export default function App() {
   }
 
   function openCodeModule(id) {
+    if (requireUser()) return;
     const m = codeModuleIndex.find(m => m.id === id);
     if (!m) return;
-    if (!m.isFree && !unlocked) { track('paywall_hit', { room: 'code', id }); setPage('unlock'); return; }
+    if (!m.isFree && !unlocked) { track('paywall_hit', { room: 'code', id }); setPage('plans'); return; }
     track('case_opened', { room: 'code', id, title: m.title });
     setActiveCodeModuleId(id);
     setPage('code-runner');
@@ -361,9 +401,10 @@ export default function App() {
   }
 
   function openPrioritizationScenario(id) {
+    if (requireUser()) return;
     const s = prioritizationIndex.find(s => s.id === id);
     if (!s) return;
-    if (!s.isFree && !unlocked) { track('paywall_hit', { room: 'prioritization', id }); setPage('unlock'); return; }
+    if (!s.isFree && !unlocked) { track('paywall_hit', { room: 'prioritization', id }); setPage('plans'); return; }
     track('case_opened', { room: 'prioritization', id, title: s.title });
     setActivePrioritizationId(id);
     setPage('prioritization-runner');
@@ -371,9 +412,10 @@ export default function App() {
   }
 
   function openBehavioralQuestion(id) {
+    if (requireUser()) return;
     const q = behavioralIndex.find(q => q.id === id);
     if (!q) return;
-    if (!q.isFree && !unlocked) { track('paywall_hit', { room: 'behavioral', id }); setPage('unlock'); return; }
+    if (!q.isFree && !unlocked) { track('paywall_hit', { room: 'behavioral', id }); setPage('plans'); return; }
     track('case_opened', { room: 'behavioral', id, title: q.title });
     setActiveBehavioralId(id);
     setPage('behavioral-runner');
@@ -381,9 +423,10 @@ export default function App() {
   }
 
   function openEstimationProblem(id) {
+    if (requireUser()) return;
     const p = estimationIndex.find(p => p.id === id);
     if (!p) return;
-    if (!p.isFree && !unlocked) { track('paywall_hit', { room: 'estimation', id }); setPage('unlock'); return; }
+    if (!p.isFree && !unlocked) { track('paywall_hit', { room: 'estimation', id }); setPage('plans'); return; }
     track('case_opened', { room: 'estimation', id, title: p.title });
     setActiveEstimationId(id);
     setPage('estimation-runner');
@@ -393,7 +436,7 @@ export default function App() {
   function openStatFoundationsModule(id) {
     const m = statsFoundationsIndex.find(m => m.id === id);
     if (!m) return;
-    // Foundations are always free — no paywall check
+    // Foundations always free — no auth or paywall check
     track('case_opened', { room: 'stat-foundations', id, title: m.title });
     setActiveStatFoundationsId(id);
     setPage('stat-foundations-runner');
@@ -401,9 +444,10 @@ export default function App() {
   }
 
   function openGrowthAnalyticsCase(id) {
+    if (requireUser()) return;
     const c = growthAnalyticsIndex.find(c => c.id === id);
     if (!c) return;
-    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'growth-analytics', id }); setPage('unlock'); return; }
+    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'growth-analytics', id }); setPage('plans'); return; }
     track('case_opened', { room: 'growth-analytics', id, title: c.title });
     setActiveGrowthAnalyticsId(id);
     setPage('growth-analytics-runner');
@@ -411,9 +455,10 @@ export default function App() {
   }
 
   function openChallenge(id) {
+    if (requireUser()) return;
     const c = challengesIndex.find(c => c.id === id);
     if (!c) return;
-    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'challenges', id }); setPage('unlock'); return; }
+    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'challenges', id }); setPage('plans'); return; }
     setActiveChallengeId(id);
     track('open_challenge', { id, title: c.title });
     setPage('challenges-runner');
@@ -425,9 +470,10 @@ export default function App() {
   }
 
   function openBICase(id) {
+    if (requireUser()) return;
     const c = biCaseIndex.find(c => c.id === id);
     if (!c) return;
-    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'bi', id }); setPage('unlock'); return; }
+    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'bi', id }); setPage('plans'); return; }
     track('case_opened', { room: 'bi', id, title: c.title });
     setActiveBICaseId(id);
     setPage('bi-runner');
@@ -439,9 +485,10 @@ export default function App() {
   }
 
   function openSTFCase(id) {
+    if (requireUser()) return;
     const c = stfCaseIndex.find(c => c.id === id);
     if (!c) return;
-    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'spot-the-flaw', id }); setPage('unlock'); return; }
+    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'spot-the-flaw', id }); setPage('plans'); return; }
     track('case_opened', { room: 'spot-the-flaw', id, title: c.title });
     setActiveSTFCaseId(id);
     setPage('stf-runner');
@@ -453,9 +500,10 @@ export default function App() {
   }
 
   function openTakehomeCase(id) {
+    if (requireUser()) return;
     const c = takehomeCaseIndex.find(c => c.id === id);
     if (!c) return;
-    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'take-home', id }); setPage('unlock'); return; }
+    if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'take-home', id }); setPage('plans'); return; }
     track('case_opened', { room: 'take-home', id, title: c.title });
     setActiveTakehomeCaseId(id);
     setPage('takehome-runner');
@@ -473,6 +521,7 @@ export default function App() {
   }
 
   function openInstrumentationCase(id) {
+    if (requireUser()) return;
     const c = instrumentationIndex.find(c => c.id === id);
     if (!c) return;
     if (!unlocked && !c.isFree) { navigate('unlock'); return; }
@@ -485,7 +534,7 @@ export default function App() {
   function openRCAFoundationModule(id) {
     const m = rcaFoundationIndex.find(m => m.id === id);
     if (!m) return;
-    // Foundations are always free — no paywall check
+    // Foundations always free — no auth or paywall check
     track('case_opened', { room: 'rca-foundations', id, title: m.title });
     setActiveRCAFoundationId(id);
     setPage('rca-foundations-runner');
@@ -495,7 +544,7 @@ export default function App() {
   function openMetricsFoundationModule(id) {
     const m = metricsFoundationIndex.find(m => m.id === id);
     if (!m) return;
-    // Foundations are always free — no paywall check
+    // Foundations always free — no auth or paywall check
     track('case_opened', { room: 'metrics-foundations', id, title: m.title });
     setActiveMetricsFoundationId(id);
     setPage('metrics-foundations-runner');
@@ -503,9 +552,10 @@ export default function App() {
   }
 
   function openPDScenario(id) {
+    if (requireUser()) return;
     const s = productDesignIndex.find(s => s.id === id);
     if (!s) return;
-    if (!s.isFree && !unlocked) { track('paywall_hit', { room: 'product-design', id }); setPage('unlock'); return; }
+    if (!s.isFree && !unlocked) { track('paywall_hit', { room: 'product-design', id }); setPage('plans'); return; }
     track('case_opened', { room: 'product-design', id, title: s.title });
     setActivePDScenarioId(id);
     setPage('product-design-runner');
@@ -1192,7 +1242,18 @@ export default function App() {
         )}
 
         {/* ── Support pages ── */}
-        {page === 'pricing' && <Pricing onShowUnlock={() => setPage('unlock')} onBack={() => setPage('home')} />}
+        {page === 'plans' && (
+          <Suspense fallback={null}>
+            <Plans
+              onBack={() => navigate('home')}
+              onShowAuth={() => setShowAuth(true)}
+              onNavigate={navigate}
+              user={user}
+              unlocked={unlocked}
+            />
+          </Suspense>
+        )}
+        {page === 'pricing' && <Pricing onShowUnlock={() => setPage('plans')} onBack={() => setPage('home')} />}
         {page === 'profile' && (
           <ProfilePage
             user={user}
@@ -1491,6 +1552,37 @@ export default function App() {
           onSuccess={() => setShowAuth(false)}
         />
       </Suspense>
+    )}
+
+    {/* Auth gate — shown when anonymous user tries to open a case OR leaves a runner */}
+    {authGate && !user && (
+      <GateOverlay
+        title="Sign in to save your progress"
+        body="Create a free account to track your prep, build a streak, and save every case you complete. Foundations are always free."
+        ctaLabel="Sign in — it\'s free →"
+        onCTA={() => { setAuthGate(false); setShowAuth(true); }}
+        secondaryLabel="See what\'s included"
+        onSecondary={() => { setAuthGate(false); setPage('plans'); }}
+      />
+    )}
+
+    {/* Progress saved toast — shown briefly when signed-in user leaves a runner */}
+    {progressSaved && (
+      <div style={{
+        position: 'fixed', bottom: '1.5rem', left: '50%', transform: 'translateX(-50%)',
+        background: 'var(--surface)', border: '1px solid var(--teal-border)',
+        borderRadius: '8px', padding: '0.6rem 1.1rem',
+        display: 'flex', alignItems: 'center', gap: '0.5rem',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+        zIndex: 600, animation: 'pal-slide-up 0.25s ease-out both',
+        fontSize: '0.85rem', fontWeight: 600, color: 'var(--teal)',
+        pointerEvents: 'none',
+      }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        Progress saved
+      </div>
     )}
   </div>
   );

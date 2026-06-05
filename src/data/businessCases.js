@@ -3833,4 +3833,436 @@ export const businessCases = [
       interviewPhrase: '"Before recommending sunset, I\'d run two analyses. First: session decomposition — are users who reduce Trending Clips time going to Personalized Feed or leaving the app? Second: CPM analysis — if Trending Clips commands a 40% higher CPM than Personalized Feed, I cannot lose that impression inventory without a revenue impact. Both analyses use existing data. Only after those inform the hypothesis do I design a 10% sunset experiment.\n\n**Weak answer:** The candidate recommends sunsetting Trending Clips immediately because engagement is declining and the product team prefers Personalized Feed, treating falling engagement time as sufficient evidence that the feature is dying without checking whether users are migrating to Personalized Feed within the app or leaving the app entirely, and without pricing the CPM differential. **Interviewer follow-up that exposes it:** \'Trending Clips engagement time is down 25% but Trending Clips inventory still commands a $4.80 CPM versus $3.40 for Personalized Feed. If you sunset Trending Clips and shift that impression volume to Personalized Feed, what is the annual advertising revenue impact, and how does that compare to the engineering cost of maintaining the feature?\'"',
     },
   },
+
+  // ─────────────────────────────────────────────
+  // C23 — Push prepaid adoption
+  // ─────────────────────────────────────────────
+  {
+    id: 'C23',
+    title: 'Should We Push Buyers to Prepaid?',
+    subtitle: 'Crafted · Marketplace · Payment & Unit Economics',
+    difficulty: 'senior',
+    isFree: false,
+    domain: 'marketplace',
+    linkedConceptIds: ['unit-economics', 'cohort-analysis', 'incentive-design'],
+    context: {
+      company: 'Crafted',
+      product: 'Two-sided marketplace — 68% of GMV from COD orders.',
+      executiveAsk: '"COD costs us Rs 45/order in handling fees and drives 80% of our RTO. How do we shift buyers to prepaid?"',
+      pressure: 'Finance is pushing to reduce COD share from 68% to below 50% within two quarters. Growth team wants to run a blanket prepaid incentive campaign.',
+      ambiguity: 'Unknown: which buyer segments are most likely to switch to prepaid, what incentive level is needed for each segment, and whether the unit economics of the switch are actually positive after accounting for incentive cost.',
+    },
+    phases: [
+      {
+        id: 'clarify',
+        stepNumber: 1,
+        label: 'Clarify the decision',
+        prompt: 'The ask is "how do we shift buyers to prepaid." What is the actual decision to make?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: '"Which buyer segment has the highest probability of switching to prepaid at the lowest incentive cost, and what is the net unit economics of the shift?" — the question is about segment-level economics, not aggregate prepaid rate.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct framing. The outcome "increase prepaid %" is not the decision — it is a result. The decision is: which cohort do we target, at what incentive, and does the math work? If you pay Rs 60 in incentives to save Rs 45 in COD costs, you have made the economics worse. The decision requires a segment × incentive × net economics framework, not a blunt campaign.'
+          },
+          {
+            id: 'b',
+            label: '"How do we increase prepaid conversion rate?" — design a campaign that nudges all buyers toward prepaid.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'This treats prepaid rate as the primary metric, which creates the incentive to spend whatever it takes to move it. Blanket campaigns often have negative unit economics: they incur incentive costs across the full buyer base, including buyers who would never complete delivery anyway (high RTO buyers who don\'t improve the economics when they switch to prepaid). The decision is unit economics, not conversion rate.'
+          },
+          {
+            id: 'c',
+            label: '"Should we mandate prepaid for high-RTO buyers?" — target the problem buyers directly.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Restricting high-RTO buyers is a separate decision from the prepaid adoption question. It may be a valid policy, but it is not what the executive ask is about. The ask is about voluntary adoption at scale, which requires an incentive and segment strategy — not a policy restriction on a subset.'
+          }
+        ]
+      },
+      {
+        id: 'kpi',
+        stepNumber: 2,
+        label: 'Define success metric',
+        prompt: 'What is the right primary metric for the prepaid adoption programme?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Net revenue per order: (COD handling fee saving + RTO cost reduction) − prepaid incentive cost. Positive net revenue per order means the shift is economically justified.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. This metric captures whether the shift actually makes money. COD handling fee saving (Rs 45) + reduced RTO cost (proportional to the switcher\'s prior RTO rate) − incentive cost = net economics per switched order. If this is positive, the programme is viable. If it is negative, you are subsidising payment method preferences with no economic return.'
+          },
+          {
+            id: 'b',
+            label: 'Prepaid conversion rate — the percentage of buyers who switch from COD to prepaid after the nudge.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Prepaid conversion rate as a primary metric creates the wrong incentive: maximise it regardless of cost. A campaign that converts 40% of buyers at Rs 80/buyer incentive is worse for the business than one that converts 20% at Rs 15/buyer. The rate alone does not tell you whether the programme is economically sound.'
+          },
+          {
+            id: 'c',
+            label: 'COD order share reduction — track the percentage-point drop in COD GMV.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'COD share reduction is an outcome metric, not a decision metric. A 5pp reduction in COD share achieved by paying Rs 100/order in incentives is worse than a 2pp reduction achieved for Rs 10/order. The economics, not the share movement, determine success.'
+          }
+        ]
+      },
+      {
+        id: 'hypothesis',
+        stepNumber: 3,
+        label: 'Form the key hypothesis',
+        prompt: 'Which buyer segment is the right target for a prepaid nudge programme, and why?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: '"Second-order buyers (placing their 2nd order) have already demonstrated intent and trust, carry lower RTO risk than first-timers, and are responsive to small incentives. They are the optimal cohort: high switch probability at low incentive cost, and their economics benefit fully from the Rs 45 COD saving."',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. Second-order buyers have cleared the trust barrier (they completed a first delivery), which reduces their refusal-at-door risk. They are also in a habit-formation window — their second purchase is when payment method preferences solidify. A Rs 20-30 off incentive at this stage has a higher conversion probability and a longer-lasting effect than the same incentive given to a first-time buyer who has not yet decided whether to trust the platform.'
+          },
+          {
+            id: 'b',
+            label: '"High-AOV buyers — buyers who place large orders have the most to gain from prepaid (no COD fee risk on large amounts) and are most likely to switch."',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'High-AOV buyers are a reasonable secondary target, but they are not the primary cohort for habit formation. They may already prefer prepaid on high-value orders — the incremental gain is lower. Second-order buyers are earlier in the loyalty arc, where prepaid nudges have the highest marginal impact on long-term payment method behaviour.'
+          },
+          {
+            id: 'c',
+            label: '"All buyers equally — a blanket campaign maximises reach and drives the largest absolute prepaid volume."',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'Blanket campaigns include first-time buyers (high RTO risk, low trust, unlikely to respond to small incentives) and already-prepaid buyers (incentive cost with zero economic benefit). The economics of a blanket campaign are almost always worse than a targeted cohort approach because you are paying for conversions that don\'t improve unit economics and buyers who were already on prepaid.'
+          }
+        ]
+      },
+      {
+        id: 'recommendation',
+        stepNumber: 4,
+        label: 'Recommendation',
+        prompt: 'You have defined the segment (second-order buyers) and the metric (net revenue per order). What is the right recommendation?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Run a targeted incentive experiment — Rs 20-30 off next order for prepaid — on the second-order cohort only. Measure net economics: COD saving (Rs 45) − incentive cost − change in RTO rate for switched buyers. If net positive at 3 weeks, expand to third-order cohort. Do not run blanket campaigns.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct structure. The experiment is designed to test the unit economics hypothesis before scaling. Three-week window is appropriate for a payment method nudge — the behavioural response is fast. Measuring net economics (not just conversion rate) keeps the incentive from being set too high. Expanding to the third-order cohort only if the second-order cohort is net positive avoids compounding a negative-economics programme.'
+          },
+          {
+            id: 'b',
+            label: 'Launch a Rs 50 off prepaid incentive for all buyers immediately to hit the 50% COD reduction target in two quarters.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'A Rs 50 incentive exceeds the Rs 45 COD handling fee saving before accounting for any change in RTO cost. This programme has negative unit economics by design. Hitting the COD % target while destroying margin is exactly the vanity-metric failure the decision framework should prevent.'
+          },
+          {
+            id: 'c',
+            label: 'Mandate prepaid for all buyers with a prior RTO event to reduce the RTO tail first, then run prepaid nudges for the remainder.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'RTO-based restrictions are a separate policy decision with its own false-positive risks (see the high-RTO block decision). Mixing it with the prepaid adoption programme conflates two separate problems. The prepaid nudge programme should be designed around positive economics for willing switchers — not restrictions for poor-performing ones. Run them as separate workstreams.'
+          }
+        ]
+      }
+    ],
+    leadershipNote: 'The failure mode is optimising prepaid rate as a vanity metric. If you pay Rs 60 in incentives to save Rs 45 in COD costs, you have made the economics worse. The decision is a unit economics question, not a conversion rate question. Staff analysts ask "at what incentive level does the net economics go negative?" before designing any campaign.',
+    spokenSummary: '68% COD is expensive — Rs 45/order in handling plus the RTO tail. The question isn\'t "how do we increase prepaid" — it\'s "which cohort has the best economics for conversion at the lowest incentive cost." My answer: second-order buyers. They\'ve already demonstrated trust, their RTO rate is lower, and they respond to small nudges. Run Rs 20-30 off experiment on that cohort, measure net economics. Don\'t run blanket campaigns — the unit economics only work for buyers who were already going to complete delivery.',
+  },
+
+  // ─────────────────────────────────────────────
+  // C24 — Block high-RTO buyers from COD
+  // ─────────────────────────────────────────────
+  {
+    id: 'C24',
+    title: 'Should We Block High-RTO Buyers from COD?',
+    subtitle: 'Crafted · Marketplace · Policy & Risk Management',
+    difficulty: 'staff',
+    isFree: false,
+    domain: 'marketplace',
+    linkedConceptIds: ['false-positive-rate', 'policy-design', 'unit-economics'],
+    context: {
+      company: 'Crafted',
+      product: 'Two-sided marketplace — COD orders represent 70% of volume in Tier 2/3 cities.',
+      executiveAsk: '"Top 8% of buyers by RTO rate account for 34% of total RTO cost. Should we block them from COD entirely?"',
+      pressure: 'Finance wants the RTO cost reduction. Operations wants it implemented in 2 weeks. Legal has flagged that blanket blocks may need review for consumer protection compliance.',
+      ambiguity: 'Unknown: what fraction of high-RTO buyers would have completed delivery on their next order (false positive rate), what is the GMV at risk from buyer churn, and whether a tiered approach outperforms a hard block.',
+    },
+    phases: [
+      {
+        id: 'clarify',
+        stepNumber: 1,
+        label: 'Clarify the decision',
+        prompt: 'The ask is "block high-RTO buyers from COD." What is the actual decision that needs to be made?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: '"What is the net GMV and long-term LTV impact of restricting COD access for the high-RTO cohort, including false positive rate and buyer churn risk?" — the question is whether the cure is worse than the disease.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. The executive ask focuses on the RTO cost side of the ledger. The full decision includes what you lose on the GMV and LTV side. High-RTO buyers who churn — rather than switching to prepaid — represent lost future revenue. High-RTO buyers who would have completed their next delivery (false positives) are wrongly penalised. The decision is a net value question, not just a cost reduction question.'
+          },
+          {
+            id: 'b',
+            label: '"Will blocking high-RTO buyers reduce total RTO cost?" — model the expected RTO reduction from the block.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'This only models one side of the ledger. Yes, blocking high-RTO buyers will mechanically reduce RTO — but it also has costs: buyer churn from those who refuse to switch to prepaid, false positive harm for buyers who had episodic high-RTO rates and would have converted normally on future orders, and platform reputation effects. The decision requires modelling both sides.'
+          },
+          {
+            id: 'c',
+            label: '"How do we implement the block technically and at what threshold?" — define the RTO rate cutoff and build the enforcement logic.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'This assumes the decision to block has already been made and skips the analytical framework entirely. Implementation details are irrelevant until the analytical case for blocking (vs. nudging, tiering, or other interventions) is established. Starting with implementation skips the most important questions.'
+          }
+        ]
+      },
+      {
+        id: 'kpi',
+        stepNumber: 2,
+        label: 'Define success metric',
+        prompt: 'What metrics must you measure to evaluate whether the COD block decision is correct?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'False positive rate among blocked buyers (fraction who complete a prepaid order post-block, indicating they would have delivered on COD) AND GMV-at-risk from buyers who churn rather than switch to prepaid.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'These two metrics capture the full cost of a policy decision. False positive rate tells you how many buyers are wrongly penalised — and how much goodwill and future GMV is destroyed by blocking buyers who had episodic bad outcomes. GMV-at-risk tells you the revenue downside of the block. Together they let you calculate whether the RTO cost saving exceeds the combined false positive and churn cost.'
+          },
+          {
+            id: 'b',
+            label: 'RTO rate reduction in the blocked cohort post-implementation.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'RTO rate reduction is an obvious output of blocking — buyers who are blocked from COD cannot generate COD RTO events. This metric will always look positive for a block policy, which makes it useless for evaluating whether the policy is correct. The meaningful metrics are on the cost side: false positives and churn.'
+          },
+          {
+            id: 'c',
+            label: 'Prepaid conversion rate of blocked buyers — how many switch to prepaid vs. churning.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Prepaid conversion rate is a useful secondary metric, but it misses the false positive problem. A buyer who had 3 bad deliveries due to address changes and then switches to prepaid still represents a buyer who was wrongly labelled a bad actor. The correct metrics include false positive rate (how many blocked buyers were actually fine) alongside conversion and churn.'
+          }
+        ]
+      },
+      {
+        id: 'hypothesis',
+        stepNumber: 3,
+        label: 'Form the key hypothesis',
+        prompt: 'What is the hypothesis that determines whether a hard block is the right policy?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: '"A meaningful fraction of the high-RTO cohort have elevated RTO rates due to episodic circumstances — not structural refusal intent. A hard block on all 8% will have a higher false positive rate than a tiered approach that blocks only buyers with RTO rate >50% over the last 90 days with no completed deliveries."',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'This hypothesis correctly identifies the precision problem with a flat threshold. The 8% cohort is defined by a historical RTO rate — but RTO rates include episodic causes (address changes, product dissatisfaction on specific orders, delivery time mismatches) that may not predict future refusal. A tiered approach — blocking only the highest-confidence bad actors — preserves the legitimate buyers in the 8% while still addressing the structural refusers.'
+          },
+          {
+            id: 'b',
+            label: '"High-RTO buyers are systematically bad actors and blocking them will reduce RTO with minimal churn risk because they have low LTV anyway."',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'This hypothesis assumes without evidence that high historical RTO = structural bad actor. Some high-RTO buyers have high LTV with episodic delivery failures. A buyer with 10 orders, Rs 500 AOV, and 3 RTO events may be worth significantly more than blocking saves in RTO costs. The assumption must be tested, not asserted.'
+          },
+          {
+            id: 'c',
+            label: '"The 34% RTO cost concentration in 8% of buyers means blocking that segment will reduce total RTO cost by approximately 34%."',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'This arithmetic is directionally correct but incomplete as a hypothesis. It models the RTO saving but not the false positive cost or GMV loss. A hypothesis that only models one side of the ledger will lead to a one-sided recommendation. The full hypothesis must include the conditions under which the net value of blocking is positive.'
+          }
+        ]
+      },
+      {
+        id: 'recommendation',
+        stepNumber: 4,
+        label: 'Recommendation',
+        prompt: 'You have framed the false positive risk. What is the right recommendation?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Do not hard-block the full 8% cohort. Hard-block only buyers with RTO rate >60% in the last 90 days AND no completed prepaid order (high-confidence bad actors). For the 30-60% RTO cohort: prepaid nudge with small incentive + order history transparency. Measure false positive rate quarterly by tracking how many blocked buyers complete a prepaid order.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct structure. Tiered intervention is the right approach when a population has heterogeneous reasons for a behaviour. The >60% + no completed prepaid filter is a high-precision signal for structural refusal intent. The 30-60% cohort gets a softer intervention that respects the false positive risk. False positive monitoring (blocked buyers completing prepaid orders) operationalises the feedback loop and lets you refine the threshold quarterly.'
+          },
+          {
+            id: 'b',
+            label: 'Hard-block all buyers with RTO rate >30% in the last 90 days to maximise the RTO cost reduction.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'A 30% RTO rate threshold over 90 days will capture a large number of buyers who are not structural bad actors — they may have had 2-3 bad deliveries due to address issues, travel, or product dissatisfaction. Blocking them at a 30% threshold sets a high false positive rate and increases churn risk significantly. The threshold should be calibrated for precision, not for maximum coverage.'
+          },
+          {
+            id: 'c',
+            label: 'Do not block any buyers — the false positive risk and GMV loss outweigh the RTO saving.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'This is too conservative. The high end of the distribution (buyers with >70-80% RTO rates with repeated delivery failures) are almost certainly structural bad actors. A hard block on this narrow group has a very low false positive rate and meaningful RTO cost reduction. Refusing to block anyone ignores the legitimate operational cost of chronic bad actors at the tail.'
+          }
+        ]
+      }
+    ],
+    leadershipNote: 'Policy decisions require false positive analysis before implementation. Blocking a buyer who had 3 bad deliveries due to address changes — and who would have been a loyal customer for 5 years — costs more than the RTO saving. The right framework is not "block high-RTO" but "what is the precision of our RTO prediction at this threshold?" Staff analysts frame policy decisions as classification problems, not just cost optimisation problems.',
+    spokenSummary: '8% of buyers driving 34% of RTO cost — hard to ignore. But hard-blocking all of them is a policy decision with real false positive risk. My recommendation: block only the >60% RTO rate + no completed prepaid delivery cohort — that\'s your high-confidence bad actors. For the 30-60% cohort, nudge to prepaid rather than block. And instrument the false positive rate: track how many blocked buyers complete a prepaid order — that tells you how many you wrongly blocked. Review the threshold quarterly.',
+  },
+
+  // ─────────────────────────────────────────────
+  // C25 — Optimise search for CVR vs contribution per session
+  // ─────────────────────────────────────────────
+  {
+    id: 'C25',
+    title: 'Should Search Optimise for CVR or Contribution Margin?',
+    subtitle: 'Crafted · Marketplace · Search Ranking & Economics',
+    difficulty: 'staff',
+    isFree: false,
+    domain: 'marketplace',
+    linkedConceptIds: ['metric-gaming', 'proxy-metric', 'incentive-alignment'],
+    context: {
+      company: 'Crafted',
+      product: 'Two-sided marketplace — search drives 55% of all orders.',
+      executiveAsk: '"The search team\'s model optimises for CVR. The finance team says we should optimise for contribution margin per session. Which is right?"',
+      pressure: 'The search team has hit its CVR targets for 3 consecutive quarters. Finance is raising concerns that take rate is declining despite volume growth. The CPO has called a decision review.',
+      ambiguity: 'Neither team has modelled what would happen to the other metric if theirs became the primary optimisation target. The disagreement is about objectives, not about data.',
+    },
+    phases: [
+      {
+        id: 'clarify',
+        stepNumber: 1,
+        label: 'Clarify the decision',
+        prompt: 'The ask is "CVR or contribution margin — which is right for search optimisation?" What is the actual decision?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: '"Which optimisation target aligns search ranking with the long-term economics of the marketplace — accounting for seller health, buyer trust, and platform take rate — not just today\'s conversion?" The choice of objective is an incentive alignment question, not just a ranking engineering question.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. The choice of optimisation target determines what the search algorithm is rewarded for, which determines what it does. CVR optimisation rewards showing items that are easy to buy. Contribution margin optimisation rewards showing items with better economics. The decision is about which incentive you want to build into the algorithm — and what each incentive does to seller behaviour, buyer experience, and platform economics over time.'
+          },
+          {
+            id: 'b',
+            label: '"Which metric is technically easier to optimise in the ranking model?"',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'Technical feasibility is a constraint, not the decision criterion. If contribution margin per session is the right objective, the engineering investment to implement it is justified. Choosing the objective based on engineering convenience rather than economic alignment produces algorithms that are easy to build and wrong to ship.'
+          },
+          {
+            id: 'c',
+            label: '"Can we increase both CVR and contribution margin simultaneously by improving relevance quality?"',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Better relevance can improve both metrics at once — this is the aspiration. But it does not resolve the question of what the primary optimisation target is when they conflict. When a high-discount item has high CVR but low contribution margin, the algorithm must choose which signal dominates. That choice is the decision.'
+          }
+        ]
+      },
+      {
+        id: 'kpi',
+        stepNumber: 2,
+        label: 'Define success metric',
+        prompt: 'Define both metrics precisely and identify the guardrail relationship between them.',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'CVR = orders / sessions (optimises for ease of purchase regardless of margin). Contribution per session = (revenue − COGS − logistics − promotions) / session (optimises for quality GMV). The guardrail for CVR optimisation is contribution/session not falling below a threshold; the guardrail for contribution optimisation is CVR not falling below a threshold.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. Defining both metrics precisely exposes that they are complementary with a tension at the extremes, not mutually exclusive. The guardrail relationship is the key insight: whichever metric you optimise, the other becomes the guardrail. This framing immediately suggests a blended approach — optimise one with a floor on the other — rather than a binary choice.'
+          },
+          {
+            id: 'b',
+            label: 'Use GMV per session as a single metric that captures both volume and value.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'GMV per session is a reasonable proxy but it is not contribution per session — it does not account for logistics cost, promotions, or COGS. A session that produces a Rs 500 GMV order with Rs 400 in logistics and promotion cost is worse for the business than a Rs 300 GMV order with Rs 50 in costs. Using GMV instead of contribution obscures the unit economics tension that the decision is trying to resolve.'
+          },
+          {
+            id: 'c',
+            label: 'Track take rate as the single decision metric — it captures the platform\'s share of GMV.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Take rate is a useful business metric but too aggregated for search ranking decisions. It is affected by category mix, seller tier, and promotional activity — not just search ranking quality. A search ranking model cannot directly optimise take rate because the model does not control most of its drivers. Contribution per session is the more direct and controllable metric.'
+          }
+        ]
+      },
+      {
+        id: 'hypothesis',
+        stepNumber: 3,
+        label: 'Form the key hypothesis',
+        prompt: 'What is the core hypothesis about the long-term risk of each single-objective optimisation?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: '"CVR-only optimisation creates a race-to-the-bottom risk: it surfaces low-price, high-discount items that are easy to buy but have poor unit economics. Over time this degrades seller economics and platform take rate. Contribution-only optimisation risks surfacing premium items that reduce purchase frequency for price-sensitive buyers."',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. Each single-objective function creates a structural incentive problem. CVR optimisation is good for short-term conversion but encourages the algorithm to surface items that convert at the cost of margin — and trains sellers to compete on price and discounts to rank higher. Contribution optimisation is good for economics but may surface fewer affordable items, hurting purchase frequency for the majority of buyers. The hypothesis correctly identifies that neither extreme is stable long-term.'
+          },
+          {
+            id: 'b',
+            label: '"Contribution margin optimisation is the right long-term objective because it aligns search with business economics."',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'This hypothesis is one-sided. It ignores the CVR risk: if contribution optimisation systematically buries affordable items, it can reduce total orders and hurt the buyer side of the marketplace. A hypothesis that only identifies the failure mode of the current objective (CVR) without modelling the failure mode of the proposed objective (contribution) is incomplete.'
+          },
+          {
+            id: 'c',
+            label: '"CVR and contribution margin are both good metrics and the debate is a team alignment issue, not an analytical question."',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'Framing a metric design debate as a "people problem" avoids the analytical work. The two objectives create different incentives in the algorithm and different outcomes for the platform. That is an analytical question with a defensible answer — and a Staff analyst is expected to provide one, not defer to team dynamics.'
+          }
+        ]
+      },
+      {
+        id: 'recommendation',
+        stepNumber: 4,
+        label: 'Recommendation',
+        prompt: 'What is the right recommendation for the search optimisation objective?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Neither pure objective is right. Recommend a blended ranking signal: CVR as primary with a hard floor on contribution/session (any model update that drops contribution/session more than 5% below baseline is rejected). Run an A/B test of the current CVR model against a margin-weighted model on 2nd-tier search pages first — measure CVR, contribution/session, repeat purchase rate, and seller satisfaction at 30 days.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct structure. The guardrail floor prevents the CVR model from destroying margin while the primary objective preserves conversion volume. Testing on 2nd-tier search pages (not homepage) limits the blast radius of the experiment while generating signal on the tradeoff at scale. The 30-day window is appropriate to capture repeat purchase rate effects, which are a leading indicator of long-term LTV impact.'
+          },
+          {
+            id: 'b',
+            label: 'Switch to contribution margin as the primary optimisation target immediately — it is the economically correct objective.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Switching the primary optimisation target without an A/B test is a high-variance change to a system that drives 55% of orders. Contribution margin optimisation may reduce CVR for price-sensitive buyers in ways that are difficult to predict without a controlled experiment. The right path is to test the tradeoff before committing.'
+          },
+          {
+            id: 'c',
+            label: 'Keep CVR as the primary target but add contribution margin as a secondary guardrail metric tracked by the finance team.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Adding a guardrail is the right direction, but "tracked by the finance team" is passive monitoring rather than an enforced constraint on the model. If the guardrail is not enforced at the model update level — meaning a model that drops contribution/session below the floor cannot ship — the guardrail will be overridden whenever CVR results are positive. Enforced floors, not passive tracking, are the right mechanism.'
+          }
+        ]
+      }
+    ],
+    leadershipNote: 'When two teams disagree on the optimisation objective, the real question is: what incentive does each objective create for the teams optimising against it? CVR optimisation creates an incentive to surface easy-to-buy, low-margin items. Contribution optimisation creates an incentive to hide affordable items. The right answer is a guardrail system, not a single-objective function. Staff analysts do not pick a side in metric debates — they design the system that makes the debate unnecessary.',
+    spokenSummary: 'CVR vs contribution — this is an incentive alignment question. CVR optimisation surfaces cheap, easy-to-buy items and degrades take rate over time. Contribution optimisation risks hiding affordable items and hurting purchase frequency. Neither is right alone. My recommendation: use CVR as the primary ranking signal with a hard contribution-per-session floor. Any model update that drops margin/session more than 5% gets rejected. Test a margin-weighted model on 2nd-tier search pages — not homepage — to measure the real tradeoff at 30 days.',
+  },
 ];

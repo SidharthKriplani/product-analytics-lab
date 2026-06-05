@@ -4238,6 +4238,242 @@ export const rcaCases = [
     },
     leadershipNote: 'Staff analysts read net revenue declining with orders stable as a P&L mechanics problem and go straight to the formula. The coupon campaign is the obvious hypothesis but it must be confirmed with data — campaign launches and metric changes co-occurring are sometimes coincidental. The RTO increase is the second concern: 3pp sounds small but at scale it is material, and it compounds with discount burn on the same orders. The leadership framing is unit economics trajectory — is this a one-month campaign overspend (fixable) or a structural mix shift toward lower-margin orders (strategic)?',
     spokenSummary: 'Orders are flat but net revenue is down 18% — so this is a per-order economics problem. Revenue per order equals fulfillment fee plus ad revenue minus logistics, discount, and RTO loss. Logistics is flat, so I\'m looking at discount burn and RTO. Discount per order doubled and a coupon campaign just launched this month — I\'d pull discount by coupon_code to confirm the campaign is driving it. RTO up 3pp is secondary but material at scale. Fix: tighten coupon eligibility with a conversion impact model, and run prepaid nudges in high-RTO pincodes. Guardrail: don\'t cut discounts without modeling what happens to conversion for COD users.',
+  },
+
+  // ─────────────────────────────────────────────
+  // RCA27 — Orders down, sessions stable
+  // ─────────────────────────────────────────────
+  {
+    id: 'RCA27',
+    title: 'Orders Down 14% — Sessions Flat',
+    subtitle: 'Crafted · Marketplace · Conversion Funnel',
+    difficulty: 'senior',
+    isFree: false,
+    domain: 'marketplace',
+    context: {
+      metricMovement: 'Orders dropped 14% WoW. Sessions are flat. No experiment running.',
+      businessImpact: 'A sustained 14% order decline at current session volume represents a significant GMV loss if the CVR drop is structural rather than temporary.',
+      timeWindow: 'Drop observed over the past 7 days vs the prior 7-day baseline.',
+      knownFacts: [
+        'Sessions: flat WoW across all platforms',
+        'Orders: down 14% WoW',
+        'No A/B test or product release in the past 10 days',
+        'A platform-wide seller fee restructuring went live 10 days ago',
+        'GMV per item is up approximately 12% — sellers appear to have raised prices'
+      ]
+    },
+    diagnosisSteps: [
+      {
+        id: 'decomp',
+        stepNumber: 1,
+        label: 'Decompose the Funnel',
+        prompt: 'Sessions are flat but orders are down 14%. What is the right first decomposition?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Break CVR by funnel stage: browse → PDP → Add-to-Cart → checkout → payment. Sessions stable means CVR is the driver — find the stage where the drop-off increased.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. Sessions flat + orders down = CVR drop. The funnel-stage decomposition immediately localises the breakpoint. Once you find which stage dropped, the mechanism narrows significantly: PDP-to-ATC drop implies a demand or price problem; ATC-to-checkout drop implies a UX or friction problem; checkout-to-payment drop implies a payment or trust problem.'
+          },
+          {
+            id: 'b',
+            label: 'Segment orders by category to find which category lost volume most.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Category segmentation is useful as a second step to understand concentration — but it skips the funnel decomposition. Without knowing where in the funnel the drop occurred, you don\'t know whether the category view tells you about demand shifts or a product/pricing issue. Do the funnel decomposition first, then slice by category to confirm concentration.'
+          },
+          {
+            id: 'c',
+            label: 'Check for a data pipeline issue — a 14% drop with flat sessions could be a logging anomaly.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Data quality checks matter, but this is too cautious given that we have corroborating signal: GMV per item is up 12%, which is consistent with a real behavioral change (price increase → lower conversion), not a logging artifact. A logging anomaly would not also show GMV per item rising. Funnel decomposition is the right first move.'
+          }
+        ]
+      },
+      {
+        id: 'isolate',
+        stepNumber: 2,
+        label: 'Isolate the Driver',
+        prompt: 'Funnel analysis shows PDP-to-ATC dropped 9pp on mobile. ATC-to-checkout is flat. Three hypotheses: (a) product page quality degraded, (b) price shift — seller fee restructuring prompted sellers to raise prices 8–15%, (c) inventory thinning in top categories. Which hypothesis is most supported by available evidence?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Price shift — the seller fee restructuring 10 days ago and the 12% GMV-per-item increase together indicate sellers raised prices, reducing buyer willingness to add to cart.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. The timing is exact: fee restructuring 10 days ago, order drop starts around the same time, GMV per item up 12%. That is a coherent price-elasticity story. Buyers are landing on PDPs but not adding to cart because prices are higher. This is not a product quality or inventory problem — it is demand responding to a price change. Confirm by segmenting ATC rate by item price tier: if premium-tier items show the biggest ATC drop, price elasticity is the mechanism.'
+          },
+          {
+            id: 'b',
+            label: 'Product page quality degraded — PDP-to-ATC drops usually signal content issues like images or descriptions.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'PDP content degradation is a plausible hypothesis in isolation, but it does not explain the timing (correlated with fee restructuring) or the GMV-per-item increase (content issues don\'t raise GMV per item). When a stronger, better-timed hypothesis is available, the weaker one requires additional evidence. The price shift hypothesis accounts for all three signals simultaneously.'
+          },
+          {
+            id: 'c',
+            label: 'Inventory thinning — top categories may have less selection, reducing buyer ability to find items they want.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'Inventory thinning would show up as a browse-to-PDP decline (buyers can\'t find the right item) or a longer session-to-ATC time, not a PDP-to-ATC drop. If buyers are reaching PDPs at the same rate and then not adding to cart, the problem is at the decision point — price or perceived value — not at the discovery stage.'
+          }
+        ]
+      },
+      {
+        id: 'recommendation',
+        stepNumber: 3,
+        label: 'Recommendation',
+        prompt: 'Price elasticity is the most likely mechanism. Sellers raised prices following the fee restructuring. What is the right recommendation?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Segment ATC drop by item price tier to confirm price elasticity. Share conversion benchmarks with sellers showing impact by price band. Monitor for 2 more weeks before any product intervention — this is a seller behaviour response, not a product bug.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct framing. This is not a product bug — it is a demand response to a pricing change. The right action is: (1) confirm the mechanism with price-tier segmentation, (2) give sellers data so they can make informed repricing decisions, and (3) avoid premature product intervention that treats a price signal as a UX problem. If sellers see that the 12% price increase is causing a 9pp ATC drop, many will self-correct.'
+          },
+          {
+            id: 'b',
+            label: 'Launch an A/B test on the product page to recover ATC rate — test new layouts, image size, and social proof elements.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'This is the failure mode the case is testing for. Running a product page A/B test when the mechanism is a price shift wastes experimentation cycles and delays the real fix. The drop is not caused by page layout — it is caused by buyers being unwilling to pay higher prices. No UX change will recover demand that was lost to a price increase.'
+          },
+          {
+            id: 'c',
+            label: 'Roll back the seller fee restructuring to restore original pricing dynamics and recover CVR.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Rolling back fee restructuring is an overreaction before confirming the mechanism. First, the connection between the fee change and the CVR drop is still a hypothesis (though a strong one). Second, fee restructuring is a platform-level business decision — reversing it based on a 7-day CVR drop without modelling the economics would be premature. Confirm the mechanism first, share data with sellers, and let the market adjust before considering structural policy changes.'
+          }
+        ]
+      }
+    ],
+    leadershipNote: 'The weak answer is "CVR dropped, let\'s A/B test the product page." The right answer names the mechanism before prescribing a fix — price shift changed demand, not product quality. Never say you\'d look at the data; say you\'d pull ATC rate by GMV tier to confirm price elasticity is the mechanism. Senior analysts distinguish between a product bug (you fix the product) and a price signal (you give sellers data and let the market respond).',
+    spokenSummary: 'Orders down 14%, sessions flat — this is a CVR problem, not a traffic problem. Funnel breakpoint is PDP-to-ATC, and it tracked exactly with the seller fee restructuring 10 days ago. Sellers raised prices, buyers are adding to cart less. Not a product bug — a price elasticity signal. Next step: segment ATC drop by item price tier to confirm, then share conversion benchmarks with sellers.',
+  },
+
+  // ─────────────────────────────────────────────
+  // RCA28 — RTO spike in Tier 2/3 cities
+  // ─────────────────────────────────────────────
+  {
+    id: 'RCA28',
+    title: 'RTO Spike in Tier 2/3 Cities',
+    subtitle: 'Crafted · Marketplace · Logistics & Delivery',
+    difficulty: 'senior',
+    isFree: false,
+    domain: 'marketplace',
+    context: {
+      metricMovement: 'Return-to-origin (RTO) rate — orders shipped but never delivered, returned to seller — spiked from 18% to 27% in Tier 2/3 cities over 3 weeks.',
+      businessImpact: 'A 9pp RTO increase in Tier 2/3 cities adds significant reverse logistics cost and reduces seller trust. At scale, sustained RTO above 25% causes sellers to limit inventory in those cities.',
+      timeWindow: '3-week trend. Tier 1 cities (Mumbai, Delhi, Bangalore) are flat at 16%.',
+      knownFacts: [
+        'Tier 1 RTO rate: 16% — flat over the same 3 weeks',
+        'Tier 2/3 RTO rate: 18% → 27% over 3 weeks',
+        'Crafted uses 3 logistics partners; Carrier B handles 70% of Tier 2/3 volume',
+        'No new seller fee or COD policy changes in the past 30 days',
+        'COD orders represent 74% of Tier 2/3 order volume'
+      ]
+    },
+    diagnosisSteps: [
+      {
+        id: 'decomp',
+        stepNumber: 1,
+        label: 'Geographic Decomposition',
+        prompt: 'RTO is up only in Tier 2/3 cities. Tier 1 is flat. What is the right first decomposition to understand whether this is a geography problem or an operations problem?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Pull RTO rate by carrier × city tier. Carrier B handles 70% of Tier 2/3 — if Carrier B\'s RTO rate spiked and Carrier A\'s did not in the same cities, this is a carrier operations problem, not a market demand problem.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct. Geographic segmentation alone tells you where — carrier segmentation tells you why. If Carrier B has high RTO and Carrier A has flat RTO in the same Tier 2/3 cities, the geography is a coincidence of carrier coverage, not a demand signal. One query on RTO rate grouped by carrier × city tier resolves the diagnosis in minutes.'
+          },
+          {
+            id: 'b',
+            label: 'Segment RTO by product category — some categories (fashion, electronics) have structural return propensity and may explain the Tier 2/3 spike.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Category segmentation is a valid second step, but it skips the carrier decomposition. If Carrier B is driving the spike, no category segmentation will explain it — the mix shift would need to be specifically in categories Carrier B handles. Start with the carrier split, which is the most structural variable given that Carrier B handles 70% of the affected volume.'
+          },
+          {
+            id: 'c',
+            label: 'Tier 2/3 buyers are structurally different — lower trust, higher COD refusal, lower digital adoption. Attribute to market characteristics.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'Attributing a 3-week spike to structural market characteristics is a failure of diagnosis. Market characteristics don\'t change in 3 weeks — logistics operations do. If Tier 2/3 buyers were structurally high-RTO, the rate would have been 27% historically, not 18%. The spike needs an operational explanation, not a demographic one.'
+          }
+        ]
+      },
+      {
+        id: 'isolate',
+        stepNumber: 2,
+        label: 'Isolate the Mechanism',
+        prompt: 'Carrier B RTO rate in Tier 2/3 went from 19% to 31%. Carrier A in the same cities: flat at 17%. Carrier B\'s RTO reason codes: "address not found" up 40%, "buyer refused delivery" up 25%, "out-for-delivery exceeded SLA" up 18%. Which reason code is most actionable?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: '"Buyer refused delivery" — up 25%. This is the most actionable signal: buyer refusal at door is often driven by COD amount disputes or wrong-expectation setting, which can be addressed directly rather than through carrier ops.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct prioritization. "Buyer refused delivery" is a demand-side signal — the buyer was present but chose not to accept the order. This typically means either (a) the COD amount at door was higher than expected, (b) the buyer changed their mind (impulse orders), or (c) a product quality concern. Each hypothesis is addressable: cross-check with recent COD disclosure changes, look at COD share in Carrier B Tier 2/3 vs baseline, and check if refused-delivery orders correlate with specific price points.'
+          },
+          {
+            id: 'b',
+            label: '"Address not found" — up 40%, the largest percentage increase. Fix address matching before the others.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: '"Address not found" is a real ops/tech problem worth fixing, but it is slower to address (requires geocoding improvements, address verification at checkout) and has a longer feedback loop. "Buyer refused delivery" can be investigated and addressed faster — if it\'s a COD amount disclosure issue, a checkout copy change can be tested in days. Sequence by actionability, not just magnitude.'
+          },
+          {
+            id: 'c',
+            label: '"Out-for-delivery exceeded SLA" — if Carrier B is losing SLA compliance, that explains all the other metrics cascading.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'SLA breach can contribute to buyer refusal (buyer is no longer home or has already reordered elsewhere), but it does not cause "address not found" to rise. These are operationally distinct failure modes. SLA breach at 18% increase is the smallest of the three signals and is the least directly actionable for RTO reduction in the near term.'
+          }
+        ]
+      },
+      {
+        id: 'recommendation',
+        stepNumber: 3,
+        label: 'Recommendation',
+        prompt: 'Carrier B is the primary driver. "Buyer refused delivery" is the most actionable signal, likely COD-related. What is the right recommendation?',
+        type: 'single',
+        options: [
+          {
+            id: 'a',
+            label: 'Two parallel tracks: (1) Investigate COD fee disclosure in Carrier B Tier 2/3 flows immediately — if COD amount at door diverges from checkout estimate, fix the disclosure. Run prepaid nudge for repeat-RTO buyer cohort with a small incentive. (2) Escalate Carrier B "address not found" as a separate ops workstream with geocoding improvements.',
+            isCorrect: true,
+            level: 'strong',
+            feedback: 'Correct structure. Two operationally distinct problems require two tracks. The COD disclosure track is fast (checkout copy + nudge experiment) and addresses the most actionable signal. The address-not-found track is slower (geocoding, address verification at entry) but is the largest volume problem. Running them in parallel avoids the false choice of fixing one and ignoring the other.'
+          },
+          {
+            id: 'b',
+            label: 'Replace Carrier B in Tier 2/3 cities with Carrier A to eliminate the operational problem.',
+            isCorrect: false,
+            level: 'partial',
+            feedback: 'Carrier switching is a blunt instrument that may not be feasible in 3 weeks and does not address the underlying issues (COD disputes, address quality) that will affect any carrier. If COD amount disclosure is the root cause, Carrier A would face the same refusal rate in Tier 2/3. Escalating within Carrier B with specific SLA and reason code targets is a faster and more targeted intervention.'
+          },
+          {
+            id: 'c',
+            label: 'Require prepaid-only orders in Tier 2/3 cities to eliminate COD-related refusals.',
+            isCorrect: false,
+            level: 'wrong',
+            feedback: 'COD represents 74% of Tier 2/3 volume. Eliminating COD would destroy the majority of that market\'s order volume — the cure is far worse than the disease. The goal is to reduce COD refusals, not eliminate COD access. A targeted prepaid nudge for repeat-RTO buyers is the proportionate intervention.'
+          }
+        ]
+      }
+    ],
+    leadershipNote: 'Don\'t jump to "Tier 2/3 buyers behave differently." The data shows carrier-specific, not geography-specific behavior — Carrier B is the variable, not the market. Senior analysts name the variable before attributing to culture or region. The carrier split is a single query; running it before hypothesizing about buyer behavior is the professional discipline.',
+    spokenSummary: 'RTO up 9pp in Tier 2/3 — geographic signal, but it\'s actually a carrier signal. Carrier B handles 70% of that volume and its RTO went from 19% to 31%. Carrier A, same cities, flat. Within Carrier B: buyer refusal at door up 25%, tracking to COD amount disputes. Two tracks: (1) immediately investigate COD fee disclosure in Carrier B flows, (2) run prepaid nudge for repeat-RTO buyer cohort. Escalate address-not-found as a parallel ops workstream.',
   }
 ];
 

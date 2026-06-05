@@ -4749,6 +4749,391 @@ export const scenarios = [
     relatedConcepts: ['heterogeneous treatment effects', 'recommendation algorithms', 'engagement tiers', 'segment harm', 'long-form content', 'algorithm personalization'],
     scenarioFamily: 'hte_subgroups',
     tags: ['HTE', 'podcast recommendations', 'long-form content', 'engagement tiers', 'casual vs power users', 'algorithm personalization', 'statistically significant harm']
+  },
+
+  // ─────────────────────────────────────────────
+  // S26 — guardrail_breach: The Margin Blind Spot
+  // ─────────────────────────────────────────────
+  {
+    id: 's26-ctr-margin-trap',
+    title: 'The Margin Blind Spot',
+    subtitle: 'CTR up 18%. Add-to-cart is up. Contribution margin per session is down 11%. The PM wants to ship.',
+    difficulty: 'senior',
+    isFree: false,
+    company: 'Crafted',
+    industry: 'ecommerce',
+    domain: 'marketplace',
+    estimatedMin: 18,
+    context: {
+      company: 'Crafted',
+      product: 'Two-sided marketplace — homepage recommendations carousel',
+      team: 'Recommendations team',
+      background: 'Crafted tested a new recommendation carousel on the homepage — "Deals of the Day" surfacing heavily discounted items. 14-day test, 50/50 split, user-level. Primary metric: CTR on recommendations. Guardrail: contribution margin per session (pre-declared).',
+      businessPressure: 'The PM wants to ship before the end of the quarter. The primary metric is positive and the team is citing strong user engagement.'
+    },
+    hypothesis: 'Surfacing high-discount deals on the homepage carousel will increase buyer engagement and session CVR.',
+    experimentDesign: {
+      type: 'A/B',
+      allocation: '50/50',
+      runtime: '14 days',
+      targetPopulation: 'All logged-in users who visit the homepage',
+      primaryMetric: 'CTR on recommendations carousel',
+      guardrailMetrics: ['Contribution margin per session (pre-declared)', 'ATC rate on non-deal items'],
+      sampleSizeContext: 'Sufficient traffic for the 14-day window; both primary and guardrail metrics reached statistical significance.'
+    },
+    metricReadout: [
+      {
+        metric: 'CTR on recommendations (primary)',
+        type: 'primary',
+        direction: 'positive',
+        delta: '+18.3%',
+        pValue: 0.001,
+        confidenceInterval: '[+14.1%, +22.5%]',
+        note: 'Strong, significant positive — the "Deals of the Day" carousel drives substantially more clicks than the baseline carousel.'
+      },
+      {
+        metric: 'Add-to-cart rate',
+        type: 'secondary',
+        direction: 'positive',
+        delta: '+9.0%',
+        pValue: 0.002,
+        confidenceInterval: '[+3.4%, +14.6%]',
+        note: 'Buyers are adding discounted items to cart at a meaningfully higher rate.'
+      },
+      {
+        metric: 'Orders per session',
+        type: 'secondary',
+        direction: 'positive',
+        delta: '+4.1%',
+        pValue: 0.04,
+        confidenceInterval: '[+0.2%, +8.0%]',
+        note: 'Directionally positive but wide CI — effect on completed orders is real but smaller than CTR and ATC suggest.'
+      },
+      {
+        metric: 'Contribution margin per session (guardrail — pre-declared)',
+        type: 'guardrail',
+        direction: 'negative',
+        delta: '-11.2%',
+        pValue: 0.001,
+        confidenceInterval: '[-14.8%, -7.6%]',
+        note: 'PRE-DECLARED GUARDRAIL BREACHED. Highly significant. The carousel increases order volume but drives buyers toward heavily discounted items with lower contribution margin.'
+      },
+      {
+        metric: 'ATC rate on non-deal items (guardrail — pre-declared)',
+        type: 'guardrail',
+        direction: 'negative',
+        delta: '-7.2%',
+        pValue: 0.01,
+        confidenceInterval: '[-12.1%, -2.3%]',
+        note: 'PRE-DECLARED GUARDRAIL BREACHED. Buyers who see the deal carousel are adding fewer full-margin items to cart — cannibalization signal.'
+      }
+    ],
+    decisions: [
+      {
+        id: 'rollback',
+        label: 'Roll back — the pre-declared guardrail is breached and statistically significant.',
+        description: 'Contribution margin per session is down 11.2% (p<0.001). This was pre-declared. The decision is made.',
+        score: 'senior_ready',
+        feedback: 'Correct. Pre-declared guardrails exist precisely for this scenario: the primary metric looks good, engagement is up, and there is pressure to ship. But the guardrail — contribution margin per session — is down 11.2% at p<0.001. This is not a close call. You cannot negotiate a pre-declared guardrail after observing that the primary metric looks positive. The "Deals of the Day" format cannibalises full-margin purchases: buyers spend their purchase intent on discounted items and buy fewer full-price items. CTR going up while margin goes down is exactly the failure mode the guardrail was designed to catch.'
+      },
+      {
+        id: 'ship-with-monitoring',
+        label: 'Ship with contribution margin monitoring — primary metric is positive, we can watch margin post-ship.',
+        description: 'The engagement signal is strong. Monitor margin after shipping and roll back if it worsens.',
+        score: 'junior_miss',
+        feedback: 'Wrong. The guardrail was pre-declared for this exact reason: post-hoc monitoring is not a substitute for pre-declared constraints. If you could monitor and roll back after shipping, there would be no point in pre-declaring guardrails at all. The contribution margin breach is statistically significant at p<0.001 — this is not a monitoring question, it is a confirmed result. Shipping and watching is how teams erode margin one "we\'ll monitor it" decision at a time.'
+      },
+      {
+        id: 'investigate-cannibalization',
+        label: 'Investigate the cannibalization mechanism before deciding.',
+        description: 'The non-deal ATC decline is interesting. Understand the mechanism, then decide.',
+        score: 'analyst_ready',
+        feedback: 'Useful instinct but the wrong sequencing. The guardrail breach is already the answer — the mechanism (cannibalization) is confirmed by the non-deal ATC decline, which is itself a pre-declared guardrail. Investigation is the right second step after rolling back, not a prerequisite to the rollback decision. The pre-declared guardrail does not require a mechanism explanation before it triggers — it was designed to be decision-making-without-explanation.'
+      }
+    ],
+    idealDecision: 'rollback',
+    warningFlags: [
+      {
+        id: 'wf-guardrail-breach',
+        label: 'Pre-declared guardrail breached at p<0.001 — not a close call',
+        description: 'Contribution margin per session is down 11.2% at p<0.001 with a tight CI. This guardrail was pre-declared before the experiment ran. A post-observation argument that "the primary metric is strong" does not override a pre-declared guardrail.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-cannibalization',
+        label: 'Non-deal ATC rate declining — cannibalization confirmed',
+        description: 'ATC on non-deal items is down 7.2% (p=0.01). Buyers are substituting discounted items for full-margin purchases, not adding them incrementally. The deal carousel is not growing the basket — it is shifting it toward lower-margin items.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-ctr-misalignment',
+        label: 'CTR as primary metric was misaligned with platform economics from the start',
+        description: 'A recommendation carousel\'s job is to drive profitable orders, not clicks. CTR optimisation without a contribution floor creates the exact failure mode observed: high engagement, declining economics. The primary metric should have been revenue per session or contribution per session, not CTR.',
+        severity: 'warning'
+      }
+    ],
+    debrief: 'This experiment illustrates why pre-declared guardrails exist: to protect against the shipping pressure that follows a positive primary metric result.\n\nThe "Deals of the Day" carousel does exactly what it sounds like — it surfaces heavily discounted items, buyers click on them and add them to cart, and orders per session ticks up. From a pure engagement standpoint, the feature works. CTR is up 18%, ATC is up 9%, orders are up 4%.\n\nBut the platform is not in the business of maximising clicks — it is in the business of profitable transactions. The contribution margin per session dropped 11.2% because buyers who enter the session through a deal carousel spend their purchase intent on low-margin discounted items. They are not adding those items on top of their normal basket; they are substituting them for full-price items. The non-deal ATC rate decline (-7.2%) confirms the cannibalization mechanism directly.\n\nThe pre-declared guardrail exists precisely for this moment. Before the experiment ran, the team agreed that if contribution margin per session declined significantly, the feature would not ship regardless of primary metric performance. Post-observation, the PM is arguing that the primary metric is strong and the team should ship with monitoring. This is how pre-declared guardrails get eroded: one "but the primary metric is good" exception at a time.\n\nPre-declared guardrails cannot be negotiated post-hoc. The moment you allow teams to override guardrails when the primary metric is positive, the guardrail system stops functioning as a constraint and becomes an advisory that is only enforced when convenient.\n\nThe correct decision is to roll back and redesign. The longer-term fix: change the primary metric for recommendation experiments from CTR to revenue per session or contribution per session. CTR tells you if people clicked, not if the feature was good for the business.',
+    interviewTakeaway: 'Pre-declared guardrails are not advisory. A significant guardrail breach is the answer — not the beginning of a negotiation. The strength of the primary metric result does not change this.',
+    relatedConcepts: ['guardrail metrics', 'pre-specification', 'cannibalization', 'contribution margin', 'metric alignment'],
+    scenarioFamily: 'guardrail_breach',
+    tags: ['guardrail breach', 'contribution margin', 'cannibalization', 'CTR', 'marketplace', 'deals', 'recommendation carousel', 'pre-declared guardrail']
+  },
+
+  // ─────────────────────────────────────────────
+  // S27 — guardrail_breach: The Easy Checkout Trap
+  // ─────────────────────────────────────────────
+  {
+    id: 's27-cvr-return-trap',
+    title: 'The Easy Checkout Trap',
+    subtitle: 'CVR is up 6.2%. Return rate is up 31%. The PM says returns are a logistics problem, not ours.',
+    difficulty: 'senior',
+    isFree: false,
+    company: 'Fieldstone Home',
+    industry: 'ecommerce',
+    domain: 'checkout',
+    estimatedMin: 18,
+    context: {
+      company: 'Fieldstone Home',
+      product: 'E-commerce platform — furniture and home goods, high AOV (avg Rs 8,400)',
+      team: 'Checkout experience team',
+      background: 'Tested a simplified one-step checkout — removed the order summary review screen, reduced fields from 8 to 4, pre-filled address from last order. 21-day test, 50/50 split, user-level. Primary metric: checkout CVR. Guardrail: return rate (pre-declared).',
+      businessPressure: 'The checkout team has been tasked with reducing checkout abandonment. CVR improvement is the team\'s primary KPI. The PM argues that returns are handled by the logistics team and should not block a checkout win.'
+    },
+    hypothesis: 'Reducing checkout friction will increase order completion without affecting purchase quality or return behaviour.',
+    experimentDesign: {
+      type: 'A/B',
+      allocation: '50/50',
+      runtime: '21 days',
+      targetPopulation: 'All users who reached the checkout page',
+      primaryMetric: 'Checkout CVR (orders / checkout page visits)',
+      guardrailMetrics: ['Return rate (pre-declared)', 'Revenue per order'],
+      sampleSizeContext: '21-day window chosen to allow sufficient return rate observation given typical 7-14 day return windows for furniture purchases.'
+    },
+    metricReadout: [
+      {
+        metric: 'Checkout CVR (primary)',
+        type: 'primary',
+        direction: 'positive',
+        delta: '+6.2%',
+        pValue: 0.003,
+        confidenceInterval: '[+2.2%, +10.2%]',
+        note: 'Significant positive. The simplified checkout meaningfully increases order completion.'
+      },
+      {
+        metric: 'Orders',
+        type: 'secondary',
+        direction: 'positive',
+        delta: '+5.8%',
+        pValue: 0.008,
+        confidenceInterval: '[+1.5%, +10.1%]',
+        note: 'Consistent with CVR improvement — more orders completed.'
+      },
+      {
+        metric: 'Return rate (guardrail — pre-declared)',
+        type: 'guardrail',
+        direction: 'negative',
+        delta: '+31%',
+        pValue: 0.001,
+        confidenceInterval: '[+21%, +41%]',
+        note: 'PRE-DECLARED GUARDRAIL BREACHED. Highly significant and large in magnitude. The simplified checkout is associated with a 31% increase in return rate.'
+      },
+      {
+        metric: 'Revenue per order',
+        type: 'guardrail',
+        direction: 'negative',
+        delta: '-3.1%',
+        pValue: 0.06,
+        confidenceInterval: '[-6.3%, +0.1%]',
+        note: 'Directionally negative, marginally non-significant. Buyers in treatment may be completing smaller or less certain purchases.'
+      },
+      {
+        metric: 'Refund processing cost',
+        type: 'secondary',
+        direction: 'negative',
+        delta: '+28%',
+        pValue: 0.002,
+        confidenceInterval: '[+11%, +45%]',
+        note: 'Returns at furniture AOV carry significant reverse logistics cost. A 28% increase in refund processing cost is material to unit economics.'
+      }
+    ],
+    decisions: [
+      {
+        id: 'rollback',
+        label: 'Roll back — the return rate guardrail breach is pre-declared and significant (+31%, p<0.001).',
+        description: 'The mechanism is clear: removing the review screen reduced purchase consideration quality. The economics are negative.',
+        score: 'senior_ready',
+        feedback: 'Correct. The return rate guardrail is pre-declared and the breach is +31% at p<0.001 — statistically unambiguous. The mechanism is also clear: removing the order summary screen eliminated a consideration checkpoint that was doing real work. For high-AOV furniture purchases, the review screen is not friction — it is a decision-quality filter. Buyers who skip it are completing impulse orders they later regret. CVR improving while returns jump 31% means the feature is making it easy to buy things people don\'t want. The net economics are negative once return processing costs are included.'
+      },
+      {
+        id: 'ship-returns-logistics',
+        label: 'Ship — returns are a logistics and ops problem, not a product problem.',
+        description: 'The checkout team improved CVR. Returns are handled by a different team.',
+        score: 'junior_miss',
+        feedback: 'Wrong, and this is a common framing failure. Returns are not an autonomous logistics event — they are a consequence of the product decision to remove the review screen. If the simplified checkout causes buyers to complete orders they did not fully intend, and those orders get returned, the product decision caused the returns. Attribution of outcomes to "other teams" does not change the causal chain. The checkout team is responsible for the full downstream economics of their checkout design, including return rates — especially when return rate was pre-declared as a guardrail.'
+      },
+      {
+        id: 'ship-low-return-segment',
+        label: 'Ship to buyers with historically low return rates — segment where the guardrail breach is not present.',
+        description: 'The guardrail breach may be driven by high-return-rate buyers. Gate to low-risk segments.',
+        score: 'analyst_ready',
+        feedback: 'Partially defensible instinct but wrong execution. The guardrail was pre-declared for the full population, not a subset. Segmenting post-hoc to find a subset where the breach does not appear is a form of outcome switching — you are looking for a population where the constraint does not bind after observing that it binds platform-wide. The right path is to roll back, diagnose whether the return mechanism is category-specific or buyer-segment-specific, and redesign the checkout with a soft gate for high-AOV orders.'
+      }
+    ],
+    idealDecision: 'rollback',
+    warningFlags: [
+      {
+        id: 'wf-return-guardrail',
+        label: 'Return rate breached pre-declared guardrail at +31%, p<0.001',
+        description: 'A 31% increase in return rate for a high-AOV category (avg Rs 8,400) has significant economic consequences. The guardrail was pre-declared for this exact reason — furniture returns are expensive. This is not a marginal result.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-logistics-framing',
+        label: '"Returns are a logistics problem" is product ownership abdication',
+        description: 'If a product decision causes an increase in returns, the product team owns that outcome. Framing the guardrail breach as someone else\'s problem is a failure of product ownership that will recur across future decisions if not corrected.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-friction-doing-work',
+        label: 'The removed friction was doing real work — consideration checkpoint for high-AOV purchases',
+        description: 'For furniture and home goods at Rs 8,400 average order value, an order summary screen is not standard UX friction. It is a deliberate decision-quality step. Removing it speeds up the purchase path for buyers who were already certain — and accelerates completion for buyers who were not. The second group creates returns.',
+        severity: 'warning'
+      }
+    ],
+    debrief: 'The checkout team ran a clean experiment with a well-designed hypothesis: less friction means more orders. They were right — CVR is up 6.2% and orders are up 5.8%. The experiment worked.\n\nBut the pre-declared guardrail — return rate — is up 31% at p<0.001. This is the finding that matters.\n\nThe friction that was removed was doing something. For a furniture retailer with an average order value of Rs 8,400, the order summary review screen is not standard UX friction — it is a consideration checkpoint. Buyers who see their full order before confirming have an explicit opportunity to reconsider. Some of them do reconsider and abandon. Those abandonments were not lost sales; they were buyers who correctly decided they did not want the item. The simplified checkout removes that checkpoint, completing orders for buyers who would have abandoned, and those buyers return the items.\n\nThe PM\'s argument — that returns are a logistics problem, not a product problem — is the critical framing failure. The product decision (removing the review screen) is causally upstream of the return event. If the product design changes which orders complete, it is responsible for the downstream quality of those orders. Product teams that disclaim responsibility for return rates are optimising CVR at the expense of economics, then attributing the cost to operations.\n\nThe pre-declared guardrail exists precisely to prevent this argument from winning. Before the experiment ran, the team agreed that if return rate increased significantly, the feature would not ship. Post-observation, the PM is trying to reframe the guardrail as "not our metric." The guardrail system only works if it is enforced regardless of how the team frames the downstream outcome.\n\nThe build on this: add a "review before confirming" soft gate for orders above a threshold AOV. This preserves the friction reduction for low-consideration purchases (small items, repeat buyers, familiar categories) while maintaining the decision-quality checkpoint for high-consideration purchases where the review screen does real work.',
+    interviewTakeaway: 'Friction is not always bad. In high-consideration purchase contexts, UX friction is a decision-quality mechanism. Removing it can increase CVR while degrading the quality of completed orders. Return rate as a guardrail exists to catch exactly this failure mode.',
+    relatedConcepts: ['guardrail metrics', 'return rate', 'checkout friction', 'purchase consideration', 'product ownership', 'unit economics'],
+    scenarioFamily: 'guardrail_breach',
+    tags: ['guardrail breach', 'return rate', 'checkout CVR', 'friction', 'furniture', 'high AOV', 'pre-declared guardrail', 'product ownership']
+  },
+
+  // ─────────────────────────────────────────────
+  // S28 — trust_and_validity: The Two Problems
+  // ─────────────────────────────────────────────
+  {
+    id: 's28-srm-segment-harm',
+    title: 'The Two Problems',
+    subtitle: 'SRM detected. Segment harm confirmed. The PM says both are explainable. The result is still positive.',
+    difficulty: 'staff',
+    isFree: false,
+    company: 'Orion',
+    industry: 'consumer_tech',
+    domain: 'notifications',
+    estimatedMin: 25,
+    context: {
+      company: 'Orion',
+      product: 'Consumer mobile — daily utility app, 4.2M MAU',
+      team: 'Notifications team',
+      background: 'Tested a new notification personalization model — timing and content personalized by user behavior cluster. 28-day test. Primary: 7-day active session rate. SRM detected on day 3; team investigated and concluded it was caused by a push permission prompt firing differently in treatment — iOS users in treatment were shown a permission prompt earlier, causing more permission denials and treatment arm dropoff. Team decided to continue the experiment.',
+      businessPressure: 'The notifications team has been working on this personalization model for two quarters. The primary result is positive. There is pressure to ship before the next planning cycle.'
+    },
+    hypothesis: 'Personalising notification timing and content by user behavior cluster will increase 7-day active session rates across all users.',
+    experimentDesign: {
+      type: 'A/B',
+      allocation: '50/50',
+      runtime: '28 days',
+      targetPopulation: 'All users who had notifications enabled at experiment start',
+      primaryMetric: '7-day active session rate',
+      guardrailMetrics: ['Notification opt-out rate (not pre-declared — observed post-hoc)'],
+      sampleSizeContext: 'SRM detected on day 3: actual split was 65/35 (treatment/control) vs intended 50/50. Team continued after attributing SRM to iOS permission prompt behavior.'
+    },
+    metricReadout: [
+      {
+        metric: '7-day active session rate — overall (primary)',
+        type: 'primary',
+        direction: 'positive',
+        delta: '+4.1%',
+        pValue: 0.02,
+        confidenceInterval: '[+0.6%, +7.6%]',
+        note: 'Significant but wide CI. Based on a sample with confirmed SRM — the treatment arm over-represents Android users.'
+      },
+      {
+        metric: '7-day active session rate — Android users',
+        type: 'segment',
+        direction: 'positive',
+        delta: '+6.3%',
+        pValue: 0.008,
+        confidenceInterval: '[+1.7%, +10.9%]',
+        note: 'Strong positive effect for Android. Android users were not differentially affected by the iOS permission prompt issue.'
+      },
+      {
+        metric: '7-day active session rate — iOS users',
+        type: 'segment',
+        direction: 'negative',
+        delta: '-1.2%',
+        pValue: 0.31,
+        confidenceInterval: '[-3.5%, +1.1%]',
+        note: 'Directionally negative, not statistically significant. iOS users were disproportionately dropped from the treatment arm due to the permission prompt. The surviving iOS treatment sample is not representative of the iOS population.'
+      },
+      {
+        metric: 'SRM check',
+        type: 'diagnostic',
+        direction: 'negative',
+        delta: '65/35 actual vs 50/50 intended (chi-square p<0.001)',
+        pValue: 0.001,
+        confidenceInterval: null,
+        note: 'SRM confirmed. The treatment arm is overloaded with Android users because iOS users were dropped from treatment at higher rates due to the push permission prompt behavior.'
+      },
+      {
+        metric: 'Notification opt-out rate (post-hoc observation)',
+        type: 'guardrail',
+        direction: 'negative',
+        delta: '+8.9% in treatment vs control',
+        pValue: null,
+        confidenceInterval: null,
+        note: 'Not pre-declared as a guardrail. Observed post-hoc. Treatment users are opting out of notifications at a higher rate — the personalization model may be sending more notifications that feel intrusive.'
+      }
+    ],
+    decisions: [
+      {
+        id: 'do-not-ship',
+        label: 'Do not ship. The SRM was not resolved — it was explained. Explanation is not resolution.',
+        description: 'The assignment mechanism was broken. The +4.1% result is a biased estimate. Re-run with proper randomization after fixing the permission prompt.',
+        score: 'senior_ready',
+        feedback: 'Correct. SRM explanation does not fix SRM. The team identified that the iOS permission prompt caused treatment arm dropout — but that explanation does not make the sample representative. The treatment arm over-represents Android users (who responded well) and under-represents iOS users (who were systematically excluded). The +4.1% result is not the treatment effect for the intended population; it is the treatment effect for the biased surviving sample. Shipping to all users based on an estimate derived from a non-representative sample risks a real negative impact on iOS users — the segment that the experiment failed to adequately represent. The correct path: fix the permission prompt issue and re-run with proper 50/50 randomization. The Android signal (+6.3%) is real and worth preserving — but it needs to be confirmed in a clean experiment before any iOS deployment.'
+      },
+      {
+        id: 'ship-android-only',
+        label: 'Ship to Android only, re-run for iOS separately.',
+        description: 'Android shows a clean positive. iOS was compromised by the SRM. Ship what is known.',
+        score: 'analyst_ready',
+        feedback: 'The instinct to separate Android and iOS is correct — the SRM differentially affected iOS users. But acting on the Android result from an SRM-contaminated experiment is still acting on biased data. The Android estimate (+6.3%) comes from an experiment where the overall randomization was broken. Even for the Android segment, you cannot be certain that the SRM did not introduce subtle confounds (e.g., if iOS users who stayed in treatment are systematically different from those who dropped, the control arm composition may have shifted in ways that affect the Android comparison). The cleaner path: acknowledge the Android signal as a strong hypothesis, fix the permission prompt, and re-run with Android as the primary target population in a clean experiment.'
+      },
+      {
+        id: 'ship-all',
+        label: 'Ship — the SRM was investigated and explained, and the overall primary result is significant at p=0.02.',
+        description: 'The team did due diligence on the SRM. The result is positive. Ship.',
+        score: 'junior_miss',
+        feedback: 'Wrong. This is the exact reasoning that SRM checks are designed to prevent. "We know why the SRM happened" is not the same as "the SRM did not affect our results." The assignment mechanism did not work as intended — iOS users were systematically excluded from treatment. The +4.1% result reflects a sample where Android users are over-represented and iOS users under-represented. If the feature is shipped to all users based on this result, the iOS experience is being influenced by a model whose effect on iOS users was never cleanly estimated. The opt-out rate increase (+8.9%) — even though not pre-declared — is a directional warning that the model may be less well-calibrated for the surviving treatment sample than the result suggests.'
+      }
+    ],
+    idealDecision: 'do-not-ship',
+    secondBestDecision: 'ship-android-only',
+    warningFlags: [
+      {
+        id: 'wf-srm-not-resolved',
+        label: 'SRM was explained but not resolved — the sample is still biased',
+        description: 'Identifying why an SRM occurred does not fix the broken randomization. The treatment arm still over-represents Android and under-represents iOS. The primary estimate (+4.1%) reflects this biased sample, not the full intended population.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-ios-directionally-negative',
+        label: 'iOS users directionally negative (-1.2%, p=0.31) — the under-represented segment shows no benefit',
+        description: 'iOS users — the segment most affected by the SRM — show a directionally negative result that is non-significant. Non-significant does not mean zero. The iOS treatment sample is not representative of the iOS population, so this result cannot be trusted in either direction.',
+        severity: 'critical'
+      },
+      {
+        id: 'wf-optout-posthoc',
+        label: 'Opt-out rate up 8.9% — post-hoc observation with no pre-declared threshold',
+        description: 'The opt-out rate increase was not pre-declared as a guardrail, so it cannot formally block the ship decision. But it is a directional signal that treatment users are opting out of notifications at a higher rate — which would erode the session rate benefit over time if the model remains deployed.',
+        severity: 'warning'
+      }
+    ],
+    debrief: 'This experiment has two independent problems, and the team\'s response to both reveals a systematic bias toward shipping.\n\nThe first problem: SRM. On day 3, the team detected a 65/35 split versus the intended 50/50. They investigated, identified a plausible cause (iOS push permission prompt), and continued. This decision — to continue an experiment with a known broken randomization — is the core error. An explained SRM is still a broken experiment. The mechanism (iOS dropout) is interesting and useful for fixing the next experiment. But it does not retroactively repair the assignment mechanism. The treatment arm spent 28 days with an over-representation of Android users and an under-representation of iOS users. Any effect estimate from this experiment reflects that biased sample, not the intended population.\n\nThe second problem: segment divergence. Android users show +6.3% (p=0.008). iOS users show -1.2% (p=0.31). iOS users are the segment that was differentially excluded from treatment — so the iOS result cannot be trusted in either direction. But the directional pattern — strong positive for Android, flat-to-negative for iOS — is consistent with a model that was inadvertently calibrated on the Android-heavy treatment sample and may not generalise to iOS.\n\nThe correct decision is to not ship. The primary estimate is biased. The iOS segment — representing a significant fraction of the user base — shows no benefit from a non-representative sample. The opt-out rate increase (+8.9%) is a warning that the model may be sending more notifications that users want to opt out of, which would erode the session rate benefit over a longer horizon.\n\nThe clean path forward: fix the iOS permission prompt issue so it does not differentially affect randomization, then re-run with proper 50/50 assignment. The Android signal is a strong hypothesis for what a well-run experiment will confirm. Test it in a clean experiment.\n\nThe broader lesson: pre-declaring guardrails is not optional. If notification opt-out rate had been pre-declared, the team would have had a clear framework for the ship decision — and the post-hoc discovery of the 8.9% increase would have been actionable rather than just concerning. Post-hoc guardrail identification is not acceptable as a substitute for pre-specification.',
+    interviewTakeaway: 'SRM explanation does not equal SRM resolution. An experiment with a broken assignment mechanism produces a biased estimate for the intended population, regardless of how well the team understands why the mechanism broke. The correct response to SRM is to stop, fix, and re-run — not to explain and continue.',
+    relatedConcepts: ['sample ratio mismatch', 'SRM', 'randomization', 'iOS permission prompts', 'segment harm', 'pre-specification', 'guardrail metrics'],
+    scenarioFamily: 'trust_and_validity',
+    tags: ['SRM', 'sample ratio mismatch', 'iOS', 'Android', 'notification personalization', 'segment divergence', 'opt-out rate', 'broken randomization']
   }
 
 ];

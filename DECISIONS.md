@@ -135,12 +135,12 @@ Desktop: Header.jsx right slot. Mobile: mobile topbar right slot. Do not add a s
 
 ---
 
-## Monetization — standing decisions (V4.80.0)
+## Monetization — standing decisions (updated V4.94.0)
 
 **Three tiers: anonymous / free / premium.** Full spec in MONETIZATION.md.
-- Anonymous: landing + browse rooms. No content execution.
-- Free (signed in): all Foundations + `isFree: true` cases (3/room) + Easy SQL. Progress sync via Supabase.
-- Premium (signed in + `DAI2026` or future Stripe): everything.
+- Anonymous: landing + Plans page + Foundations (browse, no save) + 1 demo case per room (no save) + 3 Start Here articles. Everything else visible but gated.
+- Free (signed in): all Foundations (persisted) + `isFree` cases ~3/room (persisted) + all Easy SQL 50 problems (persisted) + all Forensic SQL 25 problems (persisted) + progress tracker + streak.
+- Premium (signed in + `DAI2026` or future Stripe): everything — full case banks, Company Tracks, Staff Layer, Medium/Hard/Master SQL, Interview Simulator.
 
 **Pricing target: $29-39/month or $249-299/year.** PAL is a professional development platform, not a commodity prep tool. Do not underprice.
 
@@ -148,9 +148,19 @@ Desktop: Header.jsx right slot. Mobile: mobile topbar right slot. Do not add a s
 
 **`getAccessTier(user)`** is the canonical tier check. Use it for tier-aware UI.
 
-**Sign-in gate** enforced via `AUTH_REQUIRED_PAGES` useEffect in App.jsx. Covers all runners and SQL Lab. Browsing and Foundations open to all.
+**Guest routing rule: show GateOverlay on room pages, never redirect to home.** Anonymous users hitting gated content see the room/page with a `GateOverlay` component rendered on top — they understand what they're missing and get a targeted CTA. Redirecting to home kills product preview and destroys conversion. The `AUTH_REQUIRED_PAGES` useEffect should trigger GateOverlay, not `setPage('home')`.
 
-**Easy SQL = free tier.** All Easy SQL problems have `isFree: true`. Medium/Hard/Master/Forensic have `isFree: false` and require premium.
+**`GateOverlay` is the single gate component.** No inline gate logic in room components. Every locked surface uses `<GateOverlay title="" body="" ctaLabel="" onCTA={} />`. Consistent visual language, contextual copy via props. Existing inline gates in CompanyTracks.jsx and InterviewSimulator.jsx must be migrated to GateOverlay.
+
+**Forensic SQL = free tier (updated V4.94.0).** All 25 forensic problems have `isFree: true`. Forensics are PAL's most distinctive content — making them free is a quality signal and lead magnet. Do not gate Forensics.
+
+**Easy SQL = free tier.** All 50 Easy SQL problems have `isFree: true`. Medium/Hard/Master require premium.
+
+**No 10-question session gates. Ever.** Session-based content limits add friction without conversion benefit. A guest who hits a limit thinks the product is broken, not that they should sign up. The isFree content model already scopes access cleanly. Do not build session gates in any form.
+
+**No multi-pack infrastructure until post-Stripe.** All locked content uses one access code (`DAI2026`). Different locked rooms/packs show different GateOverlay copy but all unlock via the same code. Do not build per-pack pricing, per-pack unlock logic, or pack management UI through V4.x.
+
+**Plans page (`Plans.jsx`) is the canonical conversion surface.** Replaces the split between `Pricing.jsx` and `Unlock.jsx`. Shows 3 tiers with what's included, access code input prominent in the Premium tier. All "unlock" CTAs in the app route to `'plans'` page, not `'unlock'`.
 
 **B2B path exists but is medium-term.** Do not build team features until B2C is profitable.
 
@@ -159,14 +169,27 @@ Desktop: Header.jsx right slot. Mobile: mobile topbar right slot. Do not add a s
 **Access code gate is live as of V4.29.0. `isUnlocked()` reads localStorage.**
 Located in `src/utils/unlock.js`. Valid code: `DAI2026` (single community code — LinkedIn, word of mouth, direct invite). Stored under key `pal-access-code-v1`. The access code tier is permanent — it remains as the community tier even after Stripe goes live.
 
-**Free tier: first 3 cases per room + all Foundations + full Defense Strategy.**
-Every room has exactly `isFree: true` on its first 3 items (Stats has 4). All Foundations modules are fully free. Defense Strategy is fully free. This split is intentional — enough value to hook, enough gate to motivate unlocking.
+**Free tier: first ~3 cases per room + all Foundations + all Easy SQL + all Forensics + progress tracking.**
+Enough value to hook, enough gate to motivate unlocking. The progress tracker (streak, room completion bars) is itself a reason to create a free account — frame sign-in as "save your progress" not "unlock content."
 
-**Premium tier (access code required): full case banks, Company Tracks, full Behavioral (BEH04+), Interview Simulator.**
-Company Tracks and Interview Simulator have no `isFree` partial access — they are entirely behind the gate.
+**Premium tier (access code required): full case banks, Company Tracks, Staff Layer, Medium/Hard/Master SQL, Interview Simulator.**
+Company Tracks and Interview Simulator have no `isFree` partial access — entirely behind the gate. Staff Layer (leadershipNote in debriefs) is premium-only.
 
 **Stripe is scaffolded but not live.**
 `VITE_STRIPE_PAYMENT_LINK` env var exists but the Stripe flow is not wired. When Stripe goes live, `isUnlocked()` should also accept a valid Stripe session token. The access code community tier coexists with Stripe — it does not go away.
+
+## Gate copy system
+
+Contextual copy per locked surface — same unlock mechanism, different framing. Reference this before writing any gate copy:
+
+| Surface | Title | Body | CTA |
+|---|---|---|---|
+| Company Tracks | "Company Tracks" | "Curated prep paths calibrated to what specific employers actually test. Enter your access code to unlock." | "Unlock the full lab →" |
+| Staff Layer | "Staff-Level Debrief" | "Shows what separates a strong answer from a good enough one at L5+. Unlock the full lab to see it." | "Unlock the full lab →" |
+| Interview Simulator | "Interview Simulator" | "Timed end-to-end mock with a randomized case set — real interview clock pressure. Part of the full lab." | "Unlock the full lab →" |
+| Full case banks | "More cases in this room" | "The full bank has [N] cases at Analyst, Senior, and Staff difficulty. Unlock to access them." | "Unlock the full lab →" |
+| Medium/Hard SQL | "Medium & Hard SQL" | "The harder SQL tiers build on the same datamarts with more complex trap patterns. Unlock to access." | "Unlock the full lab →" |
+| Any runner (anonymous) | "Sign in to practice" | "Create a free account to run cases and save your progress. Foundations are always free." | "Sign in →" |
 
 ---
 
