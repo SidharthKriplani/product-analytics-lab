@@ -88,6 +88,47 @@ Top-of-funnel (page_viewed, case_opened), paywall signal (paywall_hit), and comp
 
 ---
 
+## Product health metrics (PM audit — June 2026)
+
+Recommended metrics to track once PostHog is live in prod. Grouped by funnel stage.
+
+### Activation
+| Metric | Definition | Why it matters |
+|---|---|---|
+| Guest → case start rate | % of home visitors who open a practice case (not Foundations) | Measures whether the guest demo path works |
+| Guest → debrief completion rate | % of guests who finish a full case end-to-end | The core activation signal — did they feel the product? |
+| Sign-up conversion from gate | GateOverlay impressions → sign-ups, broken out by gate type (RCA / SQL / Cases) | Tells you which content converts best — invest content there |
+| Day-1 activation rate | % of new sign-ins who complete their first case within 24 hours | The activation event; anything below 30% means onboarding is broken |
+
+### Retention
+| Metric | Definition | Why it matters |
+|---|---|---|
+| D1 / D7 / D30 return rate | % of users who return 1, 7, and 30 days after first visit | The core retention curve — set baselines before any feature changes |
+| Cases completed per session | Average case completions per session for signed-in users | Session depth proxy; low = users browsing without engaging |
+| Session continuity rate | % of sessions where user opens a second case after completing the first | ForwardPointerCard impact metric — track before and after wiring it |
+| Room breadth per user per week | # of distinct rooms visited in a 7-day window | Breadth engagement — correlates with retained users |
+
+### Conversion
+| Metric | Definition | Why it matters |
+|---|---|---|
+| Gate-to-sign-in rate by gate type | Sign-up % per GateOverlay instance, per room | Identifies which room gates are highest leverage for conversion |
+| Access code entry attempts per week | Raw weekly count of code input submissions | Demand signal for full unlock — rising trend = product is working |
+| Free → paid conversion rate (30-day) | % of signed-in users who unlock within 30 days | The core monetization metric once Stripe goes live |
+
+### Product quality
+| Metric | Definition | Why it matters |
+|---|---|---|
+| Debrief scroll depth | % of debrief text read per case (requires scroll tracking) | If users don\'t read debriefs, the core differentiation (judgment feedback) isn\'t landing |
+
+### Events needed to track these (not yet in PostHog)
+- `gate_shown` — GateOverlay rendered, with `{ room, gate_type, user_state: 'guest' | 'free' }`
+- `gate_converted` — user signs in or unlocks after a gate impression (tie to prior `gate_shown`)
+- `debrief_viewed` — debrief panel opened (distinct from `case_completed`)
+- `forward_pointer_clicked` — ForwardPointerCard CTA clicked (session continuity signal)
+- `user_signed_in` — Supabase SIGNED_IN forwarded to PostHog (enables cross-device funnel stitching)
+
+---
+
 ## localStorage keys (client-side state)
 
 All progress state lives in localStorage. Every key must be included in `onResetAllProgress` in App.jsx. All 18 `pal-*` progress keys are also synced to Supabase `user_progress` table when the user is signed in (see `src/utils/syncProgress.js` — `PROGRESS_KEYS` array).

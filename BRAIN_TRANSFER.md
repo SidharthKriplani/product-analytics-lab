@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V4.90.0 | **Build:** ✓ (1.67s, 0 errors) | **Date:** 2026-06-03
+**Version:** V5.0.0 | **Build:** ✓ (2.28s, 0 errors) | **Date:** 2026-06-05
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.0.0** — PM audit sprint: guest demo path + empty state onboarding + Plans copy. (1) P0.1: `requireUser(isFree)` now accepts the case\'s isFree flag — guests can open and complete any isFree case in any room without signing in. Safety-net useEffect narrowed to only redirect `sql-lab` (not all runners). All 17 open handlers reordered: find item first, then `requireUser(item.isFree)`. (2) P0.2: Progress.jsx day-1 empty state — accent-bordered card shown when `totalCompleted === 0`, with "Start Metrics", "Start RCA", "Try SQL Lab" CTAs. Replaces the empty progress dashboard dead-end. (3) P0.3: Plans.jsx full copy pass — all tier descriptions and feature rows now outcome-framed: Guest "Try it, no account", Free Account "Build your practice habit", Full Lab "Prep like you\'re in the room." Feature rows rewritten from feature lists to outcome statements. MD spine updated: NEXT/IDEAS/DECISIONS/AUDITS/METRICS all reflect PM audit findings. Build ✓ 2.28s.
 
 **V4.99.0** — Guest routing fix. `signed-out` CSS class (hides sidebar) now only applied when `!user && page === 'home'` — not on all non-signed-in pages. Previously guests were sidebar-less everywhere after clicking "Explore", trapping them in one room with no navigation. Now sidebar is visible on all non-home pages regardless of auth state. "Explore without signing in" now navigates to `'foundations'` (FoundationHub) instead of directly to `'stat-foundations'`. Build ✓ 2.16s.
 
@@ -118,7 +120,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V4.94–4.98 sprint complete. All 5 build tasks shipped. Next: spokenSummary backfill (RCA05–RCA26 + C01–C25 — 40+ cases, delegate to subagent), or Interview Simulator expansion (needs PostHog WAU data first).
+## Next action — V5.0.0 P0 sprint complete. P1 next: ForwardPointerCard wired at all debriefs (Audit #147), then Forensic SQL gate split f11–f25 → isFree: false (Audit #148). Both are low-effort data/wiring passes.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

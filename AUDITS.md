@@ -56,6 +56,22 @@ SQLite REAL values that are whole numbers (40.0, 25.0, 50.0, 3500.0) return as J
 
 **Files:** `src/pages/SqlLabPage.jsx`
 
+### 147. ⚠️ UX Audit — ForwardPointerCard not wired at all case debriefs
+**Type:** UX / Navigation & Discoverability
+**Status:** Open — V4.99.0
+
+`ForwardPointerCard` component exists at `src/components/shared/ForwardPointerCard.jsx` and is wired in some runners, but not consistently across all 17 rooms. After a case debrief, users have no prompted next action — they manually navigate back to the browser and choose another case. This breaks session continuity at the highest-engagement moment (immediately post-debrief). Fix: audit which runners are missing ForwardPointerCard at the debrief exit state and wire it in. Each runner already receives `onNext` and `onBack` props — the component hookup is low effort per runner. Priority: P1.
+
+**Files to check:** All runner components in `src/components/[room]/[Room]Runner.jsx` — verify ForwardPointerCard renders at debrief/completion state.
+
+### 148. ⚠️ Product Audit — Forensic SQL over-exposed (all 25 isFree)
+**Type:** Creativity / Product — access model
+**Status:** Open — V4.99.0
+
+All 25 Forensic SQL problems (`f01–f25`) are currently `isFree: true` (set in V4.97.0). Forensic is PAL\'s most distinctive SQL Lab content — staff-level broken-query trap detection, a format not available on DataLemur or StrataScratch. Making all 25 free removes the strongest premium differentiator in the SQL tier with no conversion benefit. Fix: Batch 1 (f01–f10) stays `isFree: true` — sufficient to demonstrate the Forensic format. Batch 2 (f11–f20) and Batch 3 (f21–f25) set `isFree: false`. Data-only change in `sqlLabProblems.js`. Priority: P1.
+
+**Files:** `src/data/sqlLabProblems.js` — problems f11–f25
+
 ---
 
 ## Part XXIX — V4.44.0 Pre-Beta Audit Log

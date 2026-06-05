@@ -288,6 +288,22 @@ Family 6 — Data Traps (across all): divide-by-zero, integer division, duplicat
 
 ---
 
+### PM critique items (June 2026 audit)
+
+**Sign-in tier value expansion**
+Current: signed-in free users get the same ~3 free cases as guests (just with progress saved). Weak offer — not enough to build a habit before the conversion ask. Fix: increase `isFree: true` case count from ~3 to ~8 per room for signed-in users. Guests still see 3; signing in meaningfully expands access. This is a data-file change only (no component changes) — set `isFree: true` on cases 4–8 per room, conditioned on sign-in state in the runner. Medium effort: ~15 data file edits + one gating logic tweak.
+
+**Progress home next-suggestion card**
+Progress is the signed-in home page but it doesn't direct users to their next action. Add a persistent "Continue where you left off" card at the top of Progress.jsx: last-active room, last incomplete case, one-click to resume. Not a recommendation engine — just surface the `pal-last-visited-*` localStorage keys already being written. Low effort: read last-visited room, find first incomplete case, render a card. High retention impact.
+
+**Forensic SQL gate split** (see also Audit #148)
+All 25 Forensic problems are `isFree: true`. Forensic is PAL's most distinctive SQL content — staff-level trap detection, unique format. Keeping all 25 free removes a premium differentiator with no conversion benefit. Fix: Batch 1 (f01–f10) stays free as a format demo. Batch 2 (f11–f20) and Batch 3 (f21–f25) set `isFree: false`. Data change only — 15 lines in sqlLabProblems.js.
+
+**Navigation IA cleanup**
+Two improvements with low implementation cost: (1) Move Failure Patterns, Defense Strategy, Frameworks (Playbook), and Interview Q&A from TOOLS into LEARN — they're reference/study content, not tools. TOOLS should contain only active utilities (Stats Calc, MCQ Quiz, Bookmarks, Companies). (2) Stats Calc (ab-interpreter) is a sidebar top-level item competing with rooms — it should be accessible from inside the A/B Design or Stats room as a linked tool, not a standalone nav destination. Sidebar.jsx change only.
+
+---
+
 ## Tier 2 — High impact, more effort
 
 ### One-active-session logic

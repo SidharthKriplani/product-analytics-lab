@@ -13,35 +13,41 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ---
 
-## Active build queue (V4.94.0 sprint)
+## Active build queue — PM critique sprint (V5.0+)
 
-**Note (V4.94–4.98):** Full sprint complete. GateOverlay, Plans.jsx, 8 new cases, forensic isFree, progress saved/sign-in nudge, Metric Universe Atlas — all shipped. Build ✓.
+**P0 — Must ship before any outreach or paid launch**
 
-**1. spokenSummary backfill** ← delegate as subagent writing pass
-Create `src/components/shared/GateOverlay.jsx`. Fix App.jsx: anonymous users hitting gated pages see GateOverlay, not a redirect to home. Migrate CompanyTracks.jsx + InterviewSimulator.jsx inline gates to GateOverlay. DECISIONS.md gate copy table is the source of truth for copy.
+**1. Guest demo path** ← HIGHEST PRIORITY
+One real practice case fully playable without sign-in — not Foundations theory. Recommended entry: Metrics or RCA room, one `isFree: true` case exposed to guests end-to-end (browser card visible + runner accessible + debrief fully shown). After debrief, GateOverlay fires: "Sign in to save this and keep practicing." Current flow (guest → FoundationHub → theory) never lets guests feel the product. This is the top-of-funnel conversion hole. Implementation: remove `requireUser()` guard from one open handler per room (or add a `guestDemo: true` flag on one case per room and allow it through). Audit #147 (ForwardPointerCard) can be fixed in the same session.
 
-**2. Plans.jsx — unified tier page**
-Merge `Pricing.jsx` + `Unlock.jsx` into `Plans.jsx`. Three-tier layout: Guest / Free / Premium. Access code input prominent in Premium column. Wire to App.jsx + Sidebar.jsx. All "Unlock →" CTAs in app route to `'plans'`, not `'unlock'`.
+**2. New signed-in user empty state**
+Progress is the signed-in home — correct for returning users, broken for day-1. On first visit (no cases completed), Progress must show: a "Start here →" card pointing to one specific room (Metrics or RCA by default), a brief 2-line explainer of what PAL is, and a clear next action. Do not show an empty heatmap and zero-count room cards. This is an onboarding problem hiding as a UI problem.
 
-**3. 8 new cases (content authoring)**
-RCA27 orders-down/sessions-stable · RCA28 RTO-spike-tier2/3 · C21 prepaid-adoption · C22 restrict-high-RTO-COD · C23 CVR-vs-contribution-tradeoff · s30 CTR-up/margin-down (check s09 first) · s31 CVR-up/return-rate-up · s32 SRM+segment-harm. All go in existing runners — no runner changes. See gap analysis in MSL_STRUCTURE_BRIEF.md for case specs.
+**3. Plans.jsx copy pass**
+Current tier descriptions are feature-listed, not outcome-framed. Every row and tier description needs one revision pass before launch. Rule is in DECISIONS.md: outcome-framed copy only. No code changes — copy-only edit in Plans.jsx.
 
-**4. Free-tier polish**
-Mark all 25 forensic SQL problems `isFree: true` (data change only). Add "Progress saved" micro-confirmation for signed-in free users. Add sign-in prompt at demo case debrief for anonymous users.
+**P1 — Important, build after P0**
 
-**5. Metric Universe Atlas panel**
-New `MetricAtlasPanel` component in MetricsBrowser.jsx. Toggle button in header. 6 v1 categories: Growth, Conversion/Funnel, Revenue/Monetization, Marketplace Health, Quality/Trust/Returns, Engagement. ~4 cards each. Sign-in free access.
+**4. ForwardPointerCard wired at every debrief** (Audit #147)
+Component exists at `src/components/shared/ForwardPointerCard.jsx`. Not consistently wired at case debrief exit. After every debrief, user should see "Next →" suggestion. Fixes the session-continuity drop-off at the highest-engagement moment. Wire across all runners that don't yet have it.
+
+**5. Forensic SQL gate split** (Audit #148)
+Forensic Batch 1 (f01–f10) stays free — sufficient to demonstrate the format. Batch 2 (f11–f20) and Batch 3 (f21–f25) move behind the access gate: set `isFree: false` on problems f11–f25 in sqlLabProblems.js. Restores the most distinctive SQL Lab content as a premium differentiator.
 
 ---
 
 ## Deferred (own sessions, not blocking)
 
-**spokenSummary backfill** — RCA05–RCA24 + all Business cases. Subagent writing pass.
+**spokenSummary backfill** — RCA05–RCA26 + C01–C25. Subagent writing pass.
+
+**Sign-in tier value expansion** — Increase `isFree` case count from ~3 to ~8 per room for signed-in users. Gives free tier genuine value before conversion ask. See IDEAS.md Tier 1.
+
+**Progress home next-suggestion card** — "Continue where you left off" widget on Progress page. Last-active room + case, one click to resume. See IDEAS.md Tier 1.
 
 **Experiment Design phase** — Add "design the test" phase to Review Room runner. Structural runner change, separate sprint.
 
-**Analyst product sense** — New subsection in Cases room or Product Design. product_sense_ds_packet is ready source material.
-
 **Interview Simulator expansion** — Gate: confirm PostHog WAU data first.
+
+**Analyst product sense** — New subsection in Cases room or Product Design. product_sense_ds_packet ready.
 
 **Start Here pinned articles** — Requires `pinned` field in blog data + home page changes. Separate session.

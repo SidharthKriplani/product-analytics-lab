@@ -93,7 +93,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
           How you want to practice
         </h1>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', margin: 0 }}>
-          PAL is free to explore. Sign in to track progress. Unlock for the full case bank.
+          Try a real case for free. Sign in to build a practice habit. Unlock to prep like you\'re already in the room.
         </p>
       </div>
 
@@ -106,22 +106,21 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
             Guest
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            Explore free
+            Try it, no account
           </div>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 0.75rem', lineHeight: 1.55 }}>
-            No account needed to browse or try Foundations.
+            Play one full practice case in any room — including the debrief — before deciding if PAL is worth your time.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', marginBottom: 'auto' }}>
-            <Row text="All 4 Foundation rooms (100+ modules)" available />
-            <Row text="Browse all 17 practice rooms" available />
-            <Row text="1 demo case per room (no save)" available />
-            <Row text="Blog &amp; Playbook articles" available />
-            <Row text="Progress tracking" available={false} />
-            <Row text="Case saves &amp; streak" available={false} />
-            <Row text="Easy SQL &amp; Forensic SQL" available={false} />
+            <Row text="1 full practice case per room (Analyst difficulty)" available />
+            <Row text="All 4 Foundation rooms — 100+ concept modules" available />
+            <Row text="All Frameworks + Deep Dive articles" available />
+            <Row text="Progress not saved between sessions" available={false} />
+            <Row text="Streak tracking" available={false} />
+            <Row text="SQL Lab + Forensic SQL" available={false} />
           </div>
           <button
-            onClick={() => onNavigate && onNavigate('stat-foundations')}
+            onClick={() => onNavigate && onNavigate('metrics')}
             style={{
               marginTop: '1.25rem', width: '100%',
               background: 'var(--surface-2)', border: '1px solid var(--border)',
@@ -130,7 +129,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
               cursor: 'pointer', fontFamily: 'inherit',
             }}
           >
-            Explore Foundations →
+            Try a free case →
           </button>
         </div>
 
@@ -148,17 +147,17 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
             </span>
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            Track your progress
+            Build your practice habit
           </div>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 0.75rem', lineHeight: 1.55 }}>
-            Sign in to save progress across devices and build a streak.
+            Every case you complete gets saved. Return any day and pick up where you left off — the streak tells you whether you\'re actually being consistent.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', marginBottom: 'auto' }}>
             <Row text="Everything in Guest" available accent="var(--accent)" />
-            <Row text="~3 cases per room (saved)" available accent="var(--accent)" />
-            <Row text="All 50 Easy SQL problems" available accent="var(--accent)" />
-            <Row text="All 25 Forensic SQL problems" available accent="var(--accent)" />
-            <Row text="Progress tracker + daily streak" available accent="var(--accent)" />
+            <Row text="3 saved cases per room — Analyst through Senior difficulty" available accent="var(--accent)" />
+            <Row text="All 50 Easy SQL problems — every pattern, clean data" available accent="var(--accent)" />
+            <Row text="10 Forensic SQL problems — spot the broken query" available accent="var(--accent)" />
+            <Row text="Progress tracker + daily streak across all rooms" available accent="var(--accent)" />
             <Row text="Cross-device sync" available accent="var(--accent)" />
             <Row text="Full case banks (300+ cases)" available={false} />
             <Row text="Company Tracks" available={false} />
@@ -194,18 +193,18 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
             Full Lab
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            Everything, unlocked
+            Prep like you\'re in the room
           </div>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 0.75rem', lineHeight: 1.55 }}>
-            Access code required. One code covers the entire lab — no per-room pricing.
+            One access code unlocks everything — the case depth, difficulty progression, and company-specific patterns that show up in real L4–L6 interviews.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', marginBottom: 'auto' }}>
             <Row text="Everything in Free Account" available accent="var(--teal)" />
-            <Row text="300+ cases across 17 rooms" available accent="var(--teal)" />
-            <Row text="Company Tracks (employer-specific paths)" available accent="var(--teal)" />
-            <Row text="Staff Layer debriefs (L5+ reasoning)" available accent="var(--teal)" />
-            <Row text="Medium / Hard / Master SQL (90+ problems)" available accent="var(--teal)" />
-            <Row text="Interview Simulator" available accent="var(--teal)" />
+            <Row text="300+ cases — the scenarios that separate hired from rejected at L5" available accent="var(--teal)" />
+            <Row text="Staff Layer debriefs — what separates a good answer from a hired one" available accent="var(--teal)" />
+            <Row text="Company Tracks — Meta, Amazon, Meesho difficulty sequencing" available accent="var(--teal)" />
+            <Row text="90+ Medium / Hard / Master SQL with trap detection training" available accent="var(--teal)" />
+            <Row text="Mock Interview — timed end-to-end drill with randomised case set" available accent="var(--teal)" />
           </div>
 
           {/* Code input */}

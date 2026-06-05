@@ -492,6 +492,62 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
         </p>
       </div>
 
+      {/* Day-1 empty state — shown when user has never completed anything */}
+      {totalCompleted === 0 && (
+        <div className="pal-card-enter" style={{
+          border: '1px solid var(--accent-border)',
+          background: 'var(--accent-bg)',
+          borderRadius: '12px',
+          padding: '1.5rem 1.75rem',
+          marginBottom: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+        }}>
+          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>
+            You haven\'t practiced yet — pick a room and start.
+          </div>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
+            PAL puts you in the decision, not a reading situation. Metrics and RCA are the two rooms that show up most in product analytics interviews — start with either.
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+            <button
+              onClick={() => onNavigate && onNavigate('metrics')}
+              style={{
+                background: 'var(--accent)', color: '#fff',
+                border: 'none', borderRadius: '8px',
+                padding: '0.55rem 1.1rem', fontSize: '0.875rem',
+                fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              Start Metrics →
+            </button>
+            <button
+              onClick={() => onNavigate && onNavigate('rca')}
+              style={{
+                background: 'var(--surface-2)', color: 'var(--text)',
+                border: '1px solid var(--border)', borderRadius: '8px',
+                padding: '0.55rem 1.1rem', fontSize: '0.875rem',
+                fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              Start RCA →
+            </button>
+            <button
+              onClick={() => onNavigate && onNavigate('sql-lab')}
+              style={{
+                background: 'var(--surface-2)', color: 'var(--text)',
+                border: '1px solid var(--border)', borderRadius: '8px',
+                padding: '0.55rem 1.1rem', fontSize: '0.875rem',
+                fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              Try SQL Lab →
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Sticky summary bar */}
       <div style={{
         background: 'var(--accent)',

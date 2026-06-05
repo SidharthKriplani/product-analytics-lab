@@ -74,6 +74,12 @@ GenAI content lives inside existing rooms (Playbook articles, RCA cases, Metrics
 **Every room is a judgment exercise, not a knowledge transfer.**
 The positioning is "practice the calls." Every room must put the user in a decision-making situation, not a reading situation. No room should feel like a course or textbook chapter.
 
+**Guests must be able to complete one full practice case before the sign-in gate.**
+The guest experience must include at least one real practice case (not a Foundations theory module) playable end-to-end without an account. Minimum: one `isFree: true` case per major room (Metrics, RCA, Cases) accessible to anonymous users with the full runner + debrief visible. The sign-in gate fires *after* the debrief, not before. A guest who never experiences the judgment loop will not convert. Foundations content does not substitute for this — it is theory, not practice. This rule was established after a PM audit (June 2026) identified the guest→Foundations redirect as the primary top-of-funnel conversion failure. Do not revert to redirect-before-case behavior.
+
+**All gate copy and Plans page descriptions must be outcome-framed, not feature-listed.**
+Every GateOverlay body, every tier description on Plans.jsx, and every locked-state CTA must describe what the user achieves, not what feature they get. Wrong: "Unlock 26 RCA cases." Right: "See how a Senior analyst would handle this drop — and what separates a good answer from a hired one." Wrong: "Full case banks + Company Tracks." Right: "Practice the exact difficulty and case types your target companies use at L5+." Outcome-first copy converts. Feature lists do not. This is a standing rule — apply it to any new gate copy or Plans revision, and enforce it in copy-only edit passes before any public launch.
+
 **Practice rooms use soft gates, never hard gates.**
 PAL is a practice space users return to, not a course they complete in sequence. Practice rooms are never hard-locked behind foundation completion, quiz walls, or questionnaires. The correct beginner mechanism is: (1) a dismissable "foundation recommended" nudge card at room entry when the linked foundation has not been completed, and (2) difficulty-tagged cases (Beginner/Intermediate/Senior) with filter chips so users self-calibrate. The nudge recommends — it never blocks. A user who ignores the nudge and jumps straight into Hard cases has made an informed choice. This decision is standing through V4.x. Do not reopen.
 

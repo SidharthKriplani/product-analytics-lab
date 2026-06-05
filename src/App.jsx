@@ -151,8 +151,8 @@ export default function App() {
 
   // Helper: call at top of any open handler that requires sign-in.
   // Returns true if the user is not signed in (caller should return early).
-  function requireUser() {
-    if (!user) { setAuthGate(true); return true; }
+  function requireUser(isFree = false) {
+    if (!user && !isFree) { setAuthGate(true); return true; }
     return false;
   }
 
@@ -190,7 +190,7 @@ export default function App() {
   // Safety-net: if an anonymous user somehow reaches a runner page via direct navigation,
   // show the auth gate and fall back to home. In normal usage the open handlers intercept first.
   useEffect(() => {
-    if (!user && AUTH_REQUIRED_PAGES.has(page)) {
+    if (!user && page === 'sql-lab') {
       setAuthGate(true);
       setPage('home');
     }
@@ -324,9 +324,9 @@ export default function App() {
   }
 
   function openStatsModule(id) {
-    if (requireUser()) return;
     const module = statsModuleIndex.find(m => m.id === id);
     if (!module) return;
+    if (requireUser(module.isFree)) return;
     if (!module.isFree && !unlocked) { track('paywall_hit', { room: 'stats', id }); setPage('plans'); return; }
     track('case_opened', { room: 'stats', id, title: module.title });
     setActiveStatsModuleId(id);
@@ -335,9 +335,9 @@ export default function App() {
   }
 
   function openDesignScenario(id) {
-    if (requireUser()) return;
     const scenario = designScenarioIndex.find(s => s.id === id);
     if (!scenario) return;
+    if (requireUser(scenario.isFree)) return;
     if (!scenario.isFree && !unlocked) { track('paywall_hit', { room: 'design', id }); setPage('plans'); return; }
     track('case_opened', { room: 'design', id, title: scenario.title });
     setActiveDesignScenarioId(id);
@@ -346,9 +346,9 @@ export default function App() {
   }
 
   function openScenario(id) {
-    if (requireUser()) return;
     const scenario = scenarioIndex.find(s => s.id === id);
     if (!scenario) return;
+    if (requireUser(scenario.isFree)) return;
     if (!scenario.isFree && !unlocked) { track('paywall_hit', { room: 'review', id }); setPage('plans'); return; }
     track('case_opened', { room: 'review', id, title: scenario.title });
     setActiveScenarioId(id);
@@ -357,9 +357,9 @@ export default function App() {
   }
 
   function openMetricsCase(id) {
-    if (requireUser()) return;
     const c = metricCaseIndex.find(m => m.id === id);
     if (!c) return;
+    if (requireUser(c.isFree)) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'metrics', id }); setPage('plans'); return; }
     track('case_opened', { room: 'metrics', id, title: c.title });
     setActiveMetricsCaseId(id);
@@ -368,9 +368,9 @@ export default function App() {
   }
 
   function openRCACase(id) {
-    if (requireUser()) return;
     const c = rcaCaseIndex.find(r => r.id === id);
     if (!c) return;
+    if (requireUser(c.isFree)) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'rca', id }); setPage('plans'); return; }
     track('case_opened', { room: 'rca', id, title: c.title });
     setActiveRCACaseId(id);
@@ -379,9 +379,9 @@ export default function App() {
   }
 
   function openBusinessCase(id) {
-    if (requireUser()) return;
     const c = businessCaseIndex.find(b => b.id === id);
     if (!c) return;
+    if (requireUser(c.isFree)) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'cases', id }); setPage('plans'); return; }
     track('case_opened', { room: 'cases', id, title: c.title });
     setActiveBusinessCaseId(id);
@@ -390,9 +390,9 @@ export default function App() {
   }
 
   function openCodeModule(id) {
-    if (requireUser()) return;
     const m = codeModuleIndex.find(m => m.id === id);
     if (!m) return;
+    if (requireUser(m.isFree)) return;
     if (!m.isFree && !unlocked) { track('paywall_hit', { room: 'code', id }); setPage('plans'); return; }
     track('case_opened', { room: 'code', id, title: m.title });
     setActiveCodeModuleId(id);
@@ -401,9 +401,9 @@ export default function App() {
   }
 
   function openPrioritizationScenario(id) {
-    if (requireUser()) return;
     const s = prioritizationIndex.find(s => s.id === id);
     if (!s) return;
+    if (requireUser(s.isFree)) return;
     if (!s.isFree && !unlocked) { track('paywall_hit', { room: 'prioritization', id }); setPage('plans'); return; }
     track('case_opened', { room: 'prioritization', id, title: s.title });
     setActivePrioritizationId(id);
@@ -412,9 +412,9 @@ export default function App() {
   }
 
   function openBehavioralQuestion(id) {
-    if (requireUser()) return;
     const q = behavioralIndex.find(q => q.id === id);
     if (!q) return;
+    if (requireUser(q.isFree)) return;
     if (!q.isFree && !unlocked) { track('paywall_hit', { room: 'behavioral', id }); setPage('plans'); return; }
     track('case_opened', { room: 'behavioral', id, title: q.title });
     setActiveBehavioralId(id);
@@ -423,9 +423,9 @@ export default function App() {
   }
 
   function openEstimationProblem(id) {
-    if (requireUser()) return;
     const p = estimationIndex.find(p => p.id === id);
     if (!p) return;
+    if (requireUser(p.isFree)) return;
     if (!p.isFree && !unlocked) { track('paywall_hit', { room: 'estimation', id }); setPage('plans'); return; }
     track('case_opened', { room: 'estimation', id, title: p.title });
     setActiveEstimationId(id);
@@ -444,9 +444,9 @@ export default function App() {
   }
 
   function openGrowthAnalyticsCase(id) {
-    if (requireUser()) return;
     const c = growthAnalyticsIndex.find(c => c.id === id);
     if (!c) return;
+    if (requireUser(c.isFree)) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'growth-analytics', id }); setPage('plans'); return; }
     track('case_opened', { room: 'growth-analytics', id, title: c.title });
     setActiveGrowthAnalyticsId(id);
@@ -455,9 +455,9 @@ export default function App() {
   }
 
   function openChallenge(id) {
-    if (requireUser()) return;
     const c = challengesIndex.find(c => c.id === id);
     if (!c) return;
+    if (requireUser(c.isFree)) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'challenges', id }); setPage('plans'); return; }
     setActiveChallengeId(id);
     track('open_challenge', { id, title: c.title });
@@ -470,9 +470,9 @@ export default function App() {
   }
 
   function openBICase(id) {
-    if (requireUser()) return;
     const c = biCaseIndex.find(c => c.id === id);
     if (!c) return;
+    if (requireUser(c.isFree)) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'bi', id }); setPage('plans'); return; }
     track('case_opened', { room: 'bi', id, title: c.title });
     setActiveBICaseId(id);
@@ -485,9 +485,9 @@ export default function App() {
   }
 
   function openSTFCase(id) {
-    if (requireUser()) return;
     const c = stfCaseIndex.find(c => c.id === id);
     if (!c) return;
+    if (requireUser(c.isFree)) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'spot-the-flaw', id }); setPage('plans'); return; }
     track('case_opened', { room: 'spot-the-flaw', id, title: c.title });
     setActiveSTFCaseId(id);
@@ -500,9 +500,9 @@ export default function App() {
   }
 
   function openTakehomeCase(id) {
-    if (requireUser()) return;
     const c = takehomeCaseIndex.find(c => c.id === id);
     if (!c) return;
+    if (requireUser(c.isFree)) return;
     if (!c.isFree && !unlocked) { track('paywall_hit', { room: 'take-home', id }); setPage('plans'); return; }
     track('case_opened', { room: 'take-home', id, title: c.title });
     setActiveTakehomeCaseId(id);
@@ -521,9 +521,9 @@ export default function App() {
   }
 
   function openInstrumentationCase(id) {
-    if (requireUser()) return;
     const c = instrumentationIndex.find(c => c.id === id);
     if (!c) return;
+    if (requireUser(c.isFree)) return;
     if (!unlocked && !c.isFree) { navigate('unlock'); return; }
     track('case_opened', { room: 'instrumentation', id, title: c.title });
     setActiveInstrumentationCaseId(id);
@@ -552,9 +552,9 @@ export default function App() {
   }
 
   function openPDScenario(id) {
-    if (requireUser()) return;
     const s = productDesignIndex.find(s => s.id === id);
     if (!s) return;
+    if (requireUser(s.isFree)) return;
     if (!s.isFree && !unlocked) { track('paywall_hit', { room: 'product-design', id }); setPage('plans'); return; }
     track('case_opened', { room: 'product-design', id, title: s.title });
     setActivePDScenarioId(id);
