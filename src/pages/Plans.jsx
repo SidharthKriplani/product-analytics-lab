@@ -217,7 +217,11 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
               <a href="https://www.linkedin.com/in/sidkrpl/" target="_blank" rel="noopener noreferrer"
                 style={{ color: 'var(--accent)', textDecoration: 'none' }}>
                 Join the beta group
-              </a>{' '}or DM the founder.
+              </a>{' '}or{' '}
+              <a href="https://wa.me/917838438784" target="_blank" rel="noopener noreferrer"
+                style={{ color: 'var(--accent)', textDecoration: 'none' }}>
+                DM the founder
+              </a>.
             </p>
           </div>
         </div>
