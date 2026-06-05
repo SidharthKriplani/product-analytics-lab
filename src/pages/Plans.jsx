@@ -177,7 +177,8 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
             ) : (
               <form onSubmit={handleUnlock} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <input
-                  type="text"
+                  type="password"
+                  autoComplete="off"
                   value={code}
                   onChange={e => setCode(e.target.value)}
                   placeholder="Enter access code"
