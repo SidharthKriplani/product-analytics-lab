@@ -290,10 +290,10 @@ Family 6 — Data Traps (across all): divide-by-zero, integer division, duplicat
 
 ### PM critique items (June 2026 audit)
 
-**Sign-in tier value expansion**
-Current model is binary: `isFree: true` passes both guests AND signed-in users equally — no code-level distinction between the two tiers. Signing in gives progress tracking but not more cases. Assessed June 2026: do NOT hack isFree across all data files.
+**Sign-in tier value expansion** — Phase 1 shipped V5.2.0
+`guestPreview: true` added to 1 case per room (17 rooms). `requireUser(guestPreview, isFree, room)` live. Guests are now correctly blocked from all cases except the 1 guestPreview case per room.
 
-Correct model: add `guestPreview: true` to the first 1–2 cases per room. Keep `isFree: true` on all cases accessible to signed-in free users (target 5–8 per room). Logic change: guests pass only if `guestPreview: true`; signed-in free users pass if `isFree: true`. Implementation: (1) add `guestPreview: true` to first 1–2 cases in 17 room data files; (2) change `requireUser(isFree, room)` to `requireUser(guestPreview, isFree, room)` with guest blocked if `!guestPreview`; (3) update 17 call sites in App.jsx. Effort: 1 session.
+**Phase 2 (still needed):** Increase `isFree: true` count from ~3 to ~6–8 cases per room for signed-in free users. Currently signing in gives ~3 free cases per room, which is barely more than the 1 guest-preview case. The gap needs to be wider to make sign-in feel worthwhile. This is a data-file pass only — add `isFree: true` to cases 4–8 per room in each data file. No logic changes needed. Effort: 1 session, mostly mechanical.
 
 **Progress home next-suggestion card**
 Progress is the signed-in home page but it doesn't direct users to their next action. Add a persistent "Continue where you left off" card at the top of Progress.jsx: last-active room, last incomplete case, one-click to resume. Not a recommendation engine — just surface the `pal-last-visited-*` localStorage keys already being written. Low effort: read last-visited room, find first incomplete case, render a card. High retention impact.

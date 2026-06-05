@@ -26,6 +26,8 @@ export const scenarios = [
     title: "The Checkout Trap",
     subtitle: "Conversion is up. Revenue math is down. Everyone wants to ship.",
     isFree: true,
+
+    guestPreview: true,
     industry: "ecommerce",
     difficulty: "analyst",
     theme: "metric_conflict",

@@ -36,6 +36,12 @@ f01–f10 isFree: true. f11–f25 isFree: false. 15 problems gated.
 
 ---
 
+## Shipped V5.2.0
+
+3-tier access model live. `guestPreview: true` on 1 case per room (17 rooms). `requireUser(guestPreview, isFree, room)` — guests gate on `!guestPreview`, signed-in free gate on `!isFree && !unlocked`. See DECISIONS.md for standing rule.
+
+---
+
 ## Deferred (own sessions, not blocking)
 
 **spokenSummary backfill** — RCA05–RCA26 + C01–C25. Subagent writing pass.

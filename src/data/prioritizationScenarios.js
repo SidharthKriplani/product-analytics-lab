@@ -10,6 +10,8 @@ export const prioritizationScenarios = [
     company: 'Spotify',
     difficulty: 'analyst',
     isFree: true,
+
+    guestPreview: true,
     tags: ['RICE', 'sprint planning', 'backlog'],
     context: 'You\'re a PM on Spotify\'s Discovery team. You have 6 sprints of capacity (1 sprint = 2 engineers × 2 weeks). Five feature requests have landed in your backlog from different stakeholders. You need to stack-rank them and commit to a roadmap for the next quarter.',
     items: [

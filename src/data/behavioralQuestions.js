@@ -5,6 +5,8 @@ export const behavioralQuestions = [
     subtitle: 'Influence · Data-Driven Persuasion',
     difficulty: 'analyst',
     isFree: true,
+
+    guestPreview: true,
     tags: ['stakeholder management', 'cohort analysis', 'north star metric', 'A/B testing'],
     category: 'influence',
 

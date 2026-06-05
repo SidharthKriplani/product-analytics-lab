@@ -5,6 +5,8 @@ export const estimationProblems = [
     subtitle: 'Market Sizing · Rideshare',
     difficulty: 'analyst',
     isFree: true,
+
+    guestPreview: true,
     tags: ['rideshare', 'market-sizing', 'real-time', 'NYC'],
     category: 'market-sizing',
     approach: 'bottom-up',

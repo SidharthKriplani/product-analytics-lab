@@ -14,6 +14,8 @@ export const codeModules = [
     track: 'sql',
     difficulty: 'analyst',
     isFree: true,
+
+    guestPreview: true,
     tags: ['funnel', 'conversion', 'window functions'],
 
     scenario: {

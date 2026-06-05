@@ -15,6 +15,8 @@ export const statsModules = [
     concept: 'p-value',
     difficulty: 'foundational',
     isFree: true,
+
+    guestPreview: true,
     companies: ['Meta', 'Google', 'Airbnb'],
     linkedConceptIds: ['p-value', 'confidence-interval', 'guardrail-metric'],
     linkedScenarioIds: ['s01-checkout-trap'],

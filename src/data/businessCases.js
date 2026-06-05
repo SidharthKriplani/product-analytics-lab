@@ -6,6 +6,8 @@ export const businessCases = [
     subtitle: 'Crafted · Marketplace · Ops Strategy',
     difficulty: 'analyst',
     isFree: true,
+
+    guestPreview: true,
     domain: 'marketplace',
     linkedConceptIds: ['guardrail-metric', 'segmentation', 'marketplace-interference'],
     leadershipNote: 'A Staff analyst reframes the competitive pressure argument immediately: "competitor just announced X" is not a reason to build X — it\'s a reason to understand whether your buyer base values X. The right first question is whether same-day delivery is a demand-side constraint (buyers want it but can\'t get it) or an expectation-setting artifact (buyers don\'t miss it until someone else has it). Staff analysts would push for a 2-week buyer survey before any ops investment, and would segment by AOV — same-day on a $12 handmade candle has a fundamentally different unit economics problem than same-day on a $200 item.',

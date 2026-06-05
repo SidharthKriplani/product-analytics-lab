@@ -7,6 +7,8 @@ export const metricCases = [
     subtitle: 'Vela · B2C Marketplace · Search Quality',
     difficulty: 'analyst',
     isFree: true,
+
+    guestPreview: true,
     domain: 'search',
     linkedConceptIds: ['proxy-metric', 'metric-gaming', 'guardrail-metric', 'primary-metric'],
     linkedDesignScenarioIds: ['d05-search-ranking-test'],

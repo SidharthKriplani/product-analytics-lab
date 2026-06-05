@@ -5,6 +5,8 @@ export const instrumentationCases = [
     subtitle: 'Define what to track before shipping a major feature',
     difficulty: 'junior',
     isFree: true,
+
+    guestPreview: true,
     domain: 'measurement-plan',
     company: 'Shopify',
     estimatedMin: 20,

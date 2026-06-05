@@ -6,6 +6,8 @@ export const takehomeCases = [
     durationMin: 45,
     difficulty: 'senior',
     isFree: true,
+
+    guestPreview: true,
     track: 'ds',
     company: 'Meta',
     tags: ['creator economy', 'retention', 'product analytics', 'hypothesis testing', 'segmentation'],

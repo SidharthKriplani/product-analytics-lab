@@ -16,6 +16,8 @@ export const productDesignScenarios = [
     category: 'Consumer App',
     tags: ['content discovery', 'personalization', 'consumer'],
     isFree: true,
+
+    guestPreview: true,
     prompt: 'You are a PM at Spotify. Podcast listening has grown significantly over the last three years, but podcast discovery still largely depends on users knowing what to search for. Users who don\'t already know a show\'s name rarely find new podcasts organically.\n\nDesign a feature to meaningfully improve podcast discovery — specifically for users who want to find something new but don\'t know what to search for.',
     phases: [
       {

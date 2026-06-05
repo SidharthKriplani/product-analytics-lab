@@ -7,6 +7,8 @@ export const rcaCases = [
     subtitle: 'Crestline Home · E-Commerce · Payment Flow',
     difficulty: 'analyst',
     isFree: true,
+
+    guestPreview: true,
     companies: ['Stripe', 'PayPal', 'Shopify'],
     domain: 'growth',
     linkedConceptIds: ['funnel-decomposition', 'segmentation', 'data-quality-check'],

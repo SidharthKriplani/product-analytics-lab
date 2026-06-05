@@ -6,6 +6,8 @@ export const spotTheFlawCases = [
     flawType: 'srm',
     difficulty: 'analyst',
     isFree: true,
+
+    guestPreview: true,
     company: 'Meta',
     tags: ['SRM', 'randomization', 'traffic split', 'chi-square', 'experiment validity'],
     setup: 'The Feed Ranking team ran a 10% holdback experiment over 14 days. Treatment showed +6.3% engagement (p=0.002). The launch decision was positive. Post-launch, a data scientist noticed: treatment group had 10.41% of traffic, not the expected 10.00%. The team dismissed this as \'within rounding error.\'\n\nThe analysis report stated: \'Treatment: n=1,041,000. Control: n=9,000,000. Engagement lift: +6.3%, p=0.002. Recommendation: ship.\'\n\nThe PM responded: \'The result is highly significant (p=0.002) and we\'ve been looking at this for two weeks. The 0.41 percentage point difference in traffic is a rounding artifact from how we report. We\'re confident in the result.\'',

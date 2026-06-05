@@ -74,8 +74,13 @@ GenAI content lives inside existing rooms (Playbook articles, RCA cases, Metrics
 **Every room is a judgment exercise, not a knowledge transfer.**
 The positioning is "practice the calls." Every room must put the user in a decision-making situation, not a reading situation. No room should feel like a course or textbook chapter.
 
-**Guests must be able to complete one full practice case before the sign-in gate.**
-The guest experience must include at least one real practice case (not a Foundations theory module) playable end-to-end without an account. Minimum: one `isFree: true` case per major room (Metrics, RCA, Cases) accessible to anonymous users with the full runner + debrief visible. The sign-in gate fires *after* the debrief, not before. A guest who never experiences the judgment loop will not convert. Foundations content does not substitute for this — it is theory, not practice. This rule was established after a PM audit (June 2026) identified the guest→Foundations redirect as the primary top-of-funnel conversion failure. Do not revert to redirect-before-case behavior.
+**The access model has three tiers: Guest / Signed-in Free / Full Access.**
+Implemented V5.2.0. Each tier is controlled by two data-level fields and one gating function:
+- `guestPreview: true` — case is accessible with no account. Exactly 1 case per room carries this. `requireUser(!guestPreview)` gates guests who lack it.
+- `isFree: true` — case is accessible to signed-in free users. Typically 3–8 per room. Guests are blocked unless `guestPreview` is also true. The open handler's `!isFree && !unlocked` check handles this tier's paywall.
+- Neither field / `!isFree` — requires access code (full access).
+
+Do not overload `isFree` to mean guest access. Use `guestPreview` only. Do not collapse the three tiers back into two by making `isFree` guest-accessible — that destroys the sign-in value proposition. The `requireUser(guestPreview, isFree, room)` signature in App.jsx is the canonical gating point for all practice room open handlers.
 
 **All gate copy and Plans page descriptions must be outcome-framed, not feature-listed.**
 Every GateOverlay body, every tier description on Plans.jsx, and every locked-state CTA must describe what the user achieves, not what feature they get. Wrong: "Unlock 26 RCA cases." Right: "See how a Senior analyst would handle this drop — and what separates a good answer from a hired one." Wrong: "Full case banks + Company Tracks." Right: "Practice the exact difficulty and case types your target companies use at L5+." Outcome-first copy converts. Feature lists do not. This is a standing rule — apply it to any new gate copy or Plans revision, and enforce it in copy-only edit passes before any public launch.

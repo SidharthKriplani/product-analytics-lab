@@ -5,6 +5,8 @@ export const growthAnalyticsCases = [
     subtitle: 'Prism · Video App · Growth Accounting',
     difficulty: 'analyst',
     isFree: true,
+
+    guestPreview: true,
     domain: 'growth-accounting',
     company: 'Prism',
     tags: ['dau', 'growth-accounting', 'retention', 'diagnosis'],

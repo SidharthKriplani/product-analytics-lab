@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.1.0 | **Build:** ✓ (2.14s, 0 errors) | **Date:** 2026-06-05
+**Version:** V5.2.0 | **Build:** ✓ (2.50s, 0 errors) | **Date:** 2026-06-05
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.2.0** — 3-tier access model (Guest / Signed-in Free / Full Access). Added `guestPreview: true` to the first Analyst-difficulty case in all 17 practice rooms (M01, RCA01, C01, s01-checkout-trap, stat01-pvalue-decision, d01-checkout-test, GA01, BI01, STF01, BEH01, EST01, pri01, inst01, pd01, TH01, CHL01, code01-funnel-sql) via Python bulk-insert. Updated `requireUser(guestPreview, isFree, room)` — third param added; guests blocked if `!guestPreview` (falsy for all non-tagged cases), signed-in free pass on `isFree`. 17 open handler call sites updated from `requireUser(item.isFree, room)` to `requireUser(item.guestPreview, item.isFree, room)`. DEFAULT_GATE_COPY updated to "Sign in free to keep practicing" with benefit-specific body. Plans page "1 full practice case per room" copy already matched the model. SQL Lab remains sign-in required (no guestPreview for SQL). Build ✓ 2.50s.
 
 **V5.1.0** — V5.1 sprint complete. (1) Backslash bug: all `\'` in JSX text content fixed across Plans.jsx, Progress.jsx, App.jsx — ctaLabel, secondaryLabel, and JSX text nodes now render clean apostrophes. (2) ForwardPointerCard (Audit #147 ✅): CodeRunner + TakehomeRunner were the only two missing it — both wired, onNavigate prop added to call sites in App.jsx. All 17 runners now have ForwardPointerCard at debrief. (3) Forensic SQL gate split (Audit #148 ✅): f01–f10 stay isFree: true; f11–f25 set to isFree: false. 15 problems now gated. (4) Progress next-suggestion card: returning users (totalCompleted > 0) see a "Continue where you left off" card using getNextSuggested() — room + case name + one-click Continue button. Shown above empty-state card, both conditional. (5) Sidebar TOOLS/LEARN cleanup: Interview Q&A and Failure Patterns moved from TOOLS to LEARN; Stats Calc moved from DRILLS to TOOLS and removed from DRILLS. LEARN = reference; TOOLS = active utilities; DRILLS = format drills. (6) Sign-in tier expansion: assessed — current binary isFree model has no guest vs. signed-in distinction. Model designed (guestPreview field + requireUser signature change), logged in IDEAS.md Tier 1. Not built — clean 1-session project. Build ✓ 2.14s.
 
@@ -124,7 +126,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.1.0 complete. Audits #147 + #148 closed. Next: sign-in tier expansion (guestPreview model, 1 session — spec in IDEAS.md Tier 1), or spokenSummary backfill (subagent writing pass).
+## Next action — V5.2.0 complete. 3-tier access model live. Next candidates: (1) spokenSummary backfill RCA05–RCA26 + C01–C25 (subagent writing pass), (2) sign-in tier expansion — increase isFree case count beyond current ~3 per room to give signed-in free tier more content, (3) PostHog event wiring for gate_shown / gate_converted / debrief_viewed.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

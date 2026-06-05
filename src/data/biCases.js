@@ -5,6 +5,8 @@ export const biCases = [
     subtitle: 'A 22% revenue growth headline conceals a 3% organic baseline',
     difficulty: 'analyst',
     isFree: true,
+
+    guestPreview: true,
     domain: 'data-storytelling',
     company: 'Shopify',
     estimatedMin: 15,

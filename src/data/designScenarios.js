@@ -13,6 +13,8 @@ export const designScenarios = [
     title: 'Design the Checkout Test',
     subtitle: 'Crestline Home wants to remove their checkout upsell widget. Design the experiment.',
     isFree: true,
+
+    guestPreview: true,
     difficulty: 'analyst',
     industry: 'ecommerce',
     scenarioFamily: 'metric_conflict',

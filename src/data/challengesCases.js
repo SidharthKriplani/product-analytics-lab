@@ -5,6 +5,8 @@ export const challengesCases = [
     subtitle: 'Feed ranking experiment collides with a platform-wide DAU collapse — diagnose both simultaneously.',
     difficulty: 'senior',
     isFree: true,
+
+    guestPreview: true,
     rooms: ['stats', 'rca', 'metrics'],
     estimatedMin: 20,
     company: 'Meta',
