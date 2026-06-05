@@ -1,5 +1,6 @@
 import { Icon } from './Icon.jsx';
 import { useState } from 'react';
+import { track } from '../../utils/analytics.js';
 
 // DebriefCopyButton - reusable clipboard export for any room runner.
 // Props:
@@ -40,6 +41,7 @@ export function DebriefCopyButton({ title, notes, modelAnswer, tags, difficulty,
     const md = buildMarkdown();
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(md).then(() => {
+        track('debrief_copied', { room: room || 'unknown', difficulty: difficulty || 'unknown' });
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }).catch(() => fallbackCopy(md));

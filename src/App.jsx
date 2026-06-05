@@ -241,6 +241,17 @@ export default function App() {
     body: 'A free account saves your progress, unlocks more cases in every room, and tracks your streak. Takes 10 seconds.',
   };
 
+  // gate_shown — fires whenever the auth gate becomes visible to a guest.
+  // room is set by requireUser(); null means the page-transition nudge fired (post-case).
+  useEffect(() => {
+    if (authGate && !user) {
+      track('gate_shown', {
+        room: gateRoomRef.current || 'unknown',
+        source: gateRoomRef.current ? 'room_open' : 'post_case',
+      });
+    }
+  }, [authGate]); // eslint-disable-line
+
   // Page-transition effect: detect runner → browser transitions.
   // Anonymous user leaving a runner: show sign-in nudge ("your progress wasn't saved").
   // Signed-in free user leaving a runner: show "Progress saved" toast (2.5s auto-dismiss).
@@ -301,6 +312,7 @@ export default function App() {
           setUser(session.user);
           refreshProgress();
           if (event === 'SIGNED_IN') {
+            track('user_signed_in', {});
             pushProgressToSupabase(session.user);
             setPage(p => p === 'home' ? 'progress' : p);
           }
@@ -1649,9 +1661,9 @@ export default function App() {
           title={copy.title}
           body={copy.body}
           ctaLabel="Sign in — it's free →"
-          onCTA={() => { setAuthGate(false); setShowAuth(true); }}
+          onCTA={() => { track('gate_cta_clicked', { room: gateRoomRef.current || 'unknown', action: 'sign_in' }); setAuthGate(false); setShowAuth(true); }}
           secondaryLabel="See what's included"
-          onSecondary={() => { setAuthGate(false); setPage('plans'); }}
+          onSecondary={() => { track('gate_cta_clicked', { room: gateRoomRef.current || 'unknown', action: 'see_plans' }); setAuthGate(false); setPage('plans'); }}
         />
       );
     })()}

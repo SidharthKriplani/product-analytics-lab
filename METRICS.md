@@ -39,17 +39,21 @@ Events fire from `src/App.jsx` (navigation events) and directly from runner comp
 ### Rooms tracked via `case_opened`
 `stats`, `design`, `review`, `metrics`, `rca`, `cases`, `code`, `prioritization`, `behavioral`, `estimation`, `stat-foundations`, `exp-foundations`, `metrics-foundations`, `rca-foundations`, `growth-analytics`, `bi`, `spot-the-flaw`, `take-home`, `product-design`, `challenges`, `instrumentation`, `sql-lab`
 
-### Events not yet tracked (gaps)
-- Debrief revealed
-- Hint expanded
-- Playbook article opened
-- Search query
-- Bookmark added/removed
-- Interview Simulator session completed
-- MCQ Trainer session scored
-- Defense Doc generated
-- Debrief copied to clipboard (`DebriefCopyButton` — V4.13.0) — clipboard copy fires but no PostHog event wired; `debrief_copied` event would be worth adding
-- `user_signed_in` / `user_signed_out` — Supabase auth events not yet forwarded to PostHog; would allow cross-device funnel measurement
+### Events added V5.3.0
+| Event | When it fires | Properties |
+|---|---|---|
+| `gate_shown` | GateOverlay becomes visible to a guest (authGate=true, !user) | `{ room: string\|'unknown', source: 'room_open'\|'post_case' }` |
+| `gate_cta_clicked` | User clicks "Sign in" or "See what's included" on GateOverlay | `{ room: string\|'unknown', action: 'sign_in'\|'see_plans' }` |
+| `user_signed_in` | Supabase SIGNED_IN event fires (new sign-in, not session restore) | `{}` |
+| `forward_pointer_clicked` | User clicks any button on ForwardPointerCard after debrief | `{ room: string, button: 'next_case'\|'defense_doc'\|'company_tracks' }` |
+| `debrief_copied` | User clicks the DebriefCopyButton and clipboard write succeeds | `{ room: string, difficulty: string }` |
+
+### Events not yet tracked (remaining gaps)
+- Debrief revealed (requires changes to all 17 runners — deferred)
+- Hint expanded (SQL Lab — low priority)
+- Playbook article opened, Search query, Bookmark added/removed
+- Interview Simulator session completed, MCQ Trainer session scored, Defense Doc generated
+- `user_signed_out` — low priority
 
 ---
 

@@ -1,4 +1,5 @@
 import { Icon } from './Icon.jsx';
+import { track } from '../../utils/analytics.js';
 
 /**
  * ForwardPointerCard — shows after case/debrief completion
@@ -36,7 +37,7 @@ export function ForwardPointerCard({ room, onNavigate, onNext }) {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
         {onNext && (
           <button
-            onClick={onNext}
+            onClick={() => { track('forward_pointer_clicked', { room, button: 'next_case' }); onNext(); }}
             style={{
               background: 'var(--accent-bg)', border: '1px solid var(--accent-border)',
               borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.85rem',
@@ -49,7 +50,7 @@ export function ForwardPointerCard({ room, onNavigate, onNext }) {
         {onNavigate && (
           <>
             <button
-              onClick={() => onNavigate('defense-doc')}
+              onClick={() => { track('forward_pointer_clicked', { room, button: 'defense_doc' }); onNavigate('defense-doc'); }}
               style={{
                 background: 'var(--surface-2)', border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.85rem',
@@ -59,7 +60,7 @@ export function ForwardPointerCard({ room, onNavigate, onNext }) {
               Build interview plan
             </button>
             <button
-              onClick={() => onNavigate('company-tracks')}
+              onClick={() => { track('forward_pointer_clicked', { room, button: 'company_tracks' }); onNavigate('company-tracks'); }}
               style={{
                 background: 'var(--surface-2)', border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.85rem',

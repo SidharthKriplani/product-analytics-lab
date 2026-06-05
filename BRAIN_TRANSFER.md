@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.2.0 | **Build:** ✓ (2.50s, 0 errors) | **Date:** 2026-06-05
+**Version:** V5.3.0 | **Build:** ✓ (2.65s, 0 errors) | **Date:** 2026-06-05
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.3.0** — PostHog instrumentation pass. 5 new events wired: `gate_shown` (useEffect on authGate — fires with room + source:'room_open'|'post_case'), `user_signed_in` (SIGNED_IN auth handler), `gate_cta_clicked` (GateOverlay both CTAs — action:'sign_in'|'see_plans'), `forward_pointer_clicked` (ForwardPointerCard all 3 buttons), `debrief_copied` (DebriefCopyButton clipboard success). Files: App.jsx, ForwardPointerCard.jsx, DebriefCopyButton.jsx. METRICS.md updated. Build ✓ 2.65s.
 
 **V5.2.0** — 3-tier access model (Guest / Signed-in Free / Full Access). Added `guestPreview: true` to the first Analyst-difficulty case in all 17 practice rooms (M01, RCA01, C01, s01-checkout-trap, stat01-pvalue-decision, d01-checkout-test, GA01, BI01, STF01, BEH01, EST01, pri01, inst01, pd01, TH01, CHL01, code01-funnel-sql) via Python bulk-insert. Updated `requireUser(guestPreview, isFree, room)` — third param added; guests blocked if `!guestPreview` (falsy for all non-tagged cases), signed-in free pass on `isFree`. 17 open handler call sites updated from `requireUser(item.isFree, room)` to `requireUser(item.guestPreview, item.isFree, room)`. DEFAULT_GATE_COPY updated to "Sign in free to keep practicing" with benefit-specific body. Plans page "1 full practice case per room" copy already matched the model. SQL Lab remains sign-in required (no guestPreview for SQL). Build ✓ 2.50s.
 
@@ -126,7 +128,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.0–V5.2 MVP coherence pass complete. PAL is ready for private test (3–5 people). See PRIVATE_TEST.md. Public distribution blocked until private-test feedback. Do not build new features before running the test.
+## Next action — V5.3.0 complete. PostHog wired. Ready for beta launch with 30+ testers. Confirm VITE_POSTHOG_KEY is live in Vercel, then distribute. See PRIVATE_TEST.md for tester brief. Watch gate_shown → gate_cta_clicked → user_signed_in funnel in PostHog from day 1.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 
