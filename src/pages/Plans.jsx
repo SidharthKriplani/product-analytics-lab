@@ -215,7 +215,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
             )}
             <p style={{ margin: '0.6rem 0 0', fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>
               No code?{' '}
-              <a href="https://www.linkedin.com/in/sidkrpl/" target="_blank" rel="noopener noreferrer"
+              <a href="https://chat.whatsapp.com/KqFoGxAW0XMF9hNllGyAo9" target="_blank" rel="noopener noreferrer"
                 style={{ color: 'var(--accent)', textDecoration: 'none' }}>
                 Join the beta group
               </a>{' '}or{' '}
