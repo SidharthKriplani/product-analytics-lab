@@ -34,6 +34,123 @@ All labs could benefit from country-specific content paths. For PAL, this means 
 
 ## MSL (ML Systems Lab) — Ideas to action in that repo
 
+### 🔑 PAL 3-tier access model — port to MSL (implementation brief)
+
+PAL shipped a clean guest / signed-in free / full access tier model in V5.0–V5.2. MSL should implement the same. This brief is self-contained — hand it to any MSL session as context.
+
+**What the model is:**
+
+| Tier | Who | What they get |
+|---|---|---|
+| Guest | No account | 1 `guestPreview` case per room/lab, all free reference content, Foundations if any |
+| Signed-in Free | Email/OAuth sign-in, no code | All `isFree` cases (~3–6 per room), progress tracking, streak |
+| Full Access | Access code (or future Stripe) | Everything — all cases, Staff-level content, company tracks, simulators |
+
+The `unlocked` flag is the Stripe placeholder. When Stripe goes live, `isUnlocked()` accepts a valid subscription token instead of a code. No structural refactor needed — just swap one function.
+
+**The 3 data fields per case/problem:**
+
+```js
+{
+  id: 'case-01',
+  title: '...',
+  isFree: true,        // signed-in free users can access this case
+  guestPreview: true,  // guests (no account) can access this case — 1 per room max
+  // omit both → requires full access (code/Stripe)
+}
+```
+
+Rules:
+- `guestPreview: true` → add to exactly 1 case per room/lab (the strongest Analyst-level case)
+- `isFree: true` → add to ~3–6 cases per room/lab (Analyst through Senior difficulty)
+- Everything else is full-access gated
+
+**The gating function — copy this into MSL's App.jsx:**
+
+```js
+const gateRoomRef = useRef(null); // tracks which room triggered the gate
+
+function requireUser(guestPreview = false, isFree = false, room = null) {
+  if (!user && !guestPreview) {
+    gateRoomRef.current = room;
+    setAuthGate(true);
+    return true; // caller should return early
+  }
+  return false;
+}
+```
+
+**Every case open handler follows this exact pattern:**
+
+```js
+function openCase(id) {
+  const c = caseIndex.find(x => x.id === id);
+  if (!c) return;
+  if (requireUser(c.guestPreview, c.isFree, 'room-name')) return; // guest gate
+  if (!c.isFree && !unlocked) { setPage('plans'); return; }        // paywall gate
+  // open the case
+}
+```
+
+- `undefined` (no field) is falsy → guest blocked by default. Only explicitly tagged cases let guests through.
+- Signed-in users always pass `requireUser`. Their paywall is the second check (`!isFree && !unlocked`).
+
+**GateOverlay — show contextual copy per room:**
+
+When `requireUser` fires, `gateRoomRef.current` holds the room string. The overlay uses this to show room-specific outcome-framed copy:
+
+```js
+const ROOM_GATE_COPY = {
+  'room-key': {
+    title: 'Sign in to keep practicing [Room]',
+    body: 'Outcome-framed description of what is behind the gate in this specific room.',
+  },
+  // ... one entry per room
+};
+const DEFAULT_GATE_COPY = {
+  title: 'Sign in free to keep practicing',
+  body: 'A free account saves your progress, unlocks more cases in every room, and tracks your streak.',
+};
+```
+
+**Plans page — three-column layout with comparison table:**
+
+PAL's Plans.jsx (V5.4+) is the reference implementation. Structure:
+1. Three tier cards at top — emotional pitch only (headline + description + CTA). No feature lists in the cards.
+2. Comparison table below — features as rows, 3 tier columns, ✓ / — / text cells. Middle column (Free Account) highlighted with accent color.
+3. No greyed-out negatives anywhere. Negatives are implicit from the table.
+
+Access code input goes in the Full Lab card. `type="password"`, `autoComplete="off"` to mask it.
+
+**PostHog events to wire (5 events, same as PAL):**
+
+```js
+track('gate_shown',             { room, source: 'room_open' | 'post_case' })  // useEffect on authGate
+track('gate_cta_clicked',       { room, action: 'sign_in' | 'see_plans' })    // GateOverlay CTA buttons
+track('user_signed_in',         {})                                            // SIGNED_IN auth handler
+track('forward_pointer_clicked', { room, button: 'next_case' | '...' })       // ForwardPointerCard
+track('debrief_copied',         { room, difficulty })                          // DebriefCopyButton
+```
+
+Existing events to keep: `page_viewed`, `case_opened`, `case_completed`, `paywall_hit`, `unlocked`.
+
+**Current access code:** `DAI2026` (same across PAL + MSL + GAL for now — one community, one code).
+
+**File checklist for MSL implementation:**
+
+- [ ] All case/problem data files → add `guestPreview: true` to 1 case per room, `isFree: true` to 3–6 per room
+- [ ] `src/utils/unlock.js` → copy from PAL (VALID_CODES, isUnlocked, tryUnlock, getAccessTier)
+- [ ] `src/utils/analytics.js` → copy from PAL (PostHog CDN wrapper, track function)
+- [ ] `src/App.jsx` → add `authGate` state, `gateRoomRef`, `requireUser(guestPreview, isFree, room)`, ROOM_GATE_COPY, DEFAULT_GATE_COPY, `gate_shown` useEffect, `user_signed_in` in auth handler, GateOverlay render
+- [ ] `src/components/shared/GateOverlay.jsx` → copy from PAL (portal, frosted backdrop, title/body/ctaLabel/onCTA/secondaryLabel/onSecondary props)
+- [ ] `src/pages/Plans.jsx` → copy PAL V5.4 structure (3 tier cards + comparison table)
+- [ ] `src/components/shared/ForwardPointerCard.jsx` → copy from PAL, update ROOM_NEXT map for MSL rooms
+- [ ] Sidebar → add Plans nav item under TRACK section
+
+**Estimated effort:** 2 focused sessions. Session 1: data fields + requireUser + GateOverlay. Session 2: Plans page + PostHog events + ForwardPointerCard.
+
+---
+
 1. **More project labs, extension of each lab** — the project-based learning format in MSL is a strong differentiator. Extend existing labs (each currently ~3–5 exercises) to 8–10 exercises before adding net-new labs. Depth > breadth.
 
 2. **Simplify for blog posts** — GAL shipped a "simplify" toggle on articles (Ground Truth). MSL wants the same for its ∇ Gradient posts. This requires an API call — make sure there's a proxy or key-management plan before shipping. Don't expose the API key client-side.
