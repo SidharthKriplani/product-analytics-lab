@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.10.0 | **Build:** ✓ (2.13s, 0 errors) | **Date:** 2026-06-06
+**Version:** V5.10.1 | **Build:** ✓ (2.22s, 0 errors) | **Date:** 2026-06-06
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.10.1** — Reverted "Reference Cards" back to "Frameworks" in Sidebar.jsx and PlaybookBrowser.jsx. "Frameworks" is what practitioners actually say — matching a bad page header was the wrong call. Build ✓ 2.22s.
 
 **V5.10.0** — IA audit P0+P1 fixes. Sidebar.jsx: "Frameworks" → "Reference Cards"; "Failure Patterns" → "Analytics Failures"; Take-Home removed from DRILLS nav (routing preserved); Stats Calc moved from TOOLS to Experiments sub-section (contextually relevant, lower nav weight). BlogBrowser.jsx: "deep dives" → "Deep Dives". PlaybookBrowser.jsx: "Reference cards" → "Reference Cards". ChallengesBrowser.jsx: h1 "Cross-Room Challenges" → "Challenges", sublabel changed to "Cross-Room" for context. Trainer.jsx + InterviewQABrowser.jsx: practice path nudge card added (step 1/2 of 3, green/purple left border, explains MCQ → Q&A → Mock sequence). P2 items logged to IDEAS.md: Take-Home format decision, Playbook/Deep Dives/Reference Cards naming conflict. Build ✓ 2.13s.
 

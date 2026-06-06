@@ -4800,7 +4800,7 @@ export function PlaybookBrowser({ onOpenItem, initialArticleId }) {
           <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name='book-open' size={18} color='var(--yellow)' />
           </span>
-          <h1 style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>Reference Cards</h1>
+          <h1 style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>Frameworks</h1>
         </div>
         <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 1rem', lineHeight: 1.5 }}>
           Most candidates use frameworks as vocabulary — they name MECE or RICE without those words changing their actual answer. The frameworks that matter are the ones that change your conclusion: the denominator check that flips a win into a loss, the segment cut that reveals what the aggregate was hiding, the guardrail that kills a ship decision. These articles are built around those specific moments, not the definitions.{' '}

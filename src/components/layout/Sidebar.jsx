@@ -52,7 +52,7 @@ const FLAT_GROUPS = [
     label: 'LEARN',
     items: [
       { id: 'blog',         label: 'Deep Dives',        icon: 'book-open' },
-      { id: 'playbook',     label: 'Reference Cards',   icon: 'layout' },
+      { id: 'playbook',     label: 'Frameworks',        icon: 'layout' },
       { id: 'interview-qa', label: 'Interview Q&A',     icon: 'message-square' },
       { id: 'failures',     label: 'Analytics Failures', icon: 'alert-triangle' },
     ],
