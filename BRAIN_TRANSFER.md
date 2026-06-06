@@ -1,6 +1,6 @@
 # Brain Transfer — V5.13.0
 
-**Version:** V5.13.0 | **Build:** ✓ (1.81s, 0 errors) | **Date:** 2026-06-07 | **PM Audit:** #149 complete
+**Version:** V5.16.1 | **Build:** ✓ (1.72s, 0 errors) | **Date:** 2026-06-07 | **PM Audit:** #149 complete
 
 ---
 
@@ -49,6 +49,10 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.16.1** — Plans page restructured. Pricing cards now lead (Monthly ₹799, Quarterly ₹1,999, Annual ₹5,999 with "Best value" badge, Interview Sprint ₹2,499). Each card has a "Get early access →" button linking to WhatsApp DM — functional placeholder, no Stripe yet. Below cards: quiet beta section — "Subscriptions activate at launch. Currently in beta." with sign-in button and access code input inline. Comparison table (Guest/Free/Full features) stays below as reference. Old 3-tier card hero removed. Build ✓ 1.72s.
+
+**V5.14.0** — Homepage repositioned. Headline: "Practice product analytics / interviews beyond SQL." Primary CTA: "Take the Judgment Benchmark →" (routes to benchmark, no auth needed). Secondary CTA: "Sign in to explore free cases." Role chips: Product Analyst · Growth Analyst · DA → Product · Senior Analyst. Social proof: "37 beta sign-ins in the first 48 hours of informal testing." Footer note: "No account needed for the benchmark." Build ✓ 1.65s.
 
 **V5.13.0** — Product Analytics Judgment Benchmark shipped. New file: `src/data/benchmarkCases.js` — 5 mini-cases (metric design, A/B test design, A/B readout/ship-no-ship, metrics-drop RCA, SQL reasoning), each with prompt, 4 options, correctIdx, rubric explanation, nextRoom, and RECOMMENDED_PATH + AREA_META exports. New file: `src/pages/BenchmarkPage.jsx` — 3-screen flow (IntroScreen → QuestionScreen → ResultScreen), no auth required, localStorage persistence at `pal-benchmark-v1`, 4 PostHog events (benchmark_start, benchmark_case_answered, benchmark_complete, benchmark_cta_click). Result screen shows score ring (X of 5), per-area correct/missed rows, recommended next room card (based on first wrong area), sign-in CTA for guests, explore CTA for signed-in users. App.jsx: lazy import + `{page === 'benchmark'}` routing block, `onSignIn={() => setShowAuth(true)}`. Sidebar.jsx: "Judgment Benchmark" added as first item in DRILLS group (icon: target). Build ✓ 1.81s.
 
@@ -154,7 +158,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.13.0 shipped. Benchmark is live. Push from Mac terminal. Next: V5.14.0 Homepage repositioning (headline + "Take the Judgment Benchmark" as primary CTA). Then V5.15.0 SQL Lab UX, V5.16.0 pricing ₹ tiers. Confirm `VITE_POSTHOG_KEY` in Vercel to capture benchmark_start/complete funnel from day 1.
+## Next action — V5.16.1 shipped. Session complete. Resuming Tuesday. Next: V5.15.0 SQL Lab UX (question numbering, concept tags, compact schema, multi-select filters). Full spec in NEXT.md. Confirm `VITE_POSTHOG_KEY` in Vercel before Tuesday — needed to capture benchmark funnel from day 1.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

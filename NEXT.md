@@ -2,11 +2,11 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V5.11.1 (2026-06-07)*
+*Last updated: V5.16.1 (2026-06-07)*
 
 ---
 
-## Status — V5.13.0: Judgment Benchmark live. No auth. 5 cases. PostHog events wired. Universe defects deferred (Audit #150, non-blocking).
+## Status — V5.16.1: Session complete (2026-06-07). Benchmark live. Homepage repositioned. Plans page restructured (pricing-led). Resuming Tuesday.
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 
