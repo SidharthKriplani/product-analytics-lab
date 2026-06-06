@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.3.0 | **Build:** ✓ (2.65s, 0 errors) | **Date:** 2026-06-05
+**Version:** V5.3.1 | **Build:** ✓ (2.65s, 0 errors) | **Date:** 2026-06-06
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.3.1** — Unified Lab Architecture locked. DECISIONS.md updated: "Sibling labs linked passively" (V4.33.0) superseded by the Judgment World one-app spec — one URL, lab-layer routing, `?lab=` param, per-lab access codes (DAI2026/MSL2026/GAL2026/WORLD2026), room-aware `isUnlocked(room)`, shared Supabase, target sidebar structure, 5-step build sequence. No code changes — MD-only. Build unchanged at ✓ 2.65s.
 
 **V5.3.0** — PostHog instrumentation pass. 5 new events wired: `gate_shown` (useEffect on authGate — fires with room + source:'room_open'|'post_case'), `user_signed_in` (SIGNED_IN auth handler), `gate_cta_clicked` (GateOverlay both CTAs — action:'sign_in'|'see_plans'), `forward_pointer_clicked` (ForwardPointerCard all 3 buttons), `debrief_copied` (DebriefCopyButton clipboard success). Files: App.jsx, ForwardPointerCard.jsx, DebriefCopyButton.jsx. METRICS.md updated. Build ✓ 2.65s.
 
@@ -128,7 +130,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.3.0 complete. PostHog wired. Ready for beta launch with 30+ testers. Confirm VITE_POSTHOG_KEY is live in Vercel, then distribute. See PRIVATE_TEST.md for tester brief. Watch gate_shown → gate_cta_clicked → user_signed_in funnel in PostHog from day 1.
+## Next action — V5.3.1 complete. Architecture locked. Ready for beta. Confirm VITE_POSTHOG_KEY is live in Vercel, distribute to 3–5 testers per PRIVATE_TEST.md. Watch gate_shown → gate_cta_clicked → user_signed_in funnel in PostHog from day 1. V6 sprint (Judgment World routing layer) starts after private test feedback is collected.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

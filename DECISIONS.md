@@ -62,8 +62,76 @@ This is the framing that best survives external scrutiny (confirmed by ChatGPT c
 **PAL's audience is data analysts, product analysts, business analysts, PMs, TPMs, and product leads.**
 Not data scientists. This distinction matters for copy, onboarding framing, and interview prep positioning. The onboarding modal and Interview Simulator role labels were corrected in V4.32.6 to reflect this. Do not reintroduce "Data Scientist" as a primary audience label. Analyst-track and PM-track are the two correct audience frames.
 
-**Sibling labs (ML Systems Lab, GenAI Systems Lab) are linked passively from Home.jsx only.**
-A "sister labs" footer strip linking to `https://ml-systems-lab-v9xe.vercel.app/` and `https://genai-systems-lab-ivory.vercel.app/` lives at the bottom of `src/pages/Home.jsx` only — muted style, no visual emphasis. No global footer link. No structural coupling between labs (shared auth, shared progress, unified nav). Labs are separate products that acknowledge each other's existence — not a platform. A future hub page is the right interlinking model if cross-lab navigation is ever needed. This was decided in V4.33.0. Do not add sister lab links anywhere outside Home.jsx without an explicit session decision.
+**Sibling labs (ML Systems Lab, GenAI Systems Lab) are linked passively from Home.jsx only — INTERIM STATE.**
+This is the current implementation, not the target. See "Unified Lab Architecture" section below for the locked target. Do not make new architectural decisions that couple more tightly to the separate-products model.
+
+---
+
+## Unified Lab Architecture — Judgment World (locked V5.3.1, build starts V6 sprint)
+
+PAL, MSL, and GAL converge into one app. This section supersedes the V4.33.0 "separate products" rule. The decisions below govern all future structural work.
+
+**Model: one app, lab-layer routing**
+
+One URL. One React SPA. One Supabase project. The sidebar organises rooms by lab — PAL ROOMS / MSL ROOMS / GAL ROOMS — each with a stage badge (live / beta / coming soon). A `?lab=` query param pre-activates specific labs on load and is stored in localStorage as `jw-active-labs`. No param = all labs visible.
+
+```
+/app?lab=pal    → PAL invite link — only PAL rooms shown in sidebar
+/app?lab=msl    → MSL early access — only MSL rooms shown
+/app?lab=gal    → GAL early access — only GAL rooms shown
+/app            → full app, all labs visible
+```
+
+**Sidebar structure (target)**
+
+```
+TRACK
+  Progress    ← unified across all labs
+  Plans       ← per-lab tier cards + bundle option
+
+PAL ROOMS     [live]
+  Experiments, Analytics, Metrics, RCA ...
+
+MSL ROOMS     [beta]
+  System Design, Training, Deployment ...
+
+GAL ROOMS     [coming soon]
+  AI Product, GenAI Eval, LLM Systems ...
+
+DRILLS / LEARN / TOOLS
+  Shared utilities
+```
+
+**Subscriptions: per-lab with bundle**
+
+Each lab has its own subscription. Bundle option unlocks all three. `isUnlocked(room)` is room-aware — it checks which lab the room belongs to, then validates against stored codes or (future) Stripe tokens. Access codes:
+
+| Code | Unlocks |
+|---|---|
+| `DAI2026` | PAL full access |
+| `MSL2026` | MSL full access |
+| `GAL2026` | GAL full access |
+| `WORLD2026` | All three (bundle) |
+
+**Auth: shared Supabase project**
+
+One sign-in works across all three labs. Progress keys are namespaced by lab: `pal-*`, `msl-*`, `gal-*`. This shared auth layer is the "soft merge" — it can ship before the codebase merge and is the right next step after PAL beta.
+
+**Build sequence (non-negotiable)**
+
+1. **Now:** PAL beta runs. No structural changes to routing or auth.
+2. **V6 sprint (after PAL beta feedback):** Lab-layer routing added to App.jsx. Room-aware `isUnlocked(room)`. MSL rooms merged as second lab section. `?lab=` param logic. Stage badges in sidebar.
+3. **After MSL port:** Shared Supabase project — one sign-in for all three. `jw-active-labs` localStorage key.
+4. **After Stripe:** Per-lab subscriptions + bundle plan. That is Judgment World in practice.
+5. **Codebase merge:** Optional and deferred. Only worthwhile if separate repos become a maintenance burden after step 4.
+
+**Name: deferred, not blocking**
+
+"Judgment World" is the working name. Lock or replace it before the V6 sprint. Test: does a PM prepping for a Meesho interview want to say "I practice on Judgment World"? If yes, use it. The routing architecture does not depend on the name — build first, brand second.
+
+**What this does not change**
+
+The PAL codebase stays untouched through V5.x. The unified routing layer is a V6 addition. Do not refactor App.jsx, Sidebar.jsx, or unlock.js for multi-lab support during the current beta sprint.
 
 **Rooms outside the analytics + experimentation core must not share equal visual weight with the core rooms.**
 The core rooms — Stats, Metrics, Experiment Design, Experiment Review, RCA — are PAL's product identity. Behavioral, Estimation, PM Product Design, and generic career prep are in scope for the product but must not crowd out the core above the fold or in the nav hierarchy. If the landing page or nav treats 16 rooms as equals, the product loses its identity. Homepage and nav framing must reinforce the analytics + experimentation wedge first. Other rooms exist for depth, not for positioning. This rule came from two convergent external reads (ChatGPT cold-read V4.33.7, investor-style review V4.34.0) flagging the same dilution problem. Audit #103 (homepage framing) is the open action item.
