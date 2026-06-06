@@ -26,6 +26,24 @@ _No new features until PostHog baseline is established._
 
 ## Tier 1 — High impact, buildable now
 
+### SQL Lab — progressive (stepwise) hints [V5.4 tester feedback — Rolex]
+Currently each problem has a single hint. Replace with progressive reveal: click once for a vague directional nudge, click again for the specific SQL concept, click again for a near-answer structural hint. Each problem needs 2–3 `hintSteps` entries instead of the current 1. Data change across 140 problems + minor UI change in SqlLabPage.jsx (already has `hintsShown` counter — extend it). Effort: 1 full session. Gate: do after Meesho interviews.
+
+### SQL Lab — multi-select filters + company filter [V5.4 tester feedback — Rolex]
+Right sidebar filters on SqlLabPage.jsx currently support single-select on difficulty and company. Two changes: (1) Make difficulty and company filters multi-select (checkboxes, not pill toggle). (2) Add a Concept keyword filter — tags are already in the data but hidden from the card (moved to hints in V5.5.0); expose them in the filter panel only. This lets users drill a specific concept (e.g. "only anti-join problems") without spoiling the card. Effort: 1 session. Gate: do after Meesho interviews.
+
+### SQL Lab — schema inline layout [V5.4 tester feedback — Rolex]
+SchemaAccordion currently renders each column on its own line (name + type stacked). Reformat to inline: `user_id integer · email text · signup_date text`. Reduces scroll needed to understand a table. Pure layout change in SqlLabPage.jsx SchemaAccordion component. Effort: 30 min. Can batch with any SQL Lab session.
+
+### Interview Q&A — filter sidebar + company filter [V5.4 tester feedback]
+Current pill rows (8 category pills + 2 level pills) create cognitive overload above the question list. Replace with a "Filter" button that opens a right-side panel with checkbox multi-select for category and level. Add a Company column — tag each of the 26 questions with relevant companies (Amazon, Meta, Meesho, etc.) first, then wire the filter. Content tagging is the gate before UI work. Effort: content tagging 1 hour + UI 1 session.
+
+### MCQ Quiz — filter UI cleanup [V5.4 tester feedback]
+Same pill-proliferation problem as Interview Q&A. Three rows of pills (Category, Difficulty, Session Length) before the Start button is too much. Consolidate: keep Session Length pills (functional, 4 options), move Category and Difficulty into a compact filter panel or inline dropdowns. Effort: 1 session, same pattern as Interview Q&A filter sidebar.
+
+### Metrics Foundations — intermittent navigation error [V5.4 tester feedback]
+Tester reported: "sometimes showed error, sometimes the page opens" when navigating from Metrics browser → Metrics Foundations. Likely a lazy-load race condition or progress key mismatch. Needs repro: next time it occurs, note the exact navigation path and any console errors. Do not fix blind — repro first.
+
 ### SQL Lab — S-Grade Upgrade Pass [HIGHEST PRIORITY — IN PROGRESS]
 **Gate:** All 13 audit batches complete ✅. Expanded from original trap enrichment plan. Full rubric + execution plan in SQL_LAB_PLAN.md Section 11. Tracking artifact: SQL_UPGRADE_PASS.md.
 

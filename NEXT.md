@@ -6,7 +6,7 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ---
 
-## Status — V5.4.0: Meesho SBA track live. Company Tracks visual revamp complete. Beta-ready.
+## Status — V5.6.0: Meesho track fully functional. Navigation fixed, back-button state restored, mental model card redesigned.
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 

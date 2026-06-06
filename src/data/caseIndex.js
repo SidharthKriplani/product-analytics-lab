@@ -16,6 +16,9 @@ export const scenarioIndex = [
   { id: 's10-push-open-rate-trap', isFree: false, title: 'The Push Open Rate Trap' },
   { id: 's11-seller-speed-spillover', isFree: false, title: 'The Seller Speed Spillover' },
   { id: 's12-checklist-completion-illusion', isFree: false, title: 'The Checklist Completion Illusion' },
+  { id: 's26-ctr-margin-trap', isFree: false, title: 'The Margin Blind Spot' },
+  { id: 's27-cvr-return-trap', isFree: false, title: 'The Easy Checkout Trap' },
+  { id: 's28-srm-segment-harm', isFree: false, title: 'The Two Problems' },
 ];
 
 export const designScenarioIndex = [
@@ -96,6 +99,10 @@ export const rcaCaseIndex = [
   { id: 'RCA22', isFree: false, title: 'Payment Success Rate Collapsed in Brazil Overnight' },
   { id: 'RCA23', isFree: false, title: 'All Product Metrics Look Healthy But NPS Dropped 12 Points' },
   { id: 'RCA24', isFree: false, title: 'Recommendation CTR Dropped 19% After ML Model Update' },
+  { id: 'RCA25', isFree: false, title: 'Seller Active Rate Declined, Buyer Traffic Flat' },
+  { id: 'RCA26', isFree: false, title: 'Net Revenue Declined Despite Stable Order Volume' },
+  { id: 'RCA27', isFree: false, title: 'Orders Down 14% — Sessions Flat' },
+  { id: 'RCA28', isFree: false, title: 'RTO Spike in Tier 2/3 Cities' },
 ];
 
 export const businessCaseIndex = [
@@ -119,6 +126,9 @@ export const businessCaseIndex = [
   { id: 'C20', isFree: false, title: 'Should We Bundle Our Products Into a Subscription?' },
   { id: 'C21', isFree: false, title: 'Should We Launch in Southeast Asia?' },
   { id: 'C22', isFree: false, title: 'Should We Sunset Our Highest-Revenue But Declining Feature?' },
+  { id: 'C23', isFree: false, title: 'Should We Push Buyers to Prepaid?' },
+  { id: 'C24', isFree: false, title: 'Should We Block High-RTO Buyers from COD?' },
+  { id: 'C25', isFree: false, title: 'Should Search Optimise for CVR or Contribution Margin?' },
 ];
 
 export const productDesignIndex = [

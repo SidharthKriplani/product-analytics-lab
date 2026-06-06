@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GateOverlay } from '../components/shared/GateOverlay.jsx';
 import { companyTracks } from '../data/companyTracks.js';
 
@@ -240,74 +240,103 @@ function CompanyCard({ track, onSelect, index }) {
   );
 }
 
+function MentalModelSection({ label, children }) {
+  return (
+    <div style={{ padding: '0.875rem 1.25rem', borderBottom: '1px solid var(--border-subtle)' }}>
+      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--teal)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+        {label}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 function MentalModelCard({ model }) {
+  const [open, setOpen] = useState(true);
   return (
     <div style={{
       background: 'var(--surface)',
       border: '1px solid var(--border)',
       borderLeft: '3px solid var(--teal)',
       borderRadius: '10px',
-      padding: '1.25rem 1.5rem',
+      overflow: 'hidden',
       marginBottom: '1.5rem',
     }}>
-      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--teal)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-        Meesho Mental Model
-      </div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '0.875rem 1.25rem', background: 'none', border: 'none', cursor: 'pointer',
+          borderBottom: open ? '1px solid var(--border-subtle)' : 'none',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+      >
+        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--teal)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          Meesho Mental Model
+        </span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{open ? '↑ collapse' : '↓ expand'}</span>
+      </button>
 
-      <div style={{ marginBottom: '0.85rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-          North Star
-        </div>
-        <div style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.6 }}>
-          {model.northStar}
-        </div>
-      </div>
+      {open && (
+        <>
+          <MentalModelSection label="North Star">
+            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.65, margin: 0 }}>
+              {model.northStar}
+            </p>
+          </MentalModelSection>
 
-      <div style={{ marginBottom: '0.85rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-          Reading metrics
-        </div>
-        <div style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.6 }}>
-          {model.lens}
-        </div>
-      </div>
+          <MentalModelSection label="Reading metrics">
+            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.65, margin: 0 }}>
+              {model.lens}
+            </p>
+          </MentalModelSection>
 
-      <div style={{ marginBottom: '0.85rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
-          3 MECE drivers
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          {model.drivers.map((d, i) => (
-            <div key={i} style={{ fontSize: '0.85rem', color: 'var(--text)', display: 'flex', gap: '0.5rem' }}>
-              <span style={{ color: 'var(--teal)', fontWeight: 700, flexShrink: 0 }}>{i + 1}.</span>
-              <span style={{ lineHeight: 1.5 }}>{d}</span>
+          <MentalModelSection label="3 MECE drivers">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              {model.drivers.map((d, i) => (
+                <div key={i} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                  <span style={{
+                    width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0,
+                    background: 'color-mix(in srgb, var(--teal) 15%, transparent)',
+                    border: '1px solid color-mix(in srgb, var(--teal) 30%, transparent)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.65rem', fontWeight: 700, color: 'var(--teal)',
+                  }}>{i + 1}</span>
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.6 }}>{d}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </MentalModelSection>
 
-      <div style={{ marginBottom: '0.85rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-          Answer structure
-        </div>
-        <div style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.6, fontFamily: 'monospace', background: 'var(--surface-2)', padding: '0.5rem 0.75rem', borderRadius: '6px' }}>
-          {model.structure}
-        </div>
-      </div>
-
-      <div>
-        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
-          Non-negotiable lines
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-          {model.nonNegotiables.map((line, i) => (
-            <div key={i} style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', gap: '0.5rem', lineHeight: 1.5 }}>
-              <span style={{ color: 'var(--teal)', flexShrink: 0 }}>—</span>
-              <span>"{line}"</span>
+          <MentalModelSection label="Answer structure">
+            <div style={{
+              fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.7,
+              fontFamily: 'monospace', background: 'var(--surface-2)',
+              padding: '0.6rem 0.875rem', borderRadius: '6px',
+              border: '1px solid var(--border)',
+            }}>
+              {model.structure}
             </div>
-          ))}
-        </div>
-      </div>
+          </MentalModelSection>
+
+          <div style={{ padding: '0.875rem 1.25rem' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--teal)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: '0.6rem' }}>
+              Non-negotiable lines
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+              {model.nonNegotiables.map((line, i) => (
+                <div key={i} style={{
+                  fontSize: '0.83rem', color: 'var(--text-muted)', lineHeight: 1.55,
+                  paddingLeft: '0.875rem', borderLeft: '2px solid color-mix(in srgb, var(--teal) 35%, transparent)',
+                }}>
+                  "{line}"
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -645,8 +674,22 @@ function TrackDetail({ track, onBack, onNavigate }) {
 }
 
 export function CompanyTracks({ onNavigate, onBack, unlocked }) {
-  const [view, setView] = useState('grid');
-  const [selectedTrack, setSelectedTrack] = useState(null);
+  const [view, setView] = useState(() => {
+    try { return sessionStorage.getItem('ct-view') || 'grid'; } catch { return 'grid'; }
+  });
+  const [selectedTrack, setSelectedTrack] = useState(() => {
+    try {
+      const id = sessionStorage.getItem('ct-track-id');
+      return id ? (companyTracks.find(t => t.id === id) || null) : null;
+    } catch { return null; }
+  });
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('ct-view', view);
+      sessionStorage.setItem('ct-track-id', selectedTrack?.id || '');
+    } catch {}
+  }, [view, selectedTrack]);
 
   function handleSelectTrack(track) {
     setSelectedTrack(track);

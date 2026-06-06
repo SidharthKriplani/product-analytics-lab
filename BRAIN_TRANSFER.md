@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.4.0 | **Build:** ✓ (2.25s, 0 errors) | **Date:** 2026-06-06
+**Version:** V5.6.0 | **Build:** ✓ (1.79s, 0 errors) | **Date:** 2026-06-06
 
 ---
 
@@ -49,6 +49,10 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.6.0** — Three Meesho track bug fixes. (1) caseIndex.js: added RCA25/26/27/28, C23/24/25, s26-ctr-margin-trap/s27-cvr-return-trap/s28-srm-segment-harm — all isFree:false. Root cause: openRCACase/openBusinessCase/openScenario all silently returned on `if (!c) return` because new cases were never added to the index. (2) CompanyTracks.jsx: selectedTrack+view now persisted to sessionStorage on every change and restored on mount — navigating to a case and pressing back restores the track detail exactly. (3) MentalModelCard redesigned: collapsible (open by default), sectioned layout with dividers, numbered circle badges for MECE drivers, teal left-border quotes for non-negotiable lines. Build ✓ 1.79s.
+
+**V5.5.0** — SQL concept tags moved from problem card header to hints panel. SqlLabPage.jsx: removed `problem.tags.slice(0,3)` render from card header (was giving away SQL concepts before user attempted the problem); added "Concepts:" row inside the hints section that appears only after the user has opened at least one hint — tags render as small neutral chips. Build ✓ 2.33s. Deferred items logged to IDEAS.md Tier 1: stepwise hints, multi-select + company filter, schema inline layout, Interview Q&A filter sidebar + company filter, MCQ filter cleanup, Metrics Foundations error (repro needed).
 
 **V5.4.0** — Company Tracks visual revamp + Meesho SBA track. companyTracks.js: added `faviconDomain` to all 8 existing tracks; Meesho SBA entry with `mentalModel` (north star, lens, 3 MECE drivers, answer structure, non-negotiables), `caseRefs` (RCA27/26/28/25, C23/24/25, s26-ctr-margin-trap/s27-cvr-return-trap/s28-srm-segment-harm, stat04/stat03, M01/M03, code01/code02 — 16 cases across 6 rooms), `comingSoonRoles: [PM, PA]`, `directorCards` (10 Round 3 pressure cards with expected direction + closing line). CompanyTracks.jsx full rewrite: emoji avatars replaced with Google Favicon API images (44×44 rounded square, border); colored left border removed from all cards; CTA button changed to `var(--accent)` uniform; `faviconUrl()` helper; `CompanyAvatar` component; `MentalModelCard` (teal left border, sections: north star/lens/drivers/structure/non-negotiables); `DirectorPressureCards` (expandable — click prompt to reveal expected + closing line); `RoleTabs` (active pill + coming-soon pills); emoji removed from header/stats/articles; `cases`, `design`, `browser` added to ROOM_COLORS. Build ✓ 2.25s.
 

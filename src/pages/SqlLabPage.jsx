@@ -705,9 +705,6 @@ export function SqlLabPage({ onBack }) {
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1.25rem', borderLeft: '3px solid ' + diffStyle.text }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
               <Badge label={problem.difficulty} style={{ background: diffStyle.bg, color: diffStyle.text, borderColor: diffStyle.border }} />
-              {problem.tags.slice(0, 3).map(t => (
-                <Badge key={t} label={t} style={{ background: 'var(--surface-2)', color: 'var(--text-muted)', borderColor: 'var(--border)' }} />
-              ))}
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 {problem.companyDomain && (
                   <img
@@ -895,6 +892,23 @@ export function SqlLabPage({ onBack }) {
                       {h}
                     </div>
                   ))}
+                  {problem.tags && problem.tags.length > 0 && (
+                    <div style={{
+                      padding: '0.45rem 0.75rem', background: 'var(--surface-2)',
+                      border: '1px solid var(--border)', borderRadius: '6px',
+                      fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex',
+                      alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap',
+                    }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-muted)', flexShrink: 0 }}>Concepts:</span>
+                      {problem.tags.map(t => (
+                        <span key={t} style={{
+                          padding: '1px 7px', borderRadius: '4px', fontSize: '0.72rem',
+                          background: 'var(--surface)', border: '1px solid var(--border)',
+                          color: 'var(--text-muted)',
+                        }}>{t}</span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
               {runError && (
