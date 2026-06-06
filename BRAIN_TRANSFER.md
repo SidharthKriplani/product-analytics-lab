@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.10.1 | **Build:** ✓ (2.22s, 0 errors) | **Date:** 2026-06-06
+**Version:** V5.10.1 | **Build:** ✓ (2.22s, 0 errors) | **Date:** 2026-06-06 | **PM Audit:** #149 complete
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**PM Audit #149 (2026-06-06)** — Full PM audit complete. Created PM_AUDIT.md (8-section diagnosis: core promise, user journey, IA, free/paid boundary, retention/conversion, P0/P1/P2 plan, 12 metrics, final recommendation). AUDITS.md: added #149 entry with open/resolved status per finding. METRICS.md: added PM Audit #149 metrics table (12 metrics across acquisition/activation/engagement/conversion/content health). IDEAS.md: added 5 new items — free tier value anchor (P0), guestPreview quality audit (P0), nav IA restructure (P1), ambient unlock signal (P1), Company Track progress on Progress page (P1). Biggest risk: activation — guest and day-1 user do not reach a case debrief in session 1. Highest-leverage fix: forced first-case experience for guests and new sign-ins.
 
 **V5.10.1** — Reverted "Reference Cards" back to "Frameworks" in Sidebar.jsx and PlaybookBrowser.jsx. "Frameworks" is what practitioners actually say — matching a bad page header was the wrong call. Build ✓ 2.22s.
 

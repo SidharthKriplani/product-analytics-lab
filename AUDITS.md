@@ -39,6 +39,30 @@ Start here when running an audit. Add rows as new types emerge.
 
 ---
 
+## Part XXXI — V5.10.1 PM Audit (2026-06-06)
+
+### 149. ⚠️ PM Audit — Full product review: activation, IA, free/paid boundary, retention, conversion
+
+Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
+
+- ⚠️ **Activation:** Guest and new sign-in experience does not push users into a specific case. Session-1 case completion rate is unknown but likely low. Highest-risk gap.
+- ⚠️ **Empty state:** Progress page shows nothing for day-1 users. "Start here" card missing. Already in NEXT.md P0.
+- ⚠️ **Guest demo path:** Guests browse 17 rooms instead of being pushed into one Analyst-level case immediately. Already in NEXT.md P0.
+- ⚠️ **Free tier invisible:** Signed-in free users are not told what they have access to. No "you have X free cases" anchor on sign-in or Plans page.
+- ⚠️ **Habit loop incomplete:** "Continue where you left off" card missing from Progress. Streak not above the fold.
+- ⚠️ **IA:** TOOLS is a catch-all. MCQ Quiz, Company Tracks, Defense Strategy share no logical grouping. Nav restructure logged in IDEAS.md P1.
+- ⚠️ **guestPreview quality:** Not audited for Analyst-level difficulty or conversion quality. Each room's preview case should be the strongest possible hook.
+- ✅ **Access model:** 3-tier structure (Guest / Free / Full) is correctly designed. Foundations / Easy SQL / Forensics free is the right call.
+- ✅ **Debrief quality:** Senior debrief format is PAL's moat. GateOverlay is contextual. ForwardPointerCard wired (V5.1).
+
+**P0 findings → NEXT.md:** Guest demo path, empty state, Plans copy, free tier value anchor, guestPreview audit.
+**P1 findings → IDEAS.md:** Continue where you left off, streak prominence, Company Track on Progress, nav IA restructure, ambient unlock signal.
+**Metrics → METRICS.md:** 12 recommended PostHog metrics added (activation, engagement, conversion, content health).
+
+**Full audit:** PM_AUDIT.md — Audit #149, V5.10.1, 2026-06-06.
+
+---
+
 ## Part XXX — V4.77.x Open Items (2026-06-03)
 
 ### 144. ✅ Build Audit — Forensic checkValues float formatting (f01–f10)

@@ -186,6 +186,49 @@ All progress state lives in localStorage. Every key must be included in `onReset
 
 ---
 
+## PM Audit #149 — 12 recommended metrics (V5.10.1, 2026-06-06)
+
+Priority instrumentation targets once PostHog is confirmed live. Grouped by funnel stage. Full rationale in PM_AUDIT.md Section 7.
+
+**Acquisition:**
+
+| Metric | Definition | Target |
+|---|---|---|
+| `guest_case_started` | % of guest sessions that start ≥1 case | >40% |
+| `gate_shown → user_signed_in` | % of gate impressions that result in sign-in | >15% |
+
+**Activation:**
+
+| Metric | Definition | Target |
+|---|---|---|
+| `day_1_case_completion_rate` | % of new sign-ins who complete ≥1 case in session 1 | >35% (below 25% = onboarding broken) |
+| `debrief_reached_rate` | % of case_opened events where user reaches debrief | >60% |
+
+**Engagement:**
+
+| Metric | Definition | Target |
+|---|---|---|
+| `cases_per_session` | Avg cases attempted per visit | >2 (below 1.5 = browsing not practicing) |
+| `room_breadth` | Avg rooms visited per user | Multi-room users have higher LTV; single-room users at churn risk |
+| `forward_pointer_ctr` | % of debrief exits that click ForwardPointerCard | Baseline first, then optimize |
+| `streak_day_7_retention` | % of users with 7-day streak who return day 8 | Habit formation signal |
+
+**Conversion:**
+
+| Metric | Definition | Target |
+|---|---|---|
+| `paywall_hit_rate` | gate_shown events per free session | Too low = not exploring; too high = free tier too thin |
+| `free_to_full_conversion_rate` | % of free users who enter code or pay via Stripe | Baseline first |
+| `company_track_adoption` | % of full-access users who open ≥1 Company Track | Measures premium feature engagement |
+
+**Content health:**
+
+| Metric | Definition | Target |
+|---|---|---|
+| `sql_5plus_completion_rate` | % of full-access users who complete 5+ SQL Lab problems | Low adoption = product problem, not content problem |
+
+---
+
 ## Next measurement priorities
 
 Before any paid conversion attempt, establish these baselines:

@@ -6,7 +6,7 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ---
 
-## Status — V5.10.0: Full IA audit P0+P1 complete. Naming consistent, Take-Home hidden, Stats Calc moved, practice path visible. P2 logged.
+## Status — V5.10.1 + PM Audit #149 complete. All findings logged. Next: ship P0 items before any public outreach.
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 

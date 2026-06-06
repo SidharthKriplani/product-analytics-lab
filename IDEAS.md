@@ -44,7 +44,22 @@ Same pill-proliferation problem as Interview Q&A. Three rows of pills (Category,
 ### Metrics Foundations — intermittent navigation error [V5.4 tester feedback]
 Tester reported: "sometimes showed error, sometimes the page opens" when navigating from Metrics browser → Metrics Foundations. Likely a lazy-load race condition or progress key mismatch. Needs repro: next time it occurs, note the exact navigation path and any console errors. Do not fix blind — repro first.
 
-### Take-Home — proper format decision required [P2, V5.10.0 IA audit]
+### Free tier value anchor — show what sign-in unlocks [P0, PM Audit #149]
+On first sign-in (and on Plans page), show: "You now have access to ~150 free cases, 75 SQL problems, and 25 Foundation modules." Users hit gates without knowing what they already have. This creates unnecessary churn. A single "here is what you have free" message on first session removes uncertainty and anchors perceived value before the first paywall. Implementation: a dismissable first-session card on Progress.jsx for users where completedCount === 0 and !unlocked. Effort: 30 min.
+
+### guestPreview case quality audit [P0, PM Audit #149]
+Every room has a guestPreview case but none have been audited for: (1) Analyst-level difficulty, and (2) conversion quality — is this the most compelling case in the room? The guestPreview case is PAL's first impression. If it is too hard, too generic, or not satisfying to complete, guests bounce. Audit all 17 rooms: check difficulty tag = analyst, check that the debrief is strong and the scenario is immediately relatable. Replace any weak preview cases. Effort: 1 session of content review.
+
+### Nav IA restructure — PRACTICE/PREP grouping [P1, PM Audit #149]
+TOOLS is a catch-all. MCQ Quiz, Company Tracks, Defense Strategy share no logical grouping. Proposed: rename DRILLS → PRACTICE, move MCQ Quiz into PRACTICE, create a PREP group for Company Tracks + Defense Strategy. This makes each nav group's purpose immediately clear. Sidebar restructure only — no routing changes needed. Gate: do after beta feedback confirms users find nav confusing (PostHog nav click data). Effort: 30 min code, 0 min routing.
+
+### Ambient unlock signal for free users [P1, PM Audit #149]
+Free signed-in users only see the paywall when they hit a gate. No ambient pull toward conversion. Add a single subtle card on Progress.jsx — visible only to signed-in, non-unlocked users — pointing to Company Tracks + Staff Layer with outcome-framed copy ("Practice with the exact cases your target company uses"). One card, dismissable, outcome-framed. Not a banner, not a notification. Gate: do after PostHog confirms paywall_hit_rate is measurable. Effort: 30 min.
+
+### Company Track progress on Progress page [P1, PM Audit #149]
+If a user is mid-way through a Company Track (e.g., 6/16 Meesho SBA cases done), that active path should surface on Progress.jsx as a card: "Meesho SBA — 6/16 done. Continue →". Currently Progress only shows room-level completion, not track-level. Implementation: read sessionStorage ct-track-id and ct-view from CompanyTracks state, compute progress, render a card if track is in progress. Effort: 1 hour.
+
+### Take-Home — proper format decision required [P2, PM Audit #149 + V5.10.0 IA audit]
 Current state: Take-Home is a case runner with a "take-home" label. It overpromises — real take-home prep requires multi-hour independent work, a data file/problem statement, written output, and a self-evaluation rubric. The section is now hidden from nav (V5.10.0). Before rebuilding, decide: what does a PAL take-home simulation actually look like? Likely: realistic problem statement PDF/data, 2-3 hour independent window, structured written output section, rubric self-check. That's a full UX sprint. Do not rebuild until the format is clearly defined. Gate: product design decision first.
 
 ### Navigation / content naming — Playbook vs Deep Dives vs Reference Cards [P2, V5.10.0 IA audit]
