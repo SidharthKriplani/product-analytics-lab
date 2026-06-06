@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { interviewQA } from '../data/interviewQA.js';
 import { Icon } from '../components/shared/Icon.jsx';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 
 const CAT_CONFIG = {
   'Experimentation': { color: 'var(--accent)',  bg: 'var(--accent-bg)',  border: 'var(--accent-border)' },
@@ -185,16 +186,21 @@ export function InterviewQABrowser({ unlocked, onBack }) {
 
       {/* Header */}
       <div style={{ marginBottom: '1.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '0.5rem' }}>
           <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name="message-square" size={18} color="var(--purple)" />
           </span>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
-            Interview Q&A Bank
-          </h1>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--purple)', marginBottom: '0.15rem' }}>
+              Learn
+            </div>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
+              Interview Q&A Bank
+            </h1>
+          </div>
         </div>
         <p style={{ margin: '0 0 0.75rem', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: '560px' }}>
-          26 analytical PA/PM interview questions with model answers at three levels — Analyst, Senior, and Staff. Not behavioral STAR questions. The calls, the frameworks, and the thinking that separates tiers.
+          Analytical PA/PM interview questions with model answers at three tiers — Analyst, Senior, and Staff. Not behavioral STAR questions. The calls, the frameworks, and the thinking that separates levels.
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--purple)', background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.55rem' }}>
@@ -204,54 +210,43 @@ export function InterviewQABrowser({ unlocked, onBack }) {
         </div>
       </div>
 
-      {/* Filter row */}
-      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* Category filter + count */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
         <select
           value={catFilter}
           onChange={e => setCatFilter(e.target.value)}
           style={{
             background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.75rem',
-            fontSize: '0.82rem', color: catFilter !== 'All' ? 'var(--text)' : 'var(--text-muted)',
+            borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.75rem',
+            fontSize: '0.8rem', color: catFilter !== 'All' ? 'var(--text)' : 'var(--text-muted)',
             cursor: 'pointer', fontWeight: catFilter !== 'All' ? 600 : 400,
-            outline: 'none', minWidth: '160px',
+            outline: 'none',
           }}
         >
           {categories.map(cat => (
             <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : cat}</option>
           ))}
         </select>
-        <select
-          value={diffFilter}
-          onChange={e => setDiffFilter(e.target.value)}
-          style={{
-            background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.75rem',
-            fontSize: '0.82rem', color: diffFilter !== 'all' ? 'var(--text)' : 'var(--text-muted)',
-            cursor: 'pointer', fontWeight: diffFilter !== 'all' ? 600 : 400,
-            outline: 'none', minWidth: '130px',
-          }}
-        >
-          {[['all', 'All Levels'], ['analyst', 'Analyst'], ['senior', 'Senior'], ['staff', 'Staff']].map(([val, label]) => (
-            <option key={val} value={val}>{label}</option>
-          ))}
-        </select>
-        {(catFilter !== 'All' || diffFilter !== 'all') && (
-          <button
-            onClick={() => { setCatFilter('All'); setDiffFilter('all'); }}
-            style={{
-              background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
-              padding: '0.4rem 0.65rem', fontSize: '0.75rem', color: 'var(--text-muted)',
-              cursor: 'pointer',
-            }}
-          >
-            Clear filters
+        {catFilter !== 'All' && (
+          <button onClick={() => setCatFilter('All')} style={{ background: 'none', border: 'none', fontSize: '0.75rem', color: 'var(--text-dim)', cursor: 'pointer', padding: 0 }}>
+            Clear ×
           </button>
         )}
-        <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginLeft: 'auto' }}>
-          {displayed.length} of {interviewQA.length} questions
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginLeft: 'auto' }}>
+          {displayed.length} of {interviewQA.length}
         </span>
       </div>
+      {/* DifficultyChips for level */}
+      <DifficultyChips
+        value={diffFilter}
+        onChange={setDiffFilter}
+        counts={{
+          all: interviewQA.filter(q => catFilter === 'All' || q.category === catFilter).length,
+          analyst: interviewQA.filter(q => (catFilter === 'All' || q.category === catFilter) && q.difficulty === 'analyst').length,
+          senior:  interviewQA.filter(q => (catFilter === 'All' || q.category === catFilter) && q.difficulty === 'senior').length,
+          staff:   interviewQA.filter(q => (catFilter === 'All' || q.category === catFilter) && q.difficulty === 'staff').length,
+        }}
+      />
 
       {/* Questions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>

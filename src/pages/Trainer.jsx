@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { trainerMCQ, trainerMCQByCategory } from '../data/trainerMCQ.js';
+import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
+import { Icon } from '../components/shared/Icon.jsx';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -38,7 +40,7 @@ const LENGTHS = [5, 10, 20, 'all'];
 
 const difficultyLabel = { all: 'All', analyst: 'Analyst', senior: 'Senior', staff: 'Staff' };
 const categoryLabel = {
-  all: 'All',
+  all: 'All Categories',
   statistics: 'Statistics',
   experimentation: 'Experimentation',
   metrics: 'Metrics',
@@ -46,6 +48,16 @@ const categoryLabel = {
   product: 'Product',
   behavioral: 'Behavioral',
   estimation: 'Estimation',
+};
+
+const CAT_COLORS = {
+  statistics:     { color: 'var(--accent)',  bg: 'var(--accent-bg)',  border: 'var(--accent-border)' },
+  experimentation:{ color: 'var(--teal)',    bg: 'var(--teal-bg)',    border: 'var(--teal-border)' },
+  metrics:        { color: 'var(--green)',   bg: 'var(--green-bg)',   border: 'var(--green-border)' },
+  growth:         { color: 'var(--green)',   bg: 'var(--green-bg)',   border: 'var(--green-border)' },
+  product:        { color: 'var(--purple)',  bg: 'var(--purple-bg)',  border: 'var(--purple-border)' },
+  behavioral:     { color: 'var(--yellow)',  bg: 'var(--yellow-bg)',  border: 'var(--yellow-border)' },
+  estimation:     { color: 'var(--yellow)',  bg: 'var(--yellow-bg)',  border: 'var(--yellow-border)' },
 };
 
 function scoreColor(pct) {
@@ -75,13 +87,190 @@ function formatRelativeTime(ts) {
   return days === 1 ? 'yesterday' : days + ' days ago';
 }
 
+// ─── MCQ Question Card (browse mode) ──────────────────────────────────────────
+
+function MCQQuestionCard({ q, onClick }) {
+  const cat = CAT_COLORS[q.category] || CAT_COLORS.metrics;
+  const diff = { analyst: 'var(--accent)', senior: 'var(--teal)', staff: 'var(--yellow)' }[q.difficulty] || 'var(--accent)';
+  return (
+    <button
+      onClick={() => onClick(q)}
+      className="pal-card-hover"
+      style={{
+        width: '100%', textAlign: 'left', background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderLeft: '3px solid ' + cat.color,
+        borderRadius: 'var(--radius)', padding: '0.875rem 1.1rem',
+        cursor: 'pointer', transition: 'all 0.12s', display: 'flex',
+        flexDirection: 'column', gap: '0.4rem',
+      }}
+    >
+      <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <span style={{
+          fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase',
+          letterSpacing: '0.07em', color: cat.color,
+          background: cat.bg, border: '1px solid ' + cat.border,
+          borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.45rem',
+        }}>
+          {categoryLabel[q.category] || q.category}
+        </span>
+        <span style={{
+          fontSize: '0.65rem', fontWeight: 600, color: diff,
+          background: 'var(--surface-2)', border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.4rem',
+          textTransform: 'uppercase', letterSpacing: '0.05em',
+        }}>
+          {difficultyLabel[q.difficulty] || q.difficulty}
+        </span>
+        <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+          {q.options?.length || 4} options
+        </span>
+      </div>
+      <p style={{
+        margin: 0, fontSize: '0.875rem', fontWeight: 600,
+        color: 'var(--text)', lineHeight: 1.5,
+        display: '-webkit-box', WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical', overflow: 'hidden',
+      }}>
+        {q.question}
+      </p>
+    </button>
+  );
+}
+
+// ─── Browse Screen ─────────────────────────────────────────────────────────────
+
+function BrowseScreen({ onStartQuiz, onPracticeOne }) {
+  const [catFilter, setCatFilter] = useState('all');
+  const [diffFilter, setDiffFilter] = useState('all');
+  const [pastScores] = useState(() => loadScores());
+
+  const filtered = trainerMCQ.filter(q => {
+    const catMatch = catFilter === 'all' || q.category === catFilter;
+    const diffMatch = diffFilter === 'all' || q.difficulty === diffFilter;
+    return catMatch && diffMatch;
+  });
+
+  const countsByDiff = {
+    all: trainerMCQ.filter(q => catFilter === 'all' || q.category === catFilter).length,
+    analyst: trainerMCQ.filter(q => (catFilter === 'all' || q.category === catFilter) && q.difficulty === 'analyst').length,
+    senior:  trainerMCQ.filter(q => (catFilter === 'all' || q.category === catFilter) && q.difficulty === 'senior').length,
+    staff:   trainerMCQ.filter(q => (catFilter === 'all' || q.category === catFilter) && q.difficulty === 'staff').length,
+  };
+
+  return (
+    <div className="pal-page-enter" style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1rem' }}>
+
+      {/* Room header */}
+      <div style={{ marginBottom: '1.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--green-bg)', border: '1px solid var(--green-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="target" size={18} color="var(--green)" />
+          </span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--green)', marginBottom: '0.15rem' }}>
+              MCQ Quiz
+            </div>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
+              Concept Bank
+            </h1>
+          </div>
+          <button
+            onClick={onStartQuiz}
+            className="pal-glow-pulse"
+            style={{
+              background: 'var(--green)', color: '#fff', border: 'none',
+              borderRadius: 'var(--radius)', padding: '0.55rem 1.25rem',
+              fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
+              whiteSpace: 'nowrap', flexShrink: 0,
+            }}
+          >
+            Start Quiz →
+          </button>
+        </div>
+        <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '540px' }}>
+          Concept fluency is the floor. Browse the full bank or click Start Quiz to configure a timed session. Clicking any card lets you practice that question directly.
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--green)', background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.55rem' }}>
+            {trainerMCQ.length} Questions
+          </span>
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+            7 categories · Analyst / Senior / Staff
+          </span>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+        <select
+          value={catFilter}
+          onChange={e => setCatFilter(e.target.value)}
+          style={{
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.75rem',
+            fontSize: '0.8rem', color: catFilter !== 'all' ? 'var(--text)' : 'var(--text-muted)',
+            fontWeight: catFilter !== 'all' ? 600 : 400, cursor: 'pointer', outline: 'none',
+          }}
+        >
+          {['all', ...CATEGORIES].map(cat => (
+            <option key={cat} value={cat}>{categoryLabel[cat] || cat}</option>
+          ))}
+        </select>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginLeft: 'auto' }}>
+          {filtered.length} of {trainerMCQ.length}
+        </span>
+      </div>
+      <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={countsByDiff} />
+
+      {/* Question cards */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '2rem' }}>
+        {filtered.map(q => (
+          <MCQQuestionCard key={q.id} q={q} onClick={onPracticeOne} />
+        ))}
+        {filtered.length === 0 && (
+          <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+            No questions match this filter.
+          </div>
+        )}
+      </div>
+
+      {/* Past sessions */}
+      {pastScores.length > 0 && (
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', marginBottom: '1rem' }}>
+          <div style={{ padding: '0.65rem 1rem', borderBottom: '1px solid var(--border-subtle)', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Recent Sessions
+          </div>
+          {pastScores.slice(-3).reverse().map((s, i) => {
+            const pct = s.total > 0 ? s.score / s.total : 0;
+            const cats = s.categories && !s.categories.includes('all')
+              ? s.categories.map(c => categoryLabel[c] || c).join(', ')
+              : 'All categories';
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 1rem', borderBottom: i < 2 ? '1px solid var(--border-subtle)' : 'none', gap: '0.75rem' }}>
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)' }}>
+                    {s.score}/{s.total} correct
+                    <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: 6, fontSize: '0.78rem' }}>{cats}</span>
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: 2 }}>{formatRelativeTime(s.timestamp)}</div>
+                </div>
+                <div style={{ fontWeight: 800, fontSize: '1rem', color: scoreColor(pct) }}>{Math.round(pct * 100)}%</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Setup Screen ─────────────────────────────────────────────────────────────
 
-function SetupScreen({ onStart }) {
+function SetupScreen({ onStart, onBack }) {
   const [selectedCategories, setSelectedCategories] = useState(['all']);
   const [difficulty, setDifficulty] = useState('all');
   const [length, setLength] = useState(10);
-  const [pastScores] = useState(() => loadScores());
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   function toggleCategory(cat) {
@@ -123,19 +312,17 @@ function SetupScreen({ onStart }) {
 
   return (
     <div className="pal-page-enter" style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 1rem' }}>
+      {/* Back */}
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: 0, marginBottom: '1.5rem' }}>
+        ← Back to question bank
+      </button>
       {/* Header */}
-      <div style={{
-        background: 'var(--green-bg)',
-        border: '1.5px solid var(--green-border)',
-        borderRadius: 12,
-        padding: '1.25rem 1.5rem',
-        marginBottom: '1.5rem',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--text)' }}>MCQ Quiz</h1>
-        </div>
-        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.55 }}>
-          Concept fluency is the floor — you cannot build judgment on shaky definitions. This surfaces the distinctions that trip candidates at the wrong moment: p-value vs significance, precision vs recall, SRM vs power. Run it under timed conditions until the answers are automatic.
+      <div style={{ marginBottom: '1.5rem' }}>
+        <h1 style={{ margin: '0 0 0.4rem', fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em' }}>
+          Configure your session
+        </h1>
+        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.55 }}>
+          Set session length, then filter by category and difficulty. Start Training runs a randomized quiz from the matching question pool.
         </p>
       </div>
 
@@ -270,76 +457,6 @@ function SetupScreen({ onStart }) {
         {previewPool.length === 0 ? 'No questions match' : 'Start Training →'}
       </button>
 
-      {/* Past sessions panel */}
-      <div style={{
-        marginTop: '1.75rem',
-        background: 'var(--surface)',
-        border: '1.5px solid var(--border)',
-        borderRadius: 12,
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          padding: '0.75rem 1.25rem',
-          borderBottom: '1px solid var(--border)',
-          fontWeight: 700,
-          fontSize: '0.85rem',
-          color: 'var(--text-secondary)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}>
-          Past Sessions
-        </div>
-
-        {pastScores.length === 0 ? (
-          <div style={{ padding: '2rem 1.5rem', textAlign: 'center' }}>
-            <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '0.4rem', fontSize: '0.95rem' }}>
-              No practice sessions yet
-            </div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: '360px', margin: '0 auto', lineHeight: 1.55 }}>
-              Run a drill to see your skill breakdown by category — Statistics, Metrics, RCA, and Experimentation.
-            </div>
-          </div>
-        ) : (
-          <div>
-            {pastScores.slice(-3).reverse().map((s, i) => {
-              const pct = s.total > 0 ? s.score / s.total : 0;
-              const cats = s.categories && !s.categories.includes('all')
-                ? s.categories.map(c => categoryLabel[c] || c).join(', ')
-                : 'All categories';
-              return (
-                <div key={i} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '0.7rem 1.25rem',
-                  borderBottom: i < Math.min(pastScores.length, 3) - 1 ? '1px solid var(--border)' : 'none',
-                  gap: '0.75rem',
-                  flexWrap: 'wrap',
-                }}>
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)' }}>
-                      {s.score}/{s.total} correct
-                      <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: 8, fontSize: '0.78rem' }}>
-                        {cats}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: 2 }}>
-                      {formatRelativeTime(s.timestamp)}
-                    </div>
-                  </div>
-                  <div style={{
-                    fontWeight: 800,
-                    fontSize: '1rem',
-                    color: scoreColor(pct),
-                  }}>
-                    {Math.round(pct * 100)}%
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -767,7 +884,7 @@ function DebriefScreen({ questions, answers, onRetry, onNewSession, onBack }) {
 // ─── Main Trainer Page ─────────────────────────────────────────────────────────
 
 export function Trainer({ onBack }) {
-  const [screen, setScreen] = useState('setup'); // 'setup' | 'question' | 'debrief'
+  const [screen, setScreen] = useState('browse'); // 'browse' | 'setup' | 'question' | 'debrief'
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -785,6 +902,14 @@ export function Trainer({ onBack }) {
     setCurrentIndex(0);
     setAnswers({});
     setSessionConfig({ selectedCategories, difficulty, length });
+    setScreen('question');
+  }
+
+  function handlePracticeOne(q) {
+    setQuestions([q]);
+    setCurrentIndex(0);
+    setAnswers({});
+    setSessionConfig({ selectedCategories: [q.category], difficulty: q.difficulty, length: 1 });
     setScreen('question');
   }
 
@@ -815,15 +940,19 @@ export function Trainer({ onBack }) {
   }
 
   function handleNewSession() {
-    setScreen('setup');
+    setScreen('browse');
     setQuestions([]);
     setCurrentIndex(0);
     setAnswers({});
     setSessionConfig(null);
   }
 
+  if (screen === 'browse') {
+    return <BrowseScreen onStartQuiz={() => setScreen('setup')} onPracticeOne={handlePracticeOne} />;
+  }
+
   if (screen === 'setup') {
-    return <SetupScreen onStart={handleStart} />;
+    return <SetupScreen onStart={handleStart} onBack={() => setScreen('browse')} />;
   }
 
   if (screen === 'question') {

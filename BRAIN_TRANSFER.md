@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.8.0 | **Build:** ✓ (2.10s, 0 errors) | **Date:** 2026-06-06
+**Version:** V5.9.0 | **Build:** ✓ (2.32s, 0 errors) | **Date:** 2026-06-06
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.9.0** — MCQ Quiz browse-first redesign + Interview Q&A alignment. Trainer.jsx: added BrowseScreen (room header pattern — green 36×36 icon box + "Concept Bank" title + "Start Quiz →" CTA + category select + DifficultyChips + full question card grid + recent sessions); added MCQQuestionCard (category left-border, badge, difficulty chip, 2-line clamped question text); SetupScreen now accessed via "Start Quiz →" with back link; main Trainer starts at 'browse' not 'setup'; handlePracticeOne() starts a 1-question session from any card click; "New Session" returns to browse. InterviewQABrowser.jsx: room header matches MetricsBrowser pattern (36×36 purple icon box + room label + title); filter row replaced with DifficultyChips (with per-tier counts) + category select + live count; matches platform DifficultyChips convention. Build ✓ 2.32s.
 
 **V5.8.0** — MCQ Quiz + Interview Q&A filter revamp. InterviewQABrowser.jsx: removed 9 category pills + 4 difficulty pills; replaced with two styled `<select>` dropdowns (Category / Level) in a single filter row + "Clear filters" button + live count ("N of 26 questions"). Trainer.jsx: removed three all-caps labeled pill sections; Session Length stays as prominent pills; Category + Difficulty moved into collapsible "Filters ↓" toggle — collapsed state shows active filter chips with × dismiss buttons + Clear all; expanded state shows compact pills in a surface panel. Build ✓ 2.10s.
 

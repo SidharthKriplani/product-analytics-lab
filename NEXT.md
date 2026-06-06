@@ -6,7 +6,7 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ---
 
-## Status — V5.8.0: MCQ Quiz + Interview Q&A filter revamp shipped. Session complete.
+## Status — V5.9.0: MCQ browse-first redesign + Interview Q&A alignment complete. Both match platform pattern.
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 
