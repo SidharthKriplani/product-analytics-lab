@@ -21,7 +21,19 @@ PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester pro
 
 ## Active build queue
 
-**P0 — V5.14.0: Homepage repositioning** ← NEXT
+**P0 — V5.17.0: Access gate messaging audit** ← FIRST TASK TUESDAY (partial fix already shipped)
+
+Gate logic is CORRECT: sign-in is mandatory for all non-guestPreview cases. Access code is an additional unlock on top, not a replacement for sign-in.
+
+Root cause of confusion: Unlock.jsx said "no account needed" — wrong. A guest who enters the access code still hits the auth gate on the next non-guestPreview case. **Fixed in V5.16.2:** Unlock.jsx footer updated to "Sign in separately to access free cases and save progress."
+
+Remaining check for Tuesday: audit all rooms to ensure no `guestPreview: true, isFree: false` cases exist — this combination lets guests bypass auth but then hits the unlock gate, sending them to Unlock.jsx (which still implies they're done). If found, flip those cases to `guestPreview: true, isFree: true` (guest preview should always be free-tier accessible too).
+
+Files: `src/data/*Cases.js` — grep for `guestPreview: true` and verify each has `isFree: true` alongside.
+
+---
+
+**P1 — V5.14.0: Homepage repositioning** (already shipped — verify live)
 
 Files: `src/pages/Home.jsx` only. Goal: new visitor understands PAL in under 10 seconds.
 - Headline: "Practice product analytics interviews beyond SQL."

@@ -193,7 +193,7 @@ export function Unlock({ onUnlocked, alreadyUnlocked, onNavigate }) {
         </form>
 
         <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border-subtle)', fontSize: '0.73rem', color: 'var(--text-dim)', textAlign: 'center', lineHeight: 1.5 }}>
-          Access code from the PAL community or a direct invite. Stored locally — no account needed.
+          Access code from the PAL community or a direct invite. Sign in separately to access free cases and save progress.
         </div>
       </div>
     </div>

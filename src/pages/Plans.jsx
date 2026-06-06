@@ -266,6 +266,9 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
       </div>
 
       {/* ── Comparison table ── */}
+      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '1rem', opacity: 0.8 }}>
+        All paid plans above include <strong style={{ color: 'var(--teal)', fontWeight: 700 }}>Full Lab</strong> access — same content, different billing periods.
+      </p>
       <div style={{
         border: '1px solid var(--border)', borderRadius: '14px',
         overflow: 'hidden', marginBottom: '2rem',
