@@ -63,6 +63,35 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
+## Part XXXII — V5.11.1 UniverseView audit (2026-06-07)
+
+### 150. ⚠️ Visual + Interaction — UniverseView label overlaps, 0%-progress invisibility, no interactivity
+
+**File:** `src/components/shared/UniverseView.jsx`
+
+Three distinct defects found during review after V5.11.1 shipped:
+
+**A) Sublabel text overlaps between adjacent arms**
+7 arms at ~51.4° spacing. Sublabels (`arm.sublabel`, e.g. "Behavioral · Estimation") render at `ARM_LENGTH + 40 = 195px` from center at 8.5px font. At radius 195, the arc distance between adjacent label centroids is ~174px. Sublabel strings can reach 130–160px wide — they collide for arms in the upper-right / upper-left quadrant. Fix: remove sublabels from the SVG entirely. Move room context into the progress bar list below (already present there by arm label). Single-word arm labels (Monitor, Diagnose, etc.) at 11px do not overlap — keep those.
+
+**B) 0%-progress arms show nothing — star structure is invisible to new users**
+Progress lines are only drawn when `arm.progress > 0` (`if (arm.progress === 0) return null`). A new user or demo user sees 7 faint dim background lines (opacity: 0.12) with no star structure, no nodes, and no sense of the map. Fix: always render a short dashed stub (e.g., 15% of arm length) at 0% to show the arm direction; style it as `stroke-dasharray="4 6"` so it reads as "not yet started." Outer and inner nodes should always render (with low opacity at 0% — already partially done).
+
+**C) `strokeDasharray="160"` is a hardcoded constant regardless of line length**
+Actual lit line length = `ARM_LENGTH * Math.max(0.08, arm.progress)` pixels, varying from ~12px (8% minimum) to 155px (100%). But `strokeDasharray="160"` treats every line as if it is 160px long — causing dash pattern to partially clip short lines. Fix: either remove dasharray from progress lines entirely (they don't need it — they draw via animation) or compute it as the actual pixel length of the line.
+
+**D) No hover/click interactivity**
+Arms have no hover state, no tooltip beyond SVG `<title>`, and no click handler. The progress bar list is the only way to see arm detail. Fix for V2: add `onMouseEnter/Leave` state per arm to highlight the active arm's line/nodes; optionally add `onClick` that calls a new `onNavigate(firstRoom)` prop.
+
+**Fix scope (V5.12.0):**
+- Remove sublabels from SVG, add room names to progress list sublabel column
+- Draw 0%-stub dashed line on all arms always
+- Remove hardcoded `strokeDasharray="160"` from lit lines (not needed, animation handles draw)
+- Keep outer nodes always visible at low opacity (already done — confirm no regression)
+- Defer hover/click to V2 (log in IDEAS.md)
+
+---
+
 ## Part XXX — V4.77.x Open Items (2026-06-03)
 
 ### 144. ✅ Build Audit — Forensic checkValues float formatting (f01–f10)

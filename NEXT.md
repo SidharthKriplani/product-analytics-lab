@@ -2,11 +2,11 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V5.4.0 (2026-06-06)*
+*Last updated: V5.11.1 (2026-06-07)*
 
 ---
 
-## Status — V5.11.0: Analyst Universe view live. Toggle on Progress page. SHOW_UNIVERSE_TOGGLE = false to soft-hide.
+## Status — V5.13.0: Judgment Benchmark live. No auth. 5 cases. PostHog events wired. Universe defects deferred (Audit #150, non-blocking).
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 
@@ -19,17 +19,47 @@ PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester pro
 
 ---
 
-## Active build queue — PM critique sprint (V5.0+)
+## Active build queue
 
-**P0 — Must ship before any outreach or paid launch**
+**P0 — V5.14.0: Homepage repositioning** ← NEXT
 
-**1. Guest demo path** ← HIGHEST PRIORITY
+Files: `src/pages/Home.jsx` only. Goal: new visitor understands PAL in under 10 seconds.
+- Headline: "Practice product analytics interviews beyond SQL."
+- Primary CTA: "Take the Judgment Benchmark →" (routes to page='benchmark')
+- Secondary CTA: "Explore Free Cases →" (routes to foundations)
+- Role paths: Product Analyst · Growth Analyst · DA moving to product · Senior Analyst
+- Social proof: "37 beta sign-ins in the first 48 hours of informal testing."
+- "What this tests" section listing 5 areas (same as Benchmark intro)
+No redesign — update copy and CTA routing in existing Home.jsx structure.
+
+**P1 — SQL Lab UX** (V5.15.0)
+All items confirmed from beta feedback. Files: `src/pages/SqlLabPage.jsx` (primary), possibly `src/data/sqlLabProblems.js` for tag data.
+- Question numbering: show problem index (e.g. "Problem 12 of 50") in the problem card header
+- Concept tags: already moved behind first-hint reveal (V5.5.0) — verify still working, consider showing 1 tag always visible as a category label
+- Compact schema display: current schema panel is verbose; show table name + column list in a scannable grid, collapse by default with expand toggle
+- Multi-select filters: difficulty (Easy/Medium/Hard/Master/Forensic) + company + concept tag — currently single-select pills; needs checkbox-style or multi-select chips
+- Step-wise hints: if sqlLabProblems.js supports `hints: []` array per problem, render them progressively (Hint 1 → Hint 2 → etc.) instead of all at once
+Note: SqlLabPage.jsx is large (~2000+ lines) — Grep before Read, use subagent if context is tight.
+
+**P2 — Pricing ₹ tiers** (V5.16.0)
+Plans.jsx: ₹799/month, ₹1,999/quarter, ₹5,999/year, ₹2,499 sprint.
+Remove lifetime language. Add "would you pay?" feedback field.
+
+---
+
+**Deferred (non-blocking)**
+
+**UniverseView defects** (Audit #150 — V5.12.0)
+Label overlaps, 0%-stub missing, dasharray mismatch. Behind a toggle — not user-journey blocking.
+Fix in a low-cost session before broader public launch.
+
+**Guest demo path**
 One real practice case fully playable without sign-in — not Foundations theory. Recommended entry: Metrics or RCA room, one `isFree: true` case exposed to guests end-to-end (browser card visible + runner accessible + debrief fully shown). After debrief, GateOverlay fires: "Sign in to save this and keep practicing." Current flow (guest → FoundationHub → theory) never lets guests feel the product. This is the top-of-funnel conversion hole. Implementation: remove `requireUser()` guard from one open handler per room (or add a `guestDemo: true` flag on one case per room and allow it through). Audit #147 (ForwardPointerCard) can be fixed in the same session.
 
-**2. New signed-in user empty state**
+**4. New signed-in user empty state**
 Progress is the signed-in home — correct for returning users, broken for day-1. On first visit (no cases completed), Progress must show: a "Start here →" card pointing to one specific room (Metrics or RCA by default), a brief 2-line explainer of what PAL is, and a clear next action. Do not show an empty heatmap and zero-count room cards. This is an onboarding problem hiding as a UI problem.
 
-**3. Plans.jsx copy pass**
+**5. Plans.jsx copy pass**
 Current tier descriptions are feature-listed, not outcome-framed. Every row and tier description needs one revision pass before launch. Rule is in DECISIONS.md: outcome-framed copy only. No code changes — copy-only edit in Plans.jsx.
 
 **P1 — Shipped V5.1.0**

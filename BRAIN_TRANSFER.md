@@ -1,6 +1,6 @@
-# Brain Transfer — V4.69.0
+# Brain Transfer — V5.13.0
 
-**Version:** V5.11.1 | **Build:** ✓ (2.07s, 0 errors) | **Date:** 2026-06-06 | **PM Audit:** #149 complete
+**Version:** V5.13.0 | **Build:** ✓ (1.81s, 0 errors) | **Date:** 2026-06-07 | **PM Audit:** #149 complete
 
 ---
 
@@ -9,7 +9,7 @@
 **Read this file only.** CLAUDE.md is already in your system prompt. Read NEXT.md only if the next action below is unclear. Never open a source file without grepping first.
 
 ```
-1. Connect repo: /Users/ASUS/Documents/GitHub/experimentation-systems-lab
+1. Connect repo: /Users/ASUS/Documents/GitHub/product-analytics-lab
 2. Run: rm -f .git/index.lock .git/HEAD.lock && git status && npm run build
 3. Read this file → read NEXT.md item 1 → start coding
 ```
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.13.0** — Product Analytics Judgment Benchmark shipped. New file: `src/data/benchmarkCases.js` — 5 mini-cases (metric design, A/B test design, A/B readout/ship-no-ship, metrics-drop RCA, SQL reasoning), each with prompt, 4 options, correctIdx, rubric explanation, nextRoom, and RECOMMENDED_PATH + AREA_META exports. New file: `src/pages/BenchmarkPage.jsx` — 3-screen flow (IntroScreen → QuestionScreen → ResultScreen), no auth required, localStorage persistence at `pal-benchmark-v1`, 4 PostHog events (benchmark_start, benchmark_case_answered, benchmark_complete, benchmark_cta_click). Result screen shows score ring (X of 5), per-area correct/missed rows, recommended next room card (based on first wrong area), sign-in CTA for guests, explore CTA for signed-in users. App.jsx: lazy import + `{page === 'benchmark'}` routing block, `onSignIn={() => setShowAuth(true)}`. Sidebar.jsx: "Judgment Benchmark" added as first item in DRILLS group (icon: target). Build ✓ 1.81s.
 
 **V5.11.1** — Universe View animation. index.css: added `palArmDraw` keyframe (stroke-dashoffset 160→0, 0.55s ease-out) and `palNodeAppear` keyframe (opacity 0→1, 0.3s); both covered under `prefers-reduced-motion`. UniverseView.jsx: progress lines get `strokeDasharray=160` + `palArmDraw` with `animationDelay = idx * 70ms`; inner + outer nodes get `palNodeAppear` delayed 300–400ms after their arm. Arms draw clockwise one by one, nodes fade in after lines reach them. Build ✓ 2.07s.
 
@@ -152,7 +154,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.4.0 complete. Meesho SBA track live. Push and practice. Confirm `VITE_POSTHOG_KEY` in Vercel. Distribute to 3–5 testers per PRIVATE_TEST.md. V6 sprint (Judgment World routing) starts after private test feedback. Confirm VITE_POSTHOG_KEY is live in Vercel, distribute to 3–5 testers per PRIVATE_TEST.md. Watch gate_shown → gate_cta_clicked → user_signed_in funnel in PostHog from day 1. V6 sprint (Judgment World routing layer) starts after private test feedback is collected.
+## Next action — V5.13.0 shipped. Benchmark is live. Push from Mac terminal. Next: V5.14.0 Homepage repositioning (headline + "Take the Judgment Benchmark" as primary CTA). Then V5.15.0 SQL Lab UX, V5.16.0 pricing ₹ tiers. Confirm `VITE_POSTHOG_KEY` in Vercel to capture benchmark_start/complete funnel from day 1.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 
@@ -199,12 +201,12 @@ Runners that render it: BIRunner, GrowthRunner, InstrumentationRunner, Behaviora
 
 **Standard:**
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.X.X: [description]" && git push origin main
+cd "/Users/ASUS/Documents/GitHub/product-analytics-lab" && rm -f .git/index.lock .git/HEAD.lock && git add -A && git commit -m "V4.X.X: [description]" && git push origin main
 ```
 
 **If git is stuck (lock files):**
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab" && rm -f .git/index.lock .git/HEAD.lock .git/refs/heads/main.lock && git add -A && git commit -m "V4.X.X: [description]" && git push origin main
+cd "/Users/ASUS/Documents/GitHub/product-analytics-lab" && rm -f .git/index.lock .git/HEAD.lock .git/refs/heads/main.lock && git add -A && git commit -m "V4.X.X: [description]" && git push origin main
 ```
 
 **If push is rejected:**

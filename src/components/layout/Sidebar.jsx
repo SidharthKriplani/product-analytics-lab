@@ -44,8 +44,9 @@ const FLAT_GROUPS = [
   {
     label: 'DRILLS',
     items: [
-      { id: 'challenges', label: 'Challenges',     icon: 'zap' },
-      { id: 'simulator',  label: 'Mock Interview', icon: 'mic' },
+      { id: 'benchmark',  label: 'Judgment Benchmark', icon: 'target' },
+      { id: 'challenges', label: 'Challenges',          icon: 'zap' },
+      { id: 'simulator',  label: 'Mock Interview',      icon: 'mic' },
     ],
   },
   {

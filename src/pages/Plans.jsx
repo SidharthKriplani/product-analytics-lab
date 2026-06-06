@@ -228,6 +228,51 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
         </div>
       </div>
 
+      {/* ── Subscription pricing (coming soon) ── */}
+      <div style={{ marginBottom: '3rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--teal)', marginBottom: '0.4rem' }}>
+            Subscription pricing
+          </div>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
+            Paid plans are coming. DM the founder or join the beta group to get early access pricing.
+          </p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '1rem' }}>
+          {[
+            { label: 'Monthly',          price: '₹799',  period: '/month',   note: 'Best for active interview prep'    },
+            { label: 'Quarterly',        price: '₹1,999', period: '/quarter', note: 'Save ~17% vs monthly'             },
+            { label: 'Annual',           price: '₹5,999', period: '/year',    note: 'Best value — save ~37%'           },
+            { label: 'Interview Sprint', price: '₹2,499', period: '14 days',  note: 'One focused interview sprint'     },
+          ].map(tier => (
+            <div key={tier.label} style={{
+              border: '1px solid var(--border)', borderRadius: '12px',
+              padding: '1.25rem', background: 'var(--surface)',
+              display: 'flex', flexDirection: 'column', gap: '0.35rem',
+            }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+                {tier.label}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem' }}>
+                <span style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', letterSpacing: '-0.03em' }}>{tier.price}</span>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>{tier.period}</span>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>{tier.note}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
+          <a
+            href="https://wa.me/917838438784"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: '0.82rem', color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}
+          >
+            DM to get early access →
+          </a>
+        </div>
+      </div>
+
       {/* ── Comparison table ── */}
       <div style={{
         border: '1px solid var(--border)', borderRadius: '14px',

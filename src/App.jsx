@@ -107,6 +107,7 @@ const ExpFoundationsBrowser     = lazy(() => import('./pages/ExpFoundationsBrows
 const ExpFoundationsRunner      = lazy(() => import('./components/expFoundations/ExpFoundationsRunner.jsx').then(m => ({ default: m.ExpFoundationsRunner })));
 const AuthModal                 = lazy(() => import('./components/auth/AuthModal.jsx').then(m => ({ default: m.AuthModal })));
 const SqlLabPage                = lazy(() => import('./pages/SqlLabPage.jsx').then(m => ({ default: m.SqlLabPage })));
+const BenchmarkPage             = lazy(() => import('./pages/BenchmarkPage.jsx').then(m => ({ default: m.BenchmarkPage })));
 
 function getInitialTheme() {
   try {
@@ -1336,6 +1337,17 @@ export default function App() {
                   setPage(targetPage);
                 }
               }}
+            />
+          </Suspense>
+        )}
+
+        {/* ── Benchmark ── */}
+        {page === 'benchmark' && (
+          <Suspense fallback={null}>
+            <BenchmarkPage
+              user={user}
+              onNavigate={navigate}
+              onSignIn={() => setShowAuth(true)}
             />
           </Suspense>
         )}

@@ -102,7 +102,7 @@ export function Home({ onNavigate, onShowAuth }) {
           className="pal-landing-el"
           style={{
             animationDelay: '120ms',
-            fontSize: 'clamp(2rem, 5vw, 3rem)',
+            fontSize: 'clamp(1.9rem, 5vw, 2.85rem)',
             fontWeight: 900,
             lineHeight: 1.12,
             letterSpacing: '-0.04em',
@@ -110,48 +110,64 @@ export function Home({ onNavigate, onShowAuth }) {
             margin: '0 0 0.3rem',
           }}
         >
-          You know the framework.
+          Practice product analytics
         </h1>
         <h1
           className="pal-landing-el"
           style={{
-            animationDelay: '260ms',
-            fontSize: 'clamp(2rem, 5vw, 3rem)',
+            animationDelay: '200ms',
+            fontSize: 'clamp(1.9rem, 5vw, 2.85rem)',
             fontWeight: 900,
             lineHeight: 1.12,
             letterSpacing: '-0.04em',
             color: 'var(--accent)',
-            margin: '0 0 1.75rem',
+            margin: '0 0 1.5rem',
           }}
         >
-          Can you diagnose the drop?
+          interviews beyond SQL.
         </h1>
 
         {/* Subtext */}
         <p
           className="pal-landing-el"
           style={{
-            animationDelay: '420ms',
-            fontSize: '1rem',
+            animationDelay: '340ms',
+            fontSize: '0.975rem',
             lineHeight: 1.7,
             color: 'var(--text-muted)',
-            margin: '0 0 2.5rem',
+            margin: '0 0 1.25rem',
             maxWidth: 440,
             marginLeft: 'auto',
             marginRight: 'auto',
           }}
         >
-          The hands-on prep platform for product analysts and PMs.
-          17 rooms. 140+ cases. Every skill that matters in interviews — tested on judgment, not recall.
+          Train on ambiguous metrics, A/B tests, RCA, instrumentation gaps, and ship/no-ship decisions —
+          with structured cases and rubric-based feedback.
         </p>
+
+        {/* Role chips */}
+        <div
+          className="pal-landing-el"
+          style={{ animationDelay: '420ms', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.4rem', marginBottom: '2rem' }}
+        >
+          {['Product Analyst', 'Growth Analyst', 'DA → Product', 'Senior Analyst'].map(role => (
+            <span key={role} style={{
+              fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)',
+              background: 'var(--surface)', border: '1px solid var(--border)',
+              borderRadius: '999px', padding: '0.2rem 0.7rem',
+            }}>
+              {role}
+            </span>
+          ))}
+        </div>
 
         {/* CTAs */}
         <div
           className="pal-landing-el"
-          style={{ animationDelay: '580ms', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}
+          style={{ animationDelay: '540ms', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}
         >
           <button
-            onClick={() => onShowAuth && onShowAuth()}
+            onClick={() => onNavigate && onNavigate('benchmark')}
             className="pal-landing-glow"
             style={{
               padding: '0.85rem 2.25rem',
@@ -169,11 +185,11 @@ export function Home({ onNavigate, onShowAuth }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'var(--accent-hover, #4f46e5)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'var(--accent)'; }}
           >
-            Sign in to analyze →
+            Take the Judgment Benchmark →
           </button>
 
           <button
-            onClick={() => onNavigate && onNavigate('foundations')}
+            onClick={() => onShowAuth && onShowAuth()}
             style={{
               padding: '0.6rem 1.5rem',
               fontSize: '0.875rem',
@@ -189,16 +205,17 @@ export function Home({ onNavigate, onShowAuth }) {
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
           >
-            Explore without signing in
+            Sign in to explore free cases
           </button>
         </div>
 
-        {/* Footer note */}
+        {/* Social proof + footer note */}
         <p
           className="pal-landing-el"
-          style={{ animationDelay: '720ms', marginTop: '1.5rem', fontSize: '0.78rem', color: 'var(--text-dim, var(--text-muted))', opacity: 0.7 }}
+          style={{ animationDelay: '680ms', marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--text-dim, var(--text-muted))', opacity: 0.65, lineHeight: 1.6 }}
         >
-          Free to start · No account required for first 3 cases per room
+          37 beta sign-ins in the first 48 hours of informal testing.
+          <br />No account needed for the benchmark.
         </p>
 
       </div>
