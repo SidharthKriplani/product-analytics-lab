@@ -11,6 +11,7 @@ const ROOM_SUBGROUPS = [
       { id: 'design',        label: 'A/B Design' },
       { id: 'browser',       label: 'A/B Review' },
       { id: 'spot-the-flaw', label: 'Spot the Flaw' },
+      { id: 'ab-interpreter', label: 'Stats Calc' },
     ],
   },
   {
@@ -44,24 +45,22 @@ const FLAT_GROUPS = [
     label: 'DRILLS',
     items: [
       { id: 'challenges', label: 'Challenges',     icon: 'zap' },
-      { id: 'take-home',  label: 'Take-Home',      icon: 'file-text' },
       { id: 'simulator',  label: 'Mock Interview', icon: 'mic' },
     ],
   },
   {
     label: 'LEARN',
     items: [
-      { id: 'blog',         label: 'Deep Dives',       icon: 'book-open' },
-      { id: 'playbook',     label: 'Frameworks',       icon: 'layout' },
-      { id: 'interview-qa', label: 'Interview Q&A',    icon: 'message-square' },
-      { id: 'failures',     label: 'Failure Patterns', icon: 'alert-triangle' },
+      { id: 'blog',         label: 'Deep Dives',        icon: 'book-open' },
+      { id: 'playbook',     label: 'Reference Cards',   icon: 'layout' },
+      { id: 'interview-qa', label: 'Interview Q&A',     icon: 'message-square' },
+      { id: 'failures',     label: 'Analytics Failures', icon: 'alert-triangle' },
     ],
   },
   {
     label: 'TOOLS',
     items: [
       { id: 'trainer',        label: 'MCQ Quiz',         icon: 'target' },
-      { id: 'ab-interpreter', label: 'Stats Calc',       icon: 'calculator' },
       { id: 'company-tracks', label: 'Company Tracks',   icon: 'building-2' },
       { id: 'defense-doc',    label: 'Defense Strategy', icon: 'shield' },
       { id: 'bookmarks',      label: 'Saved',            icon: 'bookmark' },

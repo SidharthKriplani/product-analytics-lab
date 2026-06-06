@@ -70,13 +70,13 @@ export function ChallengesBrowser({ onSelectChallenge, unlocked }) {
               fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
               letterSpacing: '0.1em', color: 'var(--yellow)', marginBottom: '0.15rem',
             }}>
-              Cross-Room Challenges
+              Cross-Room
             </div>
             <h1 style={{
               fontSize: '1.6rem', fontWeight: 700, color: 'var(--text)',
               margin: 0, letterSpacing: '-0.02em',
             }}>
-              Cross-Room Challenges
+              Challenges
             </h1>
           </div>
         </div>

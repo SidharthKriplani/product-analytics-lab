@@ -1942,7 +1942,7 @@ export function BlogBrowser({ onNavigate }) {
           <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name='file-text' size={18} color='var(--accent)' />
           </span>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>deep dives</h1>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>Deep Dives</h1>
         </div>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: '580px', margin: '0 0 0.9rem' }}>
           Interviewers test concepts indirectly — they give you a scenario and watch whether the right mental model surfaces on its own. These deep dives are written to build that instinct: each one targets a specific pattern, shows where candidates get it wrong, and links directly to the practice cases where it shows up live. Read, then practice — the sequence matters.

@@ -248,6 +248,23 @@ export function InterviewQABrowser({ unlocked, onBack }) {
         }}
       />
 
+      {/* Practice path nudge */}
+      <div style={{
+        background: 'var(--surface)', border: '1px solid var(--border)',
+        borderLeft: '3px solid var(--purple)', borderRadius: 'var(--radius)',
+        padding: '0.75rem 1rem', marginBottom: '1.25rem',
+        display: 'flex', alignItems: 'center', gap: '1rem',
+      }}>
+        <div>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--purple)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.2rem' }}>
+            Practice path — step 2 of 3
+          </div>
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+            Use <strong style={{ color: 'var(--text)' }}>MCQ Quiz</strong> first to build fluency, then study model answers here, then test yourself under real conditions in <strong style={{ color: 'var(--text)' }}>Mock Interview</strong>.
+          </div>
+        </div>
+      </div>
+
       {/* Questions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
         {displayed.map(qa => (

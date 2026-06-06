@@ -235,6 +235,23 @@ function BrowseScreen({ onStartQuiz, onPracticeOne }) {
         )}
       </div>
 
+      {/* Practice path nudge */}
+      <div style={{
+        background: 'var(--surface)', border: '1px solid var(--border)',
+        borderLeft: '3px solid var(--green)', borderRadius: 'var(--radius)',
+        padding: '0.75rem 1rem', marginBottom: '1.5rem',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+      }}>
+        <div>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.2rem' }}>
+            Practice path — step 1 of 3
+          </div>
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+            Build concept fluency here, then see model answers in <strong style={{ color: 'var(--text)' }}>Interview Q&A</strong>, then simulate under pressure in <strong style={{ color: 'var(--text)' }}>Mock Interview</strong>.
+          </div>
+        </div>
+      </div>
+
       {/* Past sessions */}
       {pastScores.length > 0 && (
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', marginBottom: '1rem' }}>

@@ -44,6 +44,17 @@ Same pill-proliferation problem as Interview Q&A. Three rows of pills (Category,
 ### Metrics Foundations — intermittent navigation error [V5.4 tester feedback]
 Tester reported: "sometimes showed error, sometimes the page opens" when navigating from Metrics browser → Metrics Foundations. Likely a lazy-load race condition or progress key mismatch. Needs repro: next time it occurs, note the exact navigation path and any console errors. Do not fix blind — repro first.
 
+### Take-Home — proper format decision required [P2, V5.10.0 IA audit]
+Current state: Take-Home is a case runner with a "take-home" label. It overpromises — real take-home prep requires multi-hour independent work, a data file/problem statement, written output, and a self-evaluation rubric. The section is now hidden from nav (V5.10.0). Before rebuilding, decide: what does a PAL take-home simulation actually look like? Likely: realistic problem statement PDF/data, 2-3 hour independent window, structured written output section, rubric self-check. That's a full UX sprint. Do not rebuild until the format is clearly defined. Gate: product design decision first.
+
+### Navigation / content naming — Playbook vs Deep Dives vs Reference Cards [P2, V5.10.0 IA audit]
+Three content sections share overlapping territory and their names haven't been reconciled:
+- Deep Dives (blog): long-form conceptual articles, read then practice
+- Reference Cards (playbook): frameworks, mental models, company Q&A, PM strategy cards
+- The Playbook label still appears in some internal references and article links
+
+Decision needed: Are Deep Dives and Reference Cards genuinely distinct content types, or do they belong under one umbrella? If distinct, the difference needs to be communicated clearly on each page. If they should merge, pick one name and one structure. This is a product decision before it's a code decision. Do not rename further without resolving the underlying content architecture question.
+
 ### Company Tracks — P1 detail page upgrade [PM audit V5.7.0]
 **P0 shipped:** case titles, article titles, sidebar rename, "Cases by Room" → "Practice Cases". P1 items below — gate on seeing whether users engage with the track detail page at all (PostHog).
 
