@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.7.0 | **Build:** ✓ (2.23s, 0 errors) | **Date:** 2026-06-06
+**Version:** V5.8.0 | **Build:** ✓ (2.10s, 0 errors) | **Date:** 2026-06-06
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.8.0** — MCQ Quiz + Interview Q&A filter revamp. InterviewQABrowser.jsx: removed 9 category pills + 4 difficulty pills; replaced with two styled `<select>` dropdowns (Category / Level) in a single filter row + "Clear filters" button + live count ("N of 26 questions"). Trainer.jsx: removed three all-caps labeled pill sections; Session Length stays as prominent pills; Category + Difficulty moved into collapsible "Filters ↓" toggle — collapsed state shows active filter chips with × dismiss buttons + Clear all; expanded state shows compact pills in a surface panel. Build ✓ 2.10s.
 
 **V5.7.0** — Company Tracks P0 audit fixes. caseIndex.js: added `caseTitleMap` export (flat id→title lookup built from all index arrays). companyTracks.js: added `articleTitleMap` export (17 slug→human-title entries for all playbook articles used across tracks). CompanyTracks.jsx: imported both maps; case rows now show `caseTitleMap[caseId] || caseId` instead of raw ID; article rows show `articleTitleMap[articleId] || articleId` instead of raw slug; "Navigate →" → "Practice →"; "Cases by Room" → "Practice Cases". Sidebar.jsx: "Companies" → "Company Tracks". P1/P2 items logged to IDEAS.md Tier 1. Build ✓ 2.23s.
 

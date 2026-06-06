@@ -204,47 +204,53 @@ export function InterviewQABrowser({ unlocked, onBack }) {
         </div>
       </div>
 
-      {/* Category filter */}
-      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-        {categories.map(cat => {
-          const active = catFilter === cat;
-          const cfg = cat !== 'All' ? (CAT_CONFIG[cat] || {}) : {};
-          return (
-            <button
-              key={cat}
-              onClick={() => setCatFilter(cat)}
-              style={{
-                background: active ? (cfg.bg || 'var(--surface-2)') : 'var(--surface)',
-                border: active ? '2px solid ' + (cfg.color || 'var(--border)') : '1px solid var(--border)',
-                borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.75rem',
-                fontSize: '0.78rem', fontWeight: active ? 700 : 500,
-                color: active ? (cfg.color || 'var(--text)') : 'var(--text-muted)', cursor: 'pointer',
-                transition: 'all 0.1s',
-              }}
-            >
-              {cat}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Difficulty filter */}
-      <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.5rem' }}>
-        {[['all', 'All levels'], ['analyst', 'Analyst'], ['senior', 'Senior'], ['staff', 'Staff']].map(([val, label]) => (
+      {/* Filter row */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <select
+          value={catFilter}
+          onChange={e => setCatFilter(e.target.value)}
+          style={{
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.75rem',
+            fontSize: '0.82rem', color: catFilter !== 'All' ? 'var(--text)' : 'var(--text-muted)',
+            cursor: 'pointer', fontWeight: catFilter !== 'All' ? 600 : 400,
+            outline: 'none', minWidth: '160px',
+          }}
+        >
+          {categories.map(cat => (
+            <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : cat}</option>
+          ))}
+        </select>
+        <select
+          value={diffFilter}
+          onChange={e => setDiffFilter(e.target.value)}
+          style={{
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.75rem',
+            fontSize: '0.82rem', color: diffFilter !== 'all' ? 'var(--text)' : 'var(--text-muted)',
+            cursor: 'pointer', fontWeight: diffFilter !== 'all' ? 600 : 400,
+            outline: 'none', minWidth: '130px',
+          }}
+        >
+          {[['all', 'All Levels'], ['analyst', 'Analyst'], ['senior', 'Senior'], ['staff', 'Staff']].map(([val, label]) => (
+            <option key={val} value={val}>{label}</option>
+          ))}
+        </select>
+        {(catFilter !== 'All' || diffFilter !== 'all') && (
           <button
-            key={val}
-            onClick={() => setDiffFilter(val)}
+            onClick={() => { setCatFilter('All'); setDiffFilter('all'); }}
             style={{
-              background: diffFilter === val ? 'var(--surface-2)' : 'var(--surface)',
-              border: diffFilter === val ? '2px solid var(--text-muted)' : '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)', padding: '0.25rem 0.65rem',
-              fontSize: '0.72rem', fontWeight: diffFilter === val ? 700 : 400,
-              color: diffFilter === val ? 'var(--text)' : 'var(--text-dim)', cursor: 'pointer',
+              background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+              padding: '0.4rem 0.65rem', fontSize: '0.75rem', color: 'var(--text-muted)',
+              cursor: 'pointer',
             }}
           >
-            {label}
+            Clear filters
           </button>
-        ))}
+        )}
+        <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginLeft: 'auto' }}>
+          {displayed.length} of {interviewQA.length} questions
+        </span>
       </div>
 
       {/* Questions */}

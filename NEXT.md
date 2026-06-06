@@ -6,7 +6,7 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ---
 
-## Status — V5.7.0: Company Tracks P0 audit complete. Case titles, article titles, sidebar rename all shipped. P1/P2 logged.
+## Status — V5.8.0: MCQ Quiz + Interview Q&A filter revamp shipped. Session complete.
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 

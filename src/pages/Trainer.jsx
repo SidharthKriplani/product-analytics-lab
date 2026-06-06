@@ -82,6 +82,7 @@ function SetupScreen({ onStart }) {
   const [difficulty, setDifficulty] = useState('all');
   const [length, setLength] = useState(10);
   const [pastScores] = useState(() => loadScores());
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   function toggleCategory(cat) {
     if (cat === 'all') {
@@ -138,60 +139,101 @@ function SetupScreen({ onStart }) {
         </p>
       </div>
 
-      {/* Category filter */}
+      {/* Session length — primary config */}
       <div style={{ marginBottom: '1.25rem' }}>
-        <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Category
-        </label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {['all', ...CATEGORIES].map((cat) => {
-            const active = cat === 'all'
-              ? selectedCategories.includes('all')
-              : selectedCategories.includes(cat) && !selectedCategories.includes('all') || (!selectedCategories.includes('all') && selectedCategories.includes(cat));
-            const isActive = selectedCategories.includes(cat);
-            return (
-              <button key={cat} style={isActive ? pillActive : pillBase} onClick={() => toggleCategory(cat)}>
-                {categoryLabel[cat]}
-              </button>
-            );
-          })}
+        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+          Session length
         </div>
-      </div>
-
-      {/* Difficulty filter */}
-      <div style={{ marginBottom: '1.25rem' }}>
-        <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Difficulty
-        </label>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {DIFFICULTIES.map((d) => (
-            <button
-              key={d}
-              style={difficulty === d ? pillActive : pillBase}
-              onClick={() => setDifficulty(d)}
-            >
-              {difficultyLabel[d]}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Session length */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Session Length
-        </label>
         <div style={{ display: 'flex', gap: 8 }}>
           {LENGTHS.map((l) => (
-            <button
-              key={l}
-              style={length === l ? pillActive : pillBase}
-              onClick={() => setLength(l)}
-            >
-              {l === 'all' ? 'All' : `${l} Qs`}
+            <button key={l} style={length === l ? pillActive : pillBase} onClick={() => setLength(l)}>
+              {l === 'all' ? 'All' : l + ' Qs'}
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Category + Difficulty — collapsible filters */}
+      <div style={{ marginBottom: '1.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: filtersOpen ? '0.875rem' : 0 }}>
+          <button
+            onClick={() => setFiltersOpen(o => !o)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.4rem',
+              background: 'var(--surface)', border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.75rem',
+              fontSize: '0.78rem', fontWeight: 500, color: 'var(--text-muted)',
+              cursor: 'pointer',
+            }}
+          >
+            Filters {filtersOpen ? '↑' : '↓'}
+          </button>
+          {/* Active filter chips */}
+          {!selectedCategories.includes('all') && selectedCategories.map(cat => (
+            <span key={cat} style={{
+              fontSize: '0.72rem', fontWeight: 600, color: 'var(--green)',
+              background: 'var(--green-bg)', border: '1px solid var(--green-border)',
+              borderRadius: '999px', padding: '2px 8px', display: 'flex', alignItems: 'center', gap: '0.3rem',
+            }}>
+              {categoryLabel[cat]}
+              <span onClick={() => toggleCategory(cat)} style={{ cursor: 'pointer', opacity: 0.7 }}>×</span>
+            </span>
+          ))}
+          {difficulty !== 'all' && (
+            <span style={{
+              fontSize: '0.72rem', fontWeight: 600, color: 'var(--green)',
+              background: 'var(--green-bg)', border: '1px solid var(--green-border)',
+              borderRadius: '999px', padding: '2px 8px', display: 'flex', alignItems: 'center', gap: '0.3rem',
+            }}>
+              {difficultyLabel[difficulty]}
+              <span onClick={() => setDifficulty('all')} style={{ cursor: 'pointer', opacity: 0.7 }}>×</span>
+            </span>
+          )}
+          {(!selectedCategories.includes('all') || difficulty !== 'all') && (
+            <button
+              onClick={() => { setSelectedCategories(['all']); setDifficulty('all'); }}
+              style={{ background: 'none', border: 'none', fontSize: '0.72rem', color: 'var(--text-dim)', cursor: 'pointer', padding: 0 }}
+            >
+              Clear all
+            </button>
+          )}
+        </div>
+
+        {filtersOpen && (
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)', padding: '1rem 1.25rem',
+            display: 'flex', flexDirection: 'column', gap: '1rem',
+          }}>
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                Category
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {['all', ...CATEGORIES].map((cat) => {
+                  const isActive = selectedCategories.includes(cat);
+                  return (
+                    <button key={cat} style={{ ...isActive ? pillActive : pillBase, padding: '4px 10px', fontSize: '0.75rem' }} onClick={() => toggleCategory(cat)}>
+                      {categoryLabel[cat]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                Difficulty
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {DIFFICULTIES.map((d) => (
+                  <button key={d} style={{ ...difficulty === d ? pillActive : pillBase, padding: '4px 10px', fontSize: '0.75rem' }} onClick={() => setDifficulty(d)}>
+                    {difficultyLabel[d]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats row */}
