@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.6.0 | **Build:** ✓ (1.79s, 0 errors) | **Date:** 2026-06-06
+**Version:** V5.7.0 | **Build:** ✓ (2.23s, 0 errors) | **Date:** 2026-06-06
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.7.0** — Company Tracks P0 audit fixes. caseIndex.js: added `caseTitleMap` export (flat id→title lookup built from all index arrays). companyTracks.js: added `articleTitleMap` export (17 slug→human-title entries for all playbook articles used across tracks). CompanyTracks.jsx: imported both maps; case rows now show `caseTitleMap[caseId] || caseId` instead of raw ID; article rows show `articleTitleMap[articleId] || articleId` instead of raw slug; "Navigate →" → "Practice →"; "Cases by Room" → "Practice Cases". Sidebar.jsx: "Companies" → "Company Tracks". P1/P2 items logged to IDEAS.md Tier 1. Build ✓ 2.23s.
 
 **V5.6.0** — Three Meesho track bug fixes. (1) caseIndex.js: added RCA25/26/27/28, C23/24/25, s26-ctr-margin-trap/s27-cvr-return-trap/s28-srm-segment-harm — all isFree:false. Root cause: openRCACase/openBusinessCase/openScenario all silently returned on `if (!c) return` because new cases were never added to the index. (2) CompanyTracks.jsx: selectedTrack+view now persisted to sessionStorage on every change and restored on mount — navigating to a case and pressing back restores the track detail exactly. (3) MentalModelCard redesigned: collapsible (open by default), sectioned layout with dividers, numbered circle badges for MECE drivers, teal left-border quotes for non-negotiable lines. Build ✓ 1.79s.
 

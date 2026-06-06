@@ -6,7 +6,7 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ---
 
-## Status — V5.6.0: Meesho track fully functional. Navigation fixed, back-button state restored, mental model card redesigned.
+## Status — V5.7.0: Company Tracks P0 audit complete. Case titles, article titles, sidebar rename all shipped. P1/P2 logged.
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 

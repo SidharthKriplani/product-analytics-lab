@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { GateOverlay } from '../components/shared/GateOverlay.jsx';
-import { companyTracks } from '../data/companyTracks.js';
+import { companyTracks, articleTitleMap } from '../data/companyTracks.js';
+import { caseTitleMap } from '../data/caseIndex.js';
 
 const ROOM_LABELS = {
   'stat-foundations': 'Foundations',
@@ -563,9 +564,9 @@ function TrackDetail({ track, onBack, onNavigate }) {
       {/* Mental model */}
       {track.mentalModel && <MentalModelCard model={track.mentalModel} />}
 
-      {/* Cases by Room */}
+      {/* Practice Cases */}
       <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.75rem' }}>
-        Cases by Room
+        Practice Cases
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
         {track.caseRefs.map(ref => (
@@ -612,12 +613,12 @@ function TrackDetail({ track, onBack, onNavigate }) {
                     <span style={{
                       fontSize: '0.85rem', fontWeight: 500,
                       color: done ? 'var(--text-muted)' : 'var(--text)',
-                      flex: 1,
+                      flex: 1, lineHeight: 1.4,
                     }}>
-                      {caseId}
+                      {caseTitleMap[caseId] || caseId}
                     </span>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', flexShrink: 0 }}>
-                      Navigate →
+                      Practice →
                     </span>
                   </button>
                 );
@@ -644,6 +645,7 @@ function TrackDetail({ track, onBack, onNavigate }) {
           }}>
             {track.playbookArticles.map((articleId, idx) => {
               const isLast = idx === track.playbookArticles.length - 1;
+              const articleTitle = articleTitleMap[articleId] || articleId;
               return (
                 <button
                   key={articleId}
@@ -657,8 +659,8 @@ function TrackDetail({ track, onBack, onNavigate }) {
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
                 >
-                  <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text)', flex: 1 }}>
-                    {articleId}
+                  <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text)', flex: 1, lineHeight: 1.4 }}>
+                    {articleTitle}
                   </span>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', flexShrink: 0 }}>
                     Read →

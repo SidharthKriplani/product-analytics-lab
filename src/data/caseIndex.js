@@ -2,6 +2,7 @@
 // Slim index arrays for App.jsx routing — only id, isFree, title per entry.
 // Full case data is imported directly by browser/runner components.
 // Single quotes only. No template literals.
+// caseTitleMap: flat id→title lookup used by CompanyTracks to show human names.
 
 export const scenarioIndex = [
   { id: 's01-checkout-trap', isFree: true,  title: 'The Checkout Trap' },
@@ -409,3 +410,17 @@ export const expFoundationIndex = [
   { id: 'ef06', isFree: false, title: 'Novelty Effects and Long-Run Validity' },
   { id: 'ef07', isFree: false, title: 'Multiple Testing and Experiment Guardrails' },
 ];
+
+// Flat id→title lookup for CompanyTracks case display.
+// Built from all index arrays so CompanyTracks.jsx can show human case names
+// instead of raw IDs (GA01, RCA01, stat05-multiple-testing, etc.).
+var _allCases = [].concat(
+  scenarioIndex, designScenarioIndex, statsModuleIndex, metricCaseIndex,
+  rcaCaseIndex, businessCaseIndex, productDesignIndex, codeModuleIndex,
+  prioritizationIndex, behavioralIndex, estimationIndex, challengesIndex,
+  biCaseIndex, stfCaseIndex, takehomeCaseIndex, instrumentationIndex,
+  growthAnalyticsIndex, statsFoundationsIndex, metricsFoundationIndex,
+  rcaFoundationIndex, expFoundationIndex
+);
+export var caseTitleMap = {};
+_allCases.forEach(function(c) { if (c && c.id && c.title) caseTitleMap[c.id] = c.title; });

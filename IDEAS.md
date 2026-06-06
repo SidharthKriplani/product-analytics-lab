@@ -44,6 +44,25 @@ Same pill-proliferation problem as Interview Q&A. Three rows of pills (Category,
 ### Metrics Foundations — intermittent navigation error [V5.4 tester feedback]
 Tester reported: "sometimes showed error, sometimes the page opens" when navigating from Metrics browser → Metrics Foundations. Likely a lazy-load race condition or progress key mismatch. Needs repro: next time it occurs, note the exact navigation path and any console errors. Do not fix blind — repro first.
 
+### Company Tracks — P1 detail page upgrade [PM audit V5.7.0]
+**P0 shipped:** case titles, article titles, sidebar rename, "Cases by Room" → "Practice Cases". P1 items below — gate on seeing whether users engage with the track detail page at all (PostHog).
+
+**P1a — Difficulty badge + estimated time per case row.** Each case row currently shows title + done/not done. Add difficulty chip (Analyst/Senior/Staff) from caseIndex and a rough time estimate (Analyst ~15 min, Senior ~20 min, Staff ~25 min). Makes the track feel curated, not just a list. Data change + minor row layout change in CompanyTracks.jsx. Effort: 1 session.
+
+**P1b — Topic-based grouping instead of PAL room grouping.** Currently cases group by PAL room (RCA, Stats, Metrics). Users prep by interview topic, not PAL taxonomy. Add a `topicGroup` field to each `caseRef` entry in companyTracks.js: 'Diagnosis & RCA' | 'Experiment Design & Readout' | 'Metrics & KPIs' | 'Business Trade-offs' | 'SQL'. Requires data re-tagging per track + component grouping change. Effort: 1 session.
+
+**P1c — Featured/start-here cases.** Mark 2–3 cases per track with `featured: true` in companyTracks.js data. Render them with a subtle accent border or "Start here" label. Removes decision paralysis for new users. Effort: 30 min.
+
+**P1d — Article descriptions.** Each playbook article currently shows only its title. Add a one-line description of why this article matters for THIS company's interview (e.g., for Meta: "Meta experiments at scale — SRM kills trust. Know this cold."). Add `playbookArticleNotes: { slug: 'note' }` per track in companyTracks.js. Effort: data authoring, 1 hour.
+
+### Company Tracks — P2 items [PM audit V5.7.0]
+These need user signal before building. Gate: PostHog WAU data + track completion rates.
+
+- **Personalized track recommendation** — suggest a company track based on practice history (which rooms user has completed most). Needs backend or localStorage heuristic.
+- **Company intelligence brief** — hiring bar, interview format, what interviewers focus on, culture signals. High-effort content work. Only worth it if tracks see real engagement.
+- **Progress analytics per track** — time spent, weak skill areas within a track, what to practice next. Needs event instrumentation first.
+- **Saved/pinned companies** — low priority; the track IS the saved path.
+
 ### SQL Lab — S-Grade Upgrade Pass [HIGHEST PRIORITY — IN PROGRESS]
 **Gate:** All 13 audit batches complete ✅. Expanded from original trap enrichment plan. Full rubric + execution plan in SQL_LAB_PLAN.md Section 11. Tracking artifact: SQL_UPGRADE_PASS.md.
 

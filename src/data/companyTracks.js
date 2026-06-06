@@ -220,3 +220,25 @@ export const companyTracks = [
 ];
 
 export const companyTracksById = Object.fromEntries(companyTracks.map(t => [t.id, t]));
+
+// Human-readable titles for Playbook article slugs used across tracks.
+// Shown in CompanyTracks track detail instead of raw slugs.
+export const articleTitleMap = {
+  'end-to-end-experiment': 'End-to-End Experiment: Hypothesis to Ship/Rollback Decision',
+  'srm-and-trust': 'SRM: When to Pause, Fix, and Rerun an Experiment',
+  'metric-sensitivity': 'Metric Sensitivity: Choosing What to Measure and Why It Moves',
+  'north-star-metric': 'Designing a North Star Metric',
+  'rice-prioritization': 'RICE: How to Prioritize When Everything Feels Urgent',
+  'product-sense-framework': 'Product Sense: How Analysts Think About Product Problems',
+  'cohort-retention-curves': 'Cohort Retention Curves: How to Read, Diagnose, and Act',
+  'funnel-analysis-framework': 'Funnel Analysis: Finding the Step That\'s Actually Broken',
+  'ltv-payback-period': 'LTV and Payback Period: The Economics Behind Acquisition Decisions',
+  'causal-inference-primer': 'Causal Inference: Moving Beyond Correlation',
+  'sql-window-functions': 'SQL Window Functions: RANK, LAG, and Running Totals',
+  'did-explainer': 'Difference-in-Differences: When You Can\'t Run an A/B Test',
+  'notification-driven-dau': 'Notification-Driven DAU: The Metric That Lies About Engagement',
+  'growth-accounting': 'Growth Accounting: The DAU Decomposition Every Analyst Must Know',
+  'organic-growth-quality': 'Organic vs Paid Growth: How to Diagnose Deteriorating Growth Quality',
+  'acquisition-quality': 'Acquisition Quality: Why CAC Alone Is a Dangerous Metric',
+  'dau-mau-stickiness': 'DAU/MAU Stickiness: What It Measures and When It Misleads',
+};
