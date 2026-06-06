@@ -2,11 +2,11 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V5.3.1 (2026-06-06)*
+*Last updated: V5.4.0 (2026-06-06)*
 
 ---
 
-## Status — V5.3.1: Judgment World architecture locked in DECISIONS.md. PAL beta-ready.
+## Status — V5.4.0: Meesho SBA track live. Company Tracks visual revamp complete. Beta-ready.
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 

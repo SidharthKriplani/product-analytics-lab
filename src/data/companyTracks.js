@@ -3,7 +3,7 @@ export const companyTracks = [
     id: 'meta-ds',
     company: 'Meta',
     role: 'Data Scientist',
-    emoji: '📘',
+    faviconDomain: 'meta.com',
     color: '#1877f2',
     description: 'Core skills: experiment design, metric trees, A/B testing at scale, integrity signals',
     caseRefs: [
@@ -20,7 +20,7 @@ export const companyTracks = [
     id: 'google-pm',
     company: 'Google',
     role: 'Product Manager',
-    emoji: '🔵',
+    faviconDomain: 'google.com',
     color: '#4285f4',
     description: 'Core skills: product design, estimation, metrics, prioritization, behavioral',
     caseRefs: [
@@ -37,7 +37,7 @@ export const companyTracks = [
     id: 'airbnb-ds',
     company: 'Airbnb',
     role: 'Data Scientist',
-    emoji: '🏠',
+    faviconDomain: 'airbnb.com',
     color: '#ff5a5f',
     description: 'Core skills: marketplace metrics, trust & safety, experimentation, cohort analysis',
     caseRefs: [
@@ -53,7 +53,7 @@ export const companyTracks = [
     id: 'amazon-ba',
     company: 'Amazon',
     role: 'Business Analyst / DS',
-    emoji: '📦',
+    faviconDomain: 'amazon.com',
     color: '#ff9900',
     description: 'Core skills: SQL mastery, metrics deep-dives, causal inference, leadership principles',
     caseRefs: [
@@ -69,7 +69,7 @@ export const companyTracks = [
     id: 'stripe-ds',
     company: 'Stripe',
     role: 'Data Scientist',
-    emoji: '💳',
+    faviconDomain: 'stripe.com',
     color: '#635bff',
     description: 'Core skills: payment metrics, fraud signals, experimentation, financial KPIs',
     caseRefs: [
@@ -85,7 +85,7 @@ export const companyTracks = [
     id: 'netflix-ds',
     company: 'Netflix',
     role: 'Data Scientist',
-    emoji: '🎬',
+    faviconDomain: 'netflix.com',
     color: '#e50914',
     description: 'Core skills: recommendation systems, long-horizon experiments, content metrics, retention',
     caseRefs: [
@@ -101,7 +101,7 @@ export const companyTracks = [
     id: 'uber-pm',
     company: 'Uber',
     role: 'Product Manager',
-    emoji: '🚗',
+    faviconDomain: 'uber.com',
     color: '#000000',
     description: 'Core skills: marketplace dynamics, supply/demand metrics, pricing, estimation, driver/rider balance',
     caseRefs: [
@@ -117,7 +117,7 @@ export const companyTracks = [
     id: 'spotify-ds',
     company: 'Spotify',
     role: 'Data Scientist',
-    emoji: '🎵',
+    faviconDomain: 'spotify.com',
     color: '#1db954',
     description: 'Core skills: audio engagement, podcast vs music metrics, personalization, user segmentation',
     caseRefs: [
@@ -128,6 +128,94 @@ export const companyTracks = [
     ],
     playbookArticles: ['dau-mau-stickiness', 'notification-driven-dau', 'growth-accounting'],
     estimatedHours: 6,
+  },
+  {
+    id: 'meesho-sba',
+    company: 'Meesho',
+    role: 'Senior Business Analyst',
+    faviconDomain: 'meesho.com',
+    color: '#d0006e',
+    description: 'Core skills: marketplace RCA, COD/RTO/contribution economics, A/B readouts, search/catalog metrics, multi-sided trade-offs',
+    comingSoonRoles: ['Product Manager', 'Product Analyst'],
+    mentalModel: {
+      northStar: 'Quality fulfilled transactions — delivered non-returned orders with positive/acceptable contribution. Not gross orders, GMV, CTR, or placed orders.',
+      lens: 'Every metric must be decomposed: placed vs delivered, volume vs rate, averages vs cohort. New users and Tier 2/3 always need a separate cut.',
+      drivers: [
+        'Demand/User — buyer intent, discovery, CVR, repeat behavior',
+        'Supply/Catalog/Seller — OOS, listing quality, seller health, catalog diversity',
+        'Transaction/Logistics/Economics — RTO, delivered rate, contribution, COD/payment cost',
+      ],
+      structure: 'Clarify (metric? denominator? window? scope?) → Define (placed vs delivered) → Hypothesis → 3 MECE drivers → Top 3 cuts → Validation → Decision + Guardrail',
+      nonNegotiables: [
+        'Separate placed orders from delivered quality orders.',
+        'Default is partial ramp on clean cohorts, not global launch.',
+        'If SRM fails, the experiment is not a clean causal readout.',
+        'COD is not bad by default; high-risk COD behavior is the issue.',
+        'The final recommendation depends on the broken driver, not the surface metric.',
+      ],
+    },
+    caseRefs: [
+      { room: 'rca', ids: ['RCA27', 'RCA26', 'RCA28', 'RCA25'] },
+      { room: 'cases', ids: ['C23', 'C24', 'C25'] },
+      { room: 'browser', ids: ['s26-ctr-margin-trap', 's27-cvr-return-trap', 's28-srm-segment-harm'] },
+      { room: 'stats', ids: ['stat04-srm-first', 'stat03-power-mde'] },
+      { room: 'metrics', ids: ['M01', 'M03'] },
+      { room: 'code', ids: ['code01-funnel-sql', 'code02-retention-sql'] },
+    ],
+    directorCards: [
+      {
+        prompt: 'PM wants to ship, data says RTO is up.',
+        expected: 'Translate RTO into contribution impact. Offer partial ramp or redesign.',
+        line: 'I\'d move the debate from opinion to net impact. If incremental RTO cost wipes out incremental orders, I would not ship globally.',
+      },
+      {
+        prompt: 'NMV is growing but profitability is worsening.',
+        expected: 'Discounts, RTO, logistics, payment cost, low-margin category mix.',
+        line: 'We may be buying growth. I\'d bridge NMV to contribution and identify whether growth is coming from high-cost cohorts.',
+      },
+      {
+        prompt: 'CEO asks for one metric.',
+        expected: 'Quality fulfilled transactions with contribution and repeat.',
+        line: 'I\'d choose quality fulfilled transactions with contribution and repeat — it captures demand, fulfillment success, trust, and economics in one number.',
+      },
+      {
+        prompt: 'Logistics cost is down but RTO is up.',
+        expected: 'Total contribution, not isolated logistics cost.',
+        line: 'Cheaper logistics is not better if delivery failure increases and net contribution falls.',
+      },
+      {
+        prompt: 'Tier 2/3 users reject prepaid despite discounts.',
+        expected: 'Trust, refund confidence, payment failure — not just price.',
+        line: 'This is likely a trust problem, not a discount problem. I\'d improve refund assurance, payment success, and delivery confidence first.',
+      },
+      {
+        prompt: 'Search ranking improves buyer CVR but hurts small sellers.',
+        expected: 'Seller diversity guardrail, partial rollout, blended objective.',
+        line: 'Short-term CVR cannot come at the cost of marketplace supply health. I\'d add seller exposure guardrails to the ranking objective.',
+      },
+      {
+        prompt: 'Search CTR is down but search-to-order CVR is up.',
+        expected: 'Could be good — fewer but better clicks.',
+        line: 'CTR down is not automatically bad if query satisfaction and order conversion improve. I\'d look at zero-result rate and reformulation rate to confirm.',
+      },
+      {
+        prompt: 'High-sales seller has a high defect rate.',
+        expected: 'Do not protect bad GMV.',
+        line: 'High sales do not justify burning buyer trust. I\'d suppress visibility, investigate defect cause, and penalize or support based on root cause.',
+      },
+      {
+        prompt: 'p-value is 0.08. PM says ship.',
+        expected: 'Not significant at agreed threshold. Use risk-based decision.',
+        line: 'I would not call this a clean win. If downside is low and directional signal is strong, cautious ramp with monitoring. Otherwise, continue the test or redesign.',
+      },
+      {
+        prompt: 'Feature increases AOV but drops purchase frequency.',
+        expected: 'Evaluate LTV and habit degradation.',
+        line: 'It depends on LTV. Higher AOV is good only if margin and repeat behavior do not deteriorate. I\'d model the long-run cohort before shipping.',
+      },
+    ],
+    playbookArticles: ['funnel-analysis-framework', 'north-star-metric', 'cohort-retention-curves'],
+    estimatedHours: 10,
   },
 ];
 

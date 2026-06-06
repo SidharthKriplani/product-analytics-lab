@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.3.1 | **Build:** ✓ (2.65s, 0 errors) | **Date:** 2026-06-06
+**Version:** V5.4.0 | **Build:** ✓ (2.25s, 0 errors) | **Date:** 2026-06-06
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.4.0** — Company Tracks visual revamp + Meesho SBA track. companyTracks.js: added `faviconDomain` to all 8 existing tracks; Meesho SBA entry with `mentalModel` (north star, lens, 3 MECE drivers, answer structure, non-negotiables), `caseRefs` (RCA27/26/28/25, C23/24/25, s26-ctr-margin-trap/s27-cvr-return-trap/s28-srm-segment-harm, stat04/stat03, M01/M03, code01/code02 — 16 cases across 6 rooms), `comingSoonRoles: [PM, PA]`, `directorCards` (10 Round 3 pressure cards with expected direction + closing line). CompanyTracks.jsx full rewrite: emoji avatars replaced with Google Favicon API images (44×44 rounded square, border); colored left border removed from all cards; CTA button changed to `var(--accent)` uniform; `faviconUrl()` helper; `CompanyAvatar` component; `MentalModelCard` (teal left border, sections: north star/lens/drivers/structure/non-negotiables); `DirectorPressureCards` (expandable — click prompt to reveal expected + closing line); `RoleTabs` (active pill + coming-soon pills); emoji removed from header/stats/articles; `cases`, `design`, `browser` added to ROOM_COLORS. Build ✓ 2.25s.
 
 **V5.3.1** — Unified Lab Architecture locked. DECISIONS.md updated: "Sibling labs linked passively" (V4.33.0) superseded by the Judgment World one-app spec — one URL, lab-layer routing, `?lab=` param, per-lab access codes (DAI2026/MSL2026/GAL2026/WORLD2026), room-aware `isUnlocked(room)`, shared Supabase, target sidebar structure, 5-step build sequence. No code changes — MD-only. Build unchanged at ✓ 2.65s.
 
@@ -130,7 +132,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.3.1 complete. Architecture locked. Ready for beta. Confirm VITE_POSTHOG_KEY is live in Vercel, distribute to 3–5 testers per PRIVATE_TEST.md. Watch gate_shown → gate_cta_clicked → user_signed_in funnel in PostHog from day 1. V6 sprint (Judgment World routing layer) starts after private test feedback is collected.
+## Next action — V5.4.0 complete. Meesho SBA track live. Push and practice. Confirm `VITE_POSTHOG_KEY` in Vercel. Distribute to 3–5 testers per PRIVATE_TEST.md. V6 sprint (Judgment World routing) starts after private test feedback. Confirm VITE_POSTHOG_KEY is live in Vercel, distribute to 3–5 testers per PRIVATE_TEST.md. Watch gate_shown → gate_cta_clicked → user_signed_in funnel in PostHog from day 1. V6 sprint (Judgment World routing layer) starts after private test feedback is collected.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 
