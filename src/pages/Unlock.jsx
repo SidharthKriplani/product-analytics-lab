@@ -148,40 +148,6 @@ export function Unlock({ onUnlocked, alreadyUnlocked, onNavigate }) {
             </p>
           </div>
 
-          {/* Free vs premium comparison */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem',
-            marginBottom: '1.5rem',
-          }}>
-            <div style={{
-              background: 'var(--surface-2)', border: '1px solid var(--border)',
-              borderRadius: '8px', padding: '0.9rem',
-            }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
-                Free
-              </div>
-              <ul style={{ margin: 0, padding: '0 0 0 1rem', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                <li>3 cases per room</li>
-                <li>All Foundations modules</li>
-                <li>Full Defense Strategy</li>
-                <li>Progress tracking</li>
-              </ul>
-            </div>
-            <div style={{
-              background: 'var(--accent-bg)', border: '1px solid var(--accent-border)',
-              borderRadius: '8px', padding: '0.9rem',
-            }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
-                With code
-              </div>
-              <ul style={{ margin: 0, padding: '0 0 0 1rem', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                <li>Full case banks (150+)</li>
-                <li>Company Tracks</li>
-                <li>Full Behavioral bank</li>
-                <li>Interview Simulator</li>
-              </ul>
-            </div>
-          </div>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -190,10 +156,10 @@ export function Unlock({ onUnlocked, alreadyUnlocked, onNavigate }) {
               Access Code
             </label>
             <input
-              type="text"
+              type="password"
               value={code}
               onChange={e => { setCode(e.target.value); setError(''); }}
-              placeholder="DAI2026"
+              placeholder="Enter your access code"
               autoComplete="off"
               autoCapitalize="characters"
               style={{
