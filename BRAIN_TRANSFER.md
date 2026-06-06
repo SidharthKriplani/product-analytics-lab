@@ -1,6 +1,6 @@
 # Brain Transfer — V4.69.0
 
-**Version:** V5.10.1 | **Build:** ✓ (2.22s, 0 errors) | **Date:** 2026-06-06 | **PM Audit:** #149 complete
+**Version:** V5.11.1 | **Build:** ✓ (2.07s, 0 errors) | **Date:** 2026-06-06 | **PM Audit:** #149 complete
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.11.1** — Universe View animation. index.css: added `palArmDraw` keyframe (stroke-dashoffset 160→0, 0.55s ease-out) and `palNodeAppear` keyframe (opacity 0→1, 0.3s); both covered under `prefers-reduced-motion`. UniverseView.jsx: progress lines get `strokeDasharray=160` + `palArmDraw` with `animationDelay = idx * 70ms`; inner + outer nodes get `palNodeAppear` delayed 300–400ms after their arm. Arms draw clockwise one by one, nodes fade in after lines reach them. Build ✓ 2.07s.
 
 **V5.11.0** — Analyst Universe view built. New file: src/components/shared/UniverseView.jsx — SVG star map, 7 workflow arms (Monitor/Diagnose/Understand/Communicate/Design/Analyze/Build), illumination driven by allRoomProgress from Progress.jsx, arm progress bar list below SVG, workflow narrative card. Progress.jsx: added SHOW_UNIVERSE_TOGGLE constant (set false to soft-hide), universeView state, toggle button in header ("✦ Universe" / "← Progress"), UniverseView rendered when active, existing progress content wrapped in `{!universeView && <>...</>}`. Build ✓ 2.27s. Original concept + V2 deferred items logged to IDEAS.md.
 

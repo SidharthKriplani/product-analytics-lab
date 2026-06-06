@@ -170,10 +170,11 @@ export function UniverseView({ allRoomProgress }) {
             );
           })}
 
-          {/* Progress lines (illuminated portion) */}
+          {/* Progress lines (illuminated + animated draw) */}
           {arms.map(arm => {
             if (arm.progress === 0) return null;
             const lit = pt(arm.idx, Math.max(0.08, arm.progress));
+            const delay = (arm.idx * 70) + 'ms';
             return (
               <line
                 key={'lit-' + arm.id}
@@ -182,6 +183,10 @@ export function UniverseView({ allRoomProgress }) {
                 stroke={arm.color}
                 strokeWidth="2.5"
                 opacity="0.85"
+                strokeDasharray="160"
+                strokeDashoffset="0"
+                className="pal-arm-draw"
+                style={{ animation: 'palArmDraw 0.55s ease-out both', animationDelay: delay }}
               />
             );
           })}
@@ -190,6 +195,7 @@ export function UniverseView({ allRoomProgress }) {
           {arms.map(arm => {
             const inner = pt(arm.idx, 0.42);
             const done = arm.progress >= 0.2;
+            const delay = (arm.idx * 70 + 300) + 'ms';
             return (
               <circle
                 key={'inner-' + arm.id}
@@ -200,6 +206,8 @@ export function UniverseView({ allRoomProgress }) {
                 stroke={arm.color}
                 strokeWidth="1.5"
                 opacity={done ? 0.9 : 0.3}
+                className="pal-node-appear"
+                style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay }}
               >
                 <title>{arm.label}: {Math.round(arm.progress * 100)}% complete — {arm.sublabel}</title>
               </circle>
@@ -211,6 +219,7 @@ export function UniverseView({ allRoomProgress }) {
             const outer = pt(arm.idx, 1);
             const done = arm.progress >= 0.75;
             const started = arm.progress > 0;
+            const delay = (arm.idx * 70 + 400) + 'ms';
             return (
               <circle
                 key={'outer-' + arm.id}
@@ -221,6 +230,8 @@ export function UniverseView({ allRoomProgress }) {
                 stroke={arm.color}
                 strokeWidth={started ? '2' : '1.5'}
                 opacity={started ? 1 : 0.25}
+                className="pal-node-appear"
+                style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay }}
               >
                 <title>{arm.label}: {Math.round(arm.progress * 100)}% complete</title>
               </circle>
