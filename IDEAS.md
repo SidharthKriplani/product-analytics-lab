@@ -59,6 +59,32 @@ Free signed-in users only see the paywall when they hit a gate. No ambient pull 
 ### Company Track progress on Progress page [P1, PM Audit #149]
 If a user is mid-way through a Company Track (e.g., 6/16 Meesho SBA cases done), that active path should surface on Progress.jsx as a card: "Meesho SBA — 6/16 done. Continue →". Currently Progress only shows room-level completion, not track-level. Implementation: read sessionStorage ct-track-id and ct-view from CompanyTracks state, compute progress, render a card if track is in progress. Effort: 1 hour.
 
+### Universe View V2 — animation, glow, interaction [deferred from V5.11.0]
+V1 shipped: static star map, 7 workflow arms, toggle on Progress page, soft-disable via SHOW_UNIVERSE_TOGGLE constant. V2 items deferred:
+- Arm illumination animation on first load (draw lines outward from center over ~800ms)
+- Glow effect on lit nodes (drop-shadow filter, CSS)
+- Hover tooltip/popover per arm showing which rooms are included + completion breakdown
+- "Loop" visual connection — a subtle arc connecting the last arm (Build) back to the first (Monitor) to reinforce the cycle
+- Mobile layout adjustment — for narrow screens, arms may need offset or a list-only fallback
+- Possible: clickable arms navigate directly to the relevant room browser
+Gate: validate that V1 is visually appealing and users engage with the toggle. If toggle CTR is low after beta, V2 is not worth building.
+
+### Analyst Universe — original concept and rationale [logged V5.11.0]
+**Why this was built:** The core insight is that PAL's rooms are not a syllabus — they are nodes in a real analyst job loop. A senior BA monitors KPIs, diagnoses drops (RCA), understands product behavior (Cases/Product Design), communicates impact (Behavioral/Estimation), designs the fix (A/B Design), runs and reads the experiment (Stats/A/B Review), and monitors again. This loop is the actual job. PAL's rooms are every step in it.
+
+The Progress page previously showed room-level completion bars — useful but it communicates "tasks done," not "professional capability built." The Universe view shows the same data through the lens of the workflow, making it immediately clear why all these rooms matter and how they connect.
+
+**The 7 arms and their workflow role:**
+1. Monitor — Metrics, BI, Growth Analytics, Instrumentation (own your KPI family, know when something moves)
+2. Diagnose — RCA, Spot the Flaw (find the root cause, do not anchor on the first explanation)
+3. Understand — Cases, Product Design, Prioritization (know the product and business context driving the metric)
+4. Communicate — Behavioral, Estimation (translate analysis into stakeholder-ready language and impact sizing)
+5. Design — A/B Design, Exp Foundations (propose the fix and instrument the test)
+6. Analyze — A/B Review, Stats, Stat Foundations, Challenges (read the result correctly, handle SRM/guardrails/segment harm)
+7. Build — SQL Lab, Code (everything runs on data; writing the query IS the analysis)
+
+**Build philosophy:** Implemented as a view toggle on Progress, not a replacement. The existing progress bars remain the primary view for users who want room-level detail. SHOW_UNIVERSE_TOGGLE = false soft-hides the button without removing code. Component lives in src/components/shared/UniverseView.jsx.
+
 ### Take-Home — proper format decision required [P2, PM Audit #149 + V5.10.0 IA audit]
 Current state: Take-Home is a case runner with a "take-home" label. It overpromises — real take-home prep requires multi-hour independent work, a data file/problem statement, written output, and a self-evaluation rubric. The section is now hidden from nav (V5.10.0). Before rebuilding, decide: what does a PAL take-home simulation actually look like? Likely: realistic problem statement PDF/data, 2-3 hour independent window, structured written output section, rubric self-check. That's a full UX sprint. Do not rebuild until the format is clearly defined. Gate: product design decision first.
 

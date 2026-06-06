@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { UniverseView } from '../components/shared/UniverseView.jsx';
+
+// Set to false to soft-hide the Universe view toggle without removing code
+const SHOW_UNIVERSE_TOGGLE = true;
 import { clearProgress } from '../utils/progress.js';
 import { getAllStatsProgress } from '../utils/statsProgress.js';
 import { getAllMetricsProgress } from '../utils/metricsProgress.js';
@@ -162,6 +166,7 @@ function SectionCard({ icon, title, open, onToggle, badge, children }) {
 }
 
 export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked }) {
+  const [universeView, setUniverseView] = useState(false);
   const completed = scenarios.filter(s => allProgress[s.id]?.attempts?.length > 0);
   const notStarted = scenarios.filter(s => !allProgress[s.id]?.attempts?.length);
   const totalAttempts = Object.values(allProgress).reduce((sum, p) => sum + (p.attempts?.length || 0), 0);
@@ -483,14 +488,41 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
     <div className="pal-page-enter" style={{ maxWidth: '1100px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
 
       {/* Header */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.025em', marginBottom: '0.4rem' }}>
-          Progress
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: 0 }}>
-          {totalCompleted} of {grandTotal} items completed across all rooms
-        </p>
+      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+        <div>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.025em', marginBottom: '0.4rem' }}>
+            {universeView ? 'Analyst Universe' : 'Progress'}
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: 0 }}>
+            {universeView
+              ? 'Your mastery across the analyst workflow — one interconnected loop.'
+              : totalCompleted + ' of ' + grandTotal + ' items completed across all rooms'}
+          </p>
+        </div>
+        {SHOW_UNIVERSE_TOGGLE && (
+          <button
+            onClick={() => setUniverseView(v => !v)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.4rem',
+              background: universeView ? 'var(--accent-bg)' : 'var(--surface)',
+              border: '1px solid ' + (universeView ? 'var(--accent-border)' : 'var(--border)'),
+              borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.875rem',
+              fontSize: '0.78rem', fontWeight: 600,
+              color: universeView ? 'var(--accent)' : 'var(--text-muted)',
+              cursor: 'pointer', transition: 'all 0.12s', whiteSpace: 'nowrap',
+            }}
+          >
+            {universeView ? '← Progress' : '✦ Universe'}
+          </button>
+        )}
       </div>
+
+      {/* Universe view */}
+      {universeView && (
+        <UniverseView allRoomProgress={allRoomProgress} />
+      )}
+
+      {!universeView && <>
 
       {/* Returning user next-suggestion card — shown when user has prior activity */}
       {totalCompleted > 0 && nextSuggested && (
@@ -1550,6 +1582,8 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
           </div>
         </div>
       </SectionCard>
+
+      </> }
 
     </div>
   );

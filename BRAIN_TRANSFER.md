@@ -50,6 +50,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
+**V5.11.0** — Analyst Universe view built. New file: src/components/shared/UniverseView.jsx — SVG star map, 7 workflow arms (Monitor/Diagnose/Understand/Communicate/Design/Analyze/Build), illumination driven by allRoomProgress from Progress.jsx, arm progress bar list below SVG, workflow narrative card. Progress.jsx: added SHOW_UNIVERSE_TOGGLE constant (set false to soft-hide), universeView state, toggle button in header ("✦ Universe" / "← Progress"), UniverseView rendered when active, existing progress content wrapped in `{!universeView && <>...</>}`. Build ✓ 2.27s. Original concept + V2 deferred items logged to IDEAS.md.
+
 **PM Audit #149 (2026-06-06)** — Full PM audit complete. Created PM_AUDIT.md (8-section diagnosis: core promise, user journey, IA, free/paid boundary, retention/conversion, P0/P1/P2 plan, 12 metrics, final recommendation). AUDITS.md: added #149 entry with open/resolved status per finding. METRICS.md: added PM Audit #149 metrics table (12 metrics across acquisition/activation/engagement/conversion/content health). IDEAS.md: added 5 new items — free tier value anchor (P0), guestPreview quality audit (P0), nav IA restructure (P1), ambient unlock signal (P1), Company Track progress on Progress page (P1). Biggest risk: activation — guest and day-1 user do not reach a case debrief in session 1. Highest-leverage fix: forced first-case experience for guests and new sign-ins.
 
 **V5.10.1** — Reverted "Reference Cards" back to "Frameworks" in Sidebar.jsx and PlaybookBrowser.jsx. "Frameworks" is what practitioners actually say — matching a bad page header was the wrong call. Build ✓ 2.22s.
