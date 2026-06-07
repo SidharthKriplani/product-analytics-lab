@@ -371,17 +371,24 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
             </div>
           </div>
 
-          {/* Placeholder slot — swap in next testimonial when it arrives */}
+          {/* Testimonial 3 — Debasrija */}
           <div style={{
-            background: 'var(--surface)', border: '1px dashed var(--border)',
+            background: 'var(--surface)', border: '1px solid var(--border)',
             borderRadius: '12px', padding: '1.25rem',
-            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-            minHeight: '140px', gap: '0.5rem',
           }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--border)' }} />
-            <div style={{ width: '80%', height: '8px', borderRadius: '4px', background: 'var(--border)' }} />
-            <div style={{ width: '60%', height: '8px', borderRadius: '4px', background: 'var(--border)' }} />
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.25rem' }}>More coming soon</div>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
+              "The way PAL explains p-values actually clicked for me. Being able to tweak parameters and simulate experiments made it tangible — not just theoretical. The product analytics scenarios felt comprehensive and closer to real interview questions than anything I\'ve seen."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <img src="/testimonials/debasrija.jpg" alt="Debasrija Mondal" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              <div>
+                <a href="https://www.linkedin.com/in/debasrijamondal/" target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>
+                  Debasrija Mondal
+                </a>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · Stats &amp; Design tracks</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
