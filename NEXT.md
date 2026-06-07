@@ -21,6 +21,21 @@ PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester pro
 
 ## Active build queue
 
+**P0 — V5.19.0: Meesho track — remaining question families** ← TUESDAY
+
+Full handoff doc saved at `docs/MEESHO_PREP_HANDOFF.md`. Already shipped: 17 directorCards + answerPattern + seniorLens + watchOuts in companyTracks.js.
+
+Remaining to convert into directorCards (pick 6-8 per session):
+- Experiment Design family (12 questions) — design prompts need 3-step format: hypothesis + primary metric + guardrail
+- KPI Framework family (16 questions) — metric definition prompts; debrief = hierarchy answer
+- Senior/HM family (11 questions) — highest signal for LBA bar; "first 30 days" and "leading vs lagging" are must-have
+- Catalog/Seller family (13 questions) — seller quality score, separating seller vs logistics RTO cause
+- Project defense family (13 questions) — map to MetricLens and MetaSignal projects specifically
+
+Also consider: SQL family (11 areas) → flag which are missing from sqlLabProblems.js and add as Meesho-tagged problems.
+
+---
+
 **P1 — V5.17.0: Access gate messaging audit** (partial fix already shipped)
 
 Gate logic is CORRECT: sign-in is mandatory for all non-guestPreview cases. Access code is an additional unlock on top, not a replacement for sign-in.

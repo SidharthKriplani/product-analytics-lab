@@ -153,6 +153,16 @@ export const companyTracks = [
         'COD is not bad by default; high-risk COD behavior is the issue.',
         'The final recommendation depends on the broken driver, not the surface metric.',
       ],
+      answerPattern: 'Objective → Metric decomposition → Primary metric → Guardrails → Segments → RCA / experiment logic → Decision → Action / next step',
+      seniorLens: 'Is this driving successfully delivered, trust-building, contribution-healthy orders while protecting buyer experience, seller ecosystem, and long-term repeat behavior?',
+      watchOuts: [
+        'Never use CTR, GMV, or search-to-transaction as primary without quality and economics guardrails.',
+        'Do not default to "run longer" unless statistical confidence is genuinely unclear — state why.',
+        'Lead top-down: hypothesis first, then data. Avoid exploratory framing in answers.',
+        'Name the denominator explicitly — it changes the metric entirely near an intervention point.',
+        'Decision language must be crisp: ship / hold / rollback / partial-ramp. Not "it depends" without a resolution.',
+        'Primary vs secondary vs guardrail metric hierarchy must be clear before any framework answer.',
+      ],
     },
     caseRefs: [
       { room: 'rca', ids: ['RCA27', 'RCA26', 'RCA28', 'RCA25'] },
@@ -247,6 +257,36 @@ export const companyTracks = [
         prompt: 'PDP views per session are up. ATC rate is flat. Checkout start rate is down.',
         expected: 'Users are browsing but not committing. Price competitiveness, delivery promise clarity, review volume, or trust signals are breaking the PDP-to-ATC step. More views with flat ATC means the listing is not converting intent.',
         line: 'More PDP views with flat ATC means users are interested but not convinced. I\'d check price competitiveness against comparable listings, delivery promise visibility, and review density. If checkout start is also down, the friction is in the decision layer, not the payment flow.',
+      },
+      {
+        prompt: 'Orders are stable but contribution is down. Diagnose.',
+        expected: 'Decouple volume from economics. Check logistics cost, RTO rate, discount cost, payment cost, and category/price band mix shift. Contribution can fall without orders moving if cost structure or mix changes.',
+        line: 'Stable orders with falling contribution means the cost side has moved, not demand. I\'d build a contribution bridge: start with the prior period baseline, then layer in logistics cost change, RTO cost, discount change, payment mix, and category mix shift to isolate the driver.',
+      },
+      {
+        prompt: 'Overall experiment metric is positive, but one key segment is harmed. What do you do?',
+        expected: 'Aggregate wins can mask segment harm. Identify whether the harmed segment is a guardrail (e.g. new users, Tier 2/3 buyers, low-margin category). If it is strategic, do not ship globally — partial ramp excluding the harmed segment or redesign.',
+        line: 'I would not ship on aggregate alone if a strategic segment is harmed. The question is whether the harmed group is a guardrail. If it is — new users, Tier 2/3, or a category central to supply health — I\'d hold, redesign the feature for that segment, and re-test before global rollout.',
+      },
+      {
+        prompt: 'How would you detect if growth is low-quality growth?',
+        expected: 'Low-quality growth: orders rising but repeat rate falling, new user cohorts retaining poorly, contribution per order declining, RTO up, discount cost rising disproportionately. Signal is divergence between volume metrics and quality/economics metrics.',
+        line: 'I\'d track the divergence between volume and quality metrics. If orders are up but month-2 retention, contribution/order, and net delivered rate are all flat or down, the growth is being bought — not earned. Low-quality growth shows up in the cohort before it shows up in aggregates.',
+      },
+      {
+        prompt: 'A search ranking model improves head query CVR but tail query performance drops. Ship or not?',
+        expected: 'Head queries are high-volume but tail queries represent discovery, long-tail seller exposure, and category depth. A model that wins head and loses tail may be overfitting to popular demand and harming supply diversity. Check net delivered orders and contribution across both segments before deciding.',
+        line: 'I would not ship without understanding the tail query volume and contribution impact. Head query wins can dominate aggregates while tail query harm quietly kills discovery and long-tail seller health. I\'d check net delivered orders/session and contribution/session for both segments — if tail harm is real, partial ramp on head queries only and redesign the objective function.',
+      },
+      {
+        prompt: 'Checkout completion increased but RTO also increased. What happened?',
+        expected: 'Checkout friction reduced for everyone — including low-intent COD users who now place orders they will not accept. The intervention removed a natural filter. Contribution likely worsened. Need to separate genuine intent from friction-driven order placement.',
+        line: 'Removing checkout friction can lower the intent bar. If high-risk COD users are now completing checkout at higher rates, placed order volume rises but delivered quality falls. I\'d check RTO by user segment, COD share, and contribution/checkout start — if low-intent orders are driving the RTO spike, the feature needs a targeted friction layer for that cohort.',
+      },
+      {
+        prompt: 'How would you identify whether a problem is demand-side, supply-side, discovery-side, or economics-side?',
+        expected: 'Use the marketplace funnel as a diagnostic tree. Demand: sessions, new vs repeat mix, intent signals. Supply/catalog: OOS rate, seller cancellations, listing quality. Discovery: search-to-PDP, CTR, zero-result rate. Economics: contribution/order, RTO cost, logistics cost. Each layer has distinct leading indicators.',
+        line: 'I\'d walk the funnel and look for where the drop occurs. If sessions are healthy but search-to-PDP is low, it\'s a discovery problem. If PDP traffic is healthy but ATC is low, it\'s a catalog or trust problem. If orders are healthy but contribution is down, it\'s economics. The funnel localises the problem before I form a hypothesis.',
       },
     ],
     playbookArticles: ['funnel-analysis-framework', 'north-star-metric', 'cohort-retention-curves'],
