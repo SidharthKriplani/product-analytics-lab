@@ -21,18 +21,14 @@ PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester pro
 
 ## Active build queue
 
-**P0 — V5.19.0: Meesho track — remaining question families** ← TUESDAY
+**P0 — V5.19.0: Meesho track — final two families** ← TUESDAY
 
-Full handoff doc saved at `docs/MEESHO_PREP_HANDOFF.md`. Already shipped: 17 directorCards + answerPattern + seniorLens + watchOuts in companyTracks.js.
+Full handoff doc at `docs/MEESHO_PREP_HANDOFF.md`. Already shipped in V5.18.x: 42 directorCards total + answerPattern + seniorLens + watchOuts. All RCA, experiment readout (with numbers), Senior/HM, and catalog/seller families now covered.
 
-Remaining to convert into directorCards (pick 6-8 per session):
-- Experiment Design family (12 questions) — design prompts need 3-step format: hypothesis + primary metric + guardrail
-- KPI Framework family (16 questions) — metric definition prompts; debrief = hierarchy answer
-- Senior/HM family (11 questions) — highest signal for LBA bar; "first 30 days" and "leading vs lagging" are must-have
-- Catalog/Seller family (13 questions) — seller quality score, separating seller vs logistics RTO cause
-- Project defense family (13 questions) — map to MetricLens and MetaSignal projects specifically
-
-Also consider: SQL family (11 areas) → flag which are missing from sqlLabProblems.js and add as Meesho-tagged problems.
+Remaining for Tuesday:
+- **Experiment Design family** (12 questions) — need 3-part format per card: hypothesis + primary metric + guardrail. E.g. "Design an A/B test for a new search ranking model" → unit of randomisation, primary metric (net delivered orders/session), guardrails (tail query poor-result rate, seller concentration).
+- **Project Defense family** (13 questions) — map specifically to MetricLens and MetaSignal projects. Need project context from user before writing these.
+- **SQL family** (11 areas) — check which are missing from sqlLabProblems.js and add Meesho-tagged problems. Grep sqlLabProblems.js for 'meesho' tag before building.
 
 ---
 

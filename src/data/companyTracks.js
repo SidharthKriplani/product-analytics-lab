@@ -288,6 +288,106 @@ export const companyTracks = [
         expected: 'Use the marketplace funnel as a diagnostic tree. Demand: sessions, new vs repeat mix, intent signals. Supply/catalog: OOS rate, seller cancellations, listing quality. Discovery: search-to-PDP, CTR, zero-result rate. Economics: contribution/order, RTO cost, logistics cost. Each layer has distinct leading indicators.',
         line: 'I\'d walk the funnel and look for where the drop occurs. If sessions are healthy but search-to-PDP is low, it\'s a discovery problem. If PDP traffic is healthy but ATC is low, it\'s a catalog or trust problem. If orders are healthy but contribution is down, it\'s economics. The funnel localises the problem before I form a hypothesis.',
       },
+      {
+        prompt: 'Orders are down but sessions are stable. Diagnose.',
+        expected: 'Sessions stable means demand intent exists but conversion is breaking somewhere downstream. Walk the funnel: search-to-PDP, PDP-to-ATC, ATC-to-checkout, checkout completion. The drop localises the problem — discovery, catalog, trust, or checkout friction.',
+        line: 'Stable sessions with falling orders tells me the top of the funnel is fine — the problem is conversion. I\'d walk step by step: search-to-PDP to check discovery, PDP-to-ATC for catalog trust, ATC-to-order for checkout. Whichever step breaks first is where I focus.',
+      },
+      {
+        prompt: 'Checkout conversion is down. Diagnose.',
+        expected: 'Separate checkout start from checkout completion. Is fewer users starting checkout, or starting but not completing? Check payment failure rate, COD friction, delivery promise visibility, price change, and whether a new checkout step was introduced. Segment by payment method and city tier.',
+        line: 'I\'d first split checkout start rate from completion rate — the problem is different depending on which one dropped. If start is down, the issue is pre-checkout trust or intent. If completion is down, it\'s payment failure, friction, or a new barrier at the final step. Payment method and geography cuts will localise it.',
+      },
+      {
+        prompt: 'A seller cohort has high GMV but rising buyer complaints and returns. What do you do?',
+        expected: 'High GMV does not justify buyer trust damage. Suppress visibility, investigate whether complaints are catalog mismatch, product quality, or logistics. Do not protect bad revenue — it compounds into repeat purchase loss and platform trust erosion.',
+        line: 'I would not protect GMV at the cost of buyer trust. High-GMV sellers with rising complaints need investigation, not protection. I\'d check whether the issue is listing accuracy, product quality, or fulfillment — and suppress visibility until root cause is fixed. Protecting bad GMV today destroys repeat cohort quality tomorrow.',
+      },
+      {
+        prompt: 'Tail-query performance has dropped while head queries are fine. Diagnose.',
+        expected: 'Tail queries are long-tail, low-volume, often category-specific or vernacular. Drops here indicate: ranking model overfit to head query signals, catalog gaps in long-tail categories, poor-result rate rising in niche searches, or index coverage shrinking. Check zero-result rate and query reformulation for tail queries specifically.',
+        line: 'Head queries improving while tail suffers usually means the ranking model is overfitting to high-volume signals and ignoring low-frequency intent. I\'d check zero-result rate and poor-result rate for tail queries, catalog coverage in niche categories, and whether a recent model change shifted weight toward head query training data.',
+      },
+      {
+        prompt: 'Payment success rate dropped after a new checkout or payment change. Diagnose.',
+        expected: 'Check whether the drop is bank/UPI/wallet-specific, device-specific, or universal. A new payment integration or flow change can break specific payment rails. Check payment failure reason codes, payment method mix shift, and whether the dropout is at payment initiation or confirmation.',
+        line: 'I\'d segment the failure rate by payment method, bank, and device immediately. A universal drop points to a flow-level regression; a method-specific drop points to a broken integration. Failure reason codes from the payment gateway will tell me whether it is a timeout, authentication failure, or bank-side rejection — each has a different fix.',
+      },
+      {
+        prompt: 'Catalog-related complaints are rising. Diagnose.',
+        expected: 'Catalog complaints cluster into: not-as-described, wrong category, missing attributes, image mismatch, size/spec inaccuracy. Decompose by complaint type, category, and seller vintage. New seller cohorts with low listing standards are a common driver. Check whether catalog quality score is tracking the right dimensions.',
+        line: 'I\'d cut complaints by type first — not-as-described, wrong size, image mismatch are different root causes. Then by category and seller vintage. If it\'s concentrated in new sellers, it\'s an onboarding and listing standard problem. If it\'s spread across established sellers, something changed in how listings are being created or approved — maybe a catalog tool change or a new category expansion.',
+      },
+      {
+        prompt: 'A category is growing in orders but contribution per order is falling. Diagnose.',
+        expected: 'Category mix shift within that category — higher share of low-margin products, high-return SKUs, or discount-heavy segments driving volume. Check AOV trend, return rate, RTO rate, discount cost, and logistics cost per order within the category. Growth can be low-quality if driven by cheap/returnable SKUs.',
+        line: 'Orders growing with falling contribution in a category usually means the mix inside the category is shifting — cheaper SKUs, high-return items, or discount-driven demand is taking share. I\'d build a contribution bridge within the category: price band mix, return rate change, logistics cost, and discount cost. Then decide whether to suppress low-quality SKUs or reprice incentives.',
+      },
+      {
+        prompt: 'If you joined Meesho as SBA today, what would you do in your first 30 days?',
+        expected: 'Understand the north star and how it is measured. Map the funnel end-to-end. Identify the top 3 business problems the team is focused on. Understand the experiment stack and cadence. Shadow reviews. Build the health dashboard mentally before touching any analysis.',
+        line: 'First two weeks: no analysis, only listening. Understand what the team considers a good week vs a bad week, what metrics they review, and what decisions they struggle to make. Week three: map the full funnel from sessions to contribution and identify where the team has the least visibility. Week four: propose one diagnostic that fills a real gap — not a new dashboard, a decision-enabling view.',
+      },
+      {
+        prompt: 'How do you distinguish leading indicators from lagging indicators at Meesho?',
+        expected: 'Leading: search CTR, PDP views, ATC rate, seller dispatch rate, catalog completeness. Lagging: repeat purchase rate, contribution/order, NPS, RTO rate, seller retention. Leading indicators predict future lagging outcomes — if search-to-PDP drops today, delivered orders will drop in 3-5 days.',
+        line: 'I think about it in terms of time-to-impact. Search CTR and ATC rate move today and predict order outcomes in hours. Repeat purchase rate and contribution move over weeks and reflect cumulative experience quality. The risk is optimizing leading indicators while ignoring whether they actually drive lagging outcomes — CTR can rise while orders fall if the clicks are not converting.',
+      },
+      {
+        prompt: 'How would you prevent a key metric from being gamed?',
+        expected: 'Design metrics with natural guardrails — if CTR rises but orders fall, the metric is being gamed. Use composite metrics (net delivered orders/session) that are harder to move in isolation. Audit outliers for manipulation patterns. Separate reporting metrics from incentive metrics where possible.',
+        line: 'Any metric that becomes a target stops being a good measure. I\'d pair every primary metric with a quality guardrail — CTR paired with delivered orders/session, prepaid adoption paired with payment success and net delivered orders. If the primary moves without the guardrail following, the metric is being gamed or the intervention is low-quality.',
+      },
+      {
+        prompt: 'How do you balance buyer experience, seller fairness, and unit economics when they conflict?',
+        expected: 'Buyer experience is the long-run moat — without trust and repeat, the marketplace collapses. Seller fairness is supply health — penalise bad actors but protect good sellers from unfair ranking suppression. Unit economics gates sustainability. When they conflict: buyer experience > unit economics > seller fairness in the short run, but ignoring seller fairness destroys supply health long-term.',
+        line: 'In the short run, buyer experience takes priority — a bad buyer experience compounds faster than a bad seller experience. But I\'d never ignore seller fairness completely because supply concentration risk is real. If good sellers leave because the ranking model unfairly penalises them, category depth collapses within quarters. I\'d design interventions that are buyer-first but seller-auditable.',
+      },
+      {
+        prompt: 'Experiment readout — Search CTR up, but CVR, net delivered orders, and contribution all down. RTO up. SRM: pass. Ship?',
+        expected: 'Do not ship. CTR is a surface metric. The business outcome metrics — net delivered orders/session (Control 2.7%, Treatment 2.4%) and contribution/session (Control ₹4.80, Treatment ₹4.20) — are both down. RTO up 3pp confirms lower-intent clicks are being driven, not higher-quality discovery. Rollback or redesign the ranking objective.',
+        line: 'This is a CTR trap. The ranking model learned to drive clicks, not delivered orders. Every business quality metric is worse — CVR, net delivered orders, contribution, and RTO. I\'d rollback and redesign the objective function to optimise for net delivered orders/session or contribution/session, not raw CTR.',
+      },
+      {
+        prompt: 'Experiment readout — Prepaid adoption up from 18% to 27%, but checkout completion down, net delivered orders down, payment failure up from 7% to 11%. Contribution/session slightly up. SRM: pass. Ship?',
+        expected: 'Do not ship globally. Payment failure rising 4pp is a guardrail breach — nudging users into prepaid who then fail payment creates refund cost, trust damage, and repeat churn. Contribution/session slightly up is misleading if payment failures are excluded from the denominator. Partial-ramp only to low-risk user segments or redesign the nudge targeting.',
+        line: 'Contribution slightly up looks like a win until you account for payment failure refund cost and trust damage. A 4pp rise in payment failure means we\'re pushing users into prepaid who are not ready for it. I\'d partial-ramp to users with clean payment history and exclude high-risk COD profiles from the nudge entirely.',
+      },
+      {
+        prompt: 'Experiment readout — Checkout completion up from 40% to 46%, placed orders up, but net delivered orders/checkout start down (30% to 29%), RTO up from 15% to 22%, contribution/checkout start down. SRM: pass. Ship?',
+        expected: 'Do not ship. Checkout friction reduction lowered the intent bar — more low-quality orders are being placed. Net delivered orders and contribution are both down. RTO up 7pp is a major guardrail breach. The feature needs targeted friction for high-risk COD users, not removal of friction universally.',
+        line: 'Removing checkout friction for everyone lowers the intent filter for everyone. Low-intent COD users are now completing checkout at higher rates and not accepting delivery. Net delivered orders and contribution are both down — this is negative value. I\'d hold, segment the treatment effect by user risk profile, and partial-ramp only to users with low historical RTO.',
+      },
+      {
+        prompt: 'Experiment readout — New search model: head queries CTR +8%, net delivered orders +4%, contribution +3%. Tail queries CTR -5%, net delivered orders -7%, contribution -8%, poor-result rate +10%. Aggregate slightly positive. SRM: pass. Ship globally?',
+        expected: 'Do not ship globally. Aggregate is positive only because head queries dominate volume. Tail query harm is severe — 10pp rise in poor-result rate, 8% contribution drop. Tail queries represent discovery, long-tail seller visibility, and category depth. Partial-ramp to head query traffic only, and fix the tail query objective before full rollout.',
+        line: 'The aggregate masks a two-speed result. Head query gains are real but tail query harm is also real — and tail queries are where discovery happens and where long-tail sellers live. I\'d partial-ramp to head query segments only, redesign the objective function to protect tail query quality, and re-test before global rollout.',
+      },
+      {
+        prompt: 'Experiment readout — Orders/session up, delivered orders up slightly, but contribution/order down, discount cost up, RTO/returns stable. Is this healthy growth?',
+        expected: 'No. Contribution/order falling with discount cost rising means orders are being bought, not earned. Delivered orders up slightly but contribution down means the economics of each order are worse. This is subsidy-driven volume, not quality growth. Hold and audit which user/category segments are driving the discount-heavy orders.',
+        line: 'Orders growing through discount cost is not healthy growth — it is rented demand. The moment the discount is removed, the orders will fall. I\'d check which cohorts are discount-sensitive vs organically converting, and whether the discount is driving repeat behavior or one-time cherry-picking. If it\'s the latter, this should not ship.',
+      },
+      {
+        prompt: 'Experiment readout — RTO falls materially, but checkout conversion and order volume also fall. Net delivered orders flat. Contribution improves slightly. Ship?',
+        expected: 'Partial-ramp candidate. RTO reduction with stable net delivered orders means quality improved but volume did not grow. Contribution slightly up confirms economics are better. But if the intervention is filtering out good orders along with bad ones, it is too aggressive. Segment to identify whether good-intent users are being incorrectly blocked.',
+        line: 'Net delivered orders flat with better RTO and contribution is a quality improvement without volume gain. That can be acceptable if the filtered orders were genuinely low-quality. But I\'d check whether the intervention is also blocking good-intent users — if it is, partial-ramp with a tighter targeting rule. If it is not, ship as a quality improvement and monitor repeat behavior.',
+      },
+      {
+        prompt: 'Experiment readout — Recommendation feed: CTR up, PDP views up, orders flat, repeat purchase rate down, complaints up slightly. Is engagement quality actually better?',
+        expected: 'No. CTR and PDP views are surface engagement. Orders flat means discovery is not converting. Repeat purchase rate down means the feed is surfacing content users click but do not trust enough to buy again from. Complaints up confirms relevance has degraded. The model is optimising for attention, not intent.',
+        line: 'Higher CTR with flat orders and falling repeat is the engagement trap — the feed is more clickable but less useful. Users are browsing more and buying less, and not coming back. I\'d check query satisfaction signals: did users find what they were looking for, or are they reformulating and bouncing? If the latter, the ranking objective needs to shift from click probability to delivered order probability.',
+      },
+      {
+        prompt: 'Experiment readout — Catalog quality nudge: return-due-to-mismatch down, but active listings down, seller complaints up, net delivered orders down in long-tail categories. Ship, tune, or partial-ramp?',
+        expected: 'Tune before shipping. Return reduction is real and valuable, but the intervention is over-aggressive — sellers are removing listings rather than fixing them, and long-tail category depth is shrinking. Partial-ramp to high-return-rate sellers only, and provide structured editing support rather than rejection.',
+        line: 'The intervention is working on quality but killing supply. Sellers who can\'t fix listings are removing them, which shrinks long-tail category depth and reduces delivered orders. I\'d partial-ramp to sellers with persistently high mismatch complaint rates, provide structured fix guidance, and monitor active listing count as a guardrail before global rollout.',
+      },
+      {
+        prompt: 'Experiment readout — Seller quality ranking: delivered orders/session up, RTO down, contribution up, but new seller impressions and orders sharply down, category concentration up. Ship?',
+        expected: 'Hold or partial-ramp. Buyer metrics improved, but new seller exposure collapsing is a supply health risk. If new sellers cannot get discovery, seller acquisition dries up and marketplace supply concentrates. Add a new seller exposure floor to the ranking objective and re-test.',
+        line: 'Buyer metrics are genuinely better — but concentrating orders in established sellers starves new seller growth. If new sellers cannot get impressions, they churn before they can establish quality signals, and the ranking model self-reinforces incumbents. I\'d add a new seller discovery floor to the objective, partial-ramp with that guardrail in place, and monitor seller cohort retention.',
+      },
     ],
     playbookArticles: ['funnel-analysis-framework', 'north-star-metric', 'cohort-retention-curves'],
     estimatedHours: 10,
