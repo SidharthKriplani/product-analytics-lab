@@ -253,11 +253,11 @@ export function Home({ onNavigate, onShowAuth }) {
             role: 'Statistics track',
           },
           {
-            quote: "PAL helped me test whether I truly understood the framework and surface exactly where my gaps were.",
-            name: 'Jatin Nair',
-            href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',
-            img: '/testimonials/jatin.jpg',
-            role: 'RCA track',
+            quote: "PAL doesn't let you passively scroll through — the format forces you to actively think, which is exactly what makes it stick.",
+            name: 'Meghana Joshi',
+            href: 'https://www.linkedin.com/in/meghana-joshi-82199537/',
+            img: '/testimonials/meghana.jpg',
+            role: 'Analyst & Educator',
           },
           {
             quote: "The p-value simulation made it tangible — closer to real interview questions than anything I've seen.",
@@ -272,13 +272,6 @@ export function Home({ onNavigate, onShowAuth }) {
             href: 'https://www.linkedin.com/in/swapnil-pattanshetty/',
             img: '/testimonials/swapnil.jpg',
             role: 'Data Scientist',
-          },
-          {
-            quote: "PAL doesn't let you passively scroll through — the format forces you to actively think, which is exactly what makes it stick.",
-            name: 'Meghana Joshi',
-            href: 'https://www.linkedin.com/in/meghana-joshi-82199537/',
-            img: '/testimonials/meghana.jpg',
-            role: 'Analyst & Educator',
           },
         ].map(t => (
           <div key={t.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column' }}>

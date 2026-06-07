@@ -26,6 +26,9 @@ _No new features until PostHog baseline is established._
 
 ## Tier 1 — High impact, buildable now
 
+### Testimonials wall — dedicated section with all cards [V5.21.9 — product decision]
+Once testimonial count reaches 8+, create a dedicated testimonials section (either a page or a section on Plans/Home) showing all cards in a full grid. Home stays curated at 4 (manually chosen for diversity of role/track/angle). Plans ticker handles growth automatically. The wall is for serious prospects who want to browse before paying — not a primary conversion tool. Design: same card format as current Home 1×4, but unrestricted count, 3-col grid on desktop. Gate: **8+ testimonials minimum**. File: new `src/pages/Testimonials.jsx` or appended section in Plans.jsx.
+
 ### Plans page — auto-scrolling testimonials ticker [V5.21.3 — product decision]
 Once testimonial count reaches 6+, replace the static compact strip with a 3-slot rotating ticker. Implementation: array of all testimonials, `currentIndex` state cycling every ~4s via `setInterval`, CSS opacity fade transition between slides (0.3s), no controls needed — ambient rotation only. Window always shows 3 testimonials; on tick, the oldest drops off and the next enters. Gate: **do not build until 6+ testimonials are collected** — fewer than 6 makes rotation feel sparse and undermines the "lots of people" signal. Effort: 1–2 hours. File: `src/pages/Plans.jsx` only.
 
