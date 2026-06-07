@@ -106,6 +106,58 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
         </p>
       </div>
 
+      {/* ── Testimonials ── */}
+      <div style={{ marginBottom: '2.5rem' }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
+          What people are saying
+        </h2>
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+          From analysts and PMs using PAL to prep for interviews.
+        </p>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
+          gap: '1rem',
+        }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
+              "As a complete beginner in Statistics, PAL gave me a clear, structured path — I always knew exactly what to focus on next. The progression has been genuinely helpful, and I feel like I'm building a real foundation, not just memorising concepts."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <img src="/testimonials/amaya.jpg" alt="Amaya Bhuyan" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              <div>
+                <a href="https://www.linkedin.com/in/amaya-bhuyan-91986119b/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>Amaya Bhuyan</a>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · Statistics track</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
+              "The RCA framework on PAL gave me a structured diagnostic approach I could actually practise — not just read about. I came in with some prior knowledge, but PAL helped me test whether I truly understood it and surface exactly where my gaps were."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <img src="/testimonials/jatin.jpg" alt="Jatin Nair" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              <div>
+                <a href="https://www.linkedin.com/in/jatin-nair-03161a197/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>Jatin Nair</a>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · RCA track</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
+              "The way PAL explains p-values actually clicked for me. Being able to tweak parameters and simulate experiments made it tangible — not just theoretical. The product analytics scenarios felt comprehensive and closer to real interview questions than anything I've seen."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <img src="/testimonials/debasrija.jpg" alt="Debasrija Mondal" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              <div>
+                <a href="https://www.linkedin.com/in/debasrijamondal/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>Debasrija Mondal</a>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · Stats &amp; Design tracks</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Pricing cards ── */}
       <div style={{
         display: 'grid',
@@ -317,81 +369,6 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
         ))}
       </div>
 
-      {/* ── Testimonials ── */}
-      <div style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
-          What people are saying
-        </h2>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-          From analysts and PMs using PAL to prep for interviews.
-        </p>
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
-          gap: '1rem',
-        }}>
-          {/* Testimonial 1 — Amaya */}
-          <div style={{
-            background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: '12px', padding: '1.25rem',
-          }}>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
-              "As a complete beginner in Statistics, PAL gave me a clear, structured path — I always knew exactly what to focus on next. The progression has been genuinely helpful, and I feel like I'm building a real foundation, not just memorising concepts."
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <img src="/testimonials/amaya.jpg" alt="Amaya Bhuyan" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-              <div>
-                <a href="https://www.linkedin.com/in/amaya-bhuyan-91986119b/" target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>
-                  Amaya Bhuyan
-                </a>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · Statistics track</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Testimonial 2 — Jatin */}
-          <div style={{
-            background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: '12px', padding: '1.25rem',
-          }}>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
-              "The RCA framework on PAL gave me a structured diagnostic approach I could actually practise — not just read about. I came in with some prior knowledge, but PAL helped me test whether I truly understood it and surface exactly where my gaps were."
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <img src="/testimonials/jatin.jpg" alt="Jatin Nair" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-              <div>
-                <a href="https://www.linkedin.com/in/jatin-nair-03161a197/" target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>
-                  Jatin Nair
-                </a>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · RCA track</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Testimonial 3 — Debasrija */}
-          <div style={{
-            background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: '12px', padding: '1.25rem',
-          }}>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
-              "The way PAL explains p-values actually clicked for me. Being able to tweak parameters and simulate experiments made it tangible — not just theoretical. The product analytics scenarios felt comprehensive and closer to real interview questions than anything I\'ve seen."
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <img src="/testimonials/debasrija.jpg" alt="Debasrija Mondal" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-              <div>
-                <a href="https://www.linkedin.com/in/debasrijamondal/" target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>
-                  Debasrija Mondal
-                </a>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · Stats &amp; Design tracks</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Footer */}
       <div style={{

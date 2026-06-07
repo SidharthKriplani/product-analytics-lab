@@ -218,41 +218,56 @@ export function Home({ onNavigate, onShowAuth }) {
           <br />No account needed for the benchmark.
         </p>
 
-        {/* Testimonial */}
+        {/* Testimonials */}
         <div
           className="pal-landing-el"
           style={{
             animationDelay: '780ms',
             marginTop: '2rem',
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '1.25rem 1.5rem',
-            maxWidth: '480px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))',
+            gap: '0.75rem',
+            width: '100%',
+            maxWidth: '860px',
             textAlign: 'left',
           }}
         >
-          <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
-            "As a complete beginner in Statistics, PAL gave me a clear, structured path — I always knew exactly what to focus on next. The progression has been genuinely helpful, and I feel like I'm building a real foundation, not just memorising concepts."
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <img
-              src="/testimonials/amaya.jpg"
-              alt="Amaya Bhuyan"
-              style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-            />
-            <div>
-              <a
-                href="https://www.linkedin.com/in/amaya-bhuyan-91986119b/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}
-              >
-                Amaya Bhuyan
-              </a>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · Statistics track</div>
+          {[
+            {
+              quote: "As a complete beginner in Statistics, PAL gave me a clear, structured path — I always knew exactly what to focus on next. The progression has been genuinely helpful, and I feel like I'm building a real foundation, not just memorising concepts.",
+              name: 'Amaya Bhuyan',
+              href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/',
+              img: '/testimonials/amaya.jpg',
+              role: 'Beta tester · Statistics track',
+            },
+            {
+              quote: "The RCA framework on PAL gave me a structured diagnostic approach I could actually practise — not just read about. PAL helped me test whether I truly understood it and surface exactly where my gaps were.",
+              name: 'Jatin Nair',
+              href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',
+              img: '/testimonials/jatin.jpg',
+              role: 'Beta tester · RCA track',
+            },
+            {
+              quote: "The way PAL explains p-values actually clicked for me. Being able to tweak parameters and simulate experiments made it tangible — not just theoretical. The scenarios felt closer to real interview questions than anything I've seen.",
+              name: 'Debasrija Mondal',
+              href: 'https://www.linkedin.com/in/debasrijamondal/',
+              img: '/testimonials/debasrija.jpg',
+              role: 'Beta tester · Stats & Design tracks',
+            },
+          ].map(t => (
+            <div key={t.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem 1.25rem' }}>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.65, margin: '0 0 0.875rem', fontStyle: 'italic' }}>
+                "{t.quote}"
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <img src={t.img} alt={t.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                <div>
+                  <a href={t.href} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>{t.name}</a>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t.role}</div>
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
 
       </div>

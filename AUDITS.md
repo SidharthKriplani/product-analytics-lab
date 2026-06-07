@@ -63,6 +63,48 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
+## Part XXXIV — V5.20.6 beta feedback: Debasrija Mondal (2026-06-07)
+
+### 155. ⚠️ Bug — Checkout Trap case broken on mobile: question unreadable
+
+**Source:** Debasrija Mondal (beta tester, feedback form, 2026-06-07). Quote: "The checkout trap page is broken on mobile layout. Can only see the answer, the question is in a very narrow column on the left side. Not readable."
+
+**File to check:** whichever Runner renders the Checkout Trap case (likely `src/components/cases/CasesRunner.jsx` or equivalent). The question/answer split is probably a fixed two-column layout that collapses badly below ~420px. Fix: stack question above answer on mobile — `flex-direction: column` below a breakpoint, or use the responsive grid pattern from CLAUDE.md.
+
+**Priority:** High — mobile is a primary usage context. Broken layout = case is inaccessible for mobile users.
+
+---
+
+### 154. ⚠️ Bug — Stats Foundations Module 8: normal distribution curve overflows and overlaps text
+
+**Source:** Debasrija Mondal (beta tester, feedback form, 2026-06-07). Quote: "Module 8 of stats has a normal distribution curve stretching to the top of the page overlapping text. Affects usability."
+
+**File:** `src/components/statsFoundations/` — whichever component renders Module 8 (normal distribution). Likely a canvas or SVG with a fixed height that is too tall for the container, or a missing `overflow: hidden` on the wrapper. Fix: constrain the chart container with `max-height` + `overflow: hidden`, or cap the SVG viewBox height.
+
+**Priority:** Medium — content is still readable if the curve is partially hidden, but it looks broken and undermines trust.
+
+---
+
+### 153. ⚠️ Bug — Stats Foundations CLT simulation: "not yet normal" persists even at high N
+
+**Source:** Debasrija Mondal (beta tester, feedback form, 2026-06-07). Quote: "The CLT page kept showing not yet normal for the simulated samples."
+
+**File:** CLT module in `src/components/statsFoundations/`. The normality check threshold (Shapiro-Wilk or visual heuristic) is likely miscalibrated — triggering "not yet normal" even when sample size is high enough that CLT should clearly apply. Fix: review the normality detection logic; either lower the threshold or add a sample-count override (e.g., "At n ≥ 30, the distribution is approximately normal by CLT" regardless of visual test result).
+
+**Priority:** Medium — this is a teaching moment bug. A user trying to observe CLT in action gets incorrect feedback, which actively misleads.
+
+---
+
+### 152. ⚠️ Content / UX — A/B testing "New Here" path introduces baseline rate before explaining it
+
+**Source:** Debasrija Mondal (beta tester, feedback form, 2026-06-07). Quote: "If one goes through the 'new here' option, the terms for A/B testing like baseline rates come up before the concept is actually explained. That feels unclear."
+
+**File:** Likely `src/data/expFoundationModules.js` or the "New Here" guided path ordering. The module sequence introduces `baseline rate` as a term in an early exercise before the concept module that defines it. Fix: audit the "New Here" path ordering — ensure every term used in an exercise appears in a prior explanation module. Or add an inline tooltip/definition on first use.
+
+**Priority:** Medium — affects cold-start users on the guided path, which is the highest-leverage onboarding flow.
+
+---
+
 ## Part XXXIII — V5.19.0 beta feedback + product signals (2026-06-07)
 
 ### 151. ⚠️ Content — Stat Foundations explanations too dense for complete beginners
