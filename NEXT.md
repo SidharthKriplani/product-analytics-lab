@@ -2,7 +2,7 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V5.16.1 (2026-06-07)*
+*Last updated: V5.21.1 (2026-06-07)*
 
 ---
 
@@ -20,6 +20,19 @@ PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester pro
 ---
 
 ## Active build queue
+
+**P0 — V5.22.0: Bug fixes from beta feedback (Audits #152–155)** ← TUESDAY FIRST
+
+Four concrete bugs from Debasrija Mondal's feedback form. Fix before distribution.
+
+- **#155 Checkout Trap mobile layout** — question renders in an unreadably narrow column. Find the runner rendering this case, stack question above answer on mobile (`flex-direction: column` below ~480px). Highest priority — broken layout on a core case.
+- **#153 CLT "not yet normal" at high N** — normality check fires incorrectly even when N is large enough for CLT to clearly apply. Find the CLT module in `src/components/statsFoundations/`, review threshold logic, add N≥30 override.
+- **#154 Module 8 normal distribution curve overflow** — SVG/canvas overflows container and overlaps text. Constrain with `max-height` + `overflow: hidden` on the chart wrapper.
+- **#152 Baseline rate introduced before it's explained** — in the "New Here" A/B testing path, `baseline rate` appears in an exercise before the concept module that defines it. Audit module ordering in `src/data/expFoundationModules.js`.
+- **#158 RCA Foundations progress not persisting** — selected answers reset when user navigates away. Add `rcaFoundationsState.js` utility matching the pattern in `statsFoundationsState.js`. Check `src/components/rcaFoundations/` for all modules missing save/restore.
+- **#157 RCA case distractors too easy** — wrong options are obviously wrong, bypassing analytical reasoning. Audit distractor quality across RCA cases. Plausible misconceptions only — same fix applied to C01 Phase 4 in V4.85.0.
+
+---
 
 **P0 — V5.19.0: Meesho track — final two families** ← TUESDAY
 

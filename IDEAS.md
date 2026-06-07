@@ -26,6 +26,9 @@ _No new features until PostHog baseline is established._
 
 ## Tier 1 — High impact, buildable now
 
+### Plans page — auto-scrolling testimonials ticker [V5.21.3 — product decision]
+Once testimonial count reaches 6+, replace the static compact strip with a 3-slot rotating ticker. Implementation: array of all testimonials, `currentIndex` state cycling every ~4s via `setInterval`, CSS opacity fade transition between slides (0.3s), no controls needed — ambient rotation only. Window always shows 3 testimonials; on tick, the oldest drops off and the next enters. Gate: **do not build until 6+ testimonials are collected** — fewer than 6 makes rotation feel sparse and undermines the "lots of people" signal. Effort: 1–2 hours. File: `src/pages/Plans.jsx` only.
+
 ### SQL Lab — progressive (stepwise) hints [V5.4 tester feedback — Rolex]
 Currently each problem has a single hint. Replace with progressive reveal: click once for a vague directional nudge, click again for the specific SQL concept, click again for a near-answer structural hint. Each problem needs 2–3 `hintSteps` entries instead of the current 1. Data change across 140 problems + minor UI change in SqlLabPage.jsx (already has `hintsShown` counter — extend it). Effort: 1 full session. Gate: do after Meesho interviews.
 

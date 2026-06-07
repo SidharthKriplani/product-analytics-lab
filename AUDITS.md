@@ -63,6 +63,52 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
+## Part XXXV — V5.21.1 beta feedback: Jatin Nair + Meghana Joshi (2026-06-07)
+
+### 159. ⚠️ UX — Playbook / framework concepts feel clickable but aren't
+
+**Source:** Jatin Nair (beta tester, WhatsApp, 2026-06-07). Quote: "Wherever there are playbook concepts, I had the tendency to click on them. Not sure if these will get clickable later."
+
+**Signal:** Users expect framework cards and concept references to be interactive — linking to the relevant room, module, or article. Currently they're static text. This is a discoverability gap: the content hints at depth that isn't surfaced. Fix options: (1) make concept references link to the relevant Foundations module or Playbook article, (2) add a subtle hover state to signal intent, or (3) do nothing and accept that this expectation will recur. Option 1 is highest value — turns passive reading into navigation.
+
+**Priority:** Low-medium. Not broken, but a missed retention opportunity every time a user hits a concept card.
+
+---
+
+### 158. ⚠️ Content — RCA Foundations progress not persisting between sessions
+
+**Source:** Jatin Nair (beta tester, WhatsApp, 2026-06-07). Quote: "Progress save nahi hota, like you can see the screenshot, maine select kiye the answers, when I moved to the next module, and went back the selection was erased."
+
+**Signal:** RCA Foundations module state (selected answers, revealed states) resets when the user navigates away. Stats Foundations, Exp Foundations, and Metrics Foundations all have persistence via dedicated utils (statsFoundationsState.js etc.) — RCA Foundations likely does not. Fix: audit `src/components/rcaFoundations/` for localStorage save/restore on exercise state; add a `rcaFoundationsState.js` utility matching the pattern in statsFoundationsState.js.
+
+**Priority:** High — this is a learning platform. Losing answers mid-session actively breaks the use case. Will frustrate repeat visitors.
+
+---
+
+### 157. ⚠️ Content — RCA case answer options too easy to eliminate by common sense
+
+**Source:** Jatin Nair (beta tester, WhatsApp, 2026-06-07). Quote: "I want you to make all 3 options look the same or similar. It is common sense that option A is the answer, the other 2 are just vague. Now most won't use the RCA learning or analytical thinking."
+
+**Signal:** If a user can identify the correct answer without applying the diagnostic framework, the case is not measuring what it's supposed to measure. The wrong options need to be plausible misconceptions — things a reasonable analyst might actually say — not obvious fillers. This is the same issue logged in businessCases.js (C01 Phase 4 option C, fixed V4.85.0) now appearing in RCA cases specifically. Fix: audit distractor quality across RCA cases, prioritise cases where one option is obviously correct without reasoning.
+
+**Priority:** High — weak distractors invalidate the entire practice value of those cases.
+
+---
+
+### 156. ⚠️ UX / Content — Stats data module: boxed explanation skipped by users who treat it as a note
+
+**Source:** Meghana Joshi (beta tester, feedback form, 2026-05-31). Quote: "Numeric and categorical explanation could be in main content as people tend to skip things in boxes because they think it is a note. In Stats data module."
+
+**Signal:** Content in callout boxes / bordered panels is being perceived as supplementary ("a note") and skipped. If the numeric/categorical distinction is foundational to the module, it belongs in the main content flow, not a side panel. Fix: audit Stats Foundations data module — if the boxed content is load-bearing, move it inline. Reserve boxes for genuinely optional context.
+
+**Priority:** Medium — affects comprehension for anyone who skips the box, which is apparently most users.
+
+---
+
+**Running signal — language density (3 sources now):** Amaya (Audit #151), Jatin ("needs more explanation for complete beginners"), Meghana ("try using simpler language for beginners and students") have all flagged the same issue independently. Three separate testers saying the same thing is a pattern, not an edge case. Audit #151 covers the diagnosis — this note exists to flag that the evidence base has strengthened.
+
+---
+
 ## Part XXXIV — V5.20.6 beta feedback: Debasrija Mondal (2026-06-07)
 
 ### 155. ⚠️ Bug — Checkout Trap case broken on mobile: question unreadable

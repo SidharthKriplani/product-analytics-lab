@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { tryUnlock, isUnlocked } from '../utils/unlock.js';
 
 const PRICING_PLANS = [
@@ -64,6 +64,53 @@ function Cell({ value, accent }) {
   return <span style={{ fontSize: '0.8rem', fontWeight: 600, color: accent || 'var(--text-muted)' }}>{value}</span>;
 }
 
+const TESTIMONIALS = [
+  { img: '/testimonials/amaya.jpg',    name: 'Amaya',     href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/', role: 'Statistics',     quote: 'I always knew exactly what to focus on next — it felt like a real foundation, not just memorising.' },
+  { img: '/testimonials/jatin.jpg',    name: 'Jatin',     href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',   role: 'RCA track',      quote: 'PAL helped me test whether I truly understood the framework — and surface exactly where my gaps were.' },
+  { img: '/testimonials/debasrija.jpg',name: 'Debasrija', href: 'https://www.linkedin.com/in/debasrijamondal/',        role: 'Stats & Design', quote: 'The p-value simulation made it tangible. Scenarios felt closer to real interviews than anything I\'ve seen.' },
+  { img: '/testimonials/swapnil.jpg',  name: 'Swapnil',   href: 'https://www.linkedin.com/in/swapnil-pattanshetty/',   role: 'Data Scientist', quote: 'The cases forced me to think like a PM, not just run numbers. The debrief format is what makes it stick.' },
+];
+
+function TestimonialTicker() {
+  const [start, setStart] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const total = TESTIMONIALS.length;
+  const WINDOW = 3;
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setStart(s => (s + 1) % total);
+        setVisible(true);
+      }, 350);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [total]);
+
+  const shown = Array.from({ length: WINDOW }, (_, i) => TESTIMONIALS[(start + i) % total]);
+
+  return (
+    <div style={{ marginBottom: '2rem' }}>
+      <p style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.875rem' }}>
+        What people are saying
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
+        {shown.map(t => (
+          <div key={t.name} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.625rem' }}>
+            <img src={t.img} alt={t.name} style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, marginTop: '1px' }} />
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+              <a href={t.href} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 700, color: 'var(--text)', textDecoration: 'none', marginRight: '0.3rem' }}>{t.name}</a>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginRight: '0.4rem' }}>· {t.role}</span>
+              <span style={{ fontStyle: 'italic' }}>"{t.quote}"</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlockedProp }) {
   const alreadyUnlocked = unlockedProp || isUnlocked();
   const [code, setCode]       = useState('');
@@ -106,29 +153,8 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
         </p>
       </div>
 
-      {/* ── Testimonials — compact strip ── */}
-      <div style={{ marginBottom: '2rem' }}>
-        <p style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.875rem' }}>
-          What people are saying
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          {[
-            { img: '/testimonials/amaya.jpg',    name: 'Amaya Bhuyan',          href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/', role: 'Statistics', quote: 'I always knew exactly what to focus on next — it felt like a real foundation, not just memorising.' },
-            { img: '/testimonials/jatin.jpg',    name: 'Jatin Nair',            href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',   role: 'RCA track',        quote: 'PAL helped me test whether I truly understood the framework — and surface exactly where my gaps were.' },
-            { img: '/testimonials/debasrija.jpg',name: 'Debasrija Mondal',      href: 'https://www.linkedin.com/in/debasrijamondal/',        role: 'Stats & Design',   quote: 'The p-value simulation made it tangible. Scenarios felt closer to real interviews than anything I\'ve seen.' },
-            { img: '/testimonials/swapnil.jpg',  name: 'Swapnil Pattanshetty', href: 'https://www.linkedin.com/in/swapnil-pattanshetty/',   role: 'Data Scientist',   quote: 'The cases forced me to think like a PM, not just run numbers. The debrief format is what makes it stick.' },
-          ].map(t => (
-            <div key={t.name} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.625rem' }}>
-              <img src={t.img} alt={t.name} style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, marginTop: '1px' }} />
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-                <a href={t.href} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 700, color: 'var(--text)', textDecoration: 'none', marginRight: '0.3rem' }}>{t.name}</a>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginRight: '0.4rem' }}>· {t.role}</span>
-                <span style={{ fontStyle: 'italic' }}>"{t.quote}"</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* ── Testimonials — rotating ticker ── */}
+      <TestimonialTicker />
 
 
       {/* ── Pricing cards ── */}

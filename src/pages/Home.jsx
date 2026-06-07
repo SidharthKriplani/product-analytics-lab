@@ -262,8 +262,8 @@ export function Home({ onNavigate, onShowAuth }) {
               role: 'Data Scientist',
             },
           ].map(t => (
-            <div key={t.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem 1.25rem' }}>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.65, margin: '0 0 0.875rem', fontStyle: 'italic' }}>
+            <div key={t.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column' }}>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.65, margin: '0 0 0.875rem', fontStyle: 'italic', flex: 1 }}>
                 "{t.quote}"
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

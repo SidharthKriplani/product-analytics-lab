@@ -1,6 +1,6 @@
-# Brain Transfer — V5.19.0
+# Brain Transfer — V5.21.1
 
-**Version:** V5.19.0 | **Build:** ✓ (last clean build V5.16.1, 1.72s) | **Date:** 2026-06-07 | **PM Audit:** #149 complete
+**Version:** V5.21.1 | **Build:** ✓ (1.48s) | **Date:** 2026-06-07 | **PM Audit:** #149 complete
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.20.4 → V5.21.1** — Testimonials scaffold complete. Four beta testers now showing across Home and Plans: Amaya Bhuyan (Statistics, beginner), Jatin Nair (RCA), Debasrija Mondal (Stats & Design, DA), Swapnil Pattanshetty (Data Scientist). Home: full cards in a 4-col responsive grid. Plans: compact strip — avatar + name + role + one punchy sentence, no card containers, sits above pricing cards as trust-before-ask. Removed "Beta tester" from all role labels (undermines trust on a pricing page). Fixed `\'ve` rendering bug in Debasrija's quote (backslash was rendering literally in JSX text). Fixed "What beta testers say" heading to "What people are saying." Photos: `/public/testimonials/amaya.jpg`, `jatin.jpg`, `debasrija.jpg`, `swapnil.jpg`. Four bugs logged from Debasrija's feedback form as Audits #152-155: baseline rate sequencing in "New Here" path (A/B track), CLT "not yet normal" persisting at high N, Module 8 normal distribution curve overflow, Checkout Trap broken mobile layout. All four are open — not yet fixed.
 
 **V5.19.0** — Meesho Company Track fully expanded. companyTracks.js: 42 total directorCards (up from 10). Added cards covering: all remaining RCA families (orders down/sessions stable, checkout conversion down, seller high-GMV/poor-experience, tail-query drop, payment success drop, catalog complaints, category orders up/contribution down), Senior/HM families (first 30 days, leading vs lagging indicators, gaming prevention, buyer/seller/economics balance, healthy vs unhealthy growth), and 9 numeric experiment readout cases with full metrics (search CTR trap C1, prepaid nudge C2, checkout friction C3, head/tail search model C4, discount-driven growth, RTO-but-orders-down, recommendation engagement trap, catalog quality/supply tradeoff, seller quality/new seller fairness). Also added to Meesho mentalModel: `answerPattern` (Objective→Decomposition→Primary→Guardrails→Segments→Logic→Decision→Action), `seniorLens` quote, and `watchOuts` array (6 candidate weakness reminders). Full prep handoff saved to `docs/MEESHO_PREP_HANDOFF.md`. No new files, no routing changes — pure content.
 
@@ -164,7 +166,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.19.0 shipped. Session complete. Resuming Tuesday with fresh token limit.
+## Next action — V5.21.1 shipped. Session complete. Resuming Tuesday with fresh token limit.
 
 Tuesday P0: Meesho track final two families — Experiment Design (12 questions, 3-part format: unit of randomisation + primary metric + guardrail) and Project Defense (13 questions — user will share project context at session open). SQL family: grep sqlLabProblems.js for 'meesho' tag to check coverage before adding.
 
