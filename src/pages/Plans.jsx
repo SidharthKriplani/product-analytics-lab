@@ -69,7 +69,7 @@ const TESTIMONIALS = [
   { img: '/testimonials/jatin.jpg',    name: 'Jatin',     href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',   role: 'RCA track',      quote: 'PAL helped me test whether I truly understood the framework — and surface exactly where my gaps were.' },
   { img: '/testimonials/debasrija.jpg',name: 'Debasrija', href: 'https://www.linkedin.com/in/debasrijamondal/',        role: 'Stats & Design', quote: 'The p-value simulation made it tangible. Scenarios felt closer to real interviews than anything I\'ve seen.' },
   { img: '/testimonials/swapnil.jpg',  name: 'Swapnil',   href: 'https://www.linkedin.com/in/swapnil-pattanshetty/',   role: 'Data Scientist', quote: 'The cases forced me to think like a PM, not just run numbers. The debrief format is what makes it stick.' },
-  { img: '/testimonials/meghana.jpg', name: 'Meghana',   href: 'https://www.linkedin.com/in/meghana-joshi-82199537/', role: 'Analyst & Educator', quote: 'As someone who teaches data concepts, PAL\'s format stood out — it doesn\'t let you passively scroll through. You have to actively think, which is what makes it stick.' },
+  { img: '/testimonials/meghana.jpg', name: 'Meghana',   href: 'https://www.linkedin.com/in/meghana-joshi-82199537/', role: 'Analyst & Educator', quote: 'PAL doesn\'t let you passively scroll through — it forces you to actually think.' },
 ];
 
 function TestimonialTicker() {
