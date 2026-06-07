@@ -27,7 +27,7 @@ Full handoff doc at `docs/MEESHO_PREP_HANDOFF.md`. Already shipped in V5.18.x: 4
 
 Remaining for Tuesday:
 - **Experiment Design family** (12 questions) — need 3-part format per card: hypothesis + primary metric + guardrail. E.g. "Design an A/B test for a new search ranking model" → unit of randomisation, primary metric (net delivered orders/session), guardrails (tail query poor-result rate, seller concentration).
-- **Project Defense family** (13 questions) — map specifically to MetricLens and MetaSignal projects. Need project context from user before writing these.
+- **Project Defense family** (13 questions) — need user's project context before writing these. User will share relevant projects when ready.
 - **SQL family** (11 areas) — check which are missing from sqlLabProblems.js and add Meesho-tagged problems. Grep sqlLabProblems.js for 'meesho' tag before building.
 
 ---

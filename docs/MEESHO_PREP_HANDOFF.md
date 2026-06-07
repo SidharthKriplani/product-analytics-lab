@@ -193,8 +193,6 @@ Mission / North Star → Demand → Discovery → Catalog → Buyer Decision / P
 
 ## 12. Project Defense / Director-HM Questions
 
-Projects: MetricLens, MetaSignal
-
 - What was your strongest project?
 - Why did you build it?
 - What business problem did it solve?
