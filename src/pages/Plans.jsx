@@ -351,20 +351,38 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
             </div>
           </div>
 
-          {/* Placeholder slots — swap in real testimonials as they arrive */}
-          {[1, 2].map(i => (
-            <div key={i} style={{
-              background: 'var(--surface)', border: '1px dashed var(--border)',
-              borderRadius: '12px', padding: '1.25rem',
-              display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-              minHeight: '140px', gap: '0.5rem',
-            }}>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--border)' }} />
-              <div style={{ width: '80%', height: '8px', borderRadius: '4px', background: 'var(--border)' }} />
-              <div style={{ width: '60%', height: '8px', borderRadius: '4px', background: 'var(--border)' }} />
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.25rem' }}>More coming soon</div>
+          {/* Testimonial 2 — Jatin */}
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: '12px', padding: '1.25rem',
+          }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
+              "The RCA framework on PAL gave me a structured diagnostic approach I could actually practise — not just read about. I came in with some prior knowledge, but PAL helped me test whether I truly understood it and surface exactly where my gaps were."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <img src="/testimonials/jatin.jpg" alt="Jatin Nair" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              <div>
+                <a href="https://www.linkedin.com/in/jatin-nair-03161a197/" target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>
+                  Jatin Nair
+                </a>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · RCA track</div>
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Placeholder slot — swap in next testimonial when it arrives */}
+          <div style={{
+            background: 'var(--surface)', border: '1px dashed var(--border)',
+            borderRadius: '12px', padding: '1.25rem',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+            minHeight: '140px', gap: '0.5rem',
+          }}>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--border)' }} />
+            <div style={{ width: '80%', height: '8px', borderRadius: '4px', background: 'var(--border)' }} />
+            <div style={{ width: '60%', height: '8px', borderRadius: '4px', background: 'var(--border)' }} />
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.25rem' }}>More coming soon</div>
+          </div>
         </div>
       </div>
 
