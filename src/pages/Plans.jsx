@@ -317,6 +317,57 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
         ))}
       </div>
 
+      {/* ── Testimonials ── */}
+      <div style={{ marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
+          What people are saying
+        </h2>
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+          From analysts and PMs using PAL to prep for interviews.
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
+          gap: '1rem',
+        }}>
+          {/* Testimonial 1 — Amaya */}
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: '12px', padding: '1.25rem',
+          }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
+              "As a complete beginner in Statistics, PAL gave me a clear, structured path — I always knew exactly what to focus on next. The progression has been genuinely helpful, and I feel like I'm building a real foundation, not just memorising concepts."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <img src="/testimonials/amaya.jpg" alt="Amaya Bhuyan" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              <div>
+                <a href="https://www.linkedin.com/in/amaya-bhuyan-91986119b/" target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>
+                  Amaya Bhuyan
+                </a>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · Statistics track</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Placeholder slots — swap in real testimonials as they arrive */}
+          {[1, 2].map(i => (
+            <div key={i} style={{
+              background: 'var(--surface)', border: '1px dashed var(--border)',
+              borderRadius: '12px', padding: '1.25rem',
+              display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+              minHeight: '140px', gap: '0.5rem',
+            }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--border)' }} />
+              <div style={{ width: '80%', height: '8px', borderRadius: '4px', background: 'var(--border)' }} />
+              <div style={{ width: '60%', height: '8px', borderRadius: '4px', background: 'var(--border)' }} />
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.25rem' }}>More coming soon</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Footer */}
       <div style={{
         textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)',
