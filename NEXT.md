@@ -2,7 +2,7 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V5.21.1 (2026-06-07)*
+*Last updated: V5.21.5 (2026-06-07)*
 
 ---
 

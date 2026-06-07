@@ -1,6 +1,6 @@
-# Brain Transfer — V5.21.1
+# Brain Transfer — V5.21.5
 
-**Version:** V5.21.1 | **Build:** ✓ (1.48s) | **Date:** 2026-06-07 | **PM Audit:** #149 complete
+**Version:** V5.21.5 | **Build:** ✓ (1.61s) | **Date:** 2026-06-07 | **PM Audit:** #149 complete
 
 ---
 
@@ -49,6 +49,8 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.21.2 → V5.21.5** — Ticker polished. Audits #156–159 logged (Jatin: RCA Foundations progress not persisting, RCA distractors too easy, playbook concepts feel clickable but aren't; Meghana: boxed content skipped in Stats data module; 3-person language density signal now confirmed across Amaya/Jatin/Meghana). Plans testimonials rebuilt as continuous RAF scroll ticker — doubled array `[A,B,C,D,A,B,C,D]`, 0.28px/frame upward drift, seamless loop via `pos -= half` snap (invisible because second half is identical). No blink, no disappearing. `overflow: hidden` container clips to ~3 rows. Adding new testimonials = push to `TESTIMONIALS` array in Plans.jsx, ticker handles automatically. First names only on Plans strip. Ticker idea logged to IDEAS.md Tier 1 (gate updated — already live at 4, improves as more arrive).
 
 **V5.20.4 → V5.21.1** — Testimonials scaffold complete. Four beta testers now showing across Home and Plans: Amaya Bhuyan (Statistics, beginner), Jatin Nair (RCA), Debasrija Mondal (Stats & Design, DA), Swapnil Pattanshetty (Data Scientist). Home: full cards in a 4-col responsive grid. Plans: compact strip — avatar + name + role + one punchy sentence, no card containers, sits above pricing cards as trust-before-ask. Removed "Beta tester" from all role labels (undermines trust on a pricing page). Fixed `\'ve` rendering bug in Debasrija's quote (backslash was rendering literally in JSX text). Fixed "What beta testers say" heading to "What people are saying." Photos: `/public/testimonials/amaya.jpg`, `jatin.jpg`, `debasrija.jpg`, `swapnil.jpg`. Four bugs logged from Debasrija's feedback form as Audits #152-155: baseline rate sequencing in "New Here" path (A/B track), CLT "not yet normal" persisting at high N, Module 8 normal distribution curve overflow, Checkout Trap broken mobile layout. All four are open — not yet fixed.
 
@@ -166,7 +168,7 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.21.1 shipped. Session complete. Resuming Tuesday with fresh token limit.
+## Next action — V5.21.5 shipped. Session complete. Resuming Tuesday with fresh token limit.
 
 Tuesday P0: Meesho track final two families — Experiment Design (12 questions, 3-part format: unit of randomisation + primary metric + guardrail) and Project Defense (13 questions — user will share project context at session open). SQL family: grep sqlLabProblems.js for 'meesho' tag to check coverage before adding.
 

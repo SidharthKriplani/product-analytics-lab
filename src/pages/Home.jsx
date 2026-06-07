@@ -219,13 +219,19 @@ export function Home({ onNavigate, onShowAuth }) {
         </p>
 
         {/* Testimonials */}
+        {/* FULL QUOTES PRESERVED — restore if switching back to 2x2 card layout:
+          Amaya:    "As a complete beginner in Statistics, PAL gave me a clear, structured path — I always knew exactly what to focus on next. The progression has been genuinely helpful, and I feel like I'm building a real foundation, not just memorising concepts."
+          Jatin:    "The RCA framework on PAL gave me a structured diagnostic approach I could actually practise — not just read about. PAL helped me test whether I truly understood it and surface exactly where my gaps were."
+          Debasrija:"The way PAL explains p-values actually clicked for me. Being able to tweak parameters and simulate experiments made it tangible — not just theoretical. The scenarios felt closer to real interview questions than anything I've seen."
+          Swapnil:  "As a Data Scientist, I assumed I already understood product analytics — PAL showed me the gaps. The cases on metric diagnosis, funnel drops, and A/B interpretation forced me to think like a PM, not just run numbers. The debrief format is what makes it stick."
+        */}
         <div
           className="pal-landing-el"
           style={{
             animationDelay: '780ms',
             marginTop: '2rem',
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(190px, 100%), 1fr))',
             gap: '0.75rem',
             width: '100%',
             maxWidth: '860px',
@@ -234,28 +240,28 @@ export function Home({ onNavigate, onShowAuth }) {
         >
           {[
             {
-              quote: "As a complete beginner in Statistics, PAL gave me a clear, structured path — I always knew exactly what to focus on next. The progression has been genuinely helpful, and I feel like I'm building a real foundation, not just memorising concepts.",
+              quote: "PAL gave me a structured path — I always knew exactly what to focus on next.",
               name: 'Amaya Bhuyan',
               href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/',
               img: '/testimonials/amaya.jpg',
               role: 'Statistics track',
             },
             {
-              quote: "The RCA framework on PAL gave me a structured diagnostic approach I could actually practise — not just read about. PAL helped me test whether I truly understood it and surface exactly where my gaps were.",
+              quote: "PAL helped me test whether I truly understood the framework and surface exactly where my gaps were.",
               name: 'Jatin Nair',
               href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',
               img: '/testimonials/jatin.jpg',
               role: 'RCA track',
             },
             {
-              quote: "The way PAL explains p-values actually clicked for me. Being able to tweak parameters and simulate experiments made it tangible — not just theoretical. The scenarios felt closer to real interview questions than anything I've seen.",
+              quote: "The p-value simulation made it tangible — closer to real interview questions than anything I've seen.",
               name: 'Debasrija Mondal',
               href: 'https://www.linkedin.com/in/debasrijamondal/',
               img: '/testimonials/debasrija.jpg',
               role: 'Stats & Design tracks',
             },
             {
-              quote: "As a Data Scientist, I assumed I already understood product analytics — PAL showed me the gaps. The cases on metric diagnosis, funnel drops, and A/B interpretation forced me to think like a PM, not just run numbers. The debrief format is what makes it stick.",
+              quote: "The cases forced me to think like a PM, not just run numbers.",
               name: 'Swapnil Pattanshetty',
               href: 'https://www.linkedin.com/in/swapnil-pattanshetty/',
               img: '/testimonials/swapnil.jpg',
@@ -263,14 +269,14 @@ export function Home({ onNavigate, onShowAuth }) {
             },
           ].map(t => (
             <div key={t.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column' }}>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.65, margin: '0 0 0.875rem', fontStyle: 'italic', flex: 1 }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text)', lineHeight: 1.6, margin: '0 0 0.875rem', fontStyle: 'italic', flex: 1 }}>
                 "{t.quote}"
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <img src={t.img} alt={t.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                 <div>
-                  <a href={t.href} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>{t.name}</a>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t.role}</div>
+                  <a href={t.href} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>{t.name}</a>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{t.role}</div>
                 </div>
               </div>
             </div>
