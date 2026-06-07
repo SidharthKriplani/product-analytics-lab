@@ -480,6 +480,8 @@ function TrackDetail({ track, onBack, onNavigate }) {
   const totalCases = getTotalCases(track);
   const completedCount = getCompletedCount(track);
   const progressPct = totalCases > 0 ? Math.round((completedCount / totalCases) * 100) : 0;
+  const defaultLevel = track.availableLevels ? track.availableLevels[0] : null;
+  const [selectedLevel, setSelectedLevel] = useState(defaultLevel);
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem 3rem' }}>
@@ -512,7 +514,7 @@ function TrackDetail({ track, onBack, onNavigate }) {
               {track.company}
             </h1>
             <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-              {track.role}
+              {selectedLevel ? selectedLevel + ' ' + track.roleLabel : track.role}
             </div>
           </div>
         </div>
@@ -540,10 +542,52 @@ function TrackDetail({ track, onBack, onNavigate }) {
         </div>
       </div>
 
-      {/* Role tabs */}
-      {track.comingSoonRoles && track.comingSoonRoles.length > 0 && (
-        <RoleTabs activeRole={track.role} comingSoonRoles={track.comingSoonRoles} />
-      )}
+      {/* Role + Level filter */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
+        {/* Role row */}
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '0.25rem' }}>Role</span>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', padding: '3px 11px',
+            borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600,
+            background: 'var(--accent)', color: '#fff', border: '1px solid var(--accent)',
+          }}>
+            {track.roleLabel || track.role}
+          </div>
+          {(track.comingSoonRoles || []).map(role => (
+            <div key={role} style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+              padding: '3px 11px', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 500,
+              background: 'transparent', color: 'var(--text-dim)', border: '1px solid var(--border)',
+            }}>
+              {role}
+              <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-dim)', background: 'var(--surface-2)', borderRadius: '3px', padding: '1px 4px' }}>soon</span>
+            </div>
+          ))}
+        </div>
+        {/* Level row */}
+        {track.availableLevels && (
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '0.25rem' }}>Level</span>
+            {track.availableLevels.map(level => (
+              <button
+                key={level}
+                onClick={() => setSelectedLevel(level)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', padding: '3px 11px',
+                  borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600,
+                  background: selectedLevel === level ? 'var(--teal)' : 'transparent',
+                  color: selectedLevel === level ? '#fff' : 'var(--text-muted)',
+                  border: selectedLevel === level ? '1px solid var(--teal)' : '1px solid var(--border)',
+                  cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s',
+                }}
+              >
+                {level}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Completion */}
       {progressPct === 100 && (

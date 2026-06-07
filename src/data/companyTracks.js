@@ -133,6 +133,8 @@ export const companyTracks = [
     id: 'meesho-sba',
     company: 'Meesho',
     role: 'Senior Business Analyst',
+    roleLabel: 'Business Analyst',
+    availableLevels: ['Senior', 'Lead'],
     faviconDomain: 'meesho.com',
     color: '#d0006e',
     description: 'Core skills: marketplace RCA, COD/RTO/contribution economics, A/B readouts, search/catalog metrics, multi-sided trade-offs',
