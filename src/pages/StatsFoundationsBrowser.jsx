@@ -135,6 +135,14 @@ export function StatsFoundationsBrowser({ onStart, unlocked, onNavigate }) {
         }}>
           Statistical fluency is what separates analysts who can have an opinion from those who just run queries. In interviews, you'll need to explain what a p-value actually means, catch a false positive before it ships, or design a valid experiment under time pressure. These 25 modules build that foundation from scratch — not by memorising formulas, but by building the reasoning that makes the numbers make sense.
         </p>
+        <p style={{
+          fontSize: '0.8rem', color: 'var(--text-muted)',
+          margin: '0 0 1.25rem', lineHeight: 1.6, maxWidth: '540px',
+          background: 'var(--surface)', border: '1px solid var(--border)',
+          borderRadius: '8px', padding: '0.6rem 0.875rem',
+        }}>
+          <strong style={{ color: 'var(--text)', fontWeight: 600 }}>Before you start:</strong> Comfortable with basic math. No prior statistics background needed — these modules are written to be understood on first read, even if you've never taken a stats class.
+        </p>
 
         {/* Progress bar */}
         <div style={{ marginBottom: '0.4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

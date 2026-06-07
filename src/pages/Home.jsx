@@ -218,6 +218,43 @@ export function Home({ onNavigate, onShowAuth }) {
           <br />No account needed for the benchmark.
         </p>
 
+        {/* Testimonial */}
+        <div
+          className="pal-landing-el"
+          style={{
+            animationDelay: '780ms',
+            marginTop: '2rem',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '12px',
+            padding: '1.25rem 1.5rem',
+            maxWidth: '480px',
+            textAlign: 'left',
+          }}
+        >
+          <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
+            "As a complete beginner in Statistics, PAL gave me a clear, structured path — I always knew exactly what to focus on next. The progression has been genuinely helpful, and I feel like I'm building a real foundation, not just memorising concepts."
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <img
+              src="/testimonials/amaya.jpg"
+              alt="Amaya Bhuyan"
+              style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+            />
+            <div>
+              <a
+                href="https://www.linkedin.com/in/amaya-bhuyan-91986119b/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}
+              >
+                Amaya Bhuyan
+              </a>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Beta tester · Statistics track</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
