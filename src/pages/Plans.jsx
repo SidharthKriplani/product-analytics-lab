@@ -72,40 +72,48 @@ const TESTIMONIALS = [
 ];
 
 function TestimonialTicker() {
-  const [start, setStart] = useState(0);
-  const [visible, setVisible] = useState(true);
-  const total = TESTIMONIALS.length;
-  const WINDOW = 3;
+  const innerRef = useRef(null);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setStart(s => (s + 1) % total);
-        setVisible(true);
-      }, 350);
-    }, 4000);
-    return () => clearInterval(id);
-  }, [total]);
+    const el = innerRef.current;
+    if (!el) return;
+    let pos = 0;
+    let animId;
+    const SPEED = 0.28; // px per frame — very slow drift
 
-  const shown = Array.from({ length: WINDOW }, (_, i) => TESTIMONIALS[(start + i) % total]);
+    const tick = () => {
+      pos += SPEED;
+      const half = el.scrollHeight / 2;
+      if (pos >= half) pos -= half; // seamless loop — second half is identical
+      el.style.transform = 'translateY(-' + pos + 'px)';
+      animId = requestAnimationFrame(tick);
+    };
+
+    // Let layout settle before measuring scrollHeight
+    const t = setTimeout(() => { animId = requestAnimationFrame(tick); }, 120);
+    return () => { cancelAnimationFrame(animId); clearTimeout(t); };
+  }, []);
+
+  const doubled = [...TESTIMONIALS, ...TESTIMONIALS];
 
   return (
     <div style={{ marginBottom: '2rem' }}>
       <p style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.875rem' }}>
         What people are saying
       </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
-        {shown.map(t => (
-          <div key={t.name} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.625rem' }}>
-            <img src={t.img} alt={t.name} style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, marginTop: '1px' }} />
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-              <a href={t.href} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 700, color: 'var(--text)', textDecoration: 'none', marginRight: '0.3rem' }}>{t.name}</a>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginRight: '0.4rem' }}>· {t.role}</span>
-              <span style={{ fontStyle: 'italic' }}>"{t.quote}"</span>
+      <div style={{ overflow: 'hidden', height: '8.5rem' }}>
+        <div ref={innerRef} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {doubled.map((t, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.625rem', flexShrink: 0 }}>
+              <img src={t.img} alt={t.name} style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, marginTop: '1px' }} />
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+                <a href={t.href} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 700, color: 'var(--text)', textDecoration: 'none', marginRight: '0.3rem' }}>{t.name}</a>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginRight: '0.4rem' }}>· {t.role}</span>
+                <span style={{ fontStyle: 'italic' }}>"{t.quote}"</span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
