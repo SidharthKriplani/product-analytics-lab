@@ -271,13 +271,15 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
             );
           })}
 
-          {/* Loop arc connecting Build back to Monitor */}
+          {/* Loop arc connecting Build back to Monitor — subtle curved line around back */}
           {(() => {
             const buildOuter = pt(6, 1);
             const monitorOuter = pt(0, 1);
             const arcProgress = totalProgress > 0 ? Math.min(totalProgress, 1) : 0;
-            // Calculate arc path using SVG arc syntax — large arc going the "back way"
-            const pathData = `M ${buildOuter.x} ${buildOuter.y} A 155 155 0 1 1 ${monitorOuter.x} ${monitorOuter.y}`;
+            // Quadratic bezier curve going around the back, with control point offset
+            const controlX = CX - 100;
+            const controlY = CY - 40;
+            const pathData = `M ${buildOuter.x} ${buildOuter.y} Q ${controlX} ${controlY} ${monitorOuter.x} ${monitorOuter.y}`;
 
             return (
               <g key="loop-arc">
@@ -296,9 +298,9 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
                     fill="none"
                     stroke="var(--accent)"
                     strokeWidth="2.5"
-                    opacity="0.7"
-                    strokeDasharray="350"
-                    strokeDashoffset={350 * (1 - arcProgress)}
+                    opacity={0.6 + arcProgress * 0.2}
+                    strokeDasharray="300"
+                    strokeDashoffset={300 * (1 - arcProgress)}
                     filter="url(#arcGlow)"
                     className="pal-loop-draw"
                     style={{ animation: 'palLoopDraw 1.2s ease-out both' }}
@@ -354,10 +356,10 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
                   fill={done ? arm.color : 'var(--bg)'}
                   stroke={arm.color}
                   strokeWidth="1.5"
-                  opacity={done ? 0.9 : 0.3}
+                  opacity={hoveredArm === arm.id && done ? 1 : (done ? 0.9 : 0.3)}
                   className="pal-node-appear"
-                  filter={done ? 'url(#nodeGlow)' : undefined}
-                  style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay, transition: 'opacity var(--transition)' }}
+                  filter={hoveredArm === arm.id && done ? 'url(#nodeGlow)' : undefined}
+                  style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay, transition: 'opacity var(--transition), filter var(--transition)' }}
                 />
                 <title>
                   {arm.label}: {Math.round(arm.progress * 100)}% complete
@@ -391,10 +393,10 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
                   fill={done ? arm.color : 'var(--bg)'}
                   stroke={arm.color}
                   strokeWidth={started ? '2' : '1.5'}
-                  opacity={started ? 1 : 0.25}
+                  opacity={hoveredArm === arm.id && started ? (done ? 1 : 0.8) : (started ? 1 : 0.25)}
                   className="pal-node-appear"
-                  filter={done ? 'url(#nodeGlow)' : undefined}
-                  style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay, transition: 'opacity var(--transition)' }}
+                  filter={hoveredArm === arm.id && started ? 'url(#nodeGlow)' : undefined}
+                  style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay, transition: 'opacity var(--transition), filter var(--transition)' }}
                 />
                 <title>
                   {arm.label}: {Math.round(arm.progress * 100)}% complete
