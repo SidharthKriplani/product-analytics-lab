@@ -115,6 +115,30 @@ These need user signal before building. Gate: PostHog WAU data + track completio
 - **Progress analytics per track** — time spent, weak skill areas within a track, what to practice next. Needs event instrumentation first.
 - **Saved/pinned companies** — low priority; the track IS the saved path.
 
+### Meesho Company Track — metric-framework-driven cases [logged V5.16.2]
+
+**Core idea:** Prepare users obsessively for specific companies by building cases derived from the actual analytics umbrella expected at that company — not generic RCA/metrics cases, but ones where the signal, the failure, and the diagnostic framing are calibrated to Meesho's business model.
+
+**Source:** A 10-pillar framework covering Demand → Discovery → Catalog → Buyer Decision → Checkout → Fulfillment → Delivery/RTO → Trust/Repeat → Unit Economics → Seller Ecosystem. Each pillar has: Questions the team asks, Metrics they own, and canonical Failure modes.
+
+**Build path:** The "Failures" column in each pillar IS the case prompt. Convert each into a Senior or Staff judgment case in the Cases room, tagged `company: 'meesho'`. Do not build a separate page or document viewer — the value is practice, not reading.
+
+**Richest pillars for cases (priority order):**
+1. Pillar 7 (Delivery/RTO) — placed orders vs net delivered orders divergence in tier 2/3 cities; contribution drops from reverse logistics
+2. Pillar 9 (Unit Economics) — orders stable but contribution down; discounts driving low-quality orders; prepaid up but payment failures rise
+3. Pillar 2 (Discovery) — CTR up but orders down; PRISM personalization overfits; poor-result rate rises
+4. Pillar 1 (Demand) — repeat purchase drops; new users don't convert; low-intent traffic increases
+
+**Target:** 5–8 cases for the Meesho track. Each tagged `company: 'meesho'`, `difficulty: 'senior'|'staff'`, with full debrief referencing Meesho's actual metric vocabulary (net delivered orders, RTO, contribution/session, seller cancellation rate).
+
+**Effort:** 1 session for 5 cases. Framework already authored — just conversion work.
+
+**Open question before building:** Is Meesho the right first company or does another company appear more in your tester profile? Pick the one your beta users are actively interviewing at.
+
+**Future:** Once Meesho is done, the same framework pattern works for Swiggy (growth/fulfillment), PhonePe (payments/engagement), Zepto (supply/demand balance), Flipkart (catalog quality/scale).
+
+---
+
 ### SQL Lab — S-Grade Upgrade Pass [HIGHEST PRIORITY — IN PROGRESS]
 **Gate:** All 13 audit batches complete ✅. Expanded from original trap enrichment plan. Full rubric + execution plan in SQL_LAB_PLAN.md Section 11. Tracking artifact: SQL_UPGRADE_PASS.md.
 
