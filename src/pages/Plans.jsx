@@ -109,7 +109,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
       {/* ── Testimonials — compact strip ── */}
       <div style={{ marginBottom: '2rem' }}>
         <p style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.875rem' }}>
-          What beta testers say
+          What people are saying
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           {[
