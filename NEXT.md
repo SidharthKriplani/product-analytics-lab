@@ -21,54 +21,6 @@ PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester pro
 
 ## Active build queue
 
-**P0 — V5.18.0: Meesho directorCards expansion** ← FIRST TASK TUESDAY
-
-No new files. No routing. Just append 7 cards to the existing `directorCards` array inside the Meesho track object in `src/data/companyTracks.js` (line ~165). Schema per card: `{ prompt, expected, line }`. Single quotes, escape apostrophes.
-
-Skeletons ready — just write `expected` and `line` for each on Tuesday:
-
-```js
-{
-  prompt: 'Placed orders are up 11% WoW. Net delivered orders are flat. RTO is up 4pp, concentrated in tier 2/3 cities.',
-  expected: '/* pillar 7 — placed vs delivered divergence, tier 2/3 cut, reverse logistics cost */',
-  line: '/* model answer */',
-},
-{
-  prompt: 'Prepaid adoption is up but contribution/order is down and payment failure rate is rising.',
-  expected: '/* pillar 9 — prepaid mix improving on surface, but wrong cohort being nudged */',
-  line: '/* model answer */',
-},
-{
-  prompt: 'New user acquisition is up 20% MoM but repeat purchase rate in month-2 cohorts has dropped.',
-  expected: '/* pillar 1 — demand quality, low-intent traffic, repeat vs new mix */',
-  line: '/* model answer */',
-},
-{
-  prompt: 'First-order conversion is strong but 60-day retention is falling. CSAT scores are flat.',
-  expected: '/* pillar 8 — trust/repeat, post-delivery experience, habit formation */',
-  line: '/* model answer */',
-},
-{
-  prompt: 'Seller cancellation rate has risen 3pp in the fashion category over 4 weeks.',
-  expected: '/* pillar 6 — fulfillment health, stock-out vs seller behavior, category concentration */',
-  line: '/* model answer */',
-},
-{
-  prompt: 'Returns are up 3pp. Top return reason flagged: not as described. Catalog quality score unchanged.',
-  expected: '/* pillar 3 — catalog understanding, mismatch complaint, listing accuracy vs buyer expectation */',
-  line: '/* model answer */',
-},
-{
-  prompt: 'PDP views per session are up. ATC rate is flat. Checkout start rate is down.',
-  expected: '/* pillar 4+5 — buyer decision friction, price/delivery promise visibility, checkout drop */',
-  line: '/* model answer */',
-},
-```
-
-Tuesday: fill `expected` and `line` for all 7, paste into companyTracks.js after the last existing directorCard, commit as V5.18.0.
-
----
-
 **P1 — V5.17.0: Access gate messaging audit** (partial fix already shipped)
 
 Gate logic is CORRECT: sign-in is mandatory for all non-guestPreview cases. Access code is an additional unlock on top, not a replacement for sign-in.

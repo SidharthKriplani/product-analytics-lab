@@ -213,6 +213,41 @@ export const companyTracks = [
         expected: 'Evaluate LTV and habit degradation.',
         line: 'It depends on LTV. Higher AOV is good only if margin and repeat behavior do not deteriorate. I\'d model the long-run cohort before shipping.',
       },
+      {
+        prompt: 'Placed orders are up 11% WoW. Net delivered orders are flat. RTO is up 4pp, concentrated in tier 2/3 cities.',
+        expected: 'Separate placed from delivered. RTO in tier 2/3 points to COD concentration, address quality, or logistics partner failure — not demand weakness. Investigate seller cancellations, delivery TAT, and failed delivery attempts by geography.',
+        line: 'Placed orders growing while delivered orders stagnate means we\'re booking demand we can\'t fulfill. I\'d decompose RTO by geography, check COD concentration, and identify whether seller cancellations or last-mile failures are driving the gap before calling this a growth story.',
+      },
+      {
+        prompt: 'Prepaid adoption is up but contribution/order is down and payment failure rate is rising.',
+        expected: 'Prepaid adoption is not inherently good. If the users being nudged to prepaid have high payment failure rates, refund cost replaces COD risk. Segment prepaid adopters by prior RTO behavior and check which cohort is driving failures.',
+        line: 'Prepaid adoption is a vanity metric if the wrong users are switching. Payment failures on prepaid carry refund cost and trust damage. I\'d check whether high-risk COD users are being nudged into prepaid and failing — that\'s not a win, it\'s a cost shift.',
+      },
+      {
+        prompt: 'New user acquisition is up 20% MoM but repeat purchase rate in month-2 cohorts has dropped.',
+        expected: 'Acquisition volume without repeat quality is a liability. Check category affinity, first-order AOV, and acquisition channel mix. Low-intent traffic inflates the top of funnel without delivering retained buyers.',
+        line: 'We may be acquiring the wrong users. If month-2 repeat drops while acquisition climbs, the new cohort has lower intent or a worse first experience. I\'d cohort by acquisition source and identify which channel is driving the repeat gap before scaling further.',
+      },
+      {
+        prompt: 'First-order conversion is strong but 60-day retention is falling. CSAT scores are flat.',
+        expected: 'Post-delivery experience is broken. Flat CSAT does not exonerate — passive churn does not show up in survey scores. Check return rate, complaint rate, delivery TAT, and whether product quality matches listing expectations.',
+        line: 'Strong first-order conversion with poor retention means the product promises more than it delivers. CSAT being flat actually worries me more — users who churn silently don\'t complain, they just leave. I\'d focus on return rate, complaint clustering, and repeat trigger events.',
+      },
+      {
+        prompt: 'Seller cancellation rate has risen 3pp in the fashion category over 4 weeks.',
+        expected: 'Seller cancellations in one category signal stock-out, demand spikes the seller cannot handle, or poor listing hygiene. Check ready-to-ship rate, inventory depth, and whether cancellations are concentrated in a seller tier or acquisition vintage.',
+        line: 'Category-specific seller cancellations usually mean listings are not backed by real inventory or demand has outpaced seller capacity. I\'d check OOS rate, listing freshness, and whether it\'s concentrated in a seller cohort — then decide whether to suppress, support, or penalise.',
+      },
+      {
+        prompt: 'Returns are up 3pp. Top return reason: not as described. Catalog quality score is unchanged.',
+        expected: 'Catalog quality score measures completeness, not accuracy. Not-as-described returns point to a trust gap between listing and delivered product. Decompose by category and seller — new seller cohorts with poor listing standards are a common driver.',
+        line: 'Catalog quality score is the wrong signal here — it measures whether fields are filled, not whether they are truthful. Not-as-described returns are a listing accuracy problem. I\'d cut by category, seller vintage, and image quality to find the cluster and fix at source.',
+      },
+      {
+        prompt: 'PDP views per session are up. ATC rate is flat. Checkout start rate is down.',
+        expected: 'Users are browsing but not committing. Price competitiveness, delivery promise clarity, review volume, or trust signals are breaking the PDP-to-ATC step. More views with flat ATC means the listing is not converting intent.',
+        line: 'More PDP views with flat ATC means users are interested but not convinced. I\'d check price competitiveness against comparable listings, delivery promise visibility, and review density. If checkout start is also down, the friction is in the decision layer, not the payment flow.',
+      },
     ],
     playbookArticles: ['funnel-analysis-framework', 'north-star-metric', 'cohort-retention-curves'],
     estimatedHours: 10,
