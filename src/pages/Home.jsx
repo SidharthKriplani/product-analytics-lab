@@ -273,6 +273,13 @@ export function Home({ onNavigate, onShowAuth }) {
             img: '/testimonials/swapnil.jpg',
             role: 'Data Scientist',
           },
+          {
+            quote: "PAL doesn't let you passively scroll through — the format forces you to actively think, which is exactly what makes it stick.",
+            name: 'Meghana Joshi',
+            href: 'https://www.linkedin.com/in/meghana-joshi-82199537/',
+            img: '/testimonials/meghana.jpg',
+            role: 'Analyst & Educator',
+          },
         ].map(t => (
           <div key={t.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column' }}>
             <p style={{ fontSize: '0.78rem', color: 'var(--text)', lineHeight: 1.6, margin: '0 0 0.875rem', fontStyle: 'italic', flex: 1 }}>
