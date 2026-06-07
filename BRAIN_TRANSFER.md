@@ -1,6 +1,6 @@
-# Brain Transfer — V5.13.0
+# Brain Transfer — V5.19.0
 
-**Version:** V5.16.1 | **Build:** ✓ (1.72s, 0 errors) | **Date:** 2026-06-07 | **PM Audit:** #149 complete
+**Version:** V5.19.0 | **Build:** ✓ (last clean build V5.16.1, 1.72s) | **Date:** 2026-06-07 | **PM Audit:** #149 complete
 
 ---
 
@@ -49,6 +49,12 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.19.0** — Meesho Company Track fully expanded. companyTracks.js: 42 total directorCards (up from 10). Added cards covering: all remaining RCA families (orders down/sessions stable, checkout conversion down, seller high-GMV/poor-experience, tail-query drop, payment success drop, catalog complaints, category orders up/contribution down), Senior/HM families (first 30 days, leading vs lagging indicators, gaming prevention, buyer/seller/economics balance, healthy vs unhealthy growth), and 9 numeric experiment readout cases with full metrics (search CTR trap C1, prepaid nudge C2, checkout friction C3, head/tail search model C4, discount-driven growth, RTO-but-orders-down, recommendation engagement trap, catalog quality/supply tradeoff, seller quality/new seller fairness). Also added to Meesho mentalModel: `answerPattern` (Objective→Decomposition→Primary→Guardrails→Segments→Logic→Decision→Action), `seniorLens` quote, and `watchOuts` array (6 candidate weakness reminders). Full prep handoff saved to `docs/MEESHO_PREP_HANDOFF.md`. No new files, no routing changes — pure content.
+
+**V5.18.0 / V5.18.1** — Meesho directorCards phase 1. Added 7 cards from 10-pillar framework (RTO tier 2/3 divergence, prepaid vanity metric, new user repeat gap, retention/CSAT trap, seller cancellations by category, not-as-described returns, PDP-ATC gap). Added 6 more from senior question families (contribution bridge, segment harm readout, low-quality growth detection, head/tail search ship decision, checkout+RTO readout, funnel localisation framework). answerPattern, seniorLens, watchOuts added to mentalModel.
+
+**V5.16.2 / V5.16.3** — Gate messaging + sidebar cleanup. Unlock.jsx: removed "no account needed" (sign-in is mandatory for non-preview cases — the access code is an upgrade on top of sign-in, not a replacement). Plans.jsx: added bridging line above comparison table ("All paid plans include Full Lab access — same content, different billing periods"). Sidebar.jsx: Judgment Benchmark removed from nav — Home CTA only. Gate logic confirmed correct: `requireUser` always checks `!user && !guestPreview`; access code unlocks content tier but does not bypass sign-in.
 
 **V5.16.1** — Plans page restructured. Pricing cards now lead (Monthly ₹799, Quarterly ₹1,999, Annual ₹5,999 with "Best value" badge, Interview Sprint ₹2,499). Each card has a "Get early access →" button linking to WhatsApp DM — functional placeholder, no Stripe yet. Below cards: quiet beta section — "Subscriptions activate at launch. Currently in beta." with sign-in button and access code input inline. Comparison table (Guest/Free/Full features) stays below as reference. Old 3-tier card hero removed. Build ✓ 1.72s.
 
@@ -158,7 +164,13 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.16.1 shipped. Session complete. Resuming Tuesday. Next: V5.15.0 SQL Lab UX (question numbering, concept tags, compact schema, multi-select filters). Full spec in NEXT.md. Confirm `VITE_POSTHOG_KEY` in Vercel before Tuesday — needed to capture benchmark funnel from day 1.
+## Next action — V5.19.0 shipped. Session complete. Resuming Tuesday with fresh token limit.
+
+Tuesday P0: Meesho track final two families — Experiment Design (12 questions, 3-part format: unit of randomisation + primary metric + guardrail) and Project Defense (13 questions — user will share project context at session open). SQL family: grep sqlLabProblems.js for 'meesho' tag to check coverage before adding.
+
+Tuesday P1: V5.17.0 gate audit — grep every data file for `guestPreview: true` and verify each also has `isFree: true`. If any guestPreview case has `isFree: false`, a guest can bypass auth but still hit the unlock gate, creating the contradictory flow. Fix: set `isFree: true` on all guestPreview cases.
+
+Confirm `VITE_POSTHOG_KEY` in Vercel before Tuesday — needed to capture benchmark and Meesho track funnel from day 1.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

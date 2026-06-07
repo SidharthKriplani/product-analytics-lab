@@ -115,6 +115,34 @@ These need user signal before building. Gate: PostHog WAU data + track completio
 - **Progress analytics per track** — time spent, weak skill areas within a track, what to practice next. Needs event instrumentation first.
 - **Saved/pinned companies** — low priority; the track IS the saved path.
 
+### Company Track — role and level filter dropdowns [logged V5.19.0]
+
+**Idea:** Add two filter dropdowns to the Company Track detail page. Role: BA | PA | PM | DA. Level: (blank) | Senior | Lead. Content shown adjusts based on selection — director cards, case refs, and mental model framing could be tagged by role/level.
+
+**Meesho role/level matrix (researched 2026-06-07 via levels.fyi + meesho.io/jobs):**
+- BA: BA → SBA → LBA ✓ (all three exist, all actively hiring)
+- PM: PM → Senior PM → Lead PM ✓ (Lead PM exists at Meesho — no constraint needed)
+- DA: not a standard Meesho title — BA track is the primary analytics path at Meesho; DA filter may be irrelevant for this company
+- PA: similarly rare at Meesho — BA is the dominant role
+
+**Constraint logic:** simpler than expected. For Meesho specifically, only BA and PM make sense. For other companies (Swiggy, Flipkart), DA and PA may apply. Build role filter as company-data-driven, not hardcoded — each company track in companyTracks.js declares `availableRoles: ['BA', 'PM']` and `availableLevels: ['', 'Senior', 'Lead']`.
+
+**Implementation:** Two `<select>` dropdowns in the CompanyTracks.jsx track header. Filter directorCards by a new optional `roles` or `levels` tag per card. Cards with no tag show for all selections. Effort: 1 session. Gate: build after at least 3 company tracks are live — filter is only useful with multiple role options.
+
+### Beta tester testimonials with LinkedIn proof [logged V5.19.0]
+
+**Idea:** Collect structured feedback from beta testers (1-3 sentences) linked to their LinkedIn profile. Display on Plans page or a dedicated testimonials section as social proof for when distribution starts.
+
+**Format per testimonial:** quote, name, current role/company, LinkedIn URL, PAL rooms used.
+
+**Process (no code needed yet):** After each beta tester interaction, ask for a short quote and LinkedIn. Store in a simple doc or a `src/data/testimonials.js` file. When 5+ are collected, render them as a quiet card row on Plans.jsx below the pricing cards.
+
+**Why it matters:** "37 beta sign-ins" is a number. A quote from a real person with a LinkedIn profile is proof. Distribution posts hit harder with attributed testimonials than with metrics.
+
+**Amaya signal (2026-06-07):** Already have one beta tester with clear, usable feedback ("PAL provided a clear learning path from basics to advanced — exactly what I was looking for"). Get her to confirm she's happy to be quoted + share LinkedIn. First testimonial candidate.
+
+---
+
 ### Meesho Company Track — metric-framework-driven cases [logged V5.16.2]
 
 **Core idea:** Prepare users obsessively for specific companies by building cases derived from the actual analytics umbrella expected at that company — not generic RCA/metrics cases, but ones where the signal, the failure, and the diagnostic framing are calibrated to Meesho's business model.

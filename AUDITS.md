@@ -63,6 +63,18 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
+## Part XXXIII — V5.19.0 beta feedback + product signals (2026-06-07)
+
+### 151. ⚠️ Content — Stat Foundations explanations too dense for complete beginners
+
+**Source:** Amaya (beta tester, WhatsApp, 2026-06-07). Using PAL as a beginner wanting a structured Statistics learning path. Quote: "Some of the explanations can be a bit challenging for beginners, so I usually take screenshots of the concepts and use ChatGPT to get simpler explanations and examples."
+
+**Signal:** The "screenshot → ChatGPT" workaround means explanations are failing at the comprehension layer, not the content layer. The concepts are right but the language density is too high for cold-start users. PAL is positioned for interview prep (assumes some exposure), but real usage includes complete beginners using Foundations as their first encounter with the material.
+
+**Options:** (1) Add a "Simplify" toggle per module that rewrites the explanation at a lower density level. (2) Add a "What does this mean?" expandable below jargon-heavy sentences. (3) Audit Stat Foundations modules specifically for unexplained jargon and add one-line plain-English clarifiers. Option 3 is lowest effort and highest impact. Gate: check PostHog for Stat Foundations drop-off rate to confirm this is a real funnel issue, not an edge case.
+
+---
+
 ## Part XXXII — V5.11.1 UniverseView audit (2026-06-07)
 
 ### 150. ⚠️ Visual + Interaction — UniverseView label overlaps, 0%-progress invisibility, no interactivity
