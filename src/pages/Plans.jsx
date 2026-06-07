@@ -113,7 +113,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           {[
-            { img: '/testimonials/amaya.jpg',    name: 'Amaya Bhuyan',          href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/', role: 'Statistics track', quote: 'I always knew exactly what to focus on next — it felt like a real foundation, not just memorising.' },
+            { img: '/testimonials/amaya.jpg',    name: 'Amaya Bhuyan',          href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/', role: 'Statistics', quote: 'I always knew exactly what to focus on next — it felt like a real foundation, not just memorising.' },
             { img: '/testimonials/jatin.jpg',    name: 'Jatin Nair',            href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',   role: 'RCA track',        quote: 'PAL helped me test whether I truly understood the framework — and surface exactly where my gaps were.' },
             { img: '/testimonials/debasrija.jpg',name: 'Debasrija Mondal',      href: 'https://www.linkedin.com/in/debasrijamondal/',        role: 'Stats & Design',   quote: 'The p-value simulation made it tangible. Scenarios felt closer to real interviews than anything I\'ve seen.' },
             { img: '/testimonials/swapnil.jpg',  name: 'Swapnil Pattanshetty', href: 'https://www.linkedin.com/in/swapnil-pattanshetty/',   role: 'Data Scientist',   quote: 'The cases forced me to think like a PM, not just run numbers. The debrief format is what makes it stick.' },

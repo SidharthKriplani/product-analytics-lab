@@ -238,28 +238,28 @@ export function Home({ onNavigate, onShowAuth }) {
               name: 'Amaya Bhuyan',
               href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/',
               img: '/testimonials/amaya.jpg',
-              role: 'Beta tester · Statistics track',
+              role: 'Statistics track',
             },
             {
               quote: "The RCA framework on PAL gave me a structured diagnostic approach I could actually practise — not just read about. PAL helped me test whether I truly understood it and surface exactly where my gaps were.",
               name: 'Jatin Nair',
               href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',
               img: '/testimonials/jatin.jpg',
-              role: 'Beta tester · RCA track',
+              role: 'RCA track',
             },
             {
               quote: "The way PAL explains p-values actually clicked for me. Being able to tweak parameters and simulate experiments made it tangible — not just theoretical. The scenarios felt closer to real interview questions than anything I've seen.",
               name: 'Debasrija Mondal',
               href: 'https://www.linkedin.com/in/debasrijamondal/',
               img: '/testimonials/debasrija.jpg',
-              role: 'Beta tester · Stats & Design tracks',
+              role: 'Stats & Design tracks',
             },
             {
               quote: "As a Data Scientist, I assumed I already understood product analytics — PAL showed me the gaps. The cases on metric diagnosis, funnel drops, and A/B interpretation forced me to think like a PM, not just run numbers. The debrief format is what makes it stick.",
               name: 'Swapnil Pattanshetty',
               href: 'https://www.linkedin.com/in/swapnil-pattanshetty/',
               img: '/testimonials/swapnil.jpg',
-              role: 'Data Scientist · Beta tester',
+              role: 'Data Scientist',
             },
           ].map(t => (
             <div key={t.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem 1.25rem' }}>
