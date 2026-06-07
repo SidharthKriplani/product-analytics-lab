@@ -580,6 +580,10 @@ button:not(:disabled):active {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+@keyframes palLoopDraw {
+  from { stroke-dashoffset: 350; }
+  to   { stroke-dashoffset: 0; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .pal-page-enter,
@@ -590,7 +594,8 @@ button:not(:disabled):active {
   .pal-shimmer-box,
   .pal-glow-pulse { animation: none !important; }
   .pal-success-ring { animation: none !important; }
-  .pal-arm-draw { animation: none !important; }
+  .pal-arm-draw,
+  .pal-loop-draw { animation: none !important; }
   .pal-node-appear { animation: none !important; }
   .pal-shake { animation: none !important; }
 }

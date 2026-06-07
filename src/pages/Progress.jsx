@@ -519,7 +519,13 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
 
       {/* Universe view */}
       {universeView && (
-        <UniverseView allRoomProgress={allRoomProgress} />
+        <UniverseView
+          allRoomProgress={allRoomProgress}
+          onArmClick={(roomId) => {
+            setUniverseView(false);
+            onNavigate(roomId);
+          }}
+        />
       )}
 
       {!universeView && <>

@@ -3,8 +3,9 @@
 // 7 arms correspond to the real BA/PM job loop:
 //   Monitor → Diagnose → Understand → Communicate → Design → Analyze → Build
 // Arms illuminate based on progress in their rooms (from Progress.jsx allRoomProgress).
-// V1: static, no animation. Toggle on Progress page.
-// To soft-disable: set SHOW_UNIVERSE_TOGGLE = false in Progress.jsx without removing code.
+// V2: animated arms on load, glow effects, hover tooltips, loop arc, clickable navigation.
+
+import { useState } from 'react';
 
 const ARM_DEFS = [
   {
@@ -125,7 +126,10 @@ function computeArmProgress(arm, allRoomProgress) {
   return fractions.reduce((a, b) => a + b, 0) / fractions.length;
 }
 
-export function UniverseView({ allRoomProgress }) {
+export function UniverseView({ allRoomProgress, onArmClick }) {
+  const [hoveredArm, setHoveredArm] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
+
   const arms = ARM_DEFS.map((arm, idx) => ({
     ...arm,
     idx,
@@ -134,6 +138,86 @@ export function UniverseView({ allRoomProgress }) {
   }));
 
   const totalProgress = arms.reduce((s, a) => s + a.progress, 0) / arms.length;
+
+  // Handle arm clicks for navigation
+  const handleArmClick = (armId) => {
+    const roomMap = {
+      monitor: 'metrics',
+      diagnose: 'rca',
+      understand: 'cases',
+      communicate: 'behavioral',
+      design: 'design',
+      analyze: 'review',
+      build: 'sql-lab',
+    };
+    if (onArmClick) {
+      onArmClick(roomMap[armId]);
+    }
+  };
+
+  if (isMobile) {
+    // Mobile fallback — list layout
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', width: '100%' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>
+            Analyst Universe
+          </div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', maxWidth: '460px', lineHeight: 1.55 }}>
+            Every arm is a step in the real analyst workflow — from monitoring your metrics to building the fix. They are not separate subjects. They are one loop.
+          </div>
+        </div>
+
+        {/* Mobile list layout */}
+        <div style={{ width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          {arms.map(arm => (
+            <div
+              key={arm.id}
+              onClick={() => handleArmClick(arm.id)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.75rem 1rem',
+                background: 'var(--surface)',
+                border: `1px solid var(--border)`,
+                borderRadius: 'var(--radius)',
+                cursor: 'pointer',
+                transition: 'all var(--transition)',
+              }}
+              onMouseEnter={() => setHoveredArm(arm.id)}
+              onMouseLeave={() => setHoveredArm(null)}
+            >
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: arm.progress > 0 ? arm.color : 'var(--border)', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text)' }}>{arm.label}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{arm.sublabel}</div>
+              </div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                {Math.round(arm.progress * 100)}%
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Workflow narrative */}
+        <div style={{
+          width: '100%', maxWidth: '480px',
+          background: 'var(--surface)', border: '1px solid var(--border)',
+          borderLeft: '3px solid var(--accent)',
+          borderRadius: 'var(--radius)', padding: '0.875rem 1rem',
+        }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.4rem' }}>
+            The loop
+          </div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.65 }}>
+            Metric drops → RCA → understand product behavior → communicate impact → design the fix → run the experiment → analyze the result → monitor the metric again.
+            Every room in PAL is one step in this loop.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
@@ -155,6 +239,23 @@ export function UniverseView({ allRoomProgress }) {
           xmlns="http://www.w3.org/2000/svg"
           style={{ width: '100%', height: 'auto', overflow: 'visible' }}
         >
+          {/* Filter defs for glow */}
+          <defs>
+            <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <filter id="arcGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="1.5" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
           {/* Background dim lines (full arm length) */}
           {arms.map(arm => {
             const outer = pt(arm.idx, 1);
@@ -170,24 +271,66 @@ export function UniverseView({ allRoomProgress }) {
             );
           })}
 
+          {/* Loop arc connecting Build back to Monitor */}
+          {(() => {
+            const buildOuter = pt(6, 1);
+            const monitorOuter = pt(0, 1);
+            const arcProgress = totalProgress > 0 ? Math.min(totalProgress, 1) : 0;
+            // Calculate arc path using SVG arc syntax — large arc going the "back way"
+            const pathData = `M ${buildOuter.x} ${buildOuter.y} A 155 155 0 1 1 ${monitorOuter.x} ${monitorOuter.y}`;
+
+            return (
+              <g key="loop-arc">
+                {/* Background arc (always visible, dim) */}
+                <path
+                  d={pathData}
+                  fill="none"
+                  stroke="var(--accent)"
+                  strokeWidth="1.5"
+                  opacity="0.12"
+                />
+                {/* Illuminated arc (grows with progress) */}
+                {arcProgress > 0 && (
+                  <path
+                    d={pathData}
+                    fill="none"
+                    stroke="var(--accent)"
+                    strokeWidth="2.5"
+                    opacity="0.7"
+                    strokeDasharray="350"
+                    strokeDashoffset={350 * (1 - arcProgress)}
+                    filter="url(#arcGlow)"
+                    className="pal-loop-draw"
+                    style={{ animation: 'palLoopDraw 1.2s ease-out both' }}
+                  />
+                )}
+              </g>
+            );
+          })()}
+
           {/* Progress lines (illuminated + animated draw) */}
           {arms.map(arm => {
             if (arm.progress === 0) return null;
             const lit = pt(arm.idx, Math.max(0.08, arm.progress));
             const delay = (arm.idx * 70) + 'ms';
             return (
-              <line
+              <g
                 key={'lit-' + arm.id}
-                x1={CX} y1={CY}
-                x2={lit.x} y2={lit.y}
-                stroke={arm.color}
-                strokeWidth="2.5"
-                opacity="0.85"
-                strokeDasharray="160"
-                strokeDashoffset="0"
-                className="pal-arm-draw"
-                style={{ animation: 'palArmDraw 0.55s ease-out both', animationDelay: delay }}
-              />
+                onClick={() => handleArmClick(arm.id)}
+                style={{ cursor: 'pointer' }}
+              >
+                <line
+                  x1={CX} y1={CY}
+                  x2={lit.x} y2={lit.y}
+                  stroke={arm.color}
+                  strokeWidth="2.5"
+                  opacity={hoveredArm === arm.id ? 1 : 0.85}
+                  strokeDasharray="160"
+                  strokeDashoffset="0"
+                  className="pal-arm-draw"
+                  style={{ animation: 'palArmDraw 0.55s ease-out both', animationDelay: delay, transition: 'opacity var(--transition)' }}
+                />
+              </g>
             );
           })}
 
@@ -197,20 +340,33 @@ export function UniverseView({ allRoomProgress }) {
             const done = arm.progress >= 0.2;
             const delay = (arm.idx * 70 + 300) + 'ms';
             return (
-              <circle
+              <g
                 key={'inner-' + arm.id}
-                cx={inner.x}
-                cy={inner.y}
-                r={INNER_NODE_R}
-                fill={done ? arm.color : 'var(--bg)'}
-                stroke={arm.color}
-                strokeWidth="1.5"
-                opacity={done ? 0.9 : 0.3}
-                className="pal-node-appear"
-                style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay }}
+                onMouseEnter={() => setHoveredArm(arm.id)}
+                onMouseLeave={() => setHoveredArm(null)}
+                onClick={() => handleArmClick(arm.id)}
+                style={{ cursor: 'pointer' }}
               >
-                <title>{arm.label}: {Math.round(arm.progress * 100)}% complete — {arm.sublabel}</title>
-              </circle>
+                <circle
+                  cx={inner.x}
+                  cy={inner.y}
+                  r={INNER_NODE_R}
+                  fill={done ? arm.color : 'var(--bg)'}
+                  stroke={arm.color}
+                  strokeWidth="1.5"
+                  opacity={done ? 0.9 : 0.3}
+                  className="pal-node-appear"
+                  filter={done ? 'url(#nodeGlow)' : undefined}
+                  style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay, transition: 'opacity var(--transition)' }}
+                />
+                <title>
+                  {arm.label}: {Math.round(arm.progress * 100)}% complete
+                  {hoveredArm === arm.id && arm.rooms && arm.rooms.length > 0 ? '\n' + arm.rooms.map(r => {
+                    const roomProgress = allRoomProgress.find(x => x.label === r);
+                    return roomProgress ? `${r}: ${roomProgress.completed}/${roomProgress.total}` : r;
+                  }).join('\n') : ''}
+                </title>
+              </g>
             );
           })}
 
@@ -221,20 +377,33 @@ export function UniverseView({ allRoomProgress }) {
             const started = arm.progress > 0;
             const delay = (arm.idx * 70 + 400) + 'ms';
             return (
-              <circle
+              <g
                 key={'outer-' + arm.id}
-                cx={outer.x}
-                cy={outer.y}
-                r={OUTER_NODE_R}
-                fill={done ? arm.color : 'var(--bg)'}
-                stroke={arm.color}
-                strokeWidth={started ? '2' : '1.5'}
-                opacity={started ? 1 : 0.25}
-                className="pal-node-appear"
-                style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay }}
+                onMouseEnter={() => setHoveredArm(arm.id)}
+                onMouseLeave={() => setHoveredArm(null)}
+                onClick={() => handleArmClick(arm.id)}
+                style={{ cursor: 'pointer' }}
               >
-                <title>{arm.label}: {Math.round(arm.progress * 100)}% complete</title>
-              </circle>
+                <circle
+                  cx={outer.x}
+                  cy={outer.y}
+                  r={OUTER_NODE_R}
+                  fill={done ? arm.color : 'var(--bg)'}
+                  stroke={arm.color}
+                  strokeWidth={started ? '2' : '1.5'}
+                  opacity={started ? 1 : 0.25}
+                  className="pal-node-appear"
+                  filter={done ? 'url(#nodeGlow)' : undefined}
+                  style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay, transition: 'opacity var(--transition)' }}
+                />
+                <title>
+                  {arm.label}: {Math.round(arm.progress * 100)}% complete
+                  {hoveredArm === arm.id && arm.rooms && arm.rooms.length > 0 ? '\n' + arm.rooms.map(r => {
+                    const roomProgress = allRoomProgress.find(x => x.label === r);
+                    return roomProgress ? `${r}: ${roomProgress.completed}/${roomProgress.total}` : r;
+                  }).join('\n') : ''}
+                </title>
+              </g>
             );
           })}
 
