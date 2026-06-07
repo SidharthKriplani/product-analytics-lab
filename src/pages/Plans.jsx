@@ -155,6 +155,18 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
               </div>
             </div>
           </div>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.7, margin: '0 0 1rem', fontStyle: 'italic' }}>
+              "As a Data Scientist, I assumed I already understood product analytics — PAL showed me the gaps. The cases on metric diagnosis, funnel drops, and A/B interpretation forced me to think like a PM, not just run numbers. The debrief format is what makes it stick."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <img src="/testimonials/swapnil.jpg" alt="Swapnil Pattanshetty" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              <div>
+                <a href="https://www.linkedin.com/in/swapnil-pattanshetty/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>Swapnil Pattanshetty</a>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Data Scientist · Beta tester</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

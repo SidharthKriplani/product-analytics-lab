@@ -254,6 +254,13 @@ export function Home({ onNavigate, onShowAuth }) {
               img: '/testimonials/debasrija.jpg',
               role: 'Beta tester · Stats & Design tracks',
             },
+            {
+              quote: "As a Data Scientist, I assumed I already understood product analytics — PAL showed me the gaps. The cases on metric diagnosis, funnel drops, and A/B interpretation forced me to think like a PM, not just run numbers. The debrief format is what makes it stick.",
+              name: 'Swapnil Pattanshetty',
+              href: 'https://www.linkedin.com/in/swapnil-pattanshetty/',
+              img: '/testimonials/swapnil.jpg',
+              role: 'Data Scientist · Beta tester',
+            },
           ].map(t => (
             <div key={t.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem 1.25rem' }}>
               <p style={{ fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.65, margin: '0 0 0.875rem', fontStyle: 'italic' }}>
