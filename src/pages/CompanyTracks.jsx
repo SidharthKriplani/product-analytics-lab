@@ -674,7 +674,7 @@ function TrackDetail({ track, onBack, onNavigate }) {
 
       {/* Director pressure cards */}
       {track.directorCards && track.directorCards.length > 0 && (
-        <DirectorPressureCards cards={track.directorCards} />
+        <DirectorPressureCards cards={track.directorCards.filter(c => !c.level || c.level === selectedLevel)} />
       )}
 
       {/* Playbook articles */}
