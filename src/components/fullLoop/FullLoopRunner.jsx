@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { fullLoopCasesById } from '../../data/fullLoopCases.js';
+import { fullLoopSeedData } from '../../data/fullLoopSeedData.js';
 import { saveFullLoopProgress, getFullLoopProgress, clearFullLoopProgress } from '../../utils/fullLoopProgress.js';
-import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { track } from '../../utils/analytics.js';
 
 // ─── SVG Phase Icons ───────────────────────────────────────────────────────
@@ -986,37 +986,115 @@ function RCAPhase(props) {
   );
 }
 
-// ─── SQL Phase (Run Query with key-element matching) ───────────────────────
+// ─── SQL Phase (real sql.js execution against synthetic data) ────────────────
 function SQLPhase(props) {
   var phase = props.phase;
   var state = props.state;
   var setState = props.setState;
   var onContinue = props.onContinue;
+  var caseId = props.caseId;
   var userSql = state.userSql || '';
   var revealed = state.revealed || false;
   var ran = state.ran || false;
-  var sqlMatchResults = state.matchResults || [];
+  var queryResults = state.queryResults || null;
+  var queryError = state.queryError || '';
+  var modelResults = state.modelResults || null;
 
-  var hasKeyElements = phase.keyElements && phase.keyElements.length > 0;
+  var dbRef = useRef(null);
+  var seedData = fullLoopSeedData[caseId];
+  var dbReady = state.dbReady || false;
+  var dbError = state.dbError || '';
+
+  // Initialize sql.js database with synthetic seed data
+  useEffect(function() {
+    if (!seedData) return;
+    var cancelled = false;
+
+    async function initDb() {
+      try {
+        var sqlJsModule = await import('sql.js');
+        var initSqlJs = sqlJsModule.default || sqlJsModule;
+        if (cancelled) return;
+        var SQL = await initSqlJs({ locateFile: function() { return '/sql-wasm.wasm'; } });
+        if (cancelled) return;
+        var database = new SQL.Database();
+
+        // Run seed SQL statements
+        for (var i = 0; i < seedData.seedSql.length; i++) {
+          database.run(seedData.seedSql[i]);
+        }
+
+        dbRef.current = database;
+        setState(Object.assign({}, state, { dbReady: true, dbError: '' }));
+      } catch (e) {
+        if (!cancelled) {
+          setState(Object.assign({}, state, { dbReady: false, dbError: 'Failed to load SQL engine: ' + e.message }));
+        }
+      }
+    }
+
+    initDb();
+    return function() {
+      cancelled = true;
+      if (dbRef.current) {
+        try { dbRef.current.close(); } catch (ex) { /* ignore */ }
+        dbRef.current = null;
+      }
+    };
+  }, [caseId]);
 
   function handleRunQuery() {
-    var results = matchKeyElements(userSql, phase.keyElements);
-    setState({
-      userSql: userSql,
-      revealed: revealed,
-      ran: true,
-      matchResults: results,
-    });
+    if (!dbRef.current || !userSql.trim()) return;
+    try {
+      var res = dbRef.current.exec(userSql);
+      var result = res.length === 0
+        ? { columns: [], rows: [] }
+        : { columns: res[0].columns, rows: res[0].values.map(function(r) { return r.map(function(v) { return String(v); }); }) };
+      setState(Object.assign({}, state, {
+        userSql: userSql,
+        ran: true,
+        queryResults: result,
+        queryError: '',
+        revealed: revealed,
+        modelResults: modelResults,
+        dbReady: true,
+      }));
+    } catch (e) {
+      setState(Object.assign({}, state, {
+        userSql: userSql,
+        ran: true,
+        queryResults: null,
+        queryError: e.message,
+        revealed: revealed,
+        modelResults: modelResults,
+        dbReady: true,
+      }));
+    }
   }
 
   function handleRevealQuery() {
-    setState({
+    // Also run the model query to show expected output
+    var mResults = modelResults;
+    if (!mResults && dbRef.current && seedData && seedData.correctQuerySqlite) {
+      try {
+        var res = dbRef.current.exec(seedData.correctQuerySqlite);
+        if (res.length > 0) {
+          mResults = { columns: res[0].columns, rows: res[0].values.map(function(r) { return r.map(function(v) { return String(v); }); }) };
+        }
+      } catch (ex) { /* fall back to static expectedOutput */ }
+    }
+    setState(Object.assign({}, state, {
       userSql: userSql,
       revealed: true,
       ran: ran,
-      matchResults: sqlMatchResults,
-    });
+      queryResults: queryResults,
+      queryError: queryError,
+      modelResults: mResults,
+      dbReady: true,
+    }));
   }
+
+  var hasResults = ran && queryResults && queryResults.columns.length > 0;
 
   return (
     <div>
@@ -1024,15 +1102,29 @@ function SQLPhase(props) {
       <p style={{ fontSize: '15px', lineHeight: '1.6', color: 'var(--text)', marginBottom: '12px' }}>
         {phase.task}
       </p>
+
+      {/* DB loading state */}
+      {!dbReady && !dbError && (
+        <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+          Loading SQL engine...
+        </div>
+      )}
+      {dbError && (
+        <div style={{ fontSize: '13px', color: 'var(--red)', marginBottom: '12px' }}>
+          {dbError}
+        </div>
+      )}
+
       <textarea
         value={userSql}
         onChange={function(e) {
-          setState({
+          setState(Object.assign({}, state, {
             userSql: e.target.value,
-            revealed: revealed,
             ran: false,
-            matchResults: [],
-          });
+            queryResults: null,
+            queryError: '',
+            dbReady: dbReady,
+          }));
         }}
         placeholder='-- Write your SQL here'
         rows={6}
@@ -1045,16 +1137,20 @@ function SQLPhase(props) {
         }}
       />
 
-      {/* Step 1: Run Query button (when keyElements exist) */}
-      {hasKeyElements && !ran && !revealed && (
+      {/* Run Query button */}
+      {dbReady && !revealed && (
         <button
           onClick={handleRunQuery}
+          disabled={!userSql.trim()}
           style={{
             marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
-            background: 'var(--green)', color: '#fff', fontWeight: 600,
-            fontSize: '14px', border: 'none', cursor: 'pointer',
+            background: userSql.trim() ? 'var(--green)' : 'var(--border)',
+            color: '#fff', fontWeight: 600,
+            fontSize: '14px', border: 'none',
+            cursor: userSql.trim() ? 'pointer' : 'default',
             display: 'inline-flex', alignItems: 'center', gap: '8px',
-            boxShadow: '0 2px 8px rgba(16,185,129,0.2)',
+            boxShadow: userSql.trim() ? '0 2px 8px rgba(16,185,129,0.2)' : 'none',
+            opacity: userSql.trim() ? 1 : 0.5,
           }}
         >
           <IconPlay size={14} color='#fff' />
@@ -1062,41 +1158,67 @@ function SQLPhase(props) {
         </button>
       )}
 
-      {/* Match results after running */}
-      {hasKeyElements && ran && !revealed && (
-        <div>
-          <MatchReport results={sqlMatchResults} label='key elements' />
-          <button
-            onClick={handleRevealQuery}
-            style={{
-              marginTop: '16px', padding: '12px 24px', borderRadius: '8px',
-              background: 'var(--accent)', color: '#fff', fontWeight: 600,
-              fontSize: '14px', border: 'none', cursor: 'pointer',
-              display: 'inline-flex', alignItems: 'center', gap: '6px',
-            }}
-          >
-            Compare with Model
-            <IconArrowRight size={14} color='#fff' />
-          </button>
+      {/* Query error */}
+      {ran && queryError && (
+        <div style={{
+          marginTop: '12px', padding: '12px 16px', borderRadius: '8px',
+          background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+          fontSize: '13px', color: 'var(--red)', fontFamily: 'monospace',
+        }}>
+          Error: {queryError}
         </div>
       )}
 
-      {/* Fallback: no keyElements — direct reveal */}
-      {!hasKeyElements && !revealed && (
+      {/* Query results table */}
+      {hasResults && (
+        <div style={{ marginTop: '16px' }}>
+          <div style={{
+            fontWeight: 600, marginBottom: '8px', fontSize: '13px',
+            color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px',
+          }}>
+            Your Results ({queryResults.rows.length} row{queryResults.rows.length !== 1 ? 's' : ''})
+          </div>
+          <DataTable headers={queryResults.columns} rows={queryResults.rows} />
+        </div>
+      )}
+
+      {/* Empty result notice */}
+      {ran && !queryError && queryResults && queryResults.columns.length === 0 && (
+        <div style={{
+          marginTop: '12px', fontSize: '13px', color: 'var(--text-muted)',
+          padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)',
+          borderRadius: '8px',
+        }}>
+          Query returned no results. Check your table names and column references against the schema above.
+        </div>
+      )}
+
+      {/* Hints — show before reveal, hide after */}
+      {!revealed && phase.hints && phase.hints.length > 0 && (
+        <div style={{ marginTop: '16px' }}>
+          {phase.hints.map(function(hint, i) {
+            return <CollapsibleHint key={i} hint={hint} index={i} />;
+          })}
+        </div>
+      )}
+
+      {/* Compare with Model — below hints, before reveal */}
+      {ran && !revealed && (
         <button
           onClick={handleRevealQuery}
           style={{
-            marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
+            marginTop: '16px', padding: '12px 24px', borderRadius: '8px',
             background: 'var(--accent)', color: '#fff', fontWeight: 600,
             fontSize: '14px', border: 'none', cursor: 'pointer',
             display: 'inline-flex', alignItems: 'center', gap: '6px',
           }}
         >
-          Reveal Correct Query
+          Compare with Model
           <IconArrowRight size={14} color='#fff' />
         </button>
       )}
 
+      {/* Revealed: correct query + model output */}
       {revealed && (
         <div className='pal-reveal-in'>
           <div style={{ marginTop: '16px', marginBottom: '12px' }}>
@@ -1105,26 +1227,29 @@ function SQLPhase(props) {
               display: 'flex', alignItems: 'center', gap: '6px',
             }}>
               <IconCheckmark size={16} color='var(--accent)' />
-              Correct Query
+              Model Query
             </div>
             {phase.correctQueryFormatted && phase.correctQueryFormatted.length > 0
               ? <FormattedCodeBlock lines={phase.correctQueryFormatted} />
               : <CodeBlock code={phase.correctQuery} />
             }
           </div>
-          {phase.expectedOutput && (
+          {/* Model results from actual execution */}
+          {modelResults && modelResults.columns.length > 0 && (
+            <div style={{ marginTop: '12px' }}>
+              <div style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                Model Output
+              </div>
+              <DataTable headers={modelResults.columns} rows={modelResults.rows} />
+            </div>
+          )}
+          {/* Fallback to static expected output if model query failed */}
+          {(!modelResults || modelResults.columns.length === 0) && phase.expectedOutput && (
             <div style={{ marginTop: '12px' }}>
               <div style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--text-muted)' }}>
                 Expected Output
               </div>
               <DataTable headers={phase.expectedOutput.headers} rows={phase.expectedOutput.rows} />
-            </div>
-          )}
-          {phase.hints && phase.hints.length > 0 && (
-            <div style={{ marginTop: '12px' }}>
-              {phase.hints.map(function(hint, i) {
-                return <CollapsibleHint key={i} hint={hint} index={i} />;
-              })}
             </div>
           )}
         </div>
@@ -1758,10 +1883,7 @@ function ScoreRing(props) {
           style={{ transition: 'stroke-dashoffset 0.8s ease' }}
         />
         {/* Center text */}
-        <text x='65' y='60' textAnchor='middle' fontSize='32' fontWeight='700' fill='var(--text)'>
-          {pct}%
-        </text>
-        <text x='65' y='80' textAnchor='middle' fontSize='12' fill='var(--text-muted)'>
+        <text x='65' y='62' textAnchor='middle' dominantBaseline='central' fontSize='28' fontWeight='700' fill='var(--text)'>
           {score}/{maxScore}
         </text>
       </svg>
@@ -1793,18 +1915,12 @@ function CompletionCard(props) {
       if (st.correct) totalScore += 1;
     } else if (phase.type === 'sql') {
       entry.scoreType = 'sql';
-      if (st.matchResults && st.matchResults.length > 0) {
-        var matched = countMatched(st.matchResults);
-        entry.display = matched + '/' + st.matchResults.length;
-        entry.correct = matched === st.matchResults.length;
-        totalMax += st.matchResults.length;
-        totalScore += matched;
-      } else {
-        entry.display = 'completed';
-        entry.correct = true;
-        totalMax += 1;
-        totalScore += 1;
-      }
+      // Score: 1 if user ran a query that returned results, 0 otherwise
+      var ranSuccessfully = st.ran && st.queryResults && st.queryResults.columns && st.queryResults.columns.length > 0;
+      entry.correct = !!ranSuccessfully;
+      entry.display = ranSuccessfully ? 'query returned results' : 'no valid query';
+      totalMax += 1;
+      if (ranSuccessfully) totalScore += 1;
     } else if (phase.type === 'data' || phase.type === 'communicate') {
       entry.scoreType = 'text';
       if (st.matchResults && st.matchResults.length > 0) {
@@ -1870,153 +1986,93 @@ function CompletionCard(props) {
     if (!ps.correct) weakPhases.push(ps.title);
   });
 
-  var verdict = '';
-  if (pct === 100) {
-    verdict = 'Flawless execution across all phases.';
-  } else if (pct > 75) {
-    verdict = 'Strong analytical workflow.' + (weakPhases.length > 0 ? ' Minor gaps in ' + weakPhases[0] + '.' : '');
-  } else if (pct > 50) {
-    verdict = 'Solid foundation.' + (weakPhases.length > 0 ? ' Review ' + weakPhases.slice(0, 2).join(' and ') + ' for improvement.' : '');
-  } else {
-    verdict = 'This case has room for growth.' + (weakPhases.length > 0 ? ' Focus on ' + weakPhases.slice(0, 3).join(', ') + '.' : '');
-  }
+  // No verdict text — summary sheet, not evaluation
+
+  // Get debrief from the readout phase
+  var readoutPhase = flCase.phases[flCase.phases.length - 1];
+  var debriefText = readoutPhase && readoutPhase.debrief ? readoutPhase.debrief : '';
 
   return (
     <div className='pal-page-enter' style={{
       maxWidth: '800px', margin: '0 auto', padding: '24px 16px',
     }}>
-      <div style={{
-        background: 'var(--surface)',
-        border: isPerfect ? '2px solid var(--green)' : '2px solid var(--accent)',
-        borderRadius: '16px', padding: '40px 32px', textAlign: 'center',
-        marginBottom: '24px', position: 'relative', overflow: 'hidden',
-      }}>
-        {/* Decorative dots */}
-        <div style={{
-          position: 'absolute', top: '12px', left: '16px',
-          width: '6px', height: '6px', borderRadius: '50%',
-          background: isPerfect ? 'var(--green)' : 'var(--accent)', opacity: 0.15,
-        }} />
-        <div style={{
-          position: 'absolute', top: '24px', left: '36px',
-          width: '4px', height: '4px', borderRadius: '50%',
-          background: isPerfect ? 'var(--green)' : 'var(--accent)', opacity: 0.1,
-        }} />
-        <div style={{
-          position: 'absolute', top: '8px', right: '24px',
-          width: '5px', height: '5px', borderRadius: '50%',
-          background: isPerfect ? 'var(--green)' : 'var(--accent)', opacity: 0.12,
-        }} />
-        <div style={{
-          position: 'absolute', top: '32px', right: '40px',
-          width: '3px', height: '3px', borderRadius: '50%',
-          background: isPerfect ? 'var(--green)' : 'var(--accent)', opacity: 0.08,
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '20px', left: '28px',
-          width: '4px', height: '4px', borderRadius: '50%',
-          background: isPerfect ? 'var(--green)' : 'var(--accent)', opacity: 0.1,
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '14px', right: '20px',
-          width: '6px', height: '6px', borderRadius: '50%',
-          background: isPerfect ? 'var(--green)' : 'var(--accent)', opacity: 0.12,
-        }} />
-
-        <div style={{ marginBottom: '20px' }}>
-          <IconTrophy size={52} color={isPerfect ? '#10b981' : '#f59e0b'} />
-        </div>
-        <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px' }}>
-          Case Complete
-        </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '15px', margin: '0 0 28px' }}>
-          You completed all {flCase.phases.length} phases of this full-loop case.
-        </p>
-
-        {/* Score Ring */}
-        <div style={{ marginBottom: '20px' }}>
-          <ScoreRing score={totalScore} maxScore={totalMax} />
-        </div>
-
-        {/* Verdict */}
-        <p style={{
-          fontSize: '15px', fontWeight: 500, color: 'var(--text)',
-          lineHeight: '1.5', margin: '0 0 8px', maxWidth: '480px',
-          marginLeft: 'auto', marginRight: 'auto',
-        }}>
-          {verdict}
-        </p>
-      </div>
-
-      {/* Phase Timeline */}
+      {/* ── Summary header ── */}
       <div style={{
         background: 'var(--surface)', border: '1px solid var(--border)',
-        borderRadius: '14px', padding: '24px 20px', marginBottom: '24px',
+        borderRadius: '14px', padding: '28px 24px', marginBottom: '16px',
       }}>
         <div style={{
-          fontWeight: 700, fontSize: '15px', color: 'var(--text)', marginBottom: '20px',
+          display: 'flex', alignItems: 'center', gap: '16px',
+          marginBottom: '16px',
         }}>
-          Phase Breakdown
-        </div>
-        {phaseScores.map(function(ps, i) {
-          var statusColor = ps.correct ? 'var(--green)' : 'var(--red)';
-          var isLast = i === phaseScores.length - 1;
-
-          return (
-            <div key={i} style={{
-              display: 'flex', alignItems: 'flex-start', gap: '14px',
-              position: 'relative',
-            }}>
-              {/* Timeline line */}
-              {!isLast && (
-                <div style={{
-                  position: 'absolute', left: '17px', top: '36px',
-                  width: '2px', height: 'calc(100% - 12px)',
-                  background: ps.correct ? 'rgba(16,185,129,0.2)' : 'var(--border)',
-                }} />
-              )}
-              {/* Icon */}
-              <div style={{
-                width: '36px', height: '36px', borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: ps.correct ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)',
-                border: '2px solid ' + statusColor,
-                flexShrink: 0, zIndex: 1,
+          <ScoreRing score={totalScore} maxScore={totalMax} />
+          <div>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text)', margin: '0 0 4px' }}>
+              {flCase.title}
+            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{
+                fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)',
+                background: 'var(--border)', borderRadius: '4px', padding: '2px 8px',
               }}>
-                <PhaseIcon type={ps.type} size={16} />
-              </div>
-              {/* Content */}
-              <div style={{
-                flex: 1, paddingBottom: isLast ? '0' : '20px',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                gap: '8px', minHeight: '36px',
+                {flCase.domain}
+              </span>
+              <span style={{
+                fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)',
+                background: 'var(--border)', borderRadius: '4px', padding: '2px 8px',
               }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>
-                    {ps.title}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                    {ps.scoreType === 'decision' && (ps.correct ? 'Correct on first attempt' : 'Incorrect')}
-                    {ps.scoreType === 'sql' && ('Key elements: ' + ps.display)}
-                    {ps.scoreType === 'text' && ('Coverage: ' + ps.display)}
-                    {ps.scoreType === 'experiment' && ('Score: ' + ps.display)}
-                  </div>
-                </div>
-                <div style={{ flexShrink: 0 }}>
-                  {ps.correct
-                    ? <IconCorrect size={20} />
-                    : <IconWrong size={20} />
-                  }
-                </div>
-              </div>
+                {flCase.difficulty}
+              </span>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                {flCase.phases.length} phases completed
+              </span>
             </div>
-          );
-        })}
+          </div>
+        </div>
+
+        {/* Phase pills — compact row */}
+        <div style={{
+          display: 'flex', gap: '6px', flexWrap: 'wrap',
+        }}>
+          {phaseScores.map(function(ps, i) {
+            return (
+              <div key={i} style={{
+                display: 'inline-flex', alignItems: 'center', gap: '5px',
+                padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 500,
+                background: ps.correct ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.06)',
+                color: ps.correct ? 'var(--green)' : 'var(--red)',
+                border: '1px solid ' + (ps.correct ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.15)'),
+              }}>
+                <PhaseIcon type={ps.type} size={12} />
+                {ps.title}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      <ForwardPointerCard room='fullLoop' />
+      {/* ── Case debrief ── */}
+      {debriefText && (
+        <div style={{
+          background: 'var(--surface)', border: '1px solid var(--border)',
+          borderRadius: '14px', padding: '20px 24px', marginBottom: '16px',
+        }}>
+          <div style={{
+            fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)',
+            textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px',
+          }}>
+            Case Takeaway
+          </div>
+          <p style={{
+            fontSize: '14px', lineHeight: '1.7', color: 'var(--text)', margin: 0,
+          }}>
+            {debriefText}
+          </p>
+        </div>
+      )}
 
-      <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+      {/* ── Navigation ── */}
+      <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
         <button
           onClick={onBack}
           style={{
@@ -2217,6 +2273,7 @@ export function FullLoopRunner(props) {
         state={currentState}
         setState={setCurrentPhaseState}
         onContinue={handleContinue}
+        caseId={flCase.id}
       />
     );
   } else if (currentPhase.type === 'communicate') {
