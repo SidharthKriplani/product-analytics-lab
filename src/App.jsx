@@ -150,6 +150,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
   const [authGate, setAuthGate] = useState(false);
+  const [authSettled, setAuthSettled] = useState(false);
   const [progressSaved, setProgressSaved] = useState(false); // "Progress saved" toast for signed-in free users
 
   // Helper: call at top of any open handler that requires sign-in.
@@ -298,6 +299,7 @@ export default function App() {
   // Redirect signed-in users away from landing page → Progress
   // Handles both: initial auth fire AND back-navigation to 'home'
   useEffect(() => {
+    if (pendingDeepLinkRef.current) return;
     if (user && page === 'home') {
       setPage('progress');
     }
@@ -313,18 +315,20 @@ export default function App() {
       if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && session?.user) {
         pullProgressFromSupabase(session.user).then(() => {
           setUser(session.user);
+          setAuthSettled(true);
           refreshProgress();
           if (event === 'SIGNED_IN') {
             track('user_signed_in', {});
             pushProgressToSupabase(session.user);
-            setPage(p => p === 'home' ? 'progress' : p);
+            if (!pendingDeepLinkRef.current) setPage(p => p === 'home' ? 'progress' : p);
           }
           if (event === 'INITIAL_SESSION') {
-            setPage(p => p === 'home' ? 'progress' : p);
+            if (!pendingDeepLinkRef.current) setPage(p => p === 'home' ? 'progress' : p);
           }
         });
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
+        setAuthSettled(true);
       }
     });
 
@@ -950,32 +954,31 @@ export default function App() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // On mount: if URL has a deep-link hash, restore that page instead of default 'home'.
-  // Runs once after initial render. Deferred slightly to let auth state settle.
+  // Waits for auth to settle so user state is available for requireUser checks.
+  // Fallback: if auth never fires within 2s (e.g. Supabase offline), consume anyway.
   useEffect(() => {
     if (!pendingDeepLinkRef.current) return;
+    const fallback = setTimeout(() => setAuthSettled(true), 2000);
+    return () => clearTimeout(fallback);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!pendingDeepLinkRef.current) return;
+    if (!authSettled) return;
+
     const hash = window.location.hash;
     const parsed = parseHash(hash);
+    pendingDeepLinkRef.current = false;
+    isHashNavRef.current = true;
 
-    // Clear the pending flag so state→hash sync can start working
-    const consumeAndNav = () => {
-      pendingDeepLinkRef.current = false;
-      isHashNavRef.current = true;
-      if (parsed && parsed.caseId && parsed.openFnName) {
-        const fn = openFnsRef.current[parsed.openFnName];
-        if (fn) fn(parsed.caseId);
-        else if (parsed.page) navigate(parsed.page);
-      } else if (parsed) {
-        navigate(parsed.page);
-      } else {
-        // Unrecognized hash — clear flag, let state→hash sync take over
-        pendingDeepLinkRef.current = false;
-      }
-    };
-
-    // Short delay to let auth state (onAuthStateChange) settle first
-    const timer = setTimeout(consumeAndNav, 150);
-    return () => clearTimeout(timer);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (parsed && parsed.caseId && parsed.openFnName) {
+      const fn = openFnsRef.current[parsed.openFnName];
+      if (fn) fn(parsed.caseId);
+      else if (parsed.page) navigate(parsed.page);
+    } else if (parsed) {
+      navigate(parsed.page);
+    }
+  }, [authSettled]); // eslint-disable-line react-hooks/exhaustive-deps
   // ── End hash routing ───────────────────────────────────────────────
 
   const isFocusMode = page === 'runner' || page.endsWith('-runner');

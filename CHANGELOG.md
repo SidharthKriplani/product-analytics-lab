@@ -4,6 +4,28 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.23.0] — 2026-06-09 [REBUILD + BUG FIX]
+
+### Full Loop 5-phase rebuild
+
+Rewrote Full Loop from 7 discrete phases (alert → data → rca → sql → communicate → experiment → readout) to 5 connected investigation phases that mirror a real analytics interview:
+
+1. **Problem** — metric alert + clarifying MCQ
+2. **Decomposition** — free-form MECE breakdown with key-element matching
+3. **Schema Design** — user proposes tables/columns needed for investigation
+4. **Query Chain** — 3 sequential SQL queries (sql.js), each building on prior results
+5. **Synthesis** — stakeholder summary with rubric self-assessment
+
+All 10 cases (fl01-fl10) rewritten in new format. Seed data expanded with 5 new tables (feature_usage, support_tickets, search_results, server_metrics, module_progress) to support 3-query chains. FullLoopBrowser.jsx updated for new data contract (phaseCount=5, description from problem.context).
+
+### Deep link auth race fix
+
+Root cause: `onAuthStateChange` callback fires `setPage('progress')` before deep-link handler can consume the URL hash. Fixed by adding `authSettled` state — deep link consumption waits for auth to settle instead of using a fragile 150ms timer. Added `pendingDeepLinkRef` guard to the `home→progress` redirect effect. 2-second fallback timer if Supabase never fires.
+
+Files: `src/App.jsx`, `src/components/fullLoop/FullLoopRunner.jsx`, `src/data/fullLoopCases.js`, `src/data/fullLoopSeedData.js`, `src/pages/FullLoopBrowser.jsx`
+
+---
+
 ## [4.93.0] — 2026-06-03 [BUG FIX + VISUAL]
 
 ### Audits #145 + #146 closed

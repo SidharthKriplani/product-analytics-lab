@@ -70,29 +70,20 @@ function IconCommunicate(props) {
   );
 }
 
-function IconExperiment(props) {
+function IconTree(props) {
   var size = props.size || 20;
-  var color = props.color || 'var(--green)';
+  var color = props.color || 'var(--teal)';
   return (
     <svg width={size} height={size} viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'>
-      <path d='M7 2H13V7L16.5 16C16.8 16.8 16.2 17.5 15.3 17.5H4.7C3.8 17.5 3.2 16.8 3.5 16L7 7V2Z' stroke={color} strokeWidth='1.3' fill='none'/>
-      <path d='M7 9L3.5 16C3.2 16.8 3.8 17.5 4.7 17.5H15.3C16.2 17.5 16.8 16.8 16.5 16L13 9H7Z' fill={color} fillOpacity='0.12'/>
-      <line x1='6' y1='2' x2='14' y2='2' stroke={color} strokeWidth='1.5' strokeLinecap='round'/>
-      <circle cx='8' cy='13' r='1' fill={color} fillOpacity='0.6'/>
-      <circle cx='11.5' cy='14.5' r='0.8' fill={color} fillOpacity='0.4'/>
-      <circle cx='10' cy='11.5' r='0.7' fill={color} fillOpacity='0.5'/>
-    </svg>
-  );
-}
-
-function IconReadout(props) {
-  var size = props.size || 20;
-  var color = props.color || 'var(--accent)';
-  return (
-    <svg width={size} height={size} viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'>
-      <rect x='3' y='1' width='14' height='17' rx='2' stroke={color} strokeWidth='1.3' fill='none'/>
-      <path d='M3 5H17' stroke={color} strokeWidth='1' strokeOpacity='0.3'/>
-      <polyline points='7,10 9,12.5 13,8' stroke={color} strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' fill='none'/>
+      <circle cx='10' cy='3.5' r='2' stroke={color} strokeWidth='1.3' fill={color} fillOpacity='0.15'/>
+      <line x1='10' y1='5.5' x2='10' y2='8' stroke={color} strokeWidth='1.2'/>
+      <line x1='5' y1='8' x2='15' y2='8' stroke={color} strokeWidth='1.2'/>
+      <line x1='5' y1='8' x2='5' y2='10.5' stroke={color} strokeWidth='1.2'/>
+      <line x1='10' y1='8' x2='10' y2='10.5' stroke={color} strokeWidth='1.2'/>
+      <line x1='15' y1='8' x2='15' y2='10.5' stroke={color} strokeWidth='1.2'/>
+      <circle cx='5' cy='12' r='1.5' stroke={color} strokeWidth='1.2' fill={color} fillOpacity='0.15'/>
+      <circle cx='10' cy='12' r='1.5' stroke={color} strokeWidth='1.2' fill={color} fillOpacity='0.15'/>
+      <circle cx='15' cy='12' r='1.5' stroke={color} strokeWidth='1.2' fill={color} fillOpacity='0.15'/>
     </svg>
   );
 }
@@ -219,13 +210,11 @@ function IconPlay(props) {
 }
 
 var PHASE_ICON_MAP = {
-  alert: IconAlert,
-  data: IconData,
-  rca: IconRCA,
-  sql: IconSQL,
-  communicate: IconCommunicate,
-  experiment: IconExperiment,
-  readout: IconReadout,
+  problem: IconAlert,
+  decomposition: IconTree,
+  schemaDesign: IconDatabase,
+  queryChain: IconSQL,
+  synthesis: IconCommunicate,
 };
 
 function PhaseIcon(props) {
@@ -271,7 +260,7 @@ function MatchReport(props) {
         fontWeight: 600, fontSize: '14px', color: 'var(--text)',
         marginBottom: '12px',
       }}>
-        Your query covers {matched}/{results.length} {label}
+        Your response covers {matched}/{results.length} {label}
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
         {results.map(function(r, i) {
@@ -323,9 +312,19 @@ function clearDraft(caseId) {
   } catch (e) { /* silent */ }
 }
 
+// ─── Phase definitions ─────────────────────────────────────────────────────
+var PHASES = ['problem', 'decomposition', 'schemaDesign', 'queryChain', 'synthesis'];
+
+var PHASE_META = [
+  { key: 'problem', title: 'Problem', color: '#f59e0b' },
+  { key: 'decomposition', title: 'Decompose', color: 'var(--teal)' },
+  { key: 'schemaDesign', title: 'Schema', color: 'var(--accent)' },
+  { key: 'queryChain', title: 'SQL Chain', color: 'var(--accent)' },
+  { key: 'synthesis', title: 'Synthesis', color: 'var(--purple)' },
+];
+
 // ─── Phase Bar ──────────────────────────────────────────────────────────────
 function PhaseBar(props) {
-  var phases = props.phases;
   var currentIndex = props.currentIndex;
   var completedPhases = props.completedPhases;
   var onSelect = props.onSelect;
@@ -335,8 +334,8 @@ function PhaseBar(props) {
       display: 'flex', alignItems: 'center', gap: '0',
       overflowX: 'auto', padding: '16px 0', marginBottom: '28px',
     }}>
-      {phases.map(function(phase, i) {
-        var isCompleted = completedPhases[i];
+      {PHASE_META.map(function(phase, i) {
+        var isCompleted = !!completedPhases[i];
         var isCurrent = i === currentIndex;
         var isClickable = isCompleted && !isCurrent;
         var isFuture = !isCompleted && !isCurrent;
@@ -375,7 +374,7 @@ function PhaseBar(props) {
               }}>
                 {isCompleted
                   ? <IconCheckmark size={18} />
-                  : <PhaseIcon type={phase.type} size={18} />
+                  : <PhaseIcon type={phase.key} size={18} />
                 }
               </div>
               <span style={{
@@ -388,7 +387,7 @@ function PhaseBar(props) {
               </span>
             </button>
             {/* Connector line */}
-            {i < phases.length - 1 && (
+            {i < PHASE_META.length - 1 && (
               <div style={{
                 flex: '0 0 auto', width: '20px', height: '2px',
                 background: isCompleted ? 'var(--green)' : 'transparent',
@@ -463,49 +462,7 @@ function DataTable(props) {
   );
 }
 
-// ─── Schema display for SQL phase ───────────────────────────────────────────
-function SchemaDisplay(props) {
-  var schema = props.schema;
-
-  return (
-    <div style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: '10px', padding: '16px 20px', marginBottom: '16px',
-      fontSize: '13px',
-    }}>
-      <div style={{
-        fontWeight: 600, marginBottom: '12px', color: 'var(--text-muted)',
-        display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px',
-      }}>
-        <IconDatabase size={16} />
-        Schema
-      </div>
-      {schema.tables.map(function(t, i) {
-        return (
-          <div key={i} style={{
-            marginBottom: '10px', display: 'flex', alignItems: 'baseline',
-            gap: '10px', flexWrap: 'wrap',
-          }}>
-            <span style={{
-              fontWeight: 600, fontFamily: 'monospace', color: 'var(--accent)',
-              background: 'rgba(59,130,246,0.08)', padding: '2px 8px',
-              borderRadius: '4px', fontSize: '12px',
-            }}>
-              {t.name}
-            </span>
-            <span style={{
-              color: 'var(--text-muted)', fontFamily: 'monospace', fontSize: '12px',
-            }}>
-              {t.columns.join(' · ')}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Option Buttons (for alert, rca, readout) ───────────────────────────────
+// ─── Option Buttons (for MCQ) ──────────────────────────────────────────────
 function OptionButtons(props) {
   var options = props.options;
   var selected = props.selected;
@@ -747,12 +704,10 @@ function FormattedCodeBlock(props) {
   );
 }
 
-// ─── Metric Card (for alert phase) ──────────────────────────────────────────
+// ─── Metric Card ────────────────────────────────────────────────────────────
 function MetricCard(props) {
-  var metricName = props.metricName;
-  var metricValue = props.metricValue;
-  var metricChange = props.metricChange;
-  var isNegative = (metricChange || '').indexOf('-') >= 0;
+  var metric = props.metric;
+  var isNegative = metric.direction === 'down';
 
   return (
     <div className='pal-card-enter' style={{
@@ -767,13 +722,18 @@ function MetricCard(props) {
         fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px',
         fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px',
       }}>
-        {metricName}
+        {metric.name}
       </div>
       <div style={{
         fontSize: '42px', fontWeight: 700, color: 'var(--text)', marginBottom: '6px',
         lineHeight: '1.1',
       }}>
-        {metricValue}
+        {metric.current}
+      </div>
+      <div style={{
+        fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px',
+      }}>
+        Previous: {metric.previous} ({metric.period})
       </div>
       <div style={{
         fontSize: '15px', fontWeight: 600,
@@ -784,126 +744,182 @@ function MetricCard(props) {
           ? <IconArrowDown size={14} color='var(--red)' />
           : <IconArrowUp size={14} color='var(--green)' />
         }
-        {metricChange}
+        {metric.change}
       </div>
     </div>
   );
 }
 
-// ─── Alert Phase ────────────────────────────────────────────────────────────
-function AlertPhase(props) {
+// ─── Textarea style (shared) ────────────────────────────────────────────────
+var TEXTAREA_STYLE = {
+  width: '100%',
+  minHeight: '120px',
+  padding: '12px',
+  borderRadius: 'var(--radius-sm, 8px)',
+  border: '1.5px solid var(--border)',
+  background: 'var(--surface)',
+  color: 'var(--text)',
+  fontFamily: 'inherit',
+  fontSize: '0.95rem',
+  resize: 'vertical',
+  boxSizing: 'border-box',
+  lineHeight: '1.6',
+  transition: 'border-color 0.2s ease',
+};
+
+var SQL_TEXTAREA_STYLE = {
+  width: '100%',
+  minHeight: '120px',
+  padding: '12px',
+  borderRadius: 'var(--radius-sm, 8px)',
+  border: '1.5px solid var(--border)',
+  background: 'var(--surface)',
+  color: 'var(--text)',
+  fontFamily: 'monospace',
+  fontSize: '13px',
+  resize: 'vertical',
+  boxSizing: 'border-box',
+  lineHeight: '1.6',
+  transition: 'border-color 0.2s ease',
+};
+
+// ─── Problem Phase ──────────────────────────────────────────────────────────
+function ProblemPhase(props) {
   var phase = props.phase;
-  var state = props.state;
-  var setState = props.setState;
-  var onContinue = props.onContinue;
-  var selected = state.selected || null;
-  var selectedOpt = selected ? phase.options.find(function(o) { return o.id === selected; }) : null;
+  var onComplete = props.onComplete;
+
+  var _selected = useState(null);
+  var selectedId = _selected[0];
+  var setSelectedId = _selected[1];
+
+  var _revealed = useState(false);
+  var revealed = _revealed[0];
+  var setRevealed = _revealed[1];
+
+  var selectedOpt = selectedId ? phase.options.find(function(o) { return o.id === selectedId; }) : null;
+  var isCorrect = selectedOpt ? selectedOpt.correct : false;
 
   function handleSelect(id) {
-    if (selected) return;
-    setState({ selected: id, correct: phase.options.find(function(o) { return o.id === id; }).correct });
+    if (selectedId) return;
+    setSelectedId(id);
+    var opt = phase.options.find(function(o) { return o.id === id; });
+    if (opt) {
+      setRevealed(true);
+    }
+  }
+
+  function handleContinue() {
+    onComplete(isCorrect ? 1 : 0);
   }
 
   return (
-    <div>
-      <MetricCard
-        metricName={phase.metricName}
-        metricValue={phase.metricValue}
-        metricChange={phase.metricChange}
-      />
-      <p style={{ fontSize: '15px', lineHeight: '1.6', color: 'var(--text)', marginBottom: '8px' }}>
-        {phase.prompt}
+    <div className='pal-reveal-in'>
+      <p style={{ fontSize: '15px', lineHeight: '1.7', color: 'var(--text)', marginBottom: '20px' }}>
+        {phase.context}
       </p>
+
+      <MetricCard metric={phase.metric} />
+
+      <div style={{
+        fontWeight: 600, fontSize: '15px', color: 'var(--text)',
+        marginBottom: '4px',
+      }}>
+        {phase.question}
+      </div>
+
       <OptionButtons
         options={phase.options}
-        selected={selected}
+        selected={selectedId}
         onSelect={handleSelect}
-        disabled={!!selected}
+        disabled={!!selectedId}
       />
-      {selectedOpt && <FeedbackBlock text={selectedOpt.feedback} />}
-      {selected && <ContinueButton onClick={onContinue} />}
+
+      {revealed && (
+        <FeedbackBlock text={phase.explanation} />
+      )}
+
+      {revealed && (
+        <ContinueButton onClick={handleContinue} />
+      )}
     </div>
   );
 }
 
-// ─── Data Phase (with key phrase matching) ─────────────────────────────────
-function DataPhase(props) {
+// ─── Decomposition Phase ────────────────────────────────────────────────────
+function DecompositionPhase(props) {
   var phase = props.phase;
-  var state = props.state;
-  var setState = props.setState;
-  var onContinue = props.onContinue;
-  var observation = state.observation || '';
-  var revealed = state.revealed || false;
-  var checked = state.checked || false;
-  var matchResults = state.matchResults || [];
+  var onComplete = props.onComplete;
+  var initialText = props.initialText || '';
 
-  var hasKeyPhrases = phase.keyPhrases && phase.keyPhrases.length > 0;
+  var _userText = useState(initialText);
+  var userText = _userText[0];
+  var setUserText = _userText[1];
 
-  function handleCheck() {
-    var results = matchKeyElements(observation, phase.keyPhrases);
-    setState({
-      observation: observation,
-      revealed: revealed,
-      checked: true,
-      matchResults: results,
-    });
+  var _submitted = useState(false);
+  var submitted = _submitted[0];
+  var setSubmitted = _submitted[1];
+
+  var _matchResults = useState([]);
+  var matchResults = _matchResults[0];
+  var setMatchResults = _matchResults[1];
+
+  var _modelRevealed = useState(false);
+  var modelRevealed = _modelRevealed[0];
+  var setModelRevealed = _modelRevealed[1];
+
+  function handleSubmit() {
+    var results = matchKeyElements(userText, phase.keyElements);
+    setMatchResults(results);
+    setSubmitted(true);
   }
 
   function handleReveal() {
-    setState({
-      observation: observation,
-      revealed: true,
-      checked: checked,
-      matchResults: matchResults,
-    });
+    setModelRevealed(true);
+  }
+
+  function handleContinue() {
+    var matched = countMatched(matchResults);
+    onComplete(matched);
   }
 
   return (
-    <div>
-      <p style={{ fontSize: '15px', lineHeight: '1.6', color: 'var(--text)', marginBottom: '16px' }}>
-        {phase.prompt}
-      </p>
-      <DataTable headers={phase.dataTable.headers} rows={phase.dataTable.rows} />
-      <TealCallout>{phase.guideQuestion}</TealCallout>
+    <div className='pal-reveal-in'>
+      <TealCallout>{phase.prompt}</TealCallout>
+
       <textarea
-        value={observation}
+        value={userText}
         onChange={function(e) {
-          setState({
-            observation: e.target.value,
-            revealed: revealed,
-            checked: false,
-            matchResults: [],
-          });
+          setUserText(e.target.value);
+          if (submitted) {
+            setSubmitted(false);
+            setMatchResults([]);
+            setModelRevealed(false);
+          }
         }}
-        placeholder='Write your observation here...'
-        rows={4}
-        style={{
-          width: '100%', padding: '14px', borderRadius: '10px',
-          border: '1px solid var(--border)', background: 'var(--surface)',
-          fontSize: '14px', lineHeight: '1.5', color: 'var(--text)',
-          resize: 'vertical', fontFamily: 'inherit',
-          boxSizing: 'border-box', transition: 'border-color 0.2s ease',
-        }}
+        placeholder='Write your MECE breakdown here...'
+        style={TEXTAREA_STYLE}
       />
 
-      {/* Step 1: Check Observation (if keyPhrases exist) */}
-      {hasKeyPhrases && !checked && !revealed && (
+      {!submitted && (
         <button
-          onClick={handleCheck}
+          onClick={handleSubmit}
+          disabled={!userText.trim()}
           style={{
             marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
-            background: 'var(--teal)', color: '#fff', fontWeight: 600,
-            fontSize: '14px', border: 'none', cursor: 'pointer',
+            background: userText.trim() ? 'var(--teal)' : 'var(--border)',
+            color: '#fff', fontWeight: 600,
+            fontSize: '14px', border: 'none',
+            cursor: userText.trim() ? 'pointer' : 'default',
             display: 'inline-flex', alignItems: 'center', gap: '6px',
+            opacity: userText.trim() ? 1 : 0.5,
           }}
         >
-          Check Observation
+          Check Breakdown
           <IconArrowRight size={14} color='#fff' />
         </button>
       )}
 
-      {/* Show match results */}
-      {hasKeyPhrases && checked && !revealed && (
+      {submitted && !modelRevealed && (
         <div>
           <MatchReport results={matchResults} label='key elements' />
           <button
@@ -915,129 +931,253 @@ function DataPhase(props) {
               display: 'inline-flex', alignItems: 'center', gap: '6px',
             }}
           >
-            Reveal Model Observation
+            See Model Answer
             <IconArrowRight size={14} color='#fff' />
           </button>
         </div>
       )}
 
-      {/* Fallback: no keyPhrases — direct reveal */}
-      {!hasKeyPhrases && !revealed && (
+      {modelRevealed && (
+        <div>
+          <MatchReport results={matchResults} label='key elements' />
+          <div className='pal-reveal-in' style={{
+            marginTop: '16px', padding: '18px 20px', borderRadius: '10px',
+            background: 'rgba(20,184,166,0.06)', border: '1px solid var(--teal)',
+            borderLeft: '3px solid var(--teal)',
+            fontSize: '14px', lineHeight: '1.7', color: 'var(--text)',
+          }}>
+            <div style={{
+              fontWeight: 600, marginBottom: '8px', color: 'var(--teal)',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}>
+              <IconLightbulb size={16} color='var(--teal)' />
+              Model Answer
+            </div>
+            {phase.modelAnswer}
+          </div>
+          <ContinueButton onClick={handleContinue} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Schema Design Phase ────────────────────────────────────────────────────
+function SchemaDesignPhase(props) {
+  var phase = props.phase;
+  var onComplete = props.onComplete;
+  var initialText = props.initialText || '';
+
+  var _userText = useState(initialText);
+  var userText = _userText[0];
+  var setUserText = _userText[1];
+
+  var _submitted = useState(false);
+  var submitted = _submitted[0];
+  var setSubmitted = _submitted[1];
+
+  var _matchResults = useState([]);
+  var matchResults = _matchResults[0];
+  var setMatchResults = _matchResults[1];
+
+  var _modelRevealed = useState(false);
+  var modelRevealed = _modelRevealed[0];
+  var setModelRevealed = _modelRevealed[1];
+
+  function handleSubmit() {
+    var results = matchKeyElements(userText, phase.keyElements);
+    setMatchResults(results);
+    setSubmitted(true);
+  }
+
+  function handleReveal() {
+    setModelRevealed(true);
+  }
+
+  function handleContinue() {
+    var matched = countMatched(matchResults);
+    onComplete(matched);
+  }
+
+  return (
+    <div className='pal-reveal-in'>
+      <TealCallout>{phase.prompt}</TealCallout>
+
+      <textarea
+        value={userText}
+        onChange={function(e) {
+          setUserText(e.target.value);
+          if (submitted) {
+            setSubmitted(false);
+            setMatchResults([]);
+            setModelRevealed(false);
+          }
+        }}
+        placeholder='Describe the tables and columns you would need...'
+        style={TEXTAREA_STYLE}
+      />
+
+      {!submitted && (
         <button
-          onClick={handleReveal}
+          onClick={handleSubmit}
+          disabled={!userText.trim()}
           style={{
             marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
-            background: 'var(--teal)', color: '#fff', fontWeight: 600,
-            fontSize: '14px', border: 'none', cursor: 'pointer',
+            background: userText.trim() ? 'var(--accent)' : 'var(--border)',
+            color: '#fff', fontWeight: 600,
+            fontSize: '14px', border: 'none',
+            cursor: userText.trim() ? 'pointer' : 'default',
             display: 'inline-flex', alignItems: 'center', gap: '6px',
+            opacity: userText.trim() ? 1 : 0.5,
           }}
         >
-          Reveal Model Observation
+          Check Schema
           <IconArrowRight size={14} color='#fff' />
         </button>
       )}
 
-      {revealed && (
-        <div className='pal-reveal-in' style={{
-          marginTop: '16px', padding: '18px 20px', borderRadius: '10px',
-          background: 'rgba(20,184,166,0.06)', border: '1px solid var(--teal)',
-          borderLeft: '3px solid var(--teal)',
-          fontSize: '14px', lineHeight: '1.7', color: 'var(--text)',
-        }}>
-          <div style={{
-            fontWeight: 600, marginBottom: '8px', color: 'var(--teal)',
-            display: 'flex', alignItems: 'center', gap: '6px',
-          }}>
-            <IconLightbulb size={16} color='var(--teal)' />
-            Model Observation
-          </div>
-          {phase.modelObservation}
+      {submitted && !modelRevealed && (
+        <div>
+          <MatchReport results={matchResults} label='key elements' />
+          <button
+            onClick={handleReveal}
+            style={{
+              marginTop: '16px', padding: '12px 24px', borderRadius: '8px',
+              background: 'var(--accent)', color: '#fff', fontWeight: 600,
+              fontSize: '14px', border: 'none', cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+            }}
+          >
+            See Model Answer
+            <IconArrowRight size={14} color='#fff' />
+          </button>
         </div>
       )}
-      {revealed && <ContinueButton onClick={onContinue} />}
+
+      {modelRevealed && (
+        <div>
+          <MatchReport results={matchResults} label='key elements' />
+          <div className='pal-reveal-in' style={{
+            marginTop: '16px', padding: '18px 20px', borderRadius: '10px',
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderLeft: '3px solid var(--accent)',
+            fontSize: '14px', lineHeight: '1.7', color: 'var(--text)',
+          }}>
+            <div style={{
+              fontWeight: 600, marginBottom: '8px', color: 'var(--accent)',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}>
+              <IconDatabase size={16} color='var(--accent)' />
+              Model Answer
+            </div>
+            {phase.modelAnswer}
+          </div>
+          <ContinueButton onClick={handleContinue} />
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── RCA Phase ──────────────────────────────────────────────────────────────
-function RCAPhase(props) {
-  var phase = props.phase;
-  var state = props.state;
-  var setState = props.setState;
-  var onContinue = props.onContinue;
-  var selected = state.selected || null;
-  var selectedOpt = selected ? phase.options.find(function(o) { return o.id === selected; }) : null;
-
-  function handleSelect(id) {
-    if (selected) return;
-    setState({ selected: id, correct: phase.options.find(function(o) { return o.id === id; }).correct });
-  }
-
-  return (
-    <div>
-      <p style={{ fontSize: '15px', lineHeight: '1.6', color: 'var(--text)', marginBottom: '8px' }}>
-        {phase.prompt}
-      </p>
-      <OptionButtons
-        options={phase.options}
-        selected={selected}
-        onSelect={handleSelect}
-        disabled={!!selected}
-      />
-      {selectedOpt && <FeedbackBlock text={selectedOpt.feedback} />}
-      {selected && <ContinueButton onClick={onContinue} />}
-    </div>
-  );
-}
-
-// ─── SQL Phase (real sql.js execution against synthetic data) ────────────────
-function SQLPhase(props) {
-  var phase = props.phase;
-  var state = props.state;
-  var setState = props.setState;
-  var onContinue = props.onContinue;
+// ─── Query Chain Phase ──────────────────────────────────────────────────────
+function QueryChainPhase(props) {
   var caseId = props.caseId;
-  var userSql = state.userSql || '';
-  var revealed = state.revealed || false;
-  var ran = state.ran || false;
-  var queryResults = state.queryResults || null;
-  var queryError = state.queryError || '';
-  var modelResults = state.modelResults || null;
+  var queries = props.queries;
+  var onComplete = props.onComplete;
+
+  var totalQueries = queries ? queries.length : 0;
+
+  var _currentIdx = useState(0);
+  var currentIdx = _currentIdx[0];
+  var setCurrentIdx = _currentIdx[1];
+
+  var _userQueries = useState(function() {
+    var arr = [];
+    for (var i = 0; i < totalQueries; i++) arr.push('');
+    return arr;
+  });
+  var userQueries = _userQueries[0];
+  var setUserQueries = _userQueries[1];
+
+  var _results = useState(function() {
+    var arr = [];
+    for (var i = 0; i < totalQueries; i++) arr.push(null);
+    return arr;
+  });
+  var results = _results[0];
+  var setResults = _results[1];
+
+  var _errors = useState(function() {
+    var arr = [];
+    for (var i = 0; i < totalQueries; i++) arr.push('');
+    return arr;
+  });
+  var errors = _errors[0];
+  var setErrors = _errors[1];
+
+  var _revealed = useState(function() {
+    var arr = [];
+    for (var i = 0; i < totalQueries; i++) arr.push(false);
+    return arr;
+  });
+  var revealedArr = _revealed[0];
+  var setRevealed = _revealed[1];
+
+  var _dbReady = useState(false);
+  var dbReady = _dbReady[0];
+  var setDbReady = _dbReady[1];
+
+  var _dbError = useState('');
+  var dbError = _dbError[0];
+  var setDbError = _dbError[1];
 
   var dbRef = useRef(null);
-  var seedData = fullLoopSeedData[caseId];
-  var dbReady = state.dbReady || false;
-  var dbError = state.dbError || '';
 
-  // Initialize sql.js database with synthetic seed data
+  // Initialize sql.js database
   useEffect(function() {
-    if (!seedData) return;
+    var seedData = fullLoopSeedData[caseId];
+    if (!seedData) {
+      setDbError('No seed data found for case ' + caseId);
+      return;
+    }
     var cancelled = false;
 
-    async function initDb() {
-      try {
-        var sqlJsModule = await import('sql.js');
-        var initSqlJs = sqlJsModule.default || sqlJsModule;
-        if (cancelled) return;
-        var SQL = await initSqlJs({ locateFile: function() { return '/sql-wasm.wasm'; } });
-        if (cancelled) return;
-        var database = new SQL.Database();
-
-        // Run seed SQL statements
-        for (var i = 0; i < seedData.seedSql.length; i++) {
-          database.run(seedData.seedSql[i]);
-        }
-
-        dbRef.current = database;
-        setState(Object.assign({}, state, { dbReady: true, dbError: '' }));
-      } catch (e) {
-        if (!cancelled) {
-          setState(Object.assign({}, state, { dbReady: false, dbError: 'Failed to load SQL engine: ' + e.message }));
-        }
+    function loadAndInit() {
+      var initSqlJs = window.initSqlJs;
+      if (!initSqlJs) {
+        var script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js';
+        script.onload = function() {
+          if (cancelled) return;
+          window.initSqlJs({ locateFile: function(file) { return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/' + file; } }).then(function(SQL) {
+            if (cancelled) return;
+            var db = new SQL.Database();
+            seedData.seedSql.forEach(function(stmt) { db.run(stmt); });
+            dbRef.current = db;
+            setDbReady(true);
+          }).catch(function(e) {
+            if (!cancelled) setDbError('Failed to initialize SQL engine: ' + e.message);
+          });
+        };
+        script.onerror = function() {
+          if (!cancelled) setDbError('Failed to load SQL engine script');
+        };
+        document.head.appendChild(script);
+      } else {
+        initSqlJs({ locateFile: function(file) { return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/' + file; } }).then(function(SQL) {
+          if (cancelled) return;
+          var db = new SQL.Database();
+          seedData.seedSql.forEach(function(stmt) { db.run(stmt); });
+          dbRef.current = db;
+          setDbReady(true);
+        }).catch(function(e) {
+          if (!cancelled) setDbError('Failed to initialize SQL engine: ' + e.message);
+        });
       }
     }
 
-    initDb();
+    loadAndInit();
+
     return function() {
       cancelled = true;
       if (dbRef.current) {
@@ -1048,68 +1188,103 @@ function SQLPhase(props) {
   }, [caseId]);
 
   function handleRunQuery() {
-    if (!dbRef.current || !userSql.trim()) return;
+    if (!dbRef.current) return;
+    var userQuery = userQueries[currentIdx];
+    if (!userQuery.trim()) return;
+
     try {
-      var res = dbRef.current.exec(userSql);
-      var result = res.length === 0
-        ? { columns: [], rows: [] }
-        : { columns: res[0].columns, rows: res[0].values.map(function(r) { return r.map(function(v) { return String(v); }); }) };
-      setState(Object.assign({}, state, {
-        userSql: userSql,
-        ran: true,
-        queryResults: result,
-        queryError: '',
-        revealed: revealed,
-        modelResults: modelResults,
-        dbReady: true,
-      }));
+      var stmt = dbRef.current.exec(userQuery);
+      if (stmt.length > 0) {
+        var newResults = results.slice();
+        newResults[currentIdx] = {
+          columns: stmt[0].columns,
+          values: stmt[0].values.map(function(r) { return r.map(function(v) { return String(v); }); }),
+        };
+        setResults(newResults);
+        var newErrors = errors.slice();
+        newErrors[currentIdx] = '';
+        setErrors(newErrors);
+      } else {
+        var newResults2 = results.slice();
+        newResults2[currentIdx] = { columns: [], values: [] };
+        setResults(newResults2);
+        var newErrors2 = errors.slice();
+        newErrors2[currentIdx] = '';
+        setErrors(newErrors2);
+      }
     } catch (e) {
-      setState(Object.assign({}, state, {
-        userSql: userSql,
-        ran: true,
-        queryResults: null,
-        queryError: e.message,
-        revealed: revealed,
-        modelResults: modelResults,
-        dbReady: true,
-      }));
+      var newErrors3 = errors.slice();
+      newErrors3[currentIdx] = e.message;
+      setErrors(newErrors3);
+      var newResults3 = results.slice();
+      newResults3[currentIdx] = null;
+      setResults(newResults3);
     }
   }
 
   function handleRevealQuery() {
-    // Also run the model query to show expected output
-    var mResults = modelResults;
-    if (!mResults && dbRef.current && seedData && seedData.correctQuerySqlite) {
-      try {
-        var res = dbRef.current.exec(seedData.correctQuerySqlite);
-        if (res.length > 0) {
-          mResults = { columns: res[0].columns, rows: res[0].values.map(function(r) { return r.map(function(v) { return String(v); }); }) };
-        }
-      } catch (ex) { /* fall back to static expectedOutput */ }
-    }
-    setState(Object.assign({}, state, {
-      userSql: userSql,
-      revealed: true,
-      ran: ran,
-      queryResults: queryResults,
-      queryError: queryError,
-      modelResults: mResults,
-      dbReady: true,
-    }));
+    var copy = revealedArr.slice();
+    copy[currentIdx] = true;
+    setRevealed(copy);
   }
 
-  var hasResults = ran && queryResults && queryResults.columns.length > 0;
+  function handleNextQuery() {
+    if (currentIdx < totalQueries - 1) {
+      setCurrentIdx(currentIdx + 1);
+    }
+  }
+
+  function handleFinish() {
+    // Score: count how many queries the user ran successfully
+    var successCount = 0;
+    for (var i = 0; i < totalQueries; i++) {
+      if (results[i] && results[i].columns && results[i].columns.length > 0) {
+        successCount += 1;
+      }
+    }
+    onComplete(successCount);
+  }
+
+  var query = queries[currentIdx];
+  var userSql = userQueries[currentIdx];
+  var queryResult = results[currentIdx];
+  var queryError = errors[currentIdx];
+  var isRevealed = revealedArr[currentIdx];
+  var hasResults = queryResult && queryResult.columns && queryResult.columns.length > 0;
+  var isLastQuery = currentIdx === totalQueries - 1;
 
   return (
-    <div>
-      <SchemaDisplay schema={phase.schema} />
-      <p style={{ fontSize: '15px', lineHeight: '1.6', color: 'var(--text)', marginBottom: '12px' }}>
-        {phase.task}
-      </p>
+    <div className='pal-reveal-in'>
+      {/* Query chain progress bar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '8px',
+        marginBottom: '20px', padding: '12px 16px', borderRadius: '10px',
+        background: 'var(--surface)', border: '1px solid var(--border)',
+      }}>
+        <IconSQL size={16} color='var(--accent)' />
+        <span style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>
+          {'Query ' + (currentIdx + 1) + ' of ' + totalQueries}
+        </span>
+        <div style={{
+          flex: 1, height: '6px', borderRadius: '3px',
+          background: 'var(--border)', marginLeft: '8px',
+        }}>
+          <div style={{
+            height: '100%', borderRadius: '3px',
+            background: 'var(--accent)',
+            width: (((currentIdx + 1) / totalQueries) * 100) + '%',
+            transition: 'width 0.3s ease',
+          }} />
+        </div>
+      </div>
 
       {/* DB loading state */}
       {!dbReady && !dbError && (
-        <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+        <div style={{
+          fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px',
+          display: 'flex', alignItems: 'center', gap: '8px',
+        }}>
+          <div className='pal-shimmer-box' style={{ width: '16px', height: '16px', borderRadius: '50%' }} />
           Loading SQL engine...
         </div>
       )}
@@ -1119,30 +1294,23 @@ function SQLPhase(props) {
         </div>
       )}
 
+      {/* Query prompt */}
+      <TealCallout>{query.prompt}</TealCallout>
+
+      {/* SQL textarea */}
       <textarea
         value={userSql}
         onChange={function(e) {
-          setState(Object.assign({}, state, {
-            userSql: e.target.value,
-            ran: false,
-            queryResults: null,
-            queryError: '',
-            dbReady: dbReady,
-          }));
+          var copy = userQueries.slice();
+          copy[currentIdx] = e.target.value;
+          setUserQueries(copy);
         }}
         placeholder='-- Write your SQL here'
-        rows={6}
-        style={{
-          width: '100%', padding: '14px', borderRadius: '10px',
-          border: '1px solid var(--border)', background: 'var(--surface)',
-          fontSize: '13px', lineHeight: '1.5', color: 'var(--text)',
-          fontFamily: 'monospace', resize: 'vertical',
-          boxSizing: 'border-box', transition: 'border-color 0.2s ease',
-        }}
+        style={SQL_TEXTAREA_STYLE}
       />
 
       {/* Run Query button */}
-      {dbReady && !revealed && (
+      {dbReady && !isRevealed && (
         <button
           onClick={handleRunQuery}
           disabled={!userSql.trim()}
@@ -1163,13 +1331,13 @@ function SQLPhase(props) {
       )}
 
       {/* Query error */}
-      {ran && queryError && (
+      {queryError && (
         <div style={{
           marginTop: '12px', padding: '12px 16px', borderRadius: '8px',
           background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
           fontSize: '13px', color: 'var(--red)', fontFamily: 'monospace',
         }}>
-          Error: {queryError}
+          {'Error: ' + queryError}
         </div>
       )}
 
@@ -1180,34 +1348,34 @@ function SQLPhase(props) {
             fontWeight: 600, marginBottom: '8px', fontSize: '13px',
             color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px',
           }}>
-            Your Results ({queryResults.rows.length} row{queryResults.rows.length !== 1 ? 's' : ''})
+            {'Your Results (' + queryResult.values.length + ' row' + (queryResult.values.length !== 1 ? 's' : '') + ')'}
           </div>
-          <DataTable headers={queryResults.columns} rows={queryResults.rows} maxHeight='320px' />
+          <DataTable headers={queryResult.columns} rows={queryResult.values} maxHeight='320px' />
         </div>
       )}
 
       {/* Empty result notice */}
-      {ran && !queryError && queryResults && queryResults.columns.length === 0 && (
+      {queryResult && queryResult.columns && queryResult.columns.length === 0 && !queryError && (
         <div style={{
           marginTop: '12px', fontSize: '13px', color: 'var(--text-muted)',
           padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)',
           borderRadius: '8px',
         }}>
-          Query returned no results. Check your table names and column references against the schema above.
+          Query returned no results. Check your table names and column references.
         </div>
       )}
 
-      {/* Hints — show before reveal, hide after */}
-      {!revealed && phase.hints && phase.hints.length > 0 && (
+      {/* Hints */}
+      {!isRevealed && query.hints && query.hints.length > 0 && (
         <div style={{ marginTop: '16px' }}>
-          {phase.hints.map(function(hint, i) {
+          {query.hints.map(function(hint, i) {
             return <CollapsibleHint key={i} hint={hint} index={i} />;
           })}
         </div>
       )}
 
-      {/* Compare with Model — below hints, before reveal */}
-      {ran && !revealed && (
+      {/* Show Model Answer button */}
+      {(hasResults || queryError) && !isRevealed && (
         <button
           onClick={handleRevealQuery}
           style={{
@@ -1217,13 +1385,13 @@ function SQLPhase(props) {
             display: 'inline-flex', alignItems: 'center', gap: '6px',
           }}
         >
-          Compare with Model
+          Show Model Answer
           <IconArrowRight size={14} color='#fff' />
         </button>
       )}
 
-      {/* Revealed: correct query + model output */}
-      {revealed && (
+      {/* Revealed: reference query + insight */}
+      {isRevealed && (
         <div className='pal-reveal-in'>
           <div style={{ marginTop: '16px', marginBottom: '12px' }}>
             <div style={{
@@ -1231,125 +1399,112 @@ function SQLPhase(props) {
               display: 'flex', alignItems: 'center', gap: '6px',
             }}>
               <IconCheckmark size={16} color='var(--accent)' />
-              Model Query
+              Reference Query
             </div>
-            {phase.correctQueryFormatted && phase.correctQueryFormatted.length > 0
-              ? <FormattedCodeBlock lines={phase.correctQueryFormatted} />
-              : <CodeBlock code={phase.correctQuery} />
-            }
+            <CodeBlock code={query.referenceQuery} />
           </div>
-          {/* Model results from actual execution */}
-          {modelResults && modelResults.columns.length > 0 && (
-            <div style={{ marginTop: '12px' }}>
-              <div style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--text-muted)', fontSize: '13px' }}>
-                Model Output
-              </div>
-              <DataTable headers={modelResults.columns} rows={modelResults.rows} />
-            </div>
-          )}
-          {/* Fallback to static expected output if model query failed */}
-          {(!modelResults || modelResults.columns.length === 0) && phase.expectedOutput && (
-            <div style={{ marginTop: '12px' }}>
-              <div style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--text-muted)' }}>
-                Expected Output
-              </div>
-              <DataTable headers={phase.expectedOutput.headers} rows={phase.expectedOutput.rows} />
-            </div>
+
+          {/* Insight */}
+          <FeedbackBlock text={query.insight} />
+
+          {/* Next Query or Continue */}
+          {isLastQuery ? (
+            <ContinueButton label='Continue' onClick={handleFinish} />
+          ) : (
+            <ContinueButton label='Next Query' onClick={handleNextQuery} />
           )}
         </div>
       )}
-      {revealed && <ContinueButton onClick={onContinue} />}
     </div>
   );
 }
 
-// ─── Communicate Phase (with key phrase matching) ──────────────────────────
-function CommunicatePhase(props) {
+// ─── Synthesis Phase ────────────────────────────────────────────────────────
+function SynthesisPhase(props) {
   var phase = props.phase;
-  var state = props.state;
-  var setState = props.setState;
-  var onContinue = props.onContinue;
-  var userText = state.userText || '';
-  var revealed = state.revealed || false;
-  var rubricChecked = state.rubricChecked || {};
-  var briefChecked = state.briefChecked || false;
-  var matchResults = state.matchResults || [];
+  var onComplete = props.onComplete;
+  var initialText = props.initialText || '';
 
-  var hasKeyPhrases = phase.keyPhrases && phase.keyPhrases.length > 0;
+  var _userText = useState(initialText);
+  var userText = _userText[0];
+  var setUserText = _userText[1];
 
-  function handleCheckBrief() {
-    var results = matchKeyElements(userText, phase.keyPhrases);
-    setState({
-      userText: userText,
-      revealed: revealed,
-      rubricChecked: rubricChecked,
-      briefChecked: true,
-      matchResults: results,
-    });
+  var _submitted = useState(false);
+  var submitted = _submitted[0];
+  var setSubmitted = _submitted[1];
+
+  var _matchResults = useState([]);
+  var matchResults = _matchResults[0];
+  var setMatchResults = _matchResults[1];
+
+  var _modelRevealed = useState(false);
+  var modelRevealed = _modelRevealed[0];
+  var setModelRevealed = _modelRevealed[1];
+
+  var _rubricChecked = useState({});
+  var rubricChecked = _rubricChecked[0];
+  var setRubricChecked = _rubricChecked[1];
+
+  function handleSubmit() {
+    var results = matchKeyElements(userText, phase.keyElements);
+    setMatchResults(results);
+    setSubmitted(true);
   }
 
   function handleReveal() {
-    setState({
-      userText: userText,
-      revealed: true,
-      rubricChecked: rubricChecked,
-      briefChecked: briefChecked,
-      matchResults: matchResults,
-    });
+    setModelRevealed(true);
+  }
+
+  function handleContinue() {
+    var matched = countMatched(matchResults);
+    onComplete(matched);
   }
 
   return (
-    <div>
-      <p style={{ fontSize: '15px', lineHeight: '1.6', color: 'var(--text)', marginBottom: '12px' }}>
-        {phase.prompt}
-      </p>
+    <div className='pal-reveal-in'>
+      <TealCallout>{phase.prompt}</TealCallout>
+
       <textarea
         value={userText}
         onChange={function(e) {
-          setState({
-            userText: e.target.value,
-            revealed: revealed,
-            rubricChecked: rubricChecked,
-            briefChecked: false,
-            matchResults: [],
-          });
+          setUserText(e.target.value);
+          if (submitted) {
+            setSubmitted(false);
+            setMatchResults([]);
+            setModelRevealed(false);
+          }
         }}
-        placeholder='Write your brief here...'
-        rows={5}
-        style={{
-          width: '100%', padding: '14px', borderRadius: '10px',
-          border: '1px solid var(--border)', background: 'var(--surface)',
-          fontSize: '14px', lineHeight: '1.5', color: 'var(--text)',
-          resize: 'vertical', fontFamily: 'inherit',
-          boxSizing: 'border-box', transition: 'border-color 0.2s ease',
-        }}
+        placeholder='Write your stakeholder summary and recommendations here...'
+        style={TEXTAREA_STYLE}
       />
 
-      {/* Step 1: Check Brief (if keyPhrases exist) */}
-      {hasKeyPhrases && !briefChecked && !revealed && (
+      {!submitted && (
         <button
-          onClick={handleCheckBrief}
+          onClick={handleSubmit}
+          disabled={!userText.trim()}
           style={{
             marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
-            background: 'var(--accent)', color: '#fff', fontWeight: 600,
-            fontSize: '14px', border: 'none', cursor: 'pointer',
+            background: userText.trim() ? 'var(--purple)' : 'var(--border)',
+            color: '#fff', fontWeight: 600,
+            fontSize: '14px', border: 'none',
+            cursor: userText.trim() ? 'pointer' : 'default',
             display: 'inline-flex', alignItems: 'center', gap: '6px',
+            opacity: userText.trim() ? 1 : 0.5,
           }}
         >
-          Check Brief
+          Check Summary
           <IconArrowRight size={14} color='#fff' />
         </button>
       )}
 
-      {/* Match results + reveal button */}
-      {hasKeyPhrases && briefChecked && !revealed && (
+      {submitted && !modelRevealed && (
         <div>
           <MatchReport results={matchResults} label='key elements' />
           <button
             onClick={handleReveal}
             style={{
               marginTop: '16px', padding: '12px 24px', borderRadius: '8px',
-              background: 'var(--accent)', color: '#fff', fontWeight: 600,
+              background: 'var(--purple)', color: '#fff', fontWeight: 600,
               fontSize: '14px', border: 'none', cursor: 'pointer',
               display: 'inline-flex', alignItems: 'center', gap: '6px',
             }}
@@ -1360,39 +1515,28 @@ function CommunicatePhase(props) {
         </div>
       )}
 
-      {/* Fallback: no keyPhrases — direct reveal */}
-      {!hasKeyPhrases && !revealed && (
-        <button
-          onClick={handleReveal}
-          style={{
-            marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
-            background: 'var(--accent)', color: '#fff', fontWeight: 600,
-            fontSize: '14px', border: 'none', cursor: 'pointer',
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-          }}
-        >
-          See Model Answer
-          <IconArrowRight size={14} color='#fff' />
-        </button>
-      )}
+      {modelRevealed && (
+        <div>
+          <MatchReport results={matchResults} label='key elements' />
 
-      {revealed && (
-        <div className='pal-reveal-in'>
-          <div style={{
+          {/* Model answer */}
+          <div className='pal-reveal-in' style={{
             marginTop: '16px', padding: '18px 20px', borderRadius: '10px',
             background: 'var(--surface)', border: '1px solid var(--border)',
-            borderLeft: '3px solid var(--accent)',
+            borderLeft: '3px solid var(--purple)',
             fontSize: '14px', lineHeight: '1.7', color: 'var(--text)',
           }}>
             <div style={{
-              fontWeight: 600, marginBottom: '8px', color: 'var(--accent)',
+              fontWeight: 600, marginBottom: '8px', color: 'var(--purple)',
               display: 'flex', alignItems: 'center', gap: '6px',
             }}>
-              <IconCommunicate size={16} color='var(--accent)' />
+              <IconCommunicate size={16} color='var(--purple)' />
               Model Answer
             </div>
             {phase.modelAnswer}
           </div>
+
+          {/* Rubric checklist */}
           {phase.rubric && phase.rubric.length > 0 && (
             <div style={{
               marginTop: '16px', padding: '18px 20px', borderRadius: '10px',
@@ -1418,13 +1562,7 @@ function CommunicatePhase(props) {
                       onChange={function() {
                         var next = Object.assign({}, rubricChecked);
                         next[i] = !isChecked;
-                        setState({
-                          userText: userText,
-                          revealed: true,
-                          rubricChecked: next,
-                          briefChecked: briefChecked,
-                          matchResults: matchResults,
-                        });
+                        setRubricChecked(next);
                       }}
                       style={{ marginTop: '3px', accentColor: 'var(--green)' }}
                     />
@@ -1434,431 +1572,15 @@ function CommunicatePhase(props) {
               })}
             </div>
           )}
+
+          <ContinueButton onClick={handleContinue} />
         </div>
       )}
-      {revealed && <ContinueButton onClick={onContinue} />}
     </div>
   );
 }
 
-// ─── Experiment Phase (MCQ / Multi-select / Text) ──────────────────────────
-function ExperimentPhase(props) {
-  var phase = props.phase;
-  var state = props.state;
-  var setState = props.setState;
-  var onContinue = props.onContinue;
-  var fieldSelections = state.fieldSelections || {};
-  var fieldsRevealed = state.fieldsRevealed || {};
-  var multiChecked = state.multiChecked || {};
-  var fieldValues = state.fieldValues || {};
-  var allRevealed = state.allRevealed || false;
-
-  function buildState(overrides) {
-    return Object.assign({
-      fieldSelections: fieldSelections,
-      fieldsRevealed: fieldsRevealed,
-      multiChecked: multiChecked,
-      fieldValues: fieldValues,
-      allRevealed: allRevealed,
-    }, overrides);
-  }
-
-  function handleMcqSelect(fieldIdx, optionId) {
-    if (fieldsRevealed[fieldIdx]) return;
-    var nextSelections = Object.assign({}, fieldSelections);
-    nextSelections[fieldIdx] = optionId;
-    var nextRevealed = Object.assign({}, fieldsRevealed);
-    nextRevealed[fieldIdx] = true;
-    setState(buildState({
-      fieldSelections: nextSelections,
-      fieldsRevealed: nextRevealed,
-    }));
-  }
-
-  function handleMultiToggle(fieldIdx, optionId) {
-    if (multiChecked[fieldIdx]) return;
-    var current = fieldSelections[fieldIdx] || [];
-    var idx = current.indexOf(optionId);
-    var next;
-    if (idx >= 0) {
-      next = current.filter(function(x) { return x !== optionId; });
-    } else {
-      next = current.concat([optionId]);
-    }
-    var nextSelections = Object.assign({}, fieldSelections);
-    nextSelections[fieldIdx] = next;
-    setState(buildState({ fieldSelections: nextSelections }));
-  }
-
-  function handleMultiCheck(fieldIdx) {
-    var nextMultiChecked = Object.assign({}, multiChecked);
-    nextMultiChecked[fieldIdx] = true;
-    var nextRevealed = Object.assign({}, fieldsRevealed);
-    nextRevealed[fieldIdx] = true;
-    setState(buildState({
-      multiChecked: nextMultiChecked,
-      fieldsRevealed: nextRevealed,
-    }));
-  }
-
-  function handleTextReveal() {
-    setState(buildState({ allRevealed: true }));
-  }
-
-  function updateTextField(idx, val) {
-    var next = Object.assign({}, fieldValues);
-    next[idx] = val;
-    setState(buildState({ fieldValues: next }));
-  }
-
-  // Check if all fields are answered
-  var allFieldsAnswered = true;
-  for (var fi = 0; fi < phase.fields.length; fi++) {
-    var f = phase.fields[fi];
-    var fType = f.type || 'text';
-    if (fType === 'mcq') {
-      if (!fieldsRevealed[fi]) { allFieldsAnswered = false; break; }
-    } else if (fType === 'multi') {
-      if (!multiChecked[fi]) { allFieldsAnswered = false; break; }
-    } else {
-      if (!allRevealed) { allFieldsAnswered = false; break; }
-    }
-  }
-
-  // Count how many text fields exist (for fallback reveal button)
-  var hasTextFields = false;
-  var allInteractiveAnswered = true;
-  for (var ti = 0; ti < phase.fields.length; ti++) {
-    var tf = phase.fields[ti];
-    var tfType = tf.type || 'text';
-    if (tfType === 'text') {
-      hasTextFields = true;
-    } else if (tfType === 'mcq' && !fieldsRevealed[ti]) {
-      allInteractiveAnswered = false;
-    } else if (tfType === 'multi' && !multiChecked[ti]) {
-      allInteractiveAnswered = false;
-    }
-  }
-
-  return (
-    <div>
-      <p style={{ fontSize: '15px', lineHeight: '1.6', color: 'var(--text)', marginBottom: '16px' }}>
-        {phase.prompt}
-      </p>
-      {phase.fields.map(function(field, i) {
-        var fieldType = field.type || 'text';
-
-        // ── MCQ field ──
-        if (fieldType === 'mcq') {
-          var mcqSelected = fieldSelections[i] || null;
-          var mcqRevealed = fieldsRevealed[i] || false;
-
-          return (
-            <div key={i} style={{ marginBottom: '20px' }}>
-              <div style={{
-                fontWeight: 600, fontSize: '14px',
-                color: 'var(--text)', marginBottom: '10px',
-              }}>
-                {field.label}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {field.options.map(function(opt) {
-                  var isSelected = mcqSelected === opt.id;
-                  var isCorrectOpt = opt.correct;
-                  var showResult = mcqRevealed;
-                  var isRight = showResult && isSelected && isCorrectOpt;
-                  var isWrongSel = showResult && isSelected && !isCorrectOpt;
-                  var isDimmed = showResult && !isSelected;
-
-                  var bg = 'var(--surface)';
-                  var bdr = 'var(--border)';
-                  var leftBdr = 'transparent';
-                  if (isRight) { bg = 'rgba(16,185,129,0.06)'; bdr = 'var(--green)'; leftBdr = 'var(--green)'; }
-                  if (isWrongSel) { bg = 'rgba(239,68,68,0.06)'; bdr = 'var(--red)'; leftBdr = 'var(--red)'; }
-
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={mcqRevealed ? undefined : function() { handleMcqSelect(i, opt.id); }}
-                      disabled={mcqRevealed}
-                      className={isWrongSel ? 'pal-shake' : (isRight ? 'pal-success-ring' : '')}
-                      style={{
-                        padding: '12px 16px', borderRadius: '8px', textAlign: 'left',
-                        fontSize: '14px', lineHeight: '1.5',
-                        cursor: mcqRevealed ? 'default' : 'pointer',
-                        border: '1px solid ' + bdr,
-                        borderLeft: '3px solid ' + leftBdr,
-                        background: bg, color: 'var(--text)',
-                        transition: 'all 0.2s ease',
-                        opacity: isDimmed ? 0.4 : 1,
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
-                      }}
-                    >
-                      <span>{opt.text}</span>
-                      {isRight && <IconCorrect size={16} />}
-                      {isWrongSel && <IconWrong size={16} />}
-                    </button>
-                  );
-                })}
-              </div>
-              {mcqRevealed && field.correctAnswer && (
-                <div className='pal-reveal-in' style={{
-                  marginTop: '8px', padding: '12px 14px', borderRadius: '8px',
-                  background: 'rgba(16,185,129,0.06)', border: '1px solid var(--green)',
-                  borderLeft: '3px solid var(--green)',
-                  fontSize: '13px', lineHeight: '1.6', color: 'var(--text)',
-                }}>
-                  <span style={{ fontWeight: 600, color: 'var(--green)' }}>Explanation: </span>
-                  {field.correctAnswer}
-                </div>
-              )}
-            </div>
-          );
-        }
-
-        // ── Multi-select field ──
-        if (fieldType === 'multi') {
-          var multiSelected = fieldSelections[i] || [];
-          var multiIsChecked = multiChecked[i] || false;
-
-          // Count correct
-          var correctOptions = [];
-          if (field.options) {
-            for (var ci = 0; ci < field.options.length; ci++) {
-              if (field.options[ci].correct) correctOptions.push(field.options[ci].id);
-            }
-          }
-
-          var userCorrectCount = 0;
-          if (multiIsChecked) {
-            for (var mc = 0; mc < multiSelected.length; mc++) {
-              if (correctOptions.indexOf(multiSelected[mc]) >= 0) userCorrectCount += 1;
-            }
-          }
-
-          return (
-            <div key={i} style={{ marginBottom: '20px' }}>
-              <div style={{
-                fontWeight: 600, fontSize: '14px',
-                color: 'var(--text)', marginBottom: '6px',
-              }}>
-                {field.label}
-              </div>
-              <div style={{
-                fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px',
-              }}>
-                Select all that apply
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {field.options.map(function(opt) {
-                  var isInSelection = multiSelected.indexOf(opt.id) >= 0;
-                  var isCorrectOpt = opt.correct;
-                  var showResult = multiIsChecked;
-
-                  var bg = 'var(--surface)';
-                  var bdr = 'var(--border)';
-                  var leftBdr = 'transparent';
-
-                  if (!showResult && isInSelection) {
-                    bdr = 'var(--accent)';
-                    leftBdr = 'var(--accent)';
-                    bg = 'rgba(59,130,246,0.04)';
-                  }
-                  if (showResult && isInSelection && isCorrectOpt) {
-                    bg = 'rgba(16,185,129,0.06)'; bdr = 'var(--green)'; leftBdr = 'var(--green)';
-                  }
-                  if (showResult && isInSelection && !isCorrectOpt) {
-                    bg = 'rgba(239,68,68,0.06)'; bdr = 'var(--red)'; leftBdr = 'var(--red)';
-                  }
-                  if (showResult && !isInSelection && isCorrectOpt) {
-                    bg = 'rgba(16,185,129,0.03)'; bdr = 'rgba(16,185,129,0.3)'; leftBdr = 'var(--green)';
-                  }
-
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={multiIsChecked ? undefined : function() { handleMultiToggle(i, opt.id); }}
-                      disabled={multiIsChecked}
-                      style={{
-                        padding: '12px 16px', borderRadius: '8px', textAlign: 'left',
-                        fontSize: '14px', lineHeight: '1.5',
-                        cursor: multiIsChecked ? 'default' : 'pointer',
-                        border: '1px solid ' + bdr,
-                        borderLeft: '3px solid ' + leftBdr,
-                        background: bg, color: 'var(--text)',
-                        transition: 'all 0.2s ease',
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
-                      }}
-                    >
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{
-                          width: '18px', height: '18px', borderRadius: '4px',
-                          border: '2px solid ' + (isInSelection ? 'var(--accent)' : 'var(--border)'),
-                          background: isInSelection ? 'var(--accent)' : 'transparent',
-                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0, transition: 'all 0.15s ease',
-                        }}>
-                          {isInSelection && (
-                            <svg width='12' height='12' viewBox='0 0 12 12' fill='none'>
-                              <polyline points='2.5,6 5,8.5 9.5,3.5' stroke='#fff' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' fill='none'/>
-                            </svg>
-                          )}
-                        </span>
-                        {opt.text}
-                      </span>
-                      {showResult && isInSelection && isCorrectOpt && <IconCorrect size={16} />}
-                      {showResult && isInSelection && !isCorrectOpt && <IconWrong size={16} />}
-                      {showResult && !isInSelection && isCorrectOpt && (
-                        <span style={{ fontSize: '11px', color: 'var(--green)', fontWeight: 600 }}>missed</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              {!multiIsChecked && multiSelected.length > 0 && (
-                <button
-                  onClick={function() { handleMultiCheck(i); }}
-                  style={{
-                    marginTop: '10px', padding: '10px 20px', borderRadius: '8px',
-                    background: 'var(--accent)', color: '#fff', fontWeight: 600,
-                    fontSize: '13px', border: 'none', cursor: 'pointer',
-                    display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  }}
-                >
-                  Check Answers
-                  <IconArrowRight size={13} color='#fff' />
-                </button>
-              )}
-              {multiIsChecked && (
-                <div className='pal-reveal-in' style={{
-                  marginTop: '10px', padding: '10px 14px', borderRadius: '8px',
-                  background: 'rgba(16,185,129,0.06)', border: '1px solid var(--green)',
-                  fontSize: '13px', color: 'var(--text)', lineHeight: '1.5',
-                }}>
-                  <span style={{ fontWeight: 600, color: 'var(--green)' }}>
-                    {userCorrectCount}/{correctOptions.length} correct
-                  </span>
-                  {field.correctAnswer && (
-                    <span> — {field.correctAnswer}</span>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        }
-
-        // ── Text field (fallback) ──
-        return (
-          <div key={i} style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block', fontWeight: 600, fontSize: '14px',
-              color: 'var(--text)', marginBottom: '6px',
-            }}>
-              {field.label}
-            </label>
-            <textarea
-              value={fieldValues[i] || ''}
-              onChange={function(e) { updateTextField(i, e.target.value); }}
-              placeholder={'Enter your ' + field.label.toLowerCase() + '...'}
-              rows={3}
-              style={{
-                width: '100%', padding: '12px', borderRadius: '10px',
-                border: '1px solid var(--border)', background: 'var(--surface)',
-                fontSize: '14px', lineHeight: '1.5', color: 'var(--text)',
-                resize: 'vertical', fontFamily: 'inherit',
-                boxSizing: 'border-box', transition: 'border-color 0.2s ease',
-              }}
-            />
-            {allRevealed && (
-              <div className='pal-reveal-in' style={{
-                marginTop: '8px', padding: '14px', borderRadius: '8px',
-                background: 'rgba(16,185,129,0.06)', border: '1px solid var(--green)',
-                borderLeft: '3px solid var(--green)',
-                fontSize: '13px', lineHeight: '1.6', color: 'var(--text)',
-              }}>
-                <span style={{ fontWeight: 600, color: 'var(--green)' }}>Model: </span>
-                {field.correctAnswer}
-              </div>
-            )}
-          </div>
-        );
-      })}
-
-      {/* Reveal button for text fields */}
-      {hasTextFields && !allRevealed && allInteractiveAnswered && (
-        <button
-          onClick={handleTextReveal}
-          style={{
-            padding: '12px 24px', borderRadius: '8px',
-            background: 'var(--accent)', color: '#fff', fontWeight: 600,
-            fontSize: '14px', border: 'none', cursor: 'pointer',
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-          }}
-        >
-          Reveal Answers
-          <IconArrowRight size={14} color='#fff' />
-        </button>
-      )}
-      {allFieldsAnswered && <ContinueButton onClick={onContinue} />}
-    </div>
-  );
-}
-
-// ─── Readout Phase ──────────────────────────────────────────────────────────
-function ReadoutPhase(props) {
-  var phase = props.phase;
-  var state = props.state;
-  var setState = props.setState;
-  var onComplete = props.onComplete;
-  var selected = state.selected || null;
-  var selectedOpt = selected ? phase.options.find(function(o) { return o.id === selected; }) : null;
-
-  function handleSelect(id) {
-    if (selected) return;
-    setState({ selected: id, correct: phase.options.find(function(o) { return o.id === id; }).correct });
-  }
-
-  return (
-    <div>
-      <p style={{ fontSize: '15px', lineHeight: '1.6', color: 'var(--text)', marginBottom: '16px' }}>
-        {phase.prompt}
-      </p>
-      <DataTable headers={phase.resultsTable.headers} rows={phase.resultsTable.rows} />
-      <p style={{ fontSize: '15px', lineHeight: '1.6', color: 'var(--text)', fontWeight: 600, marginBottom: '8px' }}>
-        {phase.question}
-      </p>
-      <OptionButtons
-        options={phase.options}
-        selected={selected}
-        onSelect={handleSelect}
-        disabled={!!selected}
-      />
-      {selectedOpt && <FeedbackBlock text={selectedOpt.feedback} />}
-      {selected && phase.debrief && (
-        <div className='pal-reveal-in' style={{
-          marginTop: '20px', padding: '22px 24px', borderRadius: '12px',
-          background: 'var(--surface)', border: '1px solid var(--border)',
-          borderLeft: '3px solid var(--accent)',
-          fontSize: '14px', lineHeight: '1.7', color: 'var(--text)',
-        }}>
-          <div style={{
-            fontWeight: 700, marginBottom: '10px', color: 'var(--accent)', fontSize: '15px',
-            display: 'flex', alignItems: 'center', gap: '6px',
-          }}>
-            <IconReadout size={18} color='var(--accent)' />
-            Full Debrief
-          </div>
-          {phase.debrief}
-        </div>
-      )}
-      {selected && (
-        <ContinueButton label='Complete Case' onClick={onComplete} />
-      )}
-    </div>
-  );
-}
-
-// ─── Score Ring SVG ─────────────────────────────────────────────────────────
+// ─── Score Ring ──────────────────────────────────────────────────────────────
 function ScoreRing(props) {
   var score = props.score;
   var maxScore = props.maxScore;
@@ -1895,112 +1617,49 @@ function ScoreRing(props) {
   );
 }
 
-// ─── Completion Card (dramatic per-phase breakdown) ────────────────────────
+// ─── Completion Card ────────────────────────────────────────────────────────
 function CompletionCard(props) {
   var flCase = props.flCase;
-  var phaseStates = props.phaseStates;
+  var phaseScores = props.phaseScores;
   var onBack = props.onBack;
   var onNext = props.onNext;
 
-  // Gather per-phase scores
-  var phaseScores = [];
   var totalScore = 0;
   var totalMax = 0;
 
-  flCase.phases.forEach(function(phase, i) {
-    var st = phaseStates[i] || {};
-    var entry = { phase: phase, index: i, type: phase.type, title: phase.title };
+  var phaseEntries = PHASE_META.map(function(meta, i) {
+    var score = phaseScores[meta.key];
+    var phaseData = flCase[meta.key];
+    var maxVal = 0;
+    var scoreVal = score !== null && score !== undefined ? score : 0;
 
-    if (phase.type === 'alert' || phase.type === 'rca' || phase.type === 'readout') {
-      entry.scoreType = 'decision';
-      entry.correct = !!st.correct;
-      entry.display = st.correct ? '1/1' : '0/1';
-      totalMax += 1;
-      if (st.correct) totalScore += 1;
-    } else if (phase.type === 'sql') {
-      entry.scoreType = 'sql';
-      // Score: 1 if user ran a query that returned results, 0 otherwise
-      var ranSuccessfully = st.ran && st.queryResults && st.queryResults.columns && st.queryResults.columns.length > 0;
-      entry.correct = !!ranSuccessfully;
-      entry.display = ranSuccessfully ? 'query returned results' : 'no valid query';
-      totalMax += 1;
-      if (ranSuccessfully) totalScore += 1;
-    } else if (phase.type === 'data' || phase.type === 'communicate') {
-      entry.scoreType = 'text';
-      if (st.matchResults && st.matchResults.length > 0) {
-        var m = countMatched(st.matchResults);
-        entry.display = m + '/' + st.matchResults.length;
-        entry.correct = m === st.matchResults.length;
-        totalMax += st.matchResults.length;
-        totalScore += m;
-      } else {
-        entry.display = 'completed';
-        entry.correct = true;
-        totalMax += 1;
-        totalScore += 1;
-      }
-    } else if (phase.type === 'experiment') {
-      entry.scoreType = 'experiment';
-      var expCorrect = 0;
-      var expTotal = 0;
-      if (phase.fields) {
-        for (var fi = 0; fi < phase.fields.length; fi++) {
-          var field = phase.fields[fi];
-          var fType = field.type || 'text';
-          if (fType === 'mcq') {
-            expTotal += 1;
-            var sel = (st.fieldSelections || {})[fi];
-            if (sel && field.options) {
-              var selOpt = field.options.find(function(o) { return o.id === sel; });
-              if (selOpt && selOpt.correct) expCorrect += 1;
-            }
-          } else if (fType === 'multi') {
-            var correctIds = [];
-            if (field.options) {
-              for (var oi = 0; oi < field.options.length; oi++) {
-                if (field.options[oi].correct) correctIds.push(field.options[oi].id);
-              }
-            }
-            expTotal += correctIds.length;
-            var userSels = (st.fieldSelections || {})[fi] || [];
-            for (var ui = 0; ui < userSels.length; ui++) {
-              if (correctIds.indexOf(userSels[ui]) >= 0) expCorrect += 1;
-            }
-          } else {
-            expTotal += 1;
-            expCorrect += 1; // text fields count as completed
-          }
-        }
-      }
-      entry.display = expCorrect + '/' + expTotal;
-      entry.correct = expCorrect === expTotal;
-      totalMax += expTotal;
-      totalScore += expCorrect;
+    if (meta.key === 'problem') {
+      maxVal = 1;
+    } else if (meta.key === 'decomposition' || meta.key === 'schemaDesign') {
+      maxVal = phaseData && phaseData.keyElements ? phaseData.keyElements.length : 1;
+    } else if (meta.key === 'queryChain') {
+      maxVal = flCase.queryChain ? flCase.queryChain.length : 3;
+    } else if (meta.key === 'synthesis') {
+      maxVal = phaseData && phaseData.keyElements ? phaseData.keyElements.length : 1;
     }
 
-    phaseScores.push(entry);
+    totalScore += scoreVal;
+    totalMax += maxVal;
+
+    return {
+      title: meta.title,
+      color: meta.color,
+      score: scoreVal,
+      max: maxVal,
+      perfect: scoreVal >= maxVal,
+    };
   });
-
-  var pct = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
-  var isPerfect = pct === 100;
-
-  // Find weakest phases
-  var weakPhases = [];
-  phaseScores.forEach(function(ps) {
-    if (!ps.correct) weakPhases.push(ps.title);
-  });
-
-  // No verdict text — summary sheet, not evaluation
-
-  // Get debrief from the readout phase
-  var readoutPhase = flCase.phases[flCase.phases.length - 1];
-  var debriefText = readoutPhase && readoutPhase.debrief ? readoutPhase.debrief : '';
 
   return (
     <div className='pal-page-enter' style={{
       maxWidth: '800px', margin: '0 auto', padding: '24px 16px',
     }}>
-      {/* ── Summary header ── */}
+      {/* Summary header */}
       <div style={{
         background: 'var(--surface)', border: '1px solid var(--border)',
         borderRadius: '14px', padding: '28px 24px', marginBottom: '16px',
@@ -2028,35 +1687,33 @@ function CompletionCard(props) {
                 {flCase.difficulty}
               </span>
               <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                {flCase.phases.length} phases completed
+                5 phases completed
               </span>
             </div>
           </div>
         </div>
 
-        {/* Phase pills — compact row */}
-        <div style={{
-          display: 'flex', gap: '6px', flexWrap: 'wrap',
-        }}>
-          {phaseScores.map(function(ps, i) {
+        {/* Phase pills */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {phaseEntries.map(function(pe, i) {
             return (
               <div key={i} style={{
                 display: 'inline-flex', alignItems: 'center', gap: '5px',
                 padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 500,
-                background: ps.correct ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.06)',
-                color: ps.correct ? 'var(--green)' : 'var(--red)',
-                border: '1px solid ' + (ps.correct ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.15)'),
+                background: pe.perfect ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.06)',
+                color: pe.perfect ? 'var(--green)' : 'var(--red)',
+                border: '1px solid ' + (pe.perfect ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.15)'),
               }}>
-                <PhaseIcon type={ps.type} size={12} />
-                {ps.title}
+                <PhaseIcon type={PHASES[i]} size={12} />
+                {pe.title + ' ' + pe.score + '/' + pe.max}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* ── Case debrief ── */}
-      {debriefText && (
+      {/* Case takeaway */}
+      {flCase.takeaway && (
         <div style={{
           background: 'var(--surface)', border: '1px solid var(--border)',
           borderRadius: '14px', padding: '20px 24px', marginBottom: '16px',
@@ -2070,12 +1727,12 @@ function CompletionCard(props) {
           <p style={{
             fontSize: '14px', lineHeight: '1.7', color: 'var(--text)', margin: 0,
           }}>
-            {debriefText}
+            {flCase.takeaway}
           </p>
         </div>
       )}
 
-      {/* ── Navigation ── */}
+      {/* Navigation */}
       <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
         <button
           onClick={onBack}
@@ -2117,7 +1774,6 @@ export function FullLoopRunner(props) {
   var onNext = props.onNext;
   var unlocked = props.unlocked;
   var flCase = fullLoopCasesById[caseId];
-  var phases = flCase ? flCase.phases : [];
 
   // Load saved progress or draft
   var savedProgress = getFullLoopProgress(caseId);
@@ -2127,9 +1783,9 @@ export function FullLoopRunner(props) {
   var phaseIndex = _phaseIndex[0];
   var setPhaseIndex = _phaseIndex[1];
 
-  var _phaseStates = useState(draft ? (draft.phaseStates || {}) : {});
-  var phaseStates = _phaseStates[0];
-  var setPhaseStates = _phaseStates[1];
+  var _phaseScores = useState(draft ? (draft.phaseScores || { problem: null, decomposition: null, schemaDesign: null, queryChain: null, synthesis: null }) : { problem: null, decomposition: null, schemaDesign: null, queryChain: null, synthesis: null });
+  var phaseScores = _phaseScores[0];
+  var setPhaseScores = _phaseScores[1];
 
   var _completedPhases = useState(draft ? (draft.completedPhases || {}) : {});
   var completedPhases = _completedPhases[0];
@@ -2139,67 +1795,77 @@ export function FullLoopRunner(props) {
   var completed = _completed[0];
   var setCompleted = _completed[1];
 
+  var _drafts = useState(draft ? (draft.drafts || {}) : {});
+  var drafts = _drafts[0];
+  var setDrafts = _drafts[1];
+
   // Save draft on state changes
   useEffect(function() {
     if (!completed) {
       saveDraft(caseId, {
         phaseIndex: phaseIndex,
-        phaseStates: phaseStates,
+        phaseScores: phaseScores,
         completedPhases: completedPhases,
+        drafts: drafts,
       });
     }
-  }, [phaseIndex, phaseStates, completedPhases, completed, caseId]);
+  }, [phaseIndex, phaseScores, completedPhases, drafts, completed, caseId]);
 
   // Track open
   useEffect(function() {
-    track('fullloop_case_opened', { caseId: caseId });
+    track('case_started', { room: 'full-loop', id: caseId });
   }, [caseId]);
 
-  var setCurrentPhaseState = useCallback(function(newState) {
-    setPhaseStates(function(prev) {
-      var next = Object.assign({}, prev);
-      next[phaseIndex] = newState;
-      return next;
-    });
-  }, [phaseIndex]);
+  function handlePhaseComplete(score) {
+    var currentKey = PHASES[phaseIndex];
 
-  function handleContinue() {
+    // Save score
+    var nextScores = Object.assign({}, phaseScores);
+    nextScores[currentKey] = score;
+    setPhaseScores(nextScores);
+
+    // Mark completed
     var nextCompleted = Object.assign({}, completedPhases);
     nextCompleted[phaseIndex] = true;
     setCompletedPhases(nextCompleted);
 
-    if (phaseIndex < phases.length - 1) {
+    // Check if last phase
+    if (phaseIndex >= PHASES.length - 1) {
+      // Calculate total for progress save
+      var totalScore = 0;
+      var totalMax = 0;
+      for (var i = 0; i < PHASES.length; i++) {
+        var key = PHASES[i];
+        var s = key === currentKey ? score : (nextScores[key] || 0);
+        var phaseData = flCase[key];
+        var maxVal = 0;
+        if (key === 'problem') {
+          maxVal = 1;
+        } else if (key === 'decomposition' || key === 'schemaDesign') {
+          maxVal = phaseData && phaseData.keyElements ? phaseData.keyElements.length : 1;
+        } else if (key === 'queryChain') {
+          maxVal = flCase.queryChain ? flCase.queryChain.length : 3;
+        } else if (key === 'synthesis') {
+          maxVal = phaseData && phaseData.keyElements ? phaseData.keyElements.length : 1;
+        }
+        totalScore += s;
+        totalMax += maxVal;
+      }
+
+      saveFullLoopProgress(caseId, {
+        score: totalScore,
+        maxScore: totalMax,
+        phaseScores: nextScores,
+      });
+
+      clearDraft(caseId);
+      setCompleted(true);
+      window.scrollTo(0, 0);
+      track('case_completed', { room: 'full-loop', id: caseId, score: totalScore, maxScore: totalMax });
+    } else {
       setPhaseIndex(phaseIndex + 1);
       window.scrollTo(0, 0);
     }
-  }
-
-  function handleComplete() {
-    var nextCompleted = Object.assign({}, completedPhases);
-    nextCompleted[phaseIndex] = true;
-    setCompletedPhases(nextCompleted);
-
-    // Calculate score (decision phases only for backward compat)
-    var correct = 0;
-    var total = 0;
-    phases.forEach(function(phase, i) {
-      if (phase.type === 'alert' || phase.type === 'rca' || phase.type === 'readout') {
-        total += 1;
-        var st = phaseStates[i];
-        if (st && st.correct) correct += 1;
-      }
-    });
-
-    saveFullLoopProgress(caseId, {
-      score: correct,
-      maxScore: total,
-      phaseStates: phaseStates,
-    });
-
-    clearDraft(caseId);
-    setCompleted(true);
-    window.scrollTo(0, 0);
-    track('fullloop_case_completed', { caseId: caseId, score: correct, maxScore: total });
   }
 
   function handlePhaseSelect(i) {
@@ -2230,81 +1896,56 @@ export function FullLoopRunner(props) {
     return (
       <CompletionCard
         flCase={flCase}
-        phaseStates={phaseStates}
+        phaseScores={phaseScores}
         onBack={onBack}
         onNext={onNext}
       />
     );
   }
 
-  var currentPhase = phases[phaseIndex];
-  var currentState = phaseStates[phaseIndex] || {};
+  var currentPhaseKey = PHASES[phaseIndex];
+  var currentMeta = PHASE_META[phaseIndex];
 
   // Render phase content
   var phaseContent = null;
 
-  if (currentPhase.type === 'alert') {
+  if (currentPhaseKey === 'problem') {
     phaseContent = (
-      <AlertPhase
-        phase={currentPhase}
-        state={currentState}
-        setState={setCurrentPhaseState}
-        onContinue={handleContinue}
+      <ProblemPhase
+        phase={flCase.problem}
+        onComplete={handlePhaseComplete}
       />
     );
-  } else if (currentPhase.type === 'data') {
+  } else if (currentPhaseKey === 'decomposition') {
     phaseContent = (
-      <DataPhase
-        phase={currentPhase}
-        state={currentState}
-        setState={setCurrentPhaseState}
-        onContinue={handleContinue}
+      <DecompositionPhase
+        phase={flCase.decomposition}
+        onComplete={handlePhaseComplete}
+        initialText={drafts.decomposition || ''}
       />
     );
-  } else if (currentPhase.type === 'rca') {
+  } else if (currentPhaseKey === 'schemaDesign') {
     phaseContent = (
-      <RCAPhase
-        phase={currentPhase}
-        state={currentState}
-        setState={setCurrentPhaseState}
-        onContinue={handleContinue}
+      <SchemaDesignPhase
+        phase={flCase.schemaDesign}
+        onComplete={handlePhaseComplete}
+        initialText={drafts.schemaDesign || ''}
       />
     );
-  } else if (currentPhase.type === 'sql') {
+  } else if (currentPhaseKey === 'queryChain') {
     phaseContent = (
-      <SQLPhase
-        phase={currentPhase}
-        state={currentState}
-        setState={setCurrentPhaseState}
-        onContinue={handleContinue}
+      <QueryChainPhase
         caseId={flCase.id}
+        queries={flCase.queryChain}
+        onComplete={handlePhaseComplete}
       />
     );
-  } else if (currentPhase.type === 'communicate') {
+  } else if (currentPhaseKey === 'synthesis') {
     phaseContent = (
-      <CommunicatePhase
-        phase={currentPhase}
-        state={currentState}
-        setState={setCurrentPhaseState}
-        onContinue={handleContinue}
-      />
-    );
-  } else if (currentPhase.type === 'experiment') {
-    phaseContent = (
-      <ExperimentPhase
-        phase={currentPhase}
-        state={currentState}
-        setState={setCurrentPhaseState}
-        onContinue={handleContinue}
-      />
-    );
-  } else if (currentPhase.type === 'readout') {
-    phaseContent = (
-      <ReadoutPhase
-        phase={currentPhase}
-        state={currentState}
-        setState={setCurrentPhaseState}
-        onComplete={handleComplete}
+      <SynthesisPhase
+        phase={flCase.synthesis}
+        onComplete={handlePhaseComplete}
+        initialText={drafts.synthesis || ''}
       />
     );
   }
@@ -2350,7 +1991,7 @@ export function FullLoopRunner(props) {
               background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)',
               padding: '2px 10px', borderRadius: '20px', fontWeight: 600,
             }}>
-              Phase {phaseIndex + 1} of {phases.length}
+              {'Phase ' + (phaseIndex + 1) + ' of ' + PHASES.length}
             </span>
           </div>
         </div>
@@ -2358,7 +1999,6 @@ export function FullLoopRunner(props) {
 
       {/* Phase bar */}
       <PhaseBar
-        phases={phases}
         currentIndex={phaseIndex}
         completedPhases={completedPhases}
         onSelect={handlePhaseSelect}
@@ -2374,9 +2014,9 @@ export function FullLoopRunner(props) {
           width: '32px', height: '32px', borderRadius: '8px',
           background: 'rgba(59,130,246,0.08)',
         }}>
-          <PhaseIcon type={currentPhase.type} size={20} />
+          <PhaseIcon type={currentPhaseKey} size={20} />
         </span>
-        {currentPhase.title}
+        {currentMeta.title}
       </h2>
 
       {/* Phase content */}

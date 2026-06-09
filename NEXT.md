@@ -2,11 +2,11 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V5.22.1 (2026-06-09)*
+*Last updated: V5.23.0 (2026-06-09)*
 
 ---
 
-## Status — V5.22.1: Statefulness enforced (2026-06-09). Testimonials complete (5 testers, Home 1×4, Plans RAF ticker). Universe View V2 shipped. 8 open bugs from beta feedback (#152–159). Resuming with bug fixes.
+## Status — V5.23.0: Full Loop rebuilt to 5-phase connected investigation flow. Deep link auth race fixed. All 10 cases rewritten, seed data expanded. Hash routing stable.
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 
@@ -21,13 +21,12 @@ PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester pro
 
 ## Active build queue
 
-**P0 — V5.22.0: Bug fixes from beta feedback (Audits #152–155)** ← TUESDAY FIRST
+**DONE — V5.23.0: Full Loop rebuild + deep link fix**
 
-Four concrete bugs from Debasrija Mondal's feedback form. Fix before distribution.
-
-- **#155 Checkout Trap mobile layout** — question renders in an unreadably narrow column. Find the runner rendering this case, stack question above answer on mobile (`flex-direction: column` below ~480px). Highest priority — broken layout on a core case.
-- **#153 CLT "not yet normal" at high N** — normality check fires incorrectly even when N is large enough for CLT to clearly apply. Find the CLT module in `src/components/statsFoundations/`, review threshold logic, add N≥30 override.
-- **#154 Module 8 normal distribution curve overflow** — SVG/canvas overflows container and overlaps text. Constrain with `max-height` + `overflow: hidden` on the chart wrapper.
+- Full Loop rewritten: 7 discrete phases → 5 connected investigation phases (problem → decomposition → schema → SQL chain → synthesis)
+- Deep link auth race fixed (authSettled state replaces 150ms timer)
+- All 10 cases + seed data updated
+- FullLoopBrowser.jsx patched for new data contract
 - **#152 Baseline rate introduced before it's explained** — in the "New Here" A/B testing path, `baseline rate` appears in an exercise before the concept module that defines it. Audit module ordering in `src/data/expFoundationModules.js`.
 - **#158 RCA Foundations progress not persisting** — selected answers reset when user navigates away. Add `rcaFoundationsState.js` utility matching the pattern in `statsFoundationsState.js`. Check `src/components/rcaFoundations/` for all modules missing save/restore.
 - **#157 RCA case distractors too easy** — wrong options are obviously wrong, bypassing analytical reasoning. Audit distractor quality across RCA cases. Plausible misconceptions only — same fix applied to C01 Phase 4 in V4.85.0.

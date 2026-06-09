@@ -128,9 +128,9 @@ export function FullLoopBrowser({ onOpen, onBack }) {
           const progress = getFullLoopProgress(c.id);
           const diffCfg = DIFF_CFG[c.difficulty] || DIFF_CFG.analyst;
           const domainStyle = getDomainStyle(c.domain);
-          const phaseCount = c.phases ? c.phases.length : 7;
-          const description = c.alertPrompt
-            ? (c.alertPrompt.length > 100 ? c.alertPrompt.slice(0, 100) + '...' : c.alertPrompt)
+          const phaseCount = 5;
+          const description = c.problem && c.problem.context
+            ? (c.problem.context.length > 100 ? c.problem.context.slice(0, 100) + '...' : c.problem.context)
             : c.title;
 
           return (
