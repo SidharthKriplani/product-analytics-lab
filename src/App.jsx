@@ -138,6 +138,7 @@ export default function App() {
   const [activeSTFCaseId, setActiveSTFCaseId] = useState(null);
   const [activeTakehomeCaseId, setActiveTakehomeCaseId] = useState(null);
   const [activeInstrumentationCaseId, setActiveInstrumentationCaseId] = useState(null);
+  const [activeSqlProblemId, setActiveSqlProblemId] = useState(null);
   const [activeMetricsFoundationId, setActiveMetricsFoundationId] = useState(null);
   const [activeRCAFoundationId, setActiveRCAFoundationId] = useState(null);
   const [activeExpFoundationId, setActiveExpFoundationId] = useState(null);
@@ -630,6 +631,11 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function openSqlProblem(id) {
+    setActiveSqlProblemId(id);
+    setPage('sql-lab');
+  }
+
   function openRCAFoundationModule(id) {
     const m = rcaFoundationIndex.find(m => m.id === id);
     if (!m) return;
@@ -866,6 +872,7 @@ export default function App() {
     openSTFCase,
     openTakehomeCase,
     openInstrumentationCase,
+    openSqlProblem,
     openMetricsFoundationModule,
     openRCAFoundationModule,
     openExpFoundationModule,
@@ -899,6 +906,7 @@ export default function App() {
       activeSTFCaseId,
       activeTakehomeCaseId,
       activeInstrumentationCaseId,
+      activeSqlProblemId,
       activeMetricsFoundationId,
       activeRCAFoundationId,
       activeExpFoundationId,
@@ -912,7 +920,7 @@ export default function App() {
     activeFullLoopId, activePrioritizationId, activeBehavioralId, activeEstimationId,
     activeStatFoundationsId, activeGrowthAnalyticsId, activeChallengeId,
     activeBICaseId, activeSTFCaseId, activeTakehomeCaseId, activeInstrumentationCaseId,
-    activeMetricsFoundationId, activeRCAFoundationId, activeExpFoundationId]);
+    activeSqlProblemId, activeMetricsFoundationId, activeRCAFoundationId, activeExpFoundationId]);
 
   // Hash → state sync: on hashchange (browser back/forward), parse hash and drive state.
   useEffect(() => {
@@ -1753,7 +1761,7 @@ export default function App() {
 
         {/* ── SQL Lab (internal preview — hidden from nav) ── */}
         {page === 'sql-lab' && (
-          <SqlLabPage onBack={() => navigate('home')} />
+          <SqlLabPage onBack={() => navigate('home')} initialProblemId={activeSqlProblemId} onProblemChange={setActiveSqlProblemId} />
         )}
 
         {page === 'qa' && (

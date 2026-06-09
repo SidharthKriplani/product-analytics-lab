@@ -470,8 +470,14 @@ function StudyPlanModal({ solved, onClose, onApply }) {
   );
 }
 
-export function SqlLabPage({ onBack }) {
-  const [problemIdx, setProblemIdx] = useState(0);
+export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
+  const [problemIdx, setProblemIdx] = useState(function () {
+    if (initialProblemId) {
+      var idx = SORTED_PROBLEMS.findIndex(function (p) { return p.id === initialProblemId; });
+      if (idx >= 0) return idx;
+    }
+    return 0;
+  });
   const [db, setDb] = useState(null);
   const [sqlLoading, setSqlLoading] = useState(true);
   const [sqlError, setSqlError] = useState(null);
@@ -507,6 +513,11 @@ export function SqlLabPage({ onBack }) {
   const problem = SORTED_PROBLEMS[problemIdx];
   const dm = problem ? datamarts[problem.datamartId] : null;
   const diffStyle = problem ? (DIFF_COLOR[problem.difficulty] || DIFF_COLOR.Easy) : DIFF_COLOR.Easy;
+
+  // Notify parent of problem changes for hash routing
+  useEffect(() => {
+    if (onProblemChange && problem) onProblemChange(problem.id);
+  }, [problemIdx]);
 
   // Mark solved on correct answer + save elapsed time + fire analytics + record streak date
   useEffect(() => {

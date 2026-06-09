@@ -85,6 +85,7 @@ const PAGE_TO_HASH = {
 
 // Runner pages → which activeId state they use
 const RUNNER_ACTIVE_ID_KEY = {
+  'sql-lab': 'activeSqlProblemId',
   'runner': 'activeScenarioId',
   'design-runner': 'activeDesignScenarioId',
   'stats-runner': 'activeStatsModuleId',
@@ -160,6 +161,7 @@ const HASH_TO_BROWSER_PAGE = {
 
 // Hash segment → runner page value (when a case ID is present)
 const HASH_TO_RUNNER_PAGE = {
+  'sql-lab': 'sql-lab',
   'review': 'runner',
   'design': 'design-runner',
   'stats': 'stats-runner',
@@ -185,6 +187,7 @@ const HASH_TO_RUNNER_PAGE = {
 
 // Runner page → the open function name to call (used by hashchange handler)
 const RUNNER_OPEN_FN = {
+  'sql-lab': 'openSqlProblem',
   'runner': 'openScenario',
   'design-runner': 'openDesignScenario',
   'stats-runner': 'openStatsModule',
