@@ -1,6 +1,6 @@
-# Brain Transfer — V5.22.1
+# Brain Transfer — V5.24.0
 
-**Version:** V5.22.1 | **Build:** ✓ | **Date:** 2026-06-09 | **PM Audit:** #149 complete
+**Version:** V5.24.0 | **Build:** ✓ | **Date:** 2026-06-09 | **PM Audit:** #149 complete
 
 ---
 
@@ -49,6 +49,10 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.24.0** — Full Loop fl01 QA pass. Three bugs found and fixed: (1) Q1 date split was wrong — `date('2026-06-02')` used as the migration cutoff, making the "last week" window contain only post-migration UPI failures (CVR=0%) rather than pre-migration baseline (62.5%). Fixed: cutoff moved to `date('2026-05-26')` in Q1/Q2/Q3 correctQuerySqlite fields. (2) fl01 seed had a duplicate android retry for order 15 (payment 23), inflating android count and obscuring the platform breakdown. Removed. (3) All post-migration UPI orders were android-only, so Q3 returned a single row instead of the 3-platform breakdown the insight claimed. Fixed: added orders 27/28/29 (ios/web users) and payments 31-36, giving android 25%, ios 25%, web 50% — all below 62.5% baseline, confirming provider-level failure. Build ✓ 2.73s. Files: fullLoopCases.js, fullLoopSeedData.js.
+
+**V5.23.0** — Full Loop 5-phase rebuild + deep link auth fix. (1) Full Loop rewritten from 7 disconnected phases (alert/data/rca/sql/communicate/experiment/readout) to 5 connected investigation phases: Problem → Decomposition (free-form MECE) → Schema Design (user proposes tables) → SQL Query Chain (3 sequential queries via sql.js) → Synthesis. All 10 cases rewritten in new format. Seed data expanded with 5 new tables. FullLoopBrowser.jsx patched for new data contract. (2) Deep link auth race: replaced 150ms timer with `authSettled` state driven by `onAuthStateChange` callback — deep link consumption now waits for auth to settle. Added `pendingDeepLinkRef` guard to home→progress redirect. 2s fallback timer. Files: App.jsx, FullLoopRunner.jsx, fullLoopCases.js, fullLoopSeedData.js, FullLoopBrowser.jsx.
 
 **V5.22.0 → V5.22.1** — Universe View V2 shipped. Animated arms with glow on hover, tooltips, loop arc with bezier curve, clickable navigation to rooms, mobile fallback. V5.22.1 fixed glow to hover-only + cleaner loop arc.
 

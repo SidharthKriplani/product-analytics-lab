@@ -4,6 +4,26 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.24.0] — 2026-06-09 [BUG FIX]
+
+### Full Loop fl01 QA pass — 3 bugs fixed
+
+**Bug 1 — Q1 date split (fullLoopCases.js)**
+The `correctQuerySqlite` for Q1 used `date('2026-06-02')` as the migration cutoff. This put the entire May 26–Jun 1 window (post-migration, all UPI failures) into "last week", making last_week_cvr=0% instead of the expected 62.5% baseline. Fixed: cutoff moved to `date('2026-05-26')` across Q1, Q2, and Q3. Q1 now correctly shows UPI: this_week 28.6% vs last_week 62.5%.
+
+**Bug 2 — duplicate android payment (fullLoopSeedData.js)**
+Payment 23 was a duplicate retry for order 15 (android, user 1) — an extra `upi failed 2026-05-28` that inflated android attempt count without adding any cross-platform signal. Removed. Downstream payments renumbered to stay contiguous (old 24→23, 25→24, …, 31→30).
+
+**Bug 3 — Q3 returned only android (fullLoopSeedData.js)**
+All post-migration UPI orders (15, 17, 19, 21, 23, 25, 26) linked to users 1/3/5/7/9 — all android. Q3 therefore returned a single row `['android', ...]` while the insight claimed "consistent across all platforms". Fixed: added orders 27 (user 2, ios), 28 (user 4, web), 29 (user 6, ios) and payments 31-36 for those orders. Result: android 25%, ios 25%, web 50% — all far below 62.5% baseline, confirming provider-level failure across platforms.
+
+**Verification:** all three `correctQuerySqlite` queries run against updated seed in Node (sql.js) — no errors, outputs match insight text.
+
+**Files:** `src/data/fullLoopCases.js`, `src/data/fullLoopSeedData.js`
+**Build:** ✓ 2.73s, 0 errors
+
+---
+
 ## [5.23.0] — 2026-06-09 [REBUILD + BUG FIX]
 
 ### Full Loop 5-phase rebuild

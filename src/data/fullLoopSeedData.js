@@ -77,7 +77,7 @@ export const fullLoopSeedData = {
       'INSERT INTO payments VALUES (14, 6, \'debit_card\', \'completed\', \'2026-05-17\', \'2026-05-17\')',
       'INSERT INTO payments VALUES (15, 12, \'debit_card\', \'completed\', \'2026-05-23\', \'2026-05-23\')',
 
-      // Current period — UPI (9 attempts: 2 completed, 7 failed = 22%)
+      // Current period — android UPI (8 attempts: 2 completed = 25%)
       'INSERT INTO payments VALUES (16, 15, \'upi\', \'failed\', \'2026-05-27\', NULL)',
       'INSERT INTO payments VALUES (17, 17, \'upi\', \'failed\', \'2026-05-29\', NULL)',
       'INSERT INTO payments VALUES (18, 19, \'upi\', \'failed\', \'2026-06-01\', NULL)',
@@ -85,18 +85,29 @@ export const fullLoopSeedData = {
       'INSERT INTO payments VALUES (20, 23, \'upi\', \'failed\', \'2026-06-05\', NULL)',
       'INSERT INTO payments VALUES (21, 25, \'upi\', \'completed\', \'2026-06-07\', \'2026-06-07\')',
       'INSERT INTO payments VALUES (22, 26, \'upi\', \'failed\', \'2026-06-08\', NULL)',
-      'INSERT INTO payments VALUES (23, 15, \'upi\', \'failed\', \'2026-05-28\', NULL)',
-      'INSERT INTO payments VALUES (24, 19, \'upi\', \'completed\', \'2026-06-02\', \'2026-06-02\')',
+      'INSERT INTO payments VALUES (23, 19, \'upi\', \'completed\', \'2026-06-02\', \'2026-06-02\')',
       // Current period — Credit Card (3 attempts: 2 completed = 67%)
-      'INSERT INTO payments VALUES (25, 16, \'credit_card\', \'completed\', \'2026-05-28\', \'2026-05-28\')',
-      'INSERT INTO payments VALUES (26, 22, \'credit_card\', \'completed\', \'2026-06-04\', \'2026-06-04\')',
-      'INSERT INTO payments VALUES (27, 22, \'credit_card\', \'failed\', \'2026-06-03\', NULL)',
+      'INSERT INTO payments VALUES (24, 16, \'credit_card\', \'completed\', \'2026-05-28\', \'2026-05-28\')',
+      'INSERT INTO payments VALUES (25, 22, \'credit_card\', \'completed\', \'2026-06-04\', \'2026-06-04\')',
+      'INSERT INTO payments VALUES (26, 22, \'credit_card\', \'failed\', \'2026-06-03\', NULL)',
       // Current period — Net Banking (2 attempts: 2 completed = 100%)
-      'INSERT INTO payments VALUES (28, 18, \'net_banking\', \'completed\', \'2026-05-30\', \'2026-05-30\')',
-      'INSERT INTO payments VALUES (29, 24, \'net_banking\', \'completed\', \'2026-06-06\', \'2026-06-06\')',
+      'INSERT INTO payments VALUES (27, 18, \'net_banking\', \'completed\', \'2026-05-30\', \'2026-05-30\')',
+      'INSERT INTO payments VALUES (28, 24, \'net_banking\', \'completed\', \'2026-06-06\', \'2026-06-06\')',
       // Current period — Debit Card (2 attempts: 1 completed = 50%)
-      'INSERT INTO payments VALUES (30, 20, \'debit_card\', \'completed\', \'2026-06-02\', \'2026-06-02\')',
-      'INSERT INTO payments VALUES (31, 20, \'debit_card\', \'failed\', \'2026-06-01\', NULL)',
+      'INSERT INTO payments VALUES (29, 20, \'debit_card\', \'completed\', \'2026-06-02\', \'2026-06-02\')',
+      'INSERT INTO payments VALUES (30, 20, \'debit_card\', \'failed\', \'2026-06-01\', NULL)',
+      // Cross-platform UPI orders: ios (user 2) and web (user 4) and ios (user 6)
+      'INSERT INTO orders VALUES (27, 2, \'2026-05-28\', \'upi\', \'failed\', 300.0)',
+      'INSERT INTO orders VALUES (28, 4, \'2026-06-03\', \'upi\', \'failed\', 500.0)',
+      'INSERT INTO orders VALUES (29, 6, \'2026-06-06\', \'upi\', \'failed\', 250.0)',
+      // ios UPI (user 2, order 27): 3 attempts, 1 completed = 33%; (user 6, order 29): 1 attempt, 0 completed
+      'INSERT INTO payments VALUES (31, 27, \'upi\', \'failed\', \'2026-05-28\', NULL)',
+      'INSERT INTO payments VALUES (32, 27, \'upi\', \'failed\', \'2026-05-29\', NULL)',
+      'INSERT INTO payments VALUES (33, 27, \'upi\', \'completed\', \'2026-05-30\', \'2026-05-30\')',
+      'INSERT INTO payments VALUES (34, 29, \'upi\', \'failed\', \'2026-06-06\', NULL)',
+      // web UPI (user 4, order 28): 2 attempts, 1 completed = 50%
+      'INSERT INTO payments VALUES (35, 28, \'upi\', \'failed\', \'2026-06-03\', NULL)',
+      'INSERT INTO payments VALUES (36, 28, \'upi\', \'completed\', \'2026-06-04\', \'2026-06-04\')',
     ],
     correctQuerySqlite: 'SELECT p.method, SUM(CASE WHEN p.attempted_at >= date(\'2026-06-09\', \'-14 days\') THEN 1 ELSE 0 END) AS this_period_attempts, SUM(CASE WHEN p.attempted_at >= date(\'2026-06-09\', \'-14 days\') AND p.status = \'completed\' THEN 1 ELSE 0 END) AS this_period_completed, ROUND(100.0 * SUM(CASE WHEN p.attempted_at >= date(\'2026-06-09\', \'-14 days\') AND p.status = \'completed\' THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN p.attempted_at >= date(\'2026-06-09\', \'-14 days\') THEN 1 ELSE 0 END), 0), 1) AS this_period_cvr, SUM(CASE WHEN p.attempted_at < date(\'2026-06-09\', \'-14 days\') AND p.attempted_at >= date(\'2026-06-09\', \'-28 days\') THEN 1 ELSE 0 END) AS last_period_attempts, SUM(CASE WHEN p.attempted_at < date(\'2026-06-09\', \'-14 days\') AND p.attempted_at >= date(\'2026-06-09\', \'-28 days\') AND p.status = \'completed\' THEN 1 ELSE 0 END) AS last_period_completed, ROUND(100.0 * SUM(CASE WHEN p.attempted_at < date(\'2026-06-09\', \'-14 days\') AND p.attempted_at >= date(\'2026-06-09\', \'-28 days\') AND p.status = \'completed\' THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN p.attempted_at < date(\'2026-06-09\', \'-14 days\') AND p.attempted_at >= date(\'2026-06-09\', \'-28 days\') THEN 1 ELSE 0 END), 0), 1) AS last_period_cvr FROM payments p WHERE p.attempted_at >= date(\'2026-06-09\', \'-28 days\') GROUP BY p.method ORDER BY this_period_cvr ASC',
   },

@@ -181,6 +181,9 @@ No template literals in data files. This has caused two production build failure
 **Playbook articles are story-first.**
 Every article opens with a concrete scenario — a Slack message, a PM ask, a live experiment moment — before any framework or definition. "Here's a situation" before "here's the concept."
 
+**Full Loop uses 5 connected investigation phases, not 7 discrete ones (V5.23.0).**
+The original 7-phase design (alert → data → rca → sql → communicate → experiment → readout) treated each phase as independent. Real analytics interviews are connected — your decomposition shapes your schema, your schema shapes your queries, your query results shape your synthesis. The 5-phase design: Problem → Decomposition (free-form MECE) → Schema Design (propose tables/columns) → SQL Query Chain (3 sequential queries, each informed by prior results) → Synthesis. No experiment or readout phase — those belong in the Review Room. Each case has exactly 3 queries in the chain.
+
 ---
 
 ## Design

@@ -63,6 +63,22 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
+## Part XXXVIII — V5.23.0 structural fixes (2026-06-09)
+
+### 163. ✅ BUG — Deep link URLs don't work in new tabs
+
+**Root cause:** `onAuthStateChange` callback fires `setPage('progress')` before the deep-link hash handler can consume the URL. The 150ms timer was not enough for Supabase auth to settle.
+
+**Fix (V5.23.0):** Replaced 150ms timer with `authSettled` state driven by `onAuthStateChange`. Deep link consumption now waits for auth to settle before calling open functions. Added `pendingDeepLinkRef` guard to the `home→progress` redirect effect. 2-second fallback timer for when Supabase is offline.
+
+### 164. ✅ REBUILD — Full Loop 7-phase → 5-phase connected investigation
+
+**Source:** User's Meesho SBA Round 2 experience. The real interview was a connected flow: metric alert → decomposition → schema proposal → sequential SQL queries → synthesis. PAL's 7-phase Full Loop was disconnected — each phase stood alone.
+
+**Fix (V5.23.0):** Rebuilt to 5 phases: Problem → Decomposition (free-form MECE) → Schema Design (propose tables) → SQL Query Chain (3 sequential queries via sql.js) → Synthesis. All 10 cases rewritten. Seed data expanded with 5 new tables. Removed experiment and readout phases (those belong in Review Room).
+
+---
+
 ## Part XXXVII — V5.23.0 beta feedback: Universe View + mobile (2026-06-09)
 
 ### 161. ✅ UX — Universe View has no entry point for beginners

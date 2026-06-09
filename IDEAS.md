@@ -566,8 +566,8 @@ Same card-per-day format as current, but now the plan:
 ### Interview Experiences tab
 Curated catalog of real analyst/PM interview experiences with a skill frequency graph ("what topics come up most, across which companies"). Submission flow: user pastes free text → you assess quality/completeness → approve and add manually. The curation bottleneck is real — this is ongoing work for the product's life. **Do not build the in-app submission flow first.** Manually source 20–30 experiences from LinkedIn/Reddit/r/dataengineering, validate the skill frequency pattern is interesting, then decide if the infrastructure is worth building. The graph itself (Chart.js, topics × frequency) is the high-value deliverable; the ingestion pipeline is the expensive part. Tier 2 — gate on having a real corpus first.
 
-### Share buttons + deep-link routing
-Share buttons without actual per-problem URLs are useless (they'd just link to home). Real work: add URL routing for individual problems and cases (SQL Lab problem IDs, Case IDs, Foundation module IDs). PAL is currently a pure SPA with no per-item routes. Adding `?problem=sql-e01` or `/sql-lab/sql-e01` routing requires changes to App.jsx + all runners. Once routing exists, share buttons are trivial. Do not build share buttons until routing exists. Effort: medium per room × 17 rooms. Start with SQL Lab (most benefit from sharing individual problems).
+### ~~Share buttons + deep-link routing~~
+~~Share buttons without actual per-problem URLs are useless (they'd just link to home).~~ ✅ Hash-based URL routing shipped V5.22.0 — all rooms, cases, foundation modules, and SQL Lab problems have deep-link URLs (`#/review/s01-checkout-trap`, `#/sql-lab/sql-e01`, etc.). Browser back/forward works. Share buttons are now trivial to add — routing is done. Auth race fix shipped V5.23.0.
 
 ### Room relationship map — learning arc visualization
 
@@ -755,7 +755,7 @@ Running Python (Pandas) as an alternative to SQL for solving SQL Lab problems. R
 - Progress export/import (JSON device handoff without Supabase)
 
 **5F — Sharing + Social**
-- Share buttons + deep-link routing (per-problem/per-case URLs)
+- ~~Share buttons + deep-link routing (per-problem/per-case URLs)~~ — ✅ hash routing shipped V5.22.0, auth race fix V5.23.0
 - Share score clipboard button (format: "PAL: 18/20 · 90% · Strong: Metrics · Weak: Growth")
 
 ---
