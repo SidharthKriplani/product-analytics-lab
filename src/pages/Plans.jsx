@@ -196,6 +196,68 @@ function TestimonialTicker() {
   );
 }
 
+function TestimonialWall() {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? WALL_TESTIMONIALS : WALL_TESTIMONIALS.slice(0, 3);
+  const remaining = WALL_TESTIMONIALS.length - 3;
+
+  const renderCard = (t) => (
+    <div key={t.name} style={{
+      background: 'var(--surface)',
+      border: '1px solid var(--border)',
+      borderRadius: '12px',
+      padding: '1.1rem',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      <p style={{
+        fontSize: '0.78rem', color: 'var(--text)', lineHeight: 1.6,
+        margin: '0 0 0.85rem', fontStyle: 'italic', flex: 1,
+      }}>
+        &ldquo;{t.quote}&rdquo;
+      </p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <img src={t.img} alt={t.name}
+          style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+        <div>
+          <a href={t.href} target="_blank" rel="noopener noreferrer"
+            style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>
+            {t.name}
+          </a>
+          <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)' }}>{t.role}</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ marginBottom: '2rem' }}>
+      <p style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.875rem' }}>
+        What practitioners are saying
+      </p>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))',
+        gap: '0.85rem',
+      }}>
+        {visible.map(renderCard)}
+      </div>
+      {!expanded && remaining > 0 && (
+        <button
+          onClick={() => setExpanded(true)}
+          style={{
+            background: 'none', border: 'none', color: 'var(--text-muted)',
+            fontSize: '0.75rem', cursor: 'pointer', padding: '0.75rem 0 0',
+            fontFamily: 'inherit', display: 'block', margin: '0 auto',
+          }}
+        >
+          Show all {WALL_TESTIMONIALS.length} &darr;
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlockedProp }) {
   const alreadyUnlocked = unlockedProp || isUnlocked();
   const [code, setCode]       = useState('');
@@ -238,9 +300,12 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
         </p>
       </div>
 
-      {/* ── Testimonials — rotating ticker ── */}
-      <TestimonialTicker />
-
+      {/* ── Testimonials Wall (collapsed) ── */}
+      {WALL_TESTIMONIALS.length >= 8 ? (
+        <TestimonialWall />
+      ) : (
+        <TestimonialTicker />
+      )}
 
       {/* ── Pricing cards ── */}
       <div style={{
@@ -453,54 +518,6 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
         ))}
       </div>
 
-
-      {/* ── Testimonials Wall — renders only when 8+ entries ── */}
-      {WALL_TESTIMONIALS.length >= 8 && (
-        <div style={{ marginBottom: '2.5rem' }}>
-          <h2 style={{
-            fontSize: '1.1rem', fontWeight: 800, color: 'var(--text)',
-            textAlign: 'center', margin: '0 0 1.25rem', letterSpacing: '-0.02em',
-          }}>
-            What practitioners are saying
-          </h2>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))',
-            gap: '1rem',
-          }}>
-            {WALL_TESTIMONIALS.map(t => (
-              <div key={t.name} style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                padding: '1.25rem',
-                display: 'flex',
-                flexDirection: 'column',
-              }}>
-                <p style={{
-                  fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.65,
-                  margin: '0 0 1rem', fontStyle: 'italic', flex: 1,
-                }}>
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <img
-                    src={t.img} alt={t.name}
-                    style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-                  />
-                  <div>
-                    <a href={t.href} target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>
-                      {t.name}
-                    </a>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
       <div style={{
