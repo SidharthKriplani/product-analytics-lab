@@ -214,91 +214,179 @@ function Module_MF02({ module, onNext }) {
 }
 
 // ─── Module 3: Ratio Metrics ─────────────────────────────────────────────────
+// REFERENCE MODULE — new foundation format:
+// 1. Scenario (why this matters)  2. Concept + interactive demo  3. Quick check  4. Key takeaway
 
 function Module_MF03({ module, onNext }) {
-  const saved03 = useMemo(function() { return loadMFState('mf03'); }, []);
-  const [step, setStep] = useState(function() { return saved03 ? saved03.step : 0; });
-  const [selected, setSelected] = useState(function() { return saved03 ? saved03.selected : null; });
-  const [answered, setAnswered] = useState(function() { return saved03 ? saved03.answered : false; });
+  var saved03 = useMemo(function() { return loadMFState('mf03'); }, []);
+  var [mobilePct, setMobilePct] = useState(function() { return saved03 && saved03.mobilePct !== undefined ? saved03.mobilePct : 40; });
+  var [desktopCVR, setDesktopCVR] = useState(function() { return saved03 && saved03.desktopCVR !== undefined ? saved03.desktopCVR : 4.5; });
+  var [mobileCVR, setMobileCVR] = useState(function() { return saved03 && saved03.mobileCVR !== undefined ? saved03.mobileCVR : 2.1; });
+  var [selected, setSelected] = useState(function() { return saved03 ? saved03.selected : null; });
+  var [answered, setAnswered] = useState(function() { return saved03 ? saved03.answered : false; });
+  var [discoveredParadox, setDiscoveredParadox] = useState(function() { return saved03 ? saved03.discoveredParadox : false; });
 
   useEffect(function() {
-    saveMFState('mf03', { step: step, selected: selected, answered: answered });
-  }, [step, selected, answered]);
+    saveMFState('mf03', { mobilePct: mobilePct, desktopCVR: desktopCVR, mobileCVR: mobileCVR, selected: selected, answered: answered, discoveredParadox: discoveredParadox });
+  }, [mobilePct, desktopCVR, mobileCVR, selected, answered, discoveredParadox]);
 
-  const Q = {
-    question: 'Overall CVR fell from 4.2% to 3.9% after a redesign. But desktop CVR rose (4.1%→4.5%) and mobile CVR rose (2.8%→3.2%). How is this possible?',
+  var blendedCVR = ((100 - mobilePct) / 100) * desktopCVR + (mobilePct / 100) * mobileCVR;
+  var baselineBlended = 0.6 * 4.5 + 0.4 * 2.1; // 3.54 at 40/60 split
+
+  // SVG bar chart dimensions
+  var barW = 60;
+  var chartH = 160;
+  var maxCVR = 6;
+
+  var Q = {
+    question: 'Your team redesigned the checkout page. Desktop CVR rose 4.1% to 4.5%. Mobile CVR rose 2.8% to 3.2%. But overall CVR fell 4.2% to 3.9%. A stakeholder asks: "Did the redesign help or hurt?" What do you say?',
     options: [
-      { id: 'a', text: 'Data pipeline error — the numbers cannot all be correct simultaneously.' },
-      { id: 'b', text: 'Simpson\'s Paradox: the mix shifted toward mobile (lower CVR channel), so blended CVR fell even though each segment improved.' },
-      { id: 'c', text: 'The primary metric is calculated incorrectly — numerator and denominator are swapped.' },
-      { id: 'd', text: 'The redesign only went live on a subset of users, creating sample contamination.' },
+      { id: 'a', text: 'The redesign helped — both segments improved, so the overall must have improved too.' },
+      { id: 'b', text: 'The redesign helped each segment, but a traffic mix shift toward mobile pulled the blended rate down. The redesign worked; the aggregate is misleading.' },
+      { id: 'c', text: 'The data is inconsistent — if both segments improved, the overall cannot fall. There must be a logging error.' },
     ],
     correct: 'b',
-    explanation: 'If desktop was 30% of traffic before and 20% after, and mobile was 70% before and 80% after, the blended CVR will fall — even with both segments improving. The denominator mix changed. This is why you always decompose a ratio change into: (a) did each segment improve? (b) did the mix shift? Both can happen simultaneously.',
+    explanation: 'Both segment CVRs improved, confirming the redesign worked. But mobile traffic share grew (say 60% to 75%), and mobile converts at a lower rate. The blended average fell because the denominator mix shifted — not because the product got worse. This is Simpson\'s Paradox. The correct answer to the stakeholder: "The redesign improved conversion in every segment. The aggregate fell because mobile grew as a share of traffic. Both things are true at the same time."',
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      {step === 0 && (
-        <>
-          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.92rem' }}>
-            Ratio metrics — CVR, CTR, retention rate — are attractive because they normalise for volume. But they hide a trap:
-            <strong> the denominator can change composition</strong> independently of any product change, making the ratio move in a misleading direction.
-          </p>
-          <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem' }}>
-            <div style={{ fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem', fontSize: '0.88rem' }}>The Anatomy of a Ratio Metric</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(180px, 100%), 1fr))', gap: '0.5rem', textAlign: 'center' }}>
-              {[
-                { label: 'Numerator', desc: 'The outcome (conversions, clicks)', color: 'var(--green)' },
-                { label: 'Denominator', desc: 'The exposure (sessions, users)', color: 'var(--accent)' },
-                { label: 'Mix', desc: 'Who makes up the denominator', color: 'var(--purple)' },
-              ].map(item => (
-                <div key={item.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.8rem', color: item.color }}>{item.label}</div>
-                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{item.desc}</div>
-                </div>
-              ))}
-            </div>
-            <p style={{ margin: '0.75rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-              When diagnosing a ratio change: check numerator, check denominator absolute counts, then check <em>mix of denominator</em> across segments.
-            </p>
-          </div>
-          <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--green)', lineHeight: 1.5 }}>
-            <strong>What to do:</strong> Read the anatomy of ratio metrics above, then click to encounter a real-world paradox that trips up even experienced analysts.
-          </div>
-          <button onClick={() => setStep(1)} style={{ alignSelf: 'flex-start', padding: '0.5rem 1.2rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--accent)', color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>See the paradox →</button>
-        </>
-      )}
-      {step >= 1 && (
-        <>
-          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.92rem' }}>
-            Ratio metrics — CVR, CTR, retention rate — are attractive because they normalise for volume. But they hide a trap:
-            <strong> the denominator can change composition</strong> independently of any product change, making the ratio move in a misleading direction.
-          </p>
-          <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.9rem 1.1rem' }}>
-            <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.88rem', marginBottom: '0.75rem' }}>{Q.question}</div>
-            <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', marginBottom: '0.75rem', fontSize: '0.84rem', color: 'var(--green)', lineHeight: 1.5 }}>
-              <strong>What to do:</strong> Identify the statistical phenomenon that explains how all three numbers can be simultaneously true, then click Submit.
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              {Q.options.map(opt => (
-                <MCQOption key={opt.id} label={opt.text} selected={selected === opt.id} correct={opt.id === Q.correct} revealed={answered} onClick={() => !answered && setSelected(opt.id)} />
-              ))}
-            </div>
-            {selected && !answered && (
-              <button onClick={() => setAnswered(true)} style={{ marginTop: '0.75rem', padding: '0.45rem 1.1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--accent)', color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>Submit</button>
-            )}
-            {answered && (
-              <div className="pal-reveal-in" style={{ marginTop: '0.75rem', background: selected === Q.correct ? 'var(--green-bg)' : 'var(--red-bg)', border: '1px solid ' + (selected === Q.correct ? 'var(--green-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-                <strong>{selected === Q.correct ? '✓ Correct. ' : '✗ Not quite. '}</strong>{Q.explanation}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+      {/* ── Section 1: The Scenario ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Monday morning. You open the weekly metrics dashboard and see checkout conversion rate dropped from 3.5% to 3.1%. The product lead pings you: <em>"What happened to checkout?"</em>
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          You segment by platform. Desktop CVR is 4.5% — same as last week. Mobile CVR is 2.1% — also flat. Neither segment moved. So where did the drop come from?
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          The answer is hiding in a place most analysts forget to check: <strong>the mix</strong>. Last week, 40% of traffic was mobile. This week, a push notification campaign drove it to 65%. Every segment performed identically — but the blended rate fell because more traffic came through the lower-converting channel.
+        </p>
+      </div>
+
+      {/* ── Section 2: The Concept ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Three Levers of Any Ratio</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 0.75rem', fontSize: '0.9rem' }}>
+          Every ratio metric — conversion rate, CTR, retention rate, revenue per session — is a fraction. When it moves, exactly three things could have changed:
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(180px, 100%), 1fr))', gap: '0.5rem', marginBottom: '0.75rem' }}>
+          {[
+            { label: '1. Numerator', desc: 'Did the outcome count change? (more conversions, fewer clicks)', color: 'var(--green)' },
+            { label: '2. Denominator', desc: 'Did the exposure count change? (more sessions, fewer users)', color: 'var(--accent)' },
+            { label: '3. Mix', desc: 'Did the composition of the denominator shift? (more mobile, fewer power users)', color: 'var(--purple)' },
+          ].map(function(item) {
+            return (
+              <div key={item.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.65rem 0.75rem' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.78rem', color: item.color }}>{item.label}</div>
+                <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '0.25rem', lineHeight: 1.45 }}>{item.desc}</div>
               </div>
-            )}
+            );
+          })}
+        </div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          The third lever is the one people miss. A ratio can move in a direction that looks alarming (or encouraging) even when nothing about the product changed — because the <em>who</em> shifted. This is called <strong>Simpson\'s Paradox</strong>, and it shows up constantly in product analytics: A/B tests where treatment changes funnel composition, seasonality that shifts user mix, marketing campaigns that bring different cohorts.
+        </p>
+      </div>
+
+      {/* ── Section 3: Interactive Demo ── */}
+      <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Mix-Shift Explorer</div>
+        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.55, margin: '0 0 1rem' }}>
+          Drag the mobile traffic slider to see how mix shift changes the blended conversion rate — even when segment rates stay fixed. Try to make the blended rate drop below 3.0% without changing either segment\'s CVR.
+        </p>
+
+        {/* Sliders */}
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+            Mobile traffic share: <strong style={{ color: mobilePct > 60 ? 'var(--yellow)' : 'var(--text)' }}>{mobilePct}%</strong>
+            <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>(desktop: {100 - mobilePct}%)</span>
+          </label>
+          <input type='range' min={5} max={95} step={1} value={mobilePct} onChange={function(e) { setMobilePct(Number(e.target.value)); if (Number(e.target.value) > 70 && !discoveredParadox) setDiscoveredParadox(true); }} style={{ width: '100%', accentColor: 'var(--green)' }} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+          <div>
+            <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Desktop CVR: <strong style={{ color: 'var(--text)' }}>{desktopCVR.toFixed(1)}%</strong></label>
+            <input type='range' min={1} max={6} step={0.1} value={desktopCVR} onChange={function(e) { setDesktopCVR(Number(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
           </div>
-          <InsightBox label="Key Insight" color="var(--green)" bg="var(--green-bg)" border="var(--green-border)">{module.keyInsight}</InsightBox>
-          <InsightBox label="Connects to Experiments" color="var(--accent)" bg="var(--accent-bg)" border="var(--accent-border)">{module.connection}</InsightBox>
-          <NextBtn onClick={onNext} />
-        </>
-      )}
+          <div>
+            <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Mobile CVR: <strong style={{ color: 'var(--text)' }}>{mobileCVR.toFixed(1)}%</strong></label>
+            <input type='range' min={0.5} max={5} step={0.1} value={mobileCVR} onChange={function(e) { setMobileCVR(Number(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+          </div>
+        </div>
+
+        {/* SVG bar chart */}
+        <svg viewBox={'0 0 280 ' + (chartH + 40)} width='100%' style={{ maxWidth: '320px', display: 'block', margin: '0 auto' }}>
+          {/* Y-axis labels */}
+          {[0, 2, 4, 6].map(function(v) {
+            var y = chartH - (v / maxCVR) * chartH + 10;
+            return (
+              <g key={v}>
+                <line x1={45} x2={260} y1={y} y2={y} stroke='var(--border)' strokeWidth={0.5} strokeDasharray={v > 0 ? '3,3' : 'none'} />
+                <text x={40} y={y + 3} textAnchor='end' fill='var(--text-muted)' fontSize={10}>{v}%</text>
+              </g>
+            );
+          })}
+
+          {/* Desktop bar */}
+          <rect x={70} y={chartH - (desktopCVR / maxCVR) * chartH + 10} width={barW} height={(desktopCVR / maxCVR) * chartH} rx={4} fill='var(--accent)' opacity={0.8} />
+          <text x={100} y={chartH + 28} textAnchor='middle' fill='var(--text-muted)' fontSize={10} fontWeight={600}>Desktop</text>
+          <text x={100} y={chartH - (desktopCVR / maxCVR) * chartH + 4} textAnchor='middle' fill='var(--accent)' fontSize={11} fontWeight={700}>{desktopCVR.toFixed(1)}%</text>
+
+          {/* Mobile bar */}
+          <rect x={150} y={chartH - (mobileCVR / maxCVR) * chartH + 10} width={barW} height={(mobileCVR / maxCVR) * chartH} rx={4} fill='var(--purple)' opacity={0.8} />
+          <text x={180} y={chartH + 28} textAnchor='middle' fill='var(--text-muted)' fontSize={10} fontWeight={600}>Mobile</text>
+          <text x={180} y={chartH - (mobileCVR / maxCVR) * chartH + 4} textAnchor='middle' fill='var(--purple)' fontSize={11} fontWeight={700}>{mobileCVR.toFixed(1)}%</text>
+
+          {/* Blended line */}
+          <line x1={55} x2={255} y1={chartH - (blendedCVR / maxCVR) * chartH + 10} y2={chartH - (blendedCVR / maxCVR) * chartH + 10} stroke={blendedCVR < baselineBlended ? 'var(--red)' : 'var(--green)'} strokeWidth={2} strokeDasharray='6,3' />
+          <text x={258} y={chartH - (blendedCVR / maxCVR) * chartH + 14} fill={blendedCVR < baselineBlended ? 'var(--red)' : 'var(--green)'} fontSize={11} fontWeight={700}>{blendedCVR.toFixed(1)}%</text>
+          <text x={258} y={chartH - (blendedCVR / maxCVR) * chartH + 2} fill='var(--text-muted)' fontSize={8}>Blended</text>
+        </svg>
+
+        {/* Discovery nudge */}
+        {discoveredParadox && (
+          <div className='pal-reveal-in' style={{ marginTop: '0.75rem', background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--yellow)', lineHeight: 1.55 }}>
+            Notice how the blended rate dropped below the baseline — even though neither segment\'s CVR changed? That\'s the mix shift in action. The product didn\'t get worse. The audience composition changed.
+          </div>
+        )}
+      </div>
+
+      {/* ── Section 4: The Framework ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Diagnostic Habit</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Every time a ratio metric moves, run this three-part check before concluding anything: <strong>(1)</strong> Did the numerator change? <strong>(2)</strong> Did the denominator change? <strong>(3)</strong> Did the mix of the denominator shift across segments? If you skip step 3, you will eventually present a metric movement to leadership that means the opposite of what you think it means.
+        </p>
+      </div>
+
+      {/* ── Section 5: Quick Check ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Quick Check</div>
+        <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.88rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>{Q.question}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {Q.options.map(function(opt) {
+            return (
+              <MCQOption key={opt.id} label={opt.text} selected={selected === opt.id} correct={opt.id === Q.correct} revealed={answered} onClick={function() { if (!answered) setSelected(opt.id); }} />
+            );
+          })}
+        </div>
+        {selected && !answered && (
+          <button onClick={function() { setAnswered(true); }} style={{ marginTop: '0.75rem', padding: '0.45rem 1.1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--green)', color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>Check</button>
+        )}
+        {answered && (
+          <div className='pal-reveal-in' style={{ marginTop: '0.75rem', background: selected === Q.correct ? 'var(--green-bg)' : 'var(--red-bg)', border: '1px solid ' + (selected === Q.correct ? 'var(--green-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+            <strong>{selected === Q.correct ? '✓ Correct. ' : '✗ Not quite. '}</strong>{Q.explanation}
+          </div>
+        )}
+      </div>
+
+      {/* ── Section 6: Key Takeaway ── */}
+      <InsightBox label='Key Takeaway' color='var(--green)' bg='var(--green-bg)' border='var(--green-border)'>{module.keyInsight}</InsightBox>
+      <InsightBox label='Connects to Experiments' color='var(--accent)' bg='var(--accent-bg)' border='var(--accent-border)'>{module.connection}</InsightBox>
+      <NextBtn onClick={onNext} />
     </div>
   );
 }
