@@ -936,6 +936,8 @@ export default function App() {
             caseId={activeMetricsCaseId}
             savedProgress={getMetricsProgress(activeMetricsCaseId)}
             unlocked={unlocked}
+            user={user}
+            onShowAuth={() => setShowAuth(true)}
             onBack={() => navigate('metrics')}
             onGoToDesign={id => openDesignScenario(id)}
             onGoToReview={id => openScenario(id)}
@@ -953,6 +955,8 @@ export default function App() {
             key={activeDesignScenarioId}
             caseId={activeDesignScenarioId}
             savedProgress={getDesignProgress(activeDesignScenarioId)}
+            user={user}
+            onShowAuth={() => setShowAuth(true)}
             onBack={() => navigate('design')}
             onGoToReview={id => openScenario(id)}
             onNext={nextDesignScenarioId ? () => openDesignScenario(nextDesignScenarioId) : undefined}
@@ -975,6 +979,8 @@ export default function App() {
           <ScenarioRunner
             key={activeScenarioId}
             caseId={activeScenarioId}
+            user={user}
+            onShowAuth={() => setShowAuth(true)}
             onBack={() => { navigate('browser'); refreshProgress(); }}
             onNext={nextScenarioId ? () => { openScenario(nextScenarioId); refreshProgress(); } : null}
             hasNext={!!nextScenarioId}
@@ -993,6 +999,8 @@ export default function App() {
             caseId={activeRCACaseId}
             savedProgress={getRCAProgress(activeRCACaseId)}
             unlocked={unlocked}
+            user={user}
+            onShowAuth={() => setShowAuth(true)}
             onBack={() => navigate('rca')}
             onNext={nextRCACaseId ? () => openRCACase(nextRCACaseId) : undefined}
             onNavigate={navigate}
@@ -1009,6 +1017,8 @@ export default function App() {
             caseId={activeBusinessCaseId}
             savedProgress={getCaseProgress(activeBusinessCaseId)}
             unlocked={unlocked}
+            user={user}
+            onShowAuth={() => setShowAuth(true)}
             onBack={() => navigate('cases')}
             onNext={nextBusinessCaseId ? () => openBusinessCase(nextBusinessCaseId) : undefined}
             onNavigate={navigate}
@@ -1636,12 +1646,13 @@ export default function App() {
                'pal-challenges-progress-v1', 'pal-bookmarks-v1', 'pal-notes-v1',
                'pal-metrics-foundation-progress-v1',
                'pal-rca-foundation-progress-v1',
-               'pal-exp-foundation-progress-v1'
+               'pal-exp-foundation-progress-v1',
+               'pal-rf-state-v1', 'pal-sf-state-v1'
               ].forEach(k => { try { localStorage.removeItem(k); } catch {} });
-              // Clear per-scenario product-design progress (prefix: pd-progress-)
+              // Clear per-scenario product-design progress and legacy per-module state keys
               try {
                 Object.keys(localStorage)
-                  .filter(k => k.startsWith('pd-progress-'))
+                  .filter(k => k.startsWith('pd-progress-') || k.startsWith('pal-rca-rf') || k.startsWith('pal-ef-ef') || k.startsWith('pal-mf-mf'))
                   .forEach(k => localStorage.removeItem(k));
               } catch {}
               refreshProgress();

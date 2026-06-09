@@ -7,6 +7,7 @@ import { DesignDebriefPanel } from './DesignDebriefPanel.jsx';
 import { ConceptDrawer } from '../concepts/ConceptDrawer.jsx';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { GateOverlay } from '../shared/GateOverlay.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -31,7 +32,7 @@ import {
 
 // Three views: 'form' | 'reveal' | 'debrief'
 
-export function DesignRunner({ caseId, savedProgress, onBack, onGoToReview, onNext, onNavigate }) {
+export function DesignRunner({ caseId, savedProgress, onBack, onGoToReview, onNext, onNavigate, user, onShowAuth }) {
   const scenario = designScenarios.find(s => s.id === caseId);
   const _phases = scenario.designPhases;
   const _savedAnswers = savedProgress?.answers || {};
@@ -276,6 +277,18 @@ export function DesignRunner({ caseId, savedProgress, onBack, onGoToReview, onNe
 
       {/* Concept drawer */}
       <ConceptDrawer conceptId={openConceptId} onClose={handleCloseConcept} />
+
+      {/* Guest demo gate — after debrief, prompt sign-in */}
+      {view === 'debrief' && !user && onShowAuth && (
+        <GateOverlay
+          title="Sign in to save this and keep practicing"
+          body="You just completed a free demo case. Sign in to save your progress, unlock more cases, and track your improvement."
+          ctaLabel="Sign in"
+          onCTA={onShowAuth}
+          secondaryLabel="Back to rooms"
+          onSecondary={onBack}
+        />
+      )}
     </div>
   );
 }

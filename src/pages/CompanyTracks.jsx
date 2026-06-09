@@ -427,6 +427,179 @@ function DirectorPressureCards({ cards }) {
   );
 }
 
+function ExperimentDesignCards({ cards }) {
+  const [openIdx, setOpenIdx] = useState(null);
+
+  return (
+    <div style={{ marginBottom: '2rem' }}>
+      <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.25rem' }}>
+        Experiment Design Cards
+      </div>
+      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.875rem' }}>
+        Practice the 3-part format: hypothesis, primary metric, guardrails. Click to reveal the expected answer.
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        {cards.map((card, idx) => {
+          const isOpen = openIdx === idx;
+          return (
+            <div key={idx} style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              overflow: 'hidden',
+            }}>
+              <button
+                onClick={() => setOpenIdx(isOpen ? null : idx)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  padding: '0.75rem 1rem',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+              >
+                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text)', flex: 1 }}>
+                  {card.question}
+                </span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', flexShrink: 0 }}>
+                  {isOpen ? '↑' : '↓'}
+                </span>
+              </button>
+              {isOpen && (
+                <div style={{
+                  padding: '0 1rem 0.875rem',
+                  borderTop: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.6rem',
+                }}>
+                  <div style={{ paddingTop: '0.75rem' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                      Hypothesis
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.6 }}>
+                      {card.answerPattern.hypothesis}
+                    </div>
+                  </div>
+                  <div style={{ paddingTop: '0.25rem' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                      Primary Metric
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.6, fontWeight: 600 }}>
+                      {card.answerPattern.primaryMetric}
+                    </div>
+                  </div>
+                  <div style={{ paddingTop: '0.25rem' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--red)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                      Guardrails
+                    </div>
+                    <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                      {card.answerPattern.guardrails.map((g, gi) => (
+                        <li key={gi} style={{ fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.6 }}>
+                          {g}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div style={{
+                    background: 'var(--surface-2)',
+                    border: '1px solid var(--border-subtle)',
+                    borderLeft: '3px solid var(--purple)',
+                    borderRadius: '6px',
+                    padding: '0.6rem 0.875rem',
+                    marginTop: '0.25rem',
+                  }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--purple)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
+                      Senior Lens
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.6, fontStyle: 'italic' }}>
+                      {card.seniorLens}
+                    </div>
+                  </div>
+                  {card.watchOuts && card.watchOuts.length > 0 && (
+                    <div style={{ paddingTop: '0.25rem' }}>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                        Watch Outs
+                      </div>
+                      <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                        {card.watchOuts.map((w, wi) => (
+                          <li key={wi} style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                            {w}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SQLPrepCards({ cards, onNavigate }) {
+  return (
+    <div style={{ marginBottom: '2rem' }}>
+      <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.25rem' }}>
+        SQL Practice Areas
+      </div>
+      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.875rem' }}>
+        Meesho-tagged SQL problems across 11 analytics areas. Click to practice in SQL Lab.
+      </div>
+      <div style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '10px',
+        overflow: 'hidden',
+      }}>
+        {cards.map((card, idx) => {
+          const isLast = idx === cards.length - 1;
+          return (
+            <button
+              key={card.sqlId}
+              onClick={() => onNavigate('code', card.sqlId)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem',
+                padding: '0.7rem 1rem', background: 'none', border: 'none',
+                borderBottom: isLast ? 'none' : '1px solid var(--border-subtle)',
+                cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+            >
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: '22px', height: '22px', borderRadius: '4px',
+                background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+                fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', flexShrink: 0,
+              }}>
+                {idx + 1}
+              </span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text)', flex: 1, lineHeight: 1.4 }}>
+                {card.area}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', flexShrink: 0 }}>
+                Practice →
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function RoleTabs({ activeRole, comingSoonRoles }) {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
@@ -671,6 +844,16 @@ function TrackDetail({ track, onBack, onNavigate }) {
           </div>
         ))}
       </div>
+
+      {/* Experiment design cards */}
+      {track.experimentDesignCards && track.experimentDesignCards.length > 0 && (
+        <ExperimentDesignCards cards={track.experimentDesignCards} />
+      )}
+
+      {/* SQL prep cards */}
+      {track.sqlCards && track.sqlCards.length > 0 && (
+        <SQLPrepCards cards={track.sqlCards} onNavigate={onNavigate} />
+      )}
 
       {/* Director pressure cards */}
       {track.directorCards && track.directorCards.length > 0 && (

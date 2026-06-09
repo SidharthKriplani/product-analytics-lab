@@ -10,6 +10,7 @@ import { saveRCAAttempt, saveRCADraft, loadRCADraft, clearRCADraft } from '../..
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
+import { GateOverlay } from '../shared/GateOverlay.jsx';
 
 const ROOM_KEY = 'rca';
 
@@ -67,7 +68,7 @@ const SQL_RATINGS = [
 ];
 
 // ─── Main Runner ─────────────────────────────────────────────────────────────
-export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onNavigate }) {
+export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onNavigate, user, onShowAuth }) {
   const rcaCase = rcaCases.find(r => r.id === caseId);
   const _rcaDraft = !savedProgress ? loadRCADraft(caseId) : null;
   const startView = savedProgress ? 'debrief' : 'diagnosis';
@@ -451,6 +452,18 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
           rating={sqlRating}
           onRate={setSqlRating}
           onBack={() => setView('debrief')}
+        />
+      )}
+
+      {/* Guest demo gate — after debrief, prompt sign-in */}
+      {view === 'debrief' && !user && onShowAuth && (
+        <GateOverlay
+          title="Sign in to save this and keep practicing"
+          body="You just completed a free demo case. Sign in to save your progress, unlock more cases, and track your improvement."
+          ctaLabel="Sign in"
+          onCTA={onShowAuth}
+          secondaryLabel="Back to rooms"
+          onSecondary={onBack}
         />
       )}
     </div>

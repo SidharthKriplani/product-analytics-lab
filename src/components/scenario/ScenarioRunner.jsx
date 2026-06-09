@@ -11,6 +11,7 @@ import { ScoreReveal } from './ScoreReveal.jsx';
 import { DebriefPanel } from './DebriefPanel.jsx';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { GateOverlay } from '../shared/GateOverlay.jsx';
 import { saveAttempt } from '../../utils/progress.js';
 import { track } from '../../utils/analytics.js';
 import { getScoreRank } from '../../utils/scoring.js';
@@ -70,7 +71,7 @@ const TABS = [
   { id: 'Flags',   label: 'Flags',   hint: 'Warning signs' },
 ];
 
-export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, onNavigate }) {
+export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, onNavigate, user, onShowAuth }) {
   const scenario = scenarios.find(s => s.id === caseId);
   const pairedDesignId = scenario ? (designScenarios.find(d => d.pairedReviewScenarioId === caseId)?.id || null) : null;
   const _draft = loadScenarioDraft(scenario.id);
@@ -184,12 +185,7 @@ export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, 
       )}
 
       {/* ── Main 2-col layout ─────────────────────────────────────────── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))',
-        gap: '1.25rem',
-        alignItems: 'start',
-      }}>
+      <div className="pal-scenario-grid">
 
         {/* LEFT: Tabbed info */}
         <div>
@@ -457,6 +453,18 @@ export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, 
           )}
           <ForwardPointerCard room='review' onNavigate={onNavigate} onNext={onNext} />
         </div>
+      )}
+
+      {/* Guest demo gate — after debrief, prompt sign-in */}
+      {showDebrief && !user && onShowAuth && (
+        <GateOverlay
+          title="Sign in to save this and keep practicing"
+          body="You just completed a free demo case. Sign in to save your progress, unlock more cases, and track your improvement."
+          ctaLabel="Sign in"
+          onCTA={onShowAuth}
+          secondaryLabel="Back to rooms"
+          onSecondary={onBack}
+        />
       )}
     </div>
   );

@@ -118,18 +118,17 @@ function SchemaAccordion({ dm, open, onToggle }) {
         <span style={{ fontSize: '0.65rem', transition: 'transform 0.2s', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
       </button>
       {open && (
-        <div style={{ padding: '0.6rem 0.75rem', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '200px', overflowY: 'auto' }}>
+        <div style={{ padding: '0.6rem 0.75rem', background: 'var(--surface)', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '0.6rem', maxHeight: '220px', overflowY: 'auto' }}>
           {Object.entries(dm.tables).map(([tableName, table]) => (
-            <div key={tableName}>
+            <div key={tableName} style={{ padding: '0.4rem 0.5rem', background: 'var(--surface-2)', borderRadius: '6px', border: '1px solid var(--border)' }}>
               <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', fontWeight: 700, color: 'var(--teal)', marginBottom: '4px' }}>
                 {tableName}
               </div>
-              {table.columns.map(col => (
-                <div key={col.name} style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', padding: '1px 0', fontSize: '0.72rem' }}>
-                  <span style={{ color: 'var(--text)', fontFamily: 'monospace', minWidth: 140 }}>{col.name}</span>
-                  <span style={{ color: 'var(--text-muted)', fontFamily: 'monospace', fontSize: '0.67rem' }}>{col.type}</span>
-                </div>
-              ))}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+                {table.columns.map(col => (
+                  <span key={col.name} style={{ fontSize: '0.65rem', fontFamily: 'monospace', padding: '1px 5px', borderRadius: '3px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{col.name}</span>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -219,13 +218,15 @@ function SidebarProblemBtn({ p, globalIdx, isCurrent, isSolved, onSelect }) {
 
 const DATAMARTS = ['all', ...new Set(sqlLabProblems.map(p => p.datamartId))];
 
-function ProblemSidebar({ problems, currentIdx, solved, filterDiff, onFilterDiff, filterDatamart, onFilterDatamart, onSelect }) {
+function ProblemSidebar({ problems, currentIdx, solved, filterDiffs, onToggleDiff, filterDatamarts, onToggleDatamart, onSelect }) {
   const nonMaster = problems.filter(p => p.difficulty !== 'Master');
   const masterProblems = problems.filter(p => p.difficulty === 'Master');
-  const filtered = (filterDiff === 'Master'
+  const hasDiffFilter = filterDiffs.size > 0;
+  const hasDatamartFilter = filterDatamarts.size > 0;
+  const filtered = (filterDiffs.has('Master')
     ? masterProblems
-    : nonMaster.filter(p => !filterDiff || p.difficulty === filterDiff)
-  ).filter(p => filterDatamart === 'all' || p.datamartId === filterDatamart);
+    : nonMaster.filter(p => !hasDiffFilter || filterDiffs.has(p.difficulty))
+  ).filter(p => !hasDatamartFilter || filterDatamarts.has(p.datamartId));
   const solvedCount = problems.filter(p => solved.has(p.id)).length;
 
   return (
@@ -243,43 +244,41 @@ function ProblemSidebar({ problems, currentIdx, solved, filterDiff, onFilterDiff
         </div>
       </div>
 
-      {/* Difficulty filter */}
+      {/* Difficulty filter — multi-select */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.875rem' }}>
         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Difficulty</div>
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-          {[null, 'Easy', 'Medium', 'Hard', 'Master', 'Forensic'].map(d => {
-            const label = d || 'All';
-            const active = filterDiff === d;
-            const ds = d ? DIFF_COLOR[d] : null;
+          {['Easy', 'Medium', 'Hard', 'Master', 'Forensic'].map(d => {
+            const active = filterDiffs.has(d);
+            const ds = DIFF_COLOR[d];
             return (
               <button
-                key={label}
-                onClick={() => onFilterDiff(active ? null : d)}
+                key={d}
+                onClick={() => onToggleDiff(d)}
                 style={{
                   padding: '3px 10px', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 600,
                   cursor: 'pointer', border: '1px solid',
-                  background: active ? (ds ? ds.bg : 'rgba(20,184,166,0.1)') : 'var(--surface-2)',
-                  color: active ? (ds ? ds.text : 'var(--teal)') : 'var(--text-muted)',
-                  borderColor: active ? (ds ? ds.border : 'rgba(20,184,166,0.3)') : 'var(--border)',
+                  background: active ? (ds ? ds.bg : 'var(--surface-2)') : 'var(--surface-2)',
+                  color: active ? (ds ? ds.text : 'var(--text-muted)') : 'var(--text-muted)',
+                  borderColor: active ? (ds ? ds.border : 'var(--border)') : 'var(--border)',
                 }}
-              >{label}</button>
+              >{active ? '✓ ' : ''}{d}</button>
             );
           })}
         </div>
       </div>
 
-      {/* Datamart filter */}
+      {/* Datamart filter — multi-select */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.875rem' }}>
         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Company</div>
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-          {DATAMARTS.map(dm => {
-            const active = filterDatamart === dm;
-            const count = dm === 'all' ? problems.length : problems.filter(p => p.datamartId === dm).length;
-            const label = dm === 'all' ? ('All (' + count + ')') : (dm + ' (' + count + ')');
+          {DATAMARTS.filter(dm => dm !== 'all').map(dm => {
+            const active = filterDatamarts.has(dm);
+            const count = problems.filter(p => p.datamartId === dm).length;
             return (
               <button
                 key={dm}
-                onClick={() => onFilterDatamart(active && dm !== 'all' ? 'all' : dm)}
+                onClick={() => onToggleDatamart(dm)}
                 style={{
                   padding: '3px 9px', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 600,
                   cursor: 'pointer', border: '1px solid',
@@ -287,7 +286,7 @@ function ProblemSidebar({ problems, currentIdx, solved, filterDiff, onFilterDiff
                   color: active ? 'var(--teal)' : 'var(--text-muted)',
                   borderColor: active ? 'rgba(20,184,166,0.3)' : 'var(--border)',
                 }}
-              >{label}</button>
+              >{active ? '✓ ' : ''}{dm} ({count})</button>
             );
           })}
         </div>
@@ -315,12 +314,12 @@ function ProblemSidebar({ problems, currentIdx, solved, filterDiff, onFilterDiff
       </div>
 
       {/* Challenge Vault — Master problems (hidden when Master filter is active, they show in main list) */}
-      {masterProblems.filter(p => filterDatamart === 'all' || p.datamartId === filterDatamart).length > 0 && filterDiff !== 'Master' && (
+      {masterProblems.filter(p => !hasDatamartFilter || filterDatamarts.has(p.datamartId)).length > 0 && !filterDiffs.has('Master') && (
         <div style={{ background: 'var(--surface)', border: '1px solid var(--purple-border, rgba(139,92,246,0.25))', borderRadius: '10px', overflow: 'hidden' }}>
           <div style={{ padding: '0.5rem 0.875rem', borderBottom: '1px solid var(--border)', fontSize: '0.68rem', fontWeight: 700, color: 'var(--purple, #8b5cf6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Challenge Vault
           </div>
-          {masterProblems.filter(p => filterDatamart === 'all' || p.datamartId === filterDatamart).map(p => {
+          {masterProblems.filter(p => !hasDatamartFilter || filterDatamarts.has(p.datamartId)).map(p => {
             const globalIdx = problems.findIndex(x => x.id === p.id);
             return (
               <SidebarProblemBtn
@@ -480,12 +479,12 @@ export function SqlLabPage({ onBack }) {
   const [results, setResults] = useState(null);
   const [runError, setRunError] = useState(null);
   const [revealed, setRevealed] = useState(false);
-  const [schemaOpen, setSchemaOpen] = useState(true);
+  const [schemaOpen, setSchemaOpen] = useState(false);
   const [hasRun, setHasRun] = useState(false);
   const [correct, setCorrect] = useState(null);
   const [hintsShown, setHintsShown] = useState(0);
-  const [filterDiff, setFilterDiff] = useState(null);
-  const [filterDatamart, setFilterDatamart] = useState('all');
+  const [filterDiffs, setFilterDiffs] = useState(new Set());
+  const [filterDatamarts, setFilterDatamarts] = useState(new Set());
   const timerRef = useRef(null);
   const timerStartRef = useRef(null);
   const [elapsedSec, setElapsedSec] = useState(0);
@@ -722,7 +721,10 @@ export function SqlLabPage({ onBack }) {
                 ))}
               </div>
             </div>
-            <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.6rem', color: 'var(--text)' }}>{problem.title}</h2>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', margin: '0 0 0.6rem' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Problem {problemIdx + 1} of {SORTED_PROBLEMS.length}</span>
+              <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: 'var(--text)' }}>{problem.title}</h2>
+            </div>
             <p style={{ fontSize: '0.83rem', lineHeight: 1.65, color: 'var(--text-muted)', margin: 0 }}>{problem.prompt}</p>
 
             {problem.format === 'forensic' && (
@@ -976,10 +978,10 @@ export function SqlLabPage({ onBack }) {
         problems={SORTED_PROBLEMS}
         currentIdx={problemIdx}
         solved={solved}
-        filterDiff={filterDiff}
-        onFilterDiff={setFilterDiff}
-        filterDatamart={filterDatamart}
-        onFilterDatamart={setFilterDatamart}
+        filterDiffs={filterDiffs}
+        onToggleDiff={d => setFilterDiffs(prev => { const next = new Set(prev); if (next.has(d)) next.delete(d); else next.add(d); return next; })}
+        filterDatamarts={filterDatamarts}
+        onToggleDatamart={dm => setFilterDatamarts(prev => { const next = new Set(prev); if (next.has(dm)) next.delete(dm); else next.add(dm); return next; })}
         onSelect={idx => setProblemIdx(idx)}
       />
     </div>

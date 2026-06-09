@@ -7,6 +7,7 @@ import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 import { Icon } from '../shared/Icon.jsx';
+import { GateOverlay } from '../shared/GateOverlay.jsx';
 import { saveMetricsAttempt, clearMetricsProgress, saveMetricsDraft, loadMetricsDraft, clearMetricsDraft } from '../../utils/metricsProgress.js';
 import { track } from '../../utils/analytics.js';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
@@ -40,7 +41,7 @@ function computeScore(metricCase, fieldChoices) {
   return { score, maxScore, level, pct };
 }
 
-export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onGoToReview, onNext, onNavigate }) {
+export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onGoToReview, onNext, onNavigate, user, onShowAuth }) {
   const metricCase = metricCases.find(m => m.id === caseId);
   const hasExisting = !!(savedProgress && savedProgress.fieldChoices);
   const _draft = !hasExisting ? loadMetricsDraft(metricCase.id) : null;
@@ -234,6 +235,18 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
           />
           <ForwardPointerCard room='metrics' onNavigate={onNavigate} onNext={onNext} />
         </div>
+      )}
+
+      {/* Guest demo gate — after debrief, prompt sign-in */}
+      {view === 'debrief' && !user && onShowAuth && (
+        <GateOverlay
+          title="Sign in to save this and keep practicing"
+          body="You just completed a free demo case. Sign in to save your progress, unlock more cases, and track your improvement."
+          ctaLabel="Sign in"
+          onCTA={onShowAuth}
+          secondaryLabel="Back to rooms"
+          onSecondary={onBack}
+        />
       )}
     </div>
   );

@@ -5,7 +5,7 @@
 // caseTitleMap: flat id→title lookup used by CompanyTracks to show human names.
 
 export const scenarioIndex = [
-  { id: 's01-checkout-trap', isFree: true,  title: 'The Checkout Trap' },
+  { id: 's01-checkout-trap', isFree: true,  guestPreview: true, title: 'The Checkout Trap' },
   { id: 's02-ghost-assignment', isFree: true,  title: 'The Ghost Assignment' },
   { id: 's03-slow-tax', isFree: true,  title: 'The Slow Tax' },
   { id: 's04-week-two-drop', isFree: true,  title: 'The Week-Two Drop' },
@@ -23,7 +23,7 @@ export const scenarioIndex = [
 ];
 
 export const designScenarioIndex = [
-  { id: 'd01-checkout-test', isFree: true,  title: 'Design the Checkout Test' },
+  { id: 'd01-checkout-test', isFree: true,  guestPreview: true, title: 'Design the Checkout Test' },
   { id: 'd02-onboarding-assignment', isFree: true,  title: 'Design the Onboarding Assignment' },
   { id: 'd03-mobile-feature-test', isFree: false, title: 'Design the Mobile Feature Test' },
   { id: 'd04-multi-metric-launch', isFree: false, title: 'Design the Multi-Metric Launch' },
@@ -34,7 +34,7 @@ export const designScenarioIndex = [
 ];
 
 export const statsModuleIndex = [
-  { id: 'stat01-pvalue-decision', isFree: true,  title: 'p < 0.05. Ship it?' },
+  { id: 'stat01-pvalue-decision', isFree: true,  guestPreview: true, title: 'p < 0.05. Ship it?' },
   { id: 'stat02-ci-reality', isFree: true,  title: 'The +3.2% That Might Be Nothing' },
   { id: 'stat03-power-mde', isFree: true,  title: 'No Effect Found. Roll Back?' },
   { id: 'stat04-srm-first', isFree: true,  title: 'The Numbers Look Great. Check This First.' },
@@ -57,7 +57,7 @@ export const statsModuleIndex = [
 ];
 
 export const metricCaseIndex = [
-  { id: 'M01', isFree: true,  title: 'What Defines a Successful Search?' },
+  { id: 'M01', isFree: true,  guestPreview: true, title: 'What Defines a Successful Search?' },
   { id: 'M02', isFree: true,  title: 'When Is a New User Actually Activated?' },
   { id: 'M03', isFree: false, title: 'What Proves Notifications Are Working?' },
   { id: 'M04', isFree: false, title: 'What Measures Seller Quality in a Marketplace?' },
@@ -76,7 +76,7 @@ export const metricCaseIndex = [
 ];
 
 export const rcaCaseIndex = [
-  { id: 'RCA01', isFree: true,  title: 'Checkout Conversion Dropped Overnight' },
+  { id: 'RCA01', isFree: true,  guestPreview: true, title: 'Checkout Conversion Dropped Overnight' },
   { id: 'RCA02', isFree: true,  title: 'Zero-Result Rate Spiked After Catalog Update' },
   { id: 'RCA03', isFree: false, title: 'Buyer Cancellations Up 40% in Three Cities' },
   { id: 'RCA04', isFree: false, title: 'D7 Retention Fell Despite High Open Rates' },
@@ -107,7 +107,7 @@ export const rcaCaseIndex = [
 ];
 
 export const businessCaseIndex = [
-  { id: 'C01', isFree: true,  title: 'Should We Launch Same-Day Delivery?' },
+  { id: 'C01', isFree: true,  guestPreview: true, title: 'Should We Launch Same-Day Delivery?' },
   { id: 'C02', isFree: true,  title: 'Why Did Our Retention Fall?' },
   { id: 'C03', isFree: false, title: 'Should We Replace Tier-1 Support With a GenAI Bot?' },
   { id: 'C04', isFree: false, title: 'Which Seller Segment Drives the Most Value When Incentivized?' },
@@ -133,7 +133,7 @@ export const businessCaseIndex = [
 ];
 
 export const productDesignIndex = [
-  { id: 'pd01', isFree: true,  title: 'Improve Podcast Discovery on Spotify' },
+  { id: 'pd01', isFree: true,  guestPreview: true, title: 'Improve Podcast Discovery on Spotify' },
   { id: 'pd02', isFree: false, title: 'Reduce Host Response Lag on Airbnb' },
   { id: 'pd03', isFree: false, title: 'Reduce Notification Fatigue in Slack' },
   { id: 'pd04', isFree: false, title: 'Design a Feature for EV Drivers on Google Maps' },
@@ -160,7 +160,7 @@ export const fullLoopIndex = [
 ];
 
 export const prioritizationIndex = [
-  { id: 'pri01', isFree: true,  title: 'Spotify: Feature Backlog Sprint Planning' },
+  { id: 'pri01', isFree: true,  guestPreview: true, title: 'Spotify: Feature Backlog Sprint Planning' },
   { id: 'pri02', isFree: false, title: 'Airbnb: Effort-Impact Matrix Under Constraint' },
   { id: 'pri03', isFree: false, title: 'Notion: Technical Debt vs. New Features' },
   { id: 'pri04', isFree: false, title: 'Meta: Stakeholder Conflict — Growth vs. Safety' },
@@ -175,7 +175,7 @@ export const prioritizationIndex = [
 ];
 
 export const behavioralIndex = [
-  { id: 'BEH01', isFree: true,  title: 'Changing a PM\'s Mind with Cohort Data' },
+  { id: 'BEH01', isFree: true,  guestPreview: true, title: 'Changing a PM\'s Mind with Cohort Data' },
   { id: 'BEH02', isFree: true,  title: 'Delivering a Metric Miss Before the QBR' },
   { id: 'BEH03', isFree: true,  title: 'Finding the Leaky Bucket Behind Flat DAU' },
   { id: 'BEH04', isFree: false, title: 'Stopping a False-Positive A/B Launch Before All-Hands' },
@@ -208,7 +208,7 @@ export const behavioralIndex = [
 ];
 
 export const estimationIndex = [
-  { id: 'EST01', isFree: true,  title: 'Uber Rides in NYC Right Now' },
+  { id: 'EST01', isFree: true,  guestPreview: true, title: 'Uber Rides in NYC Right Now' },
   { id: 'EST02', isFree: true,  title: 'YouTube Storage Cost Per Year' },
   { id: 'EST03', isFree: false, title: 'WhatsApp Users in India' },
   { id: 'EST04', isFree: false, title: 'Restaurant Listings on Yelp' },
@@ -269,7 +269,7 @@ export const statsFoundationsIndex = [
 ];
 
 export const growthAnalyticsIndex = [
-  { id: 'GA01', isFree: true,  title: 'DAU Dropped 8% — What\'s Driving It?' },
+  { id: 'GA01', isFree: true,  guestPreview: true, title: 'DAU Dropped 8% — What\'s Driving It?' },
   { id: 'GA02', isFree: false, title: 'Stickiness Fell From 22% to 18% — Engagement Problem?' },
   { id: 'GA03', isFree: false, title: 'Two Cohorts, Two Retention Curves' },
   { id: 'GA04', isFree: false, title: '13% Browse-to-Purchase — Where Does the Funnel Break?' },
@@ -284,7 +284,7 @@ export const growthAnalyticsIndex = [
 ];
 
 export const challengesIndex = [
-  { id: 'CHL01', isFree: true,  title: 'DAU Drops 15% During Active A/B Test' },
+  { id: 'CHL01', isFree: true,  guestPreview: true, title: 'DAU Drops 15% During Active A/B Test' },
   { id: 'CHL02', isFree: false, title: 'Feature Experiment With Conflicting Metric Signals' },
   { id: 'CHL03', isFree: false, title: 'Growth Up, Engagement Down — Diagnosis and Fix' },
   { id: 'CHL04', isFree: false, title: 'ML Model Update Causes Segment Regression' },
@@ -303,7 +303,7 @@ export const challengesIndex = [
 ];
 
 export const biCaseIndex = [
-  { id: 'BI01', isFree: true,  title: 'The Dashboard That Lies' },
+  { id: 'BI01', isFree: true,  guestPreview: true, title: 'The Dashboard That Lies' },
   { id: 'BI02', isFree: false, title: 'KPI Framework for a Two-Sided Marketplace' },
   { id: 'BI03', isFree: false, title: 'The Attribution Dispute' },
   { id: 'BI04', isFree: false, title: 'The Self-Serving Dashboard' },
@@ -322,7 +322,7 @@ export const biCaseIndex = [
 ];
 
 export const stfCaseIndex = [
-  { id: 'STF01', isFree: true,  title: 'The Experiment That Looked Too Good' },
+  { id: 'STF01', isFree: true,  guestPreview: true, title: 'The Experiment That Looked Too Good' },
   { id: 'STF02', isFree: false, title: 'We Stopped When It Looked Good' },
   { id: 'STF03', isFree: false, title: 'The Feature That Helped No One But Won Overall' },
   { id: 'STF04', isFree: false, title: 'The Feature Everyone Loved for Two Weeks' },
@@ -337,7 +337,7 @@ export const stfCaseIndex = [
 ];
 
 export const takehomeCaseIndex = [
-  { id: 'TH01', isFree: true,  title: 'Instagram Stories Creator Decline' },
+  { id: 'TH01', isFree: true,  guestPreview: true, title: 'Instagram Stories Creator Decline' },
   { id: 'TH02', isFree: false, title: 'Host Supply Crunch in Urban Markets' },
   { id: 'TH03', isFree: false, title: 'Podcast Listeners Convert at Half the Rate' },
   { id: 'TH04', isFree: false, title: 'Fraud Chargeback Spike' },
@@ -350,7 +350,7 @@ export const takehomeCaseIndex = [
 ];
 
 export const instrumentationIndex = [
-  { id: 'inst01', isFree: true,  title: 'Measurement Plan for Checkout Redesign' },
+  { id: 'inst01', isFree: true,  guestPreview: true, title: 'Measurement Plan for Checkout Redesign' },
   { id: 'inst02', isFree: false, title: 'Event Taxonomy Design' },
   { id: 'inst03', isFree: false, title: 'Data Quality Incident Investigation' },
   { id: 'inst04', isFree: false, title: 'A/B Test Instrumentation Audit' },

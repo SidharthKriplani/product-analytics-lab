@@ -7,7 +7,7 @@ const PRICING_PLANS = [
     label: 'Monthly',
     price: '₹799',
     period: '/month',
-    note: 'Billed monthly. Cancel anytime.',
+    note: 'Build a daily practice habit and sharpen your judgment on metrics, experimentation, and RCA — one session at a time.',
     highlight: false,
   },
   {
@@ -15,7 +15,7 @@ const PRICING_PLANS = [
     label: 'Quarterly',
     price: '₹1,999',
     period: '/quarter',
-    note: 'Save ~17% vs monthly.',
+    note: 'Go from shaky fundamentals to confident, structured answers across every product analytics interview topic.',
     highlight: false,
   },
   {
@@ -23,15 +23,15 @@ const PRICING_PLANS = [
     label: 'Annual',
     price: '₹5,999',
     period: '/year',
-    note: 'Best value — save ~37%.',
+    note: 'Master the full stack — stats, SQL, design, and leadership cases — at your own pace, with no gaps left uncovered.',
     highlight: true,
   },
   {
     id: 'sprint',
     label: 'Interview Sprint',
     price: '₹2,499',
-    period: '/ 14 days',
-    note: 'One focused sprint before your interview.',
+    period: 'one-time',
+    note: 'Walk into your interview in 14 days with practiced answers, tested frameworks, and real diagnostic instinct.',
     highlight: false,
   },
 ];
@@ -258,6 +258,73 @@ function TestimonialWall() {
   );
 }
 
+const FEEDBACK_KEY = 'pal-pricing-feedback-v1';
+
+function PricingFeedback() {
+  const [value, setValue] = useState('');
+  const [submitted, setSubmitted] = useState(function () {
+    try { return !!localStorage.getItem(FEEDBACK_KEY); } catch (_) { return false; }
+  });
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!value.trim()) return;
+    try { localStorage.setItem(FEEDBACK_KEY, value.trim()); } catch (_) { /* noop */ }
+    setSubmitted(true);
+  }
+
+  return (
+    <div style={{
+      border: '1px solid var(--border)',
+      borderRadius: '12px',
+      padding: '1.25rem 1.5rem',
+      background: 'var(--surface)',
+      marginBottom: '1.75rem',
+      textAlign: 'center',
+    }}>
+      <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text)', margin: '0 0 0.75rem' }}>
+        Would you pay for this?
+      </p>
+      {submitted ? (
+        <p style={{ fontSize: '0.78rem', color: 'var(--teal)', margin: 0, fontWeight: 600 }}>
+          Thanks — your feedback is saved.
+        </p>
+      ) : (
+        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            placeholder="Yes / No / Maybe — tell us why"
+            style={{
+              border: '1px solid var(--border)', borderRadius: '8px',
+              padding: '0.5rem 0.75rem', fontSize: '0.82rem',
+              color: 'var(--text)', background: 'var(--surface)',
+              outline: 'none', fontFamily: 'inherit', width: '280px', maxWidth: '100%',
+            }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'var(--teal)'; }}
+            onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+          />
+          <button
+            type="submit"
+            disabled={!value.trim()}
+            style={{
+              padding: '0.5rem 1rem',
+              background: value.trim() ? 'var(--teal)' : 'var(--surface)',
+              color: value.trim() ? '#fff' : 'var(--text-muted)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700,
+              cursor: value.trim() ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
+            }}
+          >
+            Submit
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlockedProp }) {
   const alreadyUnlocked = unlockedProp || isUnlocked();
   const [code, setCode]       = useState('');
@@ -368,6 +435,9 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
           </div>
         ))}
       </div>
+
+      {/* ── Pricing feedback ── */}
+      <PricingFeedback />
 
       {/* ── Beta access section (quiet) ── */}
       <div style={{

@@ -100,7 +100,7 @@ function pt(idx, fraction) {
 
 function labelPt(idx) {
   const a = toRad(armAngle(idx));
-  const dist = ARM_LENGTH + 26;
+  const dist = ARM_LENGTH + 32;
   return {
     x: CX + dist * Math.cos(a),
     y: CY + dist * Math.sin(a),
@@ -109,11 +109,40 @@ function labelPt(idx) {
 
 function sublabelPt(idx) {
   const a = toRad(armAngle(idx));
-  const dist = ARM_LENGTH + 40;
+  const dist = ARM_LENGTH + 46;
   return {
     x: CX + dist * Math.cos(a),
     y: CY + dist * Math.sin(a),
   };
+}
+
+// Collision avoidance: nudge labels that would overlap vertically
+function adjustedLabelPositions(arms) {
+  const MIN_GAP = 22;
+  const positions = arms.map((arm, idx) => {
+    const lp = labelPt(idx);
+    const sp = sublabelPt(idx);
+    const angle = armAngle(idx);
+    const textAnchor = Math.cos(toRad(angle)) > 0.3 ? 'start'
+      : Math.cos(toRad(angle)) < -0.3 ? 'end'
+      : 'middle';
+    return { idx, lp: { ...lp }, sp: { ...sp }, textAnchor, angle };
+  });
+  // Sort by y to detect vertical collisions, then nudge apart
+  const sorted = [...positions].sort((a, b) => a.lp.y - b.lp.y);
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = sorted[i - 1];
+    const curr = sorted[i];
+    const gap = curr.lp.y - prev.lp.y;
+    if (gap < MIN_GAP) {
+      const shift = (MIN_GAP - gap) / 2;
+      prev.lp.y -= shift;
+      prev.sp.y -= shift;
+      curr.lp.y += shift;
+      curr.sp.y += shift;
+    }
+  }
+  return positions;
 }
 
 function computeArmProgress(arm, allRoomProgress) {
@@ -316,11 +345,13 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
             );
           })()}
 
-          {/* Progress lines (illuminated + animated draw) */}
+          {/* Progress lines (illuminated + animated draw) + 0% stubs */}
           {arms.map(arm => {
-            if (arm.progress === 0) return null;
-            const lit = pt(arm.idx, Math.max(0.08, arm.progress));
+            const isZero = arm.progress === 0;
+            const fraction = isZero ? 0.04 : Math.max(0.08, arm.progress);
+            const lit = pt(arm.idx, fraction);
             const delay = (arm.idx * 70) + 'ms';
+            const lineLen = ARM_LENGTH * fraction;
             return (
               <g
                 key={'lit-' + arm.id}
@@ -331,9 +362,10 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
                   x1={CX} y1={CY}
                   x2={lit.x} y2={lit.y}
                   stroke={arm.color}
-                  strokeWidth="2.5"
-                  opacity={hoveredArm === arm.id ? 1 : 0.85}
-                  strokeDasharray="160"
+                  strokeWidth={isZero ? '2' : '2.5'}
+                  opacity={isZero ? 0.3 : (hoveredArm === arm.id ? 1 : 0.85)}
+                  strokeLinecap="round"
+                  strokeDasharray={lineLen + ' ' + lineLen}
                   strokeDashoffset="0"
                   className="pal-arm-draw"
                   style={{ animation: 'palArmDraw 0.55s ease-out both', animationDelay: delay, transition: 'opacity var(--transition)' }}
@@ -415,26 +447,15 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
             );
           })}
 
-          {/* Arm labels */}
-          {arms.map(arm => {
-            const lp = labelPt(arm.idx);
-            const sp = sublabelPt(arm.idx);
-            const angle = arm.angle;
-            // Text anchor based on which side of the diagram
-            const anchor = angle > -45 && angle < 45 ? 'middle'
-              : angle >= 45 && angle < 135 ? 'middle'
-              : angle >= 135 || angle < -135 ? 'middle'
-              : 'middle';
-            const textAnchor = Math.cos(toRad(angle)) > 0.3 ? 'start'
-              : Math.cos(toRad(angle)) < -0.3 ? 'end'
-              : 'middle';
-
+          {/* Arm labels (collision-adjusted) */}
+          {adjustedLabelPositions(arms).map(pos => {
+            const arm = arms[pos.idx];
             return (
               <g key={'label-' + arm.id}>
                 <text
-                  x={lp.x}
-                  y={lp.y}
-                  textAnchor={textAnchor}
+                  x={pos.lp.x}
+                  y={pos.lp.y}
+                  textAnchor={pos.textAnchor}
                   dominantBaseline="middle"
                   style={{
                     fontSize: '11px',
@@ -447,9 +468,9 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
                   {arm.label}
                 </text>
                 <text
-                  x={sp.x}
-                  y={sp.y}
-                  textAnchor={textAnchor}
+                  x={pos.sp.x}
+                  y={pos.sp.y}
+                  textAnchor={pos.textAnchor}
                   dominantBaseline="middle"
                   style={{
                     fontSize: '8.5px',
@@ -462,9 +483,9 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
                 </text>
                 {arm.id === 'monitor' && arm.progress === 0 && (
                   <text
-                    x={sp.x}
-                    y={sp.y + 14}
-                    textAnchor={textAnchor}
+                    x={pos.sp.x}
+                    y={pos.sp.y + 14}
+                    textAnchor={pos.textAnchor}
                     dominantBaseline="middle"
                     style={{
                       fontSize: '8px',
@@ -488,18 +509,23 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
             strokeWidth="1.5"
           />
           {/* Center progress ring */}
-          {totalProgress > 0 && (
-            <circle
-              cx={CX} cy={CY}
-              r={CENTER_R}
-              fill="none"
-              stroke="var(--accent)"
-              strokeWidth="2.5"
-              strokeDasharray={`${totalProgress * 2 * Math.PI * CENTER_R} ${2 * Math.PI * CENTER_R}`}
-              strokeDashoffset={2 * Math.PI * CENTER_R * 0.25}
-              opacity="0.6"
-            />
-          )}
+          {totalProgress > 0 && (() => {
+            const circ = 2 * Math.PI * CENTER_R;
+            const filled = totalProgress * circ;
+            const gap = circ - filled;
+            return (
+              <circle
+                cx={CX} cy={CY}
+                r={CENTER_R}
+                fill="none"
+                stroke="var(--accent)"
+                strokeWidth="2.5"
+                strokeDasharray={filled + ' ' + gap}
+                strokeDashoffset={circ * 0.25}
+                opacity="0.6"
+              />
+            );
+          })()}
           <text
             x={CX} y={CY - 5}
             textAnchor="middle"

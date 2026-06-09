@@ -172,7 +172,7 @@ export const companyTracks = [
       { room: 'browser', ids: ['s26-ctr-margin-trap', 's27-cvr-return-trap', 's28-srm-segment-harm'] },
       { room: 'stats', ids: ['stat04-srm-first', 'stat03-power-mde'] },
       { room: 'metrics', ids: ['M01', 'M03'] },
-      { room: 'code', ids: ['code01-funnel-sql', 'code02-retention-sql'] },
+      { room: 'code', ids: ['code01-funnel-sql', 'code02-retention-sql', 'sql-meesho-01', 'sql-meesho-02', 'sql-meesho-03', 'sql-meesho-04', 'sql-meesho-05', 'sql-meesho-06', 'sql-meesho-07', 'sql-meesho-08', 'sql-meesho-09', 'sql-meesho-10', 'sql-meesho-11'] },
     ],
     directorCards: [
       {
@@ -426,6 +426,141 @@ export const companyTracks = [
         expected: 'Weekly: metrics that drive immediate operational decisions — RTO, fulfillment rate, order volume, payment success. Things that can be actioned in days. Monthly: trends that require investigation and strategic response — cohort retention, contribution bridge, category health, seller ecosystem. Frequency should match decision speed.',
         line: 'The rule I use: if the right response to a metric moving is a same-week action, it belongs in the weekly review. If the right response is a 2-week investigation and a strategic recommendation, it belongs in the monthly. Putting long-cycle metrics in a weekly review creates noise and decision fatigue. Putting fast-cycle metrics in a monthly means you\'re always reacting late.',
       },
+    ],
+    experimentDesignCards: [
+      {
+        question: 'Design an A/B test for a new search ranking model',
+        answerPattern: {
+          hypothesis: 'The new ranking model improves discovery-to-purchase conversion by surfacing more relevant results, increasing net delivered orders per search session without degrading search diversity or seller exposure.',
+          primaryMetric: 'Net delivered orders per search session',
+          guardrails: ['Tail query poor-result rate', 'New seller impression share', 'Contribution per search session', 'Query reformulation rate'],
+        },
+        seniorLens: 'CTR is a trap metric for search ranking. A model that maximises clicks can surface clickbait listings that never convert to delivered orders. The right primary metric is downstream: net delivered orders per search session captures relevance, conversion, and fulfillment quality in one number.',
+        watchOuts: ['Do not use search CTR as primary — it rewards clickable but unconverting listings', 'Segment head vs tail queries separately — aggregate wins can mask tail query harm', 'Monitor seller concentration — a ranking model can kill new seller visibility'],
+      },
+      {
+        question: 'Design an A/B test for checkout flow simplification (reducing checkout steps)',
+        answerPattern: {
+          hypothesis: 'Reducing checkout steps from 4 to 2 increases checkout completion rate without increasing RTO or reducing payment success rate, by removing unnecessary friction for genuine-intent buyers.',
+          primaryMetric: 'Net delivered orders per checkout start',
+          guardrails: ['RTO rate', 'Payment failure rate', 'Contribution per checkout start', 'COD share among new users'],
+        },
+        seniorLens: 'Checkout friction is a natural intent filter. Removing it increases placed orders but also lets through low-intent COD orders that will never be accepted at delivery. The right metric is not checkout completion — it is net delivered orders per checkout start.',
+        watchOuts: ['Do not use checkout completion rate as primary — it ignores post-order quality', 'Segment by COD vs prepaid — friction removal disproportionately affects COD', 'Watch RTO by city tier — Tier 2/3 COD users are most affected by friction changes'],
+      },
+      {
+        question: 'Design an A/B test for seller onboarding redesign',
+        answerPattern: {
+          hypothesis: 'A simplified seller onboarding flow with guided listing creation increases the rate of sellers reaching first sale within 30 days without reducing listing quality or increasing catalog complaints.',
+          primaryMetric: 'Percentage of new sellers with first delivered order within 30 days',
+          guardrails: ['Listing completeness score', 'Not-as-described complaint rate from new seller listings', 'Seller 90-day retention', 'Buyer return rate on new seller orders'],
+        },
+        seniorLens: 'Seller onboarding success is not seller signup count — it is whether the seller reaches a quality first sale. A fast onboarding flow that skips listing quality steps will inflate seller count but produce bad listings that damage buyer trust.',
+        watchOuts: ['Do not use seller signup count as primary — it ignores activation quality', 'Monitor listing quality for sellers in the new flow vs old flow', 'Check whether simplified onboarding produces listings with missing attributes or poor images'],
+      },
+      {
+        question: 'Design an A/B test for push notification frequency optimisation',
+        answerPattern: {
+          hypothesis: 'Reducing push notification frequency from 5/day to 2/day for low-engagement users reduces notification opt-out rate and improves notification-driven session quality without reducing overall order volume.',
+          primaryMetric: 'Orders per user per week (notification-exposed cohort)',
+          guardrails: ['Notification opt-out rate', 'App uninstall rate', 'Session quality (orders per session)', 'DAU from notifications'],
+        },
+        seniorLens: 'Notification frequency optimisation is a long-horizon experiment. Short-run metrics like DAU from notifications will drop — the real question is whether fewer, higher-quality notifications drive better session quality and prevent the irreversible harm of opt-outs and uninstalls.',
+        watchOuts: ['Do not measure success at 1 week — notification habit changes take 2-4 weeks to stabilise', 'DAU from notifications will drop initially — this is expected, not a failure signal', 'Segment by user engagement tier — high-engagement users tolerate more notifications than low-engagement users'],
+      },
+      {
+        question: 'Design an A/B test for a product recommendation algorithm change',
+        answerPattern: {
+          hypothesis: 'The new recommendation model increases feed-to-order conversion by surfacing products aligned with user category affinity and price sensitivity, increasing net delivered orders per feed session.',
+          primaryMetric: 'Net delivered orders per feed session',
+          guardrails: ['Category diversity in recommendations', 'Seller concentration in top impressions', 'Return rate on recommended products', 'Repeat purchase rate at 30 days'],
+        },
+        seniorLens: 'Recommendation models optimise for engagement by default. CTR and PDP views will rise but if the recommendations are clickbait — visually appealing but low-quality — orders will not follow and returns will increase. The primary metric must be downstream of delivery.',
+        watchOuts: ['Do not use feed CTR as primary — it rewards attention, not purchase intent', 'Check whether the model over-indexes on popular/cheap items at the expense of category depth', 'Monitor repeat purchase — a good recommendation drives habit, not just one-time conversion'],
+      },
+      {
+        question: 'Design an A/B test for a return policy change (extending return window from 7 to 15 days)',
+        answerPattern: {
+          hypothesis: 'Extending the return window from 7 to 15 days increases buyer confidence and first-order conversion without materially increasing net return rate, because most returns happen within 3 days regardless of the policy window.',
+          primaryMetric: 'Net delivered non-returned orders per session',
+          guardrails: ['Return rate by day-of-return distribution', 'Contribution per order (net of return cost)', 'Repeat purchase rate at 60 days', 'Seller complaint rate about returns'],
+        },
+        seniorLens: 'Return policy changes affect buyer psychology, not just return behaviour. Most returns happen within 3 days — extending the window signals confidence and trust. The risk is in specific categories (fashion/apparel) where extended windows enable wardrobing.',
+        watchOuts: ['Segment return rate by category — fashion and electronics have different return dynamics', 'Do not measure return rate alone — measure return rate AND first-order conversion together', 'Check whether extended window changes return reason distribution (legitimate vs abuse)'],
+      },
+      {
+        question: 'Design an A/B test for a delivery promise / ETA display change on PDP',
+        answerPattern: {
+          hypothesis: 'Displaying a specific delivery date (e.g. "Arrives by Thursday") instead of a range ("3-7 days") on PDP increases PDP-to-order conversion by reducing delivery uncertainty, without increasing complaints when delivery is late.',
+          primaryMetric: 'PDP-to-order conversion rate',
+          guardrails: ['Late delivery complaint rate', 'Delivery promise accuracy (% orders delivered by promised date)', 'RTO rate', 'CSAT on delivery experience'],
+        },
+        seniorLens: 'Delivery promise is a trust contract. A specific date converts better than a range — but only if the promise is accurate. If the logistics network cannot reliably deliver by the promised date, the short-term conversion gain is destroyed by long-term trust damage and complaint cost.',
+        watchOuts: ['Do not promise dates the logistics network cannot reliably meet — check promise accuracy before scaling', 'Segment by city tier — Tier 1 delivery reliability is very different from Tier 3', 'Late delivery on a specific promise is worse than late delivery on a range — it feels like a broken commitment'],
+      },
+      {
+        question: 'Design an A/B test for a category page layout redesign',
+        answerPattern: {
+          hypothesis: 'A grid layout with larger images and price-prominent cards on category pages increases browse-to-PDP rate and category-level orders without reducing scroll depth or subcategory exploration.',
+          primaryMetric: 'Category page to order conversion rate',
+          guardrails: ['Scroll depth on category page', 'Subcategory click-through rate', 'Seller diversity in above-the-fold impressions', 'Time to first meaningful interaction'],
+        },
+        seniorLens: 'Category page layout affects what users see above the fold. A layout that shows fewer, larger cards may increase per-card CTR but reduce total product exposure. The real question is whether the layout change helps users find what they want faster or just makes the page look better.',
+        watchOuts: ['Do not optimise for above-the-fold CTR alone — it may suppress scroll depth and discovery', 'Check whether the new layout favours certain price bands over others', 'Mobile vs desktop behaviour will differ significantly — segment results by device'],
+      },
+      {
+        question: 'Design an A/B test for a price comparison feature on PDP',
+        answerPattern: {
+          hypothesis: 'Showing a price comparison widget (seller\'s price vs category average) on PDP increases buyer confidence and conversion for competitively priced products without reducing seller participation or listing volume.',
+          primaryMetric: 'PDP-to-order conversion rate',
+          guardrails: ['Seller listing volume (new listings created)', 'Average selling price trend', 'Seller churn rate', 'Buyer return rate (price-driven purchases may have higher return rates)'],
+        },
+        seniorLens: 'Price comparison helps buyers but can hurt sellers and marketplace economics. If sellers respond by racing to the bottom on price, average order value and contribution fall. The feature helps buyers at the potential cost of seller margin and marketplace take rate.',
+        watchOuts: ['Monitor seller pricing behaviour — a price comparison feature can trigger a price war that erodes marketplace economics', 'Check whether conversion gains are concentrated in already-cheap products (selection bias)', 'Seller sentiment matters — if high-quality sellers perceive the feature as hostile, they may reduce listings'],
+      },
+      {
+        question: 'Design an A/B test for a seller rating system redesign (from star ratings to a quality score)',
+        answerPattern: {
+          hypothesis: 'Replacing the 5-star rating with a composite seller quality score (delivery speed + return rate + listing accuracy) increases buyer trust in high-quality sellers and shifts orders toward quality sellers without reducing total order volume.',
+          primaryMetric: 'Order share of high-quality sellers (top quartile by composite score)',
+          guardrails: ['Total order volume', 'New seller order share', 'Buyer-reported trust metrics', 'Return rate and RTO rate'],
+        },
+        seniorLens: 'Star ratings are gamed and noisy. A composite quality score based on objective signals (delivery, returns, complaints) is harder to manipulate. But the transition risks confusing buyers who understand stars and alienating sellers who have invested in getting 5-star ratings.',
+        watchOuts: ['New sellers have no quality score history — need a cold-start policy or they get zero visibility', 'The composite score must be explainable to sellers — opaque scores create seller distrust', 'Monitor whether the new score actually predicts buyer satisfaction better than star ratings'],
+      },
+      {
+        question: 'Design an A/B test for a COD-to-prepaid nudge (incentivising prepaid payment over cash-on-delivery)',
+        answerPattern: {
+          hypothesis: 'Offering a small discount (2-5%) for prepaid payment at checkout increases prepaid adoption rate without reducing total checkout completion or net delivered orders, by converting users who are indifferent between COD and prepaid.',
+          primaryMetric: 'Net delivered orders per checkout start',
+          guardrails: ['Checkout completion rate', 'Payment failure rate', 'RTO rate by payment method', 'Contribution per order (net of discount cost)', 'Prepaid adoption rate (secondary, not primary)'],
+        },
+        seniorLens: 'Prepaid adoption is not a goal — it is a means to reducing RTO cost. The nudge only creates value if the users who switch to prepaid are users whose COD orders would have had high RTO. If low-risk COD users switch to prepaid, you spend discount money without reducing RTO.',
+        watchOuts: ['Do not use prepaid adoption rate as primary — it measures behaviour change, not business value', 'Users nudged into prepaid may have higher payment failure rates — check payment success', 'The discount cost must be less than the RTO cost saved — calculate unit economics before scaling'],
+      },
+      {
+        question: 'Design an A/B test for a reseller commission structure change (higher commission on first 10 orders, lower after)',
+        answerPattern: {
+          hypothesis: 'A graduated commission structure (higher rate on first 10 orders, standard rate after) increases new reseller activation rate and first-month GMV without reducing overall reseller retention or contribution margin.',
+          primaryMetric: 'New reseller activation rate (% reaching first 10 orders within 30 days)',
+          guardrails: ['Reseller 90-day retention', 'Order quality from new resellers (return rate, RTO rate)', 'Contribution margin per reseller order', 'Existing reseller churn or complaint rate'],
+        },
+        seniorLens: 'Commission structure changes are irreversible in perception — once resellers expect higher commissions, lowering them feels like a takeaway. The graduated structure must be framed as a launch incentive, not a permanent entitlement. Monitor whether activated resellers stay after commission drops.',
+        watchOuts: ['Do not measure activation alone — check whether resellers who activate under high commission retain after commission drops', 'Monitor order quality — high commission can incentivise low-quality order farming', 'Check whether existing resellers perceive the new structure as unfair (cannibalization risk)'],
+      },
+    ],
+    sqlCards: [
+      { area: 'Funnel analysis', sqlId: 'sql-meesho-01' },
+      { area: 'Cohort retention', sqlId: 'sql-meesho-02' },
+      { area: 'Revenue decomposition', sqlId: 'sql-meesho-03' },
+      { area: 'Seller performance', sqlId: 'sql-meesho-04' },
+      { area: 'Search relevance', sqlId: 'sql-meesho-05' },
+      { area: 'Category analytics', sqlId: 'sql-meesho-06' },
+      { area: 'Delivery / logistics', sqlId: 'sql-meesho-07' },
+      { area: 'Fraud detection', sqlId: 'sql-meesho-08' },
+      { area: 'Pricing optimisation', sqlId: 'sql-meesho-09' },
+      { area: 'User segmentation', sqlId: 'sql-meesho-10' },
+      { area: 'Growth accounting', sqlId: 'sql-meesho-11' },
     ],
     playbookArticles: ['funnel-analysis-framework', 'north-star-metric', 'cohort-retention-curves'],
     estimatedHours: 10,

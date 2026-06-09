@@ -150,7 +150,7 @@ export function Home({ onNavigate, onShowAuth }) {
           className="pal-landing-el"
           style={{ animationDelay: '420ms', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.4rem', marginBottom: '2rem' }}
         >
-          {['Product Analyst', 'Growth Analyst', 'DA → Product', 'Senior Analyst'].map(role => (
+          {['Product Analyst', 'Growth Analyst', 'DA moving to product', 'Senior Analyst'].map(role => (
             <span key={role} style={{
               fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)',
               background: 'var(--surface)', border: '1px solid var(--border)',
@@ -189,7 +189,7 @@ export function Home({ onNavigate, onShowAuth }) {
           </button>
 
           <button
-            onClick={() => onShowAuth && onShowAuth()}
+            onClick={() => onNavigate && onNavigate('foundations')}
             style={{
               padding: '0.6rem 1.5rem',
               fontSize: '0.875rem',
@@ -205,7 +205,7 @@ export function Home({ onNavigate, onShowAuth }) {
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
           >
-            Sign in to explore free cases
+            Explore Free Cases →
           </button>
         </div>
 
@@ -218,6 +218,61 @@ export function Home({ onNavigate, onShowAuth }) {
           <br />No account needed for the benchmark.
         </p>
 
+        {/* What this tests */}
+        <div
+          className="pal-landing-el"
+          style={{
+            animationDelay: '740ms',
+            marginTop: '1.75rem',
+            textAlign: 'left',
+            maxWidth: 440,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
+        >
+          <h3 style={{
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            color: 'var(--text)',
+            marginBottom: '0.6rem',
+            letterSpacing: '0.02em',
+            textTransform: 'uppercase',
+          }}>
+            What this tests
+          </h3>
+          <ul style={{
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.35rem',
+          }}>
+            {[
+              'Metric definition and trade-off judgment',
+              'A/B test interpretation under ambiguity',
+              'Root cause analysis on real-looking data',
+              'Instrumentation and event design',
+              'Ship / no-ship product decisions',
+            ].map(item => (
+              <li key={item} style={{
+                fontSize: '0.82rem',
+                color: 'var(--text-muted)',
+                lineHeight: 1.6,
+                paddingLeft: '1rem',
+                position: 'relative',
+              }}>
+                <span style={{
+                  position: 'absolute',
+                  left: 0,
+                  color: 'var(--accent)',
+                  fontWeight: 700,
+                }}>{'—'}</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
 
       </div>
 

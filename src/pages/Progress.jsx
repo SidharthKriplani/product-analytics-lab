@@ -484,6 +484,63 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
     }
   }
 
+  // Empty state for brand-new users with zero completions
+  const allRoomTotal = allRoomProgress.reduce((sum, r) => sum + r.completed, 0);
+  if (allRoomTotal === 0) {
+    return (
+      <div className="pal-page-enter" style={{ maxWidth: '620px', margin: '0 auto', padding: '3rem 1.5rem', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.025em', marginBottom: '0.5rem' }}>
+          Progress
+        </h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.925rem', lineHeight: 1.6, margin: '0 0 0.25rem 0' }}>
+          PAL builds your product analytics judgment through practice.
+        </p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.925rem', lineHeight: 1.6, margin: '0 0 2rem 0' }}>
+          Complete cases across rooms to track your progress here.
+        </p>
+        <div
+          className="pal-card-enter pal-card-hover"
+          onClick={() => onNavigate('metrics-foundations')}
+          style={{
+            background: 'var(--surface)',
+            border: '2px solid var(--green)',
+            borderRadius: '14px',
+            padding: '2rem 1.5rem',
+            cursor: 'pointer',
+            textAlign: 'left',
+            maxWidth: '440px',
+            margin: '0 auto',
+          }}
+        >
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+            Start Here
+          </div>
+          <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
+            Metrics Foundations
+          </div>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.5, margin: '0 0 1.25rem 0' }}>
+            Learn how product teams define and track success — the foundation of every analytics conversation.
+          </p>
+          <span
+            className="pal-glow-pulse"
+            style={{
+              display: 'inline-block',
+              background: 'var(--green)',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              padding: '0.5rem 1.25rem',
+              borderRadius: '8px',
+              border: 'none',
+            }}
+          >
+            Start Learning &rarr;
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pal-page-enter" style={{ maxWidth: '1100px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
 

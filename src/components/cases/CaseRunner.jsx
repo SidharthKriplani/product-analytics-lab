@@ -8,6 +8,7 @@ import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
+import { GateOverlay } from '../shared/GateOverlay.jsx';
 
 // ─── Seeded shuffle helpers ───
 // Deterministic per caseId+phaseId so the same tester sees the same order
@@ -93,7 +94,7 @@ function computeScore(businessCase, phaseChoices) {
 
 // ─── Main Runner ───
 
-export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, onNavigate }) {
+export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, onNavigate, user, onShowAuth }) {
   const businessCase = businessCases.find(b => b.id === caseId);
   const _draft = !savedProgress ? loadCaseDraft(businessCase.id) : null;
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(_draft ? (_draft.currentPhaseIndex || 0) : 0);
@@ -409,6 +410,18 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
             <ForwardPointerCard room="cases" onNavigate={onNavigate} onNext={onNext} />
           </div>
         </>
+      )}
+
+      {/* Guest demo gate — after debrief, prompt sign-in */}
+      {view === 'debrief' && !user && onShowAuth && (
+        <GateOverlay
+          title="Sign in to save this and keep practicing"
+          body="You just completed a free demo case. Sign in to save your progress, unlock more cases, and track your improvement."
+          ctaLabel="Sign in"
+          onCTA={onShowAuth}
+          secondaryLabel="Back to rooms"
+          onSecondary={onBack}
+        />
       )}
     </div>
   );

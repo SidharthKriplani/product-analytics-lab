@@ -2,16 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { rcaFoundationModules } from '../../data/rcaFoundationModules.js';
 import { saveRCAFoundationProgress, getRCAFoundationProgress } from '../../utils/rcaFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
+import { loadRFState, saveRFState } from '../../utils/rcaFoundationsState.js';
 import { InsightBox, NextBtn, MCQOption } from '../shared/FoundationPrimitives.jsx';
 import { FoundationRunnerShell } from '../shared/FoundationRunnerShell.jsx';
-
-// ── Persistence helpers ─────────────────────────────────────────────────────
-function saveRCAState(id, state) {
-  try { localStorage.setItem('pal-rca-' + id + '-v1', JSON.stringify(state)); } catch(e) {}
-}
-function loadRCAState(id) {
-  try { var raw = localStorage.getItem('pal-rca-' + id + '-v1'); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
-}
 function shuffleArr(arr) {
   var a = arr.slice();
   for (var i = a.length - 1; i > 0; i--) {
@@ -59,13 +52,13 @@ function Module_RF01({ onComplete }) {
     },
   ];
 
-  const _saved01 = useMemo(function() { return loadRCAState('rf01'); }, []);
+  const _saved01 = useMemo(function() { return loadRFState('rf01'); }, []);
   const [items01] = useState(function() { return _saved01 && _saved01.items ? _saved01.items : shuffleArr(ITEMS_RF01); });
   const [assignments, setAssignments] = useState(function() { return _saved01 && _saved01.assignments ? _saved01.assignments : {}; });
   const [revealed, setRevealed] = useState(function() { return _saved01 ? !!_saved01.revealed : false; });
   const [expanded, setExpanded] = useState(null);
 
-  useEffect(function() { saveRCAState('rf01', { items: items01, assignments: assignments, revealed: revealed }); }, [items01, assignments, revealed]);
+  useEffect(function() { saveRFState('rf01', { items: items01, assignments: assignments, revealed: revealed }); }, [items01, assignments, revealed]);
 
   function assign(itemIdx, layerId) {
     if (revealed) return;
@@ -279,12 +272,12 @@ const DECOMPS_RF02 = [
 function Module_RF02({ onComplete }) {
   const SCENARIO = 'WhatsApp DAU drops 18% week-over-week, from 42M to 34.4M. Your PM asks: "What happened?"';
 
-  const _saved02 = useMemo(function() { return loadRCAState('rf02'); }, []);
+  const _saved02 = useMemo(function() { return loadRFState('rf02'); }, []);
   const [decomps02] = useState(function() { return _saved02 && _saved02.decomps ? _saved02.decomps : shuffleArr(DECOMPS_RF02); });
   const [selected, setSelected] = useState(function() { return new Set(_saved02 && _saved02.selected ? _saved02.selected : []); });
   const [revealed, setRevealed] = useState(function() { return _saved02 ? !!_saved02.revealed : false; });
 
-  useEffect(function() { saveRCAState('rf02', { decomps: decomps02, selected: Array.from(selected), revealed: revealed }); }, [decomps02, selected, revealed]);
+  useEffect(function() { saveRFState('rf02', { decomps: decomps02, selected: Array.from(selected), revealed: revealed }); }, [decomps02, selected, revealed]);
 
   function toggle(id) {
     if (revealed) return;
@@ -403,7 +396,7 @@ var TRIAGE_SIGNALS = [
 ];
 
 function Module_RF03({ onComplete }) {
-  var _saved03 = useMemo(function() { return loadRCAState('rf03'); }, []);
+  var _saved03 = useMemo(function() { return loadRFState('rf03'); }, []);
   var _initSignals = useMemo(function() { return _saved03 && _saved03.signals ? _saved03.signals : shuffleArr(TRIAGE_SIGNALS); }, []);
   var _initClass = _saved03 && _saved03.classifications ? _saved03.classifications : {};
   var _initTriageRevealed = _saved03 ? !!_saved03.triageRevealed : false;
@@ -426,7 +419,7 @@ function Module_RF03({ onComplete }) {
   var setMcqAnswered = _mcqAnsState[1];
 
   useEffect(function() {
-    saveRCAState('rf03', {
+    saveRFState('rf03', {
       signals: signals,
       classifications: classifications,
       triageRevealed: triageRevealed,
@@ -632,12 +625,12 @@ const FACTORS_RF04 = [
 ];
 
 function Module_RF04({ onComplete }) {
-  const _saved04 = useMemo(function() { return loadRCAState('rf04'); }, []);
+  const _saved04 = useMemo(function() { return loadRFState('rf04'); }, []);
   const [factors04] = useState(function() { return _saved04 && _saved04.factors ? _saved04.factors : shuffleArr(FACTORS_RF04); });
   const [selected, setSelected] = useState(function() { return _saved04 && _saved04.selected ? _saved04.selected : {}; });
   const [revealed, setRevealed] = useState(function() { return _saved04 ? !!_saved04.revealed : false; });
 
-  useEffect(function() { saveRCAState('rf04', { factors: factors04, selected: selected, revealed: revealed }); }, [factors04, selected, revealed]);
+  useEffect(function() { saveRFState('rf04', { factors: factors04, selected: selected, revealed: revealed }); }, [factors04, selected, revealed]);
 
   function assign(i, type) {
     if (revealed) return;
@@ -742,7 +735,7 @@ function Module_RF05({ onComplete }) {
   const CAMPAIGN_RETENTION = 14;
   const BASELINE_NEW_PCT = 18;
 
-  const _saved05 = useMemo(function() { return loadRCAState('rf05'); }, []);
+  const _saved05 = useMemo(function() { return loadRFState('rf05'); }, []);
   const [newUserPct, setNewUserPct] = useState(function() { return _saved05 && _saved05.newUserPct != null ? _saved05.newUserPct : BASELINE_NEW_PCT; });
   const [mcqSel, setMcqSel] = useState(function() { return _saved05 && _saved05.mcqSel != null ? _saved05.mcqSel : null; });
   const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved05 ? !!_saved05.mcqRevealed : false; });
@@ -763,7 +756,7 @@ function Module_RF05({ onComplete }) {
     { label: 'D. D7 retention calculation is incorrect — check the pipeline', correct: false },
   ];
 
-  useEffect(function() { saveRCAState('rf05', { newUserPct: newUserPct, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [newUserPct, mcqSel, mcqRevealed]);
+  useEffect(function() { saveRFState('rf05', { newUserPct: newUserPct, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [newUserPct, mcqSel, mcqRevealed]);
 
   const sliderInteracted = newUserPct !== BASELINE_NEW_PCT;
 
@@ -974,20 +967,20 @@ const BLUF_FIELDS_RF06 = [
   {
     field: 'Recommended action',
     options: [
-      { label: 'Investigate why iOS users are disabling push notifications and address the underlying cause', correct: false },
+      { label: 'Run a follow-up A/B test comparing the old and new prompt copy to quantify the exact retention impact before deciding whether to revert', correct: false },
       { label: 'Revert notification prompt to control copy by Nov 7th (iOS team owner); design a softer permission request flow for Q1 A/B test', correct: true },
-      { label: 'Pause all iOS feature releases until retention recovers to baseline', correct: false },
+      { label: 'Send a re-engagement push campaign to users who opted out, then monitor whether D7 retention recovers within 2 weeks', correct: false },
     ],
-    explanation: 'A recommendation must be specific (what), time-bound (by when), and owned (by whom). "Investigate" is analysis, not a recommendation — the cause is already confirmed. Pausing all iOS releases is disproportionate to a single prompt copy change.',
+    explanation: 'A recommendation must be specific (what), time-bound (by when), and owned (by whom). Running a follow-up A/B test delays the fix when the cause is already confirmed — testing is for uncertain hypotheses, not confirmed regressions. Sending push campaigns to opted-out users addresses the symptom, not the cause (the prompt copy that drove opt-outs in the first place).',
   },
   {
     field: 'Open risk',
     options: [
-      { label: 'None — the cause is confirmed and the fix is targeted', correct: false },
+      { label: 'Reverting the prompt may not fully recover opt-in rates if users who already declined cannot be re-prompted without an app update', correct: false },
       { label: 'If the same prompt ships to Android in the upcoming release, the same opt-in drop may occur before the fix is validated', correct: true },
-      { label: 'Users may permanently churn due to the retention degradation over the past week', correct: false },
+      { label: 'The segment analysis may be confounded by a concurrent iOS update — users who updated iOS and saw the new prompt are not comparable to those who did not', correct: false },
     ],
-    explanation: 'An open risk is something that could worsen the situation or invalidate your conclusion despite the fix. "None" is always overconfident. The Android risk is specific and immediately actionable — block the prompt from the Android release. Churn risk is real but not specific to the fix decision.',
+    explanation: 'An open risk is something that could worsen the situation going forward. The revert recovery concern is real but it is a known limitation of the fix, not an open risk — it is already factored into the recommendation. The iOS update confound question is about the validity of past analysis, not a forward-looking risk. The Android risk is the only one that identifies a concrete future threat requiring immediate preventive action.',
   },
 ];
 
@@ -1000,13 +993,13 @@ function Module_RF06({ onComplete }) {
     { id: 'monitor', label: '5. Ongoing monitoring',   example: 'Weekly alert if push opt-in rate drops >5pp from baseline. Add to the iOS release checklist: verify notification opt-in rate 48h post-release.' },
   ];
 
-  const _saved06 = useMemo(function() { return loadRCAState('rf06'); }, []);
+  const _saved06 = useMemo(function() { return loadRFState('rf06'); }, []);
   const [current, setCurrent] = useState(function() { return _saved06 && _saved06.current != null ? _saved06.current : 0; });
   const [seen, setSeen] = useState(function() { return new Set(_saved06 && _saved06.seen ? _saved06.seen : []); });
   const [blufAnswers, setBlufAnswers] = useState(function() { return _saved06 && _saved06.blufAnswers ? _saved06.blufAnswers : {}; });
   const [blufRevealed, setBlufRevealed] = useState(function() { return _saved06 && _saved06.blufRevealed ? _saved06.blufRevealed : {}; });
 
-  useEffect(function() { saveRCAState('rf06', { current: current, seen: Array.from(seen), blufAnswers: blufAnswers, blufRevealed: blufRevealed }); }, [current, seen, blufAnswers, blufRevealed]);
+  useEffect(function() { saveRFState('rf06', { current: current, seen: Array.from(seen), blufAnswers: blufAnswers, blufRevealed: blufRevealed }); }, [current, seen, blufAnswers, blufRevealed]);
 
   function advance() {
     setSeen(prev => new Set([...prev, current]));
@@ -1267,23 +1260,23 @@ const RF07_QUESTIONS = [
     options: [
       'New users — a new-user drop compounds over time as each cohort feeds future retained users',
       'Retained users — the largest absolute contributor to the drop',
-      'Resurrected users — re-engagement is cheapest to fix',
-      'All three equally — you cannot prioritize without more data',
+      'Resurrected users — their -5% drop has the highest relative severity compared to their small base, so fixing it yields the highest marginal ROI',
+      'New users first — they are the leading indicator; retained user drops are a lagging consequence of earlier acquisition weakness',
     ],
     correct: 'Retained users — the largest absolute contributor to the drop',
-    explanation: 'Retained users make up the bulk of DAU at any mature product. An 18% drop in that branch dwarfs the 2% new-user fall in absolute terms. The tree tells you where the mass is — always start with the branch whose absolute contribution is largest.',
+    explanation: 'Retained users make up the bulk of DAU at any mature product. An 18% drop in that branch dwarfs the 2% new-user fall in absolute terms. Option A (new users compound) is true in theory but misleading in triage — compounding effects matter over weeks, not for the immediate drop. Option C (resurrected users have highest relative severity) confuses relative percentage drop with absolute contribution — a 5% drop on a small segment moves fewer users than an 18% drop on the largest segment. Option D (new users as leading indicator) sounds analytical but reverses the priority — you investigate the largest current contributor first, then trace upstream causes.',
   },
   {
     id: 'q2',
     prompt: 'Retained users = Day-N users x Retention rate. Retention rate held completely flat. What does that tell you?',
     options: [
-      'The product is fine — retention held, so the issue is external',
+      'Retention rate is the core health signal — if it held flat, the product experience is working and the drop is in acquisition channels upstream',
       'The issue is in the denominator — fewer users reached Day-N, meaning the new-user cohort from N days ago was smaller or lower quality',
-      'The issue is in the numerator — active retained users dropped',
-      'Retention rate and Day-N users both moved but offset each other',
+      'The numerator (active retained users) must have dropped independently — flat retention rate can mask a real product regression if the denominator also shrank proportionally',
+      'Flat retention rate means the drop is evenly distributed across all user segments, so segmentation will not help narrow the cause',
     ],
     correct: 'The issue is in the denominator — fewer users reached Day-N, meaning the new-user cohort from N days ago was smaller or lower quality',
-    explanation: 'If Retained users = Day-N users x Retention rate, and Retention rate is flat, then the only explanation is that Day-N users fell. That points backward in time — the new-user cohort that should have reached Day-N was smaller or churned before reaching it. The current product experience is not the problem; acquisition quality from N days ago is.',
+    explanation: 'If Retained users = Day-N users x Retention rate, and Retention rate is flat, then the only explanation is that Day-N users fell. Option A jumps to the right conclusion (acquisition) but for the wrong reason — flat retention does not mean "the product is fine," it means the product experience held constant while the input population shrank. Option C confuses the math — if retention rate is flat and the total dropped, the numerator and denominator both dropped proportionally, meaning the root issue is the denominator (Day-N users), not an independent numerator drop. Option D contradicts the premise — if retention rate held flat, numerator and denominator moved together, not independently in offsetting directions.',
   },
   {
     id: 'q3',
@@ -1292,7 +1285,7 @@ const RF07_QUESTIONS = [
       'Day-7 retention rate',
       'New installs converting to activated users',
       'Revenue per user',
-      'Resurrected user count',
+      'Churned user re-activation rate',
     ],
     correct: 'Revenue per user',
     explanation: 'Revenue per user belongs in a revenue tree, not a DAU tree. DAU = New users + Retained users + Resurrected users, decomposed further by activation, retention, and re-engagement rates. Revenue is a separate dimension. A common interview mistake is conflating engagement trees with monetization trees.',
@@ -1303,12 +1296,12 @@ const RF07_QUESTIONS = [
 const RF07_HIGHLIGHT = { q1: 'ret', q2: 'dayn', q3: null };
 
 function Module_RF07({ onComplete }) {
-  const _saved07 = useMemo(function() { return loadRCAState('rf07'); }, []);
+  const _saved07 = useMemo(function() { return loadRFState('rf07'); }, []);
   const [qIdx, setQIdx] = useState(function() { return _saved07 && _saved07.qIdx != null ? _saved07.qIdx : 0; });
   const [selections, setSelections] = useState(function() { return _saved07 && _saved07.selections ? _saved07.selections : {}; });
   const [revealed, setRevealed] = useState(function() { return _saved07 && _saved07.revealed ? _saved07.revealed : {}; });
 
-  useEffect(function() { saveRCAState('rf07', { qIdx: qIdx, selections: selections, revealed: revealed }); }, [qIdx, selections, revealed]);
+  useEffect(function() { saveRFState('rf07', { qIdx: qIdx, selections: selections, revealed: revealed }); }, [qIdx, selections, revealed]);
 
   const currentQ = RF07_QUESTIONS[qIdx];
   const currentSelected = selections[currentQ.id] || null;
@@ -1519,13 +1512,13 @@ function Module_RF08({ onComplete }) {
     explanation: 'Time-series the raw event count by day is always first. It confirms the drop is real (not a dashboard filter issue), shows when it started, and reveals whether it is a step change or a gradual drift — all before you touch more complex joins.',
   };
 
-  const _saved08 = useMemo(function() { return loadRCAState('rf08'); }, []);
+  const _saved08 = useMemo(function() { return loadRFState('rf08'); }, []);
   const [step, setStep] = useState(function() { return _saved08 && _saved08.step != null ? _saved08.step : 0; });
   const [ranSteps, setRanSteps] = useState(function() { return _saved08 && _saved08.ranSteps ? _saved08.ranSteps : {}; });
   const [mcqSel, setMcqSel] = useState(function() { return _saved08 && _saved08.mcqSel != null ? _saved08.mcqSel : null; });
   const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved08 ? !!_saved08.mcqRevealed : false; });
 
-  useEffect(function() { saveRCAState('rf08', { step: step, ranSteps: ranSteps, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [step, ranSteps, mcqSel, mcqRevealed]);
+  useEffect(function() { saveRFState('rf08', { step: step, ranSteps: ranSteps, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [step, ranSteps, mcqSel, mcqRevealed]);
 
   const allStepsRan = STEPS.every((_, i) => ranSteps[i]);
 
@@ -1682,21 +1675,21 @@ function Module_RF09({ onComplete }) {
   const RF09_MCQ = {
     question: 'A metric is down 13% WoW. The same metric was also down 13% in the same week last year. What does this most likely indicate?',
     options: [
-      'A product regression introduced last week — file a bug immediately',
+      'Coincidence — a 13% WoW drop is within normal variance, and last year\'s match is spurious correlation without at least three years of data',
       'This is a seasonal pattern — investigate YoY, not a product regression',
-      'A data pipeline failure — check ingestion logs before drawing any conclusion',
-      'A competitor launch — check for external news from the past 7 days',
+      'The YoY match suggests a recurring data pipeline issue that triggers during this calendar week — check ETL job schedules and ingestion logs',
+      'Both seasonal and product factors are likely contributing — decompose the drop into a seasonal baseline component and a residual to investigate separately',
     ],
     correct: 1,
-    explanation: 'When the current drop matches last year\'s drop in the same week, the pattern is almost certainly seasonal. The correct response is to confirm YoY alignment, set a seasonality-adjusted baseline, and close the investigation — not to open a bug or launch an engineering investigation.',
+    explanation: 'When the current drop matches last year\'s drop in the same week, the pattern is almost certainly seasonal. Two years of matching data is strong evidence — requiring three+ years is overly conservative and delays a clear conclusion. A recurring pipeline issue is creative but unlikely to produce the same magnitude drop on the same calendar week. Decomposing into seasonal + residual sounds rigorous but overcomplicates what is a straightforward seasonal pattern — the correct response is to confirm YoY alignment, set a seasonality-adjusted baseline, and close the investigation.',
   };
 
-  const _saved09 = useMemo(function() { return loadRCAState('rf09'); }, []);
+  const _saved09 = useMemo(function() { return loadRFState('rf09'); }, []);
   const [showYoY, setShowYoY] = useState(function() { return _saved09 ? !!_saved09.showYoY : false; });
   const [mcqSel, setMcqSel] = useState(function() { return _saved09 && _saved09.mcqSel != null ? _saved09.mcqSel : null; });
   const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved09 ? !!_saved09.mcqRevealed : false; });
 
-  useEffect(function() { saveRCAState('rf09', { showYoY: showYoY, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [showYoY, mcqSel, mcqRevealed]);
+  useEffect(function() { saveRFState('rf09', { showYoY: showYoY, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [showYoY, mcqSel, mcqRevealed]);
 
   // SVG chart constants
   const W = 500;
@@ -1895,23 +1888,23 @@ function Module_RF10({ onComplete }) {
   const RF10_MCQ = {
     question: 'Why should data quality be checked before product hypotheses in an RCA?',
     options: [
-      'Data quality issues are rare but catastrophic, so they should be ruled out early for safety',
+      'Data quality issues are rare but catastrophic, so they should be ruled out early as a precautionary measure even if it delays the investigation',
       'Data quality issues are cheap to rule out and are the most common source of false alarms in RCA',
-      'Product hypotheses require more data to test, so they naturally come later in the process',
-      'Checking data quality first is a political move to protect engineering teams from blame',
+      'Product hypotheses require stakeholder alignment before investigation can begin, so data quality fills the waiting time productively',
+      'Data quality checks establish a validated baseline — without confirming the numbers are correct first, any subsequent segmentation or decomposition could be built on faulty data',
     ],
     correct: 1,
-    explanation: 'Data quality checks take minutes and are the most frequent cause of false RCA alarms. SDK check logs, pipeline run history, and event counts by platform are fast queries. If you skip to product hypotheses first, you risk pulling engineers into a multi-day investigation for a 5-minute logging fix.',
+    explanation: 'Data quality checks take minutes and are the most frequent cause of false RCA alarms. Option A gets the reasoning backwards — data quality issues are common, not rare. Option C confuses sequencing with stakeholder coordination. Option D sounds rigorous ("validate before you segment") but describes a benefit of data quality checks, not the reason they come first — the real reason is cost-effectiveness: they are cheap to do and eliminate the most common false alarms before expensive product investigation begins.',
   };
 
-  const _saved10 = useMemo(function() { return loadRCAState('rf10'); }, []);
+  const _saved10 = useMemo(function() { return loadRFState('rf10'); }, []);
   const [symptoms10] = useState(function() { return _saved10 && _saved10.symptoms ? _saved10.symptoms : shuffleArr(SYMPTOMS_RF10); });
   const [selections, setSelections] = useState(function() { return _saved10 && _saved10.selections ? _saved10.selections : {}; });
   const [revealed, setRevealed] = useState(function() { return _saved10 && _saved10.revealed ? _saved10.revealed : {}; });
   const [mcqSel, setMcqSel] = useState(function() { return _saved10 && _saved10.mcqSel != null ? _saved10.mcqSel : null; });
   const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved10 ? !!_saved10.mcqRevealed : false; });
 
-  useEffect(function() { saveRCAState('rf10', { symptoms: symptoms10, selections: selections, revealed: revealed, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [symptoms10, selections, revealed, mcqSel, mcqRevealed]);
+  useEffect(function() { saveRFState('rf10', { symptoms: symptoms10, selections: selections, revealed: revealed, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [symptoms10, selections, revealed, mcqSel, mcqRevealed]);
 
   const allCorrect = symptoms10.every(function(s) { return revealed[s.id] && selections[s.id] === s.correct; });
   const allRevealed = symptoms10.every(function(s) { return revealed[s.id]; });
@@ -2097,23 +2090,23 @@ function Module_RF11({ onComplete }) {
   const RF11_MCQ = {
     question: 'A major competitor launched a clone of your core feature 3 days before your A/B test result read-out. What should you do?',
     options: [
-      'Cancel the experiment — the result is invalid and cannot be trusted',
-      'Ignore the competitor launch — A/B randomization protects against external events',
+      'Discard the results and rerun the experiment from scratch — any external event during the test window invalidates the causal inference',
+      'Ignore the competitor launch — both treatment and control were equally exposed, so randomization controls for it and the results remain valid',
       'Note the confound in the experiment writeup, extend or rerun if the effect was borderline, and treat results with caution',
-      'Immediately ship the winning variant before the competitive window closes',
+      'Analyze treatment and control separately for behavioral shifts after the competitor launch date — if both groups shifted equally, the relative effect is still valid',
     ],
     correct: 2,
-    explanation: 'A competitor launch during an experiment window is a confound — it affects treatment and control differently if it changes user behavior directionally. The correct response is to document it, assess whether the effect size was borderline or decisive, and flag it in the experiment writeup. Do not simply cancel or ignore it.',
+    explanation: 'A competitor launch during an experiment window is a confound. Option A (discard and rerun) is too aggressive — not every external event invalidates results, and rerunning has its own cost. Option B is the classic misconception: randomization controls for pre-existing differences, not for external events that may interact differently with treatment vs. control. Option D sounds analytical but assumes you can cleanly isolate pre/post behavior within the test window — in practice, user behavior shifts are gradual and the sub-period analysis introduces its own noise. The correct response is to document the confound, assess whether the effect size was decisive enough to survive it, and flag uncertainty in the writeup.',
   };
 
-  const _saved11 = useMemo(function() { return loadRCAState('rf11'); }, []);
+  const _saved11 = useMemo(function() { return loadRFState('rf11'); }, []);
   const [events11] = useState(function() { return _saved11 && _saved11.events ? _saved11.events : shuffleArr(EVENTS_RF11); });
   const [selections, setSelections] = useState(function() { return _saved11 && _saved11.selections ? _saved11.selections : {}; });
   const [revealed, setRevealed] = useState(function() { return _saved11 && _saved11.revealed ? _saved11.revealed : {}; });
   const [mcqSel, setMcqSel] = useState(function() { return _saved11 && _saved11.mcqSel != null ? _saved11.mcqSel : null; });
   const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved11 ? !!_saved11.mcqRevealed : false; });
 
-  useEffect(function() { saveRCAState('rf11', { events: events11, selections: selections, revealed: revealed, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [events11, selections, revealed, mcqSel, mcqRevealed]);
+  useEffect(function() { saveRFState('rf11', { events: events11, selections: selections, revealed: revealed, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [events11, selections, revealed, mcqSel, mcqRevealed]);
 
   const allRevealed = events11.every(function(e) { return !!revealed[e.id]; });
 
@@ -2304,21 +2297,21 @@ function Module_RF12({ onComplete }) {
   const RF12_MCQ = {
     question: 'An RCA concludes when...',
     options: [
-      'The engineering team has identified at least one plausible cause and a fix is in progress',
-      'The first cause found is large enough to explain the majority of the drop',
+      'The primary cause has been identified and a fix deployed — monitoring the metric for recovery confirms the RCA was correct',
+      'The largest single cause has been found and explains the majority of the drop — diminishing returns make further investigation inefficient',
       'You can account for 100% of the metric delta with attributable causes — and removing each cause would restore the metric to baseline',
-      'The incident has been open for more than 48 hours and the team needs to move on',
+      'All plausible hypotheses from the fault tree have been investigated and either confirmed or ruled out, regardless of whether they close the full delta',
     ],
     correct: 2,
-    explanation: 'An RCA is complete when every percentage point of the delta is attributed — and when you can logically demonstrate that removing each cause would restore the metric. Stopping at the first large cause leaves hidden regressions in production and produces misleading post-mortems.',
+    explanation: 'An RCA is complete when every percentage point of the delta is attributed — and when you can logically demonstrate that removing each cause would restore the metric. Option A confuses deploying a fix with completing the analysis — monitoring recovery is verification, not RCA completion. Option B is the most common mistake: stopping at the "majority" cause feels efficient but leaves hidden regressions in production. Option D sounds thorough but is process-oriented rather than outcome-oriented — you could investigate every hypothesis and still not close the delta if your fault tree was incomplete.',
   };
 
-  const _saved12 = useMemo(function() { return loadRCAState('rf12'); }, []);
+  const _saved12 = useMemo(function() { return loadRFState('rf12'); }, []);
   const [active, setActive] = useState(function() { return _saved12 && _saved12.active ? _saved12.active : { pipeline: true, seasonal: true, regression: true }; });
   const [mcqSel, setMcqSel] = useState(function() { return _saved12 && _saved12.mcqSel != null ? _saved12.mcqSel : null; });
   const [mcqRevealed, setMcqRevealed] = useState(function() { return _saved12 ? !!_saved12.mcqRevealed : false; });
 
-  useEffect(function() { saveRCAState('rf12', { active: active, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [active, mcqSel, mcqRevealed]);
+  useEffect(function() { saveRFState('rf12', { active: active, mcqSel: mcqSel, mcqRevealed: mcqRevealed }); }, [active, mcqSel, mcqRevealed]);
 
   function toggle(id) {
     setActive(function(prev) { return Object.assign({}, prev, { [id]: !prev[id] }); });
@@ -2552,12 +2545,12 @@ const ROUTES_RF13 = [
 ];
 
 function Module_RF13({ onComplete }) {
-  const _saved13 = useMemo(function() { return loadRCAState('rf13'); }, []);
+  const _saved13 = useMemo(function() { return loadRFState('rf13'); }, []);
   const [scenarios13] = useState(function() { return _saved13 && _saved13.scenarios ? _saved13.scenarios : shuffleArr(SCENARIOS_RF13); });
   const [selections, setSelections] = useState(function() { return _saved13 && _saved13.selections ? _saved13.selections : {}; });
   const [revealed, setRevealed] = useState(function() { return _saved13 ? !!_saved13.revealed : false; });
 
-  useEffect(function() { saveRCAState('rf13', { scenarios: scenarios13, selections: selections, revealed: revealed }); }, [scenarios13, selections, revealed]);
+  useEffect(function() { saveRFState('rf13', { scenarios: scenarios13, selections: selections, revealed: revealed }); }, [scenarios13, selections, revealed]);
 
   var allSelected = scenarios13.every(function(s) { return selections[s.id] != null; });
   var correctCount = revealed ? scenarios13.filter(function(s) { return selections[s.id] === s.correct; }).length : 0;
@@ -2770,7 +2763,7 @@ const SCENARIOS_RF14 = [
 ];
 
 function Module_RF14({ onComplete }) {
-  var _saved14 = useMemo(function() { return loadRCAState('rf14'); }, []);
+  var _saved14 = useMemo(function() { return loadRFState('rf14'); }, []);
   var [scenarioIdx, setScenarioIdx] = useState(function() { return _saved14 && _saved14.scenarioIdx != null ? _saved14.scenarioIdx : 0; });
   var [leverSel, setLeverSel] = useState(function() { return _saved14 ? _saved14.leverSel : null; });
   var [leverRevealed, setLeverRevealed] = useState(function() { return _saved14 ? !!_saved14.leverRevealed : false; });
@@ -2779,7 +2772,7 @@ function Module_RF14({ onComplete }) {
   var [allDone, setAllDone] = useState(function() { return _saved14 ? !!_saved14.allDone : false; });
 
   useEffect(function() {
-    saveRCAState('rf14', { scenarioIdx: scenarioIdx, leverSel: leverSel, leverRevealed: leverRevealed, branchSels: Array.from(branchSels), branchRevealed: branchRevealed, allDone: allDone });
+    saveRFState('rf14', { scenarioIdx: scenarioIdx, leverSel: leverSel, leverRevealed: leverRevealed, branchSels: Array.from(branchSels), branchRevealed: branchRevealed, allDone: allDone });
   }, [scenarioIdx, leverSel, leverRevealed, branchSels, branchRevealed, allDone]);
 
   var scenario = SCENARIOS_RF14[scenarioIdx];
@@ -3116,14 +3109,14 @@ function RF15RankBadge(props) {
 }
 
 function Module_RF15({ onComplete }) {
-  var _saved15 = useMemo(function() { return loadRCAState('rf15'); }, []);
+  var _saved15 = useMemo(function() { return loadRFState('rf15'); }, []);
   var [scenarioIdx, setScenarioIdx] = useState(function() { return _saved15 && _saved15.scenarioIdx != null ? _saved15.scenarioIdx : 0; });
   var [userRanks, setUserRanks] = useState(function() { return _saved15 ? (_saved15.userRanks || {}) : {}; });
   var [revealed, setRevealed] = useState(function() { return _saved15 ? !!_saved15.revealed : false; });
   var [allDone, setAllDone] = useState(function() { return _saved15 ? !!_saved15.allDone : false; });
 
   useEffect(function() {
-    saveRCAState('rf15', { scenarioIdx: scenarioIdx, userRanks: userRanks, revealed: revealed, allDone: allDone });
+    saveRFState('rf15', { scenarioIdx: scenarioIdx, userRanks: userRanks, revealed: revealed, allDone: allDone });
   }, [scenarioIdx, userRanks, revealed, allDone]);
 
   var scenario = SCENARIOS_RF15[scenarioIdx];
