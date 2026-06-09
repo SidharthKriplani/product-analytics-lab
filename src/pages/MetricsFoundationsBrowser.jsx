@@ -1,201 +1,24 @@
-import { useState } from 'react';
+// Metrics Foundations Browser — thin wrapper around FoundationBrowser
+import { FoundationBrowser } from '../components/shared/FoundationBrowser.jsx';
 import { metricsFoundationModules } from '../data/metricsFoundationModules.js';
 import { getAllMetricsFoundationProgress } from '../utils/metricsFoundationProgress.js';
-import { Icon } from '../components/shared/Icon.jsx';
-
-const DIFFICULTY_CONFIG = {
-  Beginner:     { color: 'var(--green)',  bg: 'var(--green-bg)',  border: 'var(--green-border)' },
-  Intermediate: { color: 'var(--yellow)', bg: 'var(--yellow-bg)', border: 'var(--yellow-border)' },
-  Advanced:     { color: 'var(--purple)', bg: 'var(--purple-bg)', border: 'var(--purple-border)' },
-};
-
-function DifficultyBadge({ difficulty }) {
-  const cfg = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.Beginner;
-  return (
-    <span style={{
-      fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-      color: cfg.color, background: cfg.bg, border: '1px solid ' + cfg.border,
-      borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.45rem',
-    }}>
-      {difficulty}
-    </span>
-  );
-}
-
-function StepCircle({ index, completed, isCurrent }) {
-  const bg = completed ? 'var(--green)' : isCurrent ? 'var(--green-bg)' : 'var(--surface-2)';
-  const border = completed ? 'var(--green)' : isCurrent ? 'var(--green-border)' : 'var(--border)';
-  const color = completed ? '#fff' : isCurrent ? 'var(--green)' : 'var(--text-muted)';
-  return (
-    <div style={{
-      width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-      background: bg, border: '2px solid ' + border,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: '0.75rem', fontWeight: 800, color, transition: 'transform var(--transition), box-shadow var(--transition), border-color var(--transition)',
-    }}>
-      {completed ? '✓' : index}
-    </div>
-  );
-}
 
 export function MetricsFoundationsBrowser({ onStart, unlocked, onNavigate }) {
-  const progress = getAllMetricsFoundationProgress();
-  const completedIds = new Set(Object.keys(progress));
-  const firstIncomplete = metricsFoundationModules.find(m => !completedIds.has(m.id));
-
-  const totalCompleted = completedIds.size;
-  const total = metricsFoundationModules.length;
+  var progress = getAllMetricsFoundationProgress();
 
   return (
-    <div className="pal-page-enter" style={{ maxWidth: 780, margin: '0 auto', padding: '2rem 1.25rem 3rem' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
-          <Icon name="bar-chart" size={20} color="var(--green)" />
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.03em', margin: 0 }}>
-            Metrics Foundation
-          </h1>
-        </div>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0 0 1rem', lineHeight: 1.5 }}>
-          Metrics questions are the most common interview format for product analysts and PMs — yet most candidates answer them by listing obvious KPIs. What separates strong candidates is understanding why metrics move, how they can be gamed, and how to design ones that actually measure what you intend. These 8 modules build that foundation.
-        </p>
-
-        {/* Progress bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', borderRadius: 3, background: 'var(--green)',
-              width: (totalCompleted / total * 100) + '%', transition: 'width 0.3s',
-            }} />
-          </div>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', flexShrink: 0 }}>
-            {totalCompleted}/{total} complete
-          </span>
-        </div>
-      </div>
-
-      {/* Continue / Start CTA */}
-      {firstIncomplete && (
-        <div style={{
-          background: 'var(--green-bg)', border: '1.5px solid var(--green-border)',
-          borderRadius: 'var(--radius)', padding: '1rem 1.25rem',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem',
-        }}>
-          <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.2rem' }}>
-              {totalCompleted === 0 ? 'Start here' : 'Continue'}
-            </div>
-            <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.92rem' }}>
-              {firstIncomplete.index}. {firstIncomplete.title}
-            </div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.1rem' }}>
-              {firstIncomplete.estimatedMin} min · {firstIncomplete.difficulty}
-            </div>
-          </div>
-          <button
-            onClick={() => onStart(firstIncomplete.id)}
-            style={{
-              padding: '0.6rem 1.4rem', borderRadius: 'var(--radius-sm)', border: 'none',
-              background: 'var(--green)', color: '#fff', fontWeight: 700, fontSize: '0.88rem',
-              cursor: 'pointer', whiteSpace: 'nowrap',
-            }}
-          >
-            {totalCompleted === 0 ? 'Start →' : 'Continue →'}
-          </button>
-        </div>
-      )}
-
-      {totalCompleted === total && (
-        <div style={{
-          background: 'var(--green-bg)', border: '1.5px solid var(--green-border)',
-          borderRadius: 'var(--radius)', padding: '1rem 1.25rem', marginBottom: '1.5rem',
-          textAlign: 'center', color: 'var(--green)', fontWeight: 700, fontSize: '0.95rem',
-        }}>
-          ✓ All 8 modules complete. Metrics fundamentals locked in.
-        </div>
-      )}
-
-      {/* Module list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0' }}>
-        {metricsFoundationModules.map((m, idx) => {
-          const completed = completedIds.has(m.id);
-          const isCurrent = firstIncomplete?.id === m.id;
-          const isLocked = !m.isFree && !unlocked;
-          return (
-            <button
-              key={m.id}
-              className="pal-card-enter pal-card-hover"
-              onClick={() => !isLocked && onStart(m.id)}
-              style={{
-                animationDelay: String(Math.min(idx * 28, 400)) + 'ms',
-                display: 'flex', alignItems: 'center', gap: '1rem',
-                padding: '0.85rem 1.1rem',
-                borderRadius: 'var(--radius)',
-                border: '1px solid ' + (isCurrent ? 'var(--green-border)' : 'var(--border)'),
-                background: isCurrent ? 'var(--green-bg)' : completed ? 'var(--surface-2)' : 'var(--surface)',
-                cursor: isLocked ? 'default' : 'pointer',
-                textAlign: 'left', width: '100%',
-                opacity: isLocked ? 0.6 : 1,
-                transition: 'border-color 0.15s, background 0.15s',
-              }}
-            >
-              <StepCircle index={m.index} completed={completed} isCurrent={isCurrent} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem' }}>
-                    {m.title}
-                  </span>
-                  <DifficultyBadge difficulty={m.difficulty} />
-                  {isLocked && (
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>🔒</span>
-                  )}
-                </div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.15rem' }}>
-                  {m.subtitle}
-                </div>
-              </div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0 }}>
-                {m.estimatedMin}m
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Ready to practice CTA */}
-      {onNavigate && (
-        <div style={{
-          marginTop: '2.5rem',
-          padding: '1.25rem 1.5rem',
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: '10px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          flexWrap: 'wrap', gap: '0.75rem',
-        }}>
-          <div>
-            <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.2rem' }}>
-              Ready to practice?
-            </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Apply what you learned in the practice rooms.
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button onClick={() => onNavigate('metrics')} style={{
-              padding: '0.45rem 1rem', borderRadius: '6px',
-              background: 'var(--green-bg)', border: '1px solid var(--green-border)',
-              color: 'var(--green)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-            }}>Metrics Room →</button>
-            <button onClick={() => onNavigate('growth-analytics')} style={{
-              padding: '0.45rem 1rem', borderRadius: '6px',
-              background: 'var(--teal-bg)', border: '1px solid var(--teal-border)',
-              color: 'var(--teal)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-            }}>Growth Analytics →</button>
-          </div>
-        </div>
-      )}
-    </div>
+    <FoundationBrowser
+      modules={metricsFoundationModules}
+      progress={progress}
+      color='var(--green)'
+      roomLabel='Metrics Foundations'
+      iconName='bar-chart'
+      onStart={onStart}
+      unlocked={unlocked}
+      practiceLinks={[
+        { label: 'Metrics Room', onClick: function () { onNavigate('metrics'); } },
+        { label: 'Growth Analytics', onClick: function () { onNavigate('growth-analytics'); } },
+      ]}
+    />
   );
 }

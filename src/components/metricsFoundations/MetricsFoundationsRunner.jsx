@@ -1,8 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { metricsFoundationModules } from '../../data/metricsFoundationModules.js';
-import { saveMetricsFoundationProgress, getMetricsFoundationProgress, getAllMetricsFoundationProgress } from '../../utils/metricsFoundationProgress.js';
+import { saveMetricsFoundationProgress, getMetricsFoundationProgress } from '../../utils/metricsFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
-import { HowTo } from '../shared/HowTo.jsx';
+import { InsightBox, NextBtn as SharedNextBtn, MCQOption } from '../shared/FoundationPrimitives.jsx';
+import { FoundationRunnerShell } from '../shared/FoundationRunnerShell.jsx';
+
+// Green-default wrapper so MF01-MF13 modules get the right color without passing it
+function NextBtn(props) { return <SharedNextBtn {...props} color={props.color || 'var(--green)'} />; }
 
 // ── Persistence helpers ──────────────────────────────────────────────────────
 function saveMFState(id, state) {
@@ -20,60 +24,6 @@ function shuffleMF(arr) {
   return a;
 }
 
-const NOTES_KEY = 'pal-notes-v1';
-
-function getNotes(room, caseId) {
-  try {
-    const all = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}');
-    return all[room + ':' + caseId] || '';
-  } catch { return ''; }
-}
-
-function saveNote(room, caseId, text) {
-  try {
-    const all = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}');
-    all[room + ':' + caseId] = text;
-    localStorage.setItem(NOTES_KEY, JSON.stringify(all));
-  } catch {}
-}
-
-// ─── Shared UI helpers ────────────────────────────────────────────────────────
-
-function InsightBox({ label, color, bg, border, children }) {
-  return (
-    <div style={{ background: bg, border: '1.5px solid ' + border, borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>{label}</div>
-      <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.65 }}>{children}</div>
-    </div>
-  );
-}
-
-function NextBtn({ onClick, label }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-      <button onClick={onClick} className="pal-glow-pulse" style={{
-        padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none',
-        background: 'var(--green)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer',
-      }}>{label || 'Next concept →'}</button>
-    </div>
-  );
-}
-
-function MCQOption({ label, selected, correct, revealed, onClick }) {
-  let bg = 'var(--surface)', border = 'var(--border)', color = 'var(--text)';
-  if (revealed) {
-    if (correct) { bg = 'var(--green-bg)'; border = 'var(--green-border)'; color = 'var(--green)'; }
-    else if (selected) { bg = 'var(--red-bg)'; border = 'var(--red-border)'; color = 'var(--red)'; }
-  } else if (selected) { bg = 'var(--accent-bg)'; border = 'var(--accent)'; color = 'var(--accent)'; }
-  return (
-    <button onClick={onClick} disabled={revealed} style={{
-      display: 'block', width: '100%', textAlign: 'left',
-      padding: '0.7rem 1rem', borderRadius: 'var(--radius-sm)', border: '1.5px solid ' + border,
-      background: bg, color, fontSize: '0.88rem', cursor: revealed ? 'default' : 'pointer',
-      fontWeight: selected || (revealed && correct) ? 600 : 400, transition: 'all 0.15s',
-    }}>{label}</button>
-  );
-}
 
 // ─── Module 1: Metrics Hierarchy ─────────────────────────────────────────────
 
@@ -1667,21 +1617,18 @@ const MODULE_COMPONENTS = {
 // ─── Runner shell ─────────────────────────────────────────────────────────────
 
 export function MetricsFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSelectModule }) {
-  const module = metricsFoundationModules.find(m => m.id === moduleId);
-  const [completed, setCompleted] = useState(() => !!getMetricsFoundationProgress(moduleId));
-  const [note, setNote] = useState(() => getNotes('metrics-foundations', moduleId));
+  var module = metricsFoundationModules.find(function(m) { return m.id === moduleId; });
+  var [completed, setCompleted] = useState(function() { return !!getMetricsFoundationProgress(moduleId); });
 
-  useEffect(() => {
+  useEffect(function() {
     setCompleted(!!getMetricsFoundationProgress(moduleId));
   }, [moduleId]);
-
-  useEffect(() => { setNote(getNotes('metrics-foundations', moduleId)); }, [moduleId]);
 
   if (!module) return (
     <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Module not found.</div>
   );
 
-  const ModuleComponent = MODULE_COMPONENTS[moduleId];
+  var ModuleComponent = MODULE_COMPONENTS[moduleId];
 
   function handleNext() {
     saveMetricsFoundationProgress(moduleId);
@@ -1691,128 +1638,21 @@ export function MetricsFoundationsRunner({ moduleId, onBack, onNext, unlocked, o
     else onBack();
   }
 
-  const completedMap = getAllMetricsFoundationProgress();
-
   return (
-    <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '1.5rem 1rem', width: '100%', boxSizing: 'border-box', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-
-      {/* ── Right nav sidebar ── */}
-      <div className="pal-foundation-nav" style={{
-        width: '190px', flexShrink: 0, order: 2,
-        position: 'sticky', top: '1rem',
-        maxHeight: 'calc(100vh - 2rem)', overflowY: 'auto',
-        background: 'var(--surface)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius)', padding: '0.75rem 0.5rem',
-      }}>
-        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '0 0.4rem', marginBottom: '0.5rem' }}>
-          Metrics Foundations
-        </div>
-        {metricsFoundationModules.map((m) => {
-          const isCurrent = m.id === moduleId;
-          const isDone = !!completedMap[m.id];
-          const isStub = !!m.isStub;
-          const isLocked = !m.isFree && !unlocked;
-          const isBlocked = isStub || isLocked;
-          return (
-            <button
-              key={m.id}
-              onClick={() => !isBlocked && onSelectModule && onSelectModule(m.id)}
-              style={{
-                display: 'flex', alignItems: 'baseline', gap: '0.35rem',
-                width: '100%', textAlign: 'left',
-                padding: '0.28rem 0.4rem', borderRadius: '5px', border: 'none',
-                background: isCurrent ? 'var(--green-bg)' : 'transparent',
-                color: isCurrent ? 'var(--green)' : (isStub || isLocked) ? 'var(--text-muted)' : isDone ? 'var(--teal)' : 'var(--text)',
-                fontSize: '0.75rem', lineHeight: 1.4,
-                cursor: isBlocked ? 'default' : 'pointer',
-                opacity: isStub ? 0.4 : isLocked ? 0.55 : 1,
-                marginBottom: '0.1rem',
-                fontWeight: isCurrent ? 700 : 400,
-              }}
-              title={isStub ? 'Coming soon' : isLocked ? 'Unlock to access' : m.title}
-            >
-              <span style={{ flexShrink: 0, fontVariantNumeric: 'tabular-nums', fontSize: '0.68rem', color: isCurrent ? 'var(--green)' : 'var(--text-muted)', minWidth: '1.4rem' }}>{m.index}.</span>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{isStub ? '' : isLocked ? '🔒 ' : isDone && !isCurrent ? '✓ ' : ''}{m.title}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Main content column ── */}
-      <div style={{ flex: 1, minWidth: 0, order: 1 }}>
-      {/* Nav bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer', padding: '0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-          ← All modules
-        </button>
-        <span style={{ color: 'var(--border)', fontSize: '0.8rem' }}>|</span>
-        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Module {module.index} of {metricsFoundationModules.length}</span>
-        {completed && (
-          <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', background: 'var(--green-bg)', color: 'var(--green)', border: '1px solid var(--green-border)' }}>✓ Complete</span>
-        )}
-      </div>
-
-      {/* Module header */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.025em', margin: '0 0 0.3rem' }}>
-          {module.index}. {module.title}
-        </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 0 0.75rem' }}>{module.subtitle}</p>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{module.estimatedMin} min</span>
-          {module.tags.slice(0, 4).map(tag => (
-            <span key={tag} style={{ fontSize: '0.68rem', padding: '0.1rem 0.45rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>{tag}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* Module content */}
-      <HowTo skill={module.subtitle} steps={['Read the situation — understand the real-world context this concept solves', 'Interact with the demo — adjust sliders, make selections, observe what changes', 'Answer the question — test your understanding before moving on']} color="var(--green)" />
+    <FoundationRunnerShell
+      module={module}
+      totalModules={metricsFoundationModules.length}
+      completed={completed}
+      color='var(--green)'
+      roomLabel='Metrics Foundations'
+      onBack={onBack}
+      playbookLinks={module.playbookLinks}
+    >
       {ModuleComponent ? (
         <ModuleComponent module={module} onNext={handleNext} />
       ) : (
-        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          Module content coming soon.
-        </div>
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Module content coming soon.</div>
       )}
-
-      {/* Playbook links */}
-      {module.playbookLinks && module.playbookLinks.length > 0 && (
-        <div style={{ marginTop: '1.5rem', padding: '0.9rem 1.1rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
-            Further reading
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-            {module.playbookLinks.map(link => (
-              <span key={link.id} style={{ fontSize: '0.78rem', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'default' }}>
-                {link.label}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Notes */}
-      <div style={{ marginTop: '1.5rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          My Notes
-        </div>
-        <textarea
-          value={note}
-          onChange={e => { setNote(e.target.value); saveNote('metrics-foundations', moduleId, e.target.value); }}
-          placeholder="Add your own notes, reminders, or follow-up questions..."
-          rows={4}
-          style={{
-            width: '100%', boxSizing: 'border-box',
-            background: 'var(--surface-2)', border: '1px solid var(--border)',
-            borderRadius: '8px', padding: '0.65rem 0.85rem',
-            color: 'var(--text)', fontSize: '0.85rem', lineHeight: 1.55,
-            resize: 'vertical', outline: 'none',
-            fontFamily: 'inherit',
-          }}
-        />
-      </div>
-      </div>{/* end main content column */}
-    </div>
+    </FoundationRunnerShell>
   );
 }

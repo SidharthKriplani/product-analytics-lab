@@ -197,9 +197,9 @@ function TestimonialTicker() {
 }
 
 function TestimonialWall() {
-  const [expanded, setExpanded] = useState(false);
-  const visible = expanded ? WALL_TESTIMONIALS : WALL_TESTIMONIALS.slice(0, 3);
-  const remaining = WALL_TESTIMONIALS.length - 3;
+  const [visibleCount, setVisibleCount] = useState(3);
+  const visible = WALL_TESTIMONIALS.slice(0, visibleCount);
+  const remaining = WALL_TESTIMONIALS.length - visibleCount;
 
   const renderCard = (t) => (
     <div key={t.name} style={{
@@ -242,16 +242,16 @@ function TestimonialWall() {
       }}>
         {visible.map(renderCard)}
       </div>
-      {!expanded && remaining > 0 && (
+      {remaining > 0 && (
         <button
-          onClick={() => setExpanded(true)}
+          onClick={() => setVisibleCount(function(c) { return Math.min(c + 3, WALL_TESTIMONIALS.length); })}
           style={{
             background: 'none', border: 'none', color: 'var(--text-muted)',
             fontSize: '0.75rem', cursor: 'pointer', padding: '0.75rem 0 0',
             fontFamily: 'inherit', display: 'block', margin: '0 auto',
           }}
         >
-          Show all {WALL_TESTIMONIALS.length} &darr;
+          Show more &darr;
         </button>
       )}
     </div>

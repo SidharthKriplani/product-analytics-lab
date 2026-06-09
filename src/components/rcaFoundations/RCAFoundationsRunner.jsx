@@ -1,77 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { rcaFoundationModules } from '../../data/rcaFoundationModules.js';
-import { saveRCAFoundationProgress, getAllRCAFoundationProgress } from '../../utils/rcaFoundationProgress.js';
+import { saveRCAFoundationProgress, getRCAFoundationProgress } from '../../utils/rcaFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
-import { HowTo } from '../shared/HowTo.jsx';
-
-const NOTES_KEY = 'pal-notes-v1';
-
-function getNotes(room, caseId) {
-  try {
-    const all = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}');
-    return all[room + ':' + caseId] || '';
-  } catch { return ''; }
-}
-
-function saveNote(room, caseId, text) {
-  try {
-    const all = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}');
-    all[room + ':' + caseId] = text;
-    localStorage.setItem(NOTES_KEY, JSON.stringify(all));
-  } catch {}
-}
-
-// ── Shared helpers ──────────────────────────────────────────────────────────
-
-function InsightBox({ children }) {
-  return (
-    <div style={{
-      background: 'var(--teal-bg)', border: '1px solid var(--teal-border)',
-      borderRadius: 'var(--radius)', padding: '1rem 1.1rem', marginTop: '1.25rem',
-    }}>
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.4rem' }}>
-        Key Insight
-      </div>
-      <div style={{ fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.6 }}>{children}</div>
-    </div>
-  );
-}
-
-function NextBtn({ onClick, label }) {
-  return (
-    <button onClick={onClick} className="pal-glow-pulse" style={{
-      marginTop: '1.5rem', padding: '0.65rem 1.6rem',
-      background: 'var(--teal)', color: '#fff', border: 'none',
-      borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.9rem',
-      cursor: 'pointer',
-    }}>
-      {label || 'Next →'}
-    </button>
-  );
-}
-
-function MCQOption({ label, selected, correct, revealed, onClick }) {
-  let bg = 'var(--surface-2)';
-  let border = 'var(--border)';
-  let color = 'var(--text)';
-  if (revealed) {
-    if (correct) { bg = 'var(--teal-bg)'; border = 'var(--teal-border)'; color = 'var(--teal)'; }
-    else if (selected && !correct) { bg = 'var(--red-bg)'; border = 'var(--red-border)'; color = 'var(--red)'; }
-  } else if (selected) {
-    border = 'var(--teal-border)';
-  }
-  return (
-    <button onClick={onClick} disabled={revealed} style={{
-      display: 'block', width: '100%', textAlign: 'left',
-      padding: '0.7rem 1rem', marginBottom: '0.5rem',
-      background: bg, border: '1.5px solid ' + border, borderRadius: 'var(--radius-sm)',
-      color, fontSize: '0.88rem', cursor: revealed ? 'default' : 'pointer',
-      transition: 'all 0.15s',
-    }}>
-      {label}
-    </button>
-  );
-}
+import { InsightBox, NextBtn, MCQOption } from '../shared/FoundationPrimitives.jsx';
+import { FoundationRunnerShell } from '../shared/FoundationRunnerShell.jsx';
 
 // ── Persistence helpers ─────────────────────────────────────────────────────
 function saveRCAState(id, state) {
@@ -3091,171 +3023,42 @@ const MODULE_COMPONENTS = {
 
 // ── Runner shell ────────────────────────────────────────────────────────────
 export function RCAFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSelectModule }) {
-  const module = rcaFoundationModules.find(m => m.id === moduleId);
-  const [completed, setCompleted] = useState(false);
-  const [note, setNote] = useState(() => getNotes('rca-foundations', moduleId));
-  useEffect(() => { setNote(getNotes('rca-foundations', moduleId)); }, [moduleId]);
+  var module = rcaFoundationModules.find(function(m) { return m.id === moduleId; });
+  var [completed, setCompleted] = useState(function() { return !!getRCAFoundationProgress(moduleId); });
 
-  if (!module) return null;
+  useEffect(function() {
+    setCompleted(!!getRCAFoundationProgress(moduleId));
+  }, [moduleId]);
 
-  const ModuleComponent = MODULE_COMPONENTS[moduleId];
+  if (!module) return (
+    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Module not found.</div>
+  );
 
-  function handleComplete() {
+  var ModuleComponent = MODULE_COMPONENTS[moduleId];
+
+  function handleNext() {
     saveRCAFoundationProgress(moduleId);
-    track('case_completed', { room: 'rca-foundations', id: moduleId, title: module.title });
     setCompleted(true);
+    track('case_completed', { room: 'rca-foundations', id: moduleId, title: module.title });
+    if (onNext) onNext();
+    else onBack();
   }
 
-  const completedMap = getAllRCAFoundationProgress();
-
   return (
-    <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '1.5rem 1rem', width: '100%', boxSizing: 'border-box', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-
-      {/* ── Right nav sidebar ── */}
-      <div className="pal-foundation-nav" style={{
-        width: '190px', flexShrink: 0, order: 2,
-        position: 'sticky', top: '1rem',
-        maxHeight: 'calc(100vh - 2rem)', overflowY: 'auto',
-        background: 'var(--surface)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius)', padding: '0.75rem 0.5rem',
-      }}>
-        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '0 0.4rem', marginBottom: '0.5rem' }}>
-          RCA Foundations
-        </div>
-        {rcaFoundationModules.map((m) => {
-          const isCurrent = m.id === moduleId;
-          const isDone = !!completedMap[m.id];
-          const isStub = !!m.isStub;
-          const isLocked = !m.isFree && !unlocked;
-          const isBlocked = isStub || isLocked;
-          return (
-            <button
-              key={m.id}
-              onClick={() => !isBlocked && onSelectModule && onSelectModule(m.id)}
-              style={{
-                display: 'flex', alignItems: 'baseline', gap: '0.35rem',
-                width: '100%', textAlign: 'left',
-                padding: '0.28rem 0.4rem', borderRadius: '5px', border: 'none',
-                background: isCurrent ? 'var(--teal-bg)' : 'transparent',
-                color: isCurrent ? 'var(--teal)' : (isStub || isLocked) ? 'var(--text-muted)' : isDone ? 'var(--teal)' : 'var(--text)',
-                fontSize: '0.75rem', lineHeight: 1.4,
-                cursor: isBlocked ? 'default' : 'pointer',
-                opacity: isStub ? 0.4 : isLocked ? 0.55 : 1,
-                marginBottom: '0.1rem',
-                fontWeight: isCurrent ? 700 : 400,
-              }}
-              title={isStub ? 'Coming soon' : isLocked ? 'Unlock to access' : m.title}
-            >
-              <span style={{ flexShrink: 0, fontVariantNumeric: 'tabular-nums', fontSize: '0.68rem', color: isCurrent ? 'var(--teal)' : 'var(--text-muted)', minWidth: '1.4rem' }}>{m.index}.</span>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{isStub ? '' : isLocked ? '🔒 ' : isDone && !isCurrent ? '✓ ' : ''}{m.title}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Main content column ── */}
-      <div style={{ flex: 1, minWidth: 0, order: 1 }}>
-      {/* Nav bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <button onClick={onBack} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--text-muted)', fontSize: '0.85rem', padding: '0.2rem 0',
-        }}>
-          ← All modules
-        </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            Module {module.index} of {rcaFoundationModules.length}
-          </span>
-          {completed && (
-            <span style={{
-              fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.5rem',
-              background: 'var(--teal-bg)', color: 'var(--teal)',
-              border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)',
-            }}>
-              ✓ Complete
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Module header */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text)', margin: '0 0 0.3rem', letterSpacing: '-0.02em' }}>
-          {module.title}
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>{module.subtitle}</p>
-      </div>
-
-      {/* Module content */}
-      <HowTo skill={module.subtitle} steps={['Read the situation — understand the real-world context this concept solves', 'Interact with the demo — adjust sliders, make selections, observe what changes', 'Answer the question — test your understanding before moving on']} color="var(--teal)" />
-      {ModuleComponent && <ModuleComponent onComplete={handleComplete} />}
-
-      {/* Post-completion: connection + playbook links + next */}
-      {completed && (
-        <div className="pal-reveal-in" style={{ marginTop: '1.75rem' }}>
-          <div style={{
-            background: 'var(--surface-2)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)', padding: '1rem 1.1rem', marginBottom: '1rem',
-          }}>
-            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.35rem' }}>
-              Why this matters for RCA practice
-            </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.6 }}>
-              {module.connection}
-            </div>
-          </div>
-
-          {module.playbookLinks && module.playbookLinks.length > 0 && (
-            <div style={{ marginBottom: '1.25rem' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.5rem' }}>
-                Playbook reading
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                {module.playbookLinks.map(link => (
-                  <span key={link.id} style={{
-                    fontSize: '0.78rem', padding: '0.2rem 0.55rem',
-                    background: 'var(--teal-bg)', color: 'var(--teal)',
-                    border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', fontWeight: 500,
-                  }}>
-                    {link.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <button onClick={onNext} className="pal-glow-pulse" style={{
-            padding: '0.65rem 1.6rem', background: 'var(--teal)', color: '#fff',
-            border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700,
-            fontSize: '0.9rem', cursor: 'pointer',
-          }}>
-            {module.index < rcaFoundationModules.length ? 'Next module →' : 'Back to all modules'}
-          </button>
-
-          {/* Notes */}
-          <div style={{ marginTop: '1.5rem' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              My Notes
-            </div>
-            <textarea
-              value={note}
-              onChange={e => { setNote(e.target.value); saveNote('rca-foundations', moduleId, e.target.value); }}
-              placeholder="Add your own notes, reminders, or follow-up questions..."
-              rows={4}
-              style={{
-                width: '100%', boxSizing: 'border-box',
-                background: 'var(--surface-2)', border: '1px solid var(--border)',
-                borderRadius: '8px', padding: '0.65rem 0.85rem',
-                color: 'var(--text)', fontSize: '0.85rem', lineHeight: 1.55,
-                resize: 'vertical', outline: 'none',
-                fontFamily: 'inherit',
-              }}
-            />
-          </div>
-        </div>
+    <FoundationRunnerShell
+      module={module}
+      totalModules={rcaFoundationModules.length}
+      completed={completed}
+      color='var(--teal)'
+      roomLabel='RCA Foundations'
+      onBack={onBack}
+      playbookLinks={module.playbookLinks}
+    >
+      {ModuleComponent ? (
+        <ModuleComponent onComplete={handleNext} />
+      ) : (
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Module content coming soon.</div>
       )}
-      </div>{/* end main content column */}
-    </div>
+    </FoundationRunnerShell>
   );
 }

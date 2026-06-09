@@ -408,12 +408,14 @@ function PhaseBar(props) {
 function DataTable(props) {
   var headers = props.headers;
   var rows = props.rows;
+  var maxHeight = props.maxHeight || null;
 
   return (
     <div style={{
       overflowX: 'auto', marginBottom: '16px',
       borderRadius: '10px', border: '1px solid var(--border)',
-      overflow: 'hidden',
+      overflow: maxHeight ? 'auto' : 'hidden',
+      maxHeight: maxHeight || 'none',
     }}>
       <table style={{
         width: '100%', borderCollapse: 'collapse',
@@ -429,6 +431,8 @@ function DataTable(props) {
                   fontWeight: 600, fontSize: '13px',
                   whiteSpace: 'nowrap',
                   borderBottom: '2px solid rgba(0,0,0,0.1)',
+                  position: maxHeight ? 'sticky' : 'static',
+                  top: 0, zIndex: 1,
                 }}>{h}</th>
               );
             })}
@@ -1178,7 +1182,7 @@ function SQLPhase(props) {
           }}>
             Your Results ({queryResults.rows.length} row{queryResults.rows.length !== 1 ? 's' : ''})
           </div>
-          <DataTable headers={queryResults.columns} rows={queryResults.rows} />
+          <DataTable headers={queryResults.columns} rows={queryResults.rows} maxHeight='320px' />
         </div>
       )}
 
