@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { metricsFoundationModules } from '../../data/metricsFoundationModules.js';
-import { saveMetricsFoundationProgress, getMetricsFoundationProgress } from '../../utils/metricsFoundationProgress.js';
+import { saveMetricsFoundationProgress, getMetricsFoundationProgress, getAllMetricsFoundationProgress } from '../../utils/metricsFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
 import { InsightBox, NextBtn as SharedNextBtn, MCQOption } from '../shared/FoundationPrimitives.jsx';
 import { FoundationRunnerShell } from '../shared/FoundationRunnerShell.jsx';
@@ -2995,6 +2995,7 @@ const MODULE_COMPONENTS = {
 export function MetricsFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSelectModule }) {
   var module = metricsFoundationModules.find(function(m) { return m.id === moduleId; });
   var [completed, setCompleted] = useState(function() { return !!getMetricsFoundationProgress(moduleId); });
+  var allProgress = getAllMetricsFoundationProgress();
 
   useEffect(function() {
     setCompleted(!!getMetricsFoundationProgress(moduleId));
@@ -3023,6 +3024,10 @@ export function MetricsFoundationsRunner({ moduleId, onBack, onNext, unlocked, o
       roomLabel='Metrics Foundations'
       onBack={onBack}
       playbookLinks={module.playbookLinks}
+      modules={metricsFoundationModules}
+      currentModuleId={moduleId}
+      onSelectModule={onSelectModule}
+      progress={allProgress}
     >
       {ModuleComponent ? (
         <ModuleComponent module={module} onNext={handleNext} />

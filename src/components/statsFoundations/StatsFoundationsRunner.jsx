@@ -119,6 +119,10 @@ export function StatsFoundationsRunner({ moduleId, onBack, onNext, unlocked, onN
       roomLabel='Stat Foundations'
       onBack={onBack}
       playbookLinks={module.playbookLinks}
+      modules={statsFoundationsModules}
+      currentModuleId={moduleId}
+      onSelectModule={onSelectModule}
+      progress={completedMap}
     >
       <ModuleErrorBoundary>
         {ModuleComponent ? (

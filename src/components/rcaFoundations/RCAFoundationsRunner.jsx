@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { rcaFoundationModules } from '../../data/rcaFoundationModules.js';
-import { saveRCAFoundationProgress, getRCAFoundationProgress } from '../../utils/rcaFoundationProgress.js';
+import { saveRCAFoundationProgress, getRCAFoundationProgress, getAllRCAFoundationProgress } from '../../utils/rcaFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
 import { loadRFState, saveRFState } from '../../utils/rcaFoundationsState.js';
 import { InsightBox, NextBtn, MCQOption } from '../shared/FoundationPrimitives.jsx';
@@ -3314,6 +3314,7 @@ const MODULE_COMPONENTS = {
 export function RCAFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSelectModule }) {
   var module = rcaFoundationModules.find(function(m) { return m.id === moduleId; });
   var [completed, setCompleted] = useState(function() { return !!getRCAFoundationProgress(moduleId); });
+  var allProgress = getAllRCAFoundationProgress();
 
   useEffect(function() {
     setCompleted(!!getRCAFoundationProgress(moduleId));
@@ -3342,6 +3343,10 @@ export function RCAFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSel
       roomLabel='RCA Foundations'
       onBack={onBack}
       playbookLinks={module.playbookLinks}
+      modules={rcaFoundationModules}
+      currentModuleId={moduleId}
+      onSelectModule={onSelectModule}
+      progress={allProgress}
     >
       {ModuleComponent ? (
         <ModuleComponent onComplete={handleNext} />

@@ -900,3 +900,12 @@ button:not(:disabled):active {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Module index — responsive toggle ── */
+.pal-module-index-desktop { display: block; }
+.pal-module-index-toggle  { display: none !important; }
+
+@media (max-width: 900px) {
+  .pal-module-index-desktop { display: none !important; }
+  .pal-module-index-toggle  { display: inline-flex !important; }
+}

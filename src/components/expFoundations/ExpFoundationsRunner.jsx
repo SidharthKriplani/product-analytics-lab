@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { expFoundationModules } from '../../data/expFoundationModules.js';
-import { saveExpFoundationProgress } from '../../utils/expFoundationProgress.js';
+import { saveExpFoundationProgress, getAllExpFoundationProgress } from '../../utils/expFoundationProgress.js';
 import { track } from '../../utils/analytics.js';
 import { InsightBox as SharedInsightBox, NextBtn as SharedNextBtn, MCQOption, CheckBtn as SharedCheckBtn, InstructionBox as SharedInstructionBox } from '../shared/FoundationPrimitives.jsx';
 import { FoundationRunnerShell } from '../shared/FoundationRunnerShell.jsx';
@@ -2820,6 +2820,7 @@ const MODULE_COMPONENTS = {
 export function ExpFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSelectModule }) {
   var module = expFoundationModules.find(function(m) { return m.id === moduleId; });
   var [completed, setCompleted] = useState(false);
+  var allProgress = getAllExpFoundationProgress();
 
   useEffect(function() {
     setCompleted(false);
@@ -2844,6 +2845,10 @@ export function ExpFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSel
       roomLabel='A/B Foundations'
       onBack={onBack}
       playbookLinks={module.playbookLinks}
+      modules={expFoundationModules}
+      currentModuleId={moduleId}
+      onSelectModule={onSelectModule}
+      progress={allProgress}
     >
       {ModuleComponent ? (
         <>
