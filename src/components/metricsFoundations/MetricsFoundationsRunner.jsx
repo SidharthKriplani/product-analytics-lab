@@ -2244,6 +2244,730 @@ function Module_MF13({ module, onNext }) {
   );
 }
 
+// ─── Module 14: Cohort Metrics and Retention Curves ─────────────────────────
+
+function Module_MF14({ module, onNext }) {
+  var saved14 = useMemo(function() { return loadMFState('mf14'); }, []);
+  var [improvement, setImprovement] = useState(function() { return saved14 && saved14.improvement !== undefined ? saved14.improvement : 0; });
+  var [seasonal, setSeasonal] = useState(function() { return saved14 && saved14.seasonal !== undefined ? saved14.seasonal : 0; });
+  var [sizeWeight, setSizeWeight] = useState(function() { return saved14 && saved14.sizeWeight !== undefined ? saved14.sizeWeight : 50; });
+  var [answer14, setAnswer14] = useState(function() { return saved14 && saved14.answer !== undefined ? saved14.answer : null; });
+  var [revealed14, setRevealed14] = useState(function() { return saved14 ? saved14.revealed : false; });
+
+  useEffect(function() {
+    saveMFState('mf14', { improvement: improvement, seasonal: seasonal, sizeWeight: sizeWeight, answer: answer14, revealed: revealed14 });
+  }, [improvement, seasonal, sizeWeight, answer14, revealed14]);
+
+  var cohortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+  var periods = ['Week 0', 'Week 1', 'Week 2', 'Week 3'];
+  var baseSizes = [1000, 1200, 800, 1500, 900];
+
+  function getRetention(cohortIdx, periodIdx) {
+    if (periodIdx === 0) return 100;
+    var base = [100, 45, 32, 28][periodIdx];
+    var improvementBoost = improvement * cohortIdx * 1.2;
+    var seasonalDip = (seasonal > 0 && cohortIdx === 1) ? -seasonal * 8 : 0;
+    var val = base + improvementBoost + seasonalDip;
+    return Math.max(2, Math.min(100, Math.round(val)));
+  }
+
+  function getAggRetention(periodIdx) {
+    if (periodIdx === 0) return 100;
+    var totalWeighted = 0;
+    var totalSize = 0;
+    for (var c = 0; c < 5; c++) {
+      var size = baseSizes[c] * (1 + (sizeWeight - 50) * 0.02 * (c < 2 ? -1 : 1));
+      size = Math.max(100, size);
+      totalWeighted += getRetention(c, periodIdx) * size;
+      totalSize += size;
+    }
+    return Math.round(totalWeighted / totalSize);
+  }
+
+  function cellColor(val) {
+    var intensity = Math.min(1, val / 100);
+    var r = Math.round(34 + (1 - intensity) * 180);
+    var g = Math.round(139 + (1 - intensity) * 80);
+    var b = Math.round(34 + (1 - intensity) * 180);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + (0.15 + intensity * 0.55) + ')';
+  }
+
+  var W14 = 400;
+  var H14 = 180;
+  var cellW = W14 / 5;
+  var cellH = H14 / 6;
+
+  var mcq14 = [
+    { label: 'A. Aggregate retention is flat — everything is fine, no action needed.', correct: false },
+    { label: 'B. The newest cohort\'s D7 is declining — investigate recent changes even though the aggregate looks stable.', correct: true },
+    { label: 'C. Focus on the oldest cohort because it has the longest retention history.', correct: false },
+    { label: 'D. Wait until aggregate retention actually drops before investigating.', correct: false },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your product&apos;s D7 retention is reported at 32% and has been flat for three months. The PM says &quot;retention is stable — let&apos;s focus on acquisition.&quot; But when you pull the data by cohort, January users retained at 38% while February dropped to 26%. The aggregate number is hiding a critical trend because cohort sizes are shifting. Bigger recent cohorts with lower retention are diluting the gains from earlier improvements.
+        </p>
+      </div>
+
+      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
+        Cohort analysis separates users by when they joined, revealing whether product changes are actually improving retention or whether shifting cohort sizes are masking deterioration. Aggregate retention is a weighted average — it can stay flat while individual cohorts trend in opposite directions.
+      </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '-1rem' }}>Try It: Retention Table Explorer</div>
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.1rem' }}>
+        <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.75rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+          <strong>What to do:</strong> Adjust the three sliders to see how product improvements, seasonal effects, and cohort size weighting change the retention table and aggregate numbers.
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.8rem', marginBottom: '1rem' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>Product improvement</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--green)' }}>{improvement}</span>
+            </div>
+            <input type='range' min={0} max={5} step={1} value={improvement} onChange={function(e) { setImprovement(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--green)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}><span>None</span><span>Strong</span></div>
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>Seasonal effect</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--yellow)' }}>{seasonal}</span>
+            </div>
+            <input type='range' min={0} max={3} step={1} value={seasonal} onChange={function(e) { setSeasonal(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--yellow)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}><span>None</span><span>Strong dip (Feb)</span></div>
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>Cohort size shift</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent)' }}>{sizeWeight}</span>
+            </div>
+            <input type='range' min={0} max={100} step={5} value={sizeWeight} onChange={function(e) { setSizeWeight(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}><span>Older heavier</span><span>Newer heavier</span></div>
+          </div>
+        </div>
+
+        <div style={{ overflowX: 'auto' }}>
+          <svg viewBox={'0 0 ' + W14 + ' ' + H14} width='100%' style={{ display: 'block', minWidth: '320px' }}>
+            {periods.map(function(p, pi) {
+              return <text key={'ph' + pi} x={cellW * (pi + 1) + cellW * 0.5} y={cellH * 0.65} textAnchor='middle' fontSize='9' fontWeight='700' fill='var(--text-muted)'>{p}</text>;
+            })}
+            {cohortNames.map(function(c, ci) {
+              return <text key={'cl' + ci} x={cellW * 0.5} y={cellH * (ci + 1) + cellH * 0.6} textAnchor='middle' fontSize='9' fontWeight='600' fill='var(--text)'>{c}</text>;
+            })}
+            {cohortNames.map(function(c, ci) {
+              return periods.map(function(p, pi) {
+                var val = getRetention(ci, pi);
+                return (
+                  <g key={'c' + ci + 'p' + pi}>
+                    <rect x={cellW * (pi + 1) + 1} y={cellH * (ci + 1) + 1} width={cellW - 2} height={cellH - 2} rx='3' fill={cellColor(val)} />
+                    <text x={cellW * (pi + 1) + cellW * 0.5} y={cellH * (ci + 1) + cellH * 0.62} textAnchor='middle' fontSize='10' fontWeight='700' fill='var(--text)'>{val + '%'}</text>
+                  </g>
+                );
+              });
+            })}
+          </svg>
+        </div>
+
+        <div style={{ marginTop: '0.75rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(140px, 100%), 1fr))', gap: '0.5rem' }}>
+          {periods.map(function(p, pi) {
+            var agg = getAggRetention(pi);
+            return (
+              <div key={'agg' + pi} style={{ textAlign: 'center', padding: '0.5rem', background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase' }}>Agg {p}</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent)' }}>{agg + '%'}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.75rem' }}>
+          D7 aggregate retention has been flat at 32% for three months. Cohort-level data shows January at 38% and the most recent cohort at 26%. What should you do?
+        </div>
+        <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.65rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+          <strong>What to do:</strong> Pick the action that best reflects how a cohort-level view should change your response to &quot;flat&quot; aggregate retention.
+        </div>
+
+        {mcq14.map(function(opt, i) {
+          var sel14 = answer14 === i;
+          var bg14 = 'var(--surface-2)'; var brd14 = 'var(--border)'; var col14 = 'var(--text)';
+          if (revealed14) {
+            if (opt.correct) { bg14 = 'var(--teal-bg)'; brd14 = 'var(--teal-border)'; col14 = 'var(--teal)'; }
+            else if (sel14) { bg14 = 'var(--red-bg)'; brd14 = 'var(--red-border)'; col14 = 'var(--red)'; }
+          } else if (sel14) { brd14 = 'var(--accent-border)'; }
+          return (
+            <button key={i} onClick={function() { if (!revealed14) setAnswer14(i); }} disabled={revealed14}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.7rem 1rem', marginBottom: '0.5rem', background: bg14, border: '1.5px solid ' + brd14, borderRadius: 'var(--radius-sm)', color: col14, fontSize: '0.88rem', cursor: revealed14 ? 'default' : 'pointer', transition: 'all 0.15s' }}>
+              {opt.label}
+            </button>
+          );
+        })}
+
+        {answer14 !== null && !revealed14 && (
+          <button onClick={function() { setRevealed14(true); }} style={{ marginTop: '0.5rem', padding: '0.5rem 1.1rem', background: 'var(--green)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+            Check
+          </button>
+        )}
+
+        {revealed14 && (
+          <div className='pal-reveal-in'>
+            <div style={{ marginTop: '0.5rem', padding: '0.65rem 0.85rem', background: mcq14[answer14] && mcq14[answer14].correct ? 'var(--teal-bg)' : 'var(--red-bg)', border: '1px solid ' + (mcq14[answer14] && mcq14[answer14].correct ? 'var(--teal-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5 }}>
+              Aggregate retention is a weighted average across cohorts. When newer, larger cohorts have worse retention, they pull the aggregate down — masking improvements in older cohorts. Conversely, a flat aggregate can hide deteriorating new-cohort retention if older, better-retaining cohorts still dominate the denominator. Always look at cohort-level trends before concluding retention is &quot;fine.&quot;
+            </div>
+            <InsightBox label='Key Takeaway' color='var(--green)' bg='var(--green-bg)' border='var(--green-border)'>
+              Never trust aggregate retention alone. Decompose by cohort to see whether product changes are actually working. A flat aggregate often hides two opposing trends — improving product quality and deteriorating acquisition quality.
+            </InsightBox>
+            <NextBtn onClick={onNext}>Complete module &rarr;</NextBtn>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Module 15: Engagement Depth ────────────────────────────────────────────
+
+function Module_MF15({ module, onNext }) {
+  var saved15 = useMemo(function() { return loadMFState('mf15'); }, []);
+  var [dau, setDau] = useState(function() { return saved15 && saved15.dau !== undefined ? saved15.dau : 2000; });
+  var [mau, setMau] = useState(function() { return saved15 && saved15.mau !== undefined ? saved15.mau : 8000; });
+  var [powerShare, setPowerShare] = useState(function() { return saved15 && saved15.powerShare !== undefined ? saved15.powerShare : 15; });
+  var [answer15, setAnswer15] = useState(function() { return saved15 && saved15.answer !== undefined ? saved15.answer : null; });
+  var [revealed15, setRevealed15] = useState(function() { return saved15 ? saved15.revealed : false; });
+
+  useEffect(function() {
+    saveMFState('mf15', { dau: dau, mau: mau, powerShare: powerShare, answer: answer15, revealed: revealed15 });
+  }, [dau, mau, powerShare, answer15, revealed15]);
+
+  var stickiness = mau > 0 ? Math.round((dau / mau) * 1000) / 1000 : 0;
+  var avgDaysActive = Math.round(stickiness * 28 * 10) / 10;
+
+  function applyPreset(name) {
+    if (name === 'social') { setDau(2500); setMau(5000); setPowerShare(30); }
+    if (name === 'utility') { setDau(900); setMau(6000); setPowerShare(8); }
+  }
+
+  // Lness distribution: model as a rough exponential decay with a power-user bump
+  var lnessBars = [];
+  for (var d = 1; d <= 28; d++) {
+    var base15 = Math.exp(-0.15 * d) * (1 - powerShare / 100);
+    var powerBump = d >= 20 ? (powerShare / 100) * 0.3 * Math.exp(-0.1 * (28 - d)) : 0;
+    var pct = (base15 + powerBump) * 100;
+    pct = Math.max(0.5, Math.min(50, pct * (stickiness / 0.3)));
+    lnessBars.push({ day: d, pct: Math.round(pct * 10) / 10 });
+  }
+  var maxPct = 0;
+  for (var lb = 0; lb < lnessBars.length; lb++) {
+    if (lnessBars[lb].pct > maxPct) maxPct = lnessBars[lb].pct;
+  }
+
+  var W15 = 420; var H15 = 120;
+  var padL15 = 30; var padB15 = 18; var padT15 = 8; var padR15 = 5;
+  var innerW15 = W15 - padL15 - padR15;
+  var innerH15 = H15 - padT15 - padB15;
+  var barW = innerW15 / 28 - 1;
+
+  var mcq15 = [
+    { label: 'A. DAU growth proves the product is getting healthier — no concern.', correct: false },
+    { label: 'B. DAU is rising from new user acquisition, not deeper engagement — the growth may not be durable.', correct: true },
+    { label: 'C. DAU/MAU is a vanity metric — only total DAU matters.', correct: false },
+    { label: 'D. The MAU denominator is probably wrong — recheck the tracking.', correct: false },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your DAU just crossed 2M and the growth team is celebrating. But when you compute DAU/MAU, it&apos;s only 0.12 — meaning the average user opens the app fewer than 4 days a month. Despite headline DAU growth, the product isn&apos;t getting stickier. You&apos;re adding users faster than you&apos;re deepening engagement. The question: is this sustainable?
+        </p>
+      </div>
+
+      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
+        Stickiness (DAU/MAU) measures how many of your monthly users come back on any given day. An app with DAU/MAU of 0.5 means users open it every other day. The Lness distribution shows what percentage of users are active 1, 2, ... 28 days per month — revealing whether engagement is broad and shallow or narrow and deep.
+      </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '-1rem' }}>Try It: Stickiness Dashboard</div>
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.1rem' }}>
+        <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.75rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+          <strong>What to do:</strong> Adjust DAU, MAU, and power user share to explore how stickiness changes. Try the presets to compare a social app vs. a utility app.
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+          <button onClick={function() { applyPreset('social'); }} style={{ padding: '0.35rem 0.8rem', background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', fontWeight: 600, color: 'var(--green)', cursor: 'pointer' }}>Healthy social app</button>
+          <button onClick={function() { applyPreset('utility'); }} style={{ padding: '0.35rem 0.8rem', background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', fontWeight: 600, color: 'var(--accent)', cursor: 'pointer' }}>Utility app</button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.8rem', marginBottom: '1rem' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>DAU (K)</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent)' }}>{dau + 'K'}</span>
+            </div>
+            <input type='range' min={500} max={3000} step={100} value={dau} onChange={function(e) { setDau(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>MAU (K)</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent)' }}>{mau + 'K'}</span>
+            </div>
+            <input type='range' min={2000} max={10000} step={500} value={mau} onChange={function(e) { setMau(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>Power user share</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--purple)' }}>{powerShare + '%'}</span>
+            </div>
+            <input type='range' min={5} max={40} step={1} value={powerShare} onChange={function(e) { setPowerShare(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--purple)' }} />
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(140px, 100%), 1fr))', gap: '0.6rem', marginBottom: '1rem' }}>
+          <div style={{ textAlign: 'center', padding: '0.65rem', background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase' }}>DAU/MAU</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--green)' }}>{stickiness}</div>
+          </div>
+          <div style={{ textAlign: 'center', padding: '0.65rem', background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase' }}>Avg days/month</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent)' }}>{avgDaysActive}</div>
+          </div>
+          <div style={{ textAlign: 'center', padding: '0.65rem', background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--purple)', textTransform: 'uppercase' }}>Power users</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--purple)' }}>{powerShare + '%'}</div>
+          </div>
+        </div>
+
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
+          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.3rem', textAlign: 'center' }}>Lness distribution — days active per month</div>
+          <svg viewBox={'0 0 ' + W15 + ' ' + H15} width='100%' style={{ display: 'block' }}>
+            <line x1={padL15} y1={padT15 + innerH15} x2={W15 - padR15} y2={padT15 + innerH15} stroke='var(--border)' strokeWidth='1' />
+            <line x1={padL15} y1={padT15} x2={padL15} y2={padT15 + innerH15} stroke='var(--border)' strokeWidth='1' />
+            {lnessBars.map(function(bar, idx) {
+              var barH = maxPct > 0 ? (bar.pct / maxPct) * innerH15 : 0;
+              var x = padL15 + idx * (innerW15 / 28);
+              var y = padT15 + innerH15 - barH;
+              var fill = idx >= 19 ? 'var(--purple)' : 'var(--accent)';
+              return (
+                <g key={'lb' + idx}>
+                  <rect x={x + 0.5} y={y} width={barW} height={barH} rx='1' fill={fill} opacity='0.75' />
+                  {idx % 7 === 0 ? <text x={x + barW / 2} y={padT15 + innerH15 + 12} textAnchor='middle' fontSize='7' fill='var(--text-muted)'>{bar.day}</text> : null}
+                </g>
+              );
+            })}
+            <text x={padL15 - 4} y={padT15 + 6} textAnchor='end' fontSize='7' fill='var(--text-muted)'>{Math.round(maxPct) + '%'}</text>
+            <text x={padL15 - 4} y={padT15 + innerH15} textAnchor='end' fontSize='7' fill='var(--text-muted)'>0%</text>
+          </svg>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+            <span><span style={{ display: 'inline-block', width: '8px', height: '8px', background: 'var(--accent)', borderRadius: '2px', marginRight: '3px' }}></span>Casual</span>
+            <span><span style={{ display: 'inline-block', width: '8px', height: '8px', background: 'var(--purple)', borderRadius: '2px', marginRight: '3px' }}></span>Power users (20+ days)</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.75rem' }}>
+          DAU is growing 15% month-over-month, but DAU/MAU has stayed flat at 0.12. What does this most likely indicate?
+        </div>
+        <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.65rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+          <strong>What to do:</strong> Select the interpretation that explains why DAU growth and flat stickiness can coexist — and what it means for product health.
+        </div>
+
+        {mcq15.map(function(opt, i) {
+          var sel15 = answer15 === i;
+          var bg15 = 'var(--surface-2)'; var brd15 = 'var(--border)'; var col15 = 'var(--text)';
+          if (revealed15) {
+            if (opt.correct) { bg15 = 'var(--teal-bg)'; brd15 = 'var(--teal-border)'; col15 = 'var(--teal)'; }
+            else if (sel15) { bg15 = 'var(--red-bg)'; brd15 = 'var(--red-border)'; col15 = 'var(--red)'; }
+          } else if (sel15) { brd15 = 'var(--accent-border)'; }
+          return (
+            <button key={i} onClick={function() { if (!revealed15) setAnswer15(i); }} disabled={revealed15}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.7rem 1rem', marginBottom: '0.5rem', background: bg15, border: '1.5px solid ' + brd15, borderRadius: 'var(--radius-sm)', color: col15, fontSize: '0.88rem', cursor: revealed15 ? 'default' : 'pointer', transition: 'all 0.15s' }}>
+              {opt.label}
+            </button>
+          );
+        })}
+
+        {answer15 !== null && !revealed15 && (
+          <button onClick={function() { setRevealed15(true); }} style={{ marginTop: '0.5rem', padding: '0.5rem 1.1rem', background: 'var(--green)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+            Check
+          </button>
+        )}
+
+        {revealed15 && (
+          <div className='pal-reveal-in'>
+            <div style={{ marginTop: '0.5rem', padding: '0.65rem 0.85rem', background: mcq15[answer15] && mcq15[answer15].correct ? 'var(--teal-bg)' : 'var(--red-bg)', border: '1px solid ' + (mcq15[answer15] && mcq15[answer15].correct ? 'var(--teal-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5 }}>
+              DAU/MAU staying flat while DAU grows means MAU is growing proportionally — you&apos;re adding users at the top of the funnel but each user&apos;s engagement frequency isn&apos;t changing. The growth is acquisition-driven, not engagement-driven. If acquisition spending slows, DAU growth will stall because you haven&apos;t built a more compelling daily use case.
+            </div>
+            <InsightBox label='Key Takeaway' color='var(--green)' bg='var(--green-bg)' border='var(--green-border)'>
+              DAU/MAU (stickiness) separates acquisition-driven growth from engagement-driven growth. Rising DAU with flat stickiness means you are buying users, not earning habit. The Lness distribution reveals whether your user base is broad-shallow or narrow-deep — both can produce the same DAU/MAU but have very different retention profiles.
+            </InsightBox>
+            <NextBtn onClick={onNext}>Complete module &rarr;</NextBtn>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Module 16: Unit Economics ───────────────────────────────────────────────
+
+function Module_MF16({ module, onNext }) {
+  var saved16 = useMemo(function() { return loadMFState('mf16'); }, []);
+  var [cac, setCac] = useState(function() { return saved16 && saved16.cac !== undefined ? saved16.cac : 25; });
+  var [arpu, setArpu] = useState(function() { return saved16 && saved16.arpu !== undefined ? saved16.arpu : 8; });
+  var [lifetime, setLifetime] = useState(function() { return saved16 && saved16.lifetime !== undefined ? saved16.lifetime : 12; });
+  var [margin, setMargin] = useState(function() { return saved16 && saved16.margin !== undefined ? saved16.margin : 65; });
+  var [answer16, setAnswer16] = useState(function() { return saved16 && saved16.answer !== undefined ? saved16.answer : null; });
+  var [revealed16, setRevealed16] = useState(function() { return saved16 ? saved16.revealed : false; });
+
+  useEffect(function() {
+    saveMFState('mf16', { cac: cac, arpu: arpu, lifetime: lifetime, margin: margin, answer: answer16, revealed: revealed16 });
+  }, [cac, arpu, lifetime, margin, answer16, revealed16]);
+
+  var marginDec = margin / 100;
+  var ltv = Math.round(arpu * lifetime * marginDec * 100) / 100;
+  var ltvCac = cac > 0 ? Math.round((ltv / cac) * 100) / 100 : 0;
+  var payback = marginDec * arpu > 0 ? Math.round((cac / (arpu * marginDec)) * 10) / 10 : 999;
+
+  var healthColor = ltvCac >= 3 ? 'var(--green)' : ltvCac >= 1 ? 'var(--yellow)' : 'var(--red)';
+  var healthBg = ltvCac >= 3 ? 'var(--green-bg)' : ltvCac >= 1 ? 'var(--yellow-bg)' : 'var(--red-bg)';
+  var healthBorder = ltvCac >= 3 ? 'var(--green-border)' : ltvCac >= 1 ? 'var(--yellow-border)' : 'var(--red-border)';
+  var healthLabel = ltvCac >= 3 ? 'Healthy' : ltvCac >= 1 ? 'Caution' : 'Danger';
+
+  var W16 = 400; var H16 = 50;
+  var timelineMax = Math.max(lifetime, payback, 24);
+  var paybackPx = (payback / timelineMax) * (W16 - 20);
+  var lifetimePx = (lifetime / timelineMax) * (W16 - 20);
+
+  var mcq16 = [
+    { label: 'A. LTV/CAC = 0.8 with accelerating acquisition spend — you are losing money faster on every new user.', correct: true },
+    { label: 'B. LTV/CAC = 2.0 with a 6-month payback — decent but could be improved.', correct: false },
+    { label: 'C. LTV/CAC = 5.0 with slow acquisition — you might be under-investing in growth.', correct: false },
+    { label: 'D. LTV/CAC = 1.0 with flat acquisition — you are breaking even.', correct: false },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          The growth team doubled signups last quarter. Everyone is celebrating — except finance. They&apos;re reporting that contribution margin went negative for the first time. The growth team spent aggressively on paid acquisition, pushing CAC from $12 to $35. Meanwhile, ARPU stayed flat at $8/month and the average user churns after 10 months. The math doesn&apos;t work: you&apos;re spending $35 to acquire users worth $52 in lifetime value, but after cost of goods sold only $34 remains. You&apos;re losing money on every new user.
+        </p>
+      </div>
+
+      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
+        Unit economics determines whether your business model works at the individual user level. LTV (lifetime value) = ARPU x lifetime x gross margin. If LTV/CAC is below 1, you lose money on every user acquired. The payback period tells you how long it takes to recoup acquisition cost — a critical cash flow constraint even when LTV/CAC is healthy.
+      </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '-1rem' }}>Try It: Unit Economics Calculator</div>
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.1rem' }}>
+        <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.75rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+          <strong>What to do:</strong> Adjust CAC, ARPU, lifetime, and margin to explore how unit economics change. Watch the LTV/CAC ratio and payback period respond in real time.
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.8rem', marginBottom: '1rem' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>CAC</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--red)' }}>{'$' + cac}</span>
+            </div>
+            <input type='range' min={5} max={50} step={1} value={cac} onChange={function(e) { setCac(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--red)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}><span>$5</span><span>$50</span></div>
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>Monthly ARPU</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--green)' }}>{'$' + arpu}</span>
+            </div>
+            <input type='range' min={2} max={20} step={1} value={arpu} onChange={function(e) { setArpu(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--green)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}><span>$2</span><span>$20</span></div>
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>Avg lifetime (months)</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent)' }}>{lifetime}</span>
+            </div>
+            <input type='range' min={2} max={24} step={1} value={lifetime} onChange={function(e) { setLifetime(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}><span>2 mo</span><span>24 mo</span></div>
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>Gross margin</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--purple)' }}>{margin + '%'}</span>
+            </div>
+            <input type='range' min={30} max={90} step={5} value={margin} onChange={function(e) { setMargin(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--purple)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}><span>30%</span><span>90%</span></div>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(140px, 100%), 1fr))', gap: '0.6rem', marginBottom: '1rem' }}>
+          <div style={{ textAlign: 'center', padding: '0.65rem', background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase' }}>LTV</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent)' }}>{'$' + ltv}</div>
+          </div>
+          <div style={{ textAlign: 'center', padding: '0.65rem', background: healthBg, border: '1px solid ' + healthBorder, borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: healthColor, textTransform: 'uppercase' }}>LTV/CAC</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: healthColor }}>{ltvCac}</div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: healthColor }}>{healthLabel}</div>
+          </div>
+          <div style={{ textAlign: 'center', padding: '0.65rem', background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--purple)', textTransform: 'uppercase' }}>Payback</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--purple)' }}>{payback + ' mo'}</div>
+          </div>
+        </div>
+
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
+          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.3rem', textAlign: 'center' }}>Payback period vs. user lifetime</div>
+          <svg viewBox={'0 0 ' + W16 + ' ' + H16} width='100%' style={{ display: 'block' }}>
+            <rect x='10' y='10' width={lifetimePx} height='14' rx='3' fill='var(--accent)' opacity='0.3' />
+            <text x={10 + lifetimePx / 2} y='20' textAnchor='middle' fontSize='8' fontWeight='600' fill='var(--accent)'>{'Lifetime: ' + lifetime + ' mo'}</text>
+            <rect x='10' y='28' width={Math.min(paybackPx, lifetimePx + 40)} height='14' rx='3' fill={payback > lifetime ? 'var(--red)' : 'var(--green)'} opacity='0.4' />
+            <text x={10 + Math.min(paybackPx, lifetimePx + 40) / 2} y='38' textAnchor='middle' fontSize='8' fontWeight='600' fill={payback > lifetime ? 'var(--red)' : 'var(--green)'}>{'Payback: ' + payback + ' mo'}</text>
+          </svg>
+        </div>
+      </div>
+
+      <div>
+        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.75rem' }}>
+          Which of these scenarios is the most dangerous for a business?
+        </div>
+        <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.65rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+          <strong>What to do:</strong> Identify the scenario where unit economics are actively destroying value — not just suboptimal, but getting worse with scale.
+        </div>
+
+        {mcq16.map(function(opt, i) {
+          var sel16 = answer16 === i;
+          var bg16 = 'var(--surface-2)'; var brd16 = 'var(--border)'; var col16 = 'var(--text)';
+          if (revealed16) {
+            if (opt.correct) { bg16 = 'var(--teal-bg)'; brd16 = 'var(--teal-border)'; col16 = 'var(--teal)'; }
+            else if (sel16) { bg16 = 'var(--red-bg)'; brd16 = 'var(--red-border)'; col16 = 'var(--red)'; }
+          } else if (sel16) { brd16 = 'var(--accent-border)'; }
+          return (
+            <button key={i} onClick={function() { if (!revealed16) setAnswer16(i); }} disabled={revealed16}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.7rem 1rem', marginBottom: '0.5rem', background: bg16, border: '1.5px solid ' + brd16, borderRadius: 'var(--radius-sm)', color: col16, fontSize: '0.88rem', cursor: revealed16 ? 'default' : 'pointer', transition: 'all 0.15s' }}>
+              {opt.label}
+            </button>
+          );
+        })}
+
+        {answer16 !== null && !revealed16 && (
+          <button onClick={function() { setRevealed16(true); }} style={{ marginTop: '0.5rem', padding: '0.5rem 1.1rem', background: 'var(--green)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+            Check
+          </button>
+        )}
+
+        {revealed16 && (
+          <div className='pal-reveal-in'>
+            <div style={{ marginTop: '0.5rem', padding: '0.65rem 0.85rem', background: mcq16[answer16] && mcq16[answer16].correct ? 'var(--teal-bg)' : 'var(--red-bg)', border: '1px solid ' + (mcq16[answer16] && mcq16[answer16].correct ? 'var(--teal-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5 }}>
+              When LTV/CAC is below 1, every new user acquired destroys value. If acquisition spend is also accelerating, the company is burning cash at an increasing rate — the faster it grows, the faster it dies. LTV/CAC = 2 with a long payback is suboptimal but survivable. LTV/CAC = 5 with slow growth might mean under-investment. But LTV/CAC &lt; 1 with accelerating spend is the textbook definition of unsustainable growth.
+            </div>
+            <InsightBox label='Key Takeaway' color='var(--green)' bg='var(--green-bg)' border='var(--green-border)'>
+              Unit economics is the ground truth of product health. A product can grow DAU, hit revenue targets, and still be destroying value if CAC exceeds LTV. Always check: LTV/CAC ratio (target 3x+), payback period (must be shorter than lifetime), and whether these metrics are improving or deteriorating with scale.
+            </InsightBox>
+            <NextBtn onClick={onNext}>Complete module &rarr;</NextBtn>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Module 17: Growth Accounting ───────────────────────────────────────────
+
+function Module_MF17({ module, onNext }) {
+  var saved17 = useMemo(function() { return loadMFState('mf17'); }, []);
+  var [newUsers, setNewUsers] = useState(function() { return saved17 && saved17.newUsers !== undefined ? saved17.newUsers : 5000; });
+  var [retained, setRetained] = useState(function() { return saved17 && saved17.retained !== undefined ? saved17.retained : 40000; });
+  var [resurrected, setResurrected] = useState(function() { return saved17 && saved17.resurrected !== undefined ? saved17.resurrected : 2000; });
+  var [churned, setChurned] = useState(function() { return saved17 && saved17.churned !== undefined ? saved17.churned : 3000; });
+  var [answer17, setAnswer17] = useState(function() { return saved17 && saved17.answer !== undefined ? saved17.answer : null; });
+  var [revealed17, setRevealed17] = useState(function() { return saved17 ? saved17.revealed : false; });
+
+  useEffect(function() {
+    saveMFState('mf17', { newUsers: newUsers, retained: retained, resurrected: resurrected, churned: churned, answer: answer17, revealed: revealed17 });
+  }, [newUsers, retained, resurrected, churned, answer17, revealed17]);
+
+  var netGrowth = newUsers + resurrected - churned;
+  var quickRatio = churned > 0 ? Math.round(((newUsers + resurrected) / churned) * 100) / 100 : 999;
+  var prevActive = retained + churned;
+  var currActive = retained + newUsers + resurrected;
+
+  function applyPreset17(name) {
+    if (name === 'leaky') { setNewUsers(8000); setRetained(30000); setResurrected(1000); setChurned(7500); }
+    if (name === 'healthy') { setNewUsers(4000); setRetained(42000); setResurrected(2000); setChurned(1500); }
+  }
+
+  // Waterfall chart
+  var W17 = 420; var H17 = 160;
+  var padL17 = 50; var padR17 = 10; var padT17 = 15; var padB17 = 30;
+  var innerW17 = W17 - padL17 - padR17;
+  var innerH17 = H17 - padT17 - padB17;
+
+  var maxVal = Math.max(prevActive, currActive, prevActive + newUsers + resurrected);
+  var barWidth = innerW17 / 6;
+
+  function yPos(val) { return padT17 + innerH17 - (val / maxVal) * innerH17; }
+
+  var bars = [
+    { label: 'Previous', value: prevActive, bottom: 0, color: 'var(--text-muted)', textColor: 'var(--text-muted)' },
+    { label: '+ New', value: newUsers, bottom: prevActive - churned, color: 'var(--green)', textColor: 'var(--green)' },
+    { label: '+ Resurrected', value: resurrected, bottom: prevActive - churned + newUsers, color: 'var(--purple)', textColor: 'var(--purple)' },
+    { label: '- Churned', value: churned, bottom: prevActive - churned, color: 'var(--red)', textColor: 'var(--red)' },
+    { label: 'Current', value: currActive, bottom: 0, color: 'var(--accent)', textColor: 'var(--accent)' },
+  ];
+
+  var mcq17 = [
+    { label: 'A. Increase acquisition spend — you need more new users to offset churn.', correct: false },
+    { label: 'B. Prioritize retention and resurrection — fix the leaky bucket before pouring more water in.', correct: true },
+    { label: 'C. Quick ratio of 0.9 is fine — it is close enough to 1.0.', correct: false },
+    { label: 'D. Focus on MAU growth rate instead — quick ratio is not a standard metric.', correct: false },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          MAU grew 5% last month and the team is optimistic. But when you decompose the growth: 8,000 new users arrived, 1,000 resurrected, and 7,500 churned. The quick ratio is just 1.2 — for every user lost, only 1.2 are gained or resurrected. The product is a leaky bucket: high inflow masks equally high outflow. If acquisition costs rise or a campaign ends, MAU will plateau or decline immediately.
+        </p>
+      </div>
+
+      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
+        Growth accounting decomposes MAU change into four components: new users (first-time), retained (active last period and this period), resurrected (inactive last period, returned this period), and churned (active last period, gone this period). The quick ratio = (new + resurrected) / churned — a ratio above 2 indicates healthy, self-sustaining growth; below 1 means the user base is shrinking.
+      </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '-1rem' }}>Try It: Growth Accounting Decomposer</div>
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.1rem' }}>
+        <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.75rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+          <strong>What to do:</strong> Adjust the four user flow components and watch how net growth and quick ratio change. Try the presets to see a leaky bucket vs. healthy growth pattern.
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+          <button onClick={function() { applyPreset17('leaky'); }} style={{ padding: '0.35rem 0.8rem', background: 'var(--red-bg)', border: '1px solid var(--red-border)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', fontWeight: 600, color: 'var(--red)', cursor: 'pointer' }}>Leaky bucket</button>
+          <button onClick={function() { applyPreset17('healthy'); }} style={{ padding: '0.35rem 0.8rem', background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', fontWeight: 600, color: 'var(--green)', cursor: 'pointer' }}>Healthy growth</button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.8rem', marginBottom: '1rem' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>New users</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--green)' }}>{newUsers.toLocaleString()}</span>
+            </div>
+            <input type='range' min={500} max={15000} step={500} value={newUsers} onChange={function(e) { setNewUsers(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--green)' }} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>Retained users</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent)' }}>{retained.toLocaleString()}</span>
+            </div>
+            <input type='range' min={10000} max={60000} step={1000} value={retained} onChange={function(e) { setRetained(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>Resurrected users</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--purple)' }}>{resurrected.toLocaleString()}</span>
+            </div>
+            <input type='range' min={0} max={8000} step={500} value={resurrected} onChange={function(e) { setResurrected(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--purple)' }} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>Churned users</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--red)' }}>{churned.toLocaleString()}</span>
+            </div>
+            <input type='range' min={500} max={15000} step={500} value={churned} onChange={function(e) { setChurned(parseInt(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--red)' }} />
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(140px, 100%), 1fr))', gap: '0.6rem', marginBottom: '1rem' }}>
+          <div style={{ textAlign: 'center', padding: '0.65rem', background: netGrowth >= 0 ? 'var(--green-bg)' : 'var(--red-bg)', border: '1px solid ' + (netGrowth >= 0 ? 'var(--green-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: netGrowth >= 0 ? 'var(--green)' : 'var(--red)', textTransform: 'uppercase' }}>Net growth</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: netGrowth >= 0 ? 'var(--green)' : 'var(--red)' }}>{(netGrowth >= 0 ? '+' : '') + netGrowth.toLocaleString()}</div>
+          </div>
+          <div style={{ textAlign: 'center', padding: '0.65rem', background: quickRatio >= 2 ? 'var(--green-bg)' : quickRatio >= 1 ? 'var(--yellow-bg)' : 'var(--red-bg)', border: '1px solid ' + (quickRatio >= 2 ? 'var(--green-border)' : quickRatio >= 1 ? 'var(--yellow-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: quickRatio >= 2 ? 'var(--green)' : quickRatio >= 1 ? 'var(--yellow)' : 'var(--red)', textTransform: 'uppercase' }}>Quick ratio</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: quickRatio >= 2 ? 'var(--green)' : quickRatio >= 1 ? 'var(--yellow)' : 'var(--red)' }}>{quickRatio}</div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: quickRatio >= 2 ? 'var(--green)' : quickRatio >= 1 ? 'var(--yellow)' : 'var(--red)' }}>{quickRatio >= 2 ? 'Healthy' : quickRatio >= 1 ? 'Fragile' : 'Shrinking'}</div>
+          </div>
+          <div style={{ textAlign: 'center', padding: '0.65rem', background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase' }}>Current MAU</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent)' }}>{currActive.toLocaleString()}</div>
+          </div>
+        </div>
+
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
+          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.3rem', textAlign: 'center' }}>Growth accounting waterfall</div>
+          <svg viewBox={'0 0 ' + W17 + ' ' + H17} width='100%' style={{ display: 'block' }}>
+            <line x1={padL17} y1={padT17 + innerH17} x2={W17 - padR17} y2={padT17 + innerH17} stroke='var(--border)' strokeWidth='1' />
+            <line x1={padL17} y1={padT17} x2={padL17} y2={padT17 + innerH17} stroke='var(--border)' strokeWidth='1' />
+            {bars.map(function(bar, idx) {
+              var xOff = padL17 + idx * (innerW17 / 5) + (innerW17 / 5 - barWidth) / 2;
+              var barTop = yPos(bar.bottom + bar.value);
+              var barBot = yPos(bar.bottom);
+              var barH17 = Math.max(1, barBot - barTop);
+              return (
+                <g key={'bar' + idx}>
+                  <rect x={xOff} y={barTop} width={barWidth} height={barH17} rx='3' fill={bar.color} opacity='0.7' />
+                  <text x={xOff + barWidth / 2} y={barTop - 4} textAnchor='middle' fontSize='8' fontWeight='700' fill={bar.textColor}>{bar.value >= 1000 ? Math.round(bar.value / 1000) + 'K' : bar.value}</text>
+                  <text x={xOff + barWidth / 2} y={padT17 + innerH17 + 14} textAnchor='middle' fontSize='7' fill='var(--text-muted)'>{bar.label}</text>
+                </g>
+              );
+            })}
+            {/* Connector lines */}
+            <line x1={padL17 + barWidth + (innerW17 / 5 - barWidth) / 2} y1={yPos(prevActive - churned)} x2={padL17 + innerW17 / 5 + (innerW17 / 5 - barWidth) / 2} y2={yPos(prevActive - churned)} stroke='var(--border)' strokeWidth='0.5' strokeDasharray='2 2' />
+          </svg>
+        </div>
+      </div>
+
+      <div>
+        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.75rem' }}>
+          Your product&apos;s quick ratio is 0.9. What should you prioritize?
+        </div>
+        <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.65rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+          <strong>What to do:</strong> Choose the action that addresses the root cause of a sub-1.0 quick ratio — where the user base is actively shrinking.
+        </div>
+
+        {mcq17.map(function(opt, i) {
+          var sel17 = answer17 === i;
+          var bg17 = 'var(--surface-2)'; var brd17 = 'var(--border)'; var col17 = 'var(--text)';
+          if (revealed17) {
+            if (opt.correct) { bg17 = 'var(--teal-bg)'; brd17 = 'var(--teal-border)'; col17 = 'var(--teal)'; }
+            else if (sel17) { bg17 = 'var(--red-bg)'; brd17 = 'var(--red-border)'; col17 = 'var(--red)'; }
+          } else if (sel17) { brd17 = 'var(--accent-border)'; }
+          return (
+            <button key={i} onClick={function() { if (!revealed17) setAnswer17(i); }} disabled={revealed17}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.7rem 1rem', marginBottom: '0.5rem', background: bg17, border: '1.5px solid ' + brd17, borderRadius: 'var(--radius-sm)', color: col17, fontSize: '0.88rem', cursor: revealed17 ? 'default' : 'pointer', transition: 'all 0.15s' }}>
+              {opt.label}
+            </button>
+          );
+        })}
+
+        {answer17 !== null && !revealed17 && (
+          <button onClick={function() { setRevealed17(true); }} style={{ marginTop: '0.5rem', padding: '0.5rem 1.1rem', background: 'var(--green)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+            Check
+          </button>
+        )}
+
+        {revealed17 && (
+          <div className='pal-reveal-in'>
+            <div style={{ marginTop: '0.5rem', padding: '0.65rem 0.85rem', background: mcq17[answer17] && mcq17[answer17].correct ? 'var(--teal-bg)' : 'var(--red-bg)', border: '1px solid ' + (mcq17[answer17] && mcq17[answer17].correct ? 'var(--teal-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5 }}>
+              A quick ratio below 1 means the user base is net shrinking — you are losing users faster than you gain them. Increasing acquisition spend when churn is high is like filling a bucket with a hole in it. The highest-leverage fix is reducing churn: improving onboarding, activation, and core engagement so that users who arrive actually stay. Resurrection campaigns (win-back emails, re-engagement pushes) are a secondary lever.
+            </div>
+            <InsightBox label='Key Takeaway' color='var(--green)' bg='var(--green-bg)' border='var(--green-border)'>
+              Growth accounting reveals whether MAU growth is healthy or fragile. A high quick ratio (2+) means growth is self-sustaining — retention is strong and churn is low. A low quick ratio (&lt;1.5) means you are on a treadmill — constantly acquiring just to replace churned users. Always decompose MAU before celebrating top-line growth.
+            </InsightBox>
+            <NextBtn onClick={onNext}>Complete module &rarr;</NextBtn>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Module registry ──────────────────────────────────────────────────────────
 
 const MODULE_COMPONENTS = {
@@ -2260,6 +2984,10 @@ const MODULE_COMPONENTS = {
   mf11: Module_MF11,
   mf12: Module_MF12,
   mf13: Module_MF13,
+  mf14: Module_MF14,
+  mf15: Module_MF15,
+  mf16: Module_MF16,
+  mf17: Module_MF17,
 };
 
 // ─── Runner shell ─────────────────────────────────────────────────────────────
