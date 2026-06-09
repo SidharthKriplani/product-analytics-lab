@@ -1,6 +1,6 @@
-# Brain Transfer — V5.24.0
+# Brain Transfer — V5.29.0
 
-**Version:** V5.24.0 | **Build:** ✓ | **Date:** 2026-06-09 | **PM Audit:** #149 complete
+**Version:** V5.29.0 | **Build:** ✓ | **Date:** 2026-06-10 | **PM Audit:** #149 complete
 
 ---
 
@@ -49,6 +49,16 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 ---
 
 ## What was just done
+
+**V5.29.0** — 21-room audit complete. Nav: "Stats Calc" → "A/B Interpreter"; "Cases" → "Analytics Cases". Full Loop browser: description paragraph added (was missing entirely). Rooms 05-08, 10-15, 17-21 audited — no content fixes needed. Files: Sidebar.jsx, FullLoopBrowser.jsx.
+
+**V5.28.0** — RCA Foundations + A/B Foundations content audit (Rooms 03 + 04). RCA: header comment fixed (12→15); rf10 renamed from "Data Quality First" (duplicate of rf03) to "Instrumentation Failure Patterns". AB Foundations: clean pass, no fixes. File: rcaFoundationModules.js.
+
+**V5.27.0** — Metrics Foundations content audit (Room 02). Fixed header comment (13→17 modules). Renamed mf13 from "Metric Sensitivity" to "False Negatives and Metric Choice" — mf08 and mf13 had near-identical titles despite distinct lessons (mf08: pick low-variance metric prospectively; mf13: null results may be false negatives). All 17 modules verified clean. File: metricsFoundationModules.js.
+
+**V5.26.0** — All 4 Foundation rooms: added room descriptions + fixed first-time user entry (Start here CTA now shows for zero-progress users). FoundationBrowser.jsx shared component — one fix, four rooms. Build ✓. Files: FoundationBrowser.jsx, all 4 browser wrappers.
+
+**V5.25.0** — Stats Foundations audit (Audit #150). sf26–sf32 had wrong difficulty values ('intermediate'/'analyst'/'senior') causing broken filter and wrong chip color. Fixed to 'Intermediate'/'Advanced'. Removed devNote fields. All 32 module JSX files confirmed built. Build ✓. File: statsFoundationsModules.js.
 
 **V5.24.0** — Full Loop fl01 QA pass. Three bugs found and fixed: (1) Q1 date split was wrong — `date('2026-06-02')` used as the migration cutoff, making the "last week" window contain only post-migration UPI failures (CVR=0%) rather than pre-migration baseline (62.5%). Fixed: cutoff moved to `date('2026-05-26')` in Q1/Q2/Q3 correctQuerySqlite fields. (2) fl01 seed had a duplicate android retry for order 15 (payment 23), inflating android count and obscuring the platform breakdown. Removed. (3) All post-migration UPI orders were android-only, so Q3 returned a single row instead of the 3-platform breakdown the insight claimed. Fixed: added orders 27/28/29 (ios/web users) and payments 31-36, giving android 25%, ios 25%, web 50% — all below 62.5% baseline, confirming provider-level failure. Build ✓ 2.73s. Files: fullLoopCases.js, fullLoopSeedData.js.
 

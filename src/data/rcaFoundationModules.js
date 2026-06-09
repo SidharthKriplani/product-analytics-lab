@@ -1,5 +1,5 @@
 // Product Analytics Lab — RCA Foundation Room Module Data
-// 12 modules building structured root cause analysis intuition
+// 15 modules building structured root cause analysis intuition
 
 export const rcaFoundationModules = [
   {
@@ -149,8 +149,8 @@ export const rcaFoundationModules = [
   {
     id: 'rf10',
     index: 10,
-    title: 'Data Quality First',
-    subtitle: 'A systematic checklist for ruling out instrumentation failures before investigating product',
+    title: 'Instrumentation Failure Patterns',
+    subtitle: 'Recognizing iOS-only, event-level, and pipeline failures before they waste engineering time',
     difficulty: 'Advanced',
     isFree: true,
     estimatedMin: 10,

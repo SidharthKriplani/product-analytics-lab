@@ -39,6 +39,75 @@ Start here when running an audit. Add rows as new types emerge.
 
 ---
 
+## Part XXXII — V5.25.0 Content Audit Sprint (2026-06-09)
+
+### 151. ⚠️ Platform UX audit — orientation, nav clarity, room identity, stickiness (2026-06-09)
+
+**Type:** UX / Navigation & Discoverability / Architecture
+
+Full platform audit across all 21 rooms. Four questions per room: (1) does a user immediately understand what this room is for and why it's different? (2) is there a clear start-here moment? (3) is there a reason to come back? (4) does this room earn its place or blur with something adjacent?
+
+**Structural findings — three root problems:**
+
+**Problem 1 — The architecture is invisible.**
+PAL has a real curriculum: foundations build mental models, practice rooms apply them as judgment calls. But users see a flat list of 21 rooms with no sense of relationship, order, or what unlocks what. The Universe View is a map, not a guide. New users need: start here → this unlocks this → here's where you are in the arc.
+
+**Problem 2 — Six rooms share the same identity in the nav.**
+Analytics: Metrics / Analytics: RCA / Analytics: Cases / Analytics: Growth Analytics / Metrics Foundations / RCA Foundations — a user sees six rooms that all feel like "analytics practice." The distinctions are real (foundations = mental model, analytics rooms = messy judgment cases) but nothing communicates them. "Analytics: Cases" is the worst offender — the vaguest name in the platform.
+
+**Problem 3 — Two rooms are misplaced or misnamed.**
+Stats Calc is a utility that occupies a nav slot. It should be embedded in Stats Foundations and AB Review, not a standalone room. Full Loops is the most impressive room on the platform (end-to-end investigation, 5-phase, SQL + synthesis) but "Full Loops" sounds like a fitness term. If users understood what it was it would be the signup hook.
+
+**Per-room findings (abbreviated):**
+
+| Room | Clarity | Start-here | Stickiness | Earns nav slot |
+|---|---|---|---|---|
+| Stats Foundations | ⚠️ signals prerequisite not value | ⚠️ module 1 is slow | ✅ 32 modules + progress | ⚠️ blurs with A/B Foundations + 3 Experiments rooms |
+| Metrics Foundations | ✅ clear topic | ✅ decent | ✅ progress | ⚠️ blurs with Analytics: Metrics |
+| RCA Foundations | ⚠️ RCA is jargon | ⚠️ weak hook | ✅ progress | ⚠️ blurs with Analytics: RCA |
+| A/B Foundations | ✅ A/B is known | ⚠️ slow start | ✅ progress | ⚠️ blurs with Stats Foundations + Experiments block |
+| Experiments: Stats | ❌ confusing name | ❌ no hook | ✅ cases | ⚠️ blurs with AB Review |
+| Experiments: AB Design | ✅ clear | ⚠️ unclear format | ✅ cases | ✅ distinct from AB Review |
+| Experiments: AB Review | ✅ clearest in block | ✅ first free case | ✅ debrief quality | ✅ earns place |
+| Spot the Flaw | ✅ best name on platform | ✅ game-like | ✅ replayable | ✅ earns place |
+| Stats Calc | ❌ feels out of place | ❌ utility not room | ❌ no stickiness | ❌ should be embedded tool |
+| Analytics: Metrics | ⚠️ vague | ⚠️ case grid, no guidance | ✅ cases | ⚠️ blurs with Metrics Foundations |
+| Analytics: RCA | ⚠️ blurs with RCA Foundations | ⚠️ weak | ✅ cases | ⚠️ same |
+| Analytics: Cases | ❌ vaguest name on platform | ❌ no hook | ✅ cases | ❌ biggest liability |
+| Analytics: Growth | ⚠️ jargon to juniors | ⚠️ weak | ✅ cases | ⚠️ blurs with Cases |
+| BI & Reporting | ⚠️ BI is jargon | ❌ text-only, format wrong | ❌ low | ⚠️ format doesn't demonstrate value |
+| Instrumentation | ❌ jargon even to mid-levels | ❌ weak | ✅ if in content | ⚠️ name buries distinct value |
+| Full Loops | ❌ worst name vs best room | ❌ name hides the hook | ✅ highest potential | ✅ earns place once understood |
+| SQL Lab | ✅ crystal clear | ✅ 140 problems | ✅ highest stickiness | ✅ most distinct room |
+| Product Design | ✅ clear to PMs | ✅ first case | ✅ cases | ✅ earns place |
+| Prioritization | ✅ universally relatable | ✅ clear format | ⚠️ limited by case count | ✅ earns place |
+| Behavioral | ✅ clear | ✅ STAR format known | ⚠️ limited | ✅ distinct |
+| Estimation | ✅ clear | ✅ Fermi problems known | ⚠️ case count | ✅ distinct |
+
+**Each room also needs:** a first-screen answer to "what will I be able to do after this room that I can't do now?" — currently missing from most rooms.
+
+**Fixes tracked in CONTENT_AUDIT_SPRINT.md.** Build changes tracked per-version in CHANGELOG.md.
+
+---
+
+### 150. ✅ Stats Foundations — difficulty field bugs + devNote clutter (V5.25.0)
+
+**Type:** Build safety + Content Integrity
+
+Audit of `statsFoundationsModules.js` (32 modules, sf01–sf32) and all 32 module JSX components.
+
+**Findings:**
+- ✅ sf01–sf25: content passes quality bar. keyInsights are specific, scenario-grounded, correct. No rewrites needed.
+- ✅ sf26–sf32: all 7 module JSX files are fully built with real interactive content (beta PDFs, bootstrap simulation, chi-square chart, MCQs, SUTVA scenario classifier). Not stubs.
+- ✅ **FIXED** — sf26–sf32 had wrong `difficulty` values ('intermediate', 'analyst', 'senior') that don't match `DIFF_CFG` keys ('Beginner'/'Intermediate'/'Advanced'). Caused: (1) all 7 modules displayed with Beginner chip color, (2) all 7 filtered out when user selected Intermediate or Advanced. Fixed: sf26→Advanced, sf27→Intermediate, sf28→Advanced, sf29→Intermediate, sf30→Advanced, sf31→Advanced, sf32→Advanced.
+- ✅ **FIXED** — sf26–sf32 had `devNote` fields (internal design notes never rendered). Removed from all 7.
+
+**Coverage assessment:** 32 modules covers Beginner→Advanced stats arc comprehensively: descriptive stats, distributions, CLT, CI, hypothesis testing, power/MDE, correlation, Simpson's paradox, multiple testing, regression to mean, selection bias, practical significance, causal inference (DiD, RD, synthetic control, IV), Bayesian inference, effect size, bootstrap, chi-square, SUTVA, ANOVA, non-parametric. No gaps found.
+
+**File:** `src/data/statsFoundationsModules.js` | Build ✓
+
+---
+
 ## Part XXXI — V5.10.1 PM Audit (2026-06-06)
 
 ### 149. ⚠️ PM Audit — Full product review: activation, IA, free/paid boundary, retention, conversion

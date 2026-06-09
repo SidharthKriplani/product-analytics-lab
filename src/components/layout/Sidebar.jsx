@@ -11,7 +11,7 @@ const ROOM_SUBGROUPS = [
       { id: 'design',        label: 'A/B Design' },
       { id: 'browser',       label: 'A/B Review' },
       { id: 'spot-the-flaw', label: 'Spot the Flaw' },
-      { id: 'ab-interpreter', label: 'Stats Calc' },
+      { id: 'ab-interpreter', label: 'A/B Interpreter' },
     ],
   },
   {
@@ -20,7 +20,7 @@ const ROOM_SUBGROUPS = [
     items: [
       { id: 'metrics',          label: 'Metrics' },
       { id: 'rca',              label: 'RCA' },
-      { id: 'cases',            label: 'Cases' },
+      { id: 'cases',            label: 'Analytics Cases' },
       { id: 'growth-analytics', label: 'Growth Analytics' },
       { id: 'bi',               label: 'BI & Reporting' },
       { id: 'instrumentation',  label: 'Instrumentation' },

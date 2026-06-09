@@ -4,6 +4,92 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.29.0] — 2026-06-10 [UX + NAV]
+
+### 21-room audit pass — nav labels + missing descriptions
+
+Three fixes from full-platform audit of all 21 rooms:
+
+1. **Sidebar nav "Stats Calc" → "A/B Interpreter"** — "Stats Calc" undersells the tool; it's a full A/B test interpreter (p-value, SRM, CI, plain-language verdict), not just a calculator. Label now matches the component's own h1.
+
+2. **Sidebar nav "Cases" → "Analytics Cases"** — "Cases" was the vaguest label in the nav. Every other analytics room names what you do (Metrics, RCA, Growth Analytics); "Cases" just said "things exist here." Renamed to "Analytics Cases" for parity.
+
+3. **Full Loop browser — description paragraph added** — FullLoopBrowser.jsx had no description paragraph, just h1 "End-to-end analyst simulations". First-time users had no context for what "end-to-end" means in practice. Added: "Most interview practice drills one skill at a time. Real analyst work does not. You get a real scenario — a metric drop, a broken experiment, a suspicious dashboard. You work it end-to-end: decompose the problem, propose a data schema, write SQL queries against live in-browser data, and synthesize a recommendation."
+
+Rooms 05–08, 10–15, 17–21 were audited and required no changes — descriptions, navigation, and UX are already well-built.
+
+**Files:** `src/components/layout/Sidebar.jsx`, `src/pages/FullLoopBrowser.jsx`
+
+---
+
+## [5.28.0] — 2026-06-10 [CONTENT]
+
+### RCA Foundations + A/B Foundations — content audit pass (Rooms 03 + 04)
+
+**RCA Foundations (rf01–rf15):**
+- Header comment said "12 modules" — corrected to 15
+- rf03 and rf10 both titled "Data Quality First" — identical titles despite distinct sub-skills (rf03: quick 4-question triage; rf10: deeper platform/pipeline checklist). rf10 renamed to "Instrumentation Failure Patterns" / "Recognizing iOS-only, event-level, and pipeline failures before they waste engineering time"
+- All difficulty values verified correct; no devNote fields
+
+**A/B Foundations (ef01–ef15):**
+- No fixes needed. Header comment correct (15 modules). Difficulty values correct. Content quality strong throughout. Cleanest foundation room.
+
+**Files:** `src/data/rcaFoundationModules.js`
+
+---
+
+## [5.27.0] — 2026-06-10 [CONTENT]
+
+### Metrics Foundations — content audit pass (Room 02)
+
+Two fixes from content audit:
+- Header comment in `metricsFoundationModules.js` said "13 modules" — updated to 17 (stale from before modules mf09–mf17 were added)
+- mf08 and mf13 had near-identical titles ("Metric Sensitivity and Trade-offs" / "Metric Sensitivity") despite teaching distinct lessons. Renamed mf13 to "False Negatives and Metric Choice" with subtitle "How a high-variance primary metric silently discards real improvements" to surface the diagnostic/retrospective framing that distinguishes it from mf08's prospective/selection framing.
+
+All 17 modules verified: difficulty values correct, no devNote fields, keyInsights scenario-grounded.
+
+**Files:** `src/data/metricsFoundationModules.js`
+
+---
+
+## [5.26.0] — 2026-06-09 [UX + CONTENT]
+
+### All 4 Foundation rooms — entry UX + room descriptions (Audit #151)
+
+**FoundationBrowser.jsx** (shared component — affects all 4 rooms):
+- Added `description` prop: displays a one-sentence room purpose below the header. Answers "what will I be able to do after this room?" for every first-time visitor.
+- Fixed Start/Continue CTA: previously only showed when `completedCount > 0`. Now also shows for zero-progress users with "Start here →" copy. New users no longer face a grid of 32 cards with zero guidance.
+
+**Room descriptions added:**
+- Stats Foundations: "Build the statistical intuition behind every experiment and metric decision. Covers distributions, hypothesis testing, confidence intervals, power, and causal inference — the math that explains why A/B tests work and when they fail."
+- Metrics Foundations: "Learn to define metrics that actually measure what you care about. Covers north star metrics, guardrail and diagnostic decomposition, and the traps that make metrics misleading — so you can design measurement before you run the experiment."
+- RCA Foundations: "Develop a systematic approach to diagnosing metric drops. Covers funnel decomposition, segment isolation, external cause identification, and data quality checks — the mental models that turn a confusing dashboard into a clear root cause."
+- A/B Foundations: "Understand how controlled experiments work — from randomization and power to SRM, novelty effects, and network interference. Build the judgment to design clean tests and read results without being misled by the data."
+
+**Files:** `src/components/shared/FoundationBrowser.jsx`, `src/pages/StatsFoundationsBrowser.jsx`, `src/pages/MetricsFoundationsBrowser.jsx`, `src/pages/RCAFoundationsBrowser.jsx`, `src/pages/ExpFoundationsBrowser.jsx` | Build ✓ 2.65s
+
+---
+
+## [5.25.0] — 2026-06-09 [BUG FIX]
+
+### Stats Foundations — difficulty filter bug (Audit #150)
+
+sf26–sf32 had wrong `difficulty` values ('intermediate', 'analyst', 'senior') that don't exist in `FoundationBrowser.jsx`'s `DIFF_CFG` map. All 7 modules silently fell back to Beginner styling and were excluded from Intermediate/Advanced filter results. Fixed all 7 to correct PAL tier values. Also removed `devNote` design-note fields from those 7 modules (never rendered, just clutter).
+
+- sf26 Bayesian Thinking: 'intermediate' → 'Advanced'
+- sf27 Effect Size: 'analyst' → 'Intermediate'
+- sf28 Bootstrap: 'senior' → 'Advanced'
+- sf29 Chi-Square: 'analyst' → 'Intermediate'
+- sf30 SUTVA: 'senior' → 'Advanced'
+- sf31 ANOVA: 'senior' → 'Advanced'
+- sf32 Non-Parametric: 'senior' → 'Advanced'
+
+All 32 module JSX files confirmed fully built. Content passes quality bar.
+
+**File:** `src/data/statsFoundationsModules.js` | Build ✓ 3.21s
+
+---
+
 ## [5.24.0] — 2026-06-09 [BUG FIX]
 
 ### Full Loop fl01 QA pass — 3 bugs fixed

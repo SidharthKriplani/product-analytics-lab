@@ -2,11 +2,11 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V5.24.0 (2026-06-09)*
+*Last updated: V5.29.0 (2026-06-10)*
 
 ---
 
-## Status — V5.24.0: Full Loop fl01 QA pass complete. 3 bugs fixed (date split, duplicate android payment, missing ios/web UPI data). All 3 queries verified in Node. Build ✓.
+## Status — V5.25.0: Full Loop fl01 QA pass complete. 3 bugs fixed (date split, duplicate android payment, missing ios/web UPI data). All 3 queries verified in Node. Build ✓.
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 

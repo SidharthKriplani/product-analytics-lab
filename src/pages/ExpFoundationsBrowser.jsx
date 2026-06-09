@@ -18,6 +18,7 @@ export function ExpFoundationsBrowser({ onStart, unlocked, onNavigate }) {
       iconName='flask'
       onStart={onStart}
       unlocked={unlocked}
+      description='Understand how controlled experiments work — from randomization and power to SRM, novelty effects, and network interference. Build the judgment to design clean tests and read results without being misled by the data.'
       practiceLinks={[
         { label: 'A/B Design', onClick: function () { onNavigate('design'); } },
         { label: 'Review Room', onClick: function () { onNavigate('browser'); } },

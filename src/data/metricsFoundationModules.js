@@ -1,5 +1,5 @@
 // Product Analytics Lab — Metrics Foundation Room Module Data
-// 13 modules building intuition around metric design, hierarchy, and measurement
+// 17 modules building intuition around metric design, hierarchy, and measurement
 
 export const metricsFoundationModules = [
   {
@@ -198,8 +198,8 @@ export const metricsFoundationModules = [
   {
     id: 'mf13',
     index: 13,
-    title: 'Metric Sensitivity',
-    subtitle: 'Why some metrics detect real effects and others never will',
+    title: 'False Negatives and Metric Choice',
+    subtitle: 'How a high-variance primary metric silently discards real improvements',
     difficulty: 'Advanced',
     isFree: true,
     estimatedMin: 10,

@@ -49,6 +49,7 @@ export function FoundationBrowser({
   onStart,        // (moduleId) => void
   unlocked,       // boolean
   practiceLinks,  // array of { label, onClick } for bottom CTA
+  description,    // one-sentence room purpose shown below header
 }) {
   var [diffFilter, setDiffFilter] = useState('all');
   var [hovered, setHovered] = useState(null);
@@ -81,6 +82,13 @@ export function FoundationBrowser({
           </span>
         </div>
 
+        {/* Room description — shown always, tells user what this room is for */}
+        {description && (
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.55, margin: '0 0 0.75rem 0' }}>
+            {description}
+          </p>
+        )}
+
         {/* Progress bar */}
         <div style={{ height: '4px', borderRadius: '2px', background: 'var(--border)', marginBottom: '1rem' }}>
           <div style={{ height: '100%', borderRadius: '2px', background: color, width: pct + '%', transition: 'width 0.3s' }} />
@@ -103,8 +111,8 @@ export function FoundationBrowser({
         </div>
       )}
 
-      {/* Continue CTA (only if not all done and no filter active) */}
-      {nextModule && diffFilter === 'all' && completedCount > 0 && completedCount < totalCount && (
+      {/* Start / Continue CTA */}
+      {nextModule && diffFilter === 'all' && completedCount < totalCount && (
         <button onClick={function () { onStart(nextModule.id); }} style={{
           display: 'flex', alignItems: 'center', gap: '0.6rem',
           width: '100%', padding: '0.75rem 1rem', marginBottom: '1.25rem',
@@ -112,7 +120,9 @@ export function FoundationBrowser({
           cursor: 'pointer', textAlign: 'left',
         }}>
           <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#fff' }}>
-            Continue: {nextModule.index}. {nextModule.title}
+            {completedCount === 0
+              ? 'Start here → ' + nextModule.index + '. ' + nextModule.title
+              : 'Continue: ' + nextModule.index + '. ' + nextModule.title}
           </span>
           <span style={{ marginLeft: 'auto', fontSize: '0.78rem', color: 'rgba(255,255,255,0.8)' }}>→</span>
         </button>

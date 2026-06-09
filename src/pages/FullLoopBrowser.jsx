@@ -94,6 +94,10 @@ export function FullLoopBrowser({ onOpen, onBack }) {
           </div>
         </div>
 
+        <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', margin: '0.5rem 0 0.75rem', lineHeight: 1.6, maxWidth: '580px' }}>
+          Most interview practice drills one skill at a time. Real analyst work does not. You get a real scenario — a metric drop, a broken experiment, a suspicious dashboard. You work it end-to-end: decompose the problem, propose a data schema, write SQL queries against live in-browser data, and synthesize a recommendation. Each simulation covers what no individual drill room can: the full analyst workflow under one roof.
+        </p>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
           <span style={{
             fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
