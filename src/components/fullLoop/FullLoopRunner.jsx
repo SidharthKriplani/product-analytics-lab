@@ -208,6 +208,16 @@ function IconWrong(props) {
   );
 }
 
+function IconPlay(props) {
+  var size = props.size || 16;
+  var color = props.color || '#fff';
+  return (
+    <svg width={size} height={size} viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'>
+      <path d='M5 3L13 8L5 13V3Z' fill={color}/>
+    </svg>
+  );
+}
+
 var PHASE_ICON_MAP = {
   alert: IconAlert,
   data: IconData,
@@ -225,6 +235,66 @@ function PhaseIcon(props) {
   var Comp = PHASE_ICON_MAP[type];
   if (!Comp) return null;
   return <Comp size={size} color={color} />;
+}
+
+// ─── Key element / phrase matching ─────────────────────────────────────────
+function matchKeyElements(userText, keyElements) {
+  var results = [];
+  for (var i = 0; i < keyElements.length; i++) {
+    var escaped = keyElements[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var pattern = new RegExp(escaped, 'i');
+    results.push({ element: keyElements[i], found: pattern.test(userText) });
+  }
+  return results;
+}
+
+function countMatched(results) {
+  var count = 0;
+  for (var i = 0; i < results.length; i++) {
+    if (results[i].found) count += 1;
+  }
+  return count;
+}
+
+// ─── Match Report Pills ───────────────────────────────────────────────────
+function MatchReport(props) {
+  var results = props.results;
+  var label = props.label || 'key elements';
+  var matched = countMatched(results);
+
+  return (
+    <div className='pal-reveal-in' style={{
+      marginTop: '16px', padding: '16px 18px', borderRadius: '10px',
+      background: 'var(--surface)', border: '1px solid var(--border)',
+    }}>
+      <div style={{
+        fontWeight: 600, fontSize: '14px', color: 'var(--text)',
+        marginBottom: '12px',
+      }}>
+        Your query covers {matched}/{results.length} {label}
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+        {results.map(function(r, i) {
+          return (
+            <span key={i} style={{
+              display: 'inline-flex', alignItems: 'center', gap: '4px',
+              fontSize: '12px', padding: '4px 10px', borderRadius: '20px',
+              fontWeight: 500, lineHeight: '1.3',
+              background: r.found ? 'rgba(16,185,129,0.1)' : 'rgba(0,0,0,0.04)',
+              color: r.found ? 'var(--green)' : 'var(--text-muted)',
+              border: '1px solid ' + (r.found ? 'rgba(16,185,129,0.2)' : 'var(--border)'),
+            }}>
+              {r.found
+                ? <IconCorrect size={12} />
+                : <IconWrong size={12} />
+              }
+              {r.element}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 // ─── Draft persistence ──────────────────────────────────────────────────────
@@ -631,6 +701,48 @@ function CodeBlock(props) {
   );
 }
 
+// ─── Formatted Code Block (line-numbered) ──────────────────────────────────
+function FormattedCodeBlock(props) {
+  var lines = props.lines;
+
+  return (
+    <div style={{ position: 'relative', marginBottom: '4px' }}>
+      <div style={{
+        position: 'absolute', top: '0', right: '0',
+        padding: '4px 10px', fontSize: '10px', fontWeight: 600,
+        color: 'rgba(205,214,244,0.5)', textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+      }}>
+        SQL
+      </div>
+      <div style={{
+        background: '#1e1e2e', padding: '20px 16px 16px',
+        borderRadius: '10px', borderTop: '3px solid var(--accent)',
+        overflowX: 'auto',
+      }}>
+        {lines.map(function(line, i) {
+          return (
+            <div key={i} style={{
+              display: 'flex', gap: '16px', fontSize: '13px',
+              lineHeight: '1.7', fontFamily: 'monospace',
+            }}>
+              <span style={{
+                color: 'rgba(205,214,244,0.3)', userSelect: 'none',
+                minWidth: '24px', textAlign: 'right', flexShrink: 0,
+              }}>
+                {i + 1}
+              </span>
+              <span style={{ color: '#cdd6f4', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                {line}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Metric Card (for alert phase) ──────────────────────────────────────────
 function MetricCard(props) {
   var metricName = props.metricName;
@@ -710,7 +822,7 @@ function AlertPhase(props) {
   );
 }
 
-// ─── Data Phase ─────────────────────────────────────────────────────────────
+// ─── Data Phase (with key phrase matching) ─────────────────────────────────
 function DataPhase(props) {
   var phase = props.phase;
   var state = props.state;
@@ -718,6 +830,29 @@ function DataPhase(props) {
   var onContinue = props.onContinue;
   var observation = state.observation || '';
   var revealed = state.revealed || false;
+  var checked = state.checked || false;
+  var matchResults = state.matchResults || [];
+
+  var hasKeyPhrases = phase.keyPhrases && phase.keyPhrases.length > 0;
+
+  function handleCheck() {
+    var results = matchKeyElements(observation, phase.keyPhrases);
+    setState({
+      observation: observation,
+      revealed: revealed,
+      checked: true,
+      matchResults: results,
+    });
+  }
+
+  function handleReveal() {
+    setState({
+      observation: observation,
+      revealed: true,
+      checked: checked,
+      matchResults: matchResults,
+    });
+  }
 
   return (
     <div>
@@ -728,7 +863,14 @@ function DataPhase(props) {
       <TealCallout>{phase.guideQuestion}</TealCallout>
       <textarea
         value={observation}
-        onChange={function(e) { setState({ observation: e.target.value, revealed: revealed }); }}
+        onChange={function(e) {
+          setState({
+            observation: e.target.value,
+            revealed: revealed,
+            checked: false,
+            matchResults: [],
+          });
+        }}
         placeholder='Write your observation here...'
         rows={4}
         style={{
@@ -739,9 +881,46 @@ function DataPhase(props) {
           boxSizing: 'border-box', transition: 'border-color 0.2s ease',
         }}
       />
-      {!revealed && (
+
+      {/* Step 1: Check Observation (if keyPhrases exist) */}
+      {hasKeyPhrases && !checked && !revealed && (
         <button
-          onClick={function() { setState({ observation: observation, revealed: true }); }}
+          onClick={handleCheck}
+          style={{
+            marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
+            background: 'var(--teal)', color: '#fff', fontWeight: 600,
+            fontSize: '14px', border: 'none', cursor: 'pointer',
+            display: 'inline-flex', alignItems: 'center', gap: '6px',
+          }}
+        >
+          Check Observation
+          <IconArrowRight size={14} color='#fff' />
+        </button>
+      )}
+
+      {/* Show match results */}
+      {hasKeyPhrases && checked && !revealed && (
+        <div>
+          <MatchReport results={matchResults} label='key elements' />
+          <button
+            onClick={handleReveal}
+            style={{
+              marginTop: '16px', padding: '12px 24px', borderRadius: '8px',
+              background: 'var(--teal)', color: '#fff', fontWeight: 600,
+              fontSize: '14px', border: 'none', cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+            }}
+          >
+            Reveal Model Observation
+            <IconArrowRight size={14} color='#fff' />
+          </button>
+        </div>
+      )}
+
+      {/* Fallback: no keyPhrases — direct reveal */}
+      {!hasKeyPhrases && !revealed && (
+        <button
+          onClick={handleReveal}
           style={{
             marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
             background: 'var(--teal)', color: '#fff', fontWeight: 600,
@@ -753,6 +932,7 @@ function DataPhase(props) {
           <IconArrowRight size={14} color='#fff' />
         </button>
       )}
+
       {revealed && (
         <div className='pal-reveal-in' style={{
           marginTop: '16px', padding: '18px 20px', borderRadius: '10px',
@@ -806,7 +986,7 @@ function RCAPhase(props) {
   );
 }
 
-// ─── SQL Phase ──────────────────────────────────────────────────────────────
+// ─── SQL Phase (Run Query with key-element matching) ───────────────────────
 function SQLPhase(props) {
   var phase = props.phase;
   var state = props.state;
@@ -814,6 +994,29 @@ function SQLPhase(props) {
   var onContinue = props.onContinue;
   var userSql = state.userSql || '';
   var revealed = state.revealed || false;
+  var ran = state.ran || false;
+  var sqlMatchResults = state.matchResults || [];
+
+  var hasKeyElements = phase.keyElements && phase.keyElements.length > 0;
+
+  function handleRunQuery() {
+    var results = matchKeyElements(userSql, phase.keyElements);
+    setState({
+      userSql: userSql,
+      revealed: revealed,
+      ran: true,
+      matchResults: results,
+    });
+  }
+
+  function handleRevealQuery() {
+    setState({
+      userSql: userSql,
+      revealed: true,
+      ran: ran,
+      matchResults: sqlMatchResults,
+    });
+  }
 
   return (
     <div>
@@ -823,7 +1026,14 @@ function SQLPhase(props) {
       </p>
       <textarea
         value={userSql}
-        onChange={function(e) { setState({ userSql: e.target.value, revealed: revealed }); }}
+        onChange={function(e) {
+          setState({
+            userSql: e.target.value,
+            revealed: revealed,
+            ran: false,
+            matchResults: [],
+          });
+        }}
         placeholder='-- Write your SQL here'
         rows={6}
         style={{
@@ -834,9 +1044,47 @@ function SQLPhase(props) {
           boxSizing: 'border-box', transition: 'border-color 0.2s ease',
         }}
       />
-      {!revealed && (
+
+      {/* Step 1: Run Query button (when keyElements exist) */}
+      {hasKeyElements && !ran && !revealed && (
         <button
-          onClick={function() { setState({ userSql: userSql, revealed: true }); }}
+          onClick={handleRunQuery}
+          style={{
+            marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
+            background: 'var(--green)', color: '#fff', fontWeight: 600,
+            fontSize: '14px', border: 'none', cursor: 'pointer',
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            boxShadow: '0 2px 8px rgba(16,185,129,0.2)',
+          }}
+        >
+          <IconPlay size={14} color='#fff' />
+          Run Query
+        </button>
+      )}
+
+      {/* Match results after running */}
+      {hasKeyElements && ran && !revealed && (
+        <div>
+          <MatchReport results={sqlMatchResults} label='key elements' />
+          <button
+            onClick={handleRevealQuery}
+            style={{
+              marginTop: '16px', padding: '12px 24px', borderRadius: '8px',
+              background: 'var(--accent)', color: '#fff', fontWeight: 600,
+              fontSize: '14px', border: 'none', cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+            }}
+          >
+            Compare with Model
+            <IconArrowRight size={14} color='#fff' />
+          </button>
+        </div>
+      )}
+
+      {/* Fallback: no keyElements — direct reveal */}
+      {!hasKeyElements && !revealed && (
+        <button
+          onClick={handleRevealQuery}
           style={{
             marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
             background: 'var(--accent)', color: '#fff', fontWeight: 600,
@@ -848,6 +1096,7 @@ function SQLPhase(props) {
           <IconArrowRight size={14} color='#fff' />
         </button>
       )}
+
       {revealed && (
         <div className='pal-reveal-in'>
           <div style={{ marginTop: '16px', marginBottom: '12px' }}>
@@ -858,7 +1107,10 @@ function SQLPhase(props) {
               <IconCheckmark size={16} color='var(--accent)' />
               Correct Query
             </div>
-            <CodeBlock code={phase.correctQuery} />
+            {phase.correctQueryFormatted && phase.correctQueryFormatted.length > 0
+              ? <FormattedCodeBlock lines={phase.correctQueryFormatted} />
+              : <CodeBlock code={phase.correctQuery} />
+            }
           </div>
           {phase.expectedOutput && (
             <div style={{ marginTop: '12px' }}>
@@ -882,7 +1134,7 @@ function SQLPhase(props) {
   );
 }
 
-// ─── Communicate Phase ──────────────────────────────────────────────────────
+// ─── Communicate Phase (with key phrase matching) ──────────────────────────
 function CommunicatePhase(props) {
   var phase = props.phase;
   var state = props.state;
@@ -890,7 +1142,32 @@ function CommunicatePhase(props) {
   var onContinue = props.onContinue;
   var userText = state.userText || '';
   var revealed = state.revealed || false;
-  var checked = state.checked || {};
+  var rubricChecked = state.rubricChecked || {};
+  var briefChecked = state.briefChecked || false;
+  var matchResults = state.matchResults || [];
+
+  var hasKeyPhrases = phase.keyPhrases && phase.keyPhrases.length > 0;
+
+  function handleCheckBrief() {
+    var results = matchKeyElements(userText, phase.keyPhrases);
+    setState({
+      userText: userText,
+      revealed: revealed,
+      rubricChecked: rubricChecked,
+      briefChecked: true,
+      matchResults: results,
+    });
+  }
+
+  function handleReveal() {
+    setState({
+      userText: userText,
+      revealed: true,
+      rubricChecked: rubricChecked,
+      briefChecked: briefChecked,
+      matchResults: matchResults,
+    });
+  }
 
   return (
     <div>
@@ -899,7 +1176,15 @@ function CommunicatePhase(props) {
       </p>
       <textarea
         value={userText}
-        onChange={function(e) { setState({ userText: e.target.value, revealed: revealed, checked: checked }); }}
+        onChange={function(e) {
+          setState({
+            userText: e.target.value,
+            revealed: revealed,
+            rubricChecked: rubricChecked,
+            briefChecked: false,
+            matchResults: [],
+          });
+        }}
         placeholder='Write your brief here...'
         rows={5}
         style={{
@@ -910,9 +1195,46 @@ function CommunicatePhase(props) {
           boxSizing: 'border-box', transition: 'border-color 0.2s ease',
         }}
       />
-      {!revealed && (
+
+      {/* Step 1: Check Brief (if keyPhrases exist) */}
+      {hasKeyPhrases && !briefChecked && !revealed && (
         <button
-          onClick={function() { setState({ userText: userText, revealed: true, checked: checked }); }}
+          onClick={handleCheckBrief}
+          style={{
+            marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
+            background: 'var(--accent)', color: '#fff', fontWeight: 600,
+            fontSize: '14px', border: 'none', cursor: 'pointer',
+            display: 'inline-flex', alignItems: 'center', gap: '6px',
+          }}
+        >
+          Check Brief
+          <IconArrowRight size={14} color='#fff' />
+        </button>
+      )}
+
+      {/* Match results + reveal button */}
+      {hasKeyPhrases && briefChecked && !revealed && (
+        <div>
+          <MatchReport results={matchResults} label='key elements' />
+          <button
+            onClick={handleReveal}
+            style={{
+              marginTop: '16px', padding: '12px 24px', borderRadius: '8px',
+              background: 'var(--accent)', color: '#fff', fontWeight: 600,
+              fontSize: '14px', border: 'none', cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+            }}
+          >
+            See Model Answer
+            <IconArrowRight size={14} color='#fff' />
+          </button>
+        </div>
+      )}
+
+      {/* Fallback: no keyPhrases — direct reveal */}
+      {!hasKeyPhrases && !revealed && (
+        <button
+          onClick={handleReveal}
           style={{
             marginTop: '12px', padding: '12px 24px', borderRadius: '8px',
             background: 'var(--accent)', color: '#fff', fontWeight: 600,
@@ -924,6 +1246,7 @@ function CommunicatePhase(props) {
           <IconArrowRight size={14} color='#fff' />
         </button>
       )}
+
       {revealed && (
         <div className='pal-reveal-in'>
           <div style={{
@@ -953,7 +1276,7 @@ function CommunicatePhase(props) {
                 Self-Assessment Rubric
               </div>
               {phase.rubric.map(function(item, i) {
-                var isChecked = !!checked[i];
+                var isChecked = !!rubricChecked[i];
                 return (
                   <label key={i} style={{
                     display: 'flex', alignItems: 'flex-start', gap: '8px',
@@ -964,9 +1287,15 @@ function CommunicatePhase(props) {
                       type='checkbox'
                       checked={isChecked}
                       onChange={function() {
-                        var next = Object.assign({}, checked);
+                        var next = Object.assign({}, rubricChecked);
                         next[i] = !isChecked;
-                        setState({ userText: userText, revealed: true, checked: next });
+                        setState({
+                          userText: userText,
+                          revealed: true,
+                          rubricChecked: next,
+                          briefChecked: briefChecked,
+                          matchResults: matchResults,
+                        });
                       }}
                       style={{ marginTop: '3px', accentColor: 'var(--green)' }}
                     />
@@ -983,19 +1312,103 @@ function CommunicatePhase(props) {
   );
 }
 
-// ─── Experiment Phase ───────────────────────────────────────────────────────
+// ─── Experiment Phase (MCQ / Multi-select / Text) ──────────────────────────
 function ExperimentPhase(props) {
   var phase = props.phase;
   var state = props.state;
   var setState = props.setState;
   var onContinue = props.onContinue;
+  var fieldSelections = state.fieldSelections || {};
+  var fieldsRevealed = state.fieldsRevealed || {};
+  var multiChecked = state.multiChecked || {};
   var fieldValues = state.fieldValues || {};
-  var revealed = state.revealed || false;
+  var allRevealed = state.allRevealed || false;
 
-  function updateField(idx, val) {
+  function buildState(overrides) {
+    return Object.assign({
+      fieldSelections: fieldSelections,
+      fieldsRevealed: fieldsRevealed,
+      multiChecked: multiChecked,
+      fieldValues: fieldValues,
+      allRevealed: allRevealed,
+    }, overrides);
+  }
+
+  function handleMcqSelect(fieldIdx, optionId) {
+    if (fieldsRevealed[fieldIdx]) return;
+    var nextSelections = Object.assign({}, fieldSelections);
+    nextSelections[fieldIdx] = optionId;
+    var nextRevealed = Object.assign({}, fieldsRevealed);
+    nextRevealed[fieldIdx] = true;
+    setState(buildState({
+      fieldSelections: nextSelections,
+      fieldsRevealed: nextRevealed,
+    }));
+  }
+
+  function handleMultiToggle(fieldIdx, optionId) {
+    if (multiChecked[fieldIdx]) return;
+    var current = fieldSelections[fieldIdx] || [];
+    var idx = current.indexOf(optionId);
+    var next;
+    if (idx >= 0) {
+      next = current.filter(function(x) { return x !== optionId; });
+    } else {
+      next = current.concat([optionId]);
+    }
+    var nextSelections = Object.assign({}, fieldSelections);
+    nextSelections[fieldIdx] = next;
+    setState(buildState({ fieldSelections: nextSelections }));
+  }
+
+  function handleMultiCheck(fieldIdx) {
+    var nextMultiChecked = Object.assign({}, multiChecked);
+    nextMultiChecked[fieldIdx] = true;
+    var nextRevealed = Object.assign({}, fieldsRevealed);
+    nextRevealed[fieldIdx] = true;
+    setState(buildState({
+      multiChecked: nextMultiChecked,
+      fieldsRevealed: nextRevealed,
+    }));
+  }
+
+  function handleTextReveal() {
+    setState(buildState({ allRevealed: true }));
+  }
+
+  function updateTextField(idx, val) {
     var next = Object.assign({}, fieldValues);
     next[idx] = val;
-    setState({ fieldValues: next, revealed: revealed });
+    setState(buildState({ fieldValues: next }));
+  }
+
+  // Check if all fields are answered
+  var allFieldsAnswered = true;
+  for (var fi = 0; fi < phase.fields.length; fi++) {
+    var f = phase.fields[fi];
+    var fType = f.type || 'text';
+    if (fType === 'mcq') {
+      if (!fieldsRevealed[fi]) { allFieldsAnswered = false; break; }
+    } else if (fType === 'multi') {
+      if (!multiChecked[fi]) { allFieldsAnswered = false; break; }
+    } else {
+      if (!allRevealed) { allFieldsAnswered = false; break; }
+    }
+  }
+
+  // Count how many text fields exist (for fallback reveal button)
+  var hasTextFields = false;
+  var allInteractiveAnswered = true;
+  for (var ti = 0; ti < phase.fields.length; ti++) {
+    var tf = phase.fields[ti];
+    var tfType = tf.type || 'text';
+    if (tfType === 'text') {
+      hasTextFields = true;
+    } else if (tfType === 'mcq' && !fieldsRevealed[ti]) {
+      allInteractiveAnswered = false;
+    } else if (tfType === 'multi' && !multiChecked[ti]) {
+      allInteractiveAnswered = false;
+    }
   }
 
   return (
@@ -1004,6 +1417,208 @@ function ExperimentPhase(props) {
         {phase.prompt}
       </p>
       {phase.fields.map(function(field, i) {
+        var fieldType = field.type || 'text';
+
+        // ── MCQ field ──
+        if (fieldType === 'mcq') {
+          var mcqSelected = fieldSelections[i] || null;
+          var mcqRevealed = fieldsRevealed[i] || false;
+
+          return (
+            <div key={i} style={{ marginBottom: '20px' }}>
+              <div style={{
+                fontWeight: 600, fontSize: '14px',
+                color: 'var(--text)', marginBottom: '10px',
+              }}>
+                {field.label}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {field.options.map(function(opt) {
+                  var isSelected = mcqSelected === opt.id;
+                  var isCorrectOpt = opt.correct;
+                  var showResult = mcqRevealed;
+                  var isRight = showResult && isSelected && isCorrectOpt;
+                  var isWrongSel = showResult && isSelected && !isCorrectOpt;
+                  var isDimmed = showResult && !isSelected;
+
+                  var bg = 'var(--surface)';
+                  var bdr = 'var(--border)';
+                  var leftBdr = 'transparent';
+                  if (isRight) { bg = 'rgba(16,185,129,0.06)'; bdr = 'var(--green)'; leftBdr = 'var(--green)'; }
+                  if (isWrongSel) { bg = 'rgba(239,68,68,0.06)'; bdr = 'var(--red)'; leftBdr = 'var(--red)'; }
+
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={mcqRevealed ? undefined : function() { handleMcqSelect(i, opt.id); }}
+                      disabled={mcqRevealed}
+                      className={isWrongSel ? 'pal-shake' : (isRight ? 'pal-success-ring' : '')}
+                      style={{
+                        padding: '12px 16px', borderRadius: '8px', textAlign: 'left',
+                        fontSize: '14px', lineHeight: '1.5',
+                        cursor: mcqRevealed ? 'default' : 'pointer',
+                        border: '1px solid ' + bdr,
+                        borderLeft: '3px solid ' + leftBdr,
+                        background: bg, color: 'var(--text)',
+                        transition: 'all 0.2s ease',
+                        opacity: isDimmed ? 0.4 : 1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
+                      }}
+                    >
+                      <span>{opt.text}</span>
+                      {isRight && <IconCorrect size={16} />}
+                      {isWrongSel && <IconWrong size={16} />}
+                    </button>
+                  );
+                })}
+              </div>
+              {mcqRevealed && field.correctAnswer && (
+                <div className='pal-reveal-in' style={{
+                  marginTop: '8px', padding: '12px 14px', borderRadius: '8px',
+                  background: 'rgba(16,185,129,0.06)', border: '1px solid var(--green)',
+                  borderLeft: '3px solid var(--green)',
+                  fontSize: '13px', lineHeight: '1.6', color: 'var(--text)',
+                }}>
+                  <span style={{ fontWeight: 600, color: 'var(--green)' }}>Explanation: </span>
+                  {field.correctAnswer}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // ── Multi-select field ──
+        if (fieldType === 'multi') {
+          var multiSelected = fieldSelections[i] || [];
+          var multiIsChecked = multiChecked[i] || false;
+
+          // Count correct
+          var correctOptions = [];
+          if (field.options) {
+            for (var ci = 0; ci < field.options.length; ci++) {
+              if (field.options[ci].correct) correctOptions.push(field.options[ci].id);
+            }
+          }
+
+          var userCorrectCount = 0;
+          if (multiIsChecked) {
+            for (var mc = 0; mc < multiSelected.length; mc++) {
+              if (correctOptions.indexOf(multiSelected[mc]) >= 0) userCorrectCount += 1;
+            }
+          }
+
+          return (
+            <div key={i} style={{ marginBottom: '20px' }}>
+              <div style={{
+                fontWeight: 600, fontSize: '14px',
+                color: 'var(--text)', marginBottom: '6px',
+              }}>
+                {field.label}
+              </div>
+              <div style={{
+                fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px',
+              }}>
+                Select all that apply
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {field.options.map(function(opt) {
+                  var isInSelection = multiSelected.indexOf(opt.id) >= 0;
+                  var isCorrectOpt = opt.correct;
+                  var showResult = multiIsChecked;
+
+                  var bg = 'var(--surface)';
+                  var bdr = 'var(--border)';
+                  var leftBdr = 'transparent';
+
+                  if (!showResult && isInSelection) {
+                    bdr = 'var(--accent)';
+                    leftBdr = 'var(--accent)';
+                    bg = 'rgba(59,130,246,0.04)';
+                  }
+                  if (showResult && isInSelection && isCorrectOpt) {
+                    bg = 'rgba(16,185,129,0.06)'; bdr = 'var(--green)'; leftBdr = 'var(--green)';
+                  }
+                  if (showResult && isInSelection && !isCorrectOpt) {
+                    bg = 'rgba(239,68,68,0.06)'; bdr = 'var(--red)'; leftBdr = 'var(--red)';
+                  }
+                  if (showResult && !isInSelection && isCorrectOpt) {
+                    bg = 'rgba(16,185,129,0.03)'; bdr = 'rgba(16,185,129,0.3)'; leftBdr = 'var(--green)';
+                  }
+
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={multiIsChecked ? undefined : function() { handleMultiToggle(i, opt.id); }}
+                      disabled={multiIsChecked}
+                      style={{
+                        padding: '12px 16px', borderRadius: '8px', textAlign: 'left',
+                        fontSize: '14px', lineHeight: '1.5',
+                        cursor: multiIsChecked ? 'default' : 'pointer',
+                        border: '1px solid ' + bdr,
+                        borderLeft: '3px solid ' + leftBdr,
+                        background: bg, color: 'var(--text)',
+                        transition: 'all 0.2s ease',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                          width: '18px', height: '18px', borderRadius: '4px',
+                          border: '2px solid ' + (isInSelection ? 'var(--accent)' : 'var(--border)'),
+                          background: isInSelection ? 'var(--accent)' : 'transparent',
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0, transition: 'all 0.15s ease',
+                        }}>
+                          {isInSelection && (
+                            <svg width='12' height='12' viewBox='0 0 12 12' fill='none'>
+                              <polyline points='2.5,6 5,8.5 9.5,3.5' stroke='#fff' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' fill='none'/>
+                            </svg>
+                          )}
+                        </span>
+                        {opt.text}
+                      </span>
+                      {showResult && isInSelection && isCorrectOpt && <IconCorrect size={16} />}
+                      {showResult && isInSelection && !isCorrectOpt && <IconWrong size={16} />}
+                      {showResult && !isInSelection && isCorrectOpt && (
+                        <span style={{ fontSize: '11px', color: 'var(--green)', fontWeight: 600 }}>missed</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {!multiIsChecked && multiSelected.length > 0 && (
+                <button
+                  onClick={function() { handleMultiCheck(i); }}
+                  style={{
+                    marginTop: '10px', padding: '10px 20px', borderRadius: '8px',
+                    background: 'var(--accent)', color: '#fff', fontWeight: 600,
+                    fontSize: '13px', border: 'none', cursor: 'pointer',
+                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  }}
+                >
+                  Check Answers
+                  <IconArrowRight size={13} color='#fff' />
+                </button>
+              )}
+              {multiIsChecked && (
+                <div className='pal-reveal-in' style={{
+                  marginTop: '10px', padding: '10px 14px', borderRadius: '8px',
+                  background: 'rgba(16,185,129,0.06)', border: '1px solid var(--green)',
+                  fontSize: '13px', color: 'var(--text)', lineHeight: '1.5',
+                }}>
+                  <span style={{ fontWeight: 600, color: 'var(--green)' }}>
+                    {userCorrectCount}/{correctOptions.length} correct
+                  </span>
+                  {field.correctAnswer && (
+                    <span> — {field.correctAnswer}</span>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // ── Text field (fallback) ──
         return (
           <div key={i} style={{ marginBottom: '16px' }}>
             <label style={{
@@ -1014,7 +1629,7 @@ function ExperimentPhase(props) {
             </label>
             <textarea
               value={fieldValues[i] || ''}
-              onChange={function(e) { updateField(i, e.target.value); }}
+              onChange={function(e) { updateTextField(i, e.target.value); }}
               placeholder={'Enter your ' + field.label.toLowerCase() + '...'}
               rows={3}
               style={{
@@ -1025,7 +1640,7 @@ function ExperimentPhase(props) {
                 boxSizing: 'border-box', transition: 'border-color 0.2s ease',
               }}
             />
-            {revealed && (
+            {allRevealed && (
               <div className='pal-reveal-in' style={{
                 marginTop: '8px', padding: '14px', borderRadius: '8px',
                 background: 'rgba(16,185,129,0.06)', border: '1px solid var(--green)',
@@ -1039,9 +1654,11 @@ function ExperimentPhase(props) {
           </div>
         );
       })}
-      {!revealed && (
+
+      {/* Reveal button for text fields */}
+      {hasTextFields && !allRevealed && allInteractiveAnswered && (
         <button
-          onClick={function() { setState({ fieldValues: fieldValues, revealed: true }); }}
+          onClick={handleTextReveal}
           style={{
             padding: '12px 24px', borderRadius: '8px',
             background: 'var(--accent)', color: '#fff', fontWeight: 600,
@@ -1053,7 +1670,7 @@ function ExperimentPhase(props) {
           <IconArrowRight size={14} color='#fff' />
         </button>
       )}
-      {revealed && <ContinueButton onClick={onContinue} />}
+      {allFieldsAnswered && <ContinueButton onClick={onContinue} />}
     </div>
   );
 }
@@ -1112,25 +1729,157 @@ function ReadoutPhase(props) {
   );
 }
 
-// ─── Completion Card ────────────────────────────────────────────────────────
+// ─── Score Ring SVG ─────────────────────────────────────────────────────────
+function ScoreRing(props) {
+  var score = props.score;
+  var maxScore = props.maxScore;
+  var pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+  var radius = 54;
+  var circumference = 2 * Math.PI * radius;
+  var offset = circumference - (pct / 100) * circumference;
+
+  var ringColor = 'var(--red)';
+  if (pct > 75) ringColor = 'var(--green)';
+  else if (pct > 50) ringColor = 'var(--yellow)';
+
+  return (
+    <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+      <svg width='130' height='130' viewBox='0 0 130 130'>
+        {/* Background track */}
+        <circle cx='65' cy='65' r={radius} fill='none' stroke='var(--border)' strokeWidth='8'/>
+        {/* Progress arc */}
+        <circle
+          cx='65' cy='65' r={radius} fill='none'
+          stroke={ringColor} strokeWidth='8'
+          strokeLinecap='round'
+          strokeDasharray={String(circumference)}
+          strokeDashoffset={String(offset)}
+          transform='rotate(-90 65 65)'
+          style={{ transition: 'stroke-dashoffset 0.8s ease' }}
+        />
+        {/* Center text */}
+        <text x='65' y='60' textAnchor='middle' fontSize='32' fontWeight='700' fill='var(--text)'>
+          {pct}%
+        </text>
+        <text x='65' y='80' textAnchor='middle' fontSize='12' fill='var(--text-muted)'>
+          {score}/{maxScore}
+        </text>
+      </svg>
+    </div>
+  );
+}
+
+// ─── Completion Card (dramatic per-phase breakdown) ────────────────────────
 function CompletionCard(props) {
   var flCase = props.flCase;
   var phaseStates = props.phaseStates;
   var onBack = props.onBack;
   var onNext = props.onNext;
-  var correct = 0;
-  var total = 0;
+
+  // Gather per-phase scores
+  var phaseScores = [];
+  var totalScore = 0;
+  var totalMax = 0;
 
   flCase.phases.forEach(function(phase, i) {
+    var st = phaseStates[i] || {};
+    var entry = { phase: phase, index: i, type: phase.type, title: phase.title };
+
     if (phase.type === 'alert' || phase.type === 'rca' || phase.type === 'readout') {
-      total += 1;
-      if (phaseStates[i] && phaseStates[i].correct) {
-        correct += 1;
+      entry.scoreType = 'decision';
+      entry.correct = !!st.correct;
+      entry.display = st.correct ? '1/1' : '0/1';
+      totalMax += 1;
+      if (st.correct) totalScore += 1;
+    } else if (phase.type === 'sql') {
+      entry.scoreType = 'sql';
+      if (st.matchResults && st.matchResults.length > 0) {
+        var matched = countMatched(st.matchResults);
+        entry.display = matched + '/' + st.matchResults.length;
+        entry.correct = matched === st.matchResults.length;
+        totalMax += st.matchResults.length;
+        totalScore += matched;
+      } else {
+        entry.display = 'completed';
+        entry.correct = true;
+        totalMax += 1;
+        totalScore += 1;
       }
+    } else if (phase.type === 'data' || phase.type === 'communicate') {
+      entry.scoreType = 'text';
+      if (st.matchResults && st.matchResults.length > 0) {
+        var m = countMatched(st.matchResults);
+        entry.display = m + '/' + st.matchResults.length;
+        entry.correct = m === st.matchResults.length;
+        totalMax += st.matchResults.length;
+        totalScore += m;
+      } else {
+        entry.display = 'completed';
+        entry.correct = true;
+        totalMax += 1;
+        totalScore += 1;
+      }
+    } else if (phase.type === 'experiment') {
+      entry.scoreType = 'experiment';
+      var expCorrect = 0;
+      var expTotal = 0;
+      if (phase.fields) {
+        for (var fi = 0; fi < phase.fields.length; fi++) {
+          var field = phase.fields[fi];
+          var fType = field.type || 'text';
+          if (fType === 'mcq') {
+            expTotal += 1;
+            var sel = (st.fieldSelections || {})[fi];
+            if (sel && field.options) {
+              var selOpt = field.options.find(function(o) { return o.id === sel; });
+              if (selOpt && selOpt.correct) expCorrect += 1;
+            }
+          } else if (fType === 'multi') {
+            var correctIds = [];
+            if (field.options) {
+              for (var oi = 0; oi < field.options.length; oi++) {
+                if (field.options[oi].correct) correctIds.push(field.options[oi].id);
+              }
+            }
+            expTotal += correctIds.length;
+            var userSels = (st.fieldSelections || {})[fi] || [];
+            for (var ui = 0; ui < userSels.length; ui++) {
+              if (correctIds.indexOf(userSels[ui]) >= 0) expCorrect += 1;
+            }
+          } else {
+            expTotal += 1;
+            expCorrect += 1; // text fields count as completed
+          }
+        }
+      }
+      entry.display = expCorrect + '/' + expTotal;
+      entry.correct = expCorrect === expTotal;
+      totalMax += expTotal;
+      totalScore += expCorrect;
     }
+
+    phaseScores.push(entry);
   });
 
-  var isPerfect = correct === total;
+  var pct = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
+  var isPerfect = pct === 100;
+
+  // Find weakest phases
+  var weakPhases = [];
+  phaseScores.forEach(function(ps) {
+    if (!ps.correct) weakPhases.push(ps.title);
+  });
+
+  var verdict = '';
+  if (pct === 100) {
+    verdict = 'Flawless execution across all phases.';
+  } else if (pct > 75) {
+    verdict = 'Strong analytical workflow.' + (weakPhases.length > 0 ? ' Minor gaps in ' + weakPhases[0] + '.' : '');
+  } else if (pct > 50) {
+    verdict = 'Solid foundation.' + (weakPhases.length > 0 ? ' Review ' + weakPhases.slice(0, 2).join(' and ') + ' for improvement.' : '');
+  } else {
+    verdict = 'This case has room for growth.' + (weakPhases.length > 0 ? ' Focus on ' + weakPhases.slice(0, 3).join(', ') + '.' : '');
+  }
 
   return (
     <div className='pal-page-enter' style={{
@@ -1173,42 +1922,96 @@ function CompletionCard(props) {
           width: '6px', height: '6px', borderRadius: '50%',
           background: isPerfect ? 'var(--green)' : 'var(--accent)', opacity: 0.12,
         }} />
-        <div style={{
-          position: 'absolute', top: '50%', left: '10px',
-          width: '3px', height: '3px', borderRadius: '50%',
-          background: isPerfect ? 'var(--green)' : 'var(--accent)', opacity: 0.08,
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '40px', right: '12px',
-          width: '4px', height: '4px', borderRadius: '50%',
-          background: isPerfect ? 'var(--green)' : 'var(--accent)', opacity: 0.1,
-        }} />
 
-        <div style={{ marginBottom: '16px' }}>
+        <div style={{ marginBottom: '20px' }}>
           <IconTrophy size={52} color={isPerfect ? '#10b981' : '#f59e0b'} />
         </div>
         <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px' }}>
           Case Complete
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '15px', margin: '0 0 24px' }}>
-          You completed all 7 phases of this full-loop case.
+        <p style={{ color: 'var(--text-muted)', fontSize: '15px', margin: '0 0 28px' }}>
+          You completed all {flCase.phases.length} phases of this full-loop case.
         </p>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '10px',
-          background: isPerfect ? 'rgba(16,185,129,0.1)' : 'rgba(59,130,246,0.08)',
-          padding: '14px 28px', borderRadius: '12px',
-          border: '1px solid ' + (isPerfect ? 'rgba(16,185,129,0.2)' : 'rgba(59,130,246,0.15)'),
-        }}>
-          <span style={{
-            fontSize: '28px', fontWeight: 700,
-            color: isPerfect ? 'var(--green)' : 'var(--accent)',
-          }}>
-            {correct}/{total}
-          </span>
-          <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
-            decision phases correct on first attempt
-          </span>
+
+        {/* Score Ring */}
+        <div style={{ marginBottom: '20px' }}>
+          <ScoreRing score={totalScore} maxScore={totalMax} />
         </div>
+
+        {/* Verdict */}
+        <p style={{
+          fontSize: '15px', fontWeight: 500, color: 'var(--text)',
+          lineHeight: '1.5', margin: '0 0 8px', maxWidth: '480px',
+          marginLeft: 'auto', marginRight: 'auto',
+        }}>
+          {verdict}
+        </p>
+      </div>
+
+      {/* Phase Timeline */}
+      <div style={{
+        background: 'var(--surface)', border: '1px solid var(--border)',
+        borderRadius: '14px', padding: '24px 20px', marginBottom: '24px',
+      }}>
+        <div style={{
+          fontWeight: 700, fontSize: '15px', color: 'var(--text)', marginBottom: '20px',
+        }}>
+          Phase Breakdown
+        </div>
+        {phaseScores.map(function(ps, i) {
+          var statusColor = ps.correct ? 'var(--green)' : 'var(--red)';
+          var isLast = i === phaseScores.length - 1;
+
+          return (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'flex-start', gap: '14px',
+              position: 'relative',
+            }}>
+              {/* Timeline line */}
+              {!isLast && (
+                <div style={{
+                  position: 'absolute', left: '17px', top: '36px',
+                  width: '2px', height: 'calc(100% - 12px)',
+                  background: ps.correct ? 'rgba(16,185,129,0.2)' : 'var(--border)',
+                }} />
+              )}
+              {/* Icon */}
+              <div style={{
+                width: '36px', height: '36px', borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: ps.correct ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)',
+                border: '2px solid ' + statusColor,
+                flexShrink: 0, zIndex: 1,
+              }}>
+                <PhaseIcon type={ps.type} size={16} />
+              </div>
+              {/* Content */}
+              <div style={{
+                flex: 1, paddingBottom: isLast ? '0' : '20px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                gap: '8px', minHeight: '36px',
+              }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>
+                    {ps.title}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    {ps.scoreType === 'decision' && (ps.correct ? 'Correct on first attempt' : 'Incorrect')}
+                    {ps.scoreType === 'sql' && ('Key elements: ' + ps.display)}
+                    {ps.scoreType === 'text' && ('Coverage: ' + ps.display)}
+                    {ps.scoreType === 'experiment' && ('Score: ' + ps.display)}
+                  </div>
+                </div>
+                <div style={{ flexShrink: 0 }}>
+                  {ps.correct
+                    ? <IconCorrect size={20} />
+                    : <IconWrong size={20} />
+                  }
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <ForwardPointerCard room='fullLoop' />
@@ -1316,13 +2119,13 @@ export function FullLoopRunner(props) {
     nextCompleted[phaseIndex] = true;
     setCompletedPhases(nextCompleted);
 
-    // Calculate score
+    // Calculate score (decision phases only for backward compat)
     var correct = 0;
     var total = 0;
     phases.forEach(function(phase, i) {
       if (phase.type === 'alert' || phase.type === 'rca' || phase.type === 'readout') {
         total += 1;
-        var st = i === phaseIndex ? phaseStates[i] : phaseStates[i];
+        var st = phaseStates[i];
         if (st && st.correct) correct += 1;
       }
     });
