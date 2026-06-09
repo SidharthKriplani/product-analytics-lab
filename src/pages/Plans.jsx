@@ -64,7 +64,7 @@ function Cell({ value, accent }) {
   return <span style={{ fontSize: '0.8rem', fontWeight: 600, color: accent || 'var(--text-muted)' }}>{value}</span>;
 }
 
-/* RAW FEEDBACK ARCHIVE — full quotes for future testimonials wall or marketing copy:
+/* RAW FEEDBACK ARCHIVE — full quotes for future marketing copy:
     Parth Gandhi (Senior Data Analyst, TCS, 4+ yrs):
       "What I really like about PAL is that the mock interviews are time-based. It gives a much more realistic interview experience."
       "PAL is short, practical, and realistic. It focuses on what actually matters during interviews rather than overwhelming you with theory."
@@ -76,6 +76,61 @@ function Cell({ value, accent }) {
       "For my prep, I have gathered many resources, but this seems like a one-stop site, like everything I need is already here."
       "One feedback: there are too much info at a time on the screen. Info is not the issue, but displaying it can be improved on."
 */
+
+// ── Testimonials Wall — full card grid, gated on 8+ entries ──
+// To activate: push an 8th entry to WALL_TESTIMONIALS. The wall renders automatically.
+const WALL_TESTIMONIALS = [
+  {
+    img: '/testimonials/amaya.jpg',
+    name: 'Amaya Bhuyan',
+    href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/',
+    role: 'Statistics track',
+    quote: 'As a complete beginner in Statistics, PAL gave me a clear, structured path — I always knew exactly what to focus on next. The progression has been genuinely helpful, and I feel like I\'m building a real foundation, not just memorising concepts.',
+  },
+  {
+    img: '/testimonials/meghana.jpg',
+    name: 'Meghana Joshi',
+    href: 'https://www.linkedin.com/in/meghana-joshi-82199537/',
+    role: 'Analyst & Assistant Professor',
+    quote: 'As someone who teaches data concepts, PAL\'s format stood out immediately — it doesn\'t let you passively scroll through. You have to actively think, which is exactly what makes it stick.',
+  },
+  {
+    img: '/testimonials/jatin.jpg',
+    name: 'Jatin Nair',
+    href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',
+    role: 'RCA track',
+    quote: 'The RCA framework on PAL gave me a structured diagnostic approach I could actually practise — not just read about. PAL helped me test whether I truly understood it and surface exactly where my gaps were.',
+  },
+  {
+    img: '/testimonials/debasrija.jpg',
+    name: 'Debasrija Mondal',
+    href: 'https://www.linkedin.com/in/debasrijamondal/',
+    role: 'Data Analyst · Stats & Design tracks',
+    quote: 'The way PAL explains p-values actually clicked for me. Being able to tweak parameters and simulate experiments made it tangible — not just theoretical. The scenarios felt closer to real interview questions than anything I\'ve seen.',
+  },
+  {
+    img: '/testimonials/swapnil.jpg',
+    name: 'Swapnil Pattanshetty',
+    href: 'https://www.linkedin.com/in/swapnil-pattanshetty/',
+    role: 'Data Scientist',
+    quote: 'As a Data Scientist, I assumed I already understood product analytics — PAL showed me the gaps. The cases on metric diagnosis, funnel drops, and A/B interpretation forced me to think like a PM, not just run numbers. The debrief format is what makes it stick.',
+  },
+  {
+    img: '/testimonials/parth.jpg',
+    name: 'Parth Gandhi',
+    href: 'https://www.linkedin.com/in/parthgandhip/',
+    role: 'Senior Data Analyst · TCS',
+    quote: 'PAL feels less like interview preparation and more like actual on-the-job training. The experimentation modules pushed me to think beyond standard frameworks, and the mix of product thinking, case studies, and SQL practice covers exactly what analytics interviews actually assess.',
+  },
+  {
+    img: '/testimonials/faizan.jpg',
+    name: 'Faizan Mulla',
+    href: 'https://www.linkedin.com/in/faizanxmulla/',
+    role: 'Data Analyst · IIT Madras',
+    quote: 'I\'ve gathered many resources for my prep, but PAL felt like a one-stop site — everything I needed was already here. I\'ve seen many interview platforms, but nothing this comprehensive for product analytics specifically.',
+  },
+  // ── Push #8 here and the wall goes live ──
+];
 const TESTIMONIALS = [
   { img: '/testimonials/amaya.jpg',    name: 'Amaya',     href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/', role: 'Statistics',     quote: 'I always knew exactly what to focus on next — it felt like a real foundation, not just memorising.' },
   { img: '/testimonials/jatin.jpg',    name: 'Jatin',     href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',   role: 'RCA track',      quote: 'PAL helped me test whether I truly understood the framework — and surface exactly where my gaps were.' },
@@ -391,6 +446,54 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
         ))}
       </div>
 
+
+      {/* ── Testimonials Wall — renders only when 8+ entries ── */}
+      {WALL_TESTIMONIALS.length >= 8 && (
+        <div style={{ marginBottom: '2.5rem' }}>
+          <h2 style={{
+            fontSize: '1.1rem', fontWeight: 800, color: 'var(--text)',
+            textAlign: 'center', margin: '0 0 1.25rem', letterSpacing: '-0.02em',
+          }}>
+            What practitioners are saying
+          </h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))',
+            gap: '1rem',
+          }}>
+            {WALL_TESTIMONIALS.map(t => (
+              <div key={t.name} style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '12px',
+                padding: '1.25rem',
+                display: 'flex',
+                flexDirection: 'column',
+              }}>
+                <p style={{
+                  fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.65,
+                  margin: '0 0 1rem', fontStyle: 'italic', flex: 1,
+                }}>
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <img
+                    src={t.img} alt={t.name}
+                    style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                  />
+                  <div>
+                    <a href={t.href} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>
+                      {t.name}
+                    </a>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div style={{
