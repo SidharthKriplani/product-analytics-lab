@@ -79,6 +79,19 @@ export function Module21_Counterfactuals({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your team shipped a new recommendation engine and revenue went up 12% this quarter. The PM credits the feature. But would revenue have grown anyway due to seasonal trends, marketing spend, or organic growth? You can\'t rewind time and observe the same quarter without the feature. That\'s the fundamental problem of causal inference.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          A/B tests solve this by creating a control group that acts as the counterfactual — the parallel universe where the feature doesn\'t exist. But not every comparison has a valid counterfactual. Classify each scenario below to sharpen your ability to spot confounded claims.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Classify Causal vs. Confounded</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         The <strong>fundamental problem of causal inference</strong>: you can never observe what would have
         happened to the same unit in a different condition. A/B tests solve this by randomly assigning

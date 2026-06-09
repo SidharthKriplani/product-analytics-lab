@@ -158,6 +158,19 @@ export function Module24_SyntheticControl({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You launched a new delivery program in Denver but nowhere else. Revenue in Denver went up 15% post-launch. But you can\'t compare Denver to "Denver without the program" — that world doesn\'t exist. And picking one comparison city is arbitrary. What if you could build a weighted blend of untreated cities that tracks Denver\'s pre-launch trajectory perfectly?
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          That\'s synthetic control: you construct a counterfactual from donor units that match the treated unit\'s pre-period behavior. The gap between the actual and synthetic trend post-treatment is your estimated causal effect. But the donor pool matters — pick the right one below and see why.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Choose the Right Donor</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         Synthetic Control builds a <strong>weighted combination of untreated units</strong> that best
         matches the treated unit's pre-period trajectory. The counterfactual is the synthetic trend

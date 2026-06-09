@@ -99,6 +99,19 @@ export function Module23_RD({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Users with a credit score above 680 get approved for a premium rewards card. Users at 679 don\'t. Does the rewards card change spending behavior? You can\'t run a randomized experiment — credit policy is fixed. But users at 679 and 681 are nearly identical in every way except whether they got the card. That tiny gap around the threshold is your natural experiment.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Regression Discontinuity exploits sharp threshold rules to estimate causal effects. The key assumption: users just above and just below the cutoff would have behaved identically without the treatment. If users can manipulate their score to land on the right side, the design breaks. Explore the outcome jump and density check below.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Examine the Threshold Jump</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         Regression Discontinuity (RD) exploits a <strong>sharp threshold rule</strong>: units just
         above vs. just below the cutoff are near-identical except for treatment assignment. This

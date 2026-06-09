@@ -88,6 +88,19 @@ export function Module11_HypothesisTesting({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Engineering shipped a latency fix last week. Page load times dropped from 3.2s to 2.9s in your sample. But is that real improvement, or just random noise? If you shipped a celebration Slack message every time the metric wiggled downward, you\'d be celebrating noise half the time. Hypothesis testing gives you a framework for deciding.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          The p-value answers one specific question: if nothing actually changed (the null hypothesis), how surprising is the data you observed? A small p-value means your data would be very unlikely under "no effect" — which is evidence that something real happened. Drag the z-score below to see how the p-value shrinks as results become more extreme.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Move the Test Statistic</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         The <strong>p-value</strong> is the probability of observing a test statistic as extreme as yours — or more extreme — if the null hypothesis were actually true.
         It's the red shaded area in the tail(s) of the null distribution. Smaller p = more surprising under H₀ = stronger evidence against it.

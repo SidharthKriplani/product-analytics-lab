@@ -97,6 +97,19 @@ export function Module16_Skewness({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your revenue data has a long right tail — the top 1% of users generate 30% of total revenue. The mean revenue per user is $15 but the median is $2. When your PM reports "average revenue is $15," most stakeholders picture a typical user spending around $15. That\'s wildly wrong.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Most product metrics — revenue, session length, LTV, order value — are right-skewed, not normal. Knowing this changes which summary stats you report, which tests you run, and whether you should log-transform before analysis. Toggle between distributions below to see skewness in action.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Compare Normal vs. Log-Normal</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         <strong>Skewness</strong> describes asymmetry in a distribution. Most product metrics — revenue per user,
         session length, LTV — are <em>right-skewed</em> (log-normal), not symmetric. A small number of power users

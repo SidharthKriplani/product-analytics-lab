@@ -47,6 +47,19 @@ export function Module03_Spread({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Two experiments both show a +5% mean lift in conversion. Your PM is ready to ship either one. But when you plot the distributions, Experiment A\'s users are tightly clustered around the mean while Experiment B\'s users are all over the map — some gained 40%, others lost 20%. Same average, wildly different risk profiles.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Variance and standard deviation quantify that spread. Without them, you\'re flying blind — you know the center but not how much individual outcomes scatter around it. Drag the slider below to stretch or compress the data and see how variance responds.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Stretch the Spread</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         Each deviation line below represents how far a single point sits from the mean. Variance averages the squared deviations — squaring penalizes large outliers more.
       </p>

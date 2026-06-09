@@ -96,6 +96,19 @@ export function Module10_CI({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your PM asks "what\'s the conversion rate?" You say 4.2%. But that\'s a point estimate from one sample — it could easily be 3.8% or 4.6% if you measured again tomorrow. Giving a single number without a range is misleading because it hides uncertainty. A confidence interval fixes this.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          A 95% CI means: if you repeated this experiment 100 times, about 95 of those intervals would contain the true value. It does NOT mean there\'s a 95% chance the true value is in this specific interval. Simulate below to see how many intervals actually capture the truth.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Simulate Confidence Intervals</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         A <strong>confidence interval</strong> gives a range that — if you repeated the experiment many times —
         would contain the true parameter in X% of those repetitions. The width depends on your confidence level

@@ -70,6 +70,19 @@ export function Module18_RegressionToMean({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your top 10 sales reps crushed it last quarter. This quarter, their numbers dropped. The VP blames the new compensation plan. But you pull the data and notice something: the bottom 10 reps from last quarter improved too — without any intervention. Both groups moved toward the average. That\'s regression to the mean, not a management failure.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Any time you select a group based on an extreme measurement, their next measurement will tend to be less extreme — because the first measurement contained random noise that happened to push them up (or down). Without a control group, you cannot distinguish regression from a real effect. Watch it happen below.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Watch Extreme Performers Regress</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         <strong>Regression to the mean</strong>: when you select extreme performers based on a noisy first measurement,
         their second measurement tends to be less extreme — not because anything changed, but because the first measurement

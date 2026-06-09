@@ -125,6 +125,19 @@ export function Module07_Sampling({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You need to estimate the average daily active usage time for a product with 50 million users. You obviously can\'t query every single user\'s data in real time. So you take a sample — but how large does that sample need to be, and how much will your estimate jump around from sample to sample?
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Every metric you report in a dashboard is a sample statistic, not the true population value. Understanding sampling variability is what separates analysts who say "the number is 7.3" from analysts who say "the number is 7.3 plus or minus 0.4." Draw repeated samples below to see how sample means scatter around the truth.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Draw Repeated Samples</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         We can never measure an entire population, so we take a <strong>sample</strong> and compute a statistic like the mean.
         Each sample gives a slightly different mean — but those sample means cluster around the true population mean.

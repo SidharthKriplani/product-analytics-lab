@@ -88,6 +88,19 @@ export function Module01_WhatIsData({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You just joined a new product team and your first task is to make sense of an event log with 50 columns. Some columns hold numbers like session duration and purchase count. Others hold labels like country, device type, and subscription tier. Before you can compute a single metric, you need to know which columns are which — because the math you use on a number makes no sense on a label.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Your lead asks you to sort the event schema into numerical vs. categorical fields so the team can set up the right aggregations in the dashboard. Get it wrong and you\'ll end up averaging country codes or counting medians of device names. Drag each variable into the correct bucket below.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Sort the Variables</div>
+
       {/* Explanation */}
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         Statistics is the toolkit that lets analysts draw reliable conclusions from noisy data — deciding whether an observed difference is real or random, how confident to be in a measurement, and how large a sample is needed to detect a true effect. Every A/B test, every experiment result, every metric significance call relies on these foundations. Every experiment metric is a numerical variable measured on each user — but knowing the type shapes how you summarize and test it.

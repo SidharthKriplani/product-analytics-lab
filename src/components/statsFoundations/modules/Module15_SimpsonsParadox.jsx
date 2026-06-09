@@ -61,6 +61,19 @@ export function Module15_SimpsonsParadox({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Every region improved its conversion rate this quarter, but the national conversion rate went down. Your VP is confused and thinks someone made a data error. They didn\'t — this is Simpson\'s Paradox, and it happens when the mix of subgroups shifts between periods.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          It\'s one of the most dangerous traps in A/B testing and metric reporting. A treatment can win in every segment but lose overall because the segments have different sizes and different baseline rates. The example below shows exactly how this happens with a checkout flow experiment.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Unpack the Paradox</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         <strong>Simpson's Paradox</strong> occurs when a trend present in each subgroup of data disappears — or
         reverses — when those groups are combined. It's one of the most dangerous traps in A/B test analysis.

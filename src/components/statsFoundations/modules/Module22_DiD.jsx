@@ -71,6 +71,19 @@ export function Module22_DiD({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          A new pricing policy rolled out in one market but not another. Revenue in the treated market went up 8%. But the untreated market also went up 5% over the same period — there was an industry-wide tailwind. The naive before-after comparison overstates the policy\'s impact by 5 percentage points. You need a method that subtracts out the shared trend.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Difference-in-Differences does exactly that: it compares the change in the treatment group to the change in the control group. The difference of the two differences isolates the causal effect. Adjust the values below to see how DiD separates treatment impact from background trends.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Compute the Double Difference</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         Difference-in-Differences (DiD) compares the <strong>change</strong> in the treatment group
         against the <strong>change</strong> in the control group over the same period.

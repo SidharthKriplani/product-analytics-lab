@@ -72,6 +72,19 @@ export function Module02_CentralTendency({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your PM shares a slide that says average revenue per user is $12 and the business is healthy. But when you pull the raw data, the median is only $3. Most users spend almost nothing — a handful of whales are dragging the average up. The PM\'s story is technically true but deeply misleading.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          This is the classic mean vs. median trap. Understanding when each measure tells the real story — and when it hides it — is the foundation of every metric you\'ll ever report. Add an outlier below and watch the mean chase it while the median barely moves.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Add Points and Watch the Measures Shift</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         The mean weighs every value equally — so one extreme outlier can drag it far from the rest. The median only cares about rank order, making it robust to extremes.
       </p>

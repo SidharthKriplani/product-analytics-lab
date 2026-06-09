@@ -71,6 +71,19 @@ export function Module08_StandardError({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You pull the average session duration and it says 8.2 minutes. You refresh the query an hour later and it says 7.9. Tomorrow it says 8.5. Your PM asks why the number keeps bouncing. The answer is standard error — every sample mean has built-in wobble, and the SE tells you exactly how much wobble to expect.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          The critical insight: SE shrinks with the square root of sample size, not linearly. That means you need 4x the users to cut the wobble in half. Drag the slider below and watch the sampling distribution narrow as n grows — but notice the diminishing returns.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Watch Precision Scale with Sample Size</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         The <strong>Standard Error (SE)</strong> measures how much your sample mean varies from sample to sample.
         It equals the population standard deviation divided by the square root of n — so larger samples produce smaller (more precise) SEs.

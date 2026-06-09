@@ -70,6 +70,19 @@ export function Module25_IV({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Users who opt into your premium coaching feature have 30% higher retention. But they self-selected — maybe they were already more motivated. You can\'t randomize access for ethical and business reasons. So you look for an instrument: something that nudged users toward the feature but couldn\'t directly affect retention.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Instrumental Variables isolates the variation in treatment that\'s essentially random — like being shown a promotional banner due to a random UI experiment. The banner affects whether users adopt the feature but has no direct path to retention. If the instrument is valid, you can estimate the true causal effect despite self-selection. Match the three IV conditions below.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Match the IV Conditions</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         Instrumental Variables (IV) uses a third variable — the <strong>instrument</strong> — that causes
         the treatment but has no direct effect on the outcome. This isolates the variation in treatment

@@ -79,6 +79,19 @@ export function Module04_NormalDist({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You plot your experiment\'s primary metric — time-to-checkout in seconds — and it forms a clean bell shape. Your stats lead says that\'s good news: a normal distribution means you can use z-tests, build confidence intervals, and run power calculations with well-understood formulas.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          But what exactly defines that bell? Just two numbers: the mean (where the peak sits) and the standard deviation (how wide the bell spreads). Move the sliders below to see how these two parameters completely control the shape.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Shape the Bell Curve</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         The normal distribution is a symmetric bell curve defined entirely by its mean μ and standard deviation σ.
         Use the sliders to shift and reshape the curve. Notice that changing σ widens the bell (more spread) while μ slides it left or right.

@@ -146,6 +146,19 @@ export function Module12_Power({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your A/B test ran for 4 weeks. The treatment group showed +2% conversion lift, but p = 0.18 — not significant. The PM says the experiment failed. But did it? Maybe the effect is real and you just didn\'t have enough users to detect it. That\'s a power problem, not a results problem.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Statistical power is the probability of correctly detecting a real effect. An underpowered test is like trying to read a street sign from a mile away — the sign exists, you just can\'t see it. Adjust the sliders below to see how effect size, sample size, and alpha all control whether you\'ll catch a real improvement.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Tune the Power Dial</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         <strong>Statistical power</strong> is the probability of detecting a real effect when one truly exists.
         It's the green area under the alternative hypothesis curve beyond the critical value.

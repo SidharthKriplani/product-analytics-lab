@@ -36,77 +36,171 @@ function shuffleEF(arr) {
 }
 
 // ── Module EF01: Why We Experiment ─────────────────────────────────────────
+var EF01_CLAIMS = [
+  { id: 'c1', text: 'Users who complete onboarding have 3x higher retention', answer: 'correlation', explanation: 'Users who complete onboarding may be more motivated to begin with. The onboarding didn\'t necessarily cause retention — motivated users both finish onboarding and stick around.' },
+  { id: 'c2', text: 'Countries that eat more chocolate win more Nobel prizes', answer: 'correlation', explanation: 'A famous spurious correlation. Wealth drives both chocolate consumption and research funding. There is no causal mechanism from chocolate to Nobel prizes.' },
+  { id: 'c3', text: 'Adding a progress bar increased signup completion by 12% in our A/B test', answer: 'causal', explanation: 'This came from a controlled A/B test with random assignment. The only systematic difference between groups was the progress bar, so the 12% lift is a causal estimate.' },
+  { id: 'c4', text: 'Power users who enable notifications churn 40% less', answer: 'correlation', explanation: 'Power users are already more engaged — they enable notifications because they care, and they churn less because they\'re invested. The notification setting is a symptom of engagement, not a cause of retention.' },
+  { id: 'c5', text: 'We randomly assigned 50% of new users to a simplified pricing page and saw 8% higher plan upgrades', answer: 'causal', explanation: 'Random assignment ensures the groups are comparable. The simplified pricing page is the only systematic difference, so the 8% lift is causal.' },
+  { id: 'c6', text: 'Customers who contact support within their first week have 2x higher lifetime value', answer: 'correlation', explanation: 'Customers who contact support early may be more invested in the product. The support interaction correlates with engagement, but didn\'t cause the higher LTV.' },
+];
+
 function Module_EF01({ onComplete }) {
-  const _saved01 = useMemo(function() { return loadEFState('ef01'); }, []);
-  const [answer, setAnswer] = useState(_saved01 ? _saved01.answer : null);
-  const [revealed, setRevealed] = useState(_saved01 ? _saved01.revealed : false);
+  var saved01 = useMemo(function() { return loadEFState('ef01'); }, []);
+  var [classifications, setClassifications] = useState(function() { return saved01 && saved01.classifications ? saved01.classifications : {}; });
+  var [revealed, setRevealed] = useState(function() { return saved01 ? saved01.revealed : false; });
+  var [mcqAnswer, setMcqAnswer] = useState(function() { return saved01 ? saved01.mcqAnswer : null; });
+  var [mcqRevealed, setMcqRevealed] = useState(function() { return saved01 ? saved01.mcqRevealed : false; });
 
-  useEffect(function() { saveEFState('ef01', { answer: answer, revealed: revealed }); }, [answer, revealed]);
+  useEffect(function() {
+    saveEFState('ef01', { classifications: classifications, revealed: revealed, mcqAnswer: mcqAnswer, mcqRevealed: mcqRevealed });
+  }, [classifications, revealed, mcqAnswer, mcqRevealed]);
 
-  const question = 'A PM notices checkout rate is 12% for users who see the new CTA, vs 9% for others. They conclude the CTA causes higher conversion. What\'s wrong?';
+  function handleClassify(id, value) {
+    if (revealed) return;
+    var next = Object.assign({}, classifications);
+    next[id] = value;
+    setClassifications(next);
+  }
 
-  const options = [
-    { label: 'A. The comparison period is too short — seasonal effects could explain the 3pp difference', correct: false },
-    { label: 'B. Correlation is not causation — users who see the CTA may differ systematically from those who don\'t', correct: true },
-    { label: 'C. The 12% vs 9% gap may not be practically significant for the business even if it\'s statistically real', correct: false },
-    { label: 'D. The sample needs to be stratified by user segment before any comparison is valid', correct: false },
+  var allClassified = Object.keys(classifications).length === EF01_CLAIMS.length;
+  var correctCount = 0;
+  if (revealed) {
+    EF01_CLAIMS.forEach(function(c) {
+      if (classifications[c.id] === c.answer) correctCount++;
+    });
+  }
+
+  var mcqOptions = [
+    { label: 'A. A strong relationship (r > 0.8) between two variables is sufficient evidence of causation', correct: false },
+    { label: 'B. Only controlled experiments with random assignment can establish causality — observational data shows correlation regardless of effect size', correct: true },
+    { label: 'C. Causation requires a large sample size; correlation is what you get with small samples', correct: false },
+    { label: 'D. If you control for confounders in a regression, the remaining effect is causal', correct: false },
   ];
 
   return (
-    <div>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        This module covers why observational data is not enough to establish causality, and how A/B testing solves
-        the fundamental problem of selection bias. Understanding this distinction is the foundation of every
-        experimentation conversation in a PM or analyst interview.
-      </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        Observational data seems simple: compare the group that saw the feature with the group that did not.
-        But this comparison has a fundamental flaw that A/B testing is designed to fix.
-      </p>
-
-      <div style={{
-        background: 'var(--surface-2)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', marginBottom: '1.25rem',
-        fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.6,
-      }}>
-        <strong>Question:</strong> {question}
+      {/* ── The Scenario ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your analytics team presents a finding: users who completed the new onboarding flow have 3x higher 30-day retention than those who skipped it. The product lead wants to invest the entire Q3 roadmap into forcing all users through the onboarding flow.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          But wait. The users who completed onboarding chose to do so. They were already more motivated, more curious, more likely to stick around. The onboarding didn\'t necessarily cause their retention — their motivation caused both behaviors. This is the fundamental problem: without random assignment, you cannot separate what the product did from who the users already were.
+        </p>
       </div>
 
-      <InstructionBox>
-        Select the answer that best captures the flaw in the PM's reasoning. Focus on what is different
-        about the two groups before any treatment was applied.
-      </InstructionBox>
+      {/* ── The Concept + Interactive Demo ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Causality Classifier</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 0.75rem', fontSize: '0.9rem' }}>
+          Below are six real-world claims. For each one, decide: is this evidence of a <strong>causal</strong> relationship (from a controlled experiment), or merely a <strong>correlation</strong> (from observational data)? The distinction is everything.
+        </p>
 
-      {options.map((opt, i) => (
-        <MCQOption
-          key={i}
-          label={opt.label}
-          selected={answer === i}
-          correct={opt.correct}
-          revealed={revealed}
-          onClick={() => !revealed && setAnswer(i)}
-        />
-      ))}
+        <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
+          {EF01_CLAIMS.map(function(claim, idx) {
+            var userChoice = classifications[claim.id];
+            var isCorrect = userChoice === claim.answer;
+            return (
+              <div key={claim.id} style={{ marginBottom: idx < EF01_CLAIMS.length - 1 ? '1rem' : 0 }}>
+                <div style={{ fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.6, marginBottom: '0.5rem', fontWeight: 600 }}>
+                  {idx + 1}. {claim.text}
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={function() { handleClassify(claim.id, 'causal'); }}
+                    style={{
+                      padding: '0.35rem 0.85rem', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', fontWeight: 600, cursor: revealed ? 'default' : 'pointer',
+                      border: '1.5px solid ' + (userChoice === 'causal' ? 'var(--accent)' : 'var(--border)'),
+                      background: userChoice === 'causal' ? 'var(--accent-bg)' : 'var(--surface)',
+                      color: userChoice === 'causal' ? 'var(--accent)' : 'var(--text-muted)',
+                    }}
+                  >Causal</button>
+                  <button
+                    onClick={function() { handleClassify(claim.id, 'correlation'); }}
+                    style={{
+                      padding: '0.35rem 0.85rem', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', fontWeight: 600, cursor: revealed ? 'default' : 'pointer',
+                      border: '1.5px solid ' + (userChoice === 'correlation' ? 'var(--purple)' : 'var(--border)'),
+                      background: userChoice === 'correlation' ? 'var(--purple-bg)' : 'var(--surface)',
+                      color: userChoice === 'correlation' ? 'var(--purple)' : 'var(--text-muted)',
+                    }}
+                  >Correlational</button>
+                </div>
+                {revealed && (
+                  <div className='pal-reveal-in' style={{
+                    marginTop: '0.4rem', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', lineHeight: 1.5,
+                    background: isCorrect ? 'var(--teal-bg)' : 'var(--red-bg)',
+                    border: '1px solid ' + (isCorrect ? 'var(--teal-border)' : 'var(--red-border)'),
+                    color: 'var(--text)',
+                  }}>
+                    <strong>{isCorrect ? 'Correct. ' : 'Not quite. '}</strong>{claim.explanation}
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
-      {answer !== null && !revealed && <CheckBtn onClick={() => setRevealed(true)} />}
+          {allClassified && !revealed && (
+            <div style={{ marginTop: '1rem' }}>
+              <CheckBtn onClick={function() { setRevealed(true); }} />
+            </div>
+          )}
+          {revealed && (
+            <div className='pal-reveal-in' style={{ marginTop: '1rem', padding: '0.6rem 1rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', border: '1px solid var(--border)', fontSize: '0.85rem', color: 'var(--text)' }}>
+              You got <strong>{correctCount}</strong> out of <strong>{EF01_CLAIMS.length}</strong> correct. The pattern: the only claims that are causal are the ones from controlled A/B tests with random assignment. Everything else — no matter how strong the relationship looks — is correlation.
+            </div>
+          )}
+        </div>
+      </div>
 
+      {/* ── The Framework ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Framework</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          When someone presents a data finding, ask one question: <strong>was there random assignment?</strong> If users were randomly split into treatment and control, the comparison is causal. If users self-selected into groups (completed onboarding vs didn\'t, enabled notifications vs didn\'t, purchased vs didn\'t), the comparison is correlational — no matter how large the effect size, how many users are in the sample, or how many confounders you control for in a regression.
+        </p>
+      </div>
+
+      {/* ── Quick Check ── */}
       {revealed && (
-        <div>
-          <div style={{
-            marginTop: '0.5rem', padding: '0.65rem 0.85rem',
-            background: options[answer] && options[answer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
-            border: '1px solid ' + (options[answer] && options[answer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
-            borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5,
-          }}>
-            Users who see the new CTA are not a random sample — they may be more engaged, further in the funnel, or on a specific device. The higher checkout rate may reflect who they are, not what the CTA did. This is selection bias, and it is why observational comparisons cannot establish causality. Option A (seasonality) and D (stratification) both identify real issues that matter in experiment design — but they are not the primary flaw in an observational comparison. Option C (practical significance) would be a relevant concern after confirming causality, not before.
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem' }}>
+          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Quick Check</div>
+          <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.88rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+            Which statement best captures the relationship between correlation and causation?
           </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            {mcqOptions.map(function(opt, i) {
+              return (
+                <MCQOption key={i} label={opt.label} selected={mcqAnswer === i} correct={opt.correct} revealed={mcqRevealed} onClick={function() { if (!mcqRevealed) setMcqAnswer(i); }} />
+              );
+            })}
+          </div>
+          {mcqAnswer !== null && !mcqRevealed && (
+            <CheckBtn onClick={function() { setMcqRevealed(true); }} />
+          )}
+          {mcqRevealed && (
+            <div className='pal-reveal-in' style={{
+              marginTop: '0.75rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', lineHeight: 1.55,
+              background: mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
+              border: '1px solid ' + (mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
+              color: 'var(--text)',
+            }}>
+              <strong>{mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'Correct. ' : 'Not quite. '}</strong>
+              Regression can reduce confounding but never eliminates it — there are always unmeasured confounders. Large samples increase statistical power but don\'t fix selection bias. Only random assignment guarantees that the groups are comparable on every dimension, measured and unmeasured.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Key Takeaway ── */}
+      {mcqRevealed && (
+        <div>
           <InsightBox>
-            Observational comparisons confound treatment with selection bias. Only random assignment breaks
-            the confound — it ensures the only systematic difference between groups is the treatment itself.
-            That is why A/B tests beat intuition, analytics dashboards, and before/after comparisons.
+            Observational data tells you what happened. Only experiments tell you why. The difference is random assignment — it breaks the link between who the users are and what treatment they received. Every other method, no matter how sophisticated, leaves the door open to confounders you haven\'t measured.
           </InsightBox>
-          <NextBtn onClick={onComplete} label="Complete module →" />
+          <NextBtn onClick={onComplete} />
         </div>
       )}
     </div>
@@ -164,6 +258,11 @@ function Module_EF02({ onComplete }) {
 
   return (
     <div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+        Your PM wants to A/B test a new one-click checkout flow. She proposes randomizing by session: each time a user visits, they\'re independently assigned to control or treatment. On paper this sounds fine — more sessions means more data. But a returning user might see the old checkout on Monday and the new one on Tuesday. They\'re confused, they abandon, and support tickets spike. Worse, if a user converts in treatment and then returns in control, their behavior is contaminated — you can\'t attribute the purchase cleanly. Session-level randomization is one of the most common design mistakes interviewers probe for, and it shows up in every checkout, subscription, and onboarding experiment.
+      </p>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
         This module covers how to choose the right randomization unit for different experiment types.
         Picking the wrong unit is one of the most common design mistakes interviewers probe for — it causes
@@ -175,6 +274,8 @@ function Module_EF02({ onComplete }) {
         Picking the wrong unit causes inconsistent user experiences, spillover, or inflated false positive rates.
         Classify each scenario to the correct randomization unit.
       </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Classify each experiment to the correct randomization unit</div>
 
       <InstructionBox>
         Assign each scenario to the correct randomization unit by clicking one of the four buttons below
@@ -272,147 +373,177 @@ function Module_EF02({ onComplete }) {
 
 // ── Module EF03: Statistical Power and MDE ─────────────────────────────────
 function Module_EF03({ onComplete }) {
-  const _saved03 = useMemo(function() { return loadEFState('ef03'); }, []);
-  const [part1Answer, setPart1Answer] = useState(_saved03 ? _saved03.part1Answer : null);
-  const [part1Revealed, setPart1Revealed] = useState(_saved03 ? _saved03.part1Revealed : false);
-  const [part2Answer, setPart2Answer] = useState(_saved03 ? _saved03.part2Answer : null);
-  const [part2Revealed, setPart2Revealed] = useState(_saved03 ? _saved03.part2Revealed : false);
+  var saved03 = useMemo(function() { return loadEFState('ef03'); }, []);
+  var [baseline, setBaseline] = useState(function() { return saved03 && saved03.baseline !== undefined ? saved03.baseline : 15; });
+  var [mdeRel, setMdeRel] = useState(function() { return saved03 && saved03.mdeRel !== undefined ? saved03.mdeRel : 5; });
+  var [sigLevel, setSigLevel] = useState(function() { return saved03 && saved03.sigLevel !== undefined ? saved03.sigLevel : 5; });
+  var [triedPreset, setTriedPreset] = useState(function() { return saved03 ? saved03.triedPreset : false; });
+  var [mcqAnswer, setMcqAnswer] = useState(function() { return saved03 ? saved03.mcqAnswer : null; });
+  var [mcqRevealed, setMcqRevealed] = useState(function() { return saved03 ? saved03.mcqRevealed : false; });
 
-  useEffect(function() { saveEFState('ef03', { part1Answer: part1Answer, part1Revealed: part1Revealed, part2Answer: part2Answer, part2Revealed: part2Revealed }); }, [part1Answer, part1Revealed, part2Answer, part2Revealed]);
+  useEffect(function() {
+    saveEFState('ef03', { baseline: baseline, mdeRel: mdeRel, sigLevel: sigLevel, triedPreset: triedPreset, mcqAnswer: mcqAnswer, mcqRevealed: mcqRevealed });
+  }, [baseline, mdeRel, sigLevel, triedPreset, mcqAnswer, mcqRevealed]);
 
-  const part1Options = [
-    { label: 'A. 2 days', correct: false },
-    { label: 'B. 7 days', correct: false },
-    { label: 'C. 30 days', correct: true },
-    { label: 'D. 90+ days', correct: false },
-  ];
+  // Z-scores for common alpha levels (two-tailed)
+  function getZAlpha(alpha) {
+    if (alpha <= 1) return 2.576;
+    if (alpha <= 2) return 2.326;
+    if (alpha <= 3) return 2.17;
+    if (alpha <= 5) return 1.96;
+    if (alpha <= 7) return 1.81;
+    return 1.645;
+  }
+  var zAlpha = getZAlpha(sigLevel);
+  var zBeta = 0.84; // 80% power
 
-  const part2Options = [
-    { label: 'A. Doubles', correct: false },
-    { label: 'B. Quadruples', correct: true },
-    { label: 'C. Stays the same', correct: false },
-    { label: 'D. Halves', correct: false },
+  var p = baseline / 100;
+  var delta = p * (mdeRel / 100);
+  var nPerArm = delta > 0 ? Math.ceil(Math.pow(zAlpha + zBeta, 2) * 2 * p * (1 - p) / Math.pow(delta, 2)) : 999999999;
+  var dailyTraffic = 10000;
+  var weeks = Math.ceil((nPerArm * 2 / dailyTraffic) / 7 * 10) / 10;
+
+  function handlePreset() {
+    setBaseline(15);
+    setMdeRel(5);
+    setSigLevel(5);
+    setTriedPreset(true);
+  }
+
+  var mcqOptions = [
+    { label: 'A. It doubles — sample size scales linearly with 1/MDE', correct: false },
+    { label: 'B. It quadruples — sample size scales with 1/MDE squared, so halving MDE means 4x the sample', correct: true },
+    { label: 'C. It stays the same — MDE only affects the analysis, not the required sample', correct: false },
+    { label: 'D. It depends entirely on the baseline rate, not the MDE', correct: false },
   ];
 
   return (
-    <div>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        This module covers how to size an experiment before running it. Power calculations and MDE are
-        almost always tested in PM and analyst interviews — knowing the 1/MDE-squared relationship is
-        the difference between a confident answer and a hand-wave.
-      </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        Sizing an experiment before you run it is non-negotiable. Running underpowered experiments wastes time
-        and produces uninterpretable null results. Two key inputs: minimum detectable effect (MDE) and baseline rate (your current conversion rate before the test).
-      </p>
+      {/* ── The Scenario ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your PM wants to test a new checkout flow. The current signup completion rate is 15%. She asks: "How long will this experiment take to run?" You need to answer with a number, not a shrug.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          The answer depends on three inputs: your baseline rate, how small an effect you need to detect (the MDE), and how much false-positive risk you\'re willing to tolerate (significance level). Getting these wrong means either running an experiment for months that should take weeks, or shipping a result that was never real.
+        </p>
+      </div>
 
-      {/* Part 1 */}
-      <div style={{
-        background: 'var(--surface-2)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', marginBottom: '1rem',
-      }}>
-        <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
-          Part 1 of 2
+      {/* ── The Concept + Interactive Demo ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Power Calculator Playground</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 0.75rem', fontSize: '0.9rem' }}>
+          Drag the sliders to see how baseline rate, MDE, and significance level affect sample size. The formula: n per arm = (Z_alpha + Z_beta)^2 * 2p(1-p) / delta^2, where delta = baseline * relative MDE. Watch how small MDE changes cause massive sample size swings.
+        </p>
+
+        <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
+          {/* Preset button */}
+          <div style={{ marginBottom: '1rem' }}>
+            <button onClick={handlePreset} style={{
+              padding: '0.35rem 0.85rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
+              border: '1.5px solid var(--accent)', background: triedPreset ? 'var(--accent-bg)' : 'var(--surface)', color: 'var(--accent)',
+            }}>
+              Preset: Typical signup flow (15% baseline, 5% relative MDE)
+            </button>
+          </div>
+
+          {/* Baseline slider */}
+          <div style={{ marginBottom: '0.85rem' }}>
+            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+              Baseline rate: <strong style={{ color: 'var(--text)' }}>{baseline}%</strong>
+            </label>
+            <input type='range' min={1} max={50} step={1} value={baseline} onChange={function(e) { setBaseline(Number(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+          </div>
+
+          {/* MDE slider */}
+          <div style={{ marginBottom: '0.85rem' }}>
+            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+              MDE (relative lift): <strong style={{ color: 'var(--text)' }}>{mdeRel}%</strong>
+              <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>(absolute: {(p * mdeRel / 100 * 100).toFixed(2)}pp)</span>
+            </label>
+            <input type='range' min={1} max={20} step={1} value={mdeRel} onChange={function(e) { setMdeRel(Number(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+          </div>
+
+          {/* Significance slider */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+              Significance level (alpha): <strong style={{ color: 'var(--text)' }}>{sigLevel}%</strong>
+            </label>
+            <input type='range' min={1} max={10} step={1} value={sigLevel} onChange={function(e) { setSigLevel(Number(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+          </div>
+
+          {/* Results display */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.3rem' }}>Sample per arm</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent)' }}>{nPerArm > 9999999 ? '---' : nPerArm.toLocaleString()}</div>
+            </div>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.3rem' }}>Total sample (2 arms)</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)' }}>{nPerArm > 9999999 ? '---' : (nPerArm * 2).toLocaleString()}</div>
+            </div>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.3rem' }}>At 10K users/day</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: weeks > 8 ? 'var(--red)' : weeks > 4 ? 'var(--yellow)' : 'var(--teal)' }}>
+                {nPerArm > 9999999 ? '---' : weeks + ' weeks'}
+              </div>
+            </div>
+          </div>
+
+          {weeks > 8 && nPerArm < 9999999 && (
+            <div className='pal-reveal-in' style={{ padding: '0.5rem 0.85rem', borderRadius: 'var(--radius-sm)', background: 'var(--red-bg)', border: '1px solid var(--red-border)', fontSize: '0.82rem', color: 'var(--red)', lineHeight: 1.5 }}>
+              Over 8 weeks is a long experiment. Consider increasing MDE (accept detecting only larger effects) or narrowing your target population to boost the baseline rate.
+            </div>
+          )}
         </div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.6, marginBottom: '1rem' }}>
-          Your baseline CTR is 5%. You want to detect a 0.5pp lift (MDE = 0.5pp) with 80% power at
-          alpha = 0.05. You get 10,000 users per day. Roughly how long will the experiment need to run?
+      </div>
+
+      {/* ── The Framework ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Framework</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Before running any experiment, answer three questions: <strong>(1)</strong> What is the baseline rate? <strong>(2)</strong> What is the smallest effect worth detecting (MDE)? <strong>(3)</strong> Does my traffic support the runtime the power calculation implies? If the answer to #3 is no, you have three options: accept a larger MDE, narrow the experiment to a higher-traffic segment, or don\'t run the experiment. Never run an underpowered test — a null result from an underpowered test is uninterpretable.
+        </p>
+      </div>
+
+      {/* ── Quick Check ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Quick Check</div>
+        <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.88rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+          You halve your MDE from 2% relative to 1% relative. What happens to the required sample size?
         </div>
-
-        <InstructionBox>
-          Select the runtime estimate that best matches the given parameters. Think about how many total
-          users are needed at 80% power before dividing by daily traffic.
-        </InstructionBox>
-
-        {part1Options.map((opt, i) => (
-          <MCQOption
-            key={i}
-            label={opt.label}
-            selected={part1Answer === i}
-            correct={opt.correct}
-            revealed={part1Revealed}
-            onClick={() => !part1Revealed && setPart1Answer(i)}
-          />
-        ))}
-
-        {part1Answer !== null && !part1Revealed && (
-          <CheckBtn onClick={() => setPart1Revealed(true)} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {mcqOptions.map(function(opt, i) {
+            return (
+              <MCQOption key={i} label={opt.label} selected={mcqAnswer === i} correct={opt.correct} revealed={mcqRevealed} onClick={function() { if (!mcqRevealed) setMcqAnswer(i); }} />
+            );
+          })}
+        </div>
+        {mcqAnswer !== null && !mcqRevealed && (
+          <CheckBtn onClick={function() { setMcqRevealed(true); }} />
         )}
-
-        {part1Revealed && (
-          <div style={{
-            marginTop: '0.5rem', padding: '0.65rem 0.85rem',
-            background: part1Options[part1Answer] && part1Options[part1Answer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
-            border: '1px solid ' + (part1Options[part1Answer] && part1Options[part1Answer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
-            borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5,
+        {mcqRevealed && (
+          <div className='pal-reveal-in' style={{
+            marginTop: '0.75rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', lineHeight: 1.55,
+            background: mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
+            border: '1px solid ' + (mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
+            color: 'var(--text)',
           }}>
-            At 5% baseline, detecting a 0.5pp lift (10% relative) at 80% power requires roughly 250,000–300,000
-            users per variant, or 500,000–600,000 total. At 10,000 users/day that is 50–60 days.
-            A commonly used rule of thumb for this baseline/MDE combo gives approximately 25–30 days per variant
-            split — so around 30 days total is the closest answer.
+            <strong>{mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'Correct. ' : 'Not quite. '}</strong>
+            n is proportional to 1/MDE^2. Halving MDE means the ratio is 2, and 2^2 = 4. The sample quadruples. This is the single most important relationship in experiment sizing — small MDE ambitions create enormous sample requirements.
           </div>
         )}
       </div>
 
-      {/* Part 2 — show after Part 1 answered */}
-      {part1Revealed && (
-        <div style={{
-          background: 'var(--surface-2)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', marginBottom: '1rem',
-        }}>
-          <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
-            Part 2 of 2
-          </div>
-          <div style={{ fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.6, marginBottom: '1rem' }}>
-            You reduce your MDE from 0.5pp to 0.25pp (you want to detect a smaller effect).
-            What happens to the required sample size?
-          </div>
-
-          <InstructionBox>
-            Select what happens to required sample size when MDE is halved. Recall that sample size
-            scales with 1/MDE squared and apply that relationship to the specific numbers here.
-          </InstructionBox>
-
-          {part2Options.map((opt, i) => (
-            <MCQOption
-              key={i}
-              label={opt.label}
-              selected={part2Answer === i}
-              correct={opt.correct}
-              revealed={part2Revealed}
-              onClick={() => !part2Revealed && setPart2Answer(i)}
-            />
-          ))}
-
-          {part2Answer !== null && !part2Revealed && (
-            <CheckBtn onClick={() => setPart2Revealed(true)} />
-          )}
-
-          {part2Revealed && (
-            <div style={{
-              marginTop: '0.5rem', padding: '0.65rem 0.85rem',
-              background: part2Options[part2Answer] && part2Options[part2Answer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
-              border: '1px solid ' + (part2Options[part2Answer] && part2Options[part2Answer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
-              borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5,
-            }}>
-              Sample size scales with 1/MDE squared. Halving the MDE from 0.5pp to 0.25pp means
-              MDE ratio = 0.5/0.25 = 2, and 2 squared = 4. Required sample size quadruples.
-              This is the most important formula in experiment design.
-            </div>
-          )}
-        </div>
-      )}
-
-      {part2Revealed && (
+      {/* ── Key Takeaway ── */}
+      {mcqRevealed && (
         <div>
           <InsightBox>
-            n proportional to 1/MDE squared. This is the central tradeoff: ambitious MDEs require
-            exponentially more traffic. Most teams underpower experiments by setting overly optimistic MDE
-            targets. Always run the power calculation first and check whether your traffic supports the
-            runtime implied by your MDE.
+            Sample size scales with 1/MDE squared. This is the central tradeoff in experiment design: the smaller the effect you want to detect, the exponentially more traffic you need. Always run the power calculation before committing to an experiment, and be honest about whether your traffic can support the MDE your stakeholders want.
           </InsightBox>
-          <NextBtn onClick={onComplete} label="Complete module →" />
+          <NextBtn onClick={onComplete} />
         </div>
       )}
     </div>
@@ -462,6 +593,11 @@ function Module_EF04({ onComplete }) {
 
   return (
     <div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+        Your team just wrapped a two-week A/B test on the new search ranking algorithm. The PM pulls up the dashboard and announces to the room: "p-value is 0.04 — the result is significant, let\'s ship it." The VP of Product asks a follow-up: "So there\'s a 96% chance the new algorithm is better?" The data scientist on your team winces. Neither statement is quite right, and the distinction matters — because the team is about to make a launch decision based on a number most people in the room are misinterpreting. This is the single most common statistical misunderstanding in product experimentation, and interviewers test it relentlessly.
+      </p>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
         This module tests whether you can correctly interpret p-values and confidence intervals — the most
         commonly misquoted statistics in product experimentation. Interviewers routinely probe these
@@ -472,6 +608,8 @@ function Module_EF04({ onComplete }) {
         p-values and confidence intervals are the most misquoted statistics in product experimentation.
         Mark each statement TRUE or FALSE, then check.
       </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Identify which statistical claims are true and which are common misconceptions</div>
 
       <InstructionBox>
         Read each statement carefully and click TRUE or FALSE. Think about what the statistic actually
@@ -562,122 +700,165 @@ function Module_EF04({ onComplete }) {
 
 // ── Module EF05: Sample Ratio Mismatch ─────────────────────────────────────
 function Module_EF05({ onComplete }) {
-  const _saved05 = useMemo(function() { return loadEFState('ef05'); }, []);
-  const [answer, setAnswer] = useState(_saved05 ? _saved05.answer : null);
-  const [revealed, setRevealed] = useState(_saved05 ? _saved05.revealed : false);
+  var saved05 = useMemo(function() { return loadEFState('ef05'); }, []);
+  var [controlN, setControlN] = useState(function() { return saved05 && saved05.controlN !== undefined ? saved05.controlN : 50213; });
+  var [treatmentN, setTreatmentN] = useState(function() { return saved05 && saved05.treatmentN !== undefined ? saved05.treatmentN : 48891; });
+  var [mcqAnswer, setMcqAnswer] = useState(function() { return saved05 ? saved05.mcqAnswer : null; });
+  var [mcqRevealed, setMcqRevealed] = useState(function() { return saved05 ? saved05.mcqRevealed : false; });
 
-  useEffect(function() { saveEFState('ef05', { answer: answer, revealed: revealed }); }, [answer, revealed]);
+  useEffect(function() {
+    saveEFState('ef05', { controlN: controlN, treatmentN: treatmentN, mcqAnswer: mcqAnswer, mcqRevealed: mcqRevealed });
+  }, [controlN, treatmentN, mcqAnswer, mcqRevealed]);
 
-  const options = [
-    { label: 'A. Proceed — the split is close enough to 50/50', correct: false },
-    { label: 'B. Flag as SRM; investigate the assignment pipeline before trusting any results', correct: true },
-    { label: 'C. Re-weight the results by the expected 50/50 ratio and proceed', correct: false },
-    { label: 'D. Extend the experiment until the ratios balance out naturally', correct: false },
+  // SRM calculation
+  var total = controlN + treatmentN;
+  var expectedEach = total / 2;
+  var chiSq = total > 0 ? (Math.pow(controlN - expectedEach, 2) / expectedEach + Math.pow(treatmentN - expectedEach, 2) / expectedEach) : 0;
+  var observedRatio = total > 0 ? (controlN / total * 100).toFixed(1) : '50.0';
+  var treatmentRatio = total > 0 ? (treatmentN / total * 100).toFixed(1) : '50.0';
+
+  // Approximate p-value from chi-squared (1 df) using rough thresholds
+  var pValue = 'p > 0.05';
+  var srmStatus = 'green';
+  if (chiSq > 10.83) { pValue = 'p < 0.001'; srmStatus = 'red'; }
+  else if (chiSq > 6.63) { pValue = 'p < 0.01'; srmStatus = 'red'; }
+  else if (chiSq > 3.84) { pValue = 'p < 0.05'; srmStatus = 'red'; }
+  else if (chiSq > 2.71) { pValue = 'p < 0.10'; srmStatus = 'yellow'; }
+
+  var statusColor = srmStatus === 'red' ? 'var(--red)' : srmStatus === 'yellow' ? 'var(--yellow)' : 'var(--teal)';
+  var statusLabel = srmStatus === 'red' ? 'SRM DETECTED' : srmStatus === 'yellow' ? 'BORDERLINE' : 'NO SRM';
+  var statusBg = srmStatus === 'red' ? 'var(--red-bg)' : srmStatus === 'yellow' ? 'var(--yellow-bg)' : 'var(--teal-bg)';
+  var statusBorder = srmStatus === 'red' ? 'var(--red-border)' : srmStatus === 'yellow' ? 'var(--yellow-border)' : 'var(--teal-border)';
+
+  var mcqOptions = [
+    { label: 'A. Proceed with analysis — the split is close enough to 50/50 for practical purposes', correct: false },
+    { label: 'B. Re-weight the metric results by the expected 50/50 ratio to compensate for the imbalance', correct: false },
+    { label: 'C. Flag SRM, halt analysis, and investigate the assignment pipeline before trusting any results', correct: true },
+    { label: 'D. Extend the experiment until the ratios naturally balance out over time', correct: false },
   ];
 
   return (
-    <div>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        This module covers Sample Ratio Mismatch (SRM) — a data quality check that must happen before
-        reading any metric results. Interviewers testing experiment design will often introduce an SRM
-        scenario to see if you know to pause the experiment rather than proceed.
-      </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        Sample Ratio Mismatch (SRM) is one of the most important data quality checks in experimentation.
-        Before reading any metric results, always verify that the observed split matches the intended split.
-      </p>
-
-      <div style={{
-        background: 'var(--surface-2)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', marginBottom: '1.25rem',
-      }}>
-        <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
-          Experiment report
-        </div>
-        <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', fontSize: '0.88rem' }}>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.2rem' }}>Intended split</div>
-            <div style={{ fontWeight: 700, color: 'var(--text)' }}>50% / 50%</div>
-          </div>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.2rem' }}>Control visitors</div>
-            <div style={{ fontWeight: 700, color: 'var(--text)' }}>48,200</div>
-          </div>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.2rem' }}>Treatment visitors</div>
-            <div style={{ fontWeight: 700, color: 'var(--text)' }}>51,800</div>
-          </div>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.2rem' }}>Observed split</div>
-            <div style={{ fontWeight: 700, color: 'var(--red)' }}>48.2% / 51.8%</div>
-          </div>
-        </div>
+      {/* ── The Scenario ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your experiment dashboard shows a statistically significant +5% lift in conversion rate for the treatment group. The PM is ready to ship. But before celebrating, you check the sample counts: control has 50,213 users, treatment has 48,891. The experiment was set to a 50/50 split.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          That 1,322-user gap might look small against 99,104 total users. But randomization at this scale should produce near-exact splits. When it doesn\'t, something in your pipeline — bot filtering, redirect latency, logging bugs — is systematically removing users from one arm. And if users are being removed non-randomly, your groups are no longer comparable, and your +5% lift might be entirely an artifact.
+        </p>
       </div>
 
-      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.85rem' }}>
-        Your experiment was supposed to split 50/50. Control received 48,200 visitors, treatment received
-        51,800. What do you do?
-      </div>
+      {/* ── The Concept + Interactive Demo ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>SRM Detector</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 0.75rem', fontSize: '0.9rem' }}>
+          Adjust the user counts below to see when Sample Ratio Mismatch appears. The chi-squared test compares observed counts against the expected 50/50 split. Try making the counts equal to see the green light, then skew them to watch SRM emerge.
+        </p>
 
-      <InstructionBox>
-        Select the correct action given the observed imbalance. Consider whether the imbalance can be
-        corrected statistically, or whether it signals a deeper pipeline problem that invalidates the data.
-      </InstructionBox>
-
-      {options.map((opt, i) => (
-        <MCQOption
-          key={i}
-          label={opt.label}
-          selected={answer === i}
-          correct={opt.correct}
-          revealed={revealed}
-          onClick={() => !revealed && setAnswer(i)}
-        />
-      ))}
-
-      {answer !== null && !revealed && <CheckBtn onClick={() => setRevealed(true)} />}
-
-      {revealed && (
-        <div>
-          <div style={{
-            marginTop: '0.5rem', padding: '0.65rem 0.85rem',
-            background: options[answer] && options[answer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
-            border: '1px solid ' + (options[answer] && options[answer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
-            borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5,
-          }}>
-            SRM means the groups are not the random samples you intended. Re-weighting (option C) does not
-            fix this — you do not know which users were systematically excluded or over-included.
-            Extending the experiment (option D) cannot correct a broken assignment pipeline.
-            The only valid path is to pause, investigate, and re-run.
-          </div>
-
-          <div style={{
-            marginTop: '0.85rem', padding: '0.75rem 1rem',
-            background: 'var(--surface-2)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)',
-          }}>
-            <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
-              Common SRM root causes
+        <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
+          {/* Input controls */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+                Control users
+              </label>
+              <input type='number' min={1000} max={200000} step={100} value={controlN} onChange={function(e) { setControlN(Math.max(1000, Number(e.target.value))); }} style={{
+                width: '100%', padding: '0.45rem 0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+                background: 'var(--surface-2)', color: 'var(--text)', fontSize: '1rem', fontWeight: 700,
+              }} />
             </div>
-            {[
-              'Bot filtering applied to only one variant (bots flushed from control but not treatment)',
-              'Redirect latency causing variant users to abandon before logging (treatment sees slower load)',
-              'Logging bugs where events fire on only one code path',
-              'Experiment assignment before eligibility check, but logging after — different users pass the check',
-            ].map((c, i) => (
-              <div key={i} style={{ fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5, marginBottom: '0.3rem' }}>
-                {i + 1}. {c}
-              </div>
-            ))}
+            <div>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+                Treatment users
+              </label>
+              <input type='number' min={1000} max={200000} step={100} value={treatmentN} onChange={function(e) { setTreatmentN(Math.max(1000, Number(e.target.value))); }} style={{
+                width: '100%', padding: '0.45rem 0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+                background: 'var(--surface-2)', color: 'var(--text)', fontSize: '1rem', fontWeight: 700,
+              }} />
+            </div>
           </div>
 
+          {/* Traffic light */}
+          <div style={{
+            padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', background: statusBg, border: '1.5px solid ' + statusBorder,
+            textAlign: 'center', marginBottom: '1rem',
+          }}>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: statusColor }}>{statusLabel}</div>
+          </div>
+
+          {/* Stats grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(150px, 100%), 1fr))', gap: '0.5rem' }}>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>Expected</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)' }}>50.0% / 50.0%</div>
+            </div>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>Observed</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: srmStatus !== 'green' ? statusColor : 'var(--text)' }}>{observedRatio}% / {treatmentRatio}%</div>
+            </div>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>Chi-squared</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)' }}>{chiSq.toFixed(2)}</div>
+            </div>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>p-value</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: statusColor }}>{pValue}</div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            SRM threshold: chi-squared &gt; 3.84 (p &lt; 0.05). Common root causes: bot filtering applied asymmetrically, redirect latency in treatment, logging bugs on one code path, or assignment before eligibility check.
+          </div>
+        </div>
+      </div>
+
+      {/* ── The Framework ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Framework</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Before reading any experiment results, run the SRM check first. Compare observed user counts per arm to the expected split using a chi-squared test. If p &lt; 0.05, stop. Do not proceed to metric analysis. Do not re-weight. Do not extend the experiment. Investigate why the split is wrong, fix the root cause, and re-run. SRM means your groups are no longer the random samples you intended, and no statistical adjustment can recover valid causal inference from broken randomization.
+        </p>
+      </div>
+
+      {/* ── Quick Check ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Quick Check</div>
+        <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.88rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+          You detect SRM in your experiment (control: 50,213, treatment: 48,891, expected 50/50). Your PM argues: "It\'s only a 1.3% imbalance — let\'s just re-weight and proceed." What is the correct response?
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {mcqOptions.map(function(opt, i) {
+            return (
+              <MCQOption key={i} label={opt.label} selected={mcqAnswer === i} correct={opt.correct} revealed={mcqRevealed} onClick={function() { if (!mcqRevealed) setMcqAnswer(i); }} />
+            );
+          })}
+        </div>
+        {mcqAnswer !== null && !mcqRevealed && (
+          <CheckBtn onClick={function() { setMcqRevealed(true); }} />
+        )}
+        {mcqRevealed && (
+          <div className='pal-reveal-in' style={{
+            marginTop: '0.75rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', lineHeight: 1.55,
+            background: mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
+            border: '1px solid ' + (mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
+            color: 'var(--text)',
+          }}>
+            <strong>{mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'Correct. ' : 'Not quite. '}</strong>
+            Re-weighting doesn\'t fix SRM because you don\'t know which users were systematically excluded or over-included. Extending the experiment cannot correct a broken assignment pipeline. The only valid path: pause, investigate the root cause (bot filtering, redirect latency, logging bugs), fix it, and re-run from scratch.
+          </div>
+        )}
+      </div>
+
+      {/* ── Key Takeaway ── */}
+      {mcqRevealed && (
+        <div>
           <InsightBox>
-            SRM invalidates the experiment because the groups are no longer comparable. It is the experiment
-            equivalent of a data quality check in RCA — always run it first, before reading any metric results.
-            A chi-squared test on the observed vs expected counts gives a formal SRM p-value.
+            SRM is the experiment equivalent of a data quality check in root cause analysis — always run it first, before reading any metric results. A chi-squared test on observed vs expected user counts takes 30 seconds and can save you from shipping a decision based on broken data.
           </InsightBox>
-          <NextBtn onClick={onComplete} label="Complete module →" />
+          <NextBtn onClick={onComplete} />
         </div>
       )}
     </div>
@@ -686,96 +867,181 @@ function Module_EF05({ onComplete }) {
 
 // ── Module EF06: Novelty Effects and Long-Run Validity ─────────────────────
 function Module_EF06({ onComplete }) {
-  const _saved06 = useMemo(function() { return loadEFState('ef06'); }, []);
-  const [answer, setAnswer] = useState(_saved06 ? _saved06.answer : null);
-  const [revealed, setRevealed] = useState(_saved06 ? _saved06.revealed : false);
+  var saved06 = useMemo(function() { return loadEFState('ef06'); }, []);
+  var [obsWeek, setObsWeek] = useState(function() { return saved06 && saved06.obsWeek !== undefined ? saved06.obsWeek : 1; });
+  var [mcqAnswer, setMcqAnswer] = useState(function() { return saved06 ? saved06.mcqAnswer : null; });
+  var [mcqRevealed, setMcqRevealed] = useState(function() { return saved06 ? saved06.mcqRevealed : false; });
 
-  useEffect(function() { saveEFState('ef06', { answer: answer, revealed: revealed }); }, [answer, revealed]);
+  useEffect(function() {
+    saveEFState('ef06', { obsWeek: obsWeek, mcqAnswer: mcqAnswer, mcqRevealed: mcqRevealed });
+  }, [obsWeek, mcqAnswer, mcqRevealed]);
 
-  const options = [
-    { label: 'A. The algorithm degraded over time', correct: false },
-    { label: 'B. Novelty effect followed by user adaptation — users explored the new recommendations initially, then settled into old patterns', correct: true },
-    { label: 'C. Seasonality — traffic mix changed across the 8-week window', correct: false },
-    { label: 'D. Sample ratio mismatch distorted early results', correct: false },
+  // Novelty decay curve: starts at +15%, decays to +3% steady state
+  // lift(w) = 3 + 12 * e^(-0.5*(w-1))
+  var weekData = [];
+  for (var w = 1; w <= 8; w++) {
+    var lift = 3 + 12 * Math.exp(-0.5 * (w - 1));
+    weekData.push({ week: w, lift: Math.round(lift * 10) / 10 });
+  }
+  var trueEffect = 3;
+
+  // SVG chart dimensions
+  var svgW = 340;
+  var svgH = 180;
+  var padL = 42;
+  var padR = 16;
+  var padT = 20;
+  var padB = 28;
+  var chartW = svgW - padL - padR;
+  var chartH = svgH - padT - padB;
+  var maxLift = 18;
+
+  function xFor(wk) { return padL + (wk - 1) / 7 * chartW; }
+  function yFor(val) { return padT + (1 - val / maxLift) * chartH; }
+
+  // Build path
+  var pathD = '';
+  weekData.forEach(function(d, i) {
+    var prefix = i === 0 ? 'M' : 'L';
+    pathD += prefix + xFor(d.week) + ',' + yFor(d.lift) + ' ';
+  });
+
+  // Current observation point
+  var currentLift = weekData[obsWeek - 1].lift;
+
+  var mcqOptions = [
+    { label: 'A. Ship after week 1 — the +15% lift is strong enough to act on immediately', correct: false },
+    { label: 'B. Run the experiment for at least 3-4 weeks to let novelty decay stabilize, then use the steady-state estimate as the true effect', correct: true },
+    { label: 'C. Average weeks 1 through 8 for the most accurate estimate of the treatment effect', correct: false },
+    { label: 'D. The declining curve means the feature is getting worse — do not ship', correct: false },
   ];
 
   return (
-    <div>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        This module covers novelty effects and when experiment results can be trusted as a long-run signal.
-        A candidate who ships based on week-one spikes without accounting for novelty decay is a red flag
-        in any PM or analyst interview.
-      </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        Not all experiment results are stable. Initial measurements often reflect novelty behavior
-        rather than the true long-run effect. Knowing when to trust week-one results is a key skill.
-      </p>
-
-      <div style={{
-        background: 'var(--surface-2)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', marginBottom: '1.25rem',
-      }}>
-        <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
-          CTR over time — treatment vs control delta
-        </div>
-        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-          {[
-            { label: 'Week 1', delta: '+8%', color: 'var(--teal)' },
-            { label: 'Week 4', delta: '+2%', color: 'var(--yellow)' },
-            { label: 'Week 8', delta: '-1%', color: 'var(--red)' },
-          ].map((d, i) => (
-            <div key={i} style={{ minWidth: 90 }}>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>{d.label}</div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: d.color }}>{d.delta}</div>
-            </div>
-          ))}
-        </div>
+      {/* ── The Scenario ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your team tested a redesigned recommendation carousel. After one week, the dashboard shows +15% CTR lift over control. The PM wants to ship immediately. But you\'ve seen this pattern before — a strong early signal that fades as users stop exploring the new UI out of curiosity and revert to their habitual behavior.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          If you ship based on week-one numbers, you\'re shipping based on a novelty-inflated estimate. The true long-run effect might be a fraction of what you measured. This is one of the most common reasons experiments overstate their impact — and one of the easiest to avoid if you know to look for it.
+        </p>
       </div>
 
-      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.85rem' }}>
-        A new recommendation algorithm shows +8% CTR in week 1. By week 4 it is +2% and by week 8 it is -1%.
-        What is the most likely explanation?
-      </div>
+      {/* ── The Concept + Interactive Demo ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Novelty Decay Visualizer</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 0.75rem', fontSize: '0.9rem' }}>
+          Drag the observation window slider to see what treatment effect you would report at each week. The blue curve shows the measured lift; the dashed green line shows the true long-run effect (+3%). Notice how reading results at week 1 massively overstates the real impact.
+        </p>
 
-      <InstructionBox>
-        Select the explanation that best accounts for the decay pattern shown above. Rule out explanations
-        that would not produce a smooth monotonic decline from a strong early positive.
-      </InstructionBox>
-
-      {options.map((opt, i) => (
-        <MCQOption
-          key={i}
-          label={opt.label}
-          selected={answer === i}
-          correct={opt.correct}
-          revealed={revealed}
-          onClick={() => !revealed && setAnswer(i)}
-        />
-      ))}
-
-      {answer !== null && !revealed && <CheckBtn onClick={() => setRevealed(true)} />}
-
-      {revealed && (
-        <div>
-          <div style={{
-            marginTop: '0.5rem', padding: '0.65rem 0.85rem',
-            background: options[answer] && options[answer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
-            border: '1px solid ' + (options[answer] && options[answer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
-            borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5,
-          }}>
-            Users explore unfamiliar UI out of curiosity, generating clicks that are not sustainable.
-            The initial +8% reflects novelty behavior. As users adapt, the lift decays to steady-state (+2%)
-            and eventually the algorithm may perform worse (-1%) as users learn to ignore the recommendations.
-            Seasonal variation (option C) would show a pattern correlated with time of year, not a smooth decay.
+        <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
+          {/* Observation window slider */}
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+              Read results at: <strong style={{ color: 'var(--accent)' }}>Week {obsWeek}</strong>
+              <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>(measured lift: <strong style={{ color: currentLift > trueEffect + 2 ? 'var(--yellow)' : 'var(--teal)' }}>+{currentLift}%</strong>)</span>
+            </label>
+            <input type='range' min={1} max={8} step={1} value={obsWeek} onChange={function(e) { setObsWeek(Number(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
           </div>
+
+          {/* SVG chart */}
+          <svg viewBox={'0 0 ' + svgW + ' ' + svgH} width='100%' style={{ maxWidth: '400px', display: 'block', margin: '0 auto' }}>
+            {/* Y-axis gridlines */}
+            {[0, 5, 10, 15].map(function(v) {
+              return (
+                <g key={v}>
+                  <line x1={padL} x2={svgW - padR} y1={yFor(v)} y2={yFor(v)} stroke='var(--border)' strokeWidth={0.5} strokeDasharray={v > 0 ? '3,3' : 'none'} />
+                  <text x={padL - 4} y={yFor(v) + 3} textAnchor='end' fill='var(--text-muted)' fontSize={9}>+{v}%</text>
+                </g>
+              );
+            })}
+
+            {/* X-axis labels */}
+            {weekData.map(function(d) {
+              return (
+                <text key={d.week} x={xFor(d.week)} y={svgH - 4} textAnchor='middle' fill='var(--text-muted)' fontSize={9}>W{d.week}</text>
+              );
+            })}
+
+            {/* True effect line */}
+            <line x1={padL} x2={svgW - padR} y1={yFor(trueEffect)} y2={yFor(trueEffect)} stroke='var(--teal)' strokeWidth={1.5} strokeDasharray='6,4' />
+            <text x={svgW - padR + 2} y={yFor(trueEffect) + 3} fill='var(--teal)' fontSize={8} fontWeight={600}>True +3%</text>
+
+            {/* Decay curve */}
+            <path d={pathD} fill='none' stroke='var(--accent)' strokeWidth={2.5} strokeLinejoin='round' strokeLinecap='round' />
+
+            {/* Data points */}
+            {weekData.map(function(d) {
+              return (
+                <circle key={d.week} cx={xFor(d.week)} cy={yFor(d.lift)} r={d.week === obsWeek ? 5 : 3} fill={d.week === obsWeek ? 'var(--accent)' : 'var(--surface)'} stroke='var(--accent)' strokeWidth={d.week === obsWeek ? 2.5 : 1.5} />
+              );
+            })}
+
+            {/* Observation marker */}
+            <line x1={xFor(obsWeek)} x2={xFor(obsWeek)} y1={yFor(currentLift) + 8} y2={yFor(0)} stroke='var(--accent)' strokeWidth={1} strokeDasharray='4,3' opacity={0.5} />
+          </svg>
+
+          {/* Reading callout */}
+          <div style={{
+            marginTop: '0.75rem', padding: '0.6rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.84rem', lineHeight: 1.55,
+            background: currentLift > trueEffect + 2 ? 'var(--yellow-bg)' : 'var(--teal-bg)',
+            border: '1px solid ' + (currentLift > trueEffect + 2 ? 'var(--yellow-border)' : 'var(--teal-border)'),
+            color: currentLift > trueEffect + 2 ? 'var(--yellow)' : 'var(--teal)',
+          }}>
+            {currentLift > trueEffect + 5 ? 'Reading at week ' + obsWeek + ': you\'d report +' + currentLift + '% — but the true long-run effect is only +' + trueEffect + '%. You\'d overstate the impact by ' + Math.round((currentLift / trueEffect - 1) * 100) + '%.' :
+             currentLift > trueEffect + 2 ? 'Week ' + obsWeek + ' still shows novelty inflation. The +' + currentLift + '% is closer to steady state but still above the true +' + trueEffect + '% long-run effect.' :
+             'Week ' + obsWeek + ': the effect has stabilized near the true long-run value of +' + trueEffect + '%. This is a reliable estimate to ship on.'}
+          </div>
+        </div>
+      </div>
+
+      {/* ── The Framework ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Framework</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          When evaluating experiment results, always check the time series of the treatment effect, not just the aggregate. If the lift is highest in week 1 and declines, you are seeing novelty decay. Run the experiment long enough to capture steady-state behavior — typically 2-4 weeks for features with habitual use patterns. Report the stabilized estimate (usually week 4+), not the week-1 peak. If your PM pushes to ship based on early results, show them the decay curve.
+        </p>
+      </div>
+
+      {/* ── Quick Check ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Quick Check</div>
+        <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.88rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+          Your experiment shows +15% lift in week 1 that decays to +3% by week 8. What is the right approach?
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {mcqOptions.map(function(opt, i) {
+            return (
+              <MCQOption key={i} label={opt.label} selected={mcqAnswer === i} correct={opt.correct} revealed={mcqRevealed} onClick={function() { if (!mcqRevealed) setMcqAnswer(i); }} />
+            );
+          })}
+        </div>
+        {mcqAnswer !== null && !mcqRevealed && (
+          <CheckBtn onClick={function() { setMcqRevealed(true); }} />
+        )}
+        {mcqRevealed && (
+          <div className='pal-reveal-in' style={{
+            marginTop: '0.75rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', lineHeight: 1.55,
+            background: mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
+            border: '1px solid ' + (mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
+            color: 'var(--text)',
+          }}>
+            <strong>{mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'Correct. ' : 'Not quite. '}</strong>
+            The declining curve doesn\'t mean the feature is getting worse — it means the novelty-inflated engagement is settling to the true effect. Averaging all 8 weeks would overweight the novelty period. The right approach: wait for stabilization (usually week 3-4), then use the steady-state estimate. The feature still has a real +3% lift, which may or may not be worth shipping depending on the cost.
+          </div>
+        )}
+      </div>
+
+      {/* ── Key Takeaway ── */}
+      {mcqRevealed && (
+        <div>
           <InsightBox>
-            Run experiments long enough to capture steady-state behavior — typically at least one full weekly
-            cycle (to account for day-of-week effects), often 2-4 weeks for features with habitual use patterns.
-            If you see a strong novelty decay, report the week-4+ average, not the week-1 peak, as your
-            point estimate.
+            Week-one experiment results often reflect novelty behavior, not the true long-run effect. Always check the time series of the treatment effect. If it decays, wait for stabilization before making a ship decision. The steady-state estimate is what your users will actually experience — the week-1 peak is a mirage.
           </InsightBox>
-          <NextBtn onClick={onComplete} label="Complete module →" />
+          <NextBtn onClick={onComplete} />
         </div>
       )}
     </div>
@@ -784,147 +1050,156 @@ function Module_EF06({ onComplete }) {
 
 // ── Module EF07: Multiple Testing and Guardrails ────────────────────────────
 function Module_EF07({ onComplete }) {
-  const _saved07 = useMemo(function() { return loadEFState('ef07'); }, []);
-  const [q1Answer, setQ1Answer] = useState(_saved07 ? _saved07.q1Answer : null);
-  const [q1Revealed, setQ1Revealed] = useState(_saved07 ? _saved07.q1Revealed : false);
-  const [q2Answer, setQ2Answer] = useState(_saved07 ? _saved07.q2Answer : null);
-  const [q2Revealed, setQ2Revealed] = useState(_saved07 ? _saved07.q2Revealed : false);
+  var saved07 = useMemo(function() { return loadEFState('ef07'); }, []);
+  var [numMetrics, setNumMetrics] = useState(function() { return saved07 && saved07.numMetrics !== undefined ? saved07.numMetrics : 1; });
+  var [mcqAnswer, setMcqAnswer] = useState(function() { return saved07 ? saved07.mcqAnswer : null; });
+  var [mcqRevealed, setMcqRevealed] = useState(function() { return saved07 ? saved07.mcqRevealed : false; });
 
-  useEffect(function() { saveEFState('ef07', { q1Answer: q1Answer, q1Revealed: q1Revealed, q2Answer: q2Answer, q2Revealed: q2Revealed }); }, [q1Answer, q1Revealed, q2Answer, q2Revealed]);
+  useEffect(function() {
+    saveEFState('ef07', { numMetrics: numMetrics, mcqAnswer: mcqAnswer, mcqRevealed: mcqRevealed });
+  }, [numMetrics, mcqAnswer, mcqRevealed]);
 
-  const q1Options = [
-    { label: 'A. 0 — if there is truly no effect, you will never get a false positive', correct: false },
-    { label: 'B. 1 — expected false positives = alpha x number of tests = 0.05 x 20 = 1', correct: true },
-    { label: 'C. 5', correct: false },
-    { label: 'D. 20', correct: false },
-  ];
+  // Calculations
+  var pAtLeastOne = 1 - Math.pow(0.95, numMetrics);
+  var pAtLeastOnePct = Math.round(pAtLeastOne * 1000) / 10;
+  var expectedFP = Math.round(numMetrics * 0.05 * 100) / 100;
+  var bonferroniAlpha = Math.round(0.05 / numMetrics * 10000) / 10000;
 
-  const q2Options = [
-    { label: 'A. Raises the significance threshold, making it easier to reject the null', correct: false },
-    { label: 'B. Divides alpha by the number of tests — lowers the per-test threshold so the family-wise error rate stays at 5%', correct: true },
-    { label: 'C. Removes metrics that were not significant, reducing the test count', correct: false },
-    { label: 'D. Increases statistical power by pooling metrics together', correct: false },
+  // Grid of 20 squares — color expected FP count red
+  var gridSquares = [];
+  var fpCount = Math.round(numMetrics * 0.05 * 20 / numMetrics); // proportion in 20-square grid
+  var fpInGrid = Math.min(20, Math.round(pAtLeastOne * 20));
+  for (var sq = 0; sq < 20; sq++) {
+    gridSquares.push(sq < fpInGrid ? 'fp' : 'ok');
+  }
+
+  var mcqOptions = [
+    { label: 'A. Always test at alpha = 0.05 regardless of how many metrics — each test is independent', correct: false },
+    { label: 'B. Apply Bonferroni correction: divide alpha by the number of metrics tested, keeping family-wise error at 5%', correct: true },
+    { label: 'C. Only report the metric with the smallest p-value — it is the most likely to be real', correct: false },
+    { label: 'D. Remove non-significant metrics from the report to reduce the multiple testing burden', correct: false },
   ];
 
   return (
-    <div>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        This module covers how tracking multiple metrics simultaneously inflates false positive rates, and
-        what the standard Bonferroni correction does about it. Interviewers will ask this any time you
-        mention guardrail metrics or a multi-metric experiment dashboard.
-      </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        Most experiment dashboards track many metrics simultaneously. Each additional metric you test
-        at alpha = 0.05 adds another 5% chance of a spurious significant result — even if nothing
-        actually changed. This module covers the math and the standard correction.
-      </p>
+      {/* ── The Scenario ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your experiment dashboard tracks 14 metrics: conversion rate, revenue per user, sessions per day, time on site, bounce rate, page views, add-to-cart rate, checkout starts, checkout completions, support tickets, app crashes, latency p50, latency p99, and DAU. The experiment ran clean — no SRM, full runtime. You open the results and see one metric is significant at p &lt; 0.05: checkout starts are up +4.2%.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Should you celebrate? With 14 metrics tested at alpha = 0.05, there\'s a 51% chance of finding at least one false positive even if the treatment did absolutely nothing. That "significant" checkout starts result might be pure noise. This is the multiple testing problem, and it catches teams that don\'t know to correct for it.
+        </p>
+      </div>
 
-      {/* Q1 */}
-      <div style={{
-        background: 'var(--surface-2)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', marginBottom: '1rem',
-      }}>
-        <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
-          Question 1 of 2
+      {/* ── The Concept + Interactive Demo ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>False Positive Simulator</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 0.75rem', fontSize: '0.9rem' }}>
+          Drag the slider to increase the number of metrics tested. Watch the probability of at least one false positive climb — and the red squares multiply. At 14 metrics, it\'s a coin flip. At 20, it\'s almost two-thirds.
+        </p>
+
+        <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
+          {/* Slider */}
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+              Number of metrics tested: <strong style={{ color: numMetrics >= 14 ? 'var(--red)' : numMetrics >= 5 ? 'var(--yellow)' : 'var(--text)' }}>{numMetrics}</strong>
+            </label>
+            <input type='range' min={1} max={20} step={1} value={numMetrics} onChange={function(e) { setNumMetrics(Number(e.target.value)); }} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+          </div>
+
+          {/* Stats display */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.3rem' }}>P(at least 1 false positive)</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: pAtLeastOnePct > 50 ? 'var(--red)' : pAtLeastOnePct > 20 ? 'var(--yellow)' : 'var(--teal)' }}>{pAtLeastOnePct}%</div>
+            </div>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.3rem' }}>Expected false positives</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)' }}>{expectedFP}</div>
+            </div>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.3rem' }}>Bonferroni alpha</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent)' }}>{bonferroniAlpha}</div>
+            </div>
+          </div>
+
+          {/* Visual grid — 20 squares */}
+          <div style={{ marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+              Out of 20 experiments with no real effect, how many would show a "significant" result?
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '4px', maxWidth: '280px' }}>
+              {gridSquares.map(function(status, i) {
+                return (
+                  <div key={i} style={{
+                    width: '100%', paddingBottom: '100%', borderRadius: '3px',
+                    background: status === 'fp' ? 'var(--red)' : 'var(--surface-2)',
+                    border: '1px solid ' + (status === 'fp' ? 'var(--red)' : 'var(--border)'),
+                    opacity: status === 'fp' ? 0.85 : 1,
+                  }} />
+                );
+              })}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+              Each red square = an experiment that would produce a false positive by chance alone
+            </div>
+          </div>
+
+          {numMetrics >= 14 && (
+            <div className='pal-reveal-in' style={{ marginTop: '0.75rem', padding: '0.6rem 1rem', borderRadius: 'var(--radius-sm)', background: 'var(--red-bg)', border: '1px solid var(--red-border)', fontSize: '0.84rem', color: 'var(--red)', lineHeight: 1.55 }}>
+              At {numMetrics} metrics, there\'s a {pAtLeastOnePct}% chance of at least one false positive. Without correction, finding a "significant" result is more likely than not — even if the treatment did nothing.
+            </div>
+          )}
         </div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.6, marginBottom: '1rem' }}>
-          You run one experiment and test 20 metrics simultaneously, each at alpha = 0.05.
-          Assuming all null hypotheses are true, how many false positives do you expect by chance?
+      </div>
+
+      {/* ── The Framework ── */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Framework</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Pre-specify your primary metric before running the experiment — this is the one metric you evaluate at alpha = 0.05 without correction. For all secondary and guardrail metrics, apply a Bonferroni correction (divide alpha by the number of tests) or Benjamini-Hochberg (less conservative, controls false discovery rate instead of family-wise error). Never data-mine your metric list after seeing results — picking the one that "happened to be significant" is p-hacking, and experienced interviewers will probe for it.
+        </p>
+      </div>
+
+      {/* ── Quick Check ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Quick Check</div>
+        <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.88rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+          Your experiment tracks 20 metrics. What is the correct way to evaluate secondary and guardrail metrics?
         </div>
-
-        <InstructionBox>
-          Select the expected number of false positives. Apply the definition of alpha as a per-test
-          error rate and multiply across the number of independent tests.
-        </InstructionBox>
-
-        {q1Options.map((opt, i) => (
-          <MCQOption
-            key={i}
-            label={opt.label}
-            selected={q1Answer === i}
-            correct={opt.correct}
-            revealed={q1Revealed}
-            onClick={() => !q1Revealed && setQ1Answer(i)}
-          />
-        ))}
-
-        {q1Answer !== null && !q1Revealed && (
-          <CheckBtn onClick={() => setQ1Revealed(true)} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {mcqOptions.map(function(opt, i) {
+            return (
+              <MCQOption key={i} label={opt.label} selected={mcqAnswer === i} correct={opt.correct} revealed={mcqRevealed} onClick={function() { if (!mcqRevealed) setMcqAnswer(i); }} />
+            );
+          })}
+        </div>
+        {mcqAnswer !== null && !mcqRevealed && (
+          <CheckBtn onClick={function() { setMcqRevealed(true); }} />
         )}
-
-        {q1Revealed && (
-          <div style={{
-            marginTop: '0.5rem', padding: '0.65rem 0.85rem',
-            background: q1Options[q1Answer] && q1Options[q1Answer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
-            border: '1px solid ' + (q1Options[q1Answer] && q1Options[q1Answer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
-            borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5,
+        {mcqRevealed && (
+          <div className='pal-reveal-in' style={{
+            marginTop: '0.75rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', lineHeight: 1.55,
+            background: mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
+            border: '1px solid ' + (mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
+            color: 'var(--text)',
           }}>
-            Expected false positives = alpha × number of tests = 0.05 × 20 = 1. With 20 metrics you will
-            on average find one "significant" result that is pure noise. This is why teams that track
-            many metrics without correction find spurious wins regularly.
+            <strong>{mcqOptions[mcqAnswer] && mcqOptions[mcqAnswer].correct ? 'Correct. ' : 'Not quite. '}</strong>
+            Bonferroni sets the per-test alpha to 0.05 / 20 = 0.0025. This keeps the family-wise error rate at 5% — the probability of any false positive across all 20 tests stays at 5%. It is conservative (may miss real effects), but simple and appropriate for guardrail metrics where false positives are costly. Options C and D are forms of p-hacking — cherry-picking results after seeing them.
           </div>
         )}
       </div>
 
-      {/* Q2 — show after Q1 answered */}
-      {q1Revealed && (
-        <div style={{
-          background: 'var(--surface-2)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', marginBottom: '1rem',
-        }}>
-          <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
-            Question 2 of 2
-          </div>
-          <div style={{ fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.6, marginBottom: '1rem' }}>
-            You apply Bonferroni correction to those 20 metrics. What does this correction do?
-          </div>
-
-          <InstructionBox>
-            Select what Bonferroni correction does mechanically. Think about what it adjusts — the
-            threshold, the sample, or the metric list — and in which direction.
-          </InstructionBox>
-
-          {q2Options.map((opt, i) => (
-            <MCQOption
-              key={i}
-              label={opt.label}
-              selected={q2Answer === i}
-              correct={opt.correct}
-              revealed={q2Revealed}
-              onClick={() => !q2Revealed && setQ2Answer(i)}
-            />
-          ))}
-
-          {q2Answer !== null && !q2Revealed && (
-            <CheckBtn onClick={() => setQ2Revealed(true)} />
-          )}
-
-          {q2Revealed && (
-            <div style={{
-              marginTop: '0.5rem', padding: '0.65rem 0.85rem',
-              background: q2Options[q2Answer] && q2Options[q2Answer].correct ? 'var(--teal-bg)' : 'var(--red-bg)',
-              border: '1px solid ' + (q2Options[q2Answer] && q2Options[q2Answer].correct ? 'var(--teal-border)' : 'var(--red-border)'),
-              borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5,
-            }}>
-              Bonferroni sets the per-test alpha to alpha / number of tests = 0.05 / 20 = 0.0025.
-              This keeps the family-wise error rate (the probability of any false positive across all tests)
-              at 5%. It is conservative — it may miss real effects — but it is simple and widely understood.
-              For guardrail metrics, where false positives are costly, this conservatism is appropriate.
-            </div>
-          )}
-        </div>
-      )}
-
-      {q2Revealed && (
+      {/* ── Key Takeaway ── */}
+      {mcqRevealed && (
         <div>
           <InsightBox>
-            The practical takeaway: pre-specify your primary metric before running the experiment.
-            Use a Bonferroni-corrected threshold (or Benjamini-Hochberg for less conservatism) when
-            evaluating secondary and guardrail metrics. Do not data-mine your metric list after seeing
-            results — that is p-hacking, and interviewers know to probe for it.
+            Every additional metric you test at alpha = 0.05 adds another 5% chance of a false positive. At 14 metrics, it\'s a coin flip. Pre-specify your primary metric, apply Bonferroni or BH correction to everything else, and never pick winners from a metric list after seeing results. The formula: P(at least 1 FP) = 1 - (1 - alpha)^n.
           </InsightBox>
-          <NextBtn onClick={onComplete} label="Complete module →" />
+          <NextBtn onClick={onComplete} />
         </div>
       )}
     </div>
@@ -974,6 +1249,11 @@ function Module_EF08({ onComplete }) {
 
   return (
     <div className="pal-page-enter">
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+        It\'s your first week on the experimentation platform team. Before launching any real tests, your lead asks you to run an A/A test — same experience in both groups, no actual change. Three days later, the dashboard shows p = 0.03. A junior analyst sees this and messages the team: "The platform is broken — we\'re getting a significant result with no treatment." Is it? An A/A test is designed to produce exactly this kind of false alarm at a known rate. If your significance threshold is 0.05, roughly 1 in 20 A/A tests will cross that line by pure chance. The real question isn\'t whether it crossed — it\'s whether it crosses more often than expected, which would indicate a genuine platform bug like broken randomization or logging skew.
+      </p>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         An A/A test runs your experiment infrastructure with identical treatment in both groups.
         It should never show a significant result — when it does, your platform has a systematic problem.
@@ -982,6 +1262,8 @@ function Module_EF08({ onComplete }) {
         The chart below simulates a 30-day A/A test. Watch how the p-value wanders — and notice
         what happens early in the run.
       </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Interpret the A/A test p-value trajectory</div>
 
       <InstructionBox>
         Study the chart below — it shows a 30-day A/A test where both groups receive identical treatment.
@@ -1209,6 +1491,11 @@ function Module_EF09({ onComplete }) {
 
   return (
     <div className="pal-page-enter">
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+        Your power analysis says the experiment needs 8 weeks to detect a 2% lift in revenue per user. The PM pushes back: "We can\'t hold a losing variant for two months — can we speed this up?" The answer is yes, but not by cutting the sample or lowering your significance bar. CUPED (Controlled-experiment Using Pre-Experiment Data) reduces the noise in your outcome metric by subtracting the part that\'s predictable from each user\'s pre-experiment behavior. If last week\'s revenue strongly predicts this week\'s, CUPED strips out that predictable component and leaves only the variation that your treatment could have caused. The result: the same experiment, same traffic, same alpha — but the confidence interval shrinks by 30-50%, and your 8-week test finishes in 4-5.
+      </p>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         CUPED (Controlled-experiment Using Pre-Experiment Data) reduces outcome variance by subtracting
         the portion of the metric that is predictable from pre-experiment behavior.
@@ -1218,6 +1505,8 @@ function Module_EF09({ onComplete }) {
         The scatter below shows each user's pre-experiment metric (x) vs their post-experiment metric (y).
         Toggle CUPED on to see what the technique removes.
       </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Toggle CUPED on and watch what happens to variance</div>
 
       <InstructionBox>
         Toggle CUPED on to see what the technique actually removes.
@@ -1491,6 +1780,11 @@ function Module_EF10({ onComplete }) {
 
   return (
     <div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+        It\'s day 3 of a 14-day experiment. Your PM checks the dashboard and sees p = 0.03. She messages you: "Great news — the new onboarding flow is significant. Let\'s ship it today and free up the traffic for the next test." You know this is wrong, but explaining why is harder than it sounds. The problem is multiple comparisons over time: every time you peek at the results, you\'re running another hypothesis test. If you peek 5 times during a 14-day experiment at alpha = 0.05, your actual false positive rate isn\'t 5% — it\'s closer to 14%. The p-value on day 3 isn\'t lying, but it wasn\'t computed under the assumption that you\'d stop the moment it crossed 0.05. Sequential testing methods like alpha spending, SPRT, and always-valid p-values solve this by adjusting the significance boundary at each look.
+      </p>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         Most teams peek at experiment results before the planned end date. Done naively, this inflates
         the true false positive rate far above the promised 5%. Sequential testing provides a principled
@@ -1501,6 +1795,8 @@ function Module_EF10({ onComplete }) {
         The charts below show the same underlying p-value trajectory under two different stopping policies.
         Watch where each approach fires a significant signal.
       </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Compare naive peeking vs. sequential testing boundaries</div>
 
       {/* Side-by-side SVG charts */}
       <div style={{
@@ -1735,6 +2031,11 @@ function Module_EF11({ onComplete }) {
 
   return (
     <div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+        Your social product team is testing a new "share to story" feature. Users in the treatment group can post stories; control users cannot. Sounds like a clean split — until you realize that control users see the stories posted by their treated friends. The treatment is leaking across the boundary. A control user who sees five friends posting stories has a fundamentally different experience than a control user whose friends are all in control. Your measured treatment effect is diluted because control users are partially treated. This is network interference, and it violates the core assumption behind every standard A/B test: that one user\'s assignment doesn\'t affect another user\'s outcome. The formal name is SUTVA — Stable Unit Treatment Value Assumption — and when it breaks, your experiment isn\'t measuring what you think it\'s measuring.
+      </p>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         Standard A/B tests assume each user's outcome depends only on their own treatment assignment.
         When users interact — through social feeds, shared supply pools, or referral chains — this
@@ -1745,6 +2046,8 @@ function Module_EF11({ onComplete }) {
         SUTVA (Stable Unit Treatment Value Assumption) is the formal name for this requirement.
         For each scenario below, decide whether SUTVA holds and which design is appropriate.
       </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Classify whether SUTVA holds and pick the right design</div>
 
       <InstructionBox>
         Read each scenario and click the classification that fits. Think about whether treated users
@@ -1883,11 +2186,18 @@ function Module_EF12({ onComplete }) {
 
   return (
     <div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+        Six months ago your team shipped a redesigned recommendation engine. The A/B test showed a 3% lift in engagement, everyone celebrated, and the feature graduated to 100%. Now the VP of Product asks: "Is it still working? And across all the features we\'ve shipped this year, are we actually better off than we were in January?" Your A/B test can\'t answer either question — it ended months ago, and it only measured one feature in isolation. This is exactly what a holdout group solves. By keeping a small permanent slice of users (typically 1-5%) on the old experience across all launches, you get a running counterfactual: what would engagement look like if you\'d shipped nothing all year? The gap between the holdout and everyone else is the cumulative causal impact of your entire feature program.
+      </p>
+
       <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         Individual A/B tests answer one question: did this feature move the metric? But they cannot
         answer: are all our feature launches adding up to real business value? A holdout group answers
         the second question by keeping a small user slice permanently excluded from all new launches.
       </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Study the holdout trajectory and spot the sum-of-parts paradox</div>
 
       <InstructionBox>
         Study the 28-day engagement trajectories below. Then click the button to see the sum-of-parts paradox.
@@ -2029,11 +2339,18 @@ function Module_EF13({ onComplete }) {
 
   return (
     <div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+        Your growth PM has four homepage hero variants ready to test. Instead of a standard A/B/C/D test, she proposes: "Let\'s just run a bandit — it\'ll automatically send more traffic to the winner and we won\'t waste impressions on losers." She\'s not wrong about the traffic efficiency, but she\'s glossing over what you give up. A multi-armed bandit optimizes for reward during the experiment: it minimizes the cost of showing users a losing variant. But it does this by shifting traffic away from underperformers before you\'ve collected enough data to be statistically confident they\'re actually worse. The result is a faster path to "probably the best variant" but a weaker causal estimate of exactly how much better it is. When the cost of a bad experience is high (e.g., pricing pages, checkout flows) and you can tolerate less precision, bandits shine. When you need a clean effect size for a launch decision, a fixed-split A/B test is still the right call.
+      </p>
+
       <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         A fixed A/B test splits traffic equally and waits — it optimizes for measurement. A multi-armed
         bandit shifts traffic toward better-performing variants in real time — it optimizes for reward
         during the experiment. The tradeoff is statistical precision vs. opportunity cost.
       </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Run the epsilon-greedy bandit and watch traffic allocation shift</div>
 
       <InstructionBox>
         Click &quot;Run round&quot; to advance the epsilon-greedy bandit. Watch how traffic allocation shifts toward Variant B as the algorithm learns it performs best.
@@ -2207,12 +2524,19 @@ function Module_EF14({ onComplete }) {
 
   return (
     <div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+        Your marketplace team wants to test a 15% price increase on delivery fees. User-level randomization won\'t work — if two people in the same household see different prices, you\'ll get complaints, PR risk, and poisoned data. You also can\'t randomize by device or session for the same reason. The solution is geo experimentation: randomize entire cities or DMAs to treatment or control. Dallas gets the new price, Houston keeps the old one, and you compare outcomes at the market level. The approach is clean — no within-market contamination, no user confusion — but the tradeoff is brutal on statistical power. Instead of 2 million randomization units (users), you have 40 (cities). Your confidence intervals widen dramatically, and detecting a 2% lift that would be trivial in a user-level test becomes nearly impossible. This is why geo experiments are reserved for interventions that can\'t be randomized at the user level: pricing changes, TV ad campaigns, and policy shifts that apply to everyone in a market.
+      </p>
+
       <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         Geo experiments randomize at the geographic unit — city, DMA, or country — rather than the user.
         They solve the problem of network spillover and enable testing of channels where individual
         assignment is impossible, like TV advertising or marketplace pricing. The tradeoff is power:
         100 cities gives you far fewer randomization units than 1 million users.
       </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Classify each scenario to the right experiment design level</div>
 
       <InstructionBox>
         For each scenario, classify the right experiment design: User-level A/B, Cluster randomization, or Geo experiment. Then click Check to see results.
@@ -2375,11 +2699,18 @@ function Module_EF15({ onComplete }) {
 
   return (
     <div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+        Your ride-sharing platform wants to test a new surge pricing algorithm in San Francisco. User-level randomization is out — if treated riders see lower surge prices, they\'ll request more rides, pulling drivers away from control riders and inflating control wait times. The treatment effect leaks across the boundary through the shared driver supply pool, violating SUTVA. Geo experiments won\'t help either — San Francisco is one market, and splitting it into sub-regions creates artificial boundaries where drivers cross freely. Switchback experiments solve this by splitting time instead of users or geographies. For two hours, everyone in SF gets the new algorithm; for the next two hours, everyone gets the old one. The city alternates between treatment and control windows throughout the day. The tradeoff is temporal autocorrelation: outcomes in one window are correlated with adjacent windows because driver positioning and demand momentum carry over. But with proper time-series modeling, switchback gives you a clean causal estimate in a context where no other design works.
+      </p>
+
       <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         Switchback experiments alternate between treatment and control windows within the same
         market — instead of splitting users or geographies, they split time. This solves the
         two-sided marketplace problem where demand and supply cannot be independently randomized.
       </p>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Work through the switchback design questions</div>
 
       <InstructionBox>
         Study the switchback timeline below — it shows how treatment and control alternate every two

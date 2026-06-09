@@ -139,6 +139,19 @@ export function Module13_ExperimentDesigner({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your PM wants to run an experiment on the checkout flow. She asks: how long should it run? The answer depends on four things locked together — your baseline rate, the minimum effect you care about, how much false-positive risk you\'ll tolerate, and how much power you want. Change any three and the fourth is determined.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Most experiment failures happen before the experiment starts — teams don\'t size correctly, chase effects too small to detect, or stop early when they see a promising p-value. This calculator builds the intuition you need to push back on unrealistic experiment plans.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Size an Experiment</div>
+
       {/* Intro paragraph */}
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         Before running any A/B test you must answer: <em>can I actually detect the effect I care about?</em>{' '}

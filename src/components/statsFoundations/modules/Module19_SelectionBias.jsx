@@ -47,6 +47,19 @@ export function Module19_SelectionBias({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You\'re running a "power users" study to understand what makes users successful. You pull everyone who\'s been active for 6+ months and analyze their behavior. The engagement metrics look fantastic. But you\'re only looking at users who stayed — what about the ones who churned in month 2? They\'re invisible in your data, and they\'re systematically different.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Selection bias means your sample is not representative of the population you care about. Every dashboard that only shows active users is biased. Every survey that only reaches respondents who bother to reply is biased. Toggle the filter below to see how excluding churned users inflates your metrics.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Toggle the Survivorship Filter</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         <strong>Selection bias</strong> occurs when the data you analyze isn't a random sample of the population you care about.
         The missing data is not random — it's <em>systematically different</em>. In product analytics, churned users are

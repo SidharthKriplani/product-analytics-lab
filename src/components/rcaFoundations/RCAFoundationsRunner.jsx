@@ -77,6 +77,18 @@ function Module_RF01({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your dashboard shows a 15% drop in booking rate overnight. Slack is already buzzing — the PM wants answers, a backend engineer thinks it\'s a deploy issue, and growth is blaming a campaign they paused. Three teams are pulling in three directions before anyone has even confirmed the signal is real.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          This is the moment that separates structured analysts from reactive ones. The instinct is to jump to the most dramatic explanation. The discipline is to start cheap and work down. Every metric movement belongs to one of four diagnostic layers, sorted by cost and false-alarm frequency. Your job is to learn the sequence — and practice routing real signals to the right layer.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Map signals to diagnostic layers</div>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
         RCA — Root Cause Analysis — is how analysts answer the question: "Our key metric dropped. Why?" It is the most common ambiguity problem in product analytics interviews and one of the highest-leverage skills in a working analyst&apos;s toolkit. Every metric movement belongs to one of four diagnostic layers. The order is not arbitrary — it is sorted by investigation cost and frequency of false alarms. Data quality is the most common false alarm and takes 10 minutes to rule out. User behaviour shifts can take weeks. Work top-to-bottom, always.
       </p>
@@ -287,6 +299,18 @@ function Module_RF02({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          DAU is down 12%. Three teams are already investigating different theories simultaneously — growth thinks it\'s a campaign expiry, product suspects the onboarding flow, and engineering just rolled back a deploy that may or may not be related. The VP of Product pings you: &quot;Can someone please just tell me what happened?&quot;
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          The first mistake everyone is making: they jumped straight to hypotheses. Before you can diagnose why DAU dropped, you need to decompose DAU into its component parts. Is it new users? Returning users? A specific platform? A single geography? Without decomposition, every theory sounds equally plausible, and every team wastes time investigating in parallel.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Identify the DAU components</div>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
         Aggregate metrics like DAU are sums of components. Jumping to a root cause without decomposing first wastes investigation time and leads to wrong diagnoses. This module trains you to break a top-line metric into the sub-metrics that can actually point to a cause.
       </p>
@@ -364,105 +388,233 @@ function Module_RF02({ onComplete }) {
 }
 
 // ── Module rf03: Data Quality First ────────────────────────────────────────
+// REFERENCE MODULE — new foundation format:
+// 1. Scenario (why this matters)  2. Concept + interactive demo  3. Framework  4. Quick check  5. Key takeaway
+
+var TRIAGE_SIGNALS = [
+  { id: 's1', text: 'Sessions dropped only on Android — iOS is completely flat', answer: 'data', explanation: 'Platform-isolated drops are the strongest data quality signal. Real product issues rarely affect exactly one platform while leaving the other untouched. This pattern points to an SDK update, a broken event listener, or a platform-specific pipeline filter.' },
+  { id: 's2', text: 'The drop coincides with an app release pushed yesterday at 3pm', answer: 'product', explanation: 'A metric change that aligns precisely with a deployment is a strong product signal. The release may have broken a flow, removed a feature, or changed navigation. Check the diff.' },
+  { id: 's3', text: 'Event timestamps show a 3-hour gap with zero events across all platforms', answer: 'data', explanation: 'A clean gap with literally zero events is almost never a real user behaviour pattern. Users don\'t all stop using an app simultaneously for exactly 3 hours. This is a pipeline outage, ingestion failure, or scheduled maintenance that dropped events.' },
+  { id: 's4', text: 'The drop is exactly the same percentage (30.0%) across every Android device model, OS version, and country', answer: 'data', explanation: 'Uniform magnitude across every segment is a telltale data quality signal. Real product issues create heterogeneous impact — some segments are hit harder than others. A perfectly uniform drop means a systematic data problem: a sampling rate change, a filter applied upstream, or a logging SDK version that stopped firing.' },
+  { id: 's5', text: 'User complaints about crashes are spiking on social media and app store reviews', answer: 'product', explanation: 'External user reports confirm that real users are experiencing real problems. Data pipeline issues are invisible to end users — they don\'t know their events aren\'t being logged. If users are complaining, something changed in the product experience.' },
+  { id: 's6', text: 'The drop started at exactly midnight UTC, not at any local timezone boundary', answer: 'data', explanation: 'Midnight UTC is when batch jobs run, partitions rotate, and pipeline schedules execute. Real user behaviour follows local timezones — people in Tokyo don\'t change behaviour at midnight UTC (9am JST). A sharp break at midnight UTC screams pipeline or cron job failure.' },
+  { id: 's7', text: 'Revenue per user is unchanged despite the session drop', answer: 'data', explanation: 'If sessions dropped 30% but revenue per user is stable, the users who are still being counted are behaving identically. This suggests the "missing" sessions never represented real engagement — they were duplicate events, bot traffic being filtered, or a logging artifact that inflated session counts before.' },
+  { id: 's8', text: 'Total events dropped but unique user count stayed flat', answer: 'data', explanation: 'Same number of users, fewer events per user. This pattern usually means an event-level logging change — a tracking call was removed, a fire-rate was throttled, or an SDK update collapsed multiple events into one. If it were a real product issue, you\'d expect some users to churn entirely, reducing unique counts.' },
+];
+
 function Module_RF03({ onComplete }) {
-  const QUESTIONS = [
-    {
-      q: 'You notice a 40% drop in session_start events on Android. iOS is flat. What do you check first?',
-      options: [
-        { label: 'A. Check if we shipped a product change to Android last week', correct: false },
-        { label: 'B. Check if the Android SDK version or tracking library changed', correct: true },
-        { label: 'C. Check if the latest Android OS update restricted background event permissions', correct: false },
-        { label: 'D. Check if a data pipeline partition filter accidentally excluded Android rows', correct: false },
-      ],
-      explanation: 'Platform-specific drops (Android only, iOS flat) almost always indicate an SDK or tracking change, not a product problem. Both C and D are plausible data quality hypotheses — but an OS permission change (C) affects multiple apps system-wide, and you\'d expect broader event degradation. A pipeline partition error (D) would not be Android-specific unless the schema change was tied to a device field. The SDK version or tracking library is the most targeted, most verifiable cause. Data quality is the first hypothesis — and it\'s cheap to rule out.',
-    },
-    {
-      q: 'Revenue per user drops 25% but order count is flat and AOV is flat. What is most likely?',
-      options: [
-        { label: 'A. A new user acquisition campaign inflated the user count in the denominator without corresponding spend', correct: false },
-        { label: 'B. A data pipeline aggregation bug is double-counting orders in the denominator', correct: true },
-        { label: 'C. A new cohort of lower-value users joined last week', correct: false },
-        { label: 'D. Refund volume increased, reducing net revenue in the numerator', correct: false },
-      ],
-      explanation: 'If RPU drops but both order count and AOV are flat, the ratio arithmetic is broken — there is no legitimate business explanation. Option A (new users without spend) would inflate the denominator but would also show as a user count spike in the data. Option C (lower-value cohort) would show in AOV or order count. Option D (refunds) would show in net revenue but would not leave order count and AOV simultaneously flat. The only explanation that fits is a pipeline bug double-counting the denominator. Data quality first.',
-    },
-  ];
+  var _saved03 = useMemo(function() { return loadRCAState('rf03'); }, []);
+  var _initSignals = useMemo(function() { return _saved03 && _saved03.signals ? _saved03.signals : shuffleArr(TRIAGE_SIGNALS); }, []);
+  var _initClass = _saved03 && _saved03.classifications ? _saved03.classifications : {};
+  var _initTriageRevealed = _saved03 ? !!_saved03.triageRevealed : false;
+  var _initMcqSel = _saved03 ? _saved03.mcqSelected || null : null;
+  var _initMcqAns = _saved03 ? !!_saved03.mcqAnswered : false;
 
-  const _saved03 = useMemo(function() { return loadRCAState('rf03'); }, []);
-  const [answers, setAnswers] = useState(function() { return _saved03 && _saved03.answers ? _saved03.answers : {}; });
-  const [revealed, setRevealed] = useState(function() { return _saved03 && _saved03.revealed ? _saved03.revealed : {}; });
+  var _signals = useState(_initSignals);
+  var signals = _signals[0];
+  var _classState = useState(_initClass);
+  var classifications = _classState[0];
+  var setClassifications = _classState[1];
+  var _triState = useState(_initTriageRevealed);
+  var triageRevealed = _triState[0];
+  var setTriageRevealed = _triState[1];
+  var _mcqSelState = useState(_initMcqSel);
+  var mcqSelected = _mcqSelState[0];
+  var setMcqSelected = _mcqSelState[1];
+  var _mcqAnsState = useState(_initMcqAns);
+  var mcqAnswered = _mcqAnsState[0];
+  var setMcqAnswered = _mcqAnsState[1];
 
-  useEffect(function() { saveRCAState('rf03', { answers: answers, revealed: revealed }); }, [answers, revealed]);
+  useEffect(function() {
+    saveRCAState('rf03', {
+      signals: signals,
+      classifications: classifications,
+      triageRevealed: triageRevealed,
+      mcqSelected: mcqSelected,
+      mcqAnswered: mcqAnswered,
+    });
+  }, [signals, classifications, triageRevealed, mcqSelected, mcqAnswered]);
 
-  function select(qi, oi) {
-    if (revealed[qi]) return;
-    setAnswers(prev => ({ ...prev, [qi]: oi }));
+  function classify(signalId, answer) {
+    if (triageRevealed) return;
+    setClassifications(function(prev) {
+      var next = {};
+      Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+      next[signalId] = answer;
+      return next;
+    });
   }
 
-  function check(qi) {
-    setRevealed(prev => ({ ...prev, [qi]: true }));
+  var allClassified = signals.every(function(s) { return classifications[s.id]; });
+
+  function handleTriageCheck() {
+    setTriageRevealed(true);
   }
 
-  const allDone = QUESTIONS.every((_, i) => revealed[i]);
+  var triageScore = null;
+  if (triageRevealed) {
+    var correctCount = signals.filter(function(s) { return classifications[s.id] === s.answer; }).length;
+    triageScore = { correct: correctCount, total: signals.length };
+  }
+
+  var MCQ = {
+    question: 'Your team\'s daily revenue dashboard shows a 15% spike overnight. Order volume is flat. Average order value is flat. Customer support tickets are at normal levels. What should you investigate first?',
+    options: [
+      { id: 'a', text: 'A. A viral marketing campaign drove high-value customers to the site overnight' },
+      { id: 'b', text: 'B. A currency conversion or tax calculation change in the data pipeline inflated revenue figures' },
+      { id: 'c', text: 'C. A competitor went down, redirecting their customers to your platform' },
+      { id: 'd', text: 'D. A pricing algorithm update increased prices across the catalog' },
+    ],
+    correct: 'b',
+    explanation: 'When revenue spikes but order count AND average order value are both flat, the arithmetic does not add up for any real business explanation. More customers (A, C) would show in order volume. Higher prices (D) would show in AOV. The only explanation that fits flat volume + flat AOV + higher revenue is a data layer issue — currency conversion rates, tax inclusion logic, or a pipeline double-count. Data quality first, always.',
+  };
+
+  function handleMcqSelect(optId) {
+    if (mcqAnswered) return;
+    setMcqSelected(optId);
+  }
+
+  function handleMcqCheck() {
+    setMcqAnswered(true);
+  }
+
+  var allDone = triageRevealed && mcqAnswered;
 
   return (
-    <div>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        The first question in any RCA is not "what changed in the product?" — it is "is the data real?" SDK bugs, pipeline failures, and instrumentation gaps routinely produce false signals. This module trains you to spot those patterns before they send an investigation in the wrong direction.
-      </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-        Data quality is the first layer of every RCA. These scenarios test whether you apply it correctly.
-      </p>
+      {/* Section 1: The Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your dashboard shows a 30% drop in Android sessions overnight. Slack is blowing up. The PM is asking if the last release broke something. The engineering lead wants to roll back. Before anyone investigates product changes, you need to check data quality first — because roughly 60% of the &quot;metric drops&quot; analysts investigate turn out to be data issues: broken SDKs, pipeline failures, logging gaps, or schema changes.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          The cost of getting this wrong is real. A false positive — treating a tracking bug as a product problem — wastes an entire engineering sprint investigating a non-issue. A false negative — dismissing a real product regression as &quot;just a data thing&quot; — lets a broken experience ship to millions of users unchecked. The skill is reading the symptoms correctly before you commit investigation time.
+        </p>
+      </div>
 
-      {QUESTIONS.map((q, qi) => (
-        <div key={qi} style={{
-          background: 'var(--surface-2)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)', padding: '1rem', marginBottom: '1.25rem',
-        }}>
-          <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.85rem', lineHeight: 1.5 }}>
-            {q.q}
-          </div>
-          <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', marginBottom: '0.75rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-            <strong>What to do:</strong> Pick the single best first action — think about which hypothesis is cheapest to rule out and most likely given the symptom pattern.
-          </div>
-          {q.options.map((opt, oi) => (
-            <MCQOption
-              key={oi}
-              label={opt.label}
-              selected={answers[qi] === oi}
-              correct={opt.correct}
-              revealed={!!revealed[qi]}
-              onClick={() => select(qi, oi)}
-            />
-          ))}
-          {answers[qi] !== undefined && !revealed[qi] && (
-            <button onClick={() => check(qi)} style={{
-              marginTop: '0.3rem', padding: '0.45rem 1rem',
-              background: 'var(--teal)', color: '#fff', border: 'none',
-              borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer',
-            }}>
-              Check
-            </button>
-          )}
-          {revealed[qi] && (
-            <div style={{
-              marginTop: '0.5rem', padding: '0.65rem 0.85rem',
-              background: 'var(--teal-bg)', border: '1px solid var(--teal-border)',
-              borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5,
-            }}>
-              {q.explanation}
+      {/* Section 2: Concept + Interactive Demo */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Data Quality vs. Product Signal</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 0.75rem', fontSize: '0.9rem' }}>
+          Data quality issues and real product problems produce metric drops that look identical on a dashboard. The difference is in the <strong>symptom pattern</strong>. Data issues tend to be suspiciously clean — uniform across segments, aligned to pipeline schedules (midnight UTC), isolated to one platform with no user-facing impact. Product problems are messy — they hit some segments harder than others, correlate with deployments, and generate user complaints.
+        </p>
+      </div>
+
+      {/* Interactive: Data Quality Triage Board */}
+      <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Data Quality Triage Board</div>
+        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.55, margin: '0 0 1rem' }}>
+          You are investigating the 30% Android session drop. Below are 8 signals your team has surfaced. For each one, classify it: does this point to a <strong>data issue</strong> (pipeline, SDK, logging) or a <strong>real product problem</strong> (broken feature, bad release, UX regression)?
+        </p>
+
+        {signals.map(function(signal) {
+          var userAnswer = classifications[signal.id];
+          var isCorrect = userAnswer === signal.answer;
+          var rowBg = 'var(--surface-2)';
+          var rowBorder = 'var(--border)';
+
+          if (triageRevealed) {
+            rowBg = isCorrect ? 'var(--teal-bg)' : 'var(--red-bg)';
+            rowBorder = isCorrect ? 'var(--teal-border)' : 'var(--red-border)';
+          }
+
+          return (
+            <div key={signal.id} style={{ background: rowBg, border: '1.5px solid ' + rowBorder, borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: triageRevealed ? '0.25rem' : '0.5rem' }}>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.55, marginBottom: '0.5rem', fontWeight: 500 }}>
+                {signal.text}
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button onClick={function() { classify(signal.id, 'data'); }} disabled={triageRevealed} style={{
+                  padding: '0.3rem 0.85rem', fontSize: '0.78rem', fontWeight: 600,
+                  borderRadius: 'var(--radius-sm)', cursor: triageRevealed ? 'default' : 'pointer',
+                  background: userAnswer === 'data' ? 'var(--teal)' : 'var(--surface)',
+                  color: userAnswer === 'data' ? '#fff' : 'var(--text-muted)',
+                  border: '1.5px solid ' + (userAnswer === 'data' ? 'var(--teal)' : 'var(--border)'),
+                  transition: 'all 0.15s',
+                }}>
+                  Data Issue
+                </button>
+                <button onClick={function() { classify(signal.id, 'product'); }} disabled={triageRevealed} style={{
+                  padding: '0.3rem 0.85rem', fontSize: '0.78rem', fontWeight: 600,
+                  borderRadius: 'var(--radius-sm)', cursor: triageRevealed ? 'default' : 'pointer',
+                  background: userAnswer === 'product' ? 'var(--purple)' : 'var(--surface)',
+                  color: userAnswer === 'product' ? '#fff' : 'var(--text-muted)',
+                  border: '1.5px solid ' + (userAnswer === 'product' ? 'var(--purple)' : 'var(--border)'),
+                  transition: 'all 0.15s',
+                }}>
+                  Product Signal
+                </button>
+              </div>
+              {triageRevealed && (
+                <div style={{ marginTop: '0.4rem', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                  {isCorrect ? '✓' : '✗'} <strong style={{ color: signal.answer === 'data' ? 'var(--teal)' : 'var(--purple)' }}>{signal.answer === 'data' ? 'Data Issue' : 'Product Signal'}.</strong> {signal.explanation}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      ))}
+          );
+        })}
 
+        {allClassified && !triageRevealed && (
+          <button onClick={handleTriageCheck} className='pal-glow-pulse' style={{
+            marginTop: '0.75rem', padding: '0.5rem 1.2rem',
+            borderRadius: 'var(--radius-sm)', border: 'none',
+            background: 'var(--teal)', color: '#fff', fontWeight: 600,
+            fontSize: '0.85rem', cursor: 'pointer',
+          }}>
+            Check My Classifications
+          </button>
+        )}
+
+        {triageRevealed && triageScore && (
+          <div className='pal-reveal-in' style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: triageScore.correct >= 7 ? 'var(--teal)' : triageScore.correct >= 5 ? 'var(--yellow)' : 'var(--red)' }}>
+              {triageScore.correct} / {triageScore.total} correct
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem', lineHeight: 1.5 }}>
+              {triageScore.correct === triageScore.total ? 'Perfect. You can distinguish data noise from real signal — this is the single most valuable triage skill an analyst can have.' : triageScore.correct >= 6 ? 'Strong. The signals you missed are subtle — review the explanations to sharpen your pattern recognition.' : 'Review the explanations carefully. The patterns here — uniform magnitude, UTC-aligned timing, platform isolation — are the fingerprints of data issues you will see over and over.'}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Section 3: Framework */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The 3-Layer Data Quality Check</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Before generating any product hypothesis, run the metric through three layers: <strong>(1) Is the data arriving?</strong> Check pipeline health dashboards, ingestion lag, and job completion logs — a failed Airflow DAG or a Kafka consumer lag spike explains most overnight drops in under 5 minutes. <strong>(2) Is the data correct?</strong> Look for schema changes, SDK version bumps, new event definitions, or field-type mismatches — a renamed event or a changed enum silently breaks downstream aggregations. <strong>(3) Is the data complete?</strong> Check for missing segments, time gaps, and coverage — a filter that excludes one country or one device type creates a partial drop that looks like a product problem but is just an incomplete picture. If all three layers pass, then — and only then — start investigating product changes.
+        </p>
+      </div>
+
+      {/* Section 4: Quick Check */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Quick Check</div>
+        <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.88rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>{MCQ.question}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {MCQ.options.map(function(opt) {
+            return (
+              <MCQOption key={opt.id} label={opt.text} selected={mcqSelected === opt.id} correct={opt.id === MCQ.correct} revealed={mcqAnswered} onClick={function() { handleMcqSelect(opt.id); }} />
+            );
+          })}
+        </div>
+        {mcqSelected && !mcqAnswered && (
+          <button onClick={handleMcqCheck} style={{ marginTop: '0.75rem', padding: '0.45rem 1.1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>Check</button>
+        )}
+        {mcqAnswered && (
+          <div className='pal-reveal-in' style={{ marginTop: '0.75rem', background: mcqSelected === MCQ.correct ? 'var(--teal-bg)' : 'var(--red-bg)', border: '1px solid ' + (mcqSelected === MCQ.correct ? 'var(--teal-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+            <strong>{mcqSelected === MCQ.correct ? '✓ Correct. ' : '✗ Not quite. '}</strong>{MCQ.explanation}
+          </div>
+        )}
+      </div>
+
+      {/* Section 5: Key Takeaway */}
       {allDone && (
         <div>
           <InsightBox>
-            Data quality checks are cheap and fast — SDK version logs, pipeline run history, event count by platform. Always run these before generating product hypotheses. A false positive (treating a tracking bug as a product problem) wastes engineering sprint capacity on a non-issue.
+            Data quality is the cheapest layer of every RCA — 10 minutes checking pipeline logs, SDK versions, and event counts by platform can save days of wasted investigation. The tell-tale signs of data issues are uniformity (same magnitude across all segments), UTC-aligned timing (midnight job failures), and platform isolation (one OS affected, others flat). When the symptom pattern is too clean, the problem is almost never the product.
           </InsightBox>
-          <NextBtn onClick={onComplete} label="Complete module →" />
+          <NextBtn onClick={onComplete} label='Complete module →' />
         </div>
       )}
     </div>
@@ -496,6 +648,18 @@ function Module_RF04({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Search volume dropped 20% over the weekend. The on-call engineer opens a P1, the PM starts drafting a war-room invite, and the growth lead is already running queries against the search index. Then someone checks the calendar — it\'s Memorial Day weekend.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          Not every drop is a product bug. Some are calendar effects you should have anticipated. Others are genuine external events — a competitor launch, an OS update, a regulatory change — that no amount of product work would have prevented. The skill is telling the two apart quickly, because one type is predictable and the other requires monitoring. Misclassifying either wastes investigation time or, worse, causes you to ignore a real signal.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Classify each factor</div>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
         Not every metric movement is caused by the product. Seasonal patterns repeat on a calendar schedule and are detectable with year-over-year comparisons. External factors are one-off market or platform events that require a different kind of awareness. Distinguishing them quickly stops you from filing a bug for a holiday.
       </p>
@@ -605,6 +769,18 @@ function Module_RF05({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          D7 retention looks flat at the aggregate level — 32% this week, 32% last week. The PM marks it green in the weekly review and moves on. But something feels off when you pull cohort-level data. Existing users still retain at 38%. Campaign users retain at 14%. Both numbers are unchanged. So why does the aggregate feel wrong?
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          This is Simpson\'s paradox in practice — the aggregate can move in the opposite direction from every subgroup when the mix of subgroups shifts. A big acquisition campaign floods your user base with low-retention users, and the blended number drops even though nobody\'s experience got worse. If you only look at the top line, you miss it entirely. This module lets you manipulate the mix directly and watch the paradox unfold.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Manipulate the cohort mix</div>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
         Aggregate metrics can move in the wrong direction even when every individual segment is healthy. Move the slider below and watch what happens to overall D7 retention — without touching either segment.
       </p>
@@ -843,6 +1019,18 @@ function Module_RF06({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You found the root cause. D7 retention dropped 6 percentage points because an iOS push notification prompt change cut opt-in rates nearly in half. You validated it with segment analysis, confirmed the timing against the deploy log, and can prove the causal chain. The VP of Product asks: &quot;Great — so what do we do about it?&quot;
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          This is where most analysts stall. They hand over a Slack message that says &quot;it was the push prompt&quot; and consider the job done. But a diagnosis without a recommendation, an owner, a success metric, and a monitoring plan just creates another round of meetings. The analysts who get promoted are the ones who deliver the full package — a one-page writeup that a VP can forward to eng and say &quot;do this.&quot;
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Walk through the 5-part RCA output</div>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
         Finding the root cause is only half the job. A complete RCA output includes a precise description of what happened, the evidence-backed cause, a concrete fix with an owner, a pre-committed success metric, and an ongoing monitoring plan. Most analysts stop at step two — this module walks you through all five.
       </p>
@@ -1154,6 +1342,18 @@ function Module_RF07({ onComplete }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          The PM asks you to explain why GMV dropped 9% this week. You could list a dozen possible causes — but without structure, every hypothesis is a guess and you have no way to tell which branches you\'ve already covered and which you haven\'t. You need a decomposition that is MECE: every dollar of GMV lives in exactly one branch of the tree, so every drop can be traced to exactly one node.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          A metric tree turns &quot;GMV is down&quot; into &quot;GMV = DAU x Orders/DAU x AOV&quot; — and suddenly the investigation has guardrails. You check each node against its baseline, and the branch that moved tells you where to dig. No wasted queries, no missed branches, no duplication across teams.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '-0.75rem' }}>Try It: Navigate the metric tree</div>
+
       <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0 }}>
         A metric tree makes RCA exhaustive — every drop lives in exactly one branch. The tree below is live: the highlighted node shows which branch each question is about. Answer each question, then advance.
       </p>
@@ -1338,6 +1538,18 @@ function Module_RF08({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You have a hypothesis: checkout completions dropped starting March 15th, possibly iOS-only. But a hypothesis without data is just a guess. You need to validate it with SQL — quickly, in a sequence that narrows the search space with each query rather than running expensive joins upfront.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          The playbook is always the same: first confirm the signal is real with a time-series, then segment by platform or dimension to isolate the affected group, then run a year-over-year comparison to rule out seasonality. Three queries, thirty minutes, and you either have a confirmed lead or you\'ve saved your team from a false alarm. This module walks you through each step with real output tables.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Run the diagnostic SQL sequence</div>
+
       <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
         The first 30 minutes of any RCA follow the same SQL playbook: confirm the signal is real, narrow to a platform or segment, then check whether the pattern has historical precedent. Walk through each query below and read what the output tells you.
       </p>
@@ -1516,6 +1728,18 @@ function Module_RF09({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          DAU is up 20% year-over-year. The growth team celebrates in the all-hands. But is that real product-driven growth, or did last year just happen to have a down week? A metric that looks impressive in isolation might be entirely explained by seasonal patterns — a holiday lull last year, a back-to-school bump this year, or just normal weekly cyclicality that the YoY comparison is magnifying.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          Separating trend from seasonality is one of the most important skills in analytics. The technique is simple: overlay the same week from last year. If the shapes match, the movement is seasonal. If this year diverges from the prior-year pattern, you have a real signal worth investigating. This module gives you a live chart where you can toggle the overlay and see the difference yourself.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Toggle the year-over-year overlay</div>
+
       <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
         Not every week-over-week drop is a product regression. Before raising an alarm, overlay the same metric from the same week last year. If the shapes match, you are looking at a predictable seasonal cycle — not a broken feature.
       </p>
@@ -1703,6 +1927,18 @@ function Module_RF10({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Metrics look weird after Tuesday\'s deploy. Checkout completions are down 40% on Android, but only since 3pm. The PM wants to roll back the release. But before you let engineering spend two hours reverting code, you check the event stream — and notice that the Android SDK version changed in the same deploy. The events aren\'t missing; they\'re being logged under a new event name.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          Data quality issues are the single most common false alarm in RCA. They take minutes to rule out — check SDK versions, pipeline run logs, event counts by platform — but if you skip this step, you pull an entire team into a multi-day investigation for what turns out to be a five-minute logging fix. Three patterns explain the vast majority of data quality false alarms: SDK changes, logging bugs, and pipeline failures. Each has a distinct signature.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Match symptoms to data quality diagnoses</div>
+
       <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
         Three data quality failure patterns account for the vast majority of false alarms in RCA. Each has a distinct signature. Match each symptom pattern to the correct diagnosis, then check your answer before moving to the next.
       </p>
@@ -1892,6 +2128,18 @@ function Module_RF11({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Engagement dropped 11% on Tuesday. The eng team scours deploy logs and finds nothing. The PM checks experiment flags — no changes. Then someone on the growth team notices: a major competitor launched a free tier of their core product on Monday evening. It was all over tech Twitter. Nobody on your team saw it because nobody was monitoring external signals.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          External factors — competitor moves, platform policy changes, macroeconomic shifts, seasonal patterns — explain a significant share of metric movements that have no internal fix. Misclassifying an external event as a product regression wastes engineering time. Missing an external event entirely means your post-mortem draws the wrong conclusion. The skill is knowing which category each event falls into, because the response is different for each.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Classify external events</div>
+
       <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.1rem' }}>
         External factors explain a large share of metric movements that have no product fix. Classifying them correctly stops engineering teams from chasing non-existent regressions. Classify each event below into one of four categories.
       </p>
@@ -2086,6 +2334,18 @@ function Module_RF12({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          The metric dropped 22%. Engineering found a checkout bug and claimed it as the root cause — their data shows it accounts for 7 percentage points. But 22 minus 7 is 15. Where did the other 15 points go? The team marked the incident as resolved and moved on. Two weeks later, the metric still hasn\'t recovered, and nobody can explain why.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          Multi-level RCA means accounting for 100% of the delta, not just finding one plausible cause and stopping. Most metric drops have multiple contributing factors across different diagnostic layers — a data pipeline delay inflated the apparent drop, a seasonal baseline shift was expected, and a real product regression explains the rest. You need to attribute each percentage point to close the investigation properly. This module lets you toggle each cause on and off to see how the unexplained gap changes.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Toggle causes to close the attribution gap</div>
+
       <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.1rem' }}>
         A total metric drop of -22% is explained by three overlapping causes across different diagnostic layers. Toggle each cause on or off to see how the unexplained gap changes — and to understand why stopping at the first plausible cause produces an incomplete RCA.
       </p>
@@ -2309,6 +2569,18 @@ function Module_RF13({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          A metric moved. Before you open a single query, you read the time signature: did it drop overnight or drift over two weeks? Did it hit one platform or all of them? Is it a step change aligned with a deploy, or a gradual trend that started before any code change? The answers to these questions route your entire investigation — they tell you which diagnostic layer to start in, which queries to run first, and which hypotheses to prioritize.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          This is the routing gate — the decision point between &quot;investigate a deploy&quot; and &quot;check the calendar.&quot; An abrupt step change on one platform is almost certainly a product change. A gradual drift across all segments is more likely external or behavioral. Getting this routing decision right in the first five minutes saves hours of wasted investigation downstream.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Route each signal to the right investigation</div>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         Before building a fault tree, read the time signature. The pattern of a drop — when it started, how fast it moved, and which segments it hit — routes the entire investigation. Jumping to hypotheses before reading the signal means you start in the wrong branch.
       </p>
@@ -2535,6 +2807,18 @@ function Module_RF14({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You have 8 hypotheses for why conversion dropped. Three involve checkout flow changes, two involve ad quality, one is a pricing experiment, one is a platform bug, and one is a seasonal pattern. Your instinct is to investigate all of them — but that means 8 parallel workstreams, 8 queries, and a week of analyst time. The smart move is to prune first: decompose the metric, find which component actually moved, and eliminate every hypothesis that doesn\'t touch that component.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          Scattered investigation is the primary failure mode of capable analysts. The discipline is not generating more hypotheses — it\'s eliminating the ones that don\'t matter. Once you identify the dominant lever (the metric component that explains the majority of the drop), you can prune entire branches of the fault tree and focus your effort where it will actually pay off.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Identify the dominant lever and prune</div>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         Decomposing a metric tells you which component moved. The next step — the one most analysts skip — is to prune every investigation branch that is unrelated to that component. Scattered thinking is the primary failure mode of smart analysts.
       </p>
@@ -2914,6 +3198,18 @@ function Module_RF15({ onComplete }) {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You\'ve pruned the fault tree and you\'re left with three competing hypotheses. All three are plausible. All three could explain a meaningful chunk of the drop. But you only have one analyst-day before the exec review. Which hypothesis do you investigate first? Second? Which one do you defer entirely?
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
+          Hypothesis ranking is the final step before you open a query editor. The framework is Impact (how much of the drop would this explain if true?) times Likelihood (how probable is this cause given the evidence?) times Ease (how quickly can you validate or rule it out?). An analyst who investigates in this order will almost always reach the root cause faster than one who starts with whatever feels most interesting. When two hypotheses tie, break in favor of higher Ease — cheap validation is always worth doing first.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Rank hypotheses by investigation priority</div>
+
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1rem' }}>
         After pruning the fault tree, you still have competing hypotheses. Rank them by investigation priority using Impact (how much of the drop does this explain?), Likelihood (how probable given the symptoms?), and Ease (how fast can you validate it?).
       </p>

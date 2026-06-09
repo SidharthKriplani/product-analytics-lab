@@ -39,6 +39,19 @@ export function Module14_Correlation({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your data shows that users who watch more tutorial videos also make more purchases. The PM concludes you should push more videos on every user. But correlation is not causation — maybe engaged users both watch videos and buy more because they\'re already motivated. Recommending more videos might do nothing for passive users.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Before you can even think about causation, you need to understand what correlation actually measures and what it misses. Drag the slider below to see how the scatter plot tightens as correlation approaches +1 or -1, and how it dissolves into noise at r = 0.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Reshape the Scatter Plot</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         <strong>Correlation</strong> measures the strength and direction of the linear relationship between two variables.
         The Pearson correlation coefficient <em>r</em> ranges from −1 (perfect negative) through 0 (no relationship) to +1 (perfect positive).

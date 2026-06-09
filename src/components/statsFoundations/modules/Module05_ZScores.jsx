@@ -79,6 +79,19 @@ export function Module05_ZScores({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          A user\'s session time is 47 minutes. Your average session is 20 minutes with a standard deviation of 9. Is this person a power user, a confused user stuck on a broken flow, or just slightly above normal? Without a z-score, you have no way to answer — 47 minutes means nothing until you know how far it is from the mean in standard-deviation units.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Z-scores convert raw values to a universal scale so you can compare across different metrics. A z-score of +2 means the same degree of unusualness whether you\'re measuring session time, revenue, or page views. Set your population parameters below and move the value slider to see where it lands.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Locate a Value on the Curve</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         It converts any normally distributed measurement to a universal scale — so you can compare values from different distributions.
       </p>

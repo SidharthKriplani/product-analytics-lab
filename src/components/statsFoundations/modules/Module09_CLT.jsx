@@ -160,6 +160,19 @@ export function Module09_CLT({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your revenue-per-user data is heavily right-skewed — most users pay nothing, a few pay a lot. Your colleague asks: how can we use z-tests and normal-based confidence intervals when the underlying data is clearly not normal? The answer is the Central Limit Theorem.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          The CLT guarantees that the distribution of sample means approaches a normal shape as sample size grows — regardless of what the population looks like. This is why most of classical statistics works even on messy real-world data. Choose a skewed population below and simulate to watch it happen.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Watch Skewed Data Become Normal</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         The <strong>Central Limit Theorem</strong> says: no matter how weird your population distribution looks,
         if you take large enough samples and compute the mean, those sample means will be approximately

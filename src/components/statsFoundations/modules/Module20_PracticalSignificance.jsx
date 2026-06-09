@@ -95,6 +95,19 @@ export function Module20_PracticalSignificance({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your experiment returns p = 0.001. The PM is thrilled — highly significant! But the actual lift is 0.3% on a conversion rate of 4.2%. With 10 million monthly users, that translates to maybe $8,000 in annual revenue. The engineering cost to ship the feature is $50,000. Statistically significant does not mean worth building.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          Large sample sizes can make trivially small effects reach statistical significance. Conversely, a genuinely large effect might not reach significance if your sample is too small. You need both statistical and practical significance to make a ship decision. Explore the matrix below to build intuition for when each applies.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Navigate the Significance Matrix</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         A result can be <strong>statistically significant but practically negligible</strong> (large N amplifies tiny effects),
         or <strong>practically large but not yet significant</strong> (small N can't confirm a real effect).

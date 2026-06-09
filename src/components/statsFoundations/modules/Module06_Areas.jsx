@@ -93,6 +93,19 @@ export function Module06_Areas({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          Your PM asks: what percentage of users complete onboarding in under 5 minutes? The onboarding time is normally distributed with a known mean and standard deviation. The answer is literally the area under the curve to the left of 5 minutes — and once you convert to z-scores, you can read it straight off the standard normal.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          This is the same math behind every p-value and confidence interval you\'ll ever compute. The shaded area IS the probability. Drag the bounds below to shade different regions and watch the probability update in real time.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Shade Regions and Read Probabilities</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         Drag the bounds to shade different regions. The shaded area is exactly P(z₁ &lt; Z &lt; z₂) — the probability that a randomly drawn value falls in that range.
       </p>

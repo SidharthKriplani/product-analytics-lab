@@ -37,6 +37,19 @@ export function Module17_MultipleTesting({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Scenario */}
+      <div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+          You tested 12 metrics in your A/B experiment and found 2 statistically significant. The PM is excited — two wins from one experiment! But at alpha = 0.05, you\'d expect about 0.6 false positives from 12 tests even if there\'s no real effect. Those 2 "wins" might just be noise.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
+          This is the multiple testing problem. Every additional metric you test gives randomness another chance to fool you. The Bonferroni correction tightens the threshold — but at a cost. Drag the slider below to see how the false positive rate explodes as you add more tests, and what correction does about it.
+        </p>
+      </div>
+
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Scale Up the Tests</div>
+
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
         Every hypothesis test carries a 5% false positive rate at α=0.05. Run multiple tests and those errors <em>accumulate</em>.
         The <strong>family-wise error rate (FWER)</strong> is the probability of getting at least one false positive across all tests — even if every null hypothesis is true.
