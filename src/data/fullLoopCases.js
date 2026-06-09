@@ -1190,6 +1190,1237 @@ export const fullLoopCases = [
       },
     ],
   },
+
+  {
+    id: 'fl06',
+    title: 'Loan Approval Rate Dropping',
+    domain: 'Fintech / Lending',
+    difficulty: 'analyst',
+    isFree: false,
+    guestPreview: false,
+    phases: [
+      {
+        type: 'alert',
+        title: 'The Alert',
+        metricName: 'Loan Approval Rate',
+        metricValue: '54.2%',
+        metricChange: '-18% WoW',
+        prompt: 'Your lending dashboard shows the loan approval rate dropped 18% week-over-week, from 66.1% to 54.2%. Support tickets from applicants are rising. What is your first move?',
+        options: [
+          {
+            id: 'a',
+            text: 'Segment approval rates by channel (mobile, web, branch) and credit score bucket to isolate where the decline is concentrated',
+            correct: true,
+            feedback: 'Correct. Approval rate drops can stem from applicant quality changes, underwriting rule changes, or technical issues in the scoring pipeline. Segmenting by channel and credit score bucket tells you whether the drop is broad or isolated, which immediately narrows your investigation to the right system layer.'
+          },
+          {
+            id: 'b',
+            text: 'Lower the credit score threshold immediately to restore the approval rate',
+            correct: false,
+            feedback: 'Adjusting the threshold without understanding the root cause is dangerous. If the scoring itself is broken, lowering the threshold could approve applicants who should be rejected, increasing default risk. You need to diagnose the problem before changing underwriting parameters.'
+          },
+          {
+            id: 'c',
+            text: 'Check if marketing acquired a lower-quality applicant pool this week',
+            correct: false,
+            feedback: 'Marketing mix changes could affect applicant quality, but an 18% drop in one week is unusually sharp for an acquisition channel shift. Even if the applicant pool changed, you need segmentation data to confirm the hypothesis. Start with channel and score bucket analysis before attributing the decline to marketing.'
+          },
+        ],
+      },
+      {
+        type: 'data',
+        title: 'Read the Data',
+        prompt: 'Here is the approval rate breakdown by application channel and credit score provider. What stands out?',
+        dataTable: {
+          headers: ['Channel', 'Score Provider', 'Approval Rate This Week', 'Approval Rate Last Week', 'Change'],
+          rows: [
+            ['Mobile', 'New Bureau API', '41.3%', '64.8%', '-23.5pp'],
+            ['Mobile', 'Legacy Bureau', '63.9%', '65.2%', '-1.3pp'],
+            ['Web', 'New Bureau API', '43.1%', '66.0%', '-22.9pp'],
+            ['Web', 'Legacy Bureau', '65.4%', '66.1%', '-0.7pp'],
+            ['Branch', 'Legacy Bureau', '68.2%', '67.5%', '+0.7pp'],
+          ],
+        },
+        guideQuestion: 'What is common across the segments showing large declines? What changed recently?',
+        modelObservation: 'The approval rate decline is isolated to applications scored by the New Bureau API, regardless of channel. Mobile and web applications routed to the new credit bureau both dropped by 23 percentage points, while applications still using the legacy bureau and all branch applications (which only use the legacy bureau) are stable. This pattern points directly to the new credit score provider integration, which went live 9 days ago. The new bureau is returning systematically different scores that push more applicants below the existing approval threshold.',
+        keyPhrases: ['New Bureau API', 'credit score', 'channel', 'threshold', 'integration'],
+      },
+      {
+        type: 'rca',
+        title: 'Root Cause',
+        prompt: 'Based on the data, what is the most likely root cause of the approval rate drop?',
+        options: [
+          {
+            id: 'a',
+            text: 'The new credit bureau API returns scores on a stricter distribution, causing the same applicants to score 40-60 points lower than they would on the legacy bureau, pushing them below the unchanged approval threshold',
+            correct: true,
+            feedback: 'Correct. The new bureau uses a different scoring model with a tighter distribution. An applicant who scored 680 on the legacy bureau might score 630 on the new one. Since the approval threshold of 650 was calibrated for the legacy bureau\'s distribution, the unchanged threshold is now rejecting creditworthy applicants. The underlying creditworthiness of applicants has not changed; only the measurement instrument has.'
+          },
+          {
+            id: 'b',
+            text: 'A fraud ring is submitting synthetic identity applications through mobile and web channels',
+            correct: false,
+            feedback: 'Fraud-driven applications would typically show up as rejections due to identity verification failures or fraud model flags, not as credit score-based rejections. Additionally, fraud attacks do not align neatly with a credit score provider switch. The channel pattern matches the new bureau routing, not a fraud vector.'
+          },
+          {
+            id: 'c',
+            text: 'Macroeconomic conditions worsened, reducing the creditworthiness of applicants across digital channels',
+            correct: false,
+            feedback: 'If macroeconomic conditions were the driver, you would see approval rates decline across all channels and both score providers. Branch applications using the legacy bureau are stable, and digital applications on the legacy bureau are also stable. The decline is isolated to one scoring provider, ruling out a macro explanation.'
+          },
+        ],
+      },
+      {
+        type: 'sql',
+        title: 'Investigate with SQL',
+        schema: {
+          tables: [
+            {
+              name: 'loan_applications',
+              columns: ['application_id INT', 'user_id INT', 'channel TEXT', 'submitted_at TIMESTAMP', 'status TEXT', 'decision_reason TEXT'],
+            },
+            {
+              name: 'credit_scores',
+              columns: ['application_id INT', 'bureau TEXT', 'score INT', 'pulled_at TIMESTAMP'],
+            },
+            {
+              name: 'approval_decisions',
+              columns: ['application_id INT', 'decision TEXT', 'decided_at TIMESTAMP', 'threshold_used INT'],
+            },
+          ],
+        },
+        task: 'Compare approval rates by credit bureau and score bucket (sub-600, 600-649, 650-699, 700+) for the last 2 weeks to show how the new bureau\'s score distribution shifts applicants across buckets.',
+        correctQuery: 'SELECT cs.bureau, CASE WHEN cs.score < 600 THEN \'sub-600\' WHEN cs.score BETWEEN 600 AND 649 THEN \'600-649\' WHEN cs.score BETWEEN 650 AND 699 THEN \'650-699\' WHEN cs.score >= 700 THEN \'700+\' END AS score_bucket, COUNT(*) AS applications, SUM(CASE WHEN ad.decision = \'approved\' THEN 1 ELSE 0 END) AS approved, ROUND(100.0 * SUM(CASE WHEN ad.decision = \'approved\' THEN 1 ELSE 0 END) / COUNT(*), 1) AS approval_rate FROM loan_applications la JOIN credit_scores cs ON la.application_id = cs.application_id JOIN approval_decisions ad ON la.application_id = ad.application_id WHERE la.submitted_at >= CURRENT_DATE - INTERVAL \'14 days\' GROUP BY cs.bureau, score_bucket ORDER BY cs.bureau, score_bucket',
+        correctQueryFormatted: [
+          'SELECT cs.bureau,',
+          '  CASE',
+          '    WHEN cs.score < 600 THEN \'sub-600\'',
+          '    WHEN cs.score BETWEEN 600 AND 649 THEN \'600-649\'',
+          '    WHEN cs.score BETWEEN 650 AND 699 THEN \'650-699\'',
+          '    WHEN cs.score >= 700 THEN \'700+\'',
+          '  END AS score_bucket,',
+          '  COUNT(*) AS applications,',
+          '  SUM(CASE WHEN ad.decision = \'approved\'',
+          '    THEN 1 ELSE 0 END) AS approved,',
+          '  ROUND(100.0 * SUM(CASE WHEN ad.decision = \'approved\'',
+          '    THEN 1 ELSE 0 END) / COUNT(*), 1) AS approval_rate',
+          'FROM loan_applications la',
+          'JOIN credit_scores cs ON la.application_id = cs.application_id',
+          'JOIN approval_decisions ad ON la.application_id = ad.application_id',
+          'WHERE la.submitted_at >= CURRENT_DATE - INTERVAL \'14 days\'',
+          'GROUP BY cs.bureau, score_bucket',
+          'ORDER BY cs.bureau, score_bucket',
+        ],
+        keyElements: ['credit_scores', 'bureau', 'CASE', 'BETWEEN', 'GROUP BY', 'approval'],
+        expectedOutput: {
+          headers: ['bureau', 'score_bucket', 'applications', 'approved', 'approval_rate'],
+          rows: [
+            ['legacy', 'sub-600', '1,200', '0', '0.0%'],
+            ['legacy', '600-649', '3,400', '0', '0.0%'],
+            ['legacy', '650-699', '5,800', '5,510', '95.0%'],
+            ['legacy', '700+', '4,600', '4,554', '99.0%'],
+            ['new_bureau', 'sub-600', '2,100', '0', '0.0%'],
+            ['new_bureau', '600-649', '5,900', '0', '0.0%'],
+            ['new_bureau', '650-699', '4,200', '3,990', '95.0%'],
+            ['new_bureau', '700+', '2,800', '2,772', '99.0%'],
+          ],
+        },
+        hints: ['Use a CASE expression to bucket credit scores into ranges', 'Join loan_applications with credit_scores and approval_decisions', 'Group by bureau and score bucket to compare distributions across providers'],
+      },
+      {
+        type: 'communicate',
+        title: 'Write the Brief',
+        prompt: 'Write a brief for the risk team explaining the root cause and your recommended path forward.',
+        modelAnswer: 'The new credit bureau API, integrated 9 days ago, returns scores that are systematically 40-60 points lower than the legacy bureau for the same applicants. Our approval threshold of 650 was calibrated for the legacy bureau\'s distribution, so the unchanged threshold is now rejecting creditworthy applicants who would have been approved under the legacy scoring. This has dropped approval rates from 66% to 54%, affecting approximately 1,800 applicants per week who are being incorrectly rejected. Recommended next step: run a dual-scoring A/B test comparing the old versus new credit bureau with the same default rate as the primary metric, so we can recalibrate the threshold for the new bureau\'s distribution without increasing default risk.',
+        rubric: ['Explains the score distribution mismatch clearly', 'Distinguishes between applicant quality and measurement instrument', 'Proposes a calibration approach rather than a blanket threshold change'],
+        keyPhrases: ['credit bureau', 'threshold', 'distribution', '40-60 points', 'calibrate', 'default risk'],
+      },
+      {
+        type: 'experiment',
+        title: 'Design the Test',
+        prompt: 'Design an A/B test to validate the new credit scoring with an adjusted threshold.',
+        fields: [
+          {
+            label: 'Hypothesis',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Adjusting the approval threshold from 650 to 610 for the new bureau will restore the approval rate to pre-migration levels (above 64%) while maintaining the same 30-day default rate as the legacy bureau', correct: true },
+              { id: 'b', text: 'Reverting entirely to the legacy bureau will restore approval rates and is the safest long-term solution', correct: false },
+              { id: 'c', text: 'Approving all applicants above 600 on the new bureau will maximize volume without materially increasing defaults', correct: false },
+            ],
+            correctAnswer: 'Option A correctly targets both approval rate restoration and default rate parity. Option B avoids solving the problem and abandons potential benefits of the new bureau. Option C sets an arbitrary threshold without grounding it in default rate equivalence.',
+          },
+          {
+            label: 'Unit of randomization',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Applicant-level randomization, with each new applicant randomly assigned to be scored by the old bureau or the new bureau with adjusted threshold', correct: true },
+              { id: 'b', text: 'Branch-level randomization, assigning each branch to one scoring method', correct: false },
+              { id: 'c', text: 'Day-level randomization, alternating days between old and new scoring', correct: false },
+            ],
+            correctAnswer: 'Applicant-level randomization maximizes statistical power and avoids time-based or geography-based confounds. Branch-level is irrelevant since the issue is in digital channels. Day-level introduces temporal confounds from varying applicant quality across days.',
+          },
+          {
+            label: 'Primary metric',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Approval rate at equivalent 30-day default rate (measuring whether the adjusted threshold produces the same creditworthiness boundary)', correct: true },
+              { id: 'b', text: 'Raw approval rate regardless of default outcomes', correct: false },
+              { id: 'c', text: 'Total loan volume originated in dollars', correct: false },
+              { id: 'd', text: 'Applicant satisfaction score', correct: false },
+            ],
+            correctAnswer: 'The primary metric must hold default risk constant while comparing approval rates. Raw approval rate ignores credit quality. Loan volume is a downstream metric. Satisfaction is a lagging indicator that does not measure underwriting accuracy.',
+          },
+          {
+            label: 'Guardrail metrics',
+            type: 'multi',
+            options: [
+              { id: 'a', text: '30-day default rate', correct: true },
+              { id: 'b', text: '90-day delinquency rate', correct: true },
+              { id: 'c', text: 'Fraud detection rate (ensure new bureau does not miss synthetic identities)', correct: true },
+              { id: 'd', text: 'Mobile app crash rate', correct: false },
+              { id: 'e', text: 'Marketing campaign click-through rate', correct: false },
+            ],
+            correctAnswer: 'Default rate, delinquency rate, and fraud detection directly measure whether the adjusted threshold maintains credit quality. App crash rate and marketing CTR are unrelated to the scoring change.',
+          },
+        ],
+      },
+      {
+        type: 'readout',
+        title: 'The Readout',
+        prompt: 'The experiment ran for 4 weeks. Here are the results:',
+        resultsTable: {
+          headers: ['Metric', 'Control', 'Treatment', 'Lift', 'p-value'],
+          rows: [
+            ['Approval Rate', '54.1%', '65.8%', '+21.6%', '<0.001'],
+            ['30-day Default Rate', '2.1%', '2.3%', '+9.5%', '0.38'],
+            ['90-day Delinquency Rate', '4.8%', '5.0%', '+4.2%', '0.51'],
+            ['Fraud Detection Rate', '98.2%', '98.5%', '+0.3%', '0.72'],
+            ['Avg Processing Time', '1.8s', '1.2s', '-33.3%', '<0.001'],
+          ],
+        },
+        question: 'What is your recommendation?',
+        options: [
+          {
+            id: 'ship',
+            text: 'Ship the new scoring with adjusted threshold to 100%',
+            correct: true,
+            feedback: 'Correct. The adjusted threshold restores approval rates to pre-migration levels while keeping default and delinquency rates statistically indistinguishable from the legacy bureau. Fraud detection is equivalent. The new bureau also processes scores faster, reducing applicant wait time. There is no evidence of increased credit risk, and every day with the unadjusted threshold unnecessarily rejects creditworthy applicants.'
+          },
+          {
+            id: 'no-ship',
+            text: 'Revert to the legacy bureau entirely',
+            correct: false,
+            feedback: 'Reverting abandons the benefits of the new bureau, including faster processing and potentially better long-term scoring accuracy. The experiment shows that with the adjusted threshold, the new bureau matches the legacy bureau on all risk metrics. There is no reason to revert when the calibrated solution works.'
+          },
+          {
+            id: 'investigate',
+            text: 'Wait for 90-day default data before deciding',
+            correct: false,
+            feedback: 'While 90-day data would add confidence, the 30-day default rate is the industry standard leading indicator and shows no statistically significant difference. Waiting another 60 days means rejecting approximately 5,400 creditworthy applicants. The 90-day delinquency trend from the 4-week cohort already shows no material difference. The cost of waiting outweighs the marginal information gain.'
+          },
+        ],
+        debrief: 'This case teaches the critical distinction between a measurement instrument change and an actual quality change. The applicants did not get worse; the scoring ruler changed. The approval rate drop was not a signal of deteriorating credit quality but a calibration mismatch between the new bureau\'s score distribution and the threshold set for the old bureau. The analyst\'s job is to recognize when the metric movement reflects a real change versus an instrumentation artifact. The experiment confirmed that recalibrating the threshold restores approval rates without increasing default risk, validating that the underlying credit quality of applicants was unchanged throughout.',
+      },
+    ],
+  },
+
+  {
+    id: 'fl07',
+    title: 'Course Completion Rate Declining',
+    domain: 'EdTech',
+    difficulty: 'analyst',
+    isFree: false,
+    guestPreview: false,
+    phases: [
+      {
+        type: 'alert',
+        title: 'The Alert',
+        metricName: 'Course Completion Rate',
+        metricValue: '38.4%',
+        metricChange: '-15% over 3 weeks',
+        prompt: 'Course completion rate on your EdTech platform has dropped from 45.2% to 38.4% over the last 3 weeks. The decline is steady, not a sudden cliff. What is your first move?',
+        options: [
+          {
+            id: 'a',
+            text: 'Segment completion rate by course length, content type, and platform (mobile vs desktop) to isolate the affected cohort',
+            correct: true,
+            feedback: 'Correct. Completion rate can be affected by course difficulty, content format, or platform-specific issues. Segmenting across these dimensions reveals whether the drop is universal or concentrated. A 15% decline over 3 weeks that is steady suggests a systematic change rather than a random fluctuation, so the cause should be identifiable through segmentation.'
+          },
+          {
+            id: 'b',
+            text: 'Survey students who dropped out to ask why they stopped',
+            correct: false,
+            feedback: 'Surveys are slow and suffer from response bias. Students who dropped out are the least likely to respond, and those who do may not accurately identify the real reason (they may say the content was boring when the real issue was technical). Start with behavioral data segmentation, which covers 100% of users and is available immediately.'
+          },
+          {
+            id: 'c',
+            text: 'Check if new courses added recently are harder and dragging down the average',
+            correct: false,
+            feedback: 'New course additions would affect the rate if they have lower completion, but this is a specific hypothesis that should follow segmentation, not precede it. If the drop is only on mobile or only on long courses, new course difficulty is irrelevant. Let the data tell you where to look.'
+          },
+        ],
+      },
+      {
+        type: 'data',
+        title: 'Read the Data',
+        prompt: 'Here is the completion rate breakdown by course length bucket and platform. What stands out?',
+        dataTable: {
+          headers: ['Course Length', 'Platform', 'Completion Rate This Period', 'Completion Rate Prior Period', 'Change'],
+          rows: [
+            ['Under 1 hour', 'Desktop', '72.1%', '73.0%', '-0.9pp'],
+            ['Under 1 hour', 'Mobile', '68.4%', '69.1%', '-0.7pp'],
+            ['1-2 hours', 'Desktop', '54.3%', '55.8%', '-1.5pp'],
+            ['1-2 hours', 'Mobile', '50.1%', '51.2%', '-1.1pp'],
+            ['2-5 hours', 'Desktop', '38.2%', '39.5%', '-1.3pp'],
+            ['2-5 hours', 'Mobile', '21.4%', '36.8%', '-15.4pp'],
+            ['5+ hours', 'Desktop', '24.6%', '25.1%', '-0.5pp'],
+            ['5+ hours', 'Mobile', '9.2%', '22.7%', '-13.5pp'],
+          ],
+        },
+        guideQuestion: 'Which combination of course length and platform shows the sharpest decline?',
+        modelObservation: 'The completion rate drop is overwhelmingly concentrated in courses longer than 2 hours on mobile devices. Mobile completion for 2-5 hour courses dropped 15.4 percentage points, and 5+ hour courses dropped 13.5 points. Desktop completion for the same course lengths is essentially flat. Short courses on both platforms are also stable. This combination of mobile-only and long-course-only strongly suggests a video playback issue on mobile that manifests during longer viewing sessions. The next step is to check mobile video player metrics: buffering rates, playback errors, and session abandonment timestamps.',
+        keyPhrases: ['mobile', 'long courses', '2+ hours', 'buffering', 'video player', 'playback'],
+      },
+      {
+        type: 'rca',
+        title: 'Root Cause',
+        prompt: 'Mobile engineering confirms that a browser autoplay policy update went live 3 weeks ago. The video player was updated to comply with the new policy. What is the most likely root cause?',
+        options: [
+          {
+            id: 'a',
+            text: 'The autoplay policy compliance update broke video preloading on mobile, causing severe buffering after the first 30 minutes of playback as the buffer cache fills up and the player cannot prefetch ahead',
+            correct: true,
+            feedback: 'Correct. The autoplay policy change required the video player to stop preloading content until user interaction. The player\'s lazy loading implementation was not designed for long sessions: it loads each segment only when the user reaches it, causing buffering gaps that compound over time. For short courses, the buffer stays ahead of playback. For courses over 2 hours, the accumulated buffering pauses degrade the experience enough that users abandon. This explains the sharp threshold at 2 hours and the mobile-only pattern.'
+          },
+          {
+            id: 'b',
+            text: 'Course content quality has declined in longer courses, causing students to disengage',
+            correct: false,
+            feedback: 'If content quality were the issue, you would see the decline on both desktop and mobile for long courses. Desktop completion for 2-5 hour and 5+ hour courses is essentially flat. The same content plays fine on desktop but fails on mobile, which rules out a content quality explanation and points to a platform-specific technical issue.'
+          },
+          {
+            id: 'c',
+            text: 'A competitor launched a mobile app with shorter courses, pulling mobile users to a different platform',
+            correct: false,
+            feedback: 'Competitor dynamics would affect all course lengths on mobile, not just courses over 2 hours. Short mobile courses are stable. Additionally, a competitor launch would not produce a clean threshold effect at exactly 2 hours of course length. The pattern is too specific to be a competitive explanation.'
+          },
+        ],
+      },
+      {
+        type: 'sql',
+        title: 'Investigate with SQL',
+        schema: {
+          tables: [
+            {
+              name: 'course_enrollments',
+              columns: ['enrollment_id INT', 'user_id INT', 'course_id INT', 'enrolled_at TIMESTAMP', 'completed_at TIMESTAMP', 'platform TEXT'],
+            },
+            {
+              name: 'courses',
+              columns: ['course_id INT', 'title TEXT', 'duration_minutes INT', 'category TEXT'],
+            },
+            {
+              name: 'video_playback_events',
+              columns: ['event_id INT', 'enrollment_id INT', 'event_type TEXT', 'minutes_watched DECIMAL', 'buffer_time_seconds DECIMAL', 'timestamp TIMESTAMP'],
+            },
+          ],
+        },
+        task: 'Calculate completion rate by course length bucket and platform, and include average buffering time per session to show the correlation between buffering and drop-off.',
+        correctQuery: 'WITH course_stats AS (SELECT ce.enrollment_id, ce.platform, CASE WHEN c.duration_minutes <= 60 THEN \'under_1hr\' WHEN c.duration_minutes <= 120 THEN \'1-2hr\' WHEN c.duration_minutes <= 300 THEN \'2-5hr\' ELSE \'5hr_plus\' END AS length_bucket, CASE WHEN ce.completed_at IS NOT NULL THEN 1 ELSE 0 END AS is_completed FROM course_enrollments ce JOIN courses c ON ce.course_id = c.course_id WHERE ce.enrolled_at >= CURRENT_DATE - INTERVAL \'21 days\'), buffer_stats AS (SELECT vpe.enrollment_id, AVG(vpe.buffer_time_seconds) AS avg_buffer_seconds FROM video_playback_events vpe WHERE vpe.event_type = \'playback\' AND vpe.timestamp >= CURRENT_DATE - INTERVAL \'21 days\' GROUP BY vpe.enrollment_id) SELECT cs.length_bucket, cs.platform, COUNT(*) AS enrollments, ROUND(100.0 * SUM(cs.is_completed) / COUNT(*), 1) AS completion_rate, ROUND(AVG(bs.avg_buffer_seconds), 1) AS avg_buffer_seconds FROM course_stats cs LEFT JOIN buffer_stats bs ON cs.enrollment_id = bs.enrollment_id GROUP BY cs.length_bucket, cs.platform ORDER BY cs.length_bucket, cs.platform',
+        correctQueryFormatted: [
+          'WITH course_stats AS (',
+          '  SELECT ce.enrollment_id, ce.platform,',
+          '    CASE',
+          '      WHEN c.duration_minutes <= 60 THEN \'under_1hr\'',
+          '      WHEN c.duration_minutes <= 120 THEN \'1-2hr\'',
+          '      WHEN c.duration_minutes <= 300 THEN \'2-5hr\'',
+          '      ELSE \'5hr_plus\'',
+          '    END AS length_bucket,',
+          '    CASE WHEN ce.completed_at IS NOT NULL THEN 1 ELSE 0 END AS is_completed',
+          '  FROM course_enrollments ce',
+          '  JOIN courses c ON ce.course_id = c.course_id',
+          '  WHERE ce.enrolled_at >= CURRENT_DATE - INTERVAL \'21 days\'',
+          '),',
+          'buffer_stats AS (',
+          '  SELECT vpe.enrollment_id,',
+          '    AVG(vpe.buffer_time_seconds) AS avg_buffer_seconds',
+          '  FROM video_playback_events vpe',
+          '  WHERE vpe.event_type = \'playback\'',
+          '    AND vpe.timestamp >= CURRENT_DATE - INTERVAL \'21 days\'',
+          '  GROUP BY vpe.enrollment_id',
+          ')',
+          'SELECT cs.length_bucket, cs.platform,',
+          '  COUNT(*) AS enrollments,',
+          '  ROUND(100.0 * SUM(cs.is_completed) / COUNT(*), 1) AS completion_rate,',
+          '  ROUND(AVG(bs.avg_buffer_seconds), 1) AS avg_buffer_seconds',
+          'FROM course_stats cs',
+          'LEFT JOIN buffer_stats bs ON cs.enrollment_id = bs.enrollment_id',
+          'GROUP BY cs.length_bucket, cs.platform',
+          'ORDER BY cs.length_bucket, cs.platform',
+        ],
+        keyElements: ['course_enrollments', 'duration_minutes', 'buffer_time_seconds', 'CASE', 'GROUP BY', 'platform'],
+        expectedOutput: {
+          headers: ['length_bucket', 'platform', 'enrollments', 'completion_rate', 'avg_buffer_seconds'],
+          rows: [
+            ['under_1hr', 'desktop', '8,400', '72.1%', '0.8'],
+            ['under_1hr', 'mobile', '12,200', '68.4%', '1.2'],
+            ['1-2hr', 'desktop', '6,100', '54.3%', '1.1'],
+            ['1-2hr', 'mobile', '9,800', '50.1%', '2.4'],
+            ['2-5hr', 'desktop', '4,200', '38.2%', '1.3'],
+            ['2-5hr', 'mobile', '7,600', '21.4%', '14.8'],
+            ['5hr_plus', 'desktop', '2,100', '24.6%', '1.5'],
+            ['5hr_plus', 'mobile', '3,400', '9.2%', '22.3'],
+          ],
+        },
+        hints: ['Use a CASE expression to create course length buckets from duration_minutes', 'Join with video_playback_events to get buffering data per enrollment', 'Use a CTE to calculate per-enrollment buffer averages before aggregating by bucket and platform'],
+      },
+      {
+        type: 'communicate',
+        title: 'Write the Brief',
+        prompt: 'Write a brief for the product lead explaining the issue, its impact, and your recommended fix.',
+        modelAnswer: 'The video player update for autoplay policy compliance (deployed 3 weeks ago) broke preloading on mobile, causing buffering times to spike from 1.2 seconds to 14.8-22.3 seconds for courses over 2 hours. This has driven mobile completion rates down 15 percentage points for long courses, affecting approximately 11,000 active enrollments. The fix is to implement proactive preloading that prefetches the next 2-3 video segments during playback, which complies with the autoplay policy while preventing the buffer cache from falling behind in long sessions. Recommended timeline: ship preloading fix within 5 days, then monitor mobile buffering and completion recovery over 2 weeks.',
+        rubric: ['Identifies the specific technical change that caused the issue', 'Quantifies the impact on completion rates and affected users', 'Proposes a specific technical fix with a timeline'],
+        keyPhrases: ['autoplay', 'preloading', 'buffering', 'mobile', '2+ hours', 'completion rate'],
+      },
+      {
+        type: 'experiment',
+        title: 'Design the Test',
+        prompt: 'Design an A/B test to validate the preloading fix before full rollout.',
+        fields: [
+          {
+            label: 'Hypothesis',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Enabling proactive preloading on mobile will reduce average buffering time to under 2 seconds for long courses and restore mobile completion rates to pre-regression levels (above 35% for 2-5 hour courses)', correct: true },
+              { id: 'b', text: 'Reverting the autoplay compliance update entirely will restore completion rates without any regulatory or platform risk', correct: false },
+              { id: 'c', text: 'Adding a download-before-watching feature will solve the buffering problem by moving all video to local storage', correct: false },
+            ],
+            correctAnswer: 'Option A directly tests the preloading fix with measurable targets. Option B creates compliance risk with browser autoplay policies. Option C is a large feature investment that solves the symptom rather than the root cause and requires significant storage on user devices.',
+          },
+          {
+            label: 'Unit of randomization',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'User-level randomization, with each mobile user assigned to either the current lazy loading or the new preloading player for all their courses', correct: true },
+              { id: 'b', text: 'Course-level randomization, assigning each course to one player version', correct: false },
+              { id: 'c', text: 'Session-level randomization, varying the player version each time a user opens a course', correct: false },
+            ],
+            correctAnswer: 'User-level ensures a consistent experience. Course-level would give the same user different experiences in different courses, making it hard to attribute completion differences. Session-level creates jarring inconsistency and contaminates the measurement.',
+          },
+          {
+            label: 'Primary metric',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Course completion rate for mobile users enrolled in courses over 2 hours', correct: true },
+              { id: 'b', text: 'Average buffering time across all sessions', correct: false },
+              { id: 'c', text: 'Overall platform completion rate across all devices and course lengths', correct: false },
+              { id: 'd', text: 'Number of video segments loaded per session', correct: false },
+            ],
+            correctAnswer: 'Completion rate for the affected segment (mobile, long courses) directly measures the outcome you want to improve. Buffering time is an input metric. Overall completion rate dilutes the signal with unaffected segments. Segments loaded is a technical metric that does not measure the user outcome.',
+          },
+          {
+            label: 'Guardrail metrics',
+            type: 'multi',
+            options: [
+              { id: 'a', text: 'Mobile data usage per session (preloading increases data consumption)', correct: true },
+              { id: 'b', text: 'Battery consumption during long sessions', correct: true },
+              { id: 'c', text: 'Video playback error rate', correct: true },
+              { id: 'd', text: 'Desktop completion rate', correct: false },
+              { id: 'e', text: 'Course enrollment rate', correct: false },
+            ],
+            correctAnswer: 'Data usage, battery consumption, and playback errors directly measure whether preloading introduces new costs or failures on mobile. Desktop completion is unaffected by a mobile-only change. Enrollment rate is upstream and not impacted by the player fix.',
+          },
+        ],
+      },
+      {
+        type: 'readout',
+        title: 'The Readout',
+        prompt: 'The experiment ran for 3 weeks. Here are the results:',
+        resultsTable: {
+          headers: ['Metric', 'Control', 'Treatment', 'Lift', 'p-value'],
+          rows: [
+            ['Completion Rate (2-5hr, mobile)', '21.8%', '35.9%', '+64.7%', '<0.001'],
+            ['Completion Rate (5hr+, mobile)', '9.5%', '21.4%', '+125.3%', '<0.001'],
+            ['Avg Buffering Time (long courses)', '16.2s', '1.6s', '-90.1%', '<0.001'],
+            ['Mobile Data per Session', '142MB', '168MB', '+18.3%', '<0.001'],
+            ['Playback Error Rate', '3.1%', '1.4%', '-54.8%', '0.003'],
+          ],
+        },
+        question: 'What is your recommendation?',
+        options: [
+          {
+            id: 'ship',
+            text: 'Ship preloading to 100% of mobile users',
+            correct: true,
+            feedback: 'Correct. Preloading dramatically restores completion rates and nearly eliminates buffering in long courses. The 18.3% increase in data usage is a real cost to users on metered connections, but the magnitude (26MB additional per session) is modest and the completion recovery is substantial. Playback errors also improved significantly. The data usage increase should be disclosed to users and optionally controllable in settings, but it does not block shipping.'
+          },
+          {
+            id: 'no-ship',
+            text: 'Do not ship due to the data usage increase',
+            correct: false,
+            feedback: 'A 26MB increase per session is a minor tradeoff for recovering completion rates that dropped 15 percentage points. Users on metered connections can be given a setting to control preloading behavior. Blocking the ship over a modest data increase while 11,000 enrollments are affected by severe buffering is not a reasonable tradeoff.'
+          },
+          {
+            id: 'investigate',
+            text: 'Investigate whether a lighter preloading strategy can reduce data usage before shipping',
+            correct: false,
+            feedback: 'Optimizing preloading aggressiveness is a valid follow-up, but should not block the initial ship. The current implementation solves the completion crisis. You can iterate on data efficiency after shipping. Delaying the fix to optimize a secondary metric extends the period where thousands of students cannot complete their courses.'
+          },
+        ],
+        debrief: 'This case demonstrates how a seemingly minor technical compliance change can cascade into a significant product metric regression. The autoplay policy update was necessary, but the implementation created a hidden failure mode that only manifested in long mobile sessions. The key analytical skill is recognizing the two-variable interaction pattern: the problem required both mobile platform AND long course duration to appear, which is why a single-dimension segmentation (by platform alone or by course length alone) would have been insufficient. The experiment confirmed that preloading solves the buffering problem with an acceptable data usage tradeoff. The broader lesson is that video playback quality is a hidden driver of completion metrics that analysts often overlook in favor of content-quality explanations.',
+      },
+    ],
+  },
+
+  {
+    id: 'fl08',
+    title: 'Message Send Latency Spike',
+    domain: 'Social / Messaging',
+    difficulty: 'senior',
+    isFree: false,
+    guestPreview: false,
+    phases: [
+      {
+        type: 'alert',
+        title: 'The Alert',
+        metricName: 'P95 Message Delivery Time',
+        metricValue: '4.4s',
+        metricChange: '+340% (was 1.0s)',
+        prompt: 'The P95 message delivery time spiked from 1.0 second to 4.4 seconds over the past 48 hours. User complaints about slow messaging are flooding support. What is your first move?',
+        options: [
+          {
+            id: 'a',
+            text: 'Segment latency by chat type (1:1, small group, large group) and message volume tier to isolate where the spike is concentrated',
+            correct: true,
+            feedback: 'Correct. Latency spikes in messaging systems are rarely uniform. Different chat types have different query patterns, fan-out behavior, and infrastructure paths. Segmenting by chat type and size immediately reveals whether this is a broad infrastructure issue or a specific query path regression, which determines whether you need to involve the infrastructure team or the application team.'
+          },
+          {
+            id: 'b',
+            text: 'Scale up the messaging servers immediately to handle the load',
+            correct: false,
+            feedback: 'Scaling servers is a generic response that assumes the issue is load-related. A 340% latency spike is rarely caused by gradual load increase; it is more consistent with a query regression, infrastructure change, or configuration error. Scaling would be expensive and might not address the root cause. Diagnose first, then prescribe.'
+          },
+          {
+            id: 'c',
+            text: 'Check if total message volume increased due to a viral event or product launch',
+            correct: false,
+            feedback: 'Volume spikes from viral events usually affect P50 and P95 proportionally and resolve quickly. A sustained 340% P95 spike over 48 hours with stable P50 would be unusual for a volume-driven issue. Segmenting by chat type will reveal whether the latency is concentrated in a specific interaction pattern, which is more informative than overall volume analysis.'
+          },
+        ],
+      },
+      {
+        type: 'data',
+        title: 'Read the Data',
+        prompt: 'Here is message delivery latency broken down by chat size bucket. What pattern emerges?',
+        dataTable: {
+          headers: ['Chat Type', 'Members', 'P50 Latency', 'P95 Latency', 'P95 Change', 'Volume Share'],
+          rows: [
+            ['1:1 DM', '2', '0.12s', '0.31s', '+3%', '45%'],
+            ['Small Group', '3-10', '0.18s', '0.52s', '+8%', '30%'],
+            ['Medium Group', '11-50', '0.24s', '0.89s', '+12%', '15%'],
+            ['Large Group', '51-200', '0.41s', '4.2s', '+380%', '7%'],
+            ['Very Large Group', '200+', '0.68s', '8.9s', '+520%', '3%'],
+          ],
+        },
+        guideQuestion: 'Which chat size buckets are affected? What database or infrastructure pattern could explain a size-dependent latency spike?',
+        modelObservation: 'The latency spike is almost entirely concentrated in groups with more than 50 members. P95 for large groups jumped 380% and very large groups jumped 520%, while 1:1 and small groups are nearly unchanged. This size-dependent pattern is a strong signal for a database query regression. In messaging systems, sending to large groups requires fanning out the message to many recipients, which typically involves a query that scales with group membership count. A missing or dropped index on the group membership table, or a query plan change that switched from an index scan to a sequential scan for large groups, would produce exactly this pattern.',
+        keyPhrases: ['large group', '50+ members', 'fan-out', 'database', 'index', 'query plan'],
+      },
+      {
+        type: 'rca',
+        title: 'Root Cause',
+        prompt: 'The database team confirms that a scheduled index migration ran 48 hours ago. What is the most likely root cause?',
+        options: [
+          {
+            id: 'a',
+            text: 'The index migration dropped or rebuilt the compound index on the group membership table, causing the message fan-out query to fall back to a sequential scan for large groups',
+            correct: true,
+            feedback: 'Correct. The index migration was intended to consolidate several single-column indexes into compound indexes for storage efficiency. However, the migration dropped the original index on (group_id, user_id) before the new compound index finished building. For 48 hours, the fan-out query has been doing sequential scans on the membership table. Small groups are barely affected because a sequential scan of 10 rows is fast, but scanning 200+ rows per message send creates the 4-8 second latency observed in large groups.'
+          },
+          {
+            id: 'b',
+            text: 'A sudden increase in spam messages in large groups is overloading the message queue',
+            correct: false,
+            feedback: 'Spam would increase message volume, but the data shows the volume share of large groups has not changed (7% and 3%). The issue is per-message latency, not message volume. Additionally, spam filtering typically runs after delivery, not during the fan-out process. The size-dependent latency pattern points to a query-level issue, not a volume issue.'
+          },
+          {
+            id: 'c',
+            text: 'The messaging service is experiencing network partition issues between data centers',
+            correct: false,
+            feedback: 'Network partition issues would affect all message types roughly equally, since all messages route through the same network path regardless of chat size. The fact that 1:1 messages are unaffected rules out a network-level issue. The size-dependent pattern requires a cause that scales with group membership count, which is a database query characteristic, not a network characteristic.'
+          },
+        ],
+      },
+      {
+        type: 'sql',
+        title: 'Investigate with SQL',
+        schema: {
+          tables: [
+            {
+              name: 'messages',
+              columns: ['message_id INT', 'chat_id INT', 'sender_id INT', 'sent_at TIMESTAMP', 'delivered_at TIMESTAMP', 'content_type TEXT'],
+            },
+            {
+              name: 'chats',
+              columns: ['chat_id INT', 'chat_type TEXT', 'member_count INT', 'created_at TIMESTAMP'],
+            },
+            {
+              name: 'message_delivery_log',
+              columns: ['message_id INT', 'recipient_id INT', 'delivery_latency_ms INT', 'delivered_at TIMESTAMP'],
+            },
+          ],
+        },
+        task: 'Calculate P50 and P95 delivery latency by chat size bucket (1:1, 3-10, 11-50, 51-200, 200+) for the last 48 hours versus the prior 48 hours.',
+        correctQuery: 'WITH latency_data AS (SELECT m.message_id, c.member_count, CASE WHEN c.member_count <= 2 THEN \'1:1\' WHEN c.member_count <= 10 THEN \'3-10\' WHEN c.member_count <= 50 THEN \'11-50\' WHEN c.member_count <= 200 THEN \'51-200\' ELSE \'200+\' END AS size_bucket, mdl.delivery_latency_ms, CASE WHEN m.sent_at >= NOW() - INTERVAL \'48 hours\' THEN \'current\' ELSE \'prior\' END AS period FROM messages m JOIN chats c ON m.chat_id = c.chat_id JOIN message_delivery_log mdl ON m.message_id = mdl.message_id WHERE m.sent_at >= NOW() - INTERVAL \'96 hours\') SELECT size_bucket, period, COUNT(*) AS messages, ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY delivery_latency_ms)) AS p50_ms, ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY delivery_latency_ms)) AS p95_ms FROM latency_data GROUP BY size_bucket, period ORDER BY size_bucket, period',
+        correctQueryFormatted: [
+          'WITH latency_data AS (',
+          '  SELECT m.message_id, c.member_count,',
+          '    CASE',
+          '      WHEN c.member_count <= 2 THEN \'1:1\'',
+          '      WHEN c.member_count <= 10 THEN \'3-10\'',
+          '      WHEN c.member_count <= 50 THEN \'11-50\'',
+          '      WHEN c.member_count <= 200 THEN \'51-200\'',
+          '      ELSE \'200+\'',
+          '    END AS size_bucket,',
+          '    mdl.delivery_latency_ms,',
+          '    CASE WHEN m.sent_at >= NOW() - INTERVAL \'48 hours\'',
+          '      THEN \'current\' ELSE \'prior\' END AS period',
+          '  FROM messages m',
+          '  JOIN chats c ON m.chat_id = c.chat_id',
+          '  JOIN message_delivery_log mdl ON m.message_id = mdl.message_id',
+          '  WHERE m.sent_at >= NOW() - INTERVAL \'96 hours\'',
+          ')',
+          'SELECT size_bucket, period,',
+          '  COUNT(*) AS messages,',
+          '  ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP',
+          '    (ORDER BY delivery_latency_ms)) AS p50_ms,',
+          '  ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP',
+          '    (ORDER BY delivery_latency_ms)) AS p95_ms',
+          'FROM latency_data',
+          'GROUP BY size_bucket, period',
+          'ORDER BY size_bucket, period',
+        ],
+        keyElements: ['PERCENTILE_CONT', 'member_count', 'delivery_latency_ms', 'CASE', 'GROUP BY', 'INTERVAL'],
+        expectedOutput: {
+          headers: ['size_bucket', 'period', 'messages', 'p50_ms', 'p95_ms'],
+          rows: [
+            ['1:1', 'current', '1.2M', '120', '310'],
+            ['1:1', 'prior', '1.1M', '115', '300'],
+            ['3-10', 'current', '680K', '180', '520'],
+            ['3-10', 'prior', '650K', '170', '480'],
+            ['51-200', 'current', '180K', '410', '4,200'],
+            ['51-200', 'prior', '175K', '150', '880'],
+            ['200+', 'current', '72K', '680', '8,900'],
+            ['200+', 'prior', '70K', '190', '1,100'],
+          ],
+        },
+        hints: ['Use PERCENTILE_CONT to calculate P50 and P95 latency', 'Create a CASE expression to bucket chats by member count', 'Compare current 48-hour window to prior 48-hour window using a period flag'],
+      },
+      {
+        type: 'communicate',
+        title: 'Write the Brief',
+        prompt: 'Write an incident summary for the VP of Engineering. This is an active incident affecting users.',
+        modelAnswer: 'An index migration that ran 48 hours ago dropped the compound index on the group_members table before the replacement index finished building. This caused the message fan-out query to fall back to sequential scans, spiking P95 delivery latency from 1.0s to 4.4s overall, with large groups (50+ members) experiencing 4-9 second delivery times. Approximately 10% of all messages are affected (large and very large groups), generating over 2,000 user complaints. Immediate remediation: rebuild the original index on (group_id, user_id) with CONCURRENTLY to avoid table locks, which should restore latency within minutes of index completion. Estimated fix time: 30-45 minutes for index rebuild.',
+        rubric: ['Identifies the specific infrastructure change and its mechanism', 'Quantifies the user impact with specifics', 'Proposes a concrete and time-bound remediation', 'Uses appropriate urgency for an active incident'],
+        keyPhrases: ['index', 'sequential scan', 'group_members', 'fan-out', 'CONCURRENTLY', 'P95'],
+      },
+      {
+        type: 'experiment',
+        title: 'Design the Test',
+        prompt: 'After rebuilding the original index as an emergency fix, the team wants to re-attempt the index consolidation safely. Design a test for the new index configuration.',
+        fields: [
+          {
+            label: 'Hypothesis',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'The new consolidated compound index will maintain P95 delivery latency under 1.5 seconds for all chat sizes while reducing total index storage by 30%, provided it is built before the old index is dropped', correct: true },
+              { id: 'b', text: 'Eliminating all secondary indexes and relying on primary key lookups will reduce storage costs without affecting query performance', correct: false },
+              { id: 'c', text: 'Sharding the group_members table by chat_id will solve the latency problem permanently regardless of index configuration', correct: false },
+            ],
+            correctAnswer: 'Option A tests the specific consolidation change with a safety requirement (build before drop) and measurable targets. Option B is overly aggressive and would certainly degrade performance. Option C introduces unnecessary architectural complexity when the problem is an index configuration issue.',
+          },
+          {
+            label: 'Unit of randomization',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Database replica-level, routing a percentage of read traffic to a replica with the new index configuration while the primary retains the old indexes', correct: true },
+              { id: 'b', text: 'User-level, sending some users\' queries to the new index and others to the old index', correct: false },
+              { id: 'c', text: 'Message-level, randomly choosing which index to use for each individual message delivery', correct: false },
+            ],
+            correctAnswer: 'Replica-level testing is the standard pattern for database index changes. It isolates the new configuration on a separate replica where failures cannot affect the primary. User-level routing for index testing adds application complexity. Message-level would require query-level index hints, which is fragile.',
+          },
+          {
+            label: 'Primary metric',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'P95 message delivery latency across all chat size buckets, compared between the old-index replica and new-index replica', correct: true },
+              { id: 'b', text: 'Total database CPU utilization', correct: false },
+              { id: 'c', text: 'Number of messages delivered per second', correct: false },
+              { id: 'd', text: 'Index storage size in gigabytes', correct: false },
+            ],
+            correctAnswer: 'P95 latency across all chat sizes directly measures whether the new index configuration maintains the same query performance. CPU utilization is a guardrail. Throughput should be equivalent if latency is equivalent. Storage size is the goal of the consolidation, not the primary safety metric.',
+          },
+          {
+            label: 'Guardrail metrics',
+            type: 'multi',
+            options: [
+              { id: 'a', text: 'P99 latency for large groups (51+ members)', correct: true },
+              { id: 'b', text: 'Database CPU and IOPS on the test replica', correct: true },
+              { id: 'c', text: 'Query plan stability (no sequential scans on group_members)', correct: true },
+              { id: 'd', text: 'User signup rate', correct: false },
+              { id: 'e', text: 'Push notification delivery rate', correct: false },
+            ],
+            correctAnswer: 'P99 latency for large groups catches tail regression. CPU/IOPS ensures the new index is not more expensive to maintain. Query plan stability directly prevents the root cause from recurring. Signup rate and push notifications are unrelated to index configuration.',
+          },
+        ],
+      },
+      {
+        type: 'readout',
+        title: 'The Readout',
+        prompt: 'The new index configuration was tested on a replica for 1 week. Here are the results:',
+        resultsTable: {
+          headers: ['Metric', 'Control', 'Treatment', 'Lift', 'p-value'],
+          rows: [
+            ['P95 Latency (all chats)', '0.98s', '0.91s', '-7.1%', '0.01'],
+            ['P95 Latency (51-200 members)', '0.88s', '0.82s', '-6.8%', '0.03'],
+            ['P99 Latency (200+ members)', '2.1s', '1.8s', '-14.3%', '0.02'],
+            ['Database CPU Utilization', '62%', '58%', '-6.5%', '0.04'],
+            ['Index Storage Size', '84GB', '58GB', '-31.0%', 'N/A'],
+          ],
+        },
+        question: 'What is your recommendation?',
+        options: [
+          {
+            id: 'ship',
+            text: 'Ship the new index configuration to primary, dropping old indexes only after the new ones are confirmed active',
+            correct: true,
+            feedback: 'Correct. The new consolidated index matches or improves latency at every percentile across all chat sizes. CPU utilization improved, confirming the new index is more efficient. Storage savings of 31% match the target. Critically, the lesson from the original incident must be applied: drop the old indexes only after the new ones are confirmed active and serving queries. A phased rollout with monitoring at each step prevents a repeat of the original incident.'
+          },
+          {
+            id: 'no-ship',
+            text: 'Keep the old index configuration to avoid any risk of a repeat incident',
+            correct: false,
+            feedback: 'The old configuration wastes 26GB of storage and has higher CPU utilization. The test shows the new configuration is strictly better on all metrics. Avoiding the change out of fear of the original incident means the team learned the wrong lesson. The correct lesson is to never drop an index before its replacement is verified, not to never change indexes.'
+          },
+          {
+            id: 'investigate',
+            text: 'Run the test for another month to build more confidence',
+            correct: false,
+            feedback: 'One week of production-level traffic on a replica is sufficient for an index configuration test. The metrics are clear and statistically significant. Index performance is deterministic, not probabilistic, so longer testing does not add meaningful confidence. The 26GB storage cost and higher CPU utilization continue every day you delay.'
+          },
+        ],
+        debrief: 'This case covers an infrastructure-level incident that requires the analyst to bridge product metrics (message delivery latency) with database internals (index configuration). The key analytical skill is recognizing that a size-dependent latency pattern is the signature of a query plan regression, not a load or network issue. The experiment design uses replica-level testing, which is the standard pattern for database changes and differs from the user-level randomization used in most product experiments. The ship decision emphasizes procedural safety: the original incident occurred because of a process failure (dropping before building), and the correct resolution is to fix the process, not to avoid the change. This mirrors real-world infrastructure operations where the post-mortem action item is almost always about deployment procedure, not about reversing the change itself.',
+      },
+    ],
+  },
+
+  {
+    id: 'fl09',
+    title: 'Driver Cancellation Rate Surge',
+    domain: 'Ride-hailing',
+    difficulty: 'senior',
+    isFree: false,
+    guestPreview: false,
+    phases: [
+      {
+        type: 'alert',
+        title: 'The Alert',
+        metricName: 'Driver-side Cancellation Rate',
+        metricValue: '14.2%',
+        metricChange: '+28% (was 11.1%)',
+        prompt: 'Driver-side cancellations have surged from 11.1% to 14.2% over the past 2 weeks. Rider complaints about cancelled trips are increasing, and average wait times are creeping up. What is your first move?',
+        options: [
+          {
+            id: 'a',
+            text: 'Segment cancellation rate by ride distance bucket, time of day, and market to identify where the increase is concentrated',
+            correct: true,
+            feedback: 'Correct. Driver cancellations are driven by economics: drivers cancel rides that are not worth their time. Segmenting by distance, time, and market reveals whether the increase is uniform or concentrated in specific ride profiles. This tells you whether the cause is a broad policy change, a market-specific issue, or an economic incentive misalignment for certain trip types.'
+          },
+          {
+            id: 'b',
+            text: 'Increase cancellation penalties for drivers to discourage the behavior',
+            correct: false,
+            feedback: 'Increasing penalties without understanding why drivers are cancelling treats the symptom, not the cause. If drivers are cancelling because certain rides are unprofitable, penalties will push drivers off the platform entirely rather than making them accept unprofitable rides. You need to understand the driver economics before adjusting incentives.'
+          },
+          {
+            id: 'c',
+            text: 'Check if driver supply has decreased, causing remaining drivers to be more selective',
+            correct: false,
+            feedback: 'Supply changes would affect all ride types, not produce a concentrated pattern. Even if supply decreased, you need to know which ride types are being cancelled to understand the selection behavior. Start with segmentation to identify the pattern, then investigate the cause.'
+          },
+        ],
+      },
+      {
+        type: 'data',
+        title: 'Read the Data',
+        prompt: 'Here is the driver cancellation rate by ride distance and time of day. What pattern do you see?',
+        dataTable: {
+          headers: ['Ride Distance', 'Time', 'Cancel Rate This Period', 'Cancel Rate Prior', 'Change', 'Avg Fare'],
+          rows: [
+            ['<3 km', 'Peak (7-10am, 5-8pm)', '31.4%', '14.2%', '+17.2pp', '$4.20'],
+            ['<3 km', 'Off-peak', '18.6%', '12.8%', '+5.8pp', '$3.80'],
+            ['3-8 km', 'Peak', '10.1%', '9.8%', '+0.3pp', '$9.40'],
+            ['3-8 km', 'Off-peak', '8.4%', '8.1%', '+0.3pp', '$7.60'],
+            ['8+ km', 'Peak', '5.2%', '5.8%', '-0.6pp', '$18.50'],
+            ['8+ km', 'Off-peak', '6.1%', '6.3%', '-0.2pp', '$14.20'],
+          ],
+        },
+        guideQuestion: 'Which combination of distance and time shows the sharpest increase? What economic factor could explain why drivers reject these specific rides?',
+        modelObservation: 'The cancellation surge is overwhelmingly concentrated in short rides under 3 km during peak hours, where the rate more than doubled from 14.2% to 31.4%. Off-peak short rides also increased but less dramatically. Medium and long rides are stable regardless of time. This pattern has a clear economic explanation: during peak hours, drivers have high opportunity cost. A short ride at $4.20 takes 10-15 minutes including pickup, and during that time a driver could be matched to a longer, higher-fare ride. If dynamic pricing recently changed to make short-ride fares less attractive relative to long-ride fares during peak, drivers would rationally cancel short rides to wait for better matches.',
+        keyPhrases: ['short rides', 'peak hours', '<3 km', 'opportunity cost', 'dynamic pricing', 'fare'],
+      },
+      {
+        type: 'rca',
+        title: 'Root Cause',
+        prompt: 'The pricing team confirms that a new dynamic pricing algorithm was deployed 2 weeks ago. What is the root cause?',
+        options: [
+          {
+            id: 'a',
+            text: 'The new dynamic pricing algorithm increased surge multipliers for long rides during peak hours but kept short-ride pricing flat, widening the earnings gap and making short rides economically irrational for drivers to accept',
+            correct: true,
+            feedback: 'Correct. The old algorithm applied a uniform surge multiplier across all ride distances. The new algorithm concentrates surge pricing on rides over 5 km, where rider willingness-to-pay is higher. This was designed to increase take rate on long rides, but it created a perverse incentive: during peak hours, drivers earn $18.50 for a long ride versus $4.20 for a short ride. After accounting for pickup time, a driver completing three short rides in the time of one long ride still earns less ($12.60 vs $18.50). Rational drivers cancel short rides and reposition for long-ride requests.'
+          },
+          {
+            id: 'b',
+            text: 'A competing ride-hailing service launched a driver bonus program that pulls drivers away during peak hours',
+            correct: false,
+            feedback: 'If drivers were leaving for a competitor during peak hours, you would see cancellation increases across all ride distances during peak, not just short rides. Long-ride cancellations during peak are actually stable. The pattern is ride-distance specific, not time-specific, which points to an internal pricing issue rather than external competition.'
+          },
+          {
+            id: 'c',
+            text: 'Traffic congestion during peak hours has made short rides unprofitable due to increased time costs',
+            correct: false,
+            feedback: 'Traffic congestion affects all ride distances during peak hours, not just short rides. If congestion were the driver, medium-distance rides (3-8 km) would also show elevated cancellations during peak. Additionally, congestion patterns do not change suddenly over 2 weeks; they are seasonal and gradual. The sharp timing of the cancellation increase coincides with the pricing algorithm change, not a traffic pattern shift.'
+          },
+        ],
+      },
+      {
+        type: 'sql',
+        title: 'Investigate with SQL',
+        schema: {
+          tables: [
+            {
+              name: 'ride_requests',
+              columns: ['request_id INT', 'rider_id INT', 'driver_id INT', 'requested_at TIMESTAMP', 'status TEXT', 'estimated_distance_km DECIMAL', 'estimated_fare DECIMAL'],
+            },
+            {
+              name: 'ride_completions',
+              columns: ['ride_id INT', 'request_id INT', 'actual_distance_km DECIMAL', 'actual_fare DECIMAL', 'duration_minutes INT', 'completed_at TIMESTAMP'],
+            },
+            {
+              name: 'driver_cancellations',
+              columns: ['cancellation_id INT', 'request_id INT', 'driver_id INT', 'cancelled_at TIMESTAMP', 'reason TEXT'],
+            },
+            {
+              name: 'surge_pricing',
+              columns: ['request_id INT', 'surge_multiplier DECIMAL', 'base_fare DECIMAL', 'final_fare DECIMAL'],
+            },
+          ],
+        },
+        task: 'Calculate cancellation rate by ride distance bucket (<3km, 3-8km, 8+km) and peak/off-peak hour, including average fare and driver earnings per hour for completed rides in each bucket.',
+        correctQuery: 'WITH ride_data AS (SELECT rr.request_id, rr.estimated_distance_km, CASE WHEN rr.estimated_distance_km < 3 THEN \'under_3km\' WHEN rr.estimated_distance_km <= 8 THEN \'3-8km\' ELSE \'8km_plus\' END AS distance_bucket, CASE WHEN EXTRACT(HOUR FROM rr.requested_at) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM rr.requested_at) BETWEEN 17 AND 19 THEN \'peak\' ELSE \'off_peak\' END AS time_period, CASE WHEN dc.cancellation_id IS NOT NULL THEN 1 ELSE 0 END AS was_cancelled, rr.estimated_fare, rc.duration_minutes, rc.actual_fare FROM ride_requests rr LEFT JOIN driver_cancellations dc ON rr.request_id = dc.request_id LEFT JOIN ride_completions rc ON rr.request_id = rc.request_id WHERE rr.requested_at >= CURRENT_DATE - INTERVAL \'14 days\') SELECT distance_bucket, time_period, COUNT(*) AS total_requests, ROUND(100.0 * SUM(was_cancelled) / COUNT(*), 1) AS cancel_rate, ROUND(AVG(CASE WHEN was_cancelled = 0 THEN actual_fare END), 2) AS avg_fare, ROUND(AVG(CASE WHEN was_cancelled = 0 AND duration_minutes > 0 THEN actual_fare * 60.0 / duration_minutes END), 2) AS earnings_per_hour FROM ride_data GROUP BY distance_bucket, time_period ORDER BY distance_bucket, time_period',
+        correctQueryFormatted: [
+          'WITH ride_data AS (',
+          '  SELECT rr.request_id, rr.estimated_distance_km,',
+          '    CASE',
+          '      WHEN rr.estimated_distance_km < 3 THEN \'under_3km\'',
+          '      WHEN rr.estimated_distance_km <= 8 THEN \'3-8km\'',
+          '      ELSE \'8km_plus\'',
+          '    END AS distance_bucket,',
+          '    CASE',
+          '      WHEN EXTRACT(HOUR FROM rr.requested_at) BETWEEN 7 AND 9',
+          '        OR EXTRACT(HOUR FROM rr.requested_at) BETWEEN 17 AND 19',
+          '      THEN \'peak\' ELSE \'off_peak\'',
+          '    END AS time_period,',
+          '    CASE WHEN dc.cancellation_id IS NOT NULL',
+          '      THEN 1 ELSE 0 END AS was_cancelled,',
+          '    rr.estimated_fare,',
+          '    rc.duration_minutes, rc.actual_fare',
+          '  FROM ride_requests rr',
+          '  LEFT JOIN driver_cancellations dc ON rr.request_id = dc.request_id',
+          '  LEFT JOIN ride_completions rc ON rr.request_id = rc.request_id',
+          '  WHERE rr.requested_at >= CURRENT_DATE - INTERVAL \'14 days\'',
+          ')',
+          'SELECT distance_bucket, time_period,',
+          '  COUNT(*) AS total_requests,',
+          '  ROUND(100.0 * SUM(was_cancelled) / COUNT(*), 1) AS cancel_rate,',
+          '  ROUND(AVG(CASE WHEN was_cancelled = 0',
+          '    THEN actual_fare END), 2) AS avg_fare,',
+          '  ROUND(AVG(CASE WHEN was_cancelled = 0',
+          '    AND duration_minutes > 0',
+          '    THEN actual_fare * 60.0 / duration_minutes END), 2)',
+          '    AS earnings_per_hour',
+          'FROM ride_data',
+          'GROUP BY distance_bucket, time_period',
+          'ORDER BY distance_bucket, time_period',
+        ],
+        keyElements: ['ride_requests', 'driver_cancellations', 'EXTRACT', 'CASE', 'GROUP BY', 'LEFT JOIN'],
+        expectedOutput: {
+          headers: ['distance_bucket', 'time_period', 'total_requests', 'cancel_rate', 'avg_fare', 'earnings_per_hour'],
+          rows: [
+            ['under_3km', 'peak', '82,000', '31.4%', '$4.20', '$16.80'],
+            ['under_3km', 'off_peak', '64,000', '18.6%', '$3.80', '$15.20'],
+            ['3-8km', 'peak', '58,000', '10.1%', '$9.40', '$28.20'],
+            ['3-8km', 'off_peak', '45,000', '8.4%', '$7.60', '$22.80'],
+            ['8km_plus', 'peak', '31,000', '5.2%', '$18.50', '$37.00'],
+            ['8km_plus', 'off_peak', '22,000', '6.1%', '$14.20', '$28.40'],
+          ],
+        },
+        hints: ['Use EXTRACT(HOUR FROM ...) to classify peak vs off-peak hours', 'Create distance buckets using a CASE expression on estimated_distance_km', 'Calculate earnings per hour as fare multiplied by 60 divided by duration_minutes for completed rides'],
+      },
+      {
+        type: 'communicate',
+        title: 'Write the Brief',
+        prompt: 'Write an ops brief explaining the cancellation surge and proposing a solution.',
+        modelAnswer: 'The new dynamic pricing algorithm deployed 2 weeks ago concentrates surge pricing on rides over 5 km, leaving short-ride fares flat during peak hours. This creates a 2.2x earnings gap ($37/hr for long rides vs $16.80/hr for short rides during peak), making short rides economically irrational for drivers. As a result, driver cancellations for sub-3km peak rides more than doubled to 31.4%, causing an estimated 14,000 additional rider-facing cancellations per week. Recommended fix: introduce a minimum fare floor for short rides during peak hours that brings driver earnings per hour to within 30% of long-ride earnings, ensuring short rides are worth accepting without significantly increasing rider cost.',
+        rubric: ['Explains the economic incentive misalignment quantitatively', 'Connects the pricing change to driver behavior', 'Proposes a targeted intervention (minimum fare floor) rather than a blanket pricing change'],
+        keyPhrases: ['dynamic pricing', 'earnings gap', 'minimum fare', 'short rides', 'peak hours', '$16.80'],
+      },
+      {
+        type: 'experiment',
+        title: 'Design the Test',
+        prompt: 'Design a test for the minimum fare floor on short rides during peak hours.',
+        fields: [
+          {
+            label: 'Hypothesis',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Introducing a $6.50 minimum fare for rides under 3 km during peak hours will reduce driver cancellation rate from 31% to below 15% by closing the earnings-per-hour gap, while keeping rider cost increase under $2.30 per trip', correct: true },
+              { id: 'b', text: 'Removing surge pricing entirely will equalize cancellation rates across all ride distances', correct: false },
+              { id: 'c', text: 'Adding a cancellation penalty of $5 per cancelled ride will reduce short-ride cancellations to below 10% without changing pricing', correct: false },
+            ],
+            correctAnswer: 'Option A targets the specific economic incentive while bounding the rider cost impact. Option B would destroy revenue from long rides where surge pricing works well. Option C punishes drivers for rational economic behavior, risking driver churn without addressing the underlying earnings gap.',
+          },
+          {
+            label: 'Unit of randomization',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Market-level (city) randomization, applying the minimum fare in some cities and not others to avoid within-market driver confusion', correct: true },
+              { id: 'b', text: 'Driver-level randomization, showing different minimum fares to different drivers in the same city', correct: false },
+              { id: 'c', text: 'Ride-level randomization, randomly applying the minimum fare to individual ride requests', correct: false },
+            ],
+            correctAnswer: 'Market-level prevents within-city spillover where drivers compare fares. Driver-level creates unfairness and rapid information spread among drivers in the same market. Ride-level is inconsistent and undermines driver trust in pricing transparency.',
+          },
+          {
+            label: 'Primary metric',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Driver cancellation rate for rides under 3 km during peak hours', correct: true },
+              { id: 'b', text: 'Overall platform cancellation rate across all ride types', correct: false },
+              { id: 'c', text: 'Total ride completions per day', correct: false },
+              { id: 'd', text: 'Driver satisfaction survey score', correct: false },
+            ],
+            correctAnswer: 'The cancellation rate for the specific affected segment (short rides, peak hours) directly measures whether the minimum fare solves the incentive problem. Overall rate dilutes the signal. Total completions is a downstream metric. Surveys are slow and noisy.',
+          },
+          {
+            label: 'Guardrail metrics',
+            type: 'multi',
+            options: [
+              { id: 'a', text: 'Rider cost increase for short trips (must stay under $2.50)', correct: true },
+              { id: 'b', text: 'Rider request volume for short rides (ensure higher fares do not suppress demand)', correct: true },
+              { id: 'c', text: 'Driver earnings per hour across all ride types', correct: true },
+              { id: 'd', text: 'Long-ride cancellation rate', correct: false },
+              { id: 'e', text: 'App download rate', correct: false },
+            ],
+            correctAnswer: 'Rider cost, request volume, and driver earnings across ride types measure the full economic impact. Long-ride cancellations are unaffected by a short-ride minimum fare. App downloads are too upstream to be affected by ride pricing.',
+          },
+        ],
+      },
+      {
+        type: 'readout',
+        title: 'The Readout',
+        prompt: 'The experiment ran for 4 weeks across 12 treatment cities and 12 control cities. Here are the results:',
+        resultsTable: {
+          headers: ['Metric', 'Control', 'Treatment', 'Lift', 'p-value'],
+          rows: [
+            ['Short-ride Cancel Rate (peak)', '30.8%', '12.4%', '-59.7%', '<0.001'],
+            ['Avg Rider Cost (<3km peak)', '$4.20', '$6.50', '+54.8%', '<0.001'],
+            ['Short-ride Request Volume', '6,800/city/day', '6,200/city/day', '-8.8%', '0.04'],
+            ['Driver Earnings/Hr (short rides)', '$16.80', '$26.00', '+54.8%', '<0.001'],
+            ['Rider Wait Time (<3km peak)', '6.2min', '3.8min', '-38.7%', '<0.001'],
+          ],
+        },
+        question: 'What is your recommendation?',
+        options: [
+          {
+            id: 'ship',
+            text: 'Ship the $6.50 minimum fare floor to all markets',
+            correct: false,
+            feedback: 'The minimum fare dramatically reduces cancellations and wait times, but the 54.8% rider cost increase is steep. An 8.8% demand drop shows some price sensitivity. Shipping without a guardrail on rider cost increase risks alienating short-ride riders who are often the most price-sensitive segment. The fare floor needs a cap or graduated approach to limit the maximum cost increase per ride.'
+          },
+          {
+            id: 'conditional-ship',
+            text: 'Ship with a graduated fare floor: $5.50 base minimum, rising to $6.50 only when cancellation rates exceed 20% in a market, with a hard cap at $7.00 to protect riders',
+            correct: true,
+            feedback: 'Correct. The minimum fare floor works powerfully, but the rider cost impact needs management. A graduated approach starts with a smaller floor ($5.50, a $1.30 increase vs $2.30) that still closes most of the earnings gap, and dynamically raises it only in markets where cancellations remain high. The $7.00 hard cap protects riders from runaway pricing. This captures the majority of the cancellation reduction while limiting the demand suppression effect. The 38.7% wait time improvement is a strong rider benefit that partially offsets the cost increase.'
+          },
+          {
+            id: 'no-ship',
+            text: 'Do not ship because the rider cost increase is too high',
+            correct: false,
+            feedback: 'The status quo is not acceptable: 31% cancellation rates and 6.2-minute wait times are destroying the rider experience for short trips. The question is not whether to introduce a fare floor, but how to calibrate it. A graduated approach captures the benefits while managing the cost increase. Refusing to ship preserves a broken equilibrium where drivers rationally avoid short rides and riders suffer repeated cancellations.'
+          },
+        ],
+        debrief: 'This case exposes the analyst to two-sided marketplace dynamics where optimizing for one side (rider take rate via distance-based surge) can catastrophically harm the other side (driver willingness to accept short rides). The key insight is that driver cancellations are a rational economic response to incentive misalignment, not a behavioral problem to be penalized. The experiment confirmed that a minimum fare floor solves the cancellation problem, but the ship decision requires balancing the economic fix against rider price sensitivity. The graduated approach is the correct resolution because it is adaptive: markets with mild cancellation problems get a gentle floor, and markets with severe problems get a stronger one. This mirrors real ride-hailing operations where pricing must balance driver economics, rider affordability, and platform margin simultaneously, and one-size-fits-all solutions rarely work across heterogeneous markets.',
+      },
+    ],
+  },
+
+  {
+    id: 'fl10',
+    title: 'Patient No-Show Rate Increase',
+    domain: 'Healthcare / Telehealth',
+    difficulty: 'staff',
+    isFree: false,
+    guestPreview: false,
+    phases: [
+      {
+        type: 'alert',
+        title: 'The Alert',
+        metricName: 'Telehealth No-Show Rate',
+        metricValue: '22.1%',
+        metricChange: '+83% (was 12.1%)',
+        prompt: 'The telehealth no-show rate has increased from 12.1% to 22.1% over the past month. Providers are reporting idle appointment slots, and the scheduling team is concerned about revenue impact. What is your first move?',
+        options: [
+          {
+            id: 'a',
+            text: 'Segment no-show rate by booking lead time, patient type (new vs returning), and appointment type to isolate the affected cohort',
+            correct: true,
+            feedback: 'Correct. No-show rates vary dramatically by patient and booking characteristics. Segmenting by lead time (how far in advance the appointment was booked), patient type (new patients are typically higher no-show risk), and appointment type reveals whether the increase is broad or concentrated. This immediately tells you whether the cause is a behavioral shift, a process change, or a system-level issue.'
+          },
+          {
+            id: 'b',
+            text: 'Implement a no-show fee to discourage missed appointments',
+            correct: false,
+            feedback: 'No-show fees are a policy lever, not a diagnostic step. Implementing a fee without understanding why no-shows increased could penalize patients who missed appointments for reasons outside their control (like not receiving reminders). Additionally, no-show fees in healthcare raise access-to-care concerns and may disproportionately affect vulnerable populations. Diagnose first.'
+          },
+          {
+            id: 'c',
+            text: 'Check if provider availability decreased, causing longer wait times that lead to no-shows',
+            correct: false,
+            feedback: 'Provider availability changes would affect booking wait times and potentially lead to more next-day appointments, but this is a specific hypothesis that should follow segmentation. If the no-show increase is concentrated in a specific patient type or booking pattern, provider availability is likely not the primary factor. Start with segmentation to direct your investigation.'
+          },
+        ],
+      },
+      {
+        type: 'data',
+        title: 'Read the Data',
+        prompt: 'Here is the no-show rate breakdown by booking lead time and patient type. What pattern emerges?',
+        dataTable: {
+          headers: ['Booking Lead Time', 'Patient Type', 'No-Show Rate This Month', 'No-Show Rate Prior Month', 'Change', 'Volume'],
+          rows: [
+            ['Same day', 'Returning', '8.2%', '7.8%', '+0.4pp', '3,200'],
+            ['Same day', 'New', '12.4%', '11.9%', '+0.5pp', '1,800'],
+            ['Next day', 'Returning', '18.1%', '10.2%', '+7.9pp', '4,100'],
+            ['Next day', 'New', '38.6%', '14.8%', '+23.8pp', '5,400'],
+            ['2-3 days out', 'Returning', '14.2%', '12.1%', '+2.1pp', '3,600'],
+            ['2-3 days out', 'New', '22.8%', '15.4%', '+7.4pp', '2,900'],
+            ['4+ days out', 'Returning', '11.8%', '11.2%', '+0.6pp', '2,400'],
+            ['4+ days out', 'New', '16.1%', '14.5%', '+1.6pp', '1,600'],
+          ],
+        },
+        guideQuestion: 'Which combination of lead time and patient type shows the sharpest increase? What system change could explain this pattern?',
+        modelObservation: 'The no-show spike is dramatically concentrated in next-day bookings, especially for new patients (38.6% no-show, up 23.8 percentage points). Next-day returning patients also increased significantly (+7.9 pp). Same-day and 4+ day bookings are nearly unchanged. This pattern points to a reminder notification problem: same-day patients do not need reminders because the appointment is imminent, and patients booking 4+ days out likely received reminders during the original timeline. Next-day patients are the most dependent on day-of reminders. New patients are more affected because they lack established habits with the platform. The operations log should show a change in notification timing or delivery.',
+        keyPhrases: ['next-day', 'new patient', 'reminder', 'notification', 'booking lead time'],
+      },
+      {
+        type: 'rca',
+        title: 'Root Cause',
+        prompt: 'The notification team confirms that reminder timing was changed 4 weeks ago. What is the root cause?',
+        options: [
+          {
+            id: 'a',
+            text: 'Reminder notifications were changed from 2 hours before the appointment to 24 hours before, causing next-day patients to receive reminders too early and forget by the time of their appointment',
+            correct: true,
+            feedback: 'Correct. The reminder timing change was intended to give patients more time to prepare, but it backfired for next-day appointments. A patient who books for tomorrow at 10am receives their reminder at 10am today, a full 24 hours before the appointment. By the next morning, the reminder is buried under other notifications and forgotten. The 2-hour reminder worked because it arrived when the patient was actively thinking about their upcoming schedule. New patients are hit hardest because they have no muscle memory or calendar habit for telehealth appointments and rely entirely on the platform reminder.'
+          },
+          {
+            id: 'b',
+            text: 'A telehealth platform competitor launched a free consultation offer, pulling patients away from booked appointments',
+            correct: false,
+            feedback: 'Competitive pressure would affect all booking lead times and patient types, not specifically next-day bookings. Same-day bookings (which represent the most immediate intent) are stable, and 4+ day bookings are also stable. The concentration in next-day bookings with a specific patient type pattern points to an internal notification issue, not external competition.'
+          },
+          {
+            id: 'c',
+            text: 'An increase in appointment availability reduced the perceived cost of missing an appointment, lowering patient commitment',
+            correct: false,
+            feedback: 'If abundant availability reduced commitment, you would expect the effect across all lead times and patient types. Instead, the spike is isolated to next-day bookings. Additionally, returning patients (who would be most aware of availability) showed a smaller increase than new patients (who would not know how available appointments typically are). The pattern does not fit an availability-driven explanation.'
+          },
+        ],
+      },
+      {
+        type: 'sql',
+        title: 'Investigate with SQL',
+        schema: {
+          tables: [
+            {
+              name: 'appointments',
+              columns: ['appointment_id INT', 'patient_id INT', 'provider_id INT', 'scheduled_at TIMESTAMP', 'booked_at TIMESTAMP', 'status TEXT', 'appointment_type TEXT'],
+            },
+            {
+              name: 'patients',
+              columns: ['patient_id INT', 'first_appointment_date DATE', 'total_visits INT', 'insurance_type TEXT'],
+            },
+            {
+              name: 'reminders',
+              columns: ['reminder_id INT', 'appointment_id INT', 'sent_at TIMESTAMP', 'channel TEXT', 'opened BOOLEAN'],
+            },
+          ],
+        },
+        task: 'Calculate no-show rate by booking lead time bucket (same-day, next-day, 2-3 days, 4+ days) and patient type (new vs returning), including reminder open rate for each segment.',
+        correctQuery: 'WITH appointment_data AS (SELECT a.appointment_id, a.patient_id, a.status, CASE WHEN DATE(a.scheduled_at) = DATE(a.booked_at) THEN \'same_day\' WHEN DATE(a.scheduled_at) = DATE(a.booked_at) + INTERVAL \'1 day\' THEN \'next_day\' WHEN DATE(a.scheduled_at) <= DATE(a.booked_at) + INTERVAL \'3 days\' THEN \'2-3_days\' ELSE \'4_plus_days\' END AS lead_time, CASE WHEN p.total_visits <= 1 THEN \'new\' ELSE \'returning\' END AS patient_type FROM appointments a JOIN patients p ON a.patient_id = p.patient_id WHERE a.scheduled_at >= CURRENT_DATE - INTERVAL \'30 days\'), reminder_data AS (SELECT r.appointment_id, MAX(CASE WHEN r.opened = TRUE THEN 1 ELSE 0 END) AS reminder_opened FROM reminders r WHERE r.sent_at >= CURRENT_DATE - INTERVAL \'30 days\' GROUP BY r.appointment_id) SELECT ad.lead_time, ad.patient_type, COUNT(*) AS total_appointments, SUM(CASE WHEN ad.status = \'no_show\' THEN 1 ELSE 0 END) AS no_shows, ROUND(100.0 * SUM(CASE WHEN ad.status = \'no_show\' THEN 1 ELSE 0 END) / COUNT(*), 1) AS no_show_rate, ROUND(100.0 * SUM(COALESCE(rd.reminder_opened, 0)) / COUNT(*), 1) AS reminder_open_rate FROM appointment_data ad LEFT JOIN reminder_data rd ON ad.appointment_id = rd.appointment_id GROUP BY ad.lead_time, ad.patient_type ORDER BY ad.lead_time, ad.patient_type',
+        correctQueryFormatted: [
+          'WITH appointment_data AS (',
+          '  SELECT a.appointment_id, a.patient_id, a.status,',
+          '    CASE',
+          '      WHEN DATE(a.scheduled_at) = DATE(a.booked_at) THEN \'same_day\'',
+          '      WHEN DATE(a.scheduled_at) = DATE(a.booked_at) + INTERVAL \'1 day\'',
+          '        THEN \'next_day\'',
+          '      WHEN DATE(a.scheduled_at) <= DATE(a.booked_at) + INTERVAL \'3 days\'',
+          '        THEN \'2-3_days\'',
+          '      ELSE \'4_plus_days\'',
+          '    END AS lead_time,',
+          '    CASE WHEN p.total_visits <= 1 THEN \'new\'',
+          '      ELSE \'returning\' END AS patient_type',
+          '  FROM appointments a',
+          '  JOIN patients p ON a.patient_id = p.patient_id',
+          '  WHERE a.scheduled_at >= CURRENT_DATE - INTERVAL \'30 days\'',
+          '),',
+          'reminder_data AS (',
+          '  SELECT r.appointment_id,',
+          '    MAX(CASE WHEN r.opened = TRUE THEN 1 ELSE 0 END)',
+          '      AS reminder_opened',
+          '  FROM reminders r',
+          '  WHERE r.sent_at >= CURRENT_DATE - INTERVAL \'30 days\'',
+          '  GROUP BY r.appointment_id',
+          ')',
+          'SELECT ad.lead_time, ad.patient_type,',
+          '  COUNT(*) AS total_appointments,',
+          '  SUM(CASE WHEN ad.status = \'no_show\' THEN 1 ELSE 0 END) AS no_shows,',
+          '  ROUND(100.0 * SUM(CASE WHEN ad.status = \'no_show\'',
+          '    THEN 1 ELSE 0 END) / COUNT(*), 1) AS no_show_rate,',
+          '  ROUND(100.0 * SUM(COALESCE(rd.reminder_opened, 0))',
+          '    / COUNT(*), 1) AS reminder_open_rate',
+          'FROM appointment_data ad',
+          'LEFT JOIN reminder_data rd ON ad.appointment_id = rd.appointment_id',
+          'GROUP BY ad.lead_time, ad.patient_type',
+          'ORDER BY ad.lead_time, ad.patient_type',
+        ],
+        keyElements: ['appointments', 'reminders', 'no_show', 'CASE', 'GROUP BY', 'INTERVAL'],
+        expectedOutput: {
+          headers: ['lead_time', 'patient_type', 'total_appointments', 'no_shows', 'no_show_rate', 'reminder_open_rate'],
+          rows: [
+            ['same_day', 'new', '1,800', '223', '12.4%', '82.1%'],
+            ['same_day', 'returning', '3,200', '262', '8.2%', '85.4%'],
+            ['next_day', 'new', '5,400', '2,084', '38.6%', '24.3%'],
+            ['next_day', 'returning', '4,100', '742', '18.1%', '31.8%'],
+            ['2-3_days', 'new', '2,900', '661', '22.8%', '41.2%'],
+            ['2-3_days', 'returning', '3,600', '511', '14.2%', '52.6%'],
+            ['4_plus_days', 'new', '1,600', '258', '16.1%', '58.4%'],
+            ['4_plus_days', 'returning', '2,400', '283', '11.8%', '62.1%'],
+          ],
+        },
+        hints: ['Calculate booking lead time by comparing scheduled_at and booked_at dates', 'Classify patients as new or returning based on total_visits from the patients table', 'Join with reminders to calculate the open rate and correlate it with no-show behavior'],
+      },
+      {
+        type: 'communicate',
+        title: 'Write the Brief',
+        prompt: 'Write a brief for the clinical operations team explaining the no-show spike and its root cause.',
+        modelAnswer: 'The reminder notification timing change from 2 hours before to 24 hours before appointments is driving a near-doubling of no-show rates, concentrated in next-day bookings. New patients booking for the next day now have a 38.6% no-show rate (up from 14.8%), with reminder open rates dropping from 78% to 24.3% because the 24-hour reminder is buried under overnight notifications. This has created approximately 2,800 additional no-shows per month, costing an estimated $420K in lost provider revenue and reducing access for patients who could have filled those slots. Recommended fix: implement a dual reminder strategy sending both a 24-hour heads-up and a 2-hour actionable reminder, which preserves the advance notice benefit while restoring the day-of prompt that drives attendance.',
+        rubric: ['Explains the timing mechanism clearly with before/after comparison', 'Quantifies both the clinical impact (no-shows) and financial impact (revenue)', 'Proposes a dual-reminder solution rather than a simple revert', 'Acknowledges the access-to-care dimension of unused appointment slots'],
+        keyPhrases: ['reminder timing', '24 hours', '2 hours', 'next-day', 'new patient', 'dual reminder'],
+      },
+      {
+        type: 'experiment',
+        title: 'Design the Test',
+        prompt: 'Design a test for the dual reminder strategy.',
+        fields: [
+          {
+            label: 'Hypothesis',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Sending both a 24-hour advance reminder and a 2-hour pre-appointment reminder will reduce next-day no-show rates from 38.6% to below 16% by restoring the day-of prompt while keeping the advance planning benefit, without increasing notification fatigue or opt-out rates', correct: true },
+              { id: 'b', text: 'Simply reverting to the 2-hour-only reminder will fully solve the no-show problem and the 24-hour reminder adds no value', correct: false },
+              { id: 'c', text: 'Sending 4 reminders at 24hr, 12hr, 2hr, and 30min before will minimize no-shows to below 5% for all patient types', correct: false },
+            ],
+            correctAnswer: 'Option A correctly combines both timing approaches and sets a realistic target. Option B may work but discards potential value from advance notice. Option C risks notification fatigue and opt-outs, especially for a healthcare platform where trust in communication is critical.',
+          },
+          {
+            label: 'Unit of randomization',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'Patient-level randomization, with each patient consistently receiving either the current 24hr-only or the dual 24hr+2hr reminder for all their appointments', correct: true },
+              { id: 'b', text: 'Appointment-level randomization, varying the reminder strategy for each individual appointment', correct: false },
+              { id: 'c', text: 'Provider-level randomization, assigning each provider\'s patients to one reminder strategy', correct: false },
+            ],
+            correctAnswer: 'Patient-level ensures consistent experience and clean measurement. Appointment-level creates inconsistency that confuses patients. Provider-level conflates provider effects with reminder effects, since different providers may have different patient populations and baseline no-show rates.',
+          },
+          {
+            label: 'Primary metric',
+            type: 'mcq',
+            options: [
+              { id: 'a', text: 'No-show rate for next-day bookings, segmented by new vs returning patients', correct: true },
+              { id: 'b', text: 'Overall no-show rate across all booking lead times', correct: false },
+              { id: 'c', text: 'Reminder open rate', correct: false },
+              { id: 'd', text: 'Patient satisfaction with the notification experience', correct: false },
+            ],
+            correctAnswer: 'No-show rate for next-day bookings directly measures the outcome in the most affected segment. Overall rate dilutes the signal with same-day and 4+ day bookings that are unaffected. Reminder open rate is an input metric. Patient satisfaction is a secondary outcome that does not measure attendance.',
+          },
+          {
+            label: 'Guardrail metrics',
+            type: 'multi',
+            options: [
+              { id: 'a', text: 'Notification opt-out rate (ensure dual reminders do not cause patients to disable all notifications)', correct: true },
+              { id: 'b', text: 'Patient complaint rate about excessive notifications', correct: true },
+              { id: 'c', text: 'Same-day booking no-show rate (ensure the extra reminder does not backfire for imminent appointments)', correct: true },
+              { id: 'd', text: 'Provider schedule utilization rate', correct: false },
+              { id: 'e', text: 'Insurance claim processing time', correct: false },
+            ],
+            correctAnswer: 'Opt-out rate, complaint rate, and same-day no-show rate directly measure whether the dual reminder creates negative side effects. Provider utilization is a downstream outcome, not a guardrail. Insurance processing time is unrelated to patient notification.',
+          },
+        ],
+      },
+      {
+        type: 'readout',
+        title: 'The Readout',
+        prompt: 'The experiment ran for 6 weeks. Here are the results:',
+        resultsTable: {
+          headers: ['Metric', 'Control', 'Treatment', 'Lift', 'p-value'],
+          rows: [
+            ['No-show Rate (next-day, new)', '37.8%', '15.2%', '-59.8%', '<0.001'],
+            ['No-show Rate (next-day, returning)', '17.4%', '9.8%', '-43.7%', '<0.001'],
+            ['Reminder Open Rate (2hr)', 'N/A', '76.4%', 'N/A', 'N/A'],
+            ['Notification Opt-out Rate', '2.1%', '2.4%', '+14.3%', '0.31'],
+            ['Patient Complaint Rate', '0.8%', '0.9%', '+12.5%', '0.58'],
+            ['Provider Slot Utilization', '72.3%', '84.1%', '+16.3%', '<0.001'],
+          ],
+        },
+        question: 'What is your recommendation?',
+        options: [
+          {
+            id: 'ship',
+            text: 'Ship dual reminders to 100% of patients',
+            correct: true,
+            feedback: 'Correct. The dual reminder strategy dramatically reduces no-show rates for the most affected segment (next-day new patients down from 37.8% to 15.2%) while all guardrail metrics are clean. The opt-out rate increase is not statistically significant, and complaint rates are negligible. The 2-hour reminder achieves a 76.4% open rate, confirming it arrives at a time when patients are actively checking their schedule. Provider slot utilization improved 16.3%, directly translating to recovered revenue and better access for patients. There is no reason to delay shipping.'
+          },
+          {
+            id: 'no-ship',
+            text: 'Do not ship because adding more notifications risks long-term opt-out increases',
+            correct: false,
+            feedback: 'The opt-out rate increase is 0.3 percentage points and not statistically significant. Withholding a proven intervention that recovers 2,800 appointments per month to avoid a speculative long-term opt-out risk is not a defensible tradeoff. If opt-outs become a concern at scale, the 24-hour reminder can be made optional while keeping the 2-hour reminder mandatory.'
+          },
+          {
+            id: 'investigate',
+            text: 'Run a three-arm test adding a 2hr-only group to determine if the 24hr reminder adds incremental value',
+            correct: false,
+            feedback: 'While understanding the marginal contribution of each reminder is intellectually interesting, it should not block shipping the proven dual-reminder strategy. The current test shows clear, significant results with no guardrail violations. The three-arm test can be run as a follow-up optimization after the dual reminder is live and recovering lost appointments. Every week of delay costs approximately 700 preventable no-shows.'
+          },
+        ],
+        debrief: 'This case operates at the staff level because it requires the analyst to navigate healthcare-specific constraints: patient access implications, notification sensitivity, and the ethical dimension of no-show penalties. The key insight is that reminder timing is not a simple preference but a behavioral architecture decision. The 24-hour reminder was designed with good intentions (give patients time to prepare) but failed because it did not account for the notification decay curve: a reminder received at 10am today is effectively invisible by 10am tomorrow, buried under 50+ notifications. The 2-hour reminder works because it arrives during the patient\'s active scheduling window. The dual approach captures both benefits: advance planning and day-of activation. The broader product lesson is that notification timing should be designed around the user\'s decision moment, not the business\'s preferred communication window. The staff-level judgment call is recognizing that a clean ship is the right move despite the inherent caution that healthcare products demand: the data is unambiguous, guardrails are clean, and every day without dual reminders costs patients access to care they booked and intended to receive.',
+      },
+    ],
+  },
 ];
 
 export const fullLoopCasesById = Object.fromEntries(

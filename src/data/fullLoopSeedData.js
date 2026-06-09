@@ -735,4 +735,560 @@ export const fullLoopSeedData = {
     ],
     correctQuerySqlite: 'SELECT ct.tier, COUNT(o.order_id) AS total_orders, ROUND(AVG(o.amount), 2) AS avg_revenue, ROUND(AVG(COALESCE(d.discount_amount, 0)), 2) AS avg_discount, ROUND(AVG(lc.outbound_cost + lc.packaging_cost), 2) AS avg_logistics, ROUND(AVG(COALESCE(r.return_logistics_cost, 0)), 2) AS avg_return_cost, ROUND(AVG(o.amount - COALESCE(d.discount_amount, 0) - (lc.outbound_cost + lc.packaging_cost) - COALESCE(r.return_logistics_cost, 0)), 2) AS avg_contribution_margin FROM orders o JOIN city_tiers ct ON o.city_id = ct.city_id JOIN logistics_costs lc ON o.order_id = lc.order_id LEFT JOIN discounts d ON o.order_id = d.order_id LEFT JOIN returns r ON o.order_id = r.order_id WHERE o.status = \'completed\' GROUP BY ct.tier ORDER BY ct.tier',
   },
+
+  // ──────────────────────────────────────────────
+  // FL06 — Loan Approval Rate Drop
+  // Pattern: new_bureau (equifax_v2) scores run 40-60pts lower,
+  //          pushing applicants below unchanged 650 threshold
+  // ──────────────────────────────────────────────
+  fl06: {
+    seedSql: [
+      // loan_applications — 30 rows
+      'CREATE TABLE loan_applications (application_id INTEGER PRIMARY KEY, user_id INTEGER, channel TEXT, submitted_at TEXT, status TEXT, decision_reason TEXT)',
+      // Legacy bureau apps — mobile + web + branch (stable approval)
+      'INSERT INTO loan_applications VALUES (1, 101, \'mobile\', \'2026-05-20\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (2, 102, \'web\', \'2026-05-20\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (3, 103, \'branch\', \'2026-05-21\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (4, 104, \'mobile\', \'2026-05-22\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (5, 105, \'web\', \'2026-05-23\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (6, 106, \'branch\', \'2026-05-24\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (7, 107, \'mobile\', \'2026-05-25\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (8, 108, \'web\', \'2026-05-26\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (9, 109, \'branch\', \'2026-05-27\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (10, 110, \'mobile\', \'2026-05-28\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (11, 111, \'web\', \'2026-05-29\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (12, 112, \'branch\', \'2026-05-30\', \'approved\', \'score_above_threshold\')',
+      // New bureau apps — mostly rejected due to lower scores
+      'INSERT INTO loan_applications VALUES (13, 113, \'mobile\', \'2026-05-20\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (14, 114, \'web\', \'2026-05-21\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (15, 115, \'mobile\', \'2026-05-22\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (16, 116, \'web\', \'2026-05-23\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (17, 117, \'mobile\', \'2026-05-24\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (18, 118, \'web\', \'2026-05-25\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (19, 119, \'mobile\', \'2026-05-26\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (20, 120, \'web\', \'2026-05-27\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (21, 121, \'mobile\', \'2026-05-28\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (22, 122, \'web\', \'2026-05-29\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (23, 123, \'mobile\', \'2026-05-30\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (24, 124, \'web\', \'2026-05-31\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (25, 125, \'mobile\', \'2026-06-01\', \'approved\', \'score_above_threshold\')',
+      'INSERT INTO loan_applications VALUES (26, 126, \'web\', \'2026-06-02\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (27, 127, \'mobile\', \'2026-06-03\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (28, 128, \'web\', \'2026-06-04\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (29, 129, \'mobile\', \'2026-06-05\', \'rejected\', \'score_below_threshold\')',
+      'INSERT INTO loan_applications VALUES (30, 130, \'web\', \'2026-06-06\', \'approved\', \'score_above_threshold\')',
+
+      // credit_scores — one per application
+      'CREATE TABLE credit_scores (application_id INTEGER, bureau TEXT, score INTEGER, pulled_at TEXT)',
+      // Legacy bureau — scores cluster 650-750 (normal distribution)
+      'INSERT INTO credit_scores VALUES (1, \'legacy\', 710, \'2026-05-20\')',
+      'INSERT INTO credit_scores VALUES (2, \'legacy\', 685, \'2026-05-20\')',
+      'INSERT INTO credit_scores VALUES (3, \'legacy\', 720, \'2026-05-21\')',
+      'INSERT INTO credit_scores VALUES (4, \'legacy\', 670, \'2026-05-22\')',
+      'INSERT INTO credit_scores VALUES (5, \'legacy\', 610, \'2026-05-23\')',
+      'INSERT INTO credit_scores VALUES (6, \'legacy\', 695, \'2026-05-24\')',
+      'INSERT INTO credit_scores VALUES (7, \'legacy\', 730, \'2026-05-25\')',
+      'INSERT INTO credit_scores VALUES (8, \'legacy\', 660, \'2026-05-26\')',
+      'INSERT INTO credit_scores VALUES (9, \'legacy\', 705, \'2026-05-27\')',
+      'INSERT INTO credit_scores VALUES (10, \'legacy\', 620, \'2026-05-28\')',
+      'INSERT INTO credit_scores VALUES (11, \'legacy\', 680, \'2026-05-29\')',
+      'INSERT INTO credit_scores VALUES (12, \'legacy\', 715, \'2026-05-30\')',
+      // New bureau — same applicants would score ~50pts lower
+      'INSERT INTO credit_scores VALUES (13, \'new_bureau\', 625, \'2026-05-20\')',
+      'INSERT INTO credit_scores VALUES (14, \'new_bureau\', 610, \'2026-05-21\')',
+      'INSERT INTO credit_scores VALUES (15, \'new_bureau\', 640, \'2026-05-22\')',
+      'INSERT INTO credit_scores VALUES (16, \'new_bureau\', 615, \'2026-05-23\')',
+      'INSERT INTO credit_scores VALUES (17, \'new_bureau\', 590, \'2026-05-24\')',
+      'INSERT INTO credit_scores VALUES (18, \'new_bureau\', 680, \'2026-05-25\')',
+      'INSERT INTO credit_scores VALUES (19, \'new_bureau\', 630, \'2026-05-26\')',
+      'INSERT INTO credit_scores VALUES (20, \'new_bureau\', 605, \'2026-05-27\')',
+      'INSERT INTO credit_scores VALUES (21, \'new_bureau\', 700, \'2026-05-28\')',
+      'INSERT INTO credit_scores VALUES (22, \'new_bureau\', 620, \'2026-05-29\')',
+      'INSERT INTO credit_scores VALUES (23, \'new_bureau\', 595, \'2026-05-30\')',
+      'INSERT INTO credit_scores VALUES (24, \'new_bureau\', 635, \'2026-05-31\')',
+      'INSERT INTO credit_scores VALUES (25, \'new_bureau\', 670, \'2026-06-01\')',
+      'INSERT INTO credit_scores VALUES (26, \'new_bureau\', 610, \'2026-06-02\')',
+      'INSERT INTO credit_scores VALUES (27, \'new_bureau\', 625, \'2026-06-03\')',
+      'INSERT INTO credit_scores VALUES (28, \'new_bureau\', 600, \'2026-06-04\')',
+      'INSERT INTO credit_scores VALUES (29, \'new_bureau\', 585, \'2026-06-05\')',
+      'INSERT INTO credit_scores VALUES (30, \'new_bureau\', 660, \'2026-06-06\')',
+
+      // approval_decisions — mirrors loan_applications status
+      'CREATE TABLE approval_decisions (application_id INTEGER, decision TEXT, decided_at TEXT, threshold_used INTEGER)',
+      'INSERT INTO approval_decisions VALUES (1, \'approved\', \'2026-05-20\', 650)',
+      'INSERT INTO approval_decisions VALUES (2, \'approved\', \'2026-05-20\', 650)',
+      'INSERT INTO approval_decisions VALUES (3, \'approved\', \'2026-05-21\', 650)',
+      'INSERT INTO approval_decisions VALUES (4, \'approved\', \'2026-05-22\', 650)',
+      'INSERT INTO approval_decisions VALUES (5, \'rejected\', \'2026-05-23\', 650)',
+      'INSERT INTO approval_decisions VALUES (6, \'approved\', \'2026-05-24\', 650)',
+      'INSERT INTO approval_decisions VALUES (7, \'approved\', \'2026-05-25\', 650)',
+      'INSERT INTO approval_decisions VALUES (8, \'approved\', \'2026-05-26\', 650)',
+      'INSERT INTO approval_decisions VALUES (9, \'approved\', \'2026-05-27\', 650)',
+      'INSERT INTO approval_decisions VALUES (10, \'rejected\', \'2026-05-28\', 650)',
+      'INSERT INTO approval_decisions VALUES (11, \'approved\', \'2026-05-29\', 650)',
+      'INSERT INTO approval_decisions VALUES (12, \'approved\', \'2026-05-30\', 650)',
+      'INSERT INTO approval_decisions VALUES (13, \'rejected\', \'2026-05-20\', 650)',
+      'INSERT INTO approval_decisions VALUES (14, \'rejected\', \'2026-05-21\', 650)',
+      'INSERT INTO approval_decisions VALUES (15, \'rejected\', \'2026-05-22\', 650)',
+      'INSERT INTO approval_decisions VALUES (16, \'rejected\', \'2026-05-23\', 650)',
+      'INSERT INTO approval_decisions VALUES (17, \'rejected\', \'2026-05-24\', 650)',
+      'INSERT INTO approval_decisions VALUES (18, \'approved\', \'2026-05-25\', 650)',
+      'INSERT INTO approval_decisions VALUES (19, \'rejected\', \'2026-05-26\', 650)',
+      'INSERT INTO approval_decisions VALUES (20, \'rejected\', \'2026-05-27\', 650)',
+      'INSERT INTO approval_decisions VALUES (21, \'approved\', \'2026-05-28\', 650)',
+      'INSERT INTO approval_decisions VALUES (22, \'rejected\', \'2026-05-29\', 650)',
+      'INSERT INTO approval_decisions VALUES (23, \'rejected\', \'2026-05-30\', 650)',
+      'INSERT INTO approval_decisions VALUES (24, \'rejected\', \'2026-05-31\', 650)',
+      'INSERT INTO approval_decisions VALUES (25, \'approved\', \'2026-06-01\', 650)',
+      'INSERT INTO approval_decisions VALUES (26, \'rejected\', \'2026-06-02\', 650)',
+      'INSERT INTO approval_decisions VALUES (27, \'rejected\', \'2026-06-03\', 650)',
+      'INSERT INTO approval_decisions VALUES (28, \'rejected\', \'2026-06-04\', 650)',
+      'INSERT INTO approval_decisions VALUES (29, \'rejected\', \'2026-06-05\', 650)',
+      'INSERT INTO approval_decisions VALUES (30, \'approved\', \'2026-06-06\', 650)',
+    ],
+    correctQuerySqlite: 'SELECT cs.bureau, CASE WHEN cs.score < 600 THEN \'sub-600\' WHEN cs.score >= 600 AND cs.score < 650 THEN \'600-649\' WHEN cs.score >= 650 AND cs.score < 700 THEN \'650-699\' WHEN cs.score >= 700 THEN \'700+\' END AS score_bucket, COUNT(*) AS applications, SUM(CASE WHEN ad.decision = \'approved\' THEN 1 ELSE 0 END) AS approved, ROUND(100.0 * SUM(CASE WHEN ad.decision = \'approved\' THEN 1 ELSE 0 END) / COUNT(*), 1) AS approval_rate FROM loan_applications la JOIN credit_scores cs ON la.application_id = cs.application_id JOIN approval_decisions ad ON la.application_id = ad.application_id WHERE la.submitted_at >= date(\'2026-06-06\', \'-14 days\') GROUP BY cs.bureau, score_bucket ORDER BY cs.bureau, score_bucket',
+  },
+
+  // ──────────────────────────────────────────────
+  // FL07 — Course Completion Rate Decline
+  // Pattern: mobile + long courses (>2hr) have high buffer
+  //          times and low completion
+  // ──────────────────────────────────────────────
+  fl07: {
+    seedSql: [
+      // courses — 8 courses across length buckets
+      'CREATE TABLE courses (course_id INTEGER PRIMARY KEY, title TEXT, duration_minutes INTEGER, category TEXT)',
+      'INSERT INTO courses VALUES (1, \'Intro to Python\', 45, \'programming\')',
+      'INSERT INTO courses VALUES (2, \'Data Literacy\', 55, \'analytics\')',
+      'INSERT INTO courses VALUES (3, \'SQL Fundamentals\', 90, \'programming\')',
+      'INSERT INTO courses VALUES (4, \'Statistics 101\', 110, \'analytics\')',
+      'INSERT INTO courses VALUES (5, \'Machine Learning Basics\', 180, \'data_science\')',
+      'INSERT INTO courses VALUES (6, \'Deep Learning\', 240, \'data_science\')',
+      'INSERT INTO courses VALUES (7, \'Data Engineering\', 360, \'engineering\')',
+      'INSERT INTO courses VALUES (8, \'Full Stack Analytics\', 420, \'analytics\')',
+
+      // course_enrollments — 32 rows across buckets and platforms
+      'CREATE TABLE course_enrollments (enrollment_id INTEGER PRIMARY KEY, user_id INTEGER, course_id INTEGER, enrolled_at TEXT, completed_at TEXT, platform TEXT)',
+      // Under 1hr — desktop (high completion)
+      'INSERT INTO course_enrollments VALUES (1, 201, 1, \'2026-05-18\', \'2026-05-18\', \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (2, 202, 2, \'2026-05-19\', \'2026-05-19\', \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (3, 203, 1, \'2026-05-20\', \'2026-05-20\', \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (4, 204, 2, \'2026-05-21\', NULL, \'desktop\')',
+      // Under 1hr — mobile (high completion)
+      'INSERT INTO course_enrollments VALUES (5, 205, 1, \'2026-05-18\', \'2026-05-18\', \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (6, 206, 2, \'2026-05-19\', \'2026-05-19\', \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (7, 207, 1, \'2026-05-20\', \'2026-05-21\', \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (8, 208, 2, \'2026-05-21\', NULL, \'mobile\')',
+      // 1-2hr — desktop (moderate completion)
+      'INSERT INTO course_enrollments VALUES (9, 209, 3, \'2026-05-18\', \'2026-05-19\', \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (10, 210, 4, \'2026-05-19\', \'2026-05-21\', \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (11, 211, 3, \'2026-05-20\', NULL, \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (12, 212, 4, \'2026-05-21\', NULL, \'desktop\')',
+      // 1-2hr — mobile (moderate completion)
+      'INSERT INTO course_enrollments VALUES (13, 213, 3, \'2026-05-18\', \'2026-05-19\', \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (14, 214, 4, \'2026-05-19\', \'2026-05-21\', \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (15, 215, 3, \'2026-05-20\', NULL, \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (16, 216, 4, \'2026-05-21\', NULL, \'mobile\')',
+      // 2-5hr — desktop (lower but stable completion)
+      'INSERT INTO course_enrollments VALUES (17, 217, 5, \'2026-05-18\', \'2026-05-22\', \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (18, 218, 6, \'2026-05-19\', NULL, \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (19, 219, 5, \'2026-05-20\', \'2026-05-24\', \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (20, 220, 6, \'2026-05-21\', NULL, \'desktop\')',
+      // 2-5hr — mobile (LOW completion — the problem segment)
+      'INSERT INTO course_enrollments VALUES (21, 221, 5, \'2026-05-18\', NULL, \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (22, 222, 6, \'2026-05-19\', NULL, \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (23, 223, 5, \'2026-05-20\', NULL, \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (24, 224, 6, \'2026-05-21\', \'2026-05-28\', \'mobile\')',
+      // 5hr+ — desktop (low but stable completion)
+      'INSERT INTO course_enrollments VALUES (25, 225, 7, \'2026-05-18\', \'2026-05-25\', \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (26, 226, 8, \'2026-05-19\', NULL, \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (27, 227, 7, \'2026-05-20\', NULL, \'desktop\')',
+      'INSERT INTO course_enrollments VALUES (28, 228, 8, \'2026-05-21\', NULL, \'desktop\')',
+      // 5hr+ — mobile (VERY LOW completion — worst segment)
+      'INSERT INTO course_enrollments VALUES (29, 229, 7, \'2026-05-18\', NULL, \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (30, 230, 8, \'2026-05-19\', NULL, \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (31, 231, 7, \'2026-05-20\', NULL, \'mobile\')',
+      'INSERT INTO course_enrollments VALUES (32, 232, 8, \'2026-05-21\', NULL, \'mobile\')',
+
+      // video_playback_events — buffer times spike on mobile + long courses
+      'CREATE TABLE video_playback_events (event_id INTEGER PRIMARY KEY, enrollment_id INTEGER, event_type TEXT, minutes_watched REAL, buffer_time_seconds REAL, timestamp TEXT)',
+      // Under 1hr desktop — low buffer
+      'INSERT INTO video_playback_events VALUES (1, 1, \'playback\', 45.0, 0.6, \'2026-05-18\')',
+      'INSERT INTO video_playback_events VALUES (2, 2, \'playback\', 55.0, 0.9, \'2026-05-19\')',
+      'INSERT INTO video_playback_events VALUES (3, 3, \'playback\', 45.0, 0.7, \'2026-05-20\')',
+      'INSERT INTO video_playback_events VALUES (4, 4, \'playback\', 30.0, 1.0, \'2026-05-21\')',
+      // Under 1hr mobile — low buffer
+      'INSERT INTO video_playback_events VALUES (5, 5, \'playback\', 45.0, 1.0, \'2026-05-18\')',
+      'INSERT INTO video_playback_events VALUES (6, 6, \'playback\', 55.0, 1.3, \'2026-05-19\')',
+      'INSERT INTO video_playback_events VALUES (7, 7, \'playback\', 45.0, 1.1, \'2026-05-20\')',
+      'INSERT INTO video_playback_events VALUES (8, 8, \'playback\', 30.0, 1.4, \'2026-05-21\')',
+      // 1-2hr desktop — low buffer
+      'INSERT INTO video_playback_events VALUES (9, 9, \'playback\', 90.0, 1.0, \'2026-05-18\')',
+      'INSERT INTO video_playback_events VALUES (10, 10, \'playback\', 110.0, 1.2, \'2026-05-19\')',
+      'INSERT INTO video_playback_events VALUES (11, 11, \'playback\', 60.0, 1.1, \'2026-05-20\')',
+      'INSERT INTO video_playback_events VALUES (12, 12, \'playback\', 40.0, 1.0, \'2026-05-21\')',
+      // 1-2hr mobile — slightly higher buffer
+      'INSERT INTO video_playback_events VALUES (13, 13, \'playback\', 90.0, 2.2, \'2026-05-18\')',
+      'INSERT INTO video_playback_events VALUES (14, 14, \'playback\', 110.0, 2.6, \'2026-05-19\')',
+      'INSERT INTO video_playback_events VALUES (15, 15, \'playback\', 50.0, 2.3, \'2026-05-20\')',
+      'INSERT INTO video_playback_events VALUES (16, 16, \'playback\', 40.0, 2.5, \'2026-05-21\')',
+      // 2-5hr desktop — low buffer
+      'INSERT INTO video_playback_events VALUES (17, 17, \'playback\', 180.0, 1.2, \'2026-05-18\')',
+      'INSERT INTO video_playback_events VALUES (18, 18, \'playback\', 100.0, 1.4, \'2026-05-19\')',
+      'INSERT INTO video_playback_events VALUES (19, 19, \'playback\', 180.0, 1.3, \'2026-05-20\')',
+      'INSERT INTO video_playback_events VALUES (20, 20, \'playback\', 80.0, 1.2, \'2026-05-21\')',
+      // 2-5hr mobile — HIGH buffer (problem!)
+      'INSERT INTO video_playback_events VALUES (21, 21, \'playback\', 60.0, 14.2, \'2026-05-18\')',
+      'INSERT INTO video_playback_events VALUES (22, 22, \'playback\', 55.0, 15.1, \'2026-05-19\')',
+      'INSERT INTO video_playback_events VALUES (23, 23, \'playback\', 70.0, 14.8, \'2026-05-20\')',
+      'INSERT INTO video_playback_events VALUES (24, 24, \'playback\', 240.0, 15.0, \'2026-05-21\')',
+      // 5hr+ desktop — low buffer
+      'INSERT INTO video_playback_events VALUES (25, 25, \'playback\', 360.0, 1.4, \'2026-05-18\')',
+      'INSERT INTO video_playback_events VALUES (26, 26, \'playback\', 120.0, 1.6, \'2026-05-19\')',
+      'INSERT INTO video_playback_events VALUES (27, 27, \'playback\', 100.0, 1.5, \'2026-05-20\')',
+      'INSERT INTO video_playback_events VALUES (28, 28, \'playback\', 80.0, 1.5, \'2026-05-21\')',
+      // 5hr+ mobile — VERY HIGH buffer (worst!)
+      'INSERT INTO video_playback_events VALUES (29, 29, \'playback\', 40.0, 21.5, \'2026-05-18\')',
+      'INSERT INTO video_playback_events VALUES (30, 30, \'playback\', 35.0, 23.1, \'2026-05-19\')',
+      'INSERT INTO video_playback_events VALUES (31, 31, \'playback\', 50.0, 22.0, \'2026-05-20\')',
+      'INSERT INTO video_playback_events VALUES (32, 32, \'playback\', 30.0, 22.6, \'2026-05-21\')',
+    ],
+    correctQuerySqlite: 'WITH course_stats AS (SELECT ce.enrollment_id, ce.platform, CASE WHEN c.duration_minutes <= 60 THEN \'under_1hr\' WHEN c.duration_minutes <= 120 THEN \'1-2hr\' WHEN c.duration_minutes <= 300 THEN \'2-5hr\' ELSE \'5hr_plus\' END AS length_bucket, CASE WHEN ce.completed_at IS NOT NULL THEN 1 ELSE 0 END AS is_completed FROM course_enrollments ce JOIN courses c ON ce.course_id = c.course_id WHERE ce.enrolled_at >= date(\'2026-06-06\', \'-21 days\')), buffer_stats AS (SELECT vpe.enrollment_id, AVG(vpe.buffer_time_seconds) AS avg_buffer_seconds FROM video_playback_events vpe WHERE vpe.event_type = \'playback\' AND vpe.timestamp >= date(\'2026-06-06\', \'-21 days\') GROUP BY vpe.enrollment_id) SELECT cs.length_bucket, cs.platform, COUNT(*) AS enrollments, ROUND(100.0 * SUM(cs.is_completed) / COUNT(*), 1) AS completion_rate, ROUND(AVG(bs.avg_buffer_seconds), 1) AS avg_buffer_seconds FROM course_stats cs LEFT JOIN buffer_stats bs ON cs.enrollment_id = bs.enrollment_id GROUP BY cs.length_bucket, cs.platform ORDER BY cs.length_bucket, cs.platform',
+  },
+
+  // ──────────────────────────────────────────────
+  // FL08 — Message Send Latency Spike
+  // Pattern: groups >50 members have huge latency due to
+  //          dropped index on group membership table
+  // ──────────────────────────────────────────────
+  fl08: {
+    seedSql: [
+      // chats — 10 chats across size buckets
+      'CREATE TABLE chats (chat_id INTEGER PRIMARY KEY, chat_type TEXT, member_count INTEGER, created_at TEXT)',
+      'INSERT INTO chats VALUES (1, \'dm\', 2, \'2026-01-10\')',
+      'INSERT INTO chats VALUES (2, \'dm\', 2, \'2026-02-15\')',
+      'INSERT INTO chats VALUES (3, \'group\', 5, \'2026-01-20\')',
+      'INSERT INTO chats VALUES (4, \'group\', 8, \'2026-03-05\')',
+      'INSERT INTO chats VALUES (5, \'group\', 25, \'2026-02-01\')',
+      'INSERT INTO chats VALUES (6, \'group\', 45, \'2026-03-10\')',
+      'INSERT INTO chats VALUES (7, \'group\', 75, \'2026-01-15\')',
+      'INSERT INTO chats VALUES (8, \'group\', 120, \'2026-02-20\')',
+      'INSERT INTO chats VALUES (9, \'group\', 250, \'2026-03-01\')',
+      'INSERT INTO chats VALUES (10, \'group\', 350, \'2026-01-25\')',
+
+      // messages — 30 msgs, mix of current (last 48hr) and prior period
+      'CREATE TABLE messages (message_id INTEGER PRIMARY KEY, chat_id INTEGER, sender_id INTEGER, sent_at TEXT, delivered_at TEXT, content_type TEXT)',
+      // Current period — DMs (fast)
+      'INSERT INTO messages VALUES (1, 1, 501, \'2026-06-08 09:00\', \'2026-06-08 09:00\', \'text\')',
+      'INSERT INTO messages VALUES (2, 2, 502, \'2026-06-08 10:15\', \'2026-06-08 10:15\', \'text\')',
+      'INSERT INTO messages VALUES (3, 1, 503, \'2026-06-08 14:00\', \'2026-06-08 14:00\', \'text\')',
+      // Current period — small groups (fast)
+      'INSERT INTO messages VALUES (4, 3, 504, \'2026-06-08 08:30\', \'2026-06-08 08:30\', \'text\')',
+      'INSERT INTO messages VALUES (5, 4, 505, \'2026-06-08 11:00\', \'2026-06-08 11:00\', \'text\')',
+      'INSERT INTO messages VALUES (6, 3, 506, \'2026-06-08 15:00\', \'2026-06-08 15:00\', \'text\')',
+      // Current period — medium groups (slightly slow)
+      'INSERT INTO messages VALUES (7, 5, 507, \'2026-06-08 09:30\', \'2026-06-08 09:30\', \'text\')',
+      'INSERT INTO messages VALUES (8, 6, 508, \'2026-06-08 12:00\', \'2026-06-08 12:00\', \'text\')',
+      'INSERT INTO messages VALUES (9, 5, 509, \'2026-06-08 16:00\', \'2026-06-08 16:00\', \'text\')',
+      // Current period — large groups (SLOW — the problem)
+      'INSERT INTO messages VALUES (10, 7, 510, \'2026-06-08 08:00\', \'2026-06-08 08:00\', \'text\')',
+      'INSERT INTO messages VALUES (11, 8, 511, \'2026-06-08 10:00\', \'2026-06-08 10:00\', \'text\')',
+      'INSERT INTO messages VALUES (12, 7, 512, \'2026-06-08 13:00\', \'2026-06-08 13:00\', \'text\')',
+      // Current period — very large groups (VERY SLOW)
+      'INSERT INTO messages VALUES (13, 9, 513, \'2026-06-08 09:00\', \'2026-06-08 09:00\', \'text\')',
+      'INSERT INTO messages VALUES (14, 10, 514, \'2026-06-08 11:30\', \'2026-06-08 11:30\', \'text\')',
+      'INSERT INTO messages VALUES (15, 9, 515, \'2026-06-08 14:30\', \'2026-06-08 14:30\', \'text\')',
+      // Prior period — same mix but all fast
+      'INSERT INTO messages VALUES (16, 1, 501, \'2026-06-06 09:00\', \'2026-06-06 09:00\', \'text\')',
+      'INSERT INTO messages VALUES (17, 2, 502, \'2026-06-06 10:00\', \'2026-06-06 10:00\', \'text\')',
+      'INSERT INTO messages VALUES (18, 3, 504, \'2026-06-06 11:00\', \'2026-06-06 11:00\', \'text\')',
+      'INSERT INTO messages VALUES (19, 4, 505, \'2026-06-06 12:00\', \'2026-06-06 12:00\', \'text\')',
+      'INSERT INTO messages VALUES (20, 5, 507, \'2026-06-06 09:30\', \'2026-06-06 09:30\', \'text\')',
+      'INSERT INTO messages VALUES (21, 6, 508, \'2026-06-06 13:00\', \'2026-06-06 13:00\', \'text\')',
+      'INSERT INTO messages VALUES (22, 7, 510, \'2026-06-06 08:00\', \'2026-06-06 08:00\', \'text\')',
+      'INSERT INTO messages VALUES (23, 8, 511, \'2026-06-06 10:00\', \'2026-06-06 10:00\', \'text\')',
+      'INSERT INTO messages VALUES (24, 9, 513, \'2026-06-06 09:00\', \'2026-06-06 09:00\', \'text\')',
+      'INSERT INTO messages VALUES (25, 10, 514, \'2026-06-06 11:00\', \'2026-06-06 11:00\', \'text\')',
+      // A few more current period messages for volume
+      'INSERT INTO messages VALUES (26, 1, 501, \'2026-06-08 17:00\', \'2026-06-08 17:00\', \'text\')',
+      'INSERT INTO messages VALUES (27, 7, 510, \'2026-06-08 17:30\', \'2026-06-08 17:30\', \'text\')',
+      'INSERT INTO messages VALUES (28, 9, 513, \'2026-06-08 18:00\', \'2026-06-08 18:00\', \'text\')',
+      'INSERT INTO messages VALUES (29, 3, 504, \'2026-06-06 15:00\', \'2026-06-06 15:00\', \'text\')',
+      'INSERT INTO messages VALUES (30, 10, 514, \'2026-06-06 16:00\', \'2026-06-06 16:00\', \'text\')',
+
+      // message_delivery_log — latency data (the key table)
+      'CREATE TABLE message_delivery_log (message_id INTEGER, recipient_id INTEGER, delivery_latency_ms INTEGER, delivered_at TEXT)',
+      // Current DMs — low latency (~100-150ms)
+      'INSERT INTO message_delivery_log VALUES (1, 601, 110, \'2026-06-08 09:00\')',
+      'INSERT INTO message_delivery_log VALUES (2, 602, 130, \'2026-06-08 10:15\')',
+      'INSERT INTO message_delivery_log VALUES (3, 603, 120, \'2026-06-08 14:00\')',
+      'INSERT INTO message_delivery_log VALUES (26, 601, 115, \'2026-06-08 17:00\')',
+      // Current small groups — low latency (~160-200ms)
+      'INSERT INTO message_delivery_log VALUES (4, 604, 170, \'2026-06-08 08:30\')',
+      'INSERT INTO message_delivery_log VALUES (5, 605, 190, \'2026-06-08 11:00\')',
+      'INSERT INTO message_delivery_log VALUES (6, 606, 180, \'2026-06-08 15:00\')',
+      // Current medium groups — moderate (~220-350ms)
+      'INSERT INTO message_delivery_log VALUES (7, 607, 240, \'2026-06-08 09:30\')',
+      'INSERT INTO message_delivery_log VALUES (8, 608, 320, \'2026-06-08 12:00\')',
+      'INSERT INTO message_delivery_log VALUES (9, 609, 280, \'2026-06-08 16:00\')',
+      // Current large groups — HIGH latency (~3500-5000ms)
+      'INSERT INTO message_delivery_log VALUES (10, 610, 4100, \'2026-06-08 08:00\')',
+      'INSERT INTO message_delivery_log VALUES (11, 611, 4500, \'2026-06-08 10:00\')',
+      'INSERT INTO message_delivery_log VALUES (12, 612, 3800, \'2026-06-08 13:00\')',
+      'INSERT INTO message_delivery_log VALUES (27, 610, 4300, \'2026-06-08 17:30\')',
+      // Current very large groups — VERY HIGH latency (~7000-10000ms)
+      'INSERT INTO message_delivery_log VALUES (13, 613, 8500, \'2026-06-08 09:00\')',
+      'INSERT INTO message_delivery_log VALUES (14, 614, 9200, \'2026-06-08 11:30\')',
+      'INSERT INTO message_delivery_log VALUES (15, 615, 8800, \'2026-06-08 14:30\')',
+      'INSERT INTO message_delivery_log VALUES (28, 613, 9100, \'2026-06-08 18:00\')',
+      // Prior period — ALL fast (before index drop)
+      'INSERT INTO message_delivery_log VALUES (16, 601, 105, \'2026-06-06 09:00\')',
+      'INSERT INTO message_delivery_log VALUES (17, 602, 125, \'2026-06-06 10:00\')',
+      'INSERT INTO message_delivery_log VALUES (18, 604, 165, \'2026-06-06 11:00\')',
+      'INSERT INTO message_delivery_log VALUES (19, 605, 175, \'2026-06-06 12:00\')',
+      'INSERT INTO message_delivery_log VALUES (20, 607, 230, \'2026-06-06 09:30\')',
+      'INSERT INTO message_delivery_log VALUES (21, 608, 290, \'2026-06-06 13:00\')',
+      'INSERT INTO message_delivery_log VALUES (22, 610, 820, \'2026-06-06 08:00\')',
+      'INSERT INTO message_delivery_log VALUES (23, 611, 910, \'2026-06-06 10:00\')',
+      'INSERT INTO message_delivery_log VALUES (24, 613, 1050, \'2026-06-06 09:00\')',
+      'INSERT INTO message_delivery_log VALUES (25, 614, 1150, \'2026-06-06 11:00\')',
+      'INSERT INTO message_delivery_log VALUES (29, 604, 160, \'2026-06-06 15:00\')',
+      'INSERT INTO message_delivery_log VALUES (30, 614, 1100, \'2026-06-06 16:00\')',
+    ],
+    correctQuerySqlite: 'WITH latency_data AS (SELECT m.message_id, c.member_count, CASE WHEN c.member_count <= 2 THEN \'1:1\' WHEN c.member_count <= 10 THEN \'3-10\' WHEN c.member_count <= 50 THEN \'11-50\' WHEN c.member_count <= 200 THEN \'51-200\' ELSE \'200+\' END AS size_bucket, mdl.delivery_latency_ms, CASE WHEN m.sent_at >= \'2026-06-08 00:00\' THEN \'current\' ELSE \'prior\' END AS period FROM messages m JOIN chats c ON m.chat_id = c.chat_id JOIN message_delivery_log mdl ON m.message_id = mdl.message_id WHERE m.sent_at >= \'2026-06-06 00:00\') SELECT size_bucket, period, COUNT(*) AS messages, CAST(ROUND(AVG(delivery_latency_ms)) AS INTEGER) AS avg_latency_ms, MAX(delivery_latency_ms) AS max_latency_ms FROM latency_data GROUP BY size_bucket, period ORDER BY size_bucket, period',
+  },
+
+  // ──────────────────────────────────────────────
+  // FL09 — Driver Cancellation Rate Surge
+  // Pattern: short rides (<3km) during peak hours have high
+  //          cancellation due to dynamic pricing gap
+  // ──────────────────────────────────────────────
+  fl09: {
+    seedSql: [
+      // ride_requests — 30 rows
+      'CREATE TABLE ride_requests (request_id INTEGER PRIMARY KEY, rider_id INTEGER, driver_id INTEGER, requested_at TEXT, status TEXT, estimated_distance_km REAL, estimated_fare REAL)',
+      // Short rides (<3km) peak — high cancellation
+      'INSERT INTO ride_requests VALUES (1, 701, 801, \'2026-05-20 08:15\', \'cancelled\', 1.5, 4.20)',
+      'INSERT INTO ride_requests VALUES (2, 702, 802, \'2026-05-21 07:30\', \'cancelled\', 2.1, 4.50)',
+      'INSERT INTO ride_requests VALUES (3, 703, 803, \'2026-05-22 17:45\', \'cancelled\', 1.8, 4.10)',
+      'INSERT INTO ride_requests VALUES (4, 704, 804, \'2026-05-23 18:00\', \'completed\', 2.5, 4.80)',
+      'INSERT INTO ride_requests VALUES (5, 705, 805, \'2026-05-24 08:00\', \'cancelled\', 1.2, 3.90)',
+      'INSERT INTO ride_requests VALUES (6, 706, 806, \'2026-05-25 17:30\', \'completed\', 2.8, 4.60)',
+      'INSERT INTO ride_requests VALUES (7, 707, 807, \'2026-05-26 09:00\', \'cancelled\', 1.9, 4.30)',
+      // Short rides (<3km) off-peak — moderate cancellation
+      'INSERT INTO ride_requests VALUES (8, 708, 808, \'2026-05-20 13:00\', \'cancelled\', 2.0, 3.80)',
+      'INSERT INTO ride_requests VALUES (9, 709, 809, \'2026-05-21 14:30\', \'completed\', 1.6, 3.60)',
+      'INSERT INTO ride_requests VALUES (10, 710, 810, \'2026-05-22 11:00\', \'completed\', 2.3, 3.90)',
+      'INSERT INTO ride_requests VALUES (11, 711, 811, \'2026-05-23 15:00\', \'completed\', 1.4, 3.50)',
+      'INSERT INTO ride_requests VALUES (12, 712, 812, \'2026-05-24 12:00\', \'cancelled\', 2.7, 4.00)',
+      // Medium rides (3-8km) peak — low cancellation
+      'INSERT INTO ride_requests VALUES (13, 713, 813, \'2026-05-20 08:00\', \'completed\', 5.2, 9.40)',
+      'INSERT INTO ride_requests VALUES (14, 714, 814, \'2026-05-21 07:45\', \'completed\', 6.1, 10.20)',
+      'INSERT INTO ride_requests VALUES (15, 715, 815, \'2026-05-22 17:30\', \'completed\', 4.5, 8.80)',
+      'INSERT INTO ride_requests VALUES (16, 716, 816, \'2026-05-23 18:15\', \'cancelled\', 7.0, 11.00)',
+      'INSERT INTO ride_requests VALUES (17, 717, 817, \'2026-05-24 08:30\', \'completed\', 5.8, 9.60)',
+      // Medium rides (3-8km) off-peak — low cancellation
+      'INSERT INTO ride_requests VALUES (18, 718, 818, \'2026-05-20 13:30\', \'completed\', 4.8, 7.60)',
+      'INSERT INTO ride_requests VALUES (19, 719, 819, \'2026-05-21 11:00\', \'completed\', 6.5, 8.20)',
+      'INSERT INTO ride_requests VALUES (20, 720, 820, \'2026-05-22 14:00\', \'completed\', 5.0, 7.40)',
+      'INSERT INTO ride_requests VALUES (21, 721, 821, \'2026-05-23 12:00\', \'completed\', 7.2, 8.50)',
+      'INSERT INTO ride_requests VALUES (22, 722, 822, \'2026-05-24 15:00\', \'cancelled\', 3.5, 7.00)',
+      // Long rides (8+km) peak — very low cancellation
+      'INSERT INTO ride_requests VALUES (23, 723, 823, \'2026-05-20 07:30\', \'completed\', 12.0, 18.50)',
+      'INSERT INTO ride_requests VALUES (24, 724, 824, \'2026-05-21 17:00\', \'completed\', 15.0, 21.00)',
+      'INSERT INTO ride_requests VALUES (25, 725, 825, \'2026-05-22 08:15\', \'completed\', 10.5, 16.80)',
+      'INSERT INTO ride_requests VALUES (26, 726, 826, \'2026-05-23 18:30\', \'completed\', 9.2, 15.40)',
+      // Long rides (8+km) off-peak — very low cancellation
+      'INSERT INTO ride_requests VALUES (27, 727, 827, \'2026-05-20 11:00\', \'completed\', 11.0, 14.20)',
+      'INSERT INTO ride_requests VALUES (28, 728, 828, \'2026-05-21 14:00\', \'completed\', 13.5, 16.00)',
+      'INSERT INTO ride_requests VALUES (29, 729, 829, \'2026-05-22 12:30\', \'completed\', 9.8, 13.50)',
+      'INSERT INTO ride_requests VALUES (30, 730, 830, \'2026-05-23 15:30\', \'cancelled\', 10.2, 14.80)',
+
+      // ride_completions — only for completed rides
+      'CREATE TABLE ride_completions (ride_id INTEGER PRIMARY KEY, request_id INTEGER, actual_distance_km REAL, actual_fare REAL, duration_minutes INTEGER, completed_at TEXT)',
+      'INSERT INTO ride_completions VALUES (1, 4, 2.6, 4.80, 15, \'2026-05-23 18:15\')',
+      'INSERT INTO ride_completions VALUES (2, 6, 2.9, 4.60, 14, \'2026-05-25 17:44\')',
+      'INSERT INTO ride_completions VALUES (3, 9, 1.7, 3.60, 12, \'2026-05-21 14:42\')',
+      'INSERT INTO ride_completions VALUES (4, 10, 2.4, 3.90, 13, \'2026-05-22 11:13\')',
+      'INSERT INTO ride_completions VALUES (5, 11, 1.5, 3.50, 11, \'2026-05-23 15:11\')',
+      'INSERT INTO ride_completions VALUES (6, 13, 5.3, 9.40, 20, \'2026-05-20 08:20\')',
+      'INSERT INTO ride_completions VALUES (7, 14, 6.2, 10.20, 22, \'2026-05-21 08:07\')',
+      'INSERT INTO ride_completions VALUES (8, 15, 4.6, 8.80, 18, \'2026-05-22 17:48\')',
+      'INSERT INTO ride_completions VALUES (9, 17, 5.9, 9.60, 21, \'2026-05-24 08:51\')',
+      'INSERT INTO ride_completions VALUES (10, 18, 4.9, 7.60, 19, \'2026-05-20 13:49\')',
+      'INSERT INTO ride_completions VALUES (11, 19, 6.6, 8.20, 23, \'2026-05-21 11:23\')',
+      'INSERT INTO ride_completions VALUES (12, 20, 5.1, 7.40, 20, \'2026-05-22 14:20\')',
+      'INSERT INTO ride_completions VALUES (13, 21, 7.3, 8.50, 25, \'2026-05-23 12:25\')',
+      'INSERT INTO ride_completions VALUES (14, 23, 12.1, 18.50, 30, \'2026-05-20 08:00\')',
+      'INSERT INTO ride_completions VALUES (15, 24, 15.2, 21.00, 35, \'2026-05-21 17:35\')',
+      'INSERT INTO ride_completions VALUES (16, 25, 10.6, 16.80, 28, \'2026-05-22 08:43\')',
+      'INSERT INTO ride_completions VALUES (17, 26, 9.3, 15.40, 27, \'2026-05-23 18:57\')',
+      'INSERT INTO ride_completions VALUES (18, 27, 11.2, 14.20, 32, \'2026-05-20 11:32\')',
+      'INSERT INTO ride_completions VALUES (19, 28, 13.6, 16.00, 34, \'2026-05-21 14:34\')',
+      'INSERT INTO ride_completions VALUES (20, 29, 9.9, 13.50, 29, \'2026-05-22 12:59\')',
+
+      // driver_cancellations — only for cancelled rides
+      'CREATE TABLE driver_cancellations (cancellation_id INTEGER PRIMARY KEY, request_id INTEGER, driver_id INTEGER, cancelled_at TEXT, reason TEXT)',
+      'INSERT INTO driver_cancellations VALUES (1, 1, 801, \'2026-05-20 08:17\', \'ride_too_short\')',
+      'INSERT INTO driver_cancellations VALUES (2, 2, 802, \'2026-05-21 07:32\', \'ride_too_short\')',
+      'INSERT INTO driver_cancellations VALUES (3, 3, 803, \'2026-05-22 17:47\', \'ride_too_short\')',
+      'INSERT INTO driver_cancellations VALUES (4, 5, 805, \'2026-05-24 08:02\', \'ride_too_short\')',
+      'INSERT INTO driver_cancellations VALUES (5, 7, 807, \'2026-05-26 09:02\', \'ride_too_short\')',
+      'INSERT INTO driver_cancellations VALUES (6, 8, 808, \'2026-05-20 13:02\', \'ride_too_short\')',
+      'INSERT INTO driver_cancellations VALUES (7, 12, 812, \'2026-05-24 12:02\', \'ride_too_short\')',
+      'INSERT INTO driver_cancellations VALUES (8, 16, 816, \'2026-05-23 18:17\', \'traffic\')',
+      'INSERT INTO driver_cancellations VALUES (9, 22, 822, \'2026-05-24 15:02\', \'changed_mind\')',
+      'INSERT INTO driver_cancellations VALUES (10, 30, 830, \'2026-05-23 15:32\', \'changed_mind\')',
+
+      // surge_pricing — higher surge on long rides during peak
+      'CREATE TABLE surge_pricing (request_id INTEGER, surge_multiplier REAL, base_fare REAL, final_fare REAL)',
+      'INSERT INTO surge_pricing VALUES (1, 1.0, 4.20, 4.20)',
+      'INSERT INTO surge_pricing VALUES (2, 1.0, 4.50, 4.50)',
+      'INSERT INTO surge_pricing VALUES (3, 1.0, 4.10, 4.10)',
+      'INSERT INTO surge_pricing VALUES (4, 1.0, 4.80, 4.80)',
+      'INSERT INTO surge_pricing VALUES (5, 1.0, 3.90, 3.90)',
+      'INSERT INTO surge_pricing VALUES (6, 1.0, 4.60, 4.60)',
+      'INSERT INTO surge_pricing VALUES (7, 1.0, 4.30, 4.30)',
+      'INSERT INTO surge_pricing VALUES (8, 1.0, 3.80, 3.80)',
+      'INSERT INTO surge_pricing VALUES (9, 1.0, 3.60, 3.60)',
+      'INSERT INTO surge_pricing VALUES (10, 1.0, 3.90, 3.90)',
+      'INSERT INTO surge_pricing VALUES (11, 1.0, 3.50, 3.50)',
+      'INSERT INTO surge_pricing VALUES (12, 1.0, 4.00, 4.00)',
+      'INSERT INTO surge_pricing VALUES (13, 1.8, 5.22, 9.40)',
+      'INSERT INTO surge_pricing VALUES (14, 1.8, 5.67, 10.20)',
+      'INSERT INTO surge_pricing VALUES (15, 1.6, 5.50, 8.80)',
+      'INSERT INTO surge_pricing VALUES (16, 1.7, 6.47, 11.00)',
+      'INSERT INTO surge_pricing VALUES (17, 1.8, 5.33, 9.60)',
+      'INSERT INTO surge_pricing VALUES (18, 1.0, 7.60, 7.60)',
+      'INSERT INTO surge_pricing VALUES (19, 1.0, 8.20, 8.20)',
+      'INSERT INTO surge_pricing VALUES (20, 1.0, 7.40, 7.40)',
+      'INSERT INTO surge_pricing VALUES (21, 1.0, 8.50, 8.50)',
+      'INSERT INTO surge_pricing VALUES (22, 1.0, 7.00, 7.00)',
+      'INSERT INTO surge_pricing VALUES (23, 2.2, 8.41, 18.50)',
+      'INSERT INTO surge_pricing VALUES (24, 2.2, 9.55, 21.00)',
+      'INSERT INTO surge_pricing VALUES (25, 2.0, 8.40, 16.80)',
+      'INSERT INTO surge_pricing VALUES (26, 2.0, 7.70, 15.40)',
+      'INSERT INTO surge_pricing VALUES (27, 1.0, 14.20, 14.20)',
+      'INSERT INTO surge_pricing VALUES (28, 1.0, 16.00, 16.00)',
+      'INSERT INTO surge_pricing VALUES (29, 1.0, 13.50, 13.50)',
+      'INSERT INTO surge_pricing VALUES (30, 1.0, 14.80, 14.80)',
+    ],
+    correctQuerySqlite: 'WITH ride_data AS (SELECT rr.request_id, rr.estimated_distance_km, CASE WHEN rr.estimated_distance_km < 3 THEN \'under_3km\' WHEN rr.estimated_distance_km <= 8 THEN \'3-8km\' ELSE \'8km_plus\' END AS distance_bucket, CASE WHEN CAST(substr(rr.requested_at, 12, 2) AS INTEGER) BETWEEN 7 AND 9 OR CAST(substr(rr.requested_at, 12, 2) AS INTEGER) BETWEEN 17 AND 19 THEN \'peak\' ELSE \'off_peak\' END AS time_period, CASE WHEN dc.cancellation_id IS NOT NULL THEN 1 ELSE 0 END AS was_cancelled, rc.actual_fare, rc.duration_minutes FROM ride_requests rr LEFT JOIN driver_cancellations dc ON rr.request_id = dc.request_id LEFT JOIN ride_completions rc ON rr.request_id = rc.request_id WHERE rr.requested_at >= date(\'2026-06-06\', \'-14 days\')) SELECT distance_bucket, time_period, COUNT(*) AS total_requests, ROUND(100.0 * SUM(was_cancelled) / COUNT(*), 1) AS cancel_rate, ROUND(AVG(CASE WHEN was_cancelled = 0 THEN actual_fare END), 2) AS avg_fare, ROUND(AVG(CASE WHEN was_cancelled = 0 AND duration_minutes > 0 THEN actual_fare * 60.0 / duration_minutes END), 2) AS earnings_per_hour FROM ride_data GROUP BY distance_bucket, time_period ORDER BY distance_bucket, time_period',
+  },
+
+  // ──────────────────────────────────────────────
+  // FL10 — Patient No-Show Rate Increase
+  // Pattern: next-day bookings (lead_time <24hr) for new
+  //          patients have high no-show due to reminder timing
+  // ──────────────────────────────────────────────
+  fl10: {
+    seedSql: [
+      // patients — 20 patients, mix of new and returning
+      'CREATE TABLE patients (patient_id INTEGER PRIMARY KEY, first_appointment_date TEXT, total_visits INTEGER, insurance_type TEXT)',
+      // Returning patients (total_visits > 1)
+      'INSERT INTO patients VALUES (1, \'2025-06-15\', 8, \'private\')',
+      'INSERT INTO patients VALUES (2, \'2025-09-20\', 5, \'medicare\')',
+      'INSERT INTO patients VALUES (3, \'2025-11-01\', 4, \'private\')',
+      'INSERT INTO patients VALUES (4, \'2026-01-10\', 3, \'medicaid\')',
+      'INSERT INTO patients VALUES (5, \'2025-08-05\', 6, \'private\')',
+      'INSERT INTO patients VALUES (6, \'2025-12-12\', 4, \'medicare\')',
+      'INSERT INTO patients VALUES (7, \'2026-02-01\', 3, \'private\')',
+      'INSERT INTO patients VALUES (8, \'2025-10-15\', 7, \'medicaid\')',
+      'INSERT INTO patients VALUES (9, \'2026-03-20\', 2, \'private\')',
+      'INSERT INTO patients VALUES (10, \'2025-07-01\', 9, \'medicare\')',
+      // New patients (total_visits = 1)
+      'INSERT INTO patients VALUES (11, \'2026-05-20\', 1, \'private\')',
+      'INSERT INTO patients VALUES (12, \'2026-05-21\', 1, \'medicare\')',
+      'INSERT INTO patients VALUES (13, \'2026-05-22\', 1, \'private\')',
+      'INSERT INTO patients VALUES (14, \'2026-05-23\', 1, \'medicaid\')',
+      'INSERT INTO patients VALUES (15, \'2026-05-24\', 1, \'private\')',
+      'INSERT INTO patients VALUES (16, \'2026-05-25\', 1, \'medicare\')',
+      'INSERT INTO patients VALUES (17, \'2026-05-26\', 1, \'private\')',
+      'INSERT INTO patients VALUES (18, \'2026-05-27\', 1, \'medicaid\')',
+      'INSERT INTO patients VALUES (19, \'2026-05-28\', 1, \'private\')',
+      'INSERT INTO patients VALUES (20, \'2026-05-29\', 1, \'medicare\')',
+
+      // appointments — 32 rows across lead time buckets and patient types
+      'CREATE TABLE appointments (appointment_id INTEGER PRIMARY KEY, patient_id INTEGER, provider_id INTEGER, scheduled_at TEXT, booked_at TEXT, status TEXT, appointment_type TEXT)',
+      // Same-day — returning (low no-show)
+      'INSERT INTO appointments VALUES (1, 1, 901, \'2026-05-20 10:00\', \'2026-05-20 08:00\', \'completed\', \'follow_up\')',
+      'INSERT INTO appointments VALUES (2, 2, 902, \'2026-05-21 14:00\', \'2026-05-21 09:00\', \'completed\', \'follow_up\')',
+      'INSERT INTO appointments VALUES (3, 3, 903, \'2026-05-22 11:00\', \'2026-05-22 07:30\', \'completed\', \'check_up\')',
+      'INSERT INTO appointments VALUES (4, 4, 901, \'2026-05-23 15:00\', \'2026-05-23 10:00\', \'no_show\', \'follow_up\')',
+      // Same-day — new (slightly higher no-show)
+      'INSERT INTO appointments VALUES (5, 11, 902, \'2026-05-24 09:00\', \'2026-05-24 07:00\', \'completed\', \'initial\')',
+      'INSERT INTO appointments VALUES (6, 12, 903, \'2026-05-25 13:00\', \'2026-05-25 08:30\', \'completed\', \'initial\')',
+      'INSERT INTO appointments VALUES (7, 13, 901, \'2026-05-26 10:00\', \'2026-05-26 09:00\', \'completed\', \'initial\')',
+      'INSERT INTO appointments VALUES (8, 14, 902, \'2026-05-27 16:00\', \'2026-05-27 11:00\', \'no_show\', \'initial\')',
+      // Next-day — returning (moderate no-show, increased from prior)
+      'INSERT INTO appointments VALUES (9, 5, 903, \'2026-05-21 10:00\', \'2026-05-20 14:00\', \'completed\', \'follow_up\')',
+      'INSERT INTO appointments VALUES (10, 6, 901, \'2026-05-22 11:00\', \'2026-05-21 16:00\', \'no_show\', \'check_up\')',
+      'INSERT INTO appointments VALUES (11, 7, 902, \'2026-05-23 09:00\', \'2026-05-22 15:00\', \'completed\', \'follow_up\')',
+      'INSERT INTO appointments VALUES (12, 8, 903, \'2026-05-24 14:00\', \'2026-05-23 17:00\', \'completed\', \'check_up\')',
+      'INSERT INTO appointments VALUES (13, 9, 901, \'2026-05-25 10:00\', \'2026-05-24 13:00\', \'completed\', \'follow_up\')',
+      'INSERT INTO appointments VALUES (14, 10, 902, \'2026-05-26 15:00\', \'2026-05-25 18:00\', \'no_show\', \'check_up\')',
+      // Next-day — new (HIGH no-show — the problem segment)
+      'INSERT INTO appointments VALUES (15, 15, 903, \'2026-05-25 09:00\', \'2026-05-24 15:00\', \'no_show\', \'initial\')',
+      'INSERT INTO appointments VALUES (16, 16, 901, \'2026-05-26 11:00\', \'2026-05-25 14:00\', \'no_show\', \'initial\')',
+      'INSERT INTO appointments VALUES (17, 17, 902, \'2026-05-27 10:00\', \'2026-05-26 16:00\', \'completed\', \'initial\')',
+      'INSERT INTO appointments VALUES (18, 18, 903, \'2026-05-28 14:00\', \'2026-05-27 13:00\', \'no_show\', \'initial\')',
+      'INSERT INTO appointments VALUES (19, 19, 901, \'2026-05-29 09:00\', \'2026-05-28 17:00\', \'no_show\', \'initial\')',
+      'INSERT INTO appointments VALUES (20, 20, 902, \'2026-05-30 11:00\', \'2026-05-29 15:00\', \'no_show\', \'initial\')',
+      'INSERT INTO appointments VALUES (21, 11, 903, \'2026-05-31 10:00\', \'2026-05-30 14:00\', \'no_show\', \'initial\')',
+      'INSERT INTO appointments VALUES (22, 12, 901, \'2026-06-01 13:00\', \'2026-05-31 16:00\', \'completed\', \'initial\')',
+      // 2-3 days — returning (slightly elevated)
+      'INSERT INTO appointments VALUES (23, 1, 902, \'2026-05-23 10:00\', \'2026-05-21 09:00\', \'completed\', \'follow_up\')',
+      'INSERT INTO appointments VALUES (24, 3, 903, \'2026-05-25 14:00\', \'2026-05-23 10:00\', \'completed\', \'check_up\')',
+      'INSERT INTO appointments VALUES (25, 5, 901, \'2026-05-27 11:00\', \'2026-05-25 14:00\', \'no_show\', \'follow_up\')',
+      'INSERT INTO appointments VALUES (26, 7, 902, \'2026-05-29 09:00\', \'2026-05-27 08:00\', \'completed\', \'follow_up\')',
+      // 2-3 days — new (moderately elevated)
+      'INSERT INTO appointments VALUES (27, 13, 903, \'2026-05-25 10:00\', \'2026-05-23 11:00\', \'no_show\', \'initial\')',
+      'INSERT INTO appointments VALUES (28, 14, 901, \'2026-05-26 14:00\', \'2026-05-24 09:00\', \'completed\', \'initial\')',
+      'INSERT INTO appointments VALUES (29, 15, 902, \'2026-05-28 11:00\', \'2026-05-26 10:00\', \'completed\', \'initial\')',
+      'INSERT INTO appointments VALUES (30, 16, 903, \'2026-05-29 09:00\', \'2026-05-27 08:00\', \'no_show\', \'initial\')',
+      // 4+ days — returning (stable, low no-show)
+      'INSERT INTO appointments VALUES (31, 2, 901, \'2026-05-28 10:00\', \'2026-05-20 09:00\', \'completed\', \'check_up\')',
+      'INSERT INTO appointments VALUES (32, 4, 902, \'2026-05-30 14:00\', \'2026-05-22 11:00\', \'completed\', \'follow_up\')',
+
+      // reminders — one per appointment
+      'CREATE TABLE reminders (reminder_id INTEGER PRIMARY KEY, appointment_id INTEGER, sent_at TEXT, channel TEXT, opened INTEGER)',
+      // Same-day reminders — sent 2hr before, high open rate
+      'INSERT INTO reminders VALUES (1, 1, \'2026-05-20 08:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (2, 2, \'2026-05-21 12:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (3, 3, \'2026-05-22 09:00\', \'email\', 1)',
+      'INSERT INTO reminders VALUES (4, 4, \'2026-05-23 13:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (5, 5, \'2026-05-24 07:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (6, 6, \'2026-05-25 11:00\', \'email\', 1)',
+      'INSERT INTO reminders VALUES (7, 7, \'2026-05-26 08:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (8, 8, \'2026-05-27 14:00\', \'sms\', 0)',
+      // Next-day reminders — sent 24hr before (too early!), low open rate
+      'INSERT INTO reminders VALUES (9, 9, \'2026-05-20 10:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (10, 10, \'2026-05-21 11:00\', \'email\', 0)',
+      'INSERT INTO reminders VALUES (11, 11, \'2026-05-22 09:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (12, 12, \'2026-05-23 14:00\', \'sms\', 0)',
+      'INSERT INTO reminders VALUES (13, 13, \'2026-05-24 10:00\', \'email\', 0)',
+      'INSERT INTO reminders VALUES (14, 14, \'2026-05-25 15:00\', \'sms\', 0)',
+      'INSERT INTO reminders VALUES (15, 15, \'2026-05-24 09:00\', \'sms\', 0)',
+      'INSERT INTO reminders VALUES (16, 16, \'2026-05-25 11:00\', \'email\', 0)',
+      'INSERT INTO reminders VALUES (17, 17, \'2026-05-26 10:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (18, 18, \'2026-05-27 14:00\', \'email\', 0)',
+      'INSERT INTO reminders VALUES (19, 19, \'2026-05-28 09:00\', \'sms\', 0)',
+      'INSERT INTO reminders VALUES (20, 20, \'2026-05-29 11:00\', \'sms\', 0)',
+      'INSERT INTO reminders VALUES (21, 21, \'2026-05-30 10:00\', \'email\', 0)',
+      'INSERT INTO reminders VALUES (22, 22, \'2026-05-31 13:00\', \'sms\', 1)',
+      // 2-3 day reminders — sent 24hr before, moderate open rate
+      'INSERT INTO reminders VALUES (23, 23, \'2026-05-22 10:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (24, 24, \'2026-05-24 14:00\', \'email\', 1)',
+      'INSERT INTO reminders VALUES (25, 25, \'2026-05-26 11:00\', \'sms\', 0)',
+      'INSERT INTO reminders VALUES (26, 26, \'2026-05-28 09:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (27, 27, \'2026-05-24 10:00\', \'email\', 0)',
+      'INSERT INTO reminders VALUES (28, 28, \'2026-05-25 14:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (29, 29, \'2026-05-27 11:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (30, 30, \'2026-05-28 09:00\', \'email\', 0)',
+      // 4+ day reminders — sent 24hr before, moderate open rate
+      'INSERT INTO reminders VALUES (31, 31, \'2026-05-27 10:00\', \'sms\', 1)',
+      'INSERT INTO reminders VALUES (32, 32, \'2026-05-29 14:00\', \'email\', 1)',
+    ],
+    correctQuerySqlite: 'WITH appointment_data AS (SELECT a.appointment_id, a.patient_id, a.status, CASE WHEN date(a.scheduled_at) = date(a.booked_at) THEN \'same_day\' WHEN julianday(date(a.scheduled_at)) - julianday(date(a.booked_at)) <= 1 THEN \'next_day\' WHEN julianday(date(a.scheduled_at)) - julianday(date(a.booked_at)) <= 3 THEN \'2-3_days\' ELSE \'4_plus_days\' END AS lead_time, CASE WHEN p.total_visits <= 1 THEN \'new\' ELSE \'returning\' END AS patient_type FROM appointments a JOIN patients p ON a.patient_id = p.patient_id WHERE a.scheduled_at >= date(\'2026-06-06\', \'-30 days\')), reminder_data AS (SELECT r.appointment_id, MAX(r.opened) AS reminder_opened FROM reminders r WHERE r.sent_at >= date(\'2026-06-06\', \'-30 days\') GROUP BY r.appointment_id) SELECT ad.lead_time, ad.patient_type, COUNT(*) AS total_appointments, SUM(CASE WHEN ad.status = \'no_show\' THEN 1 ELSE 0 END) AS no_shows, ROUND(100.0 * SUM(CASE WHEN ad.status = \'no_show\' THEN 1 ELSE 0 END) / COUNT(*), 1) AS no_show_rate, ROUND(100.0 * SUM(COALESCE(rd.reminder_opened, 0)) / COUNT(*), 1) AS reminder_open_rate FROM appointment_data ad LEFT JOIN reminder_data rd ON ad.appointment_id = rd.appointment_id GROUP BY ad.lead_time, ad.patient_type ORDER BY ad.lead_time, ad.patient_type',
+  },
 };
