@@ -129,7 +129,13 @@ const WALL_TESTIMONIALS = [
     role: 'Data Analyst · IIT Madras',
     quote: 'I\'ve gathered many resources for my prep, but PAL felt like a one-stop site — everything I needed was already here. I\'ve seen many interview platforms, but nothing this comprehensive for product analytics specifically.',
   },
-  // ── Push #8 here and the wall goes live ──
+  {
+    img: '/testimonials/rytham.jpg',
+    name: 'Rytham Bhagat',
+    href: 'https://www.linkedin.com/in/rythamb47/',
+    role: 'Data Engineer Intern · SQL Lab',
+    quote: 'The Forensic SQL problems changed how I approach queries. Instead of just writing SQL that runs, I started checking whether the output actually makes sense — catching things like integer division silently zeroing out results. That habit alone is worth more than solving 50 standard problems.',
+  },
 ];
 const TESTIMONIALS = [
   { img: '/testimonials/amaya.jpg',    name: 'Amaya',     href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/', role: 'Statistics',     quote: 'I always knew exactly what to focus on next — it felt like a real foundation, not just memorising.' },
@@ -139,6 +145,7 @@ const TESTIMONIALS = [
   { img: '/testimonials/meghana.jpg', name: 'Meghana',   href: 'https://www.linkedin.com/in/meghana-joshi-82199537/', role: 'Analyst & Educator', quote: 'PAL doesn\'t let you passively scroll through — it forces you to actually think.' },
   { img: '/testimonials/parth.jpg',  name: 'Parth',     href: 'https://www.linkedin.com/in/parthgandhip/',            role: 'Senior Data Analyst', quote: 'PAL feels less like interview prep and more like actual on-the-job training.' },
   { img: '/testimonials/faizan.jpg', name: 'Faizan',    href: 'https://www.linkedin.com/in/faizanxmulla/',            role: 'Data Analyst · IIT Madras', quote: 'I\'ve seen many interview platforms — nothing like this for product analytics.' },
+  { img: '/testimonials/rytham.jpg', name: 'Rytham',    href: 'https://www.linkedin.com/in/rythamb47/',               role: 'Data Engineer Intern · SQL Lab', quote: 'Forensic SQL taught me to check whether the output makes sense — not just whether the query runs.' },
 ];
 
 function TestimonialTicker() {
