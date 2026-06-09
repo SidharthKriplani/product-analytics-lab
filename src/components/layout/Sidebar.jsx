@@ -24,7 +24,7 @@ const ROOM_SUBGROUPS = [
       { id: 'growth-analytics', label: 'Growth Analytics' },
       { id: 'bi',               label: 'BI & Reporting' },
       { id: 'instrumentation',  label: 'Instrumentation' },
-      { id: 'code',             label: 'Code Lab' },
+      { id: 'full-loop',        label: 'Full Loop' },
       { id: 'sql-lab',          label: 'SQL Lab' },
     ],
   },
@@ -84,7 +84,7 @@ function getIsActive(itemId, currentPage) {
     || (itemId === 'browser'         && currentPage === 'runner')
     || (itemId === 'rca'             && currentPage === 'rca-runner')
     || (itemId === 'cases'           && currentPage === 'cases-runner')
-    || (itemId === 'code'            && currentPage === 'code-runner')
+    || (itemId === 'full-loop'       && currentPage === 'full-loop-runner')
     || (itemId === 'product-design'  && currentPage === 'product-design-runner')
     || (itemId === 'prioritization'  && currentPage === 'prioritization-runner')
     || (itemId === 'behavioral'      && currentPage === 'behavioral-runner')

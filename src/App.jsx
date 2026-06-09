@@ -8,7 +8,7 @@ import { pushProgressToSupabase, pullProgressFromSupabase } from './utils/syncPr
 // Slim index — id, isFree, title only (for routing and paywall checks)
 import {
   scenarioIndex, designScenarioIndex, statsModuleIndex, metricCaseIndex,
-  rcaCaseIndex, businessCaseIndex, productDesignIndex, codeModuleIndex,
+  rcaCaseIndex, businessCaseIndex, productDesignIndex, fullLoopIndex,
   prioritizationIndex, behavioralIndex, estimationIndex, statsFoundationsIndex,
   growthAnalyticsIndex, challengesIndex, biCaseIndex, stfCaseIndex,
   takehomeCaseIndex, instrumentationIndex, metricsFoundationIndex,
@@ -25,7 +25,7 @@ import { getMetricsProgress } from './utils/metricsProgress.js';
 import { getRCAProgress } from './utils/rcaProgress.js';
 import { getCaseProgress } from './utils/caseProgress.js';
 import { getProductDesignProgress } from './utils/productDesignProgress.js';
-import { getCodeProgress } from './utils/codeProgress.js';
+import { getFullLoopProgress } from './utils/fullLoopProgress.js';
 import { getPrioritizationProgress } from './utils/prioritizationProgress.js';
 import { getBehavioralProgress } from './utils/behavioralProgress.js';
 import { getEstimationProgress } from './utils/estimationProgress.js';
@@ -46,7 +46,7 @@ const MetricsBrowser        = lazy(() => import('./pages/MetricsBrowser.jsx').th
 const RCABrowser            = lazy(() => import('./pages/RCABrowser.jsx').then(m => ({ default: m.RCABrowser })));
 const CasesBrowser          = lazy(() => import('./pages/CasesBrowser.jsx').then(m => ({ default: m.CasesBrowser })));
 const ProductDesignBrowser  = lazy(() => import('./pages/ProductDesignBrowser.jsx').then(m => ({ default: m.ProductDesignBrowser })));
-const CodeBrowser           = lazy(() => import('./pages/CodeBrowser.jsx').then(m => ({ default: m.CodeBrowser })));
+const FullLoopBrowser       = lazy(() => import('./pages/FullLoopBrowser.jsx').then(m => ({ default: m.FullLoopBrowser })));
 const PrioritizationBrowser = lazy(() => import('./pages/PrioritizationBrowser.jsx').then(m => ({ default: m.PrioritizationBrowser })));
 const PlaybookBrowser       = lazy(() => import('./pages/PlaybookBrowser.jsx').then(m => ({ default: m.PlaybookBrowser })));
 const BlogBrowser           = lazy(() => import('./pages/BlogBrowser.jsx').then(m => ({ default: m.BlogBrowser })));
@@ -69,7 +69,7 @@ const MetricsRunner         = lazy(() => import('./components/metrics/MetricsRun
 const RCARunner             = lazy(() => import('./components/rca/RCARunner.jsx').then(m => ({ default: m.RCARunner })));
 const CaseRunner            = lazy(() => import('./components/cases/CaseRunner.jsx').then(m => ({ default: m.CaseRunner })));
 const ProductDesignRunner   = lazy(() => import('./components/productDesign/ProductDesignRunner.jsx').then(m => ({ default: m.ProductDesignRunner })));
-const CodeRunner            = lazy(() => import('./components/code/CodeRunner.jsx').then(m => ({ default: m.CodeRunner })));
+const FullLoopRunner        = lazy(() => import('./components/fullLoop/FullLoopRunner.jsx').then(m => ({ default: m.FullLoopRunner })));
 const PrioritizationRunner  = lazy(() => import('./components/prioritization/PrioritizationRunner.jsx').then(m => ({ default: m.PrioritizationRunner })));
 const BehavioralBrowser     = lazy(() => import('./pages/BehavioralBrowser.jsx').then(m => ({ default: m.BehavioralBrowser })));
 const BehavioralRunner      = lazy(() => import('./components/behavioral/BehavioralRunner.jsx').then(m => ({ default: m.BehavioralRunner })));
@@ -126,7 +126,7 @@ export default function App() {
   const [activeRCACaseId, setActiveRCACaseId] = useState(null);
   const [activeBusinessCaseId, setActiveBusinessCaseId] = useState(null);
   const [activePDScenarioId, setActivePDScenarioId] = useState(null);
-  const [activeCodeModuleId, setActiveCodeModuleId] = useState(null);
+  const [activeFullLoopId, setActiveFullLoopId] = useState(null);
   const [activePrioritizationId, setActivePrioritizationId] = useState(null);
   const [activeBehavioralId, setActiveBehavioralId] = useState(null);
   const [activeEstimationId, setActiveEstimationId] = useState(null);
@@ -279,7 +279,7 @@ export default function App() {
   const AUTH_REQUIRED_PAGES = new Set([
     'sql-lab',
     'stats-runner', 'design-runner', 'runner', 'metrics-runner', 'rca-runner',
-    'cases-runner', 'code-runner', 'prioritization-runner', 'behavioral-runner',
+    'cases-runner', 'full-loop-runner', 'prioritization-runner', 'behavioral-runner',
     'estimation-runner', 'growth-runner', 'bi-runner', 'stf-runner',
     'instrumentation-runner', 'sql-runner',
   ]);
@@ -349,7 +349,7 @@ export default function App() {
       stats: 'Stats Room — Product Analytics Lab',
       experimentation: 'Experimentation Room — Product Analytics Lab',
       rca: 'RCA Room — Product Analytics Lab',
-      code: 'Code Room — Product Analytics Lab',
+      'full-loop': 'Full Loop — Product Analytics Lab',
       'product-design': 'Product Design Room — Product Analytics Lab',
       prioritization: 'Prioritization Room — Product Analytics Lab',
       behavioral: 'Behavioral Room — Product Analytics Lab',
@@ -413,7 +413,7 @@ export default function App() {
     setActiveRCACaseId(null);
     setActiveBusinessCaseId(null);
     setActivePDScenarioId(null);
-    setActiveCodeModuleId(null);
+    setActiveFullLoopId(null);
     setActiveBehavioralId(null);
     setActiveEstimationId(null);
     setActiveStatFoundationsId(null);
@@ -487,14 +487,14 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function openCodeModule(id) {
-    const m = codeModuleIndex.find(m => m.id === id);
+  function openFullLoopCase(id) {
+    const m = fullLoopIndex.find(m => m.id === id);
     if (!m) return;
-    if (requireUser(m.guestPreview, m.isFree, 'code')) return;
-    if (!m.isFree && !unlocked) { track('paywall_hit', { room: 'code', id }); setPage('plans'); return; }
-    track('case_opened', { room: 'code', id, title: m.title });
-    setActiveCodeModuleId(id);
-    setPage('code-runner');
+    if (requireUser(m.guestPreview, m.isFree, 'full-loop')) return;
+    if (!m.isFree && !unlocked) { track('paywall_hit', { room: 'full-loop', id }); setPage('plans'); return; }
+    track('case_opened', { room: 'full-loop', id, title: m.title });
+    setActiveFullLoopId(id);
+    setPage('full-loop-runner');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -675,7 +675,7 @@ export default function App() {
     { key: 'm', action: () => navigate('metrics') },
     { key: 'r', action: () => navigate('rca') },
     { key: 'e', action: () => navigate('estimation') },
-    { key: 'o', action: () => navigate('code') },
+    { key: 'o', action: () => navigate('full-loop') },
     { key: 'f', action: () => navigate('spot-the-flaw') },
     { key: 'g', action: () => navigate('growth-analytics') },
     // Tools & utilities
@@ -732,8 +732,8 @@ export default function App() {
     return accessible[idx + 1].id;
   }
 
-  function getNextCodeModuleId(currentId) {
-    const accessible = codeModuleIndex.filter(m => m.isFree || unlocked);
+  function getNextFullLoopId(currentId) {
+    const accessible = fullLoopIndex.filter(m => m.isFree || unlocked);
     const idx = accessible.findIndex(m => m.id === currentId);
     if (idx < 0 || idx >= accessible.length - 1) return null;
     return accessible[idx + 1].id;
@@ -823,7 +823,7 @@ export default function App() {
   const nextRCACaseId = activeRCACaseId ? getNextRCACaseId(activeRCACaseId) : null;
   const nextBusinessCaseId = activeBusinessCaseId ? getNextBusinessCaseId(activeBusinessCaseId) : null;
   const nextPDScenarioId = activePDScenarioId ? getNextPDScenarioId(activePDScenarioId) : null;
-  const nextCodeModuleId = activeCodeModuleId ? getNextCodeModuleId(activeCodeModuleId) : null;
+  const nextFullLoopId = activeFullLoopId ? getNextFullLoopId(activeFullLoopId) : null;
   const nextPrioritizationId = activePrioritizationId ? getNextPrioritizationId(activePrioritizationId) : null;
   const nextBehavioralId = activeBehavioralId ? getNextBehavioralId(activeBehavioralId) : null;
   const nextEstimationId = activeEstimationId ? getNextEstimationId(activeEstimationId) : null;
@@ -1035,23 +1035,20 @@ export default function App() {
           />
         )}
 
-        {/* ── Code Room ── */}
-        {page === 'code' && (
-          <CodeBrowser
-            onSelectModule={openCodeModule}
-            unlocked={unlocked}
-            onUnlock={() => navigate('unlock')}
-            onOpenArticle={openPlaybookArticle}
+        {/* ── Full Loop ── */}
+        {page === 'full-loop' && (
+          <FullLoopBrowser
+            onOpen={openFullLoopCase}
+            onBack={() => navigate('home')}
           />
         )}
-        {page === 'code-runner' && activeCodeModuleId && (
-          <CodeRunner
-            key={activeCodeModuleId}
-            caseId={activeCodeModuleId}
-            savedProgress={getCodeProgress(activeCodeModuleId)}
-            onBack={() => navigate('code')}
-            onNext={nextCodeModuleId ? () => openCodeModule(nextCodeModuleId) : undefined}
-            onNavigate={navigate}
+        {page === 'full-loop-runner' && activeFullLoopId && (
+          <FullLoopRunner
+            key={activeFullLoopId}
+            caseId={activeFullLoopId}
+            onBack={() => navigate('full-loop')}
+            onNext={nextFullLoopId ? () => openFullLoopCase(nextFullLoopId) : undefined}
+            unlocked={unlocked}
           />
         )}
 
@@ -1163,7 +1160,7 @@ export default function App() {
                     case 'rca':                  openRCACase(itemId); break;
                     case 'cases':                openBusinessCase(itemId); break;
                     case 'product-design':       openPDScenario(itemId); break;
-                    case 'code':                 openCodeModule(itemId); break;
+                    case 'full-loop':            openFullLoopCase(itemId); break;
                     case 'prioritization':       openPrioritizationScenario(itemId); break;
                     case 'behavioral':           openBehavioralQuestion(itemId); break;
                     case 'estimation':           openEstimationProblem(itemId); break;
@@ -1322,7 +1319,7 @@ export default function App() {
                     case 'stats':            openStatsModule(itemId); break;
                     case 'metrics':          openMetricsCase(itemId); break;
                     case 'rca':              openRCACase(itemId); break;
-                    case 'code':             openCodeModule(itemId); break;
+                    case 'full-loop':        openFullLoopCase(itemId); break;
                     case 'prioritization':   openPrioritizationScenario(itemId); break;
                     case 'behavioral':       openBehavioralQuestion(itemId); break;
                     case 'estimation':       openEstimationProblem(itemId); break;
@@ -1525,7 +1522,7 @@ export default function App() {
                     case 'estimation':       openEstimationProblem(itemId); break;
                     case 'product-design':   openPDScenario(itemId); break;
                     case 'prioritization':   openPrioritizationScenario(itemId); break;
-                    case 'code':             openCodeModule(itemId); break;
+                    case 'full-loop':        openFullLoopCase(itemId); break;
                     case 'browser':          openScenario(itemId); break;
                     case 'playbook':         setPage('playbook'); break;
                     default:                 setPage(targetPage);
@@ -1631,7 +1628,7 @@ export default function App() {
             onResetAllProgress={() => {
               ['exp-lab-progress-v1', 'pal-design-progress-v1', 'pal-stats-progress-v1',
                'pal-metrics-progress-v2', 'pal-rca-progress-v2', 'pal-cases-progress-v2',
-               'pal-code-progress-v1', 'pal-pri-progress-v1',
+               'pal-fullloop-progress-v1', 'pal-pri-progress-v1',
                'pal-behavioral-progress-v1', 'pal-estimation-progress-v1',
                'pal-stat-foundations-progress-v1',
                'pal-bi-progress-v1', 'pal-stf-progress-v1', 'pal-takehome-progress-v1',

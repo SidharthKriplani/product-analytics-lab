@@ -249,7 +249,7 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
         {/* ── Practice stats ── */}
         <Card>
           <SectionLabel>Practice stats</SectionLabel>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.65rem', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.65rem', marginBottom: '0.75rem' }}>
             {[
               { label: 'Cases done',    value: stats.totalCases },
               { label: 'Rooms active',  value: stats.roomsActive },

@@ -142,7 +142,7 @@ export function Module17_MultipleTesting({ module, onNext }) {
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
           Accumulating false positive risk
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(140px, 100%), 1fr))', gap: '0.5rem' }}>
           {[1, 3, 5, 10, 14, 20].map(k => {
             const fwe = (1 - Math.pow(0.95, k)) * 100;
             const isActive = k === n;

@@ -209,7 +209,7 @@ export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
             </ol>
           )}
           {scenario.framework.quadrants && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: '0.5rem' }}>
               {Object.entries(scenario.framework.quadrants).map(([k, v]) => (
                 <div key={k} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.6rem 0.8rem' }}>
                   <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.82rem', marginBottom: '0.2rem' }}>{k}</div>
@@ -452,7 +452,7 @@ function ModelAnswerDisplay({ scenario }) {
       {m.matrix && (
         <div>
           <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '0.5rem' }}>Effort–Impact Matrix</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: '0.5rem' }}>
             {[
               { label: '✅ Quick Wins', key: 'quickWins', color: 'var(--green)' },
               { label: '🎯 Strategic Bets', key: 'strategicBets', color: 'var(--accent)' },
@@ -507,7 +507,7 @@ function ModelAnswerDisplay({ scenario }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <div>
             <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '0.4rem' }}>Interest Mapping</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: '0.5rem' }}>
               {Object.entries(m.interestMapping).map(([k, v]) => (
                 <div key={k} style={{ background: 'var(--surface-2)', borderRadius: '6px', padding: '0.6rem 0.8rem', border: '1px solid var(--border)' }}>
                   <div style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text)', textTransform: 'capitalize', marginBottom: '0.2rem' }}>{k}</div>

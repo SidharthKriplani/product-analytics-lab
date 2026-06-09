@@ -233,7 +233,7 @@ export function QADashboard({ onNavigate, onOpenItem, unlocked, onUnlock, onLock
 
           {/* Audit summary */}
           <SectionHeader title="Audit Summary" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.55rem', marginBottom: '1.75rem', maxWidth: '420px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(120px, 100%), 1fr))', gap: '0.55rem', marginBottom: '1.75rem', maxWidth: '420px' }}>
             {[
               { label: 'Pass',    val: audit.summary.pass,    color: 'var(--green)' },
               { label: 'Warning', val: audit.summary.warning, color: 'var(--yellow)' },

@@ -382,7 +382,7 @@ function Module_EF03({ onComplete }) {
 
       <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
         Sizing an experiment before you run it is non-negotiable. Running underpowered experiments wastes time
-        and produces uninterpretable null results. Two key inputs: minimum detectable effect (MDE) and baseline rate.
+        and produces uninterpretable null results. Two key inputs: minimum detectable effect (MDE) and baseline rate (your current conversion rate before the test).
       </p>
 
       {/* Part 1 */}
@@ -2009,7 +2009,7 @@ function Module_EF12({ onComplete }) {
       </button>
 
       {showLift && (
-        <div className="pal-reveal-in" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+        <div className="pal-reveal-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(240px, 100%), 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
           <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem' }}>
             <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Sum of individual lifts</div>
             <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.2rem' }}>+4.0%</div>
@@ -2162,7 +2162,7 @@ function Module_EF13({ onComplete }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(240px, 100%), 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
         {[
           { title: 'A/B test advantage', items: ['Clean causal estimate', 'Known false positive rate', 'Unbiased treatment effect'] },
           { title: 'Bandit advantage', items: ['Lower regret during experiment', 'Adapts as user behavior shifts', 'Good for short-lived promotions'] },

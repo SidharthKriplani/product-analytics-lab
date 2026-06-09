@@ -224,7 +224,7 @@ export function ABTestInterpreter({ onBack }) {
       <div style={{ ...cardStyle, marginBottom: '1.5rem' }}>
         <div style={sectionHeadingStyle}>Experiment Results</div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '1rem', marginBottom: '1rem' }}>
           <div>
             <label style={labelStyle}>Control Visitors</label>
             <input
@@ -271,7 +271,7 @@ export function ABTestInterpreter({ onBack }) {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '1rem' }}>
           <div>
             <label style={labelStyle}>Significance Level (α)</label>
             <div style={{ display: 'flex', gap: '0.4rem' }}>
@@ -349,7 +349,7 @@ export function ABTestInterpreter({ onBack }) {
           {/* 1. Conversion Rates */}
           <div style={cardStyle}>
             <div style={sectionHeadingStyle}>1. Conversion Rates</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '1rem' }}>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Control</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)' }}>{pctFmt(result.p1)}</div>
@@ -373,7 +373,7 @@ export function ABTestInterpreter({ onBack }) {
           {/* 2. Statistical Significance */}
           <div style={cardStyle}>
             <div style={sectionHeadingStyle}>2. Statistical Significance</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '0.75rem 1.5rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '0.75rem 1.5rem', marginBottom: '1rem' }}>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Z-statistic</div>
                 <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text)', fontFamily: 'monospace' }}>{fmt(result.z, 3)}</div>
@@ -413,7 +413,7 @@ export function ABTestInterpreter({ onBack }) {
           {/* 3. SRM Check */}
           <div style={cardStyle}>
             <div style={sectionHeadingStyle}>3. SRM Check</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '1rem', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '1rem', marginBottom: '0.75rem' }}>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Expected split</div>
                 <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text)' }}>50 / 50</div>

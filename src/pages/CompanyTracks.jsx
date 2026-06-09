@@ -803,7 +803,7 @@ export function CompanyTracks({ onNavigate, onBack, unlocked }) {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
                 gap: '1.25rem',
               }}
               className="company-tracks-grid"

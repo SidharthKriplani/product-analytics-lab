@@ -473,6 +473,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
       <div style={{
         border: '1px solid var(--border)', borderRadius: '14px',
         overflow: 'hidden', marginBottom: '2rem',
+        overflowX: 'auto', WebkitOverflowScrolling: 'touch',
       }}>
         <div style={{
           display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr',

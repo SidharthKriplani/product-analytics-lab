@@ -151,29 +151,12 @@ export const productDesignIndex = [
   { id: 'pd16', isFree: false, title: 'Design Offline Navigation for Low-Connectivity Regions on Google Maps' },
 ];
 
-export const codeModuleIndex = [
-  { id: 'code01-funnel-sql', isFree: true,  title: 'Write a Funnel Query' },
-  { id: 'code02-retention-sql', isFree: false, title: 'Build a Retention Cohort Table' },
-  { id: 'code03-ab-test-python', isFree: false, title: 'Run an A/B Test Significance Check' },
-  { id: 'code04-cuped-python', isFree: false, title: 'Implement CUPED Variance Reduction' },
-  { id: 'code05-srm-sql', isFree: false, title: 'Detect a Sample Ratio Mismatch' },
-  { id: 'code06-mix-shift-sql', isFree: false, title: 'Decompose a Mix Shift' },
-  { id: 'code07-cuped-sql', isFree: false, title: 'Apply CUPED Variance Reduction in SQL' },
-  { id: 'code08-bootstrap-python', isFree: false, title: 'Compute a Bootstrap Confidence Interval' },
-  { id: 'code09-funnel-viz-python', isFree: false, title: 'Visualize Funnel Conversion Rates' },
-  { id: 'code10-retention-heatmap', isFree: false, title: 'Build a Cohort Retention Heatmap' },
-  { id: 'code11-second-purchase-sql', isFree: false, title: 'Find Each User\'s Second Purchase Date' },
-  { id: 'code12-rolling-3month-retention-sql', isFree: false, title: 'Compute Rolling 3-Month Consecutive Retention' },
-  { id: 'code13-longest-login-streak-sql', isFree: false, title: 'Find Each User\'s Longest Login Streak' },
-  { id: 'code14-nday-retention-cohort-sql', isFree: false, title: 'Build a Day-1 / Day-7 / Day-30 Retention Cohort Table' },
-  { id: 'code15-users-x-not-y-sql', isFree: false, title: 'Users Who Watched But Never Shared' },
-  { id: 'code16-rolling-7day-dau-sql', isFree: false, title: 'Rolling 7-Day Active Users by Date' },
-  { id: 'code17-top-n-per-group-sql', isFree: false, title: 'Top 3 Sellers by GMV Per Category' },
-  { id: 'code18-sessionization-sql', isFree: false, title: 'Sessionize an Events Table' },
-  { id: 'code19-bayesian-ab-python', isFree: false, title: 'Bayesian A/B Test Analysis' },
-  { id: 'code20-cohort-ltv-python', isFree: false, title: 'Cohort LTV Projection' },
-  { id: 'code21-anomaly-detection-python', isFree: false, title: 'Metric Anomaly Detection with Rolling Z-Score' },
-  { id: 'code22-funnel-segment-chisq', isFree: false, title: 'Funnel Conversion by Segment with Significance Testing' },
+export const fullLoopIndex = [
+  { id: 'fl01', isFree: true,  guestPreview: true,  title: 'Checkout Conversion Drop', difficulty: 'analyst' },
+  { id: 'fl02', isFree: true,  guestPreview: false, title: 'DAU Drop After App Update', difficulty: 'analyst' },
+  { id: 'fl03', isFree: false, guestPreview: false, title: 'Search CTR Up, Revenue Flat', difficulty: 'senior' },
+  { id: 'fl04', isFree: false, guestPreview: false, title: 'Subscription Churn Spike', difficulty: 'senior' },
+  { id: 'fl05', isFree: false, guestPreview: false, title: 'Orders Up, Margin Down', difficulty: 'staff' },
 ];
 
 export const prioritizationIndex = [
@@ -416,7 +399,7 @@ export const expFoundationIndex = [
 // instead of raw IDs (GA01, RCA01, stat05-multiple-testing, etc.).
 var _allCases = [].concat(
   scenarioIndex, designScenarioIndex, statsModuleIndex, metricCaseIndex,
-  rcaCaseIndex, businessCaseIndex, productDesignIndex, codeModuleIndex,
+  rcaCaseIndex, businessCaseIndex, productDesignIndex, fullLoopIndex,
   prioritizationIndex, behavioralIndex, estimationIndex, challengesIndex,
   biCaseIndex, stfCaseIndex, takehomeCaseIndex, instrumentationIndex,
   growthAnalyticsIndex, statsFoundationsIndex, metricsFoundationIndex,

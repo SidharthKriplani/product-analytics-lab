@@ -192,6 +192,11 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text)' }}>{arm.label}</div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{arm.sublabel}</div>
+                {arm.id === 'monitor' && arm.progress === 0 && (
+                  <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--accent)', marginTop: '0.15rem' }}>
+                    {'Start here →'}
+                  </div>
+                )}
               </div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                 {Math.round(arm.progress * 100)}%
@@ -213,6 +218,7 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.65 }}>
             Metric drops → RCA → understand product behavior → communicate impact → design the fix → run the experiment → analyze the result → monitor the metric again.
             Every room in PAL is one step in this loop.
+            {totalProgress === 0 && ' New here? Start with Monitor — it\'s the foundation everything else builds on.'}
           </div>
         </div>
       </div>
@@ -454,6 +460,22 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
                 >
                   {arm.sublabel}
                 </text>
+                {arm.id === 'monitor' && arm.progress === 0 && (
+                  <text
+                    x={sp.x}
+                    y={sp.y + 14}
+                    textAnchor={textAnchor}
+                    dominantBaseline="middle"
+                    style={{
+                      fontSize: '8px',
+                      fontWeight: 600,
+                      fill: 'var(--accent)',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {'Start here →'}
+                  </text>
+                )}
               </g>
             );
           })}
@@ -528,6 +550,7 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.65 }}>
           Metric drops → RCA → understand product behavior → communicate impact → design the fix → run the experiment → analyze the result → monitor the metric again.
           Every room in PAL is one step in this loop.
+          {totalProgress === 0 && ' New here? Start with Monitor — it\'s the foundation everything else builds on.'}
         </div>
       </div>
     </div>

@@ -235,7 +235,7 @@ export function Home({ onNavigate, onShowAuth }) {
           animationDelay: '780ms',
           marginTop: '2rem',
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(190px, 100%), 1fr))',
           gap: '0.75rem',
           width: '100%',
           maxWidth: '860px',

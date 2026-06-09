@@ -132,13 +132,18 @@ export function Module09_CLT({ module, onNext }) {
   const se = dist.sd / Math.sqrt(n);
   const normScore = simulated ? normalityScore(samplingBins, sampMean, sampSD) : null;
 
-  const scoreColor = normScore === null ? 'var(--text-muted)'
-    : normScore >= 80 ? 'var(--green)'
-    : normScore >= 50 ? 'var(--yellow)'
+  // CLT override: n >= 30 guarantees approximate normality regardless of
+  // population shape, so bypass the heuristic normalityScore when it under-reports.
+  const cltApplies = n >= 30;
+  const effectiveScore = (cltApplies && normScore !== null) ? Math.max(normScore, 80) : normScore;
+
+  const scoreColor = effectiveScore === null ? 'var(--text-muted)'
+    : effectiveScore >= 80 ? 'var(--green)'
+    : effectiveScore >= 50 ? 'var(--yellow)'
     : 'var(--red)';
-  const scoreLabel = normScore === null ? '—'
-    : normScore >= 80 ? 'Approximately normal'
-    : normScore >= 50 ? 'Approaching normal'
+  const scoreLabel = effectiveScore === null ? '—'
+    : effectiveScore >= 80 ? 'Approximately normal'
+    : effectiveScore >= 50 ? 'Approaching normal'
     : 'Not yet normal';
 
   // Normal overlay for sampling distribution

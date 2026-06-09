@@ -89,7 +89,7 @@ export function Module05_ZScores({ module, onNext }) {
       </div>
 
       {/* Inputs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(160px, 100%), 1fr))', gap: '0.75rem' }}>
         {[
           { label: 'Population Mean μ', val: popMu, set: setPopMu, min: 0, max: 100, step: 1, color: 'var(--accent)' },
           { label: 'Population SD σ', val: popSigma, set: setPopSigma, min: 1, max: 30, step: 0.5, color: 'var(--teal)' },
@@ -169,7 +169,7 @@ export function Module05_ZScores({ module, onNext }) {
       {/* Anchor reference cards */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.1rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Reference Anchors</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.5rem' }}>
           {ANCHORS.map(({ z: az, label, desc, color }) => (
             <div key={az} style={{
               padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)',

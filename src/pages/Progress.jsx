@@ -9,7 +9,7 @@ import { getAllMetricsProgress } from '../utils/metricsProgress.js';
 import { getAllRCAProgress } from '../utils/rcaProgress.js';
 import { getAllCaseProgress } from '../utils/caseProgress.js';
 import { getDesignProgress } from '../utils/designProgress.js';
-import { getAllCodeProgress } from '../utils/codeProgress.js';
+import { getAllFullLoopProgress } from '../utils/fullLoopProgress.js';
 import { getProductDesignProgress } from '../utils/productDesignProgress.js';
 import { getAllPrioritizationProgress } from '../utils/prioritizationProgress.js';
 import { getAllBehavioralProgress } from '../utils/behavioralProgress.js';
@@ -20,7 +20,7 @@ import { metricCases } from '../data/metricCases.js';
 import { rcaCases } from '../data/rcaCases.js';
 import { businessCases } from '../data/businessCases.js';
 import { designScenarios } from '../data/designScenarios.js';
-import { codeModules } from '../data/codeModules.js';
+import { fullLoopCases } from '../data/fullLoopCases.js';
 import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { productDesignScenarios } from '../data/productDesignScenarios.js';
 import { prioritizationScenarios } from '../data/prioritizationScenarios.js';
@@ -176,7 +176,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
   const metricsProgress = getAllMetricsProgress();
   const rcaProgress = getAllRCAProgress();
   const caseProgress = getAllCaseProgress();
-  const codeProgress = getAllCodeProgress();
+  const fullLoopProgress = getAllFullLoopProgress();
   const priProgress = getAllPrioritizationProgress();
   const behavioralProgress = getAllBehavioralProgress();
   const estimationProg = getAllEstimationProgress();
@@ -245,8 +245,8 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
       onReset: makeRoomResetter(['pal-instrumentation-progress-v1']) },
     { label: 'Behavioral', completed: behavioralQuestions.filter(q => behavioralProgress[q.id]?.rating).length, total: behavioralQuestions.length, color: 'var(--purple)',
       onReset: makeRoomResetter(['pal-behavioral-progress-v1']) },
-    { label: 'Code', completed: codeModules.filter(m => codeProgress[m.id]?.completedAt).length, total: codeModules.length, color: 'var(--accent)',
-      onReset: makeRoomResetter(['pal-code-progress-v1']) },
+    { label: 'Full Loop', completed: fullLoopCases.filter(c => fullLoopProgress[c.id]?.lastCompletedAt).length, total: fullLoopCases.length, color: 'var(--accent)',
+      onReset: makeRoomResetter(['pal-fullloop-progress-v1']) },
     { label: 'Estimation', completed: estimationProblems.filter(p => estimationProg[p.id]?.rating).length, total: estimationProblems.length, color: 'var(--teal)',
       onReset: makeRoomResetter(['pal-estimation-progress-v1']) },
     { label: 'Stat Foundations', completed: statsFoundationsModules.filter(m => sfProgress[m.id]?.completedAt).length, total: statsFoundationsModules.length, color: 'var(--teal)',
@@ -328,7 +328,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
   scenarios.forEach(s => { if (allProgress[s.id]?.attempts?.length > 0) completionMap[`review:${s.id}`] = true; });
   rcaCases.forEach(c => { if (rcaProgress[c.id]?.attempts > 0) completionMap[`rca:${c.id}`] = true; });
   businessCases.forEach(c => { if (caseProgress[c.id]?.attempts > 0) completionMap[`cases:${c.id}`] = true; });
-  codeModules.forEach(m => { if (codeProgress[m.id]?.completedAt) completionMap[`code:${m.id}`] = true; });
+  fullLoopCases.forEach(c => { if (fullLoopProgress[c.id]?.lastCompletedAt) completionMap[`full-loop:${c.id}`] = true; });
   productDesignScenarios.forEach(s => { const p = getProductDesignProgress(s.id); if (p?.submittedPhases && Object.keys(p.submittedPhases).length > 0) completionMap[`product-design:${s.id}`] = true; });
   prioritizationScenarios.forEach(s => { if (priProgress[s.id]?.completedAt) completionMap[`prioritization:${s.id}`] = true; });
   behavioralQuestions.forEach(q => { if (behavioralProgress[q.id]?.rating) completionMap[`behavioral:${q.id}`] = true; });
@@ -349,7 +349,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
     const dates = new Set();
     const stores = [
       'pal-stats-progress-v1', 'pal-metrics-progress-v2', 'pal-rca-progress-v2',
-      'pal-cases-progress-v2', 'pal-code-progress-v1', 'pal-behavioral-progress-v1',
+      'pal-cases-progress-v2', 'pal-fullloop-progress-v1', 'pal-behavioral-progress-v1',
       'pal-estimation-progress-v1', 'pal-stat-foundations-progress-v1',
       'pal-growth-analytics-progress-v1',
       'pal-challenges-progress-v1', 'pal-bi-progress-v1', 'pal-stf-progress-v1', 'pal-takehome-progress-v1',
@@ -1542,7 +1542,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                 onClick={() => {
                   const ALL_PROGRESS_KEYS = [
                     'pal-stats-progress-v1', 'pal-metrics-progress-v2', 'pal-rca-progress-v2',
-                    'pal-cases-progress-v2', 'pal-code-progress-v1', 'pal-behavioral-progress-v1',
+                    'pal-cases-progress-v2', 'pal-fullloop-progress-v1', 'pal-behavioral-progress-v1',
                     'pal-estimation-progress-v1', 'pal-stat-foundations-progress-v1',
                     'pal-growth-analytics-progress-v1', 'pal-challenges-progress-v1',
                     'pal-bi-progress-v1', 'pal-stf-progress-v1', 'pal-takehome-progress-v1',

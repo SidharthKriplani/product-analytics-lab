@@ -56,6 +56,9 @@ On first sign-in (and on Plans page), show: "You now have access to ~150 free ca
 ### guestPreview case quality audit [P0, PM Audit #149]
 Every room has a guestPreview case but none have been audited for: (1) Analyst-level difficulty, and (2) conversion quality — is this the most compelling case in the room? The guestPreview case is PAL's first impression. If it is too hard, too generic, or not satisfying to complete, guests bounce. Audit all 17 rooms: check difficulty tag = analyst, check that the debrief is strong and the scenario is immediately relatable. Replace any weak preview cases. Effort: 1 session of content review.
 
+### Mobile IA — drills-first navigation on mobile [V5.23.0 beta feedback, Audit #162]
+Mobile users (commuters, phone-first) won't absorb Foundations content — they want quick drills: a case, an MCQ, a SQL problem. Current mobile IA mirrors desktop (Foundations and Universe View equally prominent). On mobile, surface case rooms, MCQ Quiz, and SQL Lab first. Push Foundations, Universe View, and learning content below the fold or into a "Learn" tab. This is an IA restructure, not a CSS fix — needs a `useMediaQuery` or `window.innerWidth` check to conditionally reorder sidebar/nav items on mobile. **Gate: confirm with PostHog mobile session data first.** Effort: 1 session. V6 territory.
+
 ### Nav IA restructure — PRACTICE/PREP grouping [P1, PM Audit #149]
 TOOLS is a catch-all. MCQ Quiz, Company Tracks, Defense Strategy share no logical grouping. Proposed: rename DRILLS → PRACTICE, move MCQ Quiz into PRACTICE, create a PREP group for Company Tracks + Defense Strategy. This makes each nav group's purpose immediately clear. Sidebar restructure only — no routing changes needed. Gate: do after beta feedback confirms users find nav confusing (PostHog nav click data). Effort: 30 min code, 0 min routing.
 

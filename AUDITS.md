@@ -63,6 +63,26 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
+## Part XXXVII — V5.23.0 beta feedback: Universe View + mobile (2026-06-09)
+
+### 161. ✅ UX — Universe View has no entry point for beginners
+
+**Source:** Beta tester (WhatsApp, 2026-06-09). Quote: "Are we assuming someone knows the entire workflow? I went to the foundations, but realised I couldn't understand which metric is what right off the bat."
+
+**Signal:** User was looking at the Universe View's 5 workflow arms (Monitor/Diagnose/Understand/Communicate/Design) all at 0% with no indication of where to start. Picked the wrong arm first, got lost because she lacked prerequisite knowledge from another arm, and blamed herself. The Universe View presents the analyst workflow without guiding entry.
+
+**Fix (V5.23.0):** Added "Start here →" indicator on the Monitor arm (visible only at 0% progress). Added beginner copy: "New here? Start with Monitor — it's the foundation everything else builds on." Both disappear once the user has any Monitor progress.
+
+### 162. ⚠️ UX — Mobile experience should prioritize drills over learning content
+
+**Source:** Beta tester (WhatsApp, 2026-06-09). Quote: "The teaching part could be desktop friendly. But the practice part, small wins which a user can check off instead of scrolling on reels — that could be made mobile friendly also."
+
+**Signal:** People commuting won't absorb Foundations content on a phone, but they'd do a quick RCA case or MCQ quiz. Current mobile IA mirrors desktop — Foundations and Universe View are equally prominent. Mobile navigation should surface case rooms and drills first, push learning content down. This is an IA decision, not a CSS fix.
+
+**Priority:** V6 territory. Log and revisit after PostHog mobile vs desktop session data confirms the pattern.
+
+---
+
 ## Part XXXVI — V5.22.2 beta feedback: Faizan Mulla (2026-06-09)
 
 ### 160. ⚠️ UX — Information density too high on screen
@@ -123,7 +143,7 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ## Part XXXIV — V5.20.6 beta feedback: Debasrija Mondal (2026-06-07)
 
-### 155. ⚠️ Bug — Checkout Trap case broken on mobile: question unreadable
+### 155. ✅ Bug — Checkout Trap case broken on mobile: question unreadable (Fixed V5.23.0)
 
 **Source:** Debasrija Mondal (beta tester, feedback form, 2026-06-07). Quote: "The checkout trap page is broken on mobile layout. Can only see the answer, the question is in a very narrow column on the left side. Not readable."
 
@@ -133,7 +153,7 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
-### 154. ⚠️ Bug — Stats Foundations Module 8: normal distribution curve overflows and overlaps text
+### 154. ✅ Bug — Stats Foundations Module 8: normal distribution curve overflows and overlaps text (Fixed V5.23.0)
 
 **Source:** Debasrija Mondal (beta tester, feedback form, 2026-06-07). Quote: "Module 8 of stats has a normal distribution curve stretching to the top of the page overlapping text. Affects usability."
 
@@ -143,7 +163,7 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
-### 153. ⚠️ Bug — Stats Foundations CLT simulation: "not yet normal" persists even at high N
+### 153. ✅ Bug — Stats Foundations CLT simulation: "not yet normal" persists even at high N (Fixed V5.23.0)
 
 **Source:** Debasrija Mondal (beta tester, feedback form, 2026-06-07). Quote: "The CLT page kept showing not yet normal for the simulated samples."
 
@@ -153,7 +173,7 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
-### 152. ⚠️ Content / UX — A/B testing "New Here" path introduces baseline rate before explaining it
+### 152. ✅ Content / UX — A/B testing "New Here" path introduces baseline rate before explaining it (Fixed V5.23.0)
 
 **Source:** Debasrija Mondal (beta tester, feedback form, 2026-06-07). Quote: "If one goes through the 'new here' option, the terms for A/B testing like baseline rates come up before the concept is actually explained. That feels unclear."
 

@@ -186,7 +186,7 @@ export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, 
       {/* ── Main 2-col layout ─────────────────────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) min(360px, 100%)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))',
         gap: '1.25rem',
         alignItems: 'start',
       }}>

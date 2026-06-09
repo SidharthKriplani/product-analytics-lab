@@ -143,7 +143,7 @@ export function Module08_StandardError({ module, onNext }) {
             ── Current n={n} (SE={se.toFixed(3)})
           </span>
         </div>
-        <svg viewBox={`0 0 ${W} ${H + 25}`} style={{ width: '100%', overflow: 'hidden' }}>
+        <svg viewBox={`0 0 ${W} ${H + 25}`} style={{ width: '100%', maxHeight: '300px', overflow: 'hidden', display: 'block' }}>
           {/* Reference curves (ghost) */}
           {refPaths.map(r => (
             <path key={r.n} d={r.path} fill="none" stroke={r.color} strokeWidth={1.5} opacity={0.35} strokeDasharray="5,3" />
