@@ -3,6 +3,7 @@ import { GateOverlay } from './components/shared/GateOverlay.jsx';
 import { ErrorBoundary } from './components/shared/ErrorBoundary.jsx';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import { track } from './utils/analytics.js';
+import { stateToHash, parseHash } from './utils/hashRouting.js';
 import { onAuthStateChange } from './utils/auth.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from './utils/syncProgress.js';
 // Slim index — id, isFree, title only (for routing and paywall checks)
@@ -832,6 +833,142 @@ export default function App() {
 
   const instrIdx = activeInstrumentationCaseId ? instrumentationIndex.findIndex(c => c.id === activeInstrumentationCaseId) : -1;
   const nextInstrumentationCaseId = instrIdx >= 0 && instrIdx < instrumentationIndex.length - 1 ? instrumentationIndex[instrIdx + 1].id : null;
+
+  // ── Hash-based URL routing ──────────────────────────────────────────
+  // Keeps window.location.hash in sync with page state.
+  // Browser back/forward trigger hashchange which drives state.
+
+  // true when state change was triggered BY a hash change (prevents double-push)
+  const isHashNavRef = useRef(false);
+  // Captures the initial deep-link hash so state→hash sync skips until it is consumed
+  const pendingDeepLinkRef = useRef(
+    window.location.hash && window.location.hash !== '#' && window.location.hash !== '#/'
+  );
+
+  // Map of open function names → actual functions (for hash→state navigation)
+  const openFnsRef = useRef({});
+  openFnsRef.current = {
+    openScenario,
+    openDesignScenario,
+    openStatsModule,
+    openMetricsCase,
+    openRCACase,
+    openBusinessCase,
+    openPDScenario,
+    openFullLoopCase,
+    openPrioritizationScenario,
+    openBehavioralQuestion,
+    openEstimationProblem,
+    openStatFoundationsModule,
+    openGrowthAnalyticsCase,
+    openChallenge,
+    openBICase,
+    openSTFCase,
+    openTakehomeCase,
+    openInstrumentationCase,
+    openMetricsFoundationModule,
+    openRCAFoundationModule,
+    openExpFoundationModule,
+  };
+
+  // State → hash sync: whenever page or an active ID changes, update the URL hash.
+  // Skipped when the change was triggered by a hash navigation (to prevent double-push).
+  // Also skipped while a deep-link is pending initial consumption.
+  useEffect(() => {
+    if (pendingDeepLinkRef.current) return;
+    if (isHashNavRef.current) {
+      isHashNavRef.current = false;
+      return;
+    }
+    const activeIds = {
+      activeScenarioId,
+      activeDesignScenarioId,
+      activeStatsModuleId,
+      activeMetricsCaseId,
+      activeRCACaseId,
+      activeBusinessCaseId,
+      activePDScenarioId,
+      activeFullLoopId,
+      activePrioritizationId,
+      activeBehavioralId,
+      activeEstimationId,
+      activeStatFoundationsId,
+      activeGrowthAnalyticsId,
+      activeChallengeId,
+      activeBICaseId,
+      activeSTFCaseId,
+      activeTakehomeCaseId,
+      activeInstrumentationCaseId,
+      activeMetricsFoundationId,
+      activeRCAFoundationId,
+      activeExpFoundationId,
+    };
+    const newHash = '#' + stateToHash(page, activeIds);
+    if (window.location.hash !== newHash) {
+      window.history.pushState(null, '', newHash);
+    }
+  }, [page, activeScenarioId, activeDesignScenarioId, activeStatsModuleId,
+    activeMetricsCaseId, activeRCACaseId, activeBusinessCaseId, activePDScenarioId,
+    activeFullLoopId, activePrioritizationId, activeBehavioralId, activeEstimationId,
+    activeStatFoundationsId, activeGrowthAnalyticsId, activeChallengeId,
+    activeBICaseId, activeSTFCaseId, activeTakehomeCaseId, activeInstrumentationCaseId,
+    activeMetricsFoundationId, activeRCAFoundationId, activeExpFoundationId]);
+
+  // Hash → state sync: on hashchange (browser back/forward), parse hash and drive state.
+  useEffect(() => {
+    function handleHashChange() {
+      const parsed = parseHash(window.location.hash);
+      if (!parsed) return;
+
+      isHashNavRef.current = true;
+
+      if (parsed.caseId && parsed.openFnName) {
+        // Runner navigation — call the open function which handles auth/paywall/tracking
+        const fn = openFnsRef.current[parsed.openFnName];
+        if (fn) {
+          fn(parsed.caseId);
+        } else {
+          // Fallback: navigate to the browser page
+          navigate(parsed.page);
+        }
+      } else {
+        // Browser/page navigation
+        navigate(parsed.page);
+      }
+    }
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // On mount: if URL has a deep-link hash, restore that page instead of default 'home'.
+  // Runs once after initial render. Deferred slightly to let auth state settle.
+  useEffect(() => {
+    if (!pendingDeepLinkRef.current) return;
+    const hash = window.location.hash;
+    const parsed = parseHash(hash);
+
+    // Clear the pending flag so state→hash sync can start working
+    const consumeAndNav = () => {
+      pendingDeepLinkRef.current = false;
+      isHashNavRef.current = true;
+      if (parsed && parsed.caseId && parsed.openFnName) {
+        const fn = openFnsRef.current[parsed.openFnName];
+        if (fn) fn(parsed.caseId);
+        else if (parsed.page) navigate(parsed.page);
+      } else if (parsed) {
+        navigate(parsed.page);
+      } else {
+        // Unrecognized hash — clear flag, let state→hash sync take over
+        pendingDeepLinkRef.current = false;
+      }
+    };
+
+    // Short delay to let auth state (onAuthStateChange) settle first
+    const timer = setTimeout(consumeAndNav, 150);
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // ── End hash routing ───────────────────────────────────────────────
 
   const isFocusMode = page === 'runner' || page.endsWith('-runner');
 
