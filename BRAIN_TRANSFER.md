@@ -1,6 +1,6 @@
-# Brain Transfer — V5.21.5
+# Brain Transfer — V5.22.1
 
-**Version:** V5.21.5 | **Build:** ✓ (1.61s) | **Date:** 2026-06-07 | **PM Audit:** #149 complete
+**Version:** V5.22.1 | **Build:** ✓ | **Date:** 2026-06-09 | **PM Audit:** #149 complete
 
 ---
 
@@ -50,9 +50,13 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ## What was just done
 
-**V5.21.2 → V5.21.5** — Ticker polished. Audits #156–159 logged (Jatin: RCA Foundations progress not persisting, RCA distractors too easy, playbook concepts feel clickable but aren't; Meghana: boxed content skipped in Stats data module; 3-person language density signal now confirmed across Amaya/Jatin/Meghana). Plans testimonials rebuilt as continuous RAF scroll ticker — doubled array `[A,B,C,D,A,B,C,D]`, 0.28px/frame upward drift, seamless loop via `pos -= half` snap (invisible because second half is identical). No blink, no disappearing. `overflow: hidden` container clips to ~3 rows. Adding new testimonials = push to `TESTIMONIALS` array in Plans.jsx, ticker handles automatically. First names only on Plans strip. Ticker idea logged to IDEAS.md Tier 1 (gate updated — already live at 4, improves as more arrive).
+**V5.22.0 → V5.22.1** — Universe View V2 shipped. Animated arms with glow on hover, tooltips, loop arc with bezier curve, clickable navigation to rooms, mobile fallback. V5.22.1 fixed glow to hover-only + cleaner loop arc.
 
-**V5.20.4 → V5.21.1** — Testimonials scaffold complete. Four beta testers now showing across Home and Plans: Amaya Bhuyan (Statistics, beginner), Jatin Nair (RCA), Debasrija Mondal (Stats & Design, DA), Swapnil Pattanshetty (Data Scientist). Home: full cards in a 4-col responsive grid. Plans: compact strip — avatar + name + role + one punchy sentence, no card containers, sits above pricing cards as trust-before-ask. Removed "Beta tester" from all role labels (undermines trust on a pricing page). Fixed `\'ve` rendering bug in Debasrija's quote (backslash was rendering literally in JSX text). Fixed "What beta testers say" heading to "What people are saying." Photos: `/public/testimonials/amaya.jpg`, `jatin.jpg`, `debasrija.jpg`, `swapnil.jpg`. Four bugs logged from Debasrija's feedback form as Audits #152-155: baseline rate sequencing in "New Here" path (A/B track), CLT "not yet normal" persisting at high N, Module 8 normal distribution curve overflow, Checkout Trap broken mobile layout. All four are open — not yet fixed.
+**V5.21.6 → V5.22.0** — Home testimonials finalized as 1×4 row (moved outside 560px wrapper for true single-row layout). Quotes trimmed to one sentence each (originals preserved in JSX comment). Swapped Jatin for Meghana on Home (educator angle more distinctive). Home: Amaya (beginner/Stats), Meghana (Analyst + Asst Prof), Debasrija (DA/Stats&Design), Swapnil (DS). Plans ticker: Meghana added as 5th entry, quote trimmed for strip. Testimonials wall idea logged to IDEAS Tier 1 (gate: 8+). First names only on Plans.
+
+**V5.21.2 → V5.21.5** — Plans testimonials rebuilt as continuous RAF scroll ticker — doubled array, 0.28px/frame upward drift, seamless loop. No blink, no disappearing. First names only on Plans strip. Audits #156–159 logged from Jatin + Meghana feedback.
+
+**V5.20.4 → V5.21.1** — Testimonials scaffold: 5 beta testers across Home and Plans (Amaya, Jatin, Debasrija, Swapnil, Meghana). Plans: compact strip above pricing as trust-before-ask. Removed "Beta tester" labels. Fixed apostrophe rendering bug. Audits #152–155 logged from Debasrija's feedback (4 bugs, all open).
 
 **V5.19.0** — Meesho Company Track fully expanded. companyTracks.js: 42 total directorCards (up from 10). Added cards covering: all remaining RCA families (orders down/sessions stable, checkout conversion down, seller high-GMV/poor-experience, tail-query drop, payment success drop, catalog complaints, category orders up/contribution down), Senior/HM families (first 30 days, leading vs lagging indicators, gaming prevention, buyer/seller/economics balance, healthy vs unhealthy growth), and 9 numeric experiment readout cases with full metrics (search CTR trap C1, prepaid nudge C2, checkout friction C3, head/tail search model C4, discount-driven growth, RTO-but-orders-down, recommendation engagement trap, catalog quality/supply tradeoff, seller quality/new seller fairness). Also added to Meesho mentalModel: `answerPattern` (Objective→Decomposition→Primary→Guardrails→Segments→Logic→Decision→Action), `seniorLens` quote, and `watchOuts` array (6 candidate weakness reminders). Full prep handoff saved to `docs/MEESHO_PREP_HANDOFF.md`. No new files, no routing changes — pure content.
 
@@ -168,13 +172,15 @@ SQL Audit: 120/130 problems audited (Batches 1–10 complete). Batch 11 scored b
 
 ---
 
-## Next action — V5.21.5 shipped. Session complete. Resuming Tuesday with fresh token limit.
+## Next action — V5.22.1 shipped. Statefulness enforced 2026-06-09.
 
-Tuesday P0: Meesho track final two families — Experiment Design (12 questions, 3-part format: unit of randomisation + primary metric + guardrail) and Project Defense (13 questions — user will share project context at session open). SQL family: grep sqlLabProblems.js for 'meesho' tag to check coverage before adding.
+P0: Bug fixes from beta feedback (Audits #152–159, 8 open, 0 fixed). #155 Checkout Trap mobile layout is highest priority. Then #153 CLT, #154 Module 8 overflow, #158 RCA Foundations persistence, #157 RCA distractors, #152 baseline rate sequencing, #156 RCA option clarity, #159 playbook concepts clickability.
 
-Tuesday P1: V5.17.0 gate audit — grep every data file for `guestPreview: true` and verify each also has `isFree: true`. If any guestPreview case has `isFree: false`, a guest can bypass auth but still hit the unlock gate, creating the contradictory flow. Fix: set `isFree: true` on all guestPreview cases.
+P0: Meesho track final two families — Experiment Design (12 questions) + Project Defense (13 questions, needs user project context).
 
-Confirm `VITE_POSTHOG_KEY` in Vercel before Tuesday — needed to capture benchmark and Meesho track funnel from day 1.
+P1: Gate audit — grep for `guestPreview: true` and verify each has `isFree: true`.
+
+Confirm `VITE_POSTHOG_KEY` in Vercel — needed for funnel data.
 
 **Forensic format — Batch 2 (f11–f20) shipped.** 20 forensic problems total. Batch 3 (f21–f25, staff-level: compounding errors, metric definition mismatch, survivorship bias) completes the planned set. Spec in SQL_LAB_PLAN.md Section 12.
 

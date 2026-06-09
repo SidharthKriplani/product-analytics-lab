@@ -64,12 +64,26 @@ function Cell({ value, accent }) {
   return <span style={{ fontSize: '0.8rem', fontWeight: 600, color: accent || 'var(--text-muted)' }}>{value}</span>;
 }
 
+/* RAW FEEDBACK ARCHIVE — full quotes for future testimonials wall or marketing copy:
+    Parth Gandhi (Senior Data Analyst, TCS, 4+ yrs):
+      "What I really like about PAL is that the mock interviews are time-based. It gives a much more realistic interview experience."
+      "PAL is short, practical, and realistic. It focuses on what actually matters during interviews rather than overwhelming you with theory."
+      "The mix of product thinking, case studies, and SQL practice covers the core skills needed to crack analytics interviews."
+      "PAL feels less like interview preparation and more like actual on-the-job training."
+      "The experimentation modules encourage you to think beyond standard frameworks and develop a more structured problem-solving mindset."
+    Faizan Mulla (Data Analyst, Enrich, IIT Madras):
+      "Its very comprehensive and thorough. I have seen many interview platforms but nothing like this especially for product analytics."
+      "For my prep, I have gathered many resources, but this seems like a one-stop site, like everything I need is already here."
+      "One feedback: there are too much info at a time on the screen. Info is not the issue, but displaying it can be improved on."
+*/
 const TESTIMONIALS = [
   { img: '/testimonials/amaya.jpg',    name: 'Amaya',     href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/', role: 'Statistics',     quote: 'I always knew exactly what to focus on next — it felt like a real foundation, not just memorising.' },
   { img: '/testimonials/jatin.jpg',    name: 'Jatin',     href: 'https://www.linkedin.com/in/jatin-nair-03161a197/',   role: 'RCA track',      quote: 'PAL helped me test whether I truly understood the framework — and surface exactly where my gaps were.' },
   { img: '/testimonials/debasrija.jpg',name: 'Debasrija', href: 'https://www.linkedin.com/in/debasrijamondal/',        role: 'Stats & Design', quote: 'The p-value simulation made it tangible. Scenarios felt closer to real interviews than anything I\'ve seen.' },
   { img: '/testimonials/swapnil.jpg',  name: 'Swapnil',   href: 'https://www.linkedin.com/in/swapnil-pattanshetty/',   role: 'Data Scientist', quote: 'The cases forced me to think like a PM, not just run numbers. The debrief format is what makes it stick.' },
   { img: '/testimonials/meghana.jpg', name: 'Meghana',   href: 'https://www.linkedin.com/in/meghana-joshi-82199537/', role: 'Analyst & Educator', quote: 'PAL doesn\'t let you passively scroll through — it forces you to actually think.' },
+  { img: '/testimonials/parth.jpg',  name: 'Parth',     href: 'https://www.linkedin.com/in/parthgandhip/',            role: 'Senior Data Analyst', quote: 'PAL feels less like interview prep and more like actual on-the-job training.' },
+  { img: '/testimonials/faizan.jpg', name: 'Faizan',    href: 'https://www.linkedin.com/in/faizanxmulla/',            role: 'Data Analyst · IIT Madras', quote: 'I\'ve seen many interview platforms — nothing like this for product analytics.' },
 ];
 
 function TestimonialTicker() {

@@ -63,6 +63,18 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
+## Part XXXVI — V5.22.2 beta feedback: Faizan Mulla (2026-06-09)
+
+### 160. ⚠️ UX — Information density too high on screen
+
+**Source:** Faizan Mulla (Data Analyst, Enrich, IIT Madras, beta tester, 2026-06-09). Quote: "There are too much info at a time on the screen. Info is not the issue, but displaying it can be improved on."
+
+**Signal:** Third person to flag density/readability (after Meghana's boxed content complaint and the general "simpler language" signal from Meghana). The content isn't the problem — it's how much is shown at once. This could mean: too many sections visible simultaneously, not enough progressive disclosure, or insufficient visual hierarchy to guide the eye. Fix: audit the highest-traffic pages (Foundations runners, case runners, SQL Lab) for opportunities to collapse, tab, or progressively reveal content. This is a design problem, not a content problem.
+
+**Priority:** Medium — recurring signal across multiple testers. Not blocking but affects perceived quality.
+
+---
+
 ## Part XXXV — V5.21.1 beta feedback: Jatin Nair + Meghana Joshi (2026-06-07)
 
 ### 159. ⚠️ UX — Playbook / framework concepts feel clickable but aren't

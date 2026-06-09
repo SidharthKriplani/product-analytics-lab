@@ -2,11 +2,11 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: V5.21.5 (2026-06-07)*
+*Last updated: V5.22.1 (2026-06-09)*
 
 ---
 
-## Status — V5.16.1: Session complete (2026-06-07). Benchmark live. Homepage repositioned. Plans page restructured (pricing-led). Resuming Tuesday.
+## Status — V5.22.1: Statefulness enforced (2026-06-09). Testimonials complete (5 testers, Home 1×4, Plans RAF ticker). Universe View V2 shipped. 8 open bugs from beta feedback (#152–159). Resuming with bug fixes.
 
 PAL is ready for a 3–5 person private test. See PRIVATE_TEST.md for tester profile, path, questions, and success criteria.
 
