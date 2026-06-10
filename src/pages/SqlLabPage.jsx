@@ -598,7 +598,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
         try {
           const solRes = database.exec(problem.solution);
           if (solRes.length > 0) {
-            sample = { columns: solRes[0].columns, rows: solRes[0].values.slice(0, 3) };
+            sample = { columns: solRes[0].columns, rows: solRes[0].values };
           }
         } catch {}
 
@@ -788,11 +788,6 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                       ))}
                     </tbody>
                   </table>
-                  {problem.expectedRowCount > 3 && (
-                    <div style={{ padding: '2px 8px', fontSize: '0.62rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border)', background: 'var(--surface)' }}>
-                      +{problem.expectedRowCount - 3} more row{problem.expectedRowCount - 3 !== 1 ? 's' : ''}
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -867,19 +862,16 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                           Hint {hintsShown + 1} of {hintCap}
                         </button>
                       )}
-                      {allExhausted && (
+                      {hintsShown >= 1 && (
                         <button
-                          onClick={() => { if (query.trim().length >= 50) { track('sql_answer_revealed', { problemId: problem.id, difficulty: problem.difficulty }); setRevealed(true); } }}
-                          disabled={query.trim().length < 50}
-                          title={query.trim().length < 50 ? ('Write ' + (50 - query.trim().length) + ' more char' + (50 - query.trim().length !== 1 ? 's' : '') + ' to unlock') : 'Show answer'}
+                          onClick={() => { track('sql_answer_revealed', { problemId: problem.id, difficulty: problem.difficulty }); setRevealed(true); }}
                           style={{
                             padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
                             background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)',
-                            cursor: query.trim().length >= 50 ? 'pointer' : 'not-allowed',
-                            opacity: query.trim().length >= 50 ? 1 : 0.35,
+                            cursor: 'pointer',
                           }}
                         >
-                          Show answer
+                          Show Solution
                         </button>
                       )}
                     </>
