@@ -3,34 +3,34 @@
 
 /* ── Theme Variables ─────────────────────────────────────────────────────── */
 :root {
-  /* Canvas */
-  --bg: #f6f5f2;
-  --surface: #ffffff;
-  --surface-2: #f9f8f6;
-  --surface-raised: #ffffff;
+  /* Canvas — casefile warm paper */
+  --bg: #F4EFE6;
+  --surface: #FFFCF4;
+  --surface-2: #F8F1E5;
+  --surface-raised: #FFFCF4;
 
-  /* Borders */
-  --border: #e2dfd8;
-  --border-subtle: #ece9e3;
-  --border-strong: #cbc7bf;
+  /* Borders — warm tan */
+  --border: #DDD0BE;
+  --border-subtle: #EDE5D5;
+  --border-strong: #BFAE98;
 
   /* Text hierarchy — all values at ≥4.5:1 WCAG AA against --bg and --surface */
-  --text: #111827;
-  --text-secondary: #374151;
-  --text-muted: #595e6b;
-  --text-dim: #595e6b;
+  --text: #141414;
+  --text-secondary: #4A4036;
+  --text-muted: #756B60;
+  --text-dim: #9B8E80;
 
-  /* Primary accent — indigo */
-  --accent: #3730a3;
-  --accent-hover: #2D279E;
-  --accent-light: #6366f1;
-  --accent-bg: #eef2ff;
-  --accent-border: #c7d2fe;
+  /* Primary accent — cobalt blue (replaces indigo/purple) */
+  --accent: #2457D6;
+  --accent-hover: #1D45AD;
+  --accent-light: #5A7FE8;
+  --accent-bg: rgba(36,87,214,0.07);
+  --accent-border: rgba(36,87,214,0.22);
 
-  /* Secondary accent — teal */
-  --teal: #0f766e;
-  --teal-bg: #f0fdfa;
-  --teal-border: #99f6e4;
+  /* Secondary accent — evidence teal */
+  --teal: #007C89;
+  --teal-bg: rgba(0,124,137,0.07);
+  --teal-border: rgba(0,124,137,0.25);
 
   /* Semantic — green */
   --green: #16a34a;
@@ -44,17 +44,17 @@
   --red-border: #fca5a5;
   --red-text: #7f1d1d;
 
-  /* Semantic — yellow/amber */
-  --yellow: #d97706;
-  --yellow-bg: #fffbeb;
-  --yellow-border: #fde68a;
-  --yellow-text: #92400e;
+  /* Semantic — progress amber */
+  --yellow: #C97706;
+  --yellow-bg: rgba(201,119,6,0.08);
+  --yellow-border: rgba(201,119,6,0.25);
+  --yellow-text: #7A4500;
 
-  /* Semantic — purple */
-  --purple: #7c3aed;
-  --purple-bg: #f5f3ff;
-  --purple-border: #ddd6fe;
-  --purple-text: #4c1d95;
+  /* Semantic — purple (accent use only, not brand color) */
+  --purple: #6B3FA0;
+  --purple-bg: rgba(107,63,160,0.07);
+  --purple-border: rgba(107,63,160,0.22);
+  --purple-text: #3D2060;
 
   /* Blue (info/hypothesis) */
   --blue-text: #1d4ed8;
@@ -62,7 +62,7 @@
   --blue-border: #bfdbfe;
 
   /* Structural */
-  --header-bg: rgba(246, 245, 242, 0.97);
+  --header-bg: rgba(255,252,244,0.97);
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
   --shadow: 0 2px 8px rgba(0,0,0,0.09), 0 1px 3px rgba(0,0,0,0.05);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.06);
@@ -76,10 +76,10 @@
   --radius-xl: 18px;
 
   /* Gradients */
-  --gradient-accent: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
-  --gradient-warm: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-  --gradient-teal: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%);
-  --gradient-hero: linear-gradient(135deg, rgba(99,102,241,0.07) 0%, rgba(139,92,246,0.04) 50%, rgba(14,165,233,0.03) 100%);
+  --gradient-accent: linear-gradient(135deg, #2457D6 0%, #5A7FE8 100%);
+  --gradient-warm: linear-gradient(135deg, #C97706 0%, #E8900A 100%);
+  --gradient-teal: linear-gradient(135deg, #007C89 0%, #00A3B4 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(36,87,214,0.06) 0%, rgba(0,124,137,0.03) 50%, rgba(201,119,6,0.02) 100%);
 
   /* Overlay / backdrop */
   --overlay: rgba(0, 0, 0, 0.45);
@@ -115,7 +115,7 @@
   /* Primary accent — indigo (more saturated, electric direction) */
   --accent: #5C5FF5;
   --accent-hover: #7478F7;
-  --accent-light: #818cf8;
+  --accent-light: #7478F7;
   --accent-bg: #141f3e;
   --accent-border: #2d4e98;
 
@@ -168,7 +168,7 @@
   --radius-xl: 18px;
 
   /* Gradients */
-  --gradient-accent: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  --gradient-accent: linear-gradient(135deg, #7478F7 0%, #5A7FE8 100%);
   --gradient-warm: linear-gradient(135deg, #fbbf24 0%, #fb923c 100%);
   --gradient-teal: linear-gradient(135deg, #2dd4bf 0%, #22d3ee 100%);
   --gradient-hero: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.07) 50%, rgba(14,165,233,0.04) 100%);
@@ -266,9 +266,9 @@ table { border-collapse: collapse; }
   left: 0; top: 0; bottom: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  border-right: 1px solid var(--border);
+  border-right: 2px solid var(--border-strong);
   background: var(--surface);
-  box-shadow: 1px 0 0 var(--border-subtle), 4px 0 20px rgba(0,0,0,0.05);
+  box-shadow: 1px 0 0 var(--border-subtle), 4px 0 16px rgba(0,0,0,0.04);
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -311,7 +311,7 @@ table { border-collapse: collapse; }
   top: 0; bottom: 0;
   left: 0; right: 0;
   overflow-y: auto;
-  background: var(--bg);
+  background: #070A12;
   z-index: 5;
   padding: 1.5rem 2.5rem;
   box-sizing: border-box;
@@ -322,8 +322,8 @@ table { border-collapse: collapse; }
   top: 0; bottom: 0;
   left: 0; right: 54vw;
   overflow-y: auto;
-  background: var(--bg);
-  border-right: 1px solid var(--border);
+  background: #0D1320;
+  border-right: 1px solid #2A3548;
   z-index: 5;
   padding: 1.5rem 1.25rem 0 1.75rem;
   box-sizing: border-box;
@@ -333,7 +333,7 @@ table { border-collapse: collapse; }
   top: 0; bottom: 0;
   left: 46vw; right: 0;
   overflow-y: auto;
-  background: var(--bg);
+  background: #070A12;
   z-index: 5;
   padding: 1.5rem 2rem 0 1.5rem;
   box-sizing: border-box;
@@ -926,4 +926,192 @@ button:not(:disabled):active {
 @media (max-width: 900px) {
   .pal-module-index-desktop { display: none !important; }
   .pal-module-index-toggle  { display: inline-flex !important; }
+}
+
+/* ── Casefile OS utilities ───────────────────────────────────────────────── */
+
+/* Evidence tag — hole-punch label pill */
+.ev-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 3px 20px 20px 3px;
+  padding: 2px 10px 2px 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.ev-tag-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  border: 1px solid var(--border-strong);
+  flex-shrink: 0;
+}
+
+/* Stamp — rotated border box */
+.cf-stamp {
+  display: inline-block;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+  line-height: 1.5;
+  flex-shrink: 0;
+  opacity: 0.82;
+}
+.cf-stamp-active { color: var(--accent); }
+.cf-stamp-filed  { color: var(--text-dim); }
+.cf-stamp-open   { color: var(--green); }
+.cf-stamp-review { color: var(--yellow); }
+
+/* Room card — casefile style */
+.cf-room-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 14px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  cursor: pointer;
+  position: relative;
+}
+.cf-room-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.cf-room-card-tab {
+  position: absolute;
+  top: -1px; right: 11px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  padding: 1px 7px;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ── VerdictStrip ────────────────────────────────────────────────────────── */
+.verdict-strip {
+  display: flex;
+  border: 1px solid #2A3548;
+  border-radius: 7px;
+  overflow: hidden;
+  width: 100%;
+}
+.verdict-option {
+  flex: 1;
+  padding: 10px 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  cursor: pointer;
+  border-right: 1px solid #2A3548;
+  background: #121A2A;
+  color: #64748B;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  border-top: 2px solid transparent;
+  user-select: none;
+}
+.verdict-option:last-child { border-right: none; }
+.verdict-option svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.verdict-option:hover,
+.verdict-option.selected {
+  background: rgba(255,255,255,0.04);
+}
+.verdict-option.ship:hover,
+.verdict-option.ship.selected {
+  background: rgba(51,209,122,0.1);
+  color: #33D17A;
+  border-top-color: #33D17A;
+  border-right-color: rgba(51,209,122,0.2);
+}
+.verdict-option.noship:hover,
+.verdict-option.noship.selected {
+  background: rgba(255,107,107,0.1);
+  color: #FF6B6B;
+  border-top-color: #FF6B6B;
+  border-right-color: rgba(255,107,107,0.2);
+}
+.verdict-option.dig:hover,
+.verdict-option.dig.selected {
+  background: rgba(246,183,60,0.1);
+  color: #F6B73C;
+  border-top-color: #F6B73C;
+  border-right-color: rgba(246,183,60,0.2);
+}
+.verdict-option.invalid:hover,
+.verdict-option.invalid.selected {
+  background: rgba(139,152,170,0.08);
+  color: #8B98AA;
+  border-top-color: #8B98AA;
+}
+
+/* ── Terminal Lab — scoped variable overrides ────────────────────────────── */
+/* All var(--x) references inside SQL Lab panels automatically use dark vals */
+.sql-lab-browse-panel,
+.sql-lab-solve-left,
+.sql-lab-solve-right {
+  --bg: #070A12;
+  --surface: #0D1320;
+  --surface-2: #121A2A;
+  --surface-raised: #121A2A;
+  --border: #2A3548;
+  --border-subtle: #1E2A40;
+  --border-strong: #3A4E68;
+  --text: #E8EDF5;
+  --text-secondary: #C5D0E0;
+  --text-muted: #8B98AA;
+  --text-dim: #64748B;
+  --accent: #6EA8FF;
+  --accent-hover: #8BBEFF;
+  --accent-bg: rgba(110,168,255,0.1);
+  --accent-border: rgba(110,168,255,0.25);
+  --teal: #20C7D9;
+  --teal-bg: rgba(32,199,217,0.1);
+  --teal-border: rgba(32,199,217,0.25);
+  --yellow: #F6B73C;
+  --yellow-bg: rgba(246,183,60,0.1);
+  --yellow-border: rgba(246,183,60,0.2);
+  --yellow-text: #F6B73C;
+  --green: #33D17A;
+  --green-bg: rgba(51,209,122,0.1);
+  --green-border: rgba(51,209,122,0.25);
+  --green-text: #33D17A;
+  --red: #FF6B6B;
+  --red-bg: rgba(255,107,107,0.1);
+  --input-bg: #121A2A;
+  color: #E8EDF5;
+}
+
+/* Confidential footer stamp */
+.cf-footer-stamp {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 0.1em;
+  padding: 8px 0 4px;
+  border-top: 1px dashed var(--border);
+  margin-top: 14px;
+  text-transform: uppercase;
+  font-weight: 500;
+  opacity: 0.55;
 }

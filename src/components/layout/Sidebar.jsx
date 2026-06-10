@@ -255,10 +255,10 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
           >
             <div style={{
               width: 26, height: 26, flexShrink: 0,
-              background: 'var(--gradient-accent)',
+              background: 'var(--accent)',
               borderRadius: 7,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 10px rgba(99,102,241,0.4)',
+              boxShadow: '0 2px 8px rgba(36,87,214,0.35)',
             }}><svg width="16" height="16" viewBox="0 0 26 26" fill="none" aria-hidden="true">
                 <g stroke="#ffffff" strokeLinecap="round" strokeWidth="1.6">
                   <line x1="4" y1="13" x2="22" y2="13"/>
