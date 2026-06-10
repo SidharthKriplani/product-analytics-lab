@@ -643,7 +643,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
   const [results, setResults] = useState(null);
   const [runError, setRunError] = useState(null);
   const [revealed, setRevealed] = useState(false);
-  const [schemaOpen, setSchemaOpen] = useState(false);
+  const [schemaOpen, setSchemaOpen] = useState(true);
   const [hasRun, setHasRun] = useState(false);
   const [correct, setCorrect] = useState(null);
   const [hintsShown, setHintsShown] = useState(0);
@@ -928,10 +928,13 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
             onClick={() => setMode('browse')}
             style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.78rem', color: 'var(--text-muted)', cursor: 'pointer' }}
           >← Browse</button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <button
+            onClick={() => setMode('browse')}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
             <div style={{ width: 24, height: 24, background: 'var(--teal)', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', color: '#fff', fontWeight: 700 }}>{'<>'}</div>
             <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--teal)' }}>SQL Lab</span>
-          </div>
+          </button>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <button
               onClick={() => { if (problemIdx > 0) setProblemIdx(problemIdx - 1); }}
@@ -1044,16 +1047,15 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           onRestore={q => { setQuery(q); saveQueryLS(problem.id, q); }}
         />
 
-        {/* Hints — in left panel so editor stays uninterrupted */}
-        {!revealed && (() => {
+        {/* Hints + Show Solution (pre-reveal) OR Solution + Debrief (post-reveal) */}
+        {!revealed ? (() => {
           var maxH = ({ Easy: 1, Medium: 2, Hard: 5, Master: 5 })[problem.difficulty] || 1;
           var availableHints = (problem.hints || []).length;
           var hintCap = Math.min(maxH, availableHints);
           var allExhausted = hintsShown >= hintCap;
-          if (availableHints === 0) return null;
           return (
             <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              {!allExhausted && (
+              {availableHints > 0 && !allExhausted && (
                 <button
                   onClick={function() { track('sql_hint_used', { problemId: problem.id, hintIndex: hintsShown + 1, difficulty: problem.difficulty }); setHintsShown(function(n) { return Math.min(n + 1, hintCap); }); }}
                   style={{
@@ -1100,9 +1102,61 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                   )}
                 </>
               )}
+              {hintsShown >= 1 && (
+                <button
+                  onClick={function() { track('sql_answer_revealed', { problemId: problem.id, difficulty: problem.difficulty }); setRevealed(true); }}
+                  style={{
+                    alignSelf: 'flex-start', marginTop: '0.2rem', padding: '0.4rem 0.85rem',
+                    borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
+                    background: 'none', color: 'var(--text-muted)',
+                    border: '1px solid var(--border)', cursor: 'pointer',
+                  }}
+                >Show Solution</button>
+              )}
             </div>
           );
-        })()}
+        })() : (
+          /* Solution + debrief shown after reveal */
+          <div className="pal-reveal-in" style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            {/* Solution code */}
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ padding: '0.4rem 0.75rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>Solution</div>
+              <pre style={{
+                margin: 0, padding: '0.75rem', background: 'var(--surface-2)', fontSize: '0.8rem',
+                fontFamily: 'monospace', lineHeight: 1.6, color: 'var(--text)',
+                overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+              }}>{problem.solution}</pre>
+            </div>
+            {/* Debrief blocks */}
+            {problem.debrief && (
+              <div style={{
+                borderLeft: '3px solid rgba(232,160,51,0.6)',
+                background: 'rgba(232,160,51,0.05)',
+                borderRadius: '0 8px 8px 0',
+                padding: '0.85rem 1rem',
+                fontSize: '0.83rem', lineHeight: 1.65, color: 'var(--text)',
+              }}>
+                <DebriefPanel text={problem.debrief} />
+              </div>
+            )}
+            {/* Next problem button */}
+            <button
+              className={correct === true ? 'pal-glow-pulse' : ''}
+              onClick={function() {
+                var next = SORTED_PROBLEMS.findIndex(function(p, i) { return i > problemIdx && !solved.has(p.id); });
+                if (next !== -1) setProblemIdx(next);
+              }}
+              style={{
+                alignSelf: 'flex-start', padding: '0.5rem 1.1rem', borderRadius: '6px',
+                fontWeight: 600, fontSize: '0.82rem',
+                background: correct === true ? 'var(--teal)' : 'var(--surface)',
+                color: correct === true ? '#fff' : 'var(--text-muted)',
+                border: correct === true ? 'none' : '1px solid var(--border)',
+                cursor: 'pointer',
+              }}
+            >Next Problem →</button>
+          </div>
+        )}
 
         <div style={{ height: '1.5rem' }} />
       </div>
@@ -1167,16 +1221,6 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                   opacity: query.trim() ? 1 : 0.4,
                 }}
               >▶ Run</button>
-              {!revealed && hintsShown >= 1 && (
-                <button
-                  onClick={() => { track('sql_answer_revealed', { problemId: problem.id, difficulty: problem.difficulty }); setRevealed(true); }}
-                  style={{
-                    padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
-                    background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)',
-                    cursor: 'pointer',
-                  }}
-                >Show Solution</button>
-              )}
               {hasRun && correct === true && (
                 <span className="pal-success-ring" style={{ fontSize: '0.78rem', color: 'var(--green)', fontWeight: 600 }}>✓ Correct — well done</span>
               )}
@@ -1201,43 +1245,6 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                 <ResultsTable results={results} />
               </div>
             )}
-          </div>
-        )}
-
-        {/* Debrief */}
-        {revealed && (
-          <div className="pal-reveal-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.75rem' }}>
-            <div style={{
-              borderLeft: '3px solid var(--discovery, #E8A033)',
-              background: 'rgba(232,160,51,0.07)',
-              borderRadius: '0 8px 8px 0',
-              padding: '0.85rem 1rem',
-              fontSize: '0.83rem', lineHeight: 1.65, color: 'var(--text)',
-            }}>
-              <DebriefPanel text={problem.debrief} />
-            </div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Model solution</div>
-              <pre style={{
-                margin: 0, padding: '0.75rem', background: 'var(--surface-2)', borderRadius: '6px',
-                fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: 1.6, color: 'var(--text)',
-                overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-              }}>{problem.solution}</pre>
-              {correct === true && (
-                <button
-                  className="pal-glow-pulse"
-                  onClick={() => {
-                    const next = SORTED_PROBLEMS.findIndex((p, i) => i > problemIdx && !solved.has(p.id));
-                    if (next !== -1) setProblemIdx(next);
-                  }}
-                  style={{
-                    marginTop: '0.75rem', padding: '0.5rem 1.25rem', borderRadius: '6px',
-                    fontWeight: 600, fontSize: '0.82rem', background: 'var(--teal)',
-                    color: '#fff', border: 'none', cursor: 'pointer',
-                  }}
-                >Next unsolved →</button>
-              )}
-            </div>
           </div>
         )}
 
