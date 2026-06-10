@@ -31,7 +31,7 @@ export function Home({ onNavigate, onShowAuth }) {
         <div style={{
           position: 'absolute', top: '15%', left: '20%',
           width: 520, height: 520, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(36,87,214,0.09) 0%, transparent 70%)',
           animation: 'palLandingBgDrift 18s ease-in-out infinite',
           filter: 'blur(2px)',
         }} />
@@ -81,7 +81,7 @@ export function Home({ onNavigate, onShowAuth }) {
             background: 'var(--gradient-accent)',
             borderRadius: 6,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 10px rgba(99,102,241,0.35)',
+            boxShadow: '0 2px 8px rgba(36,87,214,0.3)',
           }}>
             <svg width="13" height="13" viewBox="0 0 26 26" fill="none" aria-hidden="true">
               <g stroke="#ffffff" strokeLinecap="round" strokeWidth="1.6">
