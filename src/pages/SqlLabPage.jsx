@@ -44,40 +44,64 @@ const DEBRIEF_BLOCKS = [
   },
 ];
 
-function renderDebrief(text) {
+function DebriefBlock({ block, body }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{
+      borderLeft: '3px solid ' + block.border,
+      background: block.bg,
+      borderRadius: '0 6px 6px 0',
+      overflow: 'hidden',
+      margin: '0.8rem 0 0',
+    }}>
+      <button
+        onClick={() => setOpen(function(o) { return !o; })}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '0.45rem 0.85rem', background: 'none', border: 'none',
+          cursor: 'pointer', textAlign: 'left',
+        }}
+      >
+        <span style={{
+          fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase',
+          letterSpacing: '0.09em', color: block.color,
+        }}>{block.label}</span>
+        <span style={{
+          fontSize: '0.62rem', color: block.color, opacity: 0.7,
+          display: 'inline-block', transition: 'transform 0.15s',
+          transform: open ? 'rotate(180deg)' : 'none',
+        }}>▾</span>
+      </button>
+      {open && (
+        <div style={{ padding: '0 0.85rem 0.6rem', fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.65 }}>
+          {renderInline(body)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DebriefPanel({ text }) {
   if (!text) return null;
-  return text.split('\n\n').map((para, i) => {
-    const trimmed = para.trim();
-    for (const block of DEBRIEF_BLOCKS) {
-      if (block.pattern.test(trimmed)) {
-        const body = trimmed.replace(block.pattern, '').replace(/^:\s*/, '').trim();
+  return (
+    <div>
+      {text.split('\n\n').map(function(para, i) {
+        var trimmed = para.trim();
+        for (var bi = 0; bi < DEBRIEF_BLOCKS.length; bi++) {
+          var block = DEBRIEF_BLOCKS[bi];
+          if (block.pattern.test(trimmed)) {
+            var body = trimmed.replace(block.pattern, '').replace(/^:\s*/, '').trim();
+            return <DebriefBlock key={i} block={block} body={body} />;
+          }
+        }
         return (
-          <div key={i} style={{
-            borderLeft: '3px solid ' + block.border,
-            background: block.bg,
-            borderRadius: '0 6px 6px 0',
-            padding: '0.6rem 0.85rem',
-            margin: '0.8rem 0 0',
-          }}>
-            <div style={{
-              fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase',
-              letterSpacing: '0.09em', color: block.color, marginBottom: '0.3rem',
-            }}>
-              {block.label}
-            </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.65 }}>
-              {renderInline(body)}
-            </div>
-          </div>
+          <p key={i} style={{ margin: i === 0 ? 0 : '0.6rem 0 0 0', fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.65 }}>
+            {renderInline(para)}
+          </p>
         );
-      }
-    }
-    return (
-      <p key={i} style={{ margin: i === 0 ? 0 : '0.6rem 0 0 0' }}>
-        {renderInline(para)}
-      </p>
-    );
-  });
+      })}
+    </div>
+  );
 }
 
 const SORTED_PROBLEMS = [...sqlLabProblems].sort((a, b) => DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty]);
@@ -1020,6 +1044,66 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           onRestore={q => { setQuery(q); saveQueryLS(problem.id, q); }}
         />
 
+        {/* Hints — in left panel so editor stays uninterrupted */}
+        {!revealed && (() => {
+          var maxH = ({ Easy: 1, Medium: 2, Hard: 5, Master: 5 })[problem.difficulty] || 1;
+          var availableHints = (problem.hints || []).length;
+          var hintCap = Math.min(maxH, availableHints);
+          var allExhausted = hintsShown >= hintCap;
+          if (availableHints === 0) return null;
+          return (
+            <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              {!allExhausted && (
+                <button
+                  onClick={function() { track('sql_hint_used', { problemId: problem.id, hintIndex: hintsShown + 1, difficulty: problem.difficulty }); setHintsShown(function(n) { return Math.min(n + 1, hintCap); }); }}
+                  style={{
+                    alignSelf: 'flex-start', padding: '0.4rem 0.85rem', borderRadius: '6px',
+                    fontWeight: 500, fontSize: '0.78rem',
+                    background: 'rgba(20,184,166,0.08)', color: 'var(--teal)',
+                    border: '1px solid rgba(20,184,166,0.25)', cursor: 'pointer',
+                  }}
+                >Hint {hintsShown + 1} of {hintCap}</button>
+              )}
+              {hintsShown > 0 && problem.hints && (
+                <>
+                  {problem.hints.slice(0, hintsShown).map(function(h, i) {
+                    return (
+                      <div key={i} style={{
+                        padding: '0.55rem 0.75rem', background: 'rgba(20,184,166,0.06)',
+                        border: '1px solid rgba(20,184,166,0.2)', borderRadius: '6px',
+                        borderLeft: '3px solid var(--teal)',
+                        fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.55,
+                      }}>
+                        <span style={{ fontWeight: 700, color: 'var(--teal)', marginRight: '0.4rem' }}>Hint {i + 1}:</span>
+                        {h}
+                      </div>
+                    );
+                  })}
+                  {problem.tags && problem.tags.length > 0 && (
+                    <div style={{
+                      padding: '0.45rem 0.75rem', background: 'var(--surface-2)',
+                      border: '1px solid var(--border)', borderRadius: '6px',
+                      fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex',
+                      alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap',
+                    }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-muted)', flexShrink: 0 }}>Concepts:</span>
+                      {problem.tags.map(function(t) {
+                        return (
+                          <span key={t} style={{
+                            padding: '1px 7px', borderRadius: '4px', fontSize: '0.72rem',
+                            background: 'var(--surface)', border: '1px solid var(--border)',
+                            color: 'var(--text-muted)',
+                          }}>{t}</span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })()}
+
         <div style={{ height: '1.5rem' }} />
       </div>
 
@@ -1083,36 +1167,16 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                   opacity: query.trim() ? 1 : 0.4,
                 }}
               >▶ Run</button>
-              {!revealed && (() => {
-                const maxH = { Easy: 1, Medium: 2, Hard: 5, Master: 5 }[problem.difficulty] || 1;
-                const availableHints = (problem.hints || []).length;
-                const hintCap = Math.min(maxH, availableHints);
-                const allExhausted = hintsShown >= hintCap;
-                return (
-                  <>
-                    {!allExhausted && (
-                      <button
-                        onClick={() => { track('sql_hint_used', { problemId: problem.id, hintIndex: hintsShown + 1, difficulty: problem.difficulty }); setHintsShown(n => Math.min(n + 1, hintCap)); }}
-                        style={{
-                          padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
-                          background: 'rgba(20,184,166,0.08)', color: 'var(--teal)',
-                          border: '1px solid rgba(20,184,166,0.25)', cursor: 'pointer',
-                        }}
-                      >Hint {hintsShown + 1} of {hintCap}</button>
-                    )}
-                    {hintsShown >= 1 && (
-                      <button
-                        onClick={() => { track('sql_answer_revealed', { problemId: problem.id, difficulty: problem.difficulty }); setRevealed(true); }}
-                        style={{
-                          padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
-                          background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)',
-                          cursor: 'pointer',
-                        }}
-                      >Show Solution</button>
-                    )}
-                  </>
-                );
-              })()}
+              {!revealed && hintsShown >= 1 && (
+                <button
+                  onClick={() => { track('sql_answer_revealed', { problemId: problem.id, difficulty: problem.difficulty }); setRevealed(true); }}
+                  style={{
+                    padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
+                    background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)',
+                    cursor: 'pointer',
+                  }}
+                >Show Solution</button>
+              )}
               {hasRun && correct === true && (
                 <span className="pal-success-ring" style={{ fontSize: '0.78rem', color: 'var(--green)', fontWeight: 600 }}>✓ Correct — well done</span>
               )}
@@ -1120,40 +1184,6 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Output does not match — check row count or column names</span>
               )}
             </div>
-
-            {/* Hints */}
-            {hintsShown > 0 && problem.hints && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                {problem.hints.slice(0, hintsShown).map((h, i) => (
-                  <div key={i} style={{
-                    padding: '0.55rem 0.75rem', background: 'rgba(20,184,166,0.06)',
-                    border: '1px solid rgba(20,184,166,0.2)', borderRadius: '6px',
-                    borderLeft: '3px solid var(--teal)',
-                    fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.55,
-                  }}>
-                    <span style={{ fontWeight: 700, color: 'var(--teal)', marginRight: '0.4rem' }}>Hint {i + 1}:</span>
-                    {h}
-                  </div>
-                ))}
-                {problem.tags && problem.tags.length > 0 && (
-                  <div style={{
-                    padding: '0.45rem 0.75rem', background: 'var(--surface-2)',
-                    border: '1px solid var(--border)', borderRadius: '6px',
-                    fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex',
-                    alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap',
-                  }}>
-                    <span style={{ fontWeight: 600, color: 'var(--text-muted)', flexShrink: 0 }}>Concepts:</span>
-                    {problem.tags.map(t => (
-                      <span key={t} style={{
-                        padding: '1px 7px', borderRadius: '4px', fontSize: '0.72rem',
-                        background: 'var(--surface)', border: '1px solid var(--border)',
-                        color: 'var(--text-muted)',
-                      }}>{t}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Run error */}
             {runError && (
@@ -1184,7 +1214,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
               padding: '0.85rem 1rem',
               fontSize: '0.83rem', lineHeight: 1.65, color: 'var(--text)',
             }}>
-              {renderDebrief(problem.debrief)}
+              <DebriefPanel text={problem.debrief} />
             </div>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem' }}>
               <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Model solution</div>
