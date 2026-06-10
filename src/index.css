@@ -14,11 +14,11 @@
   --border-subtle: #ece9e3;
   --border-strong: #cbc7bf;
 
-  /* Text hierarchy */
+  /* Text hierarchy — all values at ≥4.5:1 WCAG AA against --bg and --surface */
   --text: #111827;
   --text-secondary: #374151;
-  --text-muted: #6b7280;
-  --text-dim: #6b7280;
+  --text-muted: #595e6b;
+  --text-dim: #595e6b;
 
   /* Primary accent — indigo */
   --accent: #3730a3;
@@ -290,8 +290,10 @@ table { border-collapse: collapse; }
 .focus-mode .app-sidebar { display: none; }
 .focus-mode .app-main-wrapper { margin-left: 0; }
 
-/* SQL Lab — give app-main-wrapper a hard height so flex chain propagates */
+/* SQL Lab — hide sidebar entirely; panels own the full viewport */
+.sql-lab-mode .app-sidebar { display: none; }
 .sql-lab-mode .app-main-wrapper {
+  margin-left: 0;
   height: 100vh;
   overflow: hidden;
 }
@@ -303,38 +305,37 @@ table { border-collapse: collapse; }
   flex-direction: column;
   overflow: hidden;
 }
-/* SQL Lab — browse mode (full screen) */
+/* SQL Lab — browse mode (full screen, no sidebar offset) */
 .sql-lab-browse-panel {
   position: fixed;
   top: 0; bottom: 0;
-  left: var(--sidebar-w); right: 0;
+  left: 0; right: 0;
   overflow-y: auto;
   background: var(--bg);
   z-index: 5;
-  padding: 1.5rem 2rem;
+  padding: 1.5rem 2.5rem;
   box-sizing: border-box;
 }
-/* SQL Lab — solve mode: left = problem info, right = editor */
+/* SQL Lab — solve mode: 46/54 split across full viewport */
 .sql-lab-solve-left {
   position: fixed;
   top: 0; bottom: 0;
-  left: var(--sidebar-w);
-  right: 52vw;
+  left: 0; right: 54vw;
   overflow-y: auto;
   background: var(--bg);
   border-right: 1px solid var(--border);
   z-index: 5;
-  padding: 1.5rem 1.25rem 0 1.5rem;
+  padding: 1.5rem 1.25rem 0 1.75rem;
   box-sizing: border-box;
 }
 .sql-lab-solve-right {
   position: fixed;
   top: 0; bottom: 0;
-  left: 48vw; right: 0;
+  left: 46vw; right: 0;
   overflow-y: auto;
   background: var(--bg);
   z-index: 5;
-  padding: 1.5rem 1.5rem 0 1.25rem;
+  padding: 1.5rem 2rem 0 1.5rem;
   box-sizing: border-box;
 }
 @media (max-width: 900px) {
