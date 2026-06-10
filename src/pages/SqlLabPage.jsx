@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { datamarts } from '../data/sqlLabDatamarts.js';
 import { track } from '../utils/analytics.js';
@@ -90,6 +90,31 @@ const DIFF_COLOR = {
   Forensic: { bg: 'rgba(234,88,12,0.10)',                     text: '#ea580c',       border: 'rgba(234,88,12,0.35)' },
 };
 
+const DIFFICULTIES = ['Easy', 'Medium', 'Hard', 'Master', 'Forensic'];
+const ALL_DATAMARTS = [...new Set(SORTED_PROBLEMS.map(p => p.datamartId))].sort();
+
+// ─── localStorage helpers ─────────────────────────────────────────────────────
+
+function getStoredQuery(id) {
+  try { return localStorage.getItem('pal-sql-query-' + id) || ''; } catch { return ''; }
+}
+function saveQueryLS(id, q) {
+  try { localStorage.setItem('pal-sql-query-' + id, q); } catch {}
+}
+function getStoredSubs(id) {
+  try { return JSON.parse(localStorage.getItem('pal-sql-subs-' + id) || '[]'); } catch { return []; }
+}
+function addStoredSub(id, query, passed) {
+  try {
+    const subs = getStoredSubs(id);
+    subs.unshift({ query: query, passed: passed, ts: Date.now() });
+    if (subs.length > 15) subs.length = 15;
+    localStorage.setItem('pal-sql-subs-' + id, JSON.stringify(subs));
+  } catch {}
+}
+
+// ─── Shared components ────────────────────────────────────────────────────────
+
 function Badge({ label, style }) {
   return (
     <span style={{
@@ -167,120 +192,168 @@ function ResultsTable({ results }) {
   );
 }
 
-function SidebarProblemBtn({ p, globalIdx, isCurrent, isSolved, onSelect }) {
+// ─── Browse mode ──────────────────────────────────────────────────────────────
+
+function ProblemCard({ p, isSolved, onSelect }) {
   const ds = DIFF_COLOR[p.difficulty] || DIFF_COLOR.Easy;
   return (
-    <button
-      onClick={() => onSelect(globalIdx)}
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onSelect}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
+      className="pal-card-hover"
       style={{
-        width: '100%', display: 'flex', alignItems: 'flex-start', gap: '0.6rem',
-        padding: '0.6rem 0.875rem', border: 'none', borderBottom: '1px solid var(--border)',
-        background: isCurrent ? 'rgba(20,184,166,0.08)' : 'transparent',
-        cursor: 'pointer', textAlign: 'left',
-        borderLeft: isCurrent ? '3px solid var(--teal)' : '3px solid transparent',
-        transition: 'background 0.15s',
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderLeft: '3px solid ' + ds.text,
+        borderRadius: 'var(--radius)',
+        padding: '0.85rem 1rem',
+        cursor: 'pointer',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.35rem',
       }}
     >
-      <div style={{
-        width: 16, height: 16, borderRadius: '50%', flexShrink: 0, marginTop: 2,
-        background: isSolved ? 'var(--green)' : 'transparent',
-        border: isSolved ? 'none' : '1.5px solid var(--border)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '0.55rem', color: '#fff', fontWeight: 700,
-      }}>
-        {isSolved ? '✓' : ''}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          fontSize: '0.78rem', fontWeight: isCurrent ? 600 : 400, lineHeight: 1.4, marginBottom: '2px',
-          color: isCurrent ? 'var(--teal)' : 'var(--text-muted)',
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>
-          {globalIdx + 1}. {p.title}
-        </div>
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.65rem', fontWeight: 600, color: ds.text }}>{p.difficulty}</span>
-          <span style={{ fontSize: '0.65rem', color: 'var(--border)' }}>·</span>
-          {p.companyDomain ? (
+      {isSolved && (
+        <span style={{
+          position: 'absolute', top: '0.5rem', right: '0.6rem',
+          fontSize: '0.72rem', color: 'var(--green)', fontWeight: 700,
+        }}>✓</span>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+        <span style={{
+          fontSize: '0.63rem', fontWeight: 700, padding: '1px 7px', borderRadius: '99px',
+          background: ds.bg, color: ds.text, border: '1px solid ' + ds.border,
+        }}>{p.difficulty}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+          {p.companyDomain && (
             <img
-              src={`https://www.google.com/s2/favicons?domain=${p.companyDomain}&sz=32`}
+              src={'https://www.google.com/s2/favicons?domain=' + p.companyDomain + '&sz=32'}
               alt={p.company}
-              style={{ width: 12, height: 12, borderRadius: 2, objectFit: 'contain', verticalAlign: 'middle' }}
+              style={{ width: 11, height: 11, borderRadius: 2, objectFit: 'contain' }}
               onError={e => { e.currentTarget.style.display = 'none'; }}
             />
-          ) : null}
-          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{p.company}</span>
+          )}
+          <span style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontWeight: 500 }}>{p.company}</span>
         </div>
       </div>
-    </button>
+      <div style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>
+        {p.title}
+      </div>
+      {p.tags && p.tags.length > 0 && (
+        <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap', marginTop: '0.05rem' }}>
+          {p.tags.slice(0, 3).map(t => (
+            <span key={t} style={{
+              fontSize: '0.58rem', padding: '1px 5px', borderRadius: '3px',
+              background: 'var(--surface-2)', border: '1px solid var(--border)',
+              color: 'var(--text-muted)',
+            }}>{t}</span>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
-const DATAMARTS = ['all', ...new Set(sqlLabProblems.map(p => p.datamartId))];
+function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
+  const [filterDiffs, setFilterDiffs] = useState(new Set());
+  const [filterDM, setFilterDM] = useState(new Set());
+  const [search, setSearch] = useState('');
 
-function ProblemSidebar({ problems, currentIdx, solved, filterDiffs, onToggleDiff, filterDatamarts, onToggleDatamart, onSelect }) {
-  const nonMaster = problems.filter(p => p.difficulty !== 'Master');
-  const masterProblems = problems.filter(p => p.difficulty === 'Master');
-  const hasDiffFilter = filterDiffs.size > 0;
-  const hasDatamartFilter = filterDatamarts.size > 0;
-  const filtered = (filterDiffs.has('Master')
-    ? masterProblems
-    : nonMaster.filter(p => !hasDiffFilter || filterDiffs.has(p.difficulty))
-  ).filter(p => !hasDatamartFilter || filterDatamarts.has(p.datamartId));
-  const solvedCount = problems.filter(p => solved.has(p.id)).length;
+  const solvedCount = SORTED_PROBLEMS.filter(p => solved.has(p.id)).length;
+
+  const filtered = SORTED_PROBLEMS.filter(p => {
+    if (filterDiffs.size > 0 && !filterDiffs.has(p.difficulty)) return false;
+    if (filterDM.size > 0 && !filterDM.has(p.datamartId)) return false;
+    if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  function toggleDiff(d) {
+    setFilterDiffs(prev => { const n = new Set(prev); if (n.has(d)) n.delete(d); else n.add(d); return n; });
+  }
+  function toggleDM(dm) {
+    setFilterDM(prev => { const n = new Set(prev); if (n.has(dm)) n.delete(dm); else n.add(dm); return n; });
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-
-      {/* Progress */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.875rem' }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Progress</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem', marginBottom: '0.5rem' }}>
-          <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--teal)' }}>{solvedCount}</span>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>/ {problems.length} solved</span>
+    <div className="sql-lab-browse-panel">
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', flexShrink: 0 }}>
+        <button
+          onClick={onBack}
+          style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.78rem', color: 'var(--text-muted)', cursor: 'pointer' }}
+        >← Back</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ width: 28, height: 28, background: 'var(--teal)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#fff', fontWeight: 700 }}>{'<>'}</div>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--teal)', letterSpacing: '-0.02em' }}>SQL Lab</span>
         </div>
-        <div style={{ height: 6, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${solvedCount / problems.length * 100}%`, background: 'var(--teal)', borderRadius: 99, transition: 'width 0.4s ease' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.25rem' }}>
+          <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--teal)' }}>{solvedCount}</span>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>/ {SORTED_PROBLEMS.length} solved</span>
+          <div style={{ width: 72, height: 5, background: 'var(--border)', borderRadius: 99, overflow: 'hidden', marginLeft: '0.2rem' }}>
+            <div style={{ height: '100%', width: (solvedCount / SORTED_PROBLEMS.length * 100) + '%', background: 'var(--teal)', borderRadius: 99 }} />
+          </div>
         </div>
+        <button
+          onClick={onShowPlan}
+          style={{ marginLeft: 'auto', background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.75rem', fontSize: '0.78rem', fontWeight: 600, color: 'var(--teal)', cursor: 'pointer' }}
+        >Study Plan</button>
       </div>
 
-      {/* Difficulty filter — multi-select */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.875rem' }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Difficulty</div>
-        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-          {['Easy', 'Medium', 'Hard', 'Master', 'Forensic'].map(d => {
-            const active = filterDiffs.has(d);
-            const ds = DIFF_COLOR[d];
-            return (
-              <button
-                key={d}
-                onClick={() => onToggleDiff(d)}
-                style={{
-                  padding: '3px 10px', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 600,
-                  cursor: 'pointer', border: '1px solid',
-                  background: active ? (ds ? ds.bg : 'var(--surface-2)') : 'var(--surface-2)',
-                  color: active ? (ds ? ds.text : 'var(--text-muted)') : 'var(--text-muted)',
-                  borderColor: active ? (ds ? ds.border : 'var(--border)') : 'var(--border)',
-                }}
-              >{active ? '✓ ' : ''}{d}</button>
-            );
-          })}
-        </div>
+      {/* Search */}
+      <div style={{ marginBottom: '1rem' }}>
+        <input
+          type="text"
+          placeholder="Search problems…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{
+            width: '100%', maxWidth: 340, padding: '0.4rem 0.75rem',
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: '6px', fontSize: '0.82rem', color: 'var(--text)',
+            outline: 'none', boxSizing: 'border-box',
+          }}
+        />
       </div>
 
-      {/* Datamart filter — multi-select */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.875rem' }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Company</div>
+      {/* Difficulty filter */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+        <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>Difficulty</span>
+        {DIFFICULTIES.map(d => {
+          const active = filterDiffs.has(d);
+          const ds = DIFF_COLOR[d];
+          return (
+            <button
+              key={d}
+              onClick={() => toggleDiff(d)}
+              style={{
+                padding: '2px 10px', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 600,
+                cursor: 'pointer', border: '1px solid',
+                background: active ? ds.bg : 'var(--surface-2)',
+                color: active ? ds.text : 'var(--text-muted)',
+                borderColor: active ? ds.border : 'var(--border)',
+              }}
+            >{active ? '✓ ' : ''}{d}</button>
+          );
+        })}
+      </div>
+
+      {/* Company/datamart filter */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+        <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0, marginTop: '4px' }}>Company</span>
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-          {DATAMARTS.filter(dm => dm !== 'all').map(dm => {
-            const active = filterDatamarts.has(dm);
-            const count = problems.filter(p => p.datamartId === dm).length;
+          {ALL_DATAMARTS.map(dm => {
+            const active = filterDM.has(dm);
+            const count = SORTED_PROBLEMS.filter(p => p.datamartId === dm).length;
             return (
               <button
                 key={dm}
-                onClick={() => onToggleDatamart(dm)}
+                onClick={() => toggleDM(dm)}
                 style={{
-                  padding: '3px 9px', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 600,
+                  padding: '2px 9px', borderRadius: '99px', fontSize: '0.68rem', fontWeight: 600,
                   cursor: 'pointer', border: '1px solid',
                   background: active ? 'rgba(20,184,166,0.1)' : 'var(--surface-2)',
                   color: active ? 'var(--teal)' : 'var(--text-muted)',
@@ -292,44 +365,85 @@ function ProblemSidebar({ problems, currentIdx, solved, filterDiffs, onToggleDif
         </div>
       </div>
 
-      {/* Problem list */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
-        <div style={{ padding: '0.5rem 0.875rem', borderBottom: '1px solid var(--border)', fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          {filtered.length} problem{filtered.length !== 1 ? 's' : ''}
-        </div>
-        {filtered.map(p => {
-          const globalIdx = problems.findIndex(x => x.id === p.id);
-          return (
-            <SidebarProblemBtn
-              key={p.id} p={p} globalIdx={globalIdx}
-              isCurrent={globalIdx === currentIdx}
-              isSolved={solved.has(p.id)}
-              onSelect={onSelect}
-            />
-          );
-        })}
-        {filtered.length === 0 && (
-          <div style={{ padding: '1rem', fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center' }}>No problems match</div>
-        )}
+      {/* Count */}
+      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 500 }}>
+        {filtered.length === SORTED_PROBLEMS.length
+          ? SORTED_PROBLEMS.length + ' problems'
+          : filtered.length + ' of ' + SORTED_PROBLEMS.length + ' problems'}
       </div>
 
-      {/* Challenge Vault — Master problems (hidden when Master filter is active, they show in main list) */}
-      {masterProblems.filter(p => !hasDatamartFilter || filterDatamarts.has(p.datamartId)).length > 0 && !filterDiffs.has('Master') && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--purple-border, rgba(139,92,246,0.25))', borderRadius: '10px', overflow: 'hidden' }}>
-          <div style={{ padding: '0.5rem 0.875rem', borderBottom: '1px solid var(--border)', fontSize: '0.68rem', fontWeight: 700, color: 'var(--purple, #8b5cf6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Challenge Vault
+      {/* Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
+        gap: '0.6rem',
+        paddingBottom: '2rem',
+      }}>
+        {filtered.map(p => (
+          <ProblemCard key={p.id} p={p} isSolved={solved.has(p.id)} onSelect={() => onSelect(p.id)} />
+        ))}
+        {filtered.length === 0 && (
+          <div style={{ gridColumn: '1/-1', padding: '2rem', textAlign: 'center', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+            No problems match these filters.
           </div>
-          {masterProblems.filter(p => !hasDatamartFilter || filterDatamarts.has(p.datamartId)).map(p => {
-            const globalIdx = problems.findIndex(x => x.id === p.id);
-            return (
-              <SidebarProblemBtn
-                key={p.id} p={p} globalIdx={globalIdx}
-                isCurrent={globalIdx === currentIdx}
-                isSolved={solved.has(p.id)}
-                onSelect={onSelect}
-              />
-            );
-          })}
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Submissions history ──────────────────────────────────────────────────────
+
+function SubmissionsHistory({ problemId, onRestore }) {
+  const [open, setOpen] = useState(false);
+  const subs = getStoredSubs(problemId);
+  if (subs.length === 0) return null;
+
+  function fmtTime(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  return (
+    <div style={{ marginTop: '0.75rem', border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '0.45rem 0.75rem', background: 'var(--surface-2)', border: 'none',
+          cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 500,
+        }}
+      >
+        <span>Past attempts ({subs.length})</span>
+        <span style={{ fontSize: '0.62rem', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
+      </button>
+      {open && (
+        <div style={{ padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', maxHeight: 220, overflowY: 'auto' }}>
+          {subs.map((s, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'flex-start', gap: '0.45rem',
+              padding: '0.4rem 0.5rem', background: 'var(--surface)', borderRadius: '4px',
+              border: '1px solid var(--border)',
+            }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: s.passed ? 'var(--green)' : 'var(--red)', flexShrink: 0, marginTop: '1px' }}>
+                {s.passed ? '✓' : '✗'}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', marginBottom: '2px' }}>{fmtTime(s.ts)}</div>
+                <pre style={{ margin: 0, fontSize: '0.67rem', fontFamily: 'monospace', color: 'var(--text-muted)', whiteSpace: 'pre-wrap', wordBreak: 'break-all', overflow: 'hidden', maxHeight: 56, lineHeight: 1.4 }}>
+                  {s.query.length > 200 ? s.query.slice(0, 200) + '…' : s.query}
+                </pre>
+              </div>
+              <button
+                onClick={() => onRestore(s.query)}
+                style={{
+                  flexShrink: 0, padding: '2px 7px', borderRadius: '4px', fontSize: '0.62rem',
+                  fontWeight: 600, background: 'var(--surface-2)', border: '1px solid var(--border)',
+                  color: 'var(--text-muted)', cursor: 'pointer',
+                }}
+              >Restore</button>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -470,7 +584,10 @@ function StudyPlanModal({ solved, onClose, onApply }) {
   );
 }
 
+// ─── Main export ──────────────────────────────────────────────────────────────
+
 export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
+  const [mode, setMode] = useState(initialProblemId ? 'solve' : 'browse');
   const [problemIdx, setProblemIdx] = useState(function () {
     if (initialProblemId) {
       var idx = SORTED_PROBLEMS.findIndex(function (p) { return p.id === initialProblemId; });
@@ -489,8 +606,6 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
   const [hasRun, setHasRun] = useState(false);
   const [correct, setCorrect] = useState(null);
   const [hintsShown, setHintsShown] = useState(0);
-  const [filterDiffs, setFilterDiffs] = useState(new Set());
-  const [filterDatamarts, setFilterDatamarts] = useState(new Set());
   const timerRef = useRef(null);
   const timerStartRef = useRef(null);
   const [elapsedSec, setElapsedSec] = useState(0);
@@ -531,14 +646,12 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
         localStorage.setItem('pal-sql-lab-times-v1', JSON.stringify(stored));
       } catch {}
     }
-    // Record solve date for heatmap
     try {
       const today = new Date().toISOString().slice(0, 10);
       const dateDiary = JSON.parse(localStorage.getItem('pal-sql-lab-dates-v1') || '{}');
       dateDiary[today] = (dateDiary[today] || 0) + 1;
       localStorage.setItem('pal-sql-lab-dates-v1', JSON.stringify(dateDiary));
     } catch {}
-    // Analytics
     track('sql_problem_solved', { problemId: problem.id, difficulty: problem.difficulty, datamartId: problem.datamartId, elapsedSec: elapsed });
     setSolved(prev => {
       const next = new Set(prev);
@@ -548,7 +661,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
     });
   }, [correct]);
 
-  // Re-init DB on problem change
+  // Re-init DB on problem change + restore saved query
   useEffect(() => {
     if (!problem || !dm) return;
     let cancelled = false;
@@ -559,7 +672,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
     setRevealed(false);
     setHasRun(false);
     setCorrect(null);
-    setQuery('');
+    setQuery(getStoredQuery(problem.id));
     setExpectedSample(null);
     setHintsShown(0);
     setElapsedSec(0);
@@ -581,7 +694,6 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
         if (cancelled) return;
         const database = new SQL.Database();
 
-        // Create tables and insert seed data via prepared statements
         Object.entries(dm.tables).forEach(([tableName, table]) => {
           database.run(table.schema + ';');
           if (table.rows.length > 0) {
@@ -593,7 +705,6 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           }
         });
 
-        // Silently run solution to populate expected output sample
         let sample = null;
         try {
           const solRes = database.exec(problem.solution);
@@ -629,12 +740,15 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
       setResults(resultData);
       setRunError(null);
       setHasRun(true);
-      setCorrect(validateResults(resultData, problem));
+      const isCorrect = validateResults(resultData, problem);
+      setCorrect(isCorrect);
+      addStoredSub(problem.id, query, isCorrect);
     } catch (e) {
       setRunError(e.message);
       setResults(null);
       setHasRun(true);
       setCorrect(false);
+      addStoredSub(problem.id, query, false);
     }
   }
 
@@ -675,7 +789,9 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
       const el = e.target;
       const start = el.selectionStart;
       const end = el.selectionEnd;
-      setQuery(el.value.substring(0, start) + '  ' + el.value.substring(end));
+      const newQ = el.value.substring(0, start) + '  ' + el.value.substring(end);
+      setQuery(newQ);
+      if (problem) saveQueryLS(problem.id, newQ);
       requestAnimationFrame(() => {
         el.selectionStart = start + 2;
         el.selectionEnd = start + 2;
@@ -685,309 +801,348 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
 
   if (!problem) return null;
 
+  // ── Browse mode ──────────────────────────────────────────────────────────────
+  if (mode === 'browse') {
+    return (
+      <>
+        <SqlLabBrowserView
+          onBack={onBack}
+          onSelect={id => {
+            const idx = SORTED_PROBLEMS.findIndex(p => p.id === id);
+            if (idx >= 0) setProblemIdx(idx);
+            setMode('solve');
+          }}
+          solved={solved}
+          onShowPlan={() => setShowPlanModal(true)}
+        />
+        {showPlanModal && <StudyPlanModal solved={solved} onClose={() => setShowPlanModal(false)} onApply={() => setShowPlanModal(false)} />}
+      </>
+    );
+  }
+
+  // ── Solve mode ───────────────────────────────────────────────────────────────
   return (
     <>
-    <div className="sql-lab-main-panel">
+      {/* LEFT: problem info */}
+      <div className="sql-lab-solve-left">
 
-      {/* Header — never scrolls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap', flexShrink: 0 }}>
-        <button
-          onClick={onBack}
-          style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.78rem', color: 'var(--text-muted)', cursor: 'pointer' }}
-        >
-          ← Back
-        </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{ width: 28, height: 28, background: 'var(--teal)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#fff', fontWeight: 700 }}>{'<>'}</div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--teal)', letterSpacing: '-0.02em' }}>SQL Lab</span>
+        {/* Nav bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.1rem', flexShrink: 0 }}>
+          <button
+            onClick={() => setMode('browse')}
+            style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.78rem', color: 'var(--text-muted)', cursor: 'pointer' }}
+          >← Browse</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <div style={{ width: 24, height: 24, background: 'var(--teal)', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', color: '#fff', fontWeight: 700 }}>{'<>'}</div>
+            <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--teal)' }}>SQL Lab</span>
+          </div>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <button
+              onClick={() => { if (problemIdx > 0) setProblemIdx(problemIdx - 1); }}
+              disabled={problemIdx === 0}
+              style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '4px', width: 26, height: 26, cursor: problemIdx > 0 ? 'pointer' : 'not-allowed', color: 'var(--text-muted)', opacity: problemIdx > 0 ? 1 : 0.35, fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >‹</button>
+            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', minWidth: 38, textAlign: 'center' }}>{problemIdx + 1}/{SORTED_PROBLEMS.length}</span>
+            <button
+              onClick={() => { if (problemIdx < SORTED_PROBLEMS.length - 1) setProblemIdx(problemIdx + 1); }}
+              disabled={problemIdx === SORTED_PROBLEMS.length - 1}
+              style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '4px', width: 26, height: 26, cursor: problemIdx < SORTED_PROBLEMS.length - 1 ? 'pointer' : 'not-allowed', color: 'var(--text-muted)', opacity: problemIdx < SORTED_PROBLEMS.length - 1 ? 1 : 0.35, fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >›</button>
+          </div>
         </div>
-        <button
-          onClick={() => setShowPlanModal(true)}
-          style={{ marginLeft: 'auto', background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.75rem', fontSize: '0.78rem', fontWeight: 600, color: 'var(--teal)', cursor: 'pointer' }}
-        >
-          Study Plan
-        </button>
-      </div>
-      {/* Scrollable content */}
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '1.5rem' }}>
 
-          {/* Problem card */}
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1.25rem', borderLeft: '3px solid ' + diffStyle.text }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-              <Badge label={problem.difficulty} style={{ background: diffStyle.bg, color: diffStyle.text, borderColor: diffStyle.border }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                {problem.companyDomain && (
-                  <img
-                    src={`https://www.google.com/s2/favicons?domain=${problem.companyDomain}&sz=32`}
-                    alt={problem.company}
-                    style={{ width: 14, height: 14, borderRadius: 2, objectFit: 'contain' }}
-                    onError={e => { e.currentTarget.style.display = 'none'; }}
-                  />
-                )}
-                <Badge label={problem.company} style={{ background: 'rgba(67,56,202,0.08)', color: 'var(--accent)', borderColor: 'rgba(67,56,202,0.2)' }} />
-              </div>
-              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                {problem.roles.map(r => (
-                  <span key={r} style={{ fontSize: '0.65rem', color: 'var(--text-muted)', background: 'var(--surface-2)', border: '1px solid var(--border)', padding: '1px 6px', borderRadius: '4px' }}>{r}</span>
-                ))}
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', margin: '0 0 0.6rem' }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Problem {problemIdx + 1} of {SORTED_PROBLEMS.length}</span>
-              <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: 'var(--text)' }}>{problem.title}</h2>
-            </div>
-            <p style={{ fontSize: '0.83rem', lineHeight: 1.65, color: 'var(--text-muted)', margin: 0 }}>{problem.prompt}</p>
-
-            {problem.format === 'forensic' && (
-              <div style={{ marginTop: '0.75rem', border: '1.5px solid rgba(234,88,12,0.45)', borderRadius: '8px', overflow: 'hidden' }}>
-                <div style={{ padding: '0.35rem 0.75rem', background: 'rgba(234,88,12,0.12)', fontSize: '0.68rem', fontWeight: 700, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid rgba(234,88,12,0.2)' }}>
-                  ⚠ Broken query — in production
-                </div>
-                <pre style={{ margin: 0, padding: '0.75rem', background: 'var(--surface-2)', fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: 1.6, color: 'var(--text)', overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{problem.brokenQuery}</pre>
-                {problem.brokenOutputNote && (
-                  <div style={{ padding: '0.4rem 0.75rem', background: 'rgba(234,88,12,0.06)', fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px solid rgba(234,88,12,0.15)', fontStyle: 'italic' }}>
-                    {problem.brokenOutputNote}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <SchemaAccordion dm={dm} open={schemaOpen} onToggle={() => setSchemaOpen(o => !o)} />
-
-            {/* Expected output */}
-            <div style={{ marginTop: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--surface-2)', borderRadius: '6px', border: '1px solid var(--border)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expected output</span>
-                <span style={{ fontSize: '0.65rem', color: 'var(--border)' }}>·</span>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{problem.expectedRowCount} row{problem.expectedRowCount !== 1 ? 's' : ''}</span>
-                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginLeft: '0.25rem' }}>
-                  {problem.expectedColumns.map(col => (
-                    <span key={col} style={{ fontSize: '0.65rem', fontFamily: 'monospace', padding: '1px 6px', borderRadius: '3px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--teal)' }}>{col}</span>
-                  ))}
-                </div>
-              </div>
-              {expectedSample && (
-                <div style={{ overflowX: 'auto', borderRadius: '4px', border: '1px solid var(--border)' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem', fontFamily: 'monospace' }}>
-                    <thead>
-                      <tr style={{ background: 'var(--surface)' }}>
-                        {expectedSample.columns.map(col => (
-                          <th key={col} style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 600, fontSize: '0.65rem', color: 'var(--teal)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{col}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {expectedSample.rows.map((row, ri) => (
-                        <tr key={ri} style={{ borderBottom: ri < expectedSample.rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                          {row.map((cell, ci) => (
-                            <td key={ci} style={{ padding: '3px 8px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                              {cell === null ? <span style={{ color: 'var(--border)', fontStyle: 'italic' }}>NULL</span> : String(cell)}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+        {/* Problem card */}
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem 1.15rem', borderLeft: '3px solid ' + diffStyle.text, marginBottom: '0.65rem' }}>
+          {/* Meta row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+            <Badge label={problem.difficulty} style={{ background: diffStyle.bg, color: diffStyle.text, borderColor: diffStyle.border }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {problem.companyDomain && (
+                <img
+                  src={`https://www.google.com/s2/favicons?domain=${problem.companyDomain}&sz=32`}
+                  alt={problem.company}
+                  style={{ width: 14, height: 14, borderRadius: 2, objectFit: 'contain' }}
+                  onError={e => { e.currentTarget.style.display = 'none'; }}
+                />
               )}
+              <Badge label={problem.company} style={{ background: 'rgba(67,56,202,0.08)', color: 'var(--accent)', borderColor: 'rgba(67,56,202,0.2)' }} />
             </div>
-
-            {problem.sqliteNote && (
-              <div style={{ marginTop: '0.6rem', padding: '0.4rem 0.6rem', borderRadius: '4px', background: 'var(--surface-2)', fontSize: '0.7rem', color: 'var(--text-muted)', borderLeft: '2px solid var(--teal)' }}>
-                {problem.sqliteNote}
-              </div>
-            )}
-            <div style={{ marginTop: '0.6rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              {elapsedSec > 0
-                ? `⏱ ${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} elapsed`
-                : `⏱ ~${problem.estimatedMin} min`
-              } &nbsp;·&nbsp; Ctrl+Enter to run
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              {problem.roles.map(r => (
+                <span key={r} style={{ fontSize: '0.62rem', color: 'var(--text-muted)', background: 'var(--surface-2)', border: '1px solid var(--border)', padding: '1px 6px', borderRadius: '4px' }}>{r}</span>
+              ))}
             </div>
           </div>
+          {/* Title */}
+          <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.55rem', color: 'var(--text)', lineHeight: 1.3 }}>{problem.title}</h2>
+          {/* Prompt */}
+          <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--text-muted)', margin: 0 }}>{problem.prompt}</p>
 
-          {/* Editor + results */}
-          {sqlLoading && (
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1.5rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Loading SQL engine…
-            </div>
-          )}
-          {sqlError && (
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem', fontSize: '0.8rem', color: 'var(--red)' }}>
-              {sqlError}
-            </div>
-          )}
-          {!sqlLoading && !sqlError && (
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <textarea
-                value={query}
-                onChange={e => { startTimer(); setQuery(e.target.value); }}
-                onKeyDown={handleKeyDown}
-                spellCheck={false}
-                placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Ctrl+Enter to run' : '-- Write your SQL here\n-- Ctrl+Enter to run'}
-                style={{
-                  width: '100%', minHeight: 280, resize: 'vertical', fontFamily: 'monospace',
-                  fontSize: '0.82rem', lineHeight: 1.6, padding: '0.75rem',
-                  background: 'var(--surface-2)', border: '1px solid rgba(20,184,166,0.3)',
-                  borderRadius: '6px', color: 'var(--text)', outline: 'none', boxSizing: 'border-box',
-                }}
-              />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                <button
-                  onClick={runQuery}
-                  disabled={!query.trim()}
-                  style={{
-                    padding: '0.45rem 1rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem',
-                    background: 'var(--teal)', color: '#fff', border: 'none', cursor: 'pointer',
-                    opacity: query.trim() ? 1 : 0.4,
-                  }}
-                >
-                  ▶ Run
-                </button>
-                {!revealed && (() => {
-                  const maxH = { Easy: 1, Medium: 2, Hard: 5, Master: 5 }[problem.difficulty] || 1;
-                  const availableHints = (problem.hints || []).length;
-                  const hintCap = Math.min(maxH, availableHints);
-                  const allExhausted = hintsShown >= hintCap;
-                  return (
-                    <>
-                      {!allExhausted && (
-                        <button
-                          onClick={() => { track('sql_hint_used', { problemId: problem.id, hintIndex: hintsShown + 1, difficulty: problem.difficulty }); setHintsShown(n => Math.min(n + 1, hintCap)); }}
-                          style={{
-                            padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
-                            background: 'rgba(20,184,166,0.08)', color: 'var(--teal)',
-                            border: '1px solid rgba(20,184,166,0.25)', cursor: 'pointer',
-                          }}
-                        >
-                          Hint {hintsShown + 1} of {hintCap}
-                        </button>
-                      )}
-                      {hintsShown >= 1 && (
-                        <button
-                          onClick={() => { track('sql_answer_revealed', { problemId: problem.id, difficulty: problem.difficulty }); setRevealed(true); }}
-                          style={{
-                            padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
-                            background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Show Solution
-                        </button>
-                      )}
-                    </>
-                  );
-                })()}
-                {hasRun && correct === true && (
-                  <span className="pal-success-ring" style={{ fontSize: '0.78rem', color: 'var(--green)', fontWeight: 600 }}>✓ Correct — well done</span>
-                )}
-                {hasRun && correct === false && !runError && (
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Output does not match — check row count or column names</span>
-                )}
+          {/* Forensic broken query */}
+          {problem.format === 'forensic' && (
+            <div style={{ marginTop: '0.75rem', border: '1.5px solid rgba(234,88,12,0.45)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ padding: '0.35rem 0.75rem', background: 'rgba(234,88,12,0.12)', fontSize: '0.68rem', fontWeight: 700, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid rgba(234,88,12,0.2)' }}>
+                ⚠ Broken query — in production
               </div>
-              {hintsShown > 0 && problem.hints && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  {problem.hints.slice(0, hintsShown).map((h, i) => (
-                    <div key={i} style={{
-                      padding: '0.55rem 0.75rem', background: 'rgba(20,184,166,0.06)',
-                      border: '1px solid rgba(20,184,166,0.2)', borderRadius: '6px',
-                      borderLeft: '3px solid var(--teal)',
-                      fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.55,
-                    }}>
-                      <span style={{ fontWeight: 700, color: 'var(--teal)', marginRight: '0.4rem' }}>Hint {i + 1}:</span>
-                      {h}
-                    </div>
-                  ))}
-                  {problem.tags && problem.tags.length > 0 && (
-                    <div style={{
-                      padding: '0.45rem 0.75rem', background: 'var(--surface-2)',
-                      border: '1px solid var(--border)', borderRadius: '6px',
-                      fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex',
-                      alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap',
-                    }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-muted)', flexShrink: 0 }}>Concepts:</span>
-                      {problem.tags.map(t => (
-                        <span key={t} style={{
-                          padding: '1px 7px', borderRadius: '4px', fontSize: '0.72rem',
-                          background: 'var(--surface)', border: '1px solid var(--border)',
-                          color: 'var(--text-muted)',
-                        }}>{t}</span>
+              <pre style={{ margin: 0, padding: '0.75rem', background: 'var(--surface-2)', fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: 1.6, color: 'var(--text)', overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{problem.brokenQuery}</pre>
+              {problem.brokenOutputNote && (
+                <div style={{ padding: '0.4rem 0.75rem', background: 'rgba(234,88,12,0.06)', fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px solid rgba(234,88,12,0.15)', fontStyle: 'italic' }}>
+                  {problem.brokenOutputNote}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Schema accordion */}
+        <SchemaAccordion dm={dm} open={schemaOpen} onToggle={() => setSchemaOpen(o => !o)} />
+
+        {/* Expected output */}
+        <div style={{ marginTop: '0.65rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+          <div style={{ padding: '0.4rem 0.75rem', background: 'var(--surface-2)', borderBottom: expectedSample ? '1px solid var(--border)' : 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expected output</span>
+            <span style={{ fontSize: '0.6rem', color: 'var(--border)' }}>·</span>
+            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{problem.expectedRowCount} row{problem.expectedRowCount !== 1 ? 's' : ''}</span>
+            <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap', marginLeft: '0.2rem' }}>
+              {problem.expectedColumns.map(col => (
+                <span key={col} style={{ fontSize: '0.6rem', fontFamily: 'monospace', padding: '1px 5px', borderRadius: '3px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--teal)' }}>{col}</span>
+              ))}
+            </div>
+          </div>
+          {expectedSample && (
+            <div style={{ overflowX: 'auto', maxHeight: 180, overflowY: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem', fontFamily: 'monospace' }}>
+                <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+                  <tr style={{ background: 'var(--surface)' }}>
+                    {expectedSample.columns.map(col => (
+                      <th key={col} style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 600, fontSize: '0.63rem', color: 'var(--teal)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{col}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {expectedSample.rows.map((row, ri) => (
+                    <tr key={ri} style={{ borderBottom: ri < expectedSample.rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                      {row.map((cell, ci) => (
+                        <td key={ci} style={{ padding: '3px 8px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                          {cell === null ? <span style={{ color: 'var(--border)', fontStyle: 'italic' }}>NULL</span> : String(cell)}
+                        </td>
                       ))}
-                    </div>
-                  )}
-                </div>
-              )}
-              {runError && (
-                <div style={{ padding: '0.6rem 0.75rem', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '6px', fontSize: '0.78rem', color: 'var(--red)', fontFamily: 'monospace' }}>
-                  {runError}
-                </div>
-              )}
-              {results && !runError && (
-                <div style={{ border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden' }}>
-                  <div style={{ padding: '4px 10px', background: 'var(--surface-2)', fontSize: '0.7rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>
-                    {results.rows.length} row{results.rows.length !== 1 ? 's' : ''}
-                  </div>
-                  <ResultsTable results={results} />
-                </div>
-              )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
+        </div>
 
-          {/* Debrief */}
-          {revealed && (
-            <div className="pal-reveal-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <div style={{
-                borderLeft: '3px solid var(--discovery, #E8A033)',
-                background: 'rgba(232,160,51,0.07)',
-                borderRadius: '0 8px 8px 0',
-                padding: '0.85rem 1rem',
-                fontSize: '0.83rem', lineHeight: 1.65, color: 'var(--text)',
-              }}>
-                {renderDebrief(problem.debrief)}
-              </div>
-              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem' }}>
-                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Model solution</div>
-                <pre style={{
-                  margin: 0, padding: '0.75rem', background: 'var(--surface-2)', borderRadius: '6px',
-                  fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: 1.6, color: 'var(--text)',
-                  overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                }}>{problem.solution}</pre>
-                {correct === true && (
-                  <button
-                    className="pal-glow-pulse"
-                    onClick={() => {
-                      const next = SORTED_PROBLEMS.findIndex((p, i) => i > problemIdx && !solved.has(p.id));
-                      if (next !== -1) setProblemIdx(next);
-                    }}
-                    style={{
-                      marginTop: '0.75rem', padding: '0.5rem 1.25rem', borderRadius: '6px',
-                      fontWeight: 600, fontSize: '0.82rem', background: 'var(--teal)',
-                      color: '#fff', border: 'none', cursor: 'pointer',
-                    }}
-                  >
-                    Next unsolved →
-                  </button>
+        {/* SQLite note */}
+        {problem.sqliteNote && (
+          <div style={{ marginTop: '0.55rem', padding: '0.4rem 0.6rem', borderRadius: '4px', background: 'var(--surface-2)', fontSize: '0.7rem', color: 'var(--text-muted)', borderLeft: '2px solid var(--teal)' }}>
+            {problem.sqliteNote}
+          </div>
+        )}
+
+        {/* Submissions history */}
+        <SubmissionsHistory
+          problemId={problem.id}
+          onRestore={q => { setQuery(q); saveQueryLS(problem.id, q); }}
+        />
+
+        <div style={{ height: '1.5rem' }} />
+      </div>
+
+      {/* RIGHT: editor */}
+      <div className="sql-lab-solve-right">
+
+        {/* Timer row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexShrink: 0 }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            {elapsedSec > 0
+              ? `⏱ ${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} elapsed`
+              : `⏱ ~${problem.estimatedMin} min`
+            }{' · Ctrl+Enter to run'}
+          </div>
+          <button
+            onClick={() => setShowPlanModal(true)}
+            style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.25rem 0.65rem', fontSize: '0.72rem', fontWeight: 600, color: 'var(--teal)', cursor: 'pointer' }}
+          >Study Plan</button>
+        </div>
+
+        {/* SQL engine loading/error */}
+        {sqlLoading && (
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1.5rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            Loading SQL engine…
+          </div>
+        )}
+        {sqlError && (
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem', fontSize: '0.8rem', color: 'var(--red)' }}>
+            {sqlError}
+          </div>
+        )}
+
+        {!sqlLoading && !sqlError && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <textarea
+              value={query}
+              onChange={e => {
+                startTimer();
+                setQuery(e.target.value);
+                if (problem) saveQueryLS(problem.id, e.target.value);
+              }}
+              onKeyDown={handleKeyDown}
+              spellCheck={false}
+              placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Ctrl+Enter to run' : '-- Write your SQL here\n-- Ctrl+Enter to run'}
+              style={{
+                width: '100%', minHeight: 300, resize: 'vertical', fontFamily: 'monospace',
+                fontSize: '0.82rem', lineHeight: 1.6, padding: '0.75rem',
+                background: 'var(--surface-2)', border: '1px solid rgba(20,184,166,0.3)',
+                borderRadius: '6px', color: 'var(--text)', outline: 'none', boxSizing: 'border-box',
+              }}
+            />
+
+            {/* Buttons row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <button
+                onClick={runQuery}
+                disabled={!query.trim()}
+                style={{
+                  padding: '0.45rem 1rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem',
+                  background: 'var(--teal)', color: '#fff', border: 'none', cursor: 'pointer',
+                  opacity: query.trim() ? 1 : 0.4,
+                }}
+              >▶ Run</button>
+              {!revealed && (() => {
+                const maxH = { Easy: 1, Medium: 2, Hard: 5, Master: 5 }[problem.difficulty] || 1;
+                const availableHints = (problem.hints || []).length;
+                const hintCap = Math.min(maxH, availableHints);
+                const allExhausted = hintsShown >= hintCap;
+                return (
+                  <>
+                    {!allExhausted && (
+                      <button
+                        onClick={() => { track('sql_hint_used', { problemId: problem.id, hintIndex: hintsShown + 1, difficulty: problem.difficulty }); setHintsShown(n => Math.min(n + 1, hintCap)); }}
+                        style={{
+                          padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
+                          background: 'rgba(20,184,166,0.08)', color: 'var(--teal)',
+                          border: '1px solid rgba(20,184,166,0.25)', cursor: 'pointer',
+                        }}
+                      >Hint {hintsShown + 1} of {hintCap}</button>
+                    )}
+                    {hintsShown >= 1 && (
+                      <button
+                        onClick={() => { track('sql_answer_revealed', { problemId: problem.id, difficulty: problem.difficulty }); setRevealed(true); }}
+                        style={{
+                          padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 500, fontSize: '0.78rem',
+                          background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)',
+                          cursor: 'pointer',
+                        }}
+                      >Show Solution</button>
+                    )}
+                  </>
+                );
+              })()}
+              {hasRun && correct === true && (
+                <span className="pal-success-ring" style={{ fontSize: '0.78rem', color: 'var(--green)', fontWeight: 600 }}>✓ Correct — well done</span>
+              )}
+              {hasRun && correct === false && !runError && (
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Output does not match — check row count or column names</span>
+              )}
+            </div>
+
+            {/* Hints */}
+            {hintsShown > 0 && problem.hints && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {problem.hints.slice(0, hintsShown).map((h, i) => (
+                  <div key={i} style={{
+                    padding: '0.55rem 0.75rem', background: 'rgba(20,184,166,0.06)',
+                    border: '1px solid rgba(20,184,166,0.2)', borderRadius: '6px',
+                    borderLeft: '3px solid var(--teal)',
+                    fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.55,
+                  }}>
+                    <span style={{ fontWeight: 700, color: 'var(--teal)', marginRight: '0.4rem' }}>Hint {i + 1}:</span>
+                    {h}
+                  </div>
+                ))}
+                {problem.tags && problem.tags.length > 0 && (
+                  <div style={{
+                    padding: '0.45rem 0.75rem', background: 'var(--surface-2)',
+                    border: '1px solid var(--border)', borderRadius: '6px',
+                    fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex',
+                    alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap',
+                  }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-muted)', flexShrink: 0 }}>Concepts:</span>
+                    {problem.tags.map(t => (
+                      <span key={t} style={{
+                        padding: '1px 7px', borderRadius: '4px', fontSize: '0.72rem',
+                        background: 'var(--surface)', border: '1px solid var(--border)',
+                        color: 'var(--text-muted)',
+                      }}>{t}</span>
+                    ))}
+                  </div>
                 )}
               </div>
+            )}
+
+            {/* Run error */}
+            {runError && (
+              <div style={{ padding: '0.6rem 0.75rem', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '6px', fontSize: '0.78rem', color: 'var(--red)', fontFamily: 'monospace' }}>
+                {runError}
+              </div>
+            )}
+
+            {/* Results */}
+            {results && !runError && (
+              <div style={{ border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden' }}>
+                <div style={{ padding: '4px 10px', background: 'var(--surface-2)', fontSize: '0.7rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>
+                  {results.rows.length} row{results.rows.length !== 1 ? 's' : ''}
+                </div>
+                <ResultsTable results={results} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Debrief */}
+        {revealed && (
+          <div className="pal-reveal-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.75rem' }}>
+            <div style={{
+              borderLeft: '3px solid var(--discovery, #E8A033)',
+              background: 'rgba(232,160,51,0.07)',
+              borderRadius: '0 8px 8px 0',
+              padding: '0.85rem 1rem',
+              fontSize: '0.83rem', lineHeight: 1.65, color: 'var(--text)',
+            }}>
+              {renderDebrief(problem.debrief)}
             </div>
-          )}
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Model solution</div>
+              <pre style={{
+                margin: 0, padding: '0.75rem', background: 'var(--surface-2)', borderRadius: '6px',
+                fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: 1.6, color: 'var(--text)',
+                overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+              }}>{problem.solution}</pre>
+              {correct === true && (
+                <button
+                  className="pal-glow-pulse"
+                  onClick={() => {
+                    const next = SORTED_PROBLEMS.findIndex((p, i) => i > problemIdx && !solved.has(p.id));
+                    if (next !== -1) setProblemIdx(next);
+                  }}
+                  style={{
+                    marginTop: '0.75rem', padding: '0.5rem 1.25rem', borderRadius: '6px',
+                    fontWeight: 600, fontSize: '0.82rem', background: 'var(--teal)',
+                    color: '#fff', border: 'none', cursor: 'pointer',
+                  }}
+                >Next unsolved →</button>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div style={{ height: '1.5rem' }} />
       </div>
-    </div>
 
-    {/* Problem list — independent fixed panel, scrolls on its own */}
-    {showPlanModal && <StudyPlanModal solved={solved} onClose={() => setShowPlanModal(false)} onApply={() => setShowPlanModal(false)} />}
-
-    <div className="sql-lab-problem-panel">
-      <ProblemSidebar
-        problems={SORTED_PROBLEMS}
-        currentIdx={problemIdx}
-        solved={solved}
-        filterDiffs={filterDiffs}
-        onToggleDiff={d => setFilterDiffs(prev => { const next = new Set(prev); if (next.has(d)) next.delete(d); else next.add(d); return next; })}
-        filterDatamarts={filterDatamarts}
-        onToggleDatamart={dm => setFilterDatamarts(prev => { const next = new Set(prev); if (next.has(dm)) next.delete(dm); else next.add(dm); return next; })}
-        onSelect={idx => setProblemIdx(idx)}
-      />
-    </div>
+      {showPlanModal && <StudyPlanModal solved={solved} onClose={() => setShowPlanModal(false)} onApply={() => setShowPlanModal(false)} />}
     </>
   );
 }
