@@ -997,7 +997,7 @@ export default function App() {
   const isFocusMode = page === 'runner' || page.endsWith('-runner');
 
   return (
-    <div className={`app-layout${isFocusMode ? ' focus-mode' : ''}${page === 'sql-lab' ? ' sql-lab-mode' : ''}${!user && page === 'home' ? ' signed-out' : ''}`} style={{ color: 'var(--text)' }}>
+    <div className={`app-layout ${TERMINAL_PAGES.has(page) ? 'terminal-page' : 'casefile-page'}${isFocusMode ? ' focus-mode' : ''}${page === 'sql-lab' ? ' sql-lab-mode' : ''}${!user && page === 'home' ? ' signed-out' : ''}`} style={{ color: 'var(--text)' }}>
       <Sidebar
         currentPage={page}
         onNavigate={navigate}
@@ -1065,7 +1065,7 @@ export default function App() {
               ))}
             </div>
           }>
-        <div key={page} className={`${TERMINAL_PAGES.has(page) ? 'terminal-page' : 'casefile-page'} ${page === 'sql-lab' ? 'sql-lab-page-wrap' : 'pal-page-enter'}`}>
+        <div key={page} className={page === 'sql-lab' ? 'sql-lab-page-wrap' : 'pal-page-enter'}>
         {page === 'home' && (
           <Home onNavigate={navigate} onShowAuth={() => setShowAuth(true)} />
         )}
