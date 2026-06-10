@@ -698,7 +698,7 @@ export default function App() {
     { key: 'x', action: () => navigate('challenges') },
     { key: 'b', action: () => navigate('bi') },
     { key: 'd', action: () => navigate('defense-doc') },
-    { key: 'q', action: () => navigate('sql-lab') },
+    { key: 'q', action: () => { setActiveSqlProblemId(null); navigate('sql-lab'); } },
   ]);
 
   function getNextScenarioId(currentId) {

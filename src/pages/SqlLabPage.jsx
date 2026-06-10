@@ -91,7 +91,7 @@ const DIFF_COLOR = {
 };
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard', 'Master', 'Forensic'];
-const ALL_DATAMARTS = [...new Set(SORTED_PROBLEMS.map(p => p.datamartId))].sort();
+const ALL_COMPANIES = [...new Set(SORTED_PROBLEMS.map(p => p.datamartId))].sort();
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 
@@ -143,7 +143,7 @@ function SchemaAccordion({ dm, open, onToggle }) {
         <span style={{ fontSize: '0.65rem', transition: 'transform 0.2s', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
       </button>
       {open && (
-        <div style={{ padding: '0.6rem 0.75rem', background: 'var(--surface)', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '0.6rem', maxHeight: '220px', overflowY: 'auto' }}>
+        <div style={{ padding: '0.6rem 0.75rem', background: 'var(--surface)', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '0.6rem' }}>
           {Object.entries(dm.tables).map(([tableName, table]) => (
             <div key={tableName} style={{ padding: '0.4rem 0.5rem', background: 'var(--surface-2)', borderRadius: '6px', border: '1px solid var(--border)' }}>
               <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', fontWeight: 700, color: 'var(--teal)', marginBottom: '4px' }}>
@@ -194,7 +194,7 @@ function ResultsTable({ results }) {
 
 // ─── Browse mode ──────────────────────────────────────────────────────────────
 
-function ProblemCard({ p, isSolved, onSelect }) {
+function ProblemListRow({ p, isSolved, onSelect }) {
   const ds = DIFF_COLOR[p.difficulty] || DIFF_COLOR.Easy;
   return (
     <div
@@ -202,53 +202,51 @@ function ProblemCard({ p, isSolved, onSelect }) {
       tabIndex={0}
       onClick={onSelect}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
-      className="pal-card-hover"
       style={{
-        background: 'var(--surface)',
-        border: '1px solid var(--border)',
-        borderLeft: '3px solid ' + ds.text,
-        borderRadius: 'var(--radius)',
-        padding: '0.85rem 1rem',
-        cursor: 'pointer',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.35rem',
+        display: 'flex', alignItems: 'center', gap: '0.65rem',
+        padding: '0.55rem 0.85rem',
+        borderBottom: '1px solid var(--border)',
+        cursor: 'pointer', transition: 'background 0.1s',
       }}
+      onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
     >
-      {isSolved && (
-        <span style={{
-          position: 'absolute', top: '0.5rem', right: '0.6rem',
-          fontSize: '0.72rem', color: 'var(--green)', fontWeight: 700,
-        }}>✓</span>
-      )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-        <span style={{
-          fontSize: '0.63rem', fontWeight: 700, padding: '1px 7px', borderRadius: '99px',
-          background: ds.bg, color: ds.text, border: '1px solid ' + ds.border,
-        }}>{p.difficulty}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-          {p.companyDomain && (
-            <img
-              src={'https://www.google.com/s2/favicons?domain=' + p.companyDomain + '&sz=32'}
-              alt={p.company}
-              style={{ width: 11, height: 11, borderRadius: 2, objectFit: 'contain' }}
-              onError={e => { e.currentTarget.style.display = 'none'; }}
-            />
-          )}
-          <span style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontWeight: 500 }}>{p.company}</span>
-        </div>
+      {/* Status dot */}
+      <span style={{
+        width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+        background: isSolved ? 'var(--green)' : 'var(--border)',
+        border: isSolved ? 'none' : '1.5px solid var(--border)',
+      }} />
+      {/* Difficulty */}
+      <span style={{
+        fontSize: '0.62rem', fontWeight: 700, padding: '1px 7px', borderRadius: '99px',
+        background: ds.bg, color: ds.text, border: '1px solid ' + ds.border,
+        flexShrink: 0, minWidth: 48, textAlign: 'center',
+      }}>{p.difficulty}</span>
+      {/* Company */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, minWidth: 80 }}>
+        {p.companyDomain && (
+          <img
+            src={'https://www.google.com/s2/favicons?domain=' + p.companyDomain + '&sz=32'}
+            alt={p.company}
+            style={{ width: 11, height: 11, borderRadius: 2, objectFit: 'contain' }}
+            onError={e => { e.currentTarget.style.display = 'none'; }}
+          />
+        )}
+        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>{p.company}</span>
       </div>
-      <div style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>
+      {/* Title */}
+      <span style={{ flex: 1, fontSize: '0.85rem', fontWeight: 500, color: 'var(--text)', lineHeight: 1.3, minWidth: 0 }}>
         {p.title}
-      </div>
+      </span>
+      {/* Tags */}
       {p.tags && p.tags.length > 0 && (
-        <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap', marginTop: '0.05rem' }}>
-          {p.tags.slice(0, 3).map(t => (
+        <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
+          {p.tags.slice(0, 2).map(t => (
             <span key={t} style={{
               fontSize: '0.58rem', padding: '1px 5px', borderRadius: '3px',
               background: 'var(--surface-2)', border: '1px solid var(--border)',
-              color: 'var(--text-muted)',
+              color: 'var(--text-muted)', whiteSpace: 'nowrap',
             }}>{t}</span>
           ))}
         </div>
@@ -259,14 +257,17 @@ function ProblemCard({ p, isSolved, onSelect }) {
 
 function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
   const [filterDiffs, setFilterDiffs] = useState(new Set());
-  const [filterDM, setFilterDM] = useState(new Set());
+  const [filterCompany, setFilterCompany] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
   const [search, setSearch] = useState('');
 
   const solvedCount = SORTED_PROBLEMS.filter(p => solved.has(p.id)).length;
 
   const filtered = SORTED_PROBLEMS.filter(p => {
     if (filterDiffs.size > 0 && !filterDiffs.has(p.difficulty)) return false;
-    if (filterDM.size > 0 && !filterDM.has(p.datamartId)) return false;
+    if (filterCompany && p.datamartId !== filterCompany) return false;
+    if (filterStatus === 'solved' && !solved.has(p.id)) return false;
+    if (filterStatus === 'unsolved' && solved.has(p.id)) return false;
     if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -274,14 +275,11 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
   function toggleDiff(d) {
     setFilterDiffs(prev => { const n = new Set(prev); if (n.has(d)) n.delete(d); else n.add(d); return n; });
   }
-  function toggleDM(dm) {
-    setFilterDM(prev => { const n = new Set(prev); if (n.has(dm)) n.delete(dm); else n.add(dm); return n; });
-  }
 
   return (
     <div className="sql-lab-browse-panel">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap', flexShrink: 0 }}>
         <button
           onClick={onBack}
           style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.78rem', color: 'var(--text-muted)', cursor: 'pointer' }}
@@ -303,25 +301,23 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
         >Study Plan</button>
       </div>
 
-      {/* Search */}
-      <div style={{ marginBottom: '1rem' }}>
+      {/* Filter bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+        {/* Search */}
         <input
           type="text"
-          placeholder="Search problems…"
+          placeholder="Search…"
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{
-            width: '100%', maxWidth: 340, padding: '0.4rem 0.75rem',
+            padding: '0.35rem 0.65rem', width: 180,
             background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: '6px', fontSize: '0.82rem', color: 'var(--text)',
+            borderRadius: '6px', fontSize: '0.78rem', color: 'var(--text)',
             outline: 'none', boxSizing: 'border-box',
           }}
         />
-      </div>
 
-      {/* Difficulty filter */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
-        <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>Difficulty</span>
+        {/* Difficulty chips */}
         {DIFFICULTIES.map(d => {
           const active = filterDiffs.has(d);
           const ds = DIFF_COLOR[d];
@@ -330,7 +326,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
               key={d}
               onClick={() => toggleDiff(d)}
               style={{
-                padding: '2px 10px', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 600,
+                padding: '2px 9px', borderRadius: '99px', fontSize: '0.68rem', fontWeight: 600,
                 cursor: 'pointer', border: '1px solid',
                 background: active ? ds.bg : 'var(--surface-2)',
                 color: active ? ds.text : 'var(--text-muted)',
@@ -339,53 +335,74 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
             >{active ? '✓ ' : ''}{d}</button>
           );
         })}
-      </div>
 
-      {/* Company/datamart filter */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-        <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0, marginTop: '4px' }}>Company</span>
-        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-          {ALL_DATAMARTS.map(dm => {
-            const active = filterDM.has(dm);
-            const count = SORTED_PROBLEMS.filter(p => p.datamartId === dm).length;
-            return (
-              <button
-                key={dm}
-                onClick={() => toggleDM(dm)}
-                style={{
-                  padding: '2px 9px', borderRadius: '99px', fontSize: '0.68rem', fontWeight: 600,
-                  cursor: 'pointer', border: '1px solid',
-                  background: active ? 'rgba(20,184,166,0.1)' : 'var(--surface-2)',
-                  color: active ? 'var(--teal)' : 'var(--text-muted)',
-                  borderColor: active ? 'rgba(20,184,166,0.3)' : 'var(--border)',
-                }}
-              >{active ? '✓ ' : ''}{dm} ({count})</button>
-            );
-          })}
-        </div>
-      </div>
+        {/* Company dropdown */}
+        <select
+          value={filterCompany}
+          onChange={e => setFilterCompany(e.target.value)}
+          style={{
+            padding: '3px 0.6rem', borderRadius: '6px', fontSize: '0.72rem',
+            background: filterCompany ? 'rgba(20,184,166,0.08)' : 'var(--surface-2)',
+            color: filterCompany ? 'var(--teal)' : 'var(--text-muted)',
+            border: filterCompany ? '1px solid rgba(20,184,166,0.35)' : '1px solid var(--border)',
+            cursor: 'pointer', outline: 'none',
+          }}
+        >
+          <option value="">All companies</option>
+          {ALL_COMPANIES.map(c => (
+            <option key={c} value={c}>{c} ({SORTED_PROBLEMS.filter(p => p.datamartId === c).length})</option>
+          ))}
+        </select>
 
-      {/* Count */}
-      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 500 }}>
-        {filtered.length === SORTED_PROBLEMS.length
-          ? SORTED_PROBLEMS.length + ' problems'
-          : filtered.length + ' of ' + SORTED_PROBLEMS.length + ' problems'}
-      </div>
-
-      {/* Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
-        gap: '0.6rem',
-        paddingBottom: '2rem',
-      }}>
-        {filtered.map(p => (
-          <ProblemCard key={p.id} p={p} isSolved={solved.has(p.id)} onSelect={() => onSelect(p.id)} />
+        {/* Status filter */}
+        {['all', 'unsolved', 'solved'].map(s => (
+          <button
+            key={s}
+            onClick={() => setFilterStatus(s)}
+            style={{
+              padding: '2px 9px', borderRadius: '99px', fontSize: '0.68rem', fontWeight: 600,
+              cursor: 'pointer', border: '1px solid',
+              background: filterStatus === s ? 'rgba(20,184,166,0.1)' : 'var(--surface-2)',
+              color: filterStatus === s ? 'var(--teal)' : 'var(--text-muted)',
+              borderColor: filterStatus === s ? 'rgba(20,184,166,0.35)' : 'var(--border)',
+            }}
+          >{s === 'all' ? 'All' : s === 'solved' ? '✓ Solved' : '○ Unsolved'}</button>
         ))}
-        {filtered.length === 0 && (
-          <div style={{ gridColumn: '1/-1', padding: '2rem', textAlign: 'center', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+
+        {/* Count */}
+        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
+          {filtered.length}{filtered.length !== SORTED_PROBLEMS.length ? ' / ' + SORTED_PROBLEMS.length : ''} problems
+        </span>
+      </div>
+
+      {/* List */}
+      <div style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        marginBottom: '2rem',
+      }}>
+        {/* List header */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '0.65rem',
+          padding: '0.4rem 0.85rem',
+          background: 'var(--surface-2)', borderBottom: '1px solid var(--border)',
+        }}>
+          <span style={{ width: 7, flexShrink: 0 }} />
+          <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', minWidth: 48 }}>Level</span>
+          <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', minWidth: 80 }}>Company</span>
+          <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', flex: 1 }}>Problem</span>
+          <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)' }}>Topics</span>
+        </div>
+        {filtered.length === 0 ? (
+          <div style={{ padding: '2rem', textAlign: 'center', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
             No problems match these filters.
           </div>
+        ) : (
+          filtered.map(p => (
+            <ProblemListRow key={p.id} p={p} isSolved={solved.has(p.id)} onSelect={() => onSelect(p.id)} />
+          ))
         )}
       </div>
     </div>
@@ -740,7 +757,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
       setResults(resultData);
       setRunError(null);
       setHasRun(true);
-      const isCorrect = validateResults(resultData, problem);
+      const isCorrect = validateResults(resultData, problem, expectedSample);
       setCorrect(isCorrect);
       addStoredSub(problem.id, query, isCorrect);
     } catch (e) {
@@ -752,20 +769,75 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
     }
   }
 
-  function validateResults(res, prob) {
-    if (!res || res.rows.length !== prob.expectedRowCount) return false;
-    for (const expected of prob.expectedColumns) {
-      if (!res.columns.includes(expected)) return false;
+  function sqlValuesMatch(expected, actual) {
+    if (expected === null && actual === null) return true;
+    if (expected === null || actual === null) return false;
+    const eStr = String(expected);
+    const aStr = String(actual);
+    if (eStr === aStr) return true;
+    const eNum = parseFloat(eStr);
+    const aNum = parseFloat(aStr);
+    if (!isNaN(eNum) && !isNaN(aNum)) return Math.abs(eNum - aNum) < 0.01;
+    return false;
+  }
+
+  // Sort rows by a stable string key for order-insensitive comparison
+  function sortRowsStable(rows) {
+    return [...rows].sort(function(a, b) {
+      var aKey = a.map(function(v) { return v === null ? '\x00' : String(v); }).join('\x01');
+      var bKey = b.map(function(v) { return v === null ? '\x00' : String(v); }).join('\x01');
+      return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
+    });
+  }
+
+  // Compare two aligned row arrays (same length, same column mapping already applied)
+  function rowArraysMatch(expRows, userRows, expCols, colIdx) {
+    for (var ri = 0; ri < expRows.length; ri++) {
+      for (var ci = 0; ci < expCols.length; ci++) {
+        var col = expCols[ci];
+        var userIdx = colIdx[col];
+        if (userIdx === undefined) return false;
+        if (!sqlValuesMatch(expRows[ri][ci], userRows[ri][userIdx])) return false;
+      }
     }
-    const colIdx = {};
-    res.columns.forEach((col, i) => { colIdx[col] = i; });
-    for (const check of prob.checkValues) {
-      const match = res.rows.find(row =>
-        Object.entries(check).every(([col, val]) => {
-          const i = colIdx[col];
+    return true;
+  }
+
+  function validateResults(res, prob, expected) {
+    if (!res || res.rows.length !== prob.expectedRowCount) return false;
+    for (var col of prob.expectedColumns) {
+      if (!res.columns.includes(col)) return false;
+    }
+    // Primary: compare against computed expected output (catches integer division, rounding bugs)
+    if (expected && expected.columns && expected.rows && expected.rows.length === res.rows.length) {
+      var colIdx = {};
+      res.columns.forEach(function(c, i) { colIdx[c] = i; });
+      // 1. Ordered comparison (respects ORDER BY)
+      if (rowArraysMatch(expected.rows, res.rows, expected.columns, colIdx)) return true;
+      // 2. Sort-tolerant comparison (correct data, different order is also accepted)
+      var sortedExp = sortRowsStable(expected.rows);
+      // Build user rows aligned to expected column order for sorting
+      var alignedUserRows = res.rows.map(function(row) {
+        return expected.columns.map(function(c) {
+          var idx = colIdx[c];
+          return idx !== undefined ? row[idx] : null;
+        });
+      });
+      var sortedUser = sortRowsStable(alignedUserRows);
+      if (rowArraysMatch(sortedExp, sortedUser, expected.columns, expected.columns.reduce(function(acc, c, i) { acc[c] = i; return acc; }, {}))) return true;
+      return false;
+    }
+    // Fallback to checkValues if expected sample not yet loaded
+    var colIdx2 = {};
+    res.columns.forEach(function(c, i) { colIdx2[c] = i; });
+    for (var check of prob.checkValues) {
+      var match = res.rows.find(function(row) {
+        return Object.entries(check).every(function(entry) {
+          var c = entry[0]; var val = entry[1];
+          var i = colIdx2[c];
           return i !== undefined && String(row[i]) === String(val);
-        })
-      );
+        });
+      });
       if (!match) return false;
     }
     return true;
