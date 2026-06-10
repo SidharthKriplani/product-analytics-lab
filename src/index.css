@@ -121,35 +121,34 @@
 }
 
 :root[data-theme="dark"] {
-  /* Canvas — deeper blue cast, bioluminescence direction (Linear benchmark: #08090A)
-     bg→surface step maintained, borders blue-shifted for depth */
-  --bg: #0D101E;
-  --surface: #151929;
-  --surface-2: #1C2035;
-  --surface-raised: #232840;
+  /* Canvas — terminal workbench dark */
+  --bg: #0D1320;
+  --surface: #121A2A;
+  --surface-2: #172033;
+  --surface-raised: #1C2840;
 
-  /* Borders — blue-shifted, still visible at low brightness */
-  --border: #2E3A5C;
-  --border-subtle: #263350;
-  --border-strong: #3E4E72;
+  /* Borders */
+  --border: #2A3548;
+  --border-subtle: #1E2A40;
+  --border-strong: #3A4E68;
 
-  /* Text — cooler blue cast, full hierarchy readable at low brightness */
-  --text: #EEF0FA;
-  --text-secondary: #C5CBE4;
-  --text-muted: #8F9BB8;
-  --text-dim: #7A87A8;
+  /* Text */
+  --text: #E8EDF5;
+  --text-secondary: #C5D0E0;
+  --text-muted: #8B98AA;
+  --text-dim: #64748B;
 
-  /* Primary accent — indigo (more saturated, electric direction) */
-  --accent: #5C5FF5;
-  --accent-hover: #7478F7;
-  --accent-light: #7478F7;
-  --accent-bg: #141f3e;
-  --accent-border: #2d4e98;
+  /* Primary accent — cobalt blue (matches light mode brand) */
+  --accent: #5A8AFF;
+  --accent-hover: #7BA3FF;
+  --accent-light: #7BA3FF;
+  --accent-bg: rgba(90,138,255,0.12);
+  --accent-border: rgba(90,138,255,0.3);
 
-  /* Secondary accent — teal */
-  --teal: #2dd4bf;
-  --teal-bg: #0e2d2c;
-  --teal-border: #1e5e5a;
+  /* Secondary accent — evidence teal */
+  --teal: #20C7D9;
+  --teal-bg: rgba(32,199,217,0.1);
+  --teal-border: rgba(32,199,217,0.25);
 
   /* Semantic — green */
   --green: #22c55e;
@@ -163,17 +162,17 @@
   --red-border: #8c2424;
   --red-text: #fca5a5;
 
-  /* Semantic — yellow/amber */
-  --yellow: #fbbf24;
-  --yellow-bg: #2c2010;
-  --yellow-border: #a84e12;
-  --yellow-text: #fde68a;
+  /* Semantic — progress amber */
+  --yellow: #F6B73C;
+  --yellow-bg: rgba(246,183,60,0.12);
+  --yellow-border: rgba(246,183,60,0.25);
+  --yellow-text: #F6B73C;
 
-  /* Semantic — purple */
-  --purple: #a78bfa;
-  --purple-bg: #1e1238;
-  --purple-border: #6a2ec0;
-  --purple-text: #ddd6fe;
+  /* Semantic — purple (accent use only) */
+  --purple: #A78BFA;
+  --purple-bg: rgba(167,139,250,0.1);
+  --purple-border: rgba(167,139,250,0.25);
+  --purple-text: #C4B5FD;
 
   /* Blue */
   --blue-text: #93c5fd;
@@ -181,7 +180,7 @@
   --blue-border: #2d4e98;
 
   /* Structural */
-  --header-bg: rgba(13, 16, 30, 0.97);
+  --header-bg: rgba(13, 19, 32, 0.97);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.25);
   --shadow: 0 2px 8px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.35);
@@ -195,10 +194,10 @@
   --radius-xl: 18px;
 
   /* Gradients */
-  --gradient-accent: linear-gradient(135deg, #7478F7 0%, #5A7FE8 100%);
-  --gradient-warm: linear-gradient(135deg, #fbbf24 0%, #fb923c 100%);
-  --gradient-teal: linear-gradient(135deg, #2dd4bf 0%, #22d3ee 100%);
-  --gradient-hero: linear-gradient(135deg, rgba(36,87,214,0.08) 0%, rgba(0,124,137,0.04) 50%, rgba(201,119,6,0.02) 100%);
+  --gradient-accent: linear-gradient(135deg, #5A8AFF 0%, #7BA3FF 100%);
+  --gradient-warm: linear-gradient(135deg, #F6B73C 0%, #E8900A 100%);
+  --gradient-teal: linear-gradient(135deg, #20C7D9 0%, #00A3B4 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(90,138,255,0.1) 0%, rgba(32,199,217,0.05) 50%, rgba(246,183,60,0.03) 100%);
 
   /* Discovery — insight reveal (warmer amber on dark surface) */
   --discovery: #F0B352;
@@ -207,6 +206,98 @@
   --transition-fast: 0.1s ease;
   --transition: 0.16s ease;
   --transition-slow: 0.26s ease;
+}
+
+/* ── Casefile page scope — warm regardless of [data-theme="dark"] ────────── */
+/* Apply to all non-runner page wrappers. Pins warm casefile identity and wins
+   over root dark-mode variables via element-level cascade. */
+.casefile-page,
+html[data-theme="dark"] .casefile-page {
+  --bg: #F4EFE6;
+  --surface: #FFFCF4;
+  --surface-2: #F8F1E5;
+  --surface-raised: #FFFCF4;
+  --border: #DDD0BE;
+  --border-subtle: #EDE5D5;
+  --border-strong: #BFAE98;
+  --text: #141414;
+  --text-secondary: #4A4036;
+  --text-muted: #756B60;
+  --text-dim: #9B8E80;
+  --accent: #2457D6;
+  --accent-hover: #1D45AD;
+  --accent-light: #5A7FE8;
+  --accent-bg: rgba(36,87,214,0.07);
+  --accent-border: rgba(36,87,214,0.22);
+  --teal: #007C89;
+  --teal-bg: rgba(0,124,137,0.07);
+  --teal-border: rgba(0,124,137,0.25);
+  --yellow: #C97706;
+  --yellow-bg: rgba(201,119,6,0.08);
+  --yellow-border: rgba(201,119,6,0.25);
+  --yellow-text: #7A4500;
+  --green: #16a34a;
+  --green-bg: #f0fdf4;
+  --green-border: #86efac;
+  --green-text: #14532d;
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --red-border: #fca5a5;
+  --red-text: #7f1d1d;
+  --header-bg: rgba(255,252,244,0.97);
+  --shadow-sm: 0 1px 3px rgba(20,20,20,0.05), 0 1px 2px rgba(20,20,20,0.04);
+  --shadow: 0 2px 8px rgba(20,20,20,0.07), 0 1px 3px rgba(20,20,20,0.04);
+  --shadow-md: 0 4px 16px rgba(20,20,20,0.08), 0 2px 6px rgba(20,20,20,0.05);
+  --input-bg: #ffffff;
+  --gradient-accent: linear-gradient(135deg, #2457D6 0%, #5A7FE8 100%);
+  --gradient-warm: linear-gradient(135deg, #C97706 0%, #E8900A 100%);
+  background: #F4EFE6;
+  color: #141414;
+}
+
+/* ── Terminal page scope — dark regardless of [data-theme] ───────────────── */
+/* Apply to all runner / SQL Lab wrappers. Opt-in dark workbench. */
+.terminal-page,
+html .terminal-page {
+  --bg: #070A12;
+  --surface: #0D1320;
+  --surface-2: #121A2A;
+  --surface-raised: #172033;
+  --border: #2A3548;
+  --border-subtle: #1E2A40;
+  --border-strong: #3A4E68;
+  --text: #E8EDF5;
+  --text-secondary: #C5D0E0;
+  --text-muted: #8B98AA;
+  --text-dim: #64748B;
+  --accent: #5A8AFF;
+  --accent-hover: #7BA3FF;
+  --accent-light: #7BA3FF;
+  --accent-bg: rgba(90,138,255,0.12);
+  --accent-border: rgba(90,138,255,0.3);
+  --teal: #20C7D9;
+  --teal-bg: rgba(32,199,217,0.1);
+  --teal-border: rgba(32,199,217,0.25);
+  --yellow: #F6B73C;
+  --yellow-bg: rgba(246,183,60,0.12);
+  --yellow-border: rgba(246,183,60,0.25);
+  --yellow-text: #F6B73C;
+  --green: #33D17A;
+  --green-bg: #0f2c1e;
+  --green-border: #1e6840;
+  --green-text: #86efac;
+  --red: #FF6B6B;
+  --red-bg: #2c1212;
+  --red-border: #8c2424;
+  --red-text: #fca5a5;
+  --header-bg: rgba(7,10,18,0.97);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow: 0 2px 8px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.35);
+  --input-bg: #0D1320;
+  --gradient-accent: linear-gradient(135deg, #5A8AFF 0%, #7BA3FF 100%);
+  background: #070A12;
+  color: #E8EDF5;
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────── */

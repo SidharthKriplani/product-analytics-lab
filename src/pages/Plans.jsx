@@ -558,7 +558,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
               padding: '0.85rem 0.75rem', textAlign: 'center',
               fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
               color: t.color,
-              background: i === 1 ? 'var(--accent-bg, rgba(99,102,241,0.06))' : 'transparent',
+              background: i === 1 ? 'var(--accent-bg)' : 'transparent',
               borderLeft: i === 1 ? '1px solid var(--accent-border)' : '1px solid var(--border)',
               borderRight: i === 1 ? '1px solid var(--accent-border)' : 'none',
             }}>
@@ -578,7 +578,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
             {[f.guest, f.free, f.full].map((val, i) => (
               <div key={i} style={{
                 padding: '0.7rem 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: i === 1 ? 'var(--accent-bg, rgba(99,102,241,0.04))' : 'transparent',
+                background: i === 1 ? 'var(--accent-bg)' : 'transparent',
                 borderLeft: i === 1 ? '1px solid var(--accent-border)' : '1px solid var(--border)',
                 borderRight: i === 1 ? '1px solid var(--accent-border)' : 'none',
               }}>

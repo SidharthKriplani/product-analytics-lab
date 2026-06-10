@@ -45,7 +45,7 @@ const ARM_DEFS = [
     label: 'Design',
     sublabel: 'A/B Design · Exp Foundations',
     rooms: ['Design', 'Exp Foundations'],
-    color: '#6366f1',
+    color: 'var(--accent)',
     cssColor: 'var(--accent)',
   },
   {

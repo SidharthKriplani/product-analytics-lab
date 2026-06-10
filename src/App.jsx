@@ -287,6 +287,19 @@ export default function App() {
     'instrumentation-runner', 'sql-runner',
   ]);
 
+  // Terminal (dark workbench) pages — runners + SQL Lab.
+  // All other pages use the warm Casefile identity regardless of user theme.
+  const TERMINAL_PAGES = new Set([
+    'sql-lab',
+    'stats-runner', 'design-runner', 'runner', 'metrics-runner', 'rca-runner',
+    'cases-runner', 'full-loop-runner', 'prioritization-runner', 'behavioral-runner',
+    'estimation-runner', 'growth-runner', 'bi-runner', 'stf-runner', 'growth-analytics-runner',
+    'instrumentation-runner', 'sql-runner', 'takehome-runner',
+    'stat-foundations-runner', 'rca-foundations-runner', 'metrics-foundations-runner',
+    'product-design-runner', 'leadership-lens-runner', 'exp-foundations-runner',
+    'challenges-runner', 'behavioral-runner',
+  ]);
+
   // Safety-net: if an anonymous user somehow reaches a runner page via direct navigation,
   // show the auth gate and fall back to home. In normal usage the open handlers intercept first.
   useEffect(() => {
@@ -1052,7 +1065,7 @@ export default function App() {
               ))}
             </div>
           }>
-        <div key={page} className={page === 'sql-lab' ? 'sql-lab-page-wrap' : 'pal-page-enter'}>
+        <div key={page} className={`${TERMINAL_PAGES.has(page) ? 'terminal-page' : 'casefile-page'} ${page === 'sql-lab' ? 'sql-lab-page-wrap' : 'pal-page-enter'}`}>
         {page === 'home' && (
           <Home onNavigate={navigate} onShowAuth={() => setShowAuth(true)} />
         )}
