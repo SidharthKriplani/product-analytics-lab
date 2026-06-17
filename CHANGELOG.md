@@ -4,6 +4,16 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.34.6] — 2026-06-18 [CODE LAB ROUTING FIX]
+
+### CodeBrowser + CodeRunner wired into App.jsx
+
+Both components existed and were fully built but were never imported or routed in App.jsx. `onNavigate('code')` from PythonLabBrowser went nowhere. Fixed by adding lazy imports, `activeCodeModuleId` state, `openCodeModule()` function, page titles, runner page guard, and routes for `page === 'code'` and `page === 'code-runner'`. Also added `getCodeProgress` import so `savedProgress` is correctly passed to CodeRunner.
+
+**Files changed:** `src/App.jsx`
+
+---
+
 ## [5.34.4] — 2026-06-18 [MISSING FILE FIX]
 
 ### PythonLabBrowser.jsx added to git

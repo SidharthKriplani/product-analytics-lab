@@ -37,6 +37,7 @@ import { getAllBIProgress } from './utils/biProgress.js';
 import { getAllSTFProgress } from './utils/spotTheFlawProgress.js';
 import { getAllTakehomeProgress } from './utils/takehomeProgress.js';
 import { isUnlocked } from './utils/unlock.js';
+import { getCodeProgress } from './utils/codeProgress.js';
 
 // Pages — lazy-loaded for code splitting
 const Home                  = lazy(() => import('./pages/Home.jsx').then(m => ({ default: m.Home })));
@@ -96,6 +97,8 @@ const SpotTheFlawBrowser = lazy(() => import('./pages/SpotTheFlawBrowser.jsx').t
 const SpotTheFlawRunner  = lazy(() => import('./components/spotTheFlaw/SpotTheFlawRunner.jsx').then(m => ({ default: m.SpotTheFlawRunner })));
 const TakehomeBrowser  = lazy(() => import('./pages/TakehomeBrowser.jsx').then(m => ({ default: m.TakehomeBrowser })));
 const CheatSheet       = lazy(() => import('./pages/CheatSheet.jsx').then(m => ({ default: m.CheatSheet })));
+const CodeBrowser      = lazy(() => import('./pages/CodeBrowser.jsx').then(m => ({ default: m.CodeBrowser })));
+const CodeRunner       = lazy(() => import('./components/code/CodeRunner.jsx').then(m => ({ default: m.CodeRunner })));
 const PythonLabBrowser = lazy(() => import('./pages/PythonLabBrowser.jsx').then(m => ({ default: m.PythonLabBrowser })));
 const DimensionalModelBrowser = lazy(() => import('./pages/DimensionalModelBrowser.jsx').then(m => ({ default: m.DimensionalModelBrowser })));
 // StudyRoom: lazy import here when src/study/sm2.js + Supabase migration are ready
@@ -143,6 +146,7 @@ export default function App() {
   const [activeSTFCaseId, setActiveSTFCaseId] = useState(null);
   const [activeTakehomeCaseId, setActiveTakehomeCaseId] = useState(null);
   const [activeInstrumentationCaseId, setActiveInstrumentationCaseId] = useState(null);
+  const [activeCodeModuleId, setActiveCodeModuleId] = useState(null);
   const [activeSqlProblemId, setActiveSqlProblemId] = useState(null);
   const [activeMetricsFoundationId, setActiveMetricsFoundationId] = useState(null);
   const [activeRCAFoundationId, setActiveRCAFoundationId] = useState(null);
@@ -289,7 +293,7 @@ export default function App() {
     'stats-runner', 'design-runner', 'runner', 'metrics-runner', 'rca-runner',
     'cases-runner', 'full-loop-runner', 'prioritization-runner', 'behavioral-runner',
     'estimation-runner', 'growth-runner', 'bi-runner', 'stf-runner',
-    'instrumentation-runner', 'sql-runner',
+    'instrumentation-runner', 'sql-runner', 'code-runner',
   ]);
 
   // Terminal routes — active solving, evidence review, SQL workbench.
@@ -428,6 +432,8 @@ export default function App() {
       'exp-foundations': 'Experimentation Foundations — Product Analytics Lab',
       'exp-foundations-runner': 'Experimentation Foundations — Product Analytics Lab',
       'sql-lab': 'SQL Lab — Product Analytics Lab',
+      'code': 'Code Lab — Product Analytics Lab',
+      'code-runner': 'Code Lab — Product Analytics Lab',
     };
     document.title = titles[page] || 'Product Analytics Lab';
   }, [page]);
@@ -672,6 +678,13 @@ export default function App() {
   function openSqlProblem(id) {
     setActiveSqlProblemId(id);
     setPage('sql-lab');
+  }
+
+  function openCodeModule(id) {
+    track('case_opened', { room: 'code', id });
+    setActiveCodeModuleId(id);
+    setPage('code-runner');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function openRCAFoundationModule(id) {
@@ -1657,6 +1670,22 @@ export default function App() {
         {page === 'cheatsheet' && (
           <Suspense fallback={null}>
             <CheatSheet onNavigate={navigate} />
+          </Suspense>
+        )}
+        {page === 'code' && (
+          <Suspense fallback={null}>
+            <CodeBrowser onSelectModule={openCodeModule} unlocked={unlocked} onUnlock={() => setPage('plans')} onOpenArticle={openPlaybookArticle} />
+          </Suspense>
+        )}
+        {page === 'code-runner' && activeCodeModuleId && (
+          <Suspense fallback={null}>
+            <CodeRunner
+              caseId={activeCodeModuleId}
+              savedProgress={getCodeProgress(activeCodeModuleId)}
+              onBack={() => setPage('code')}
+              onNext={() => setPage('code')}
+              onNavigate={navigate}
+            />
           </Suspense>
         )}
         {page === 'python-lab' && (

@@ -28,6 +28,8 @@ Private test still pending. Public distribution blocked until private-test feedb
 
 ## Recently shipped
 
+- ✅ V5.34.6 — CodeBrowser + CodeRunner wired into App.jsx (were built but never imported/routed; clicking Code Lab went nowhere)
+- ✅ V5.34.5 — sitemap, code progress reset key, CLAUDE/DECISIONS/AUDITS/NEXT/CHANGELOG updated
 - ✅ V5.34.4 — PythonLabBrowser.jsx committed (was on disk, never in git due to mmap failures); pal-code-progress-v1 added to onResetAllProgress; sitemap updated
 - ✅ V5.34.3 — codeModules.js build fix (unescaped quote line 1330), STF double-comma fix (Progress crash), Python Lab + Dimensional Modeling fully wired in sidebar, code-2 + layers icons added
 - ✅ V5.34.0 — StudyRoom auth gate removed (was gated on `user &&` — null in beta), Dimensional Modeling coming-soon skeleton (Sidebar + App.jsx wired)
