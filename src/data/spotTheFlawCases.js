@@ -288,7 +288,7 @@ export const spotTheFlawCases = [
       'Cluster randomization by social graph community or geo-market is the correct design for networked interventions',
       'The estimated lift from a standard A/B test on a social network will not generalize to full rollout — cross-contamination effects disappear when the entire population is treated, making post-rollout performance appear weaker than the test suggested',
     ],
-  },,
+    },
 // Python/Pandas STF cases — STF13–STF17
 // Append inside spotTheFlawCases array before closing ];
 

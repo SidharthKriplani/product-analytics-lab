@@ -564,7 +564,7 @@ export const companyTracks = [
     ],
     playbookArticles: ['funnel-analysis-framework', 'north-star-metric', 'cohort-retention-curves'],
     estimatedHours: 10,
-  },,
+    },
 // Bangalore company tracks — append to companyTracks array before articleTitleMap export
 // Swiggy DA, Zepto PA, Flipkart BA/DA
 
