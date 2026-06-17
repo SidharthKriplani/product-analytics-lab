@@ -157,6 +157,20 @@ const PATHS = {
       <circle cx="12" cy="7" r="4" />
     </>
   ),
+  'code-2': (
+    <>
+      <path d="M8 9l-3 3 3 3" />
+      <path d="M16 9l3 3-3 3" />
+      <path d="M14 4l-4 16" />
+    </>
+  ),
+  'layers': (
+    <>
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </>
+  ),
 };
 
 export function Icon({ name, size = 16, color = 'currentColor', strokeWidth = 1.75, style, className }) {

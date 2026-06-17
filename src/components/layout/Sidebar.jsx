@@ -65,6 +65,8 @@ const FLAT_GROUPS = [
       { id: 'defense-doc',    label: 'Defense Strategy', icon: 'shield' },
       { id: 'bookmarks',      label: 'Saved',            icon: 'bookmark' },
       { id: 'cheatsheet',     label: 'Prep Cheatsheet',  icon: 'file-text' },
+      { id: 'python-lab',           label: 'Python Lab',          icon: 'code-2' },
+      { id: 'dimensional-modeling', label: 'Dimensional Modeling', icon: 'layers' },
     ],
   },
   {
@@ -113,7 +115,9 @@ function getIsActive(itemId, currentPage) {
     || (itemId === 'exp-foundations'     && (currentPage === 'exp-foundations' || currentPage === 'exp-foundations-runner'))
     || (itemId === 'sql-lab'             && currentPage === 'sql-lab')
     || (itemId === 'cheatsheet'          && currentPage === 'cheatsheet')
-    || (itemId === 'study'               && currentPage === 'study');
+    || (itemId === 'python-lab'          && currentPage === 'python-lab')
+    || (itemId === 'study'               && currentPage === 'study')
+    || (itemId === 'dimensional-modeling' && currentPage === 'dimensional-modeling');
 }
 
 function getActiveSubGroup(currentPage) {
@@ -503,13 +507,11 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
             </div>
           ))}
 
-          {/* STUDY ROOM — private, email-gated */}
-          {user?.email === 'claudesubscription12@gmail.com' && (
-            <div style={{ marginBottom: '0.1rem' }}>
-              <SectionLabel label="PRIVATE" />
-              <NavItem id="study" />
-            </div>
-          )}
+          {/* STUDY ROOM — open in beta */}
+          <div style={{ marginBottom: '0.1rem' }}>
+            <SectionLabel label="STUDY" />
+            <NavItem id="study" />
+          </div>
 
         </nav>
 

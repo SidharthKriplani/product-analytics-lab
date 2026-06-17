@@ -921,6 +921,422 @@ export const codeModules = [
       'This pattern — SQL to extract counts → Python to compute rates and run tests — is the standard workflow in product analytics. The SQL does the data aggregation; Python does the statistical inference. Keep these concerns separated for clarity and reproducibility.',
     ],
   },
+
+  // ─────────────────────────────────────────────
+  // CODE23 — GroupBy + Aggregation (pandas · Analyst)
+  // ─────────────────────────────────────────────
+  {
+    id: 'code23-pandas-groupby',
+    title: 'Segment Performance with GroupBy',
+    subtitle: 'Python · pandas · groupby · agg · Swiggy',
+    track: 'python',
+    difficulty: 'analyst',
+    isFree: true,
+    tags: ['pandas', 'groupby', 'aggregation', 'segmentation'],
+
+    scenario: {
+      company: 'Swiggy',
+      context: 'The growth team suspects delivery performance varies significantly by city tier and order type. You have a DataFrame of the last 30 days of orders. The head of analytics wants a clean summary: average order value, order volume, cancellation rate, and average delivery time — broken down by city_tier and order_type.',
+      schema: [
+        { table: 'Python variable already defined:', description: '', columns: [] },
+        { table: 'orders', description: 'DataFrame — one row per order', columns: ['order_id', 'city_tier', 'order_type', 'order_value', 'is_cancelled', 'delivery_minutes'] },
+      ],
+      task: 'Write pandas code that produces a grouped summary with: order_count, avg_order_value (rounded to 2dp), cancellation_rate (as %, rounded to 1dp), avg_delivery_minutes (rounded to 1dp). Sort by city_tier then order_type.',
+    },
+
+    hints: [
+      'groupby([\'city_tier\', \'order_type\']) groups on two columns at once',
+      'Pass a dict to .agg() to apply different functions per column: {\'col\': [\'count\', \'mean\']}',
+      'cancellation_rate = is_cancelled.mean() * 100 — mean() on a boolean column gives the proportion',
+      'Use .round() on the final DataFrame or per-column in agg with a lambda',
+      'reset_index() after groupby turns the MultiIndex back into regular columns',
+    ],
+
+    partialCode: 'import pandas as pd\nimport numpy as np\n\n# Pre-defined DataFrame\nnp.random.seed(42)\nn = 2000\norders = pd.DataFrame({\n    \'order_id\':         range(1, n+1),\n    \'city_tier\':        np.random.choice([\'Tier1\', \'Tier2\', \'Tier3\'], n, p=[0.5, 0.3, 0.2]),\n    \'order_type\':       np.random.choice([\'food\', \'grocery\', \'instamart\'], n, p=[0.6, 0.25, 0.15]),\n    \'order_value\':      np.random.lognormal(4.2, 0.6, n).round(2),\n    \'is_cancelled\':     np.random.choice([0, 1], n, p=[0.92, 0.08]),\n    \'delivery_minutes\': np.random.normal(28, 8, n).clip(5, 90).round(1),\n})\n\n# TODO: group by city_tier and order_type\n# Compute: order_count, avg_order_value, cancellation_rate (%), avg_delivery_minutes\nsummary = orders.groupby(___).agg(\n    order_count        = (\'order_id\',         ___),\n    avg_order_value    = (\'order_value\',      ___),\n    cancellation_rate  = (\'is_cancelled\',     ___),\n    avg_delivery_mins  = (\'delivery_minutes\', ___),\n).reset_index()\n\n# TODO: round appropriately and sort\nsummary[\'avg_order_value\']   = ___\nsummary[\'cancellation_rate\'] = ___\nsummary[\'avg_delivery_mins\'] = ___\nsummary = summary.sort_values(___)\n\nprint(summary.to_string(index=False))',
+
+    modelAnswer: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(42)\nn = 2000\norders = pd.DataFrame({\n    \'order_id\':         range(1, n+1),\n    \'city_tier\':        np.random.choice([\'Tier1\', \'Tier2\', \'Tier3\'], n, p=[0.5, 0.3, 0.2]),\n    \'order_type\':       np.random.choice([\'food\', \'grocery\', \'instamart\'], n, p=[0.6, 0.25, 0.15]),\n    \'order_value\':      np.random.lognormal(4.2, 0.6, n).round(2),\n    \'is_cancelled\':     np.random.choice([0, 1], n, p=[0.92, 0.08]),\n    \'delivery_minutes\': np.random.normal(28, 8, n).clip(5, 90).round(1),\n})\n\nsummary = orders.groupby([\'city_tier\', \'order_type\']).agg(\n    order_count        = (\'order_id\',         \'count\'),\n    avg_order_value    = (\'order_value\',       \'mean\'),\n    cancellation_rate  = (\'is_cancelled\',      \'mean\'),\n    avg_delivery_mins  = (\'delivery_minutes\',  \'mean\'),\n).reset_index()\n\nsummary[\'avg_order_value\']   = summary[\'avg_order_value\'].round(2)\nsummary[\'cancellation_rate\'] = (summary[\'cancellation_rate\'] * 100).round(1)\nsummary[\'avg_delivery_mins\'] = summary[\'avg_delivery_mins\'].round(1)\nsummary = summary.sort_values([\'city_tier\', \'order_type\']).reset_index(drop=True)\n\nprint(summary.to_string(index=False))\n\n# Insight: which tier has highest cancellation rate?\nworst = summary.loc[summary[\'cancellation_rate\'].idxmax()]\nprint(f\'\\nHighest cancellation: {worst.city_tier} / {worst.order_type} at {worst.cancellation_rate}%\')',
+
+    keyInsights: [
+      'Named aggregation syntax — agg(new_col=(\'source_col\', \'func\')) — is cleaner than dict agg and gives you direct column name control in one step.',
+      'mean() on a boolean or 0/1 integer column returns the proportion. Multiply by 100 after the groupby, not inside it — applying arithmetic inside agg on a boolean column is error-prone.',
+      'Always reset_index() after a multi-column groupby unless you intentionally want a MultiIndex. MultiIndex DataFrames are harder to sort, merge, and display.',
+      'In interviews, always state your sort order explicitly and explain why — "sorted by city_tier then order_type so the reader can scan tiers" shows communication, not just code.',
+    ],
+  },
+
+  // ─────────────────────────────────────────────
+  // CODE24 — Merge Validation (pandas · Analyst)
+  // ─────────────────────────────────────────────
+  {
+    id: 'code24-pandas-merge-validation',
+    title: 'Merge DataFrames Safely',
+    subtitle: 'Python · pandas · merge · many-to-many · validation · Meesho',
+    track: 'python',
+    difficulty: 'analyst',
+    isFree: false,
+    tags: ['pandas', 'merge', 'join', 'data validation', 'many-to-many'],
+
+    scenario: {
+      company: 'Meesho',
+      context: 'You\'re joining an orders table to a returns table to compute return rate by category. A colleague merged them and got a row count 3x higher than orders — a classic many-to-many inflation. You need to safely merge, detect if inflation occurred, and compute the correct return rate per category.',
+      schema: [
+        { table: 'Python variables already defined:', description: '', columns: [] },
+        { table: 'orders', description: 'DataFrame — one row per order', columns: ['order_id', 'user_id', 'category', 'order_value'] },
+        { table: 'returns', description: 'DataFrame — one row per return event (an order can have multiple return events)', columns: ['return_id', 'order_id', 'return_reason'] },
+      ],
+      task: 'Deduplicate returns to one row per order_id, merge with orders, validate row count matches orders, then compute return_rate per category (% of orders with at least one return).',
+    },
+
+    hints: [
+      'Before merging, check returns.duplicated(\'order_id\').sum() — if > 0, the merge will inflate',
+      'drop_duplicates(\'order_id\') on returns keeps only the first return event per order',
+      'After merging, assert len(merged) == len(orders) — catch inflation before it silently corrupts metrics',
+      'Use how=\'left\' so orders with no return still appear (with NaN in return columns)',
+      'return_rate = orders_with_return / total_orders — a returned flag column makes this easy',
+    ],
+
+    partialCode: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(7)\norders = pd.DataFrame({\n    \'order_id\':    range(1, 1001),\n    \'user_id\':     np.random.randint(1, 301, 1000),\n    \'category\':    np.random.choice([\'fashion\', \'home\', \'beauty\', \'electronics\'], 1000, p=[0.4, 0.25, 0.2, 0.15]),\n    \'order_value\': np.random.lognormal(4.0, 0.7, 1000).round(2),\n})\n\n# returns has duplicates — some orders have 2 return events\nbase_returns = pd.DataFrame({\n    \'return_id\': range(1, 161),\n    \'order_id\':  np.random.choice(orders[\'order_id\'], 160),\n    \'return_reason\': np.random.choice([\'wrong_item\', \'damaged\', \'not_needed\'], 160),\n})\nreturns = base_returns  # intentionally has duplicate order_ids\n\n# STEP 1: Check for duplicates in returns\ndup_count = ___\nprint(f\'Return events with duplicate order_id: {dup_count}\')\n\n# STEP 2: Deduplicate — keep first return event per order\nreturns_deduped = ___\n\n# STEP 3: Merge orders (left join)\nmerged = ___\n\n# STEP 4: Validate row count\nassert ___, f\'Row inflation detected: {len(merged)} rows vs {len(orders)} expected\'\nprint(f\'Merge validated: {len(merged)} rows\')\n\n# STEP 5: Add a returned flag and compute return rate per category\nmerged[\'returned\'] = ___\nreturn_rate = merged.groupby(\'category\')[\'returned\'].___\nprint(\'\\nReturn rate by category (%):\') \nprint((return_rate * 100).round(1))',
+
+    modelAnswer: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(7)\norders = pd.DataFrame({\n    \'order_id\':    range(1, 1001),\n    \'user_id\':     np.random.randint(1, 301, 1000),\n    \'category\':    np.random.choice([\'fashion\', \'home\', \'beauty\', \'electronics\'], 1000, p=[0.4, 0.25, 0.2, 0.15]),\n    \'order_value\': np.random.lognormal(4.0, 0.7, 1000).round(2),\n})\nbase_returns = pd.DataFrame({\n    \'return_id\': range(1, 161),\n    \'order_id\':  np.random.choice(orders[\'order_id\'], 160),\n    \'return_reason\': np.random.choice([\'wrong_item\', \'damaged\', \'not_needed\'], 160),\n})\nreturns = base_returns\n\n# STEP 1: Check for duplicates\ndup_count = returns.duplicated(\'order_id\').sum()\nprint(f\'Return events with duplicate order_id: {dup_count}\')\n\n# STEP 2: Deduplicate\nreturns_deduped = returns.drop_duplicates(\'order_id\', keep=\'first\')\nprint(f\'Returns after dedup: {len(returns_deduped)} rows (was {len(returns)})\')\n\n# STEP 3: Left merge\nmerged = orders.merge(returns_deduped[[\'order_id\', \'return_reason\']], on=\'order_id\', how=\'left\')\n\n# STEP 4: Validate\nassert len(merged) == len(orders), f\'Row inflation: {len(merged)} vs {len(orders)}\'\nprint(f\'Merge validated: {len(merged)} rows\')\n\n# STEP 5: Return rate\nmerged[\'returned\'] = merged[\'return_reason\'].notna().astype(int)\nreturn_rate = merged.groupby(\'category\')[\'returned\'].mean()\nprint(\'\\nReturn rate by category (%):\')\nprint((return_rate * 100).round(1).sort_values(ascending=False))\n\noverall = merged[\'returned\'].mean() * 100\nprint(f\'\\nOverall return rate: {overall:.1f}%\')',
+
+    keyInsights: [
+      'Always check for duplicate keys before merging. duplicated(\'key_col\').sum() takes one line and catches silent inflation before it corrupts every downstream metric.',
+      'A left merge on a deduplicated right table preserves the left table\'s row count exactly. If len(merged) != len(left), you missed duplicates — add an assert so it fails loudly.',
+      'notna() on a merged column is cleaner than fillna(0) for creating a binary flag. It reads as "did this order have a return?" not "is return_reason not missing?".',
+      'In interviews, narrate the dedup decision: "I\'m keeping the first return event per order because return_rate is binary — returned or not. Multiple return events per order are operational detail, not relevant here."',
+    ],
+  },
+
+  // ─────────────────────────────────────────────
+  // CODE25 — Pivot Cohort Retention Table (pandas · Senior)
+  // ─────────────────────────────────────────────
+  {
+    id: 'code25-pandas-pivot-cohort',
+    title: 'Build a Cohort Retention Table',
+    subtitle: 'Python · pandas · pivot_table · cohort analysis · Zepto',
+    track: 'python',
+    difficulty: 'senior',
+    isFree: false,
+    tags: ['pandas', 'cohort', 'retention', 'pivot_table'],
+
+    scenario: {
+      company: 'Zepto',
+      context: 'The PM wants a classic cohort retention table: rows = install week, columns = Week 0 / Week 1 / Week 2 / Week 4, values = retention rate (% of install cohort who placed an order that week). You have a raw events DataFrame. Build the full pivot table and show percentage retained.',
+      schema: [
+        { table: 'Python variable already defined:', description: '', columns: [] },
+        { table: 'events', description: 'DataFrame — one row per order event', columns: ['user_id', 'install_date', 'order_date'] },
+      ],
+      task: 'Compute weeks_since_install for each event, pivot into a cohort table (install_week x weeks_since), fill missing as 0, divide each row by Week 0 to get retention rates, display as percentages.',
+    },
+
+    hints: [
+      '(order_date - install_date).dt.days // 7 gives weeks since install as an integer',
+      'install_week = install_date.dt.to_period(\'W\') groups users into weekly cohorts',
+      'pivot_table with aggfunc=\'nunique\' and values=\'user_id\' counts unique users per cohort-week cell',
+      'Divide each row by the Week 0 column: df.div(df[0], axis=0) — axis=0 broadcasts per row',
+      'fillna(0) before dividing to avoid NaN in cells with no returning users',
+    ],
+
+    partialCode: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(99)\nusers = pd.DataFrame({\n    \'user_id\':      range(1, 801),\n    \'install_date\': pd.date_range(\'2024-01-01\', periods=800, freq=\'6H\'),\n})\n# Simulate return orders with decaying retention\nevents_list = []\nfor _, u in users.iterrows():\n    for week in range(5):\n        p_return = max(0, 0.9 - week * 0.15 + np.random.normal(0, 0.05))\n        if np.random.random() < p_return:\n            order_date = u[\'install_date\'] + pd.Timedelta(days=week*7 + np.random.randint(0, 7))\n            events_list.append({\'user_id\': u[\'user_id\'], \'install_date\': u[\'install_date\'], \'order_date\': order_date})\nevents = pd.DataFrame(events_list)\n\n# STEP 1: compute weeks_since_install\nevents[\'weeks_since_install\'] = ___\n\n# STEP 2: compute install_week (period)\nevents[\'install_week\'] = ___\n\n# STEP 3: pivot table — unique users per install_week x weeks_since\ncohort_counts = events.pivot_table(\n    index=___,\n    columns=___,\n    values=___,\n    aggfunc=___,\n).fillna(0).astype(int)\n\n# STEP 4: divide each row by Week 0 to get retention rate\nretention = ___\n\n# STEP 5: display as percentages\nprint((retention * 100).round(1))',
+
+    modelAnswer: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(99)\nusers = pd.DataFrame({\n    \'user_id\':      range(1, 801),\n    \'install_date\': pd.date_range(\'2024-01-01\', periods=800, freq=\'6H\'),\n})\nevents_list = []\nfor _, u in users.iterrows():\n    for week in range(5):\n        p_return = max(0, 0.9 - week * 0.15 + np.random.normal(0, 0.05))\n        if np.random.random() < p_return:\n            order_date = u[\'install_date\'] + pd.Timedelta(days=week*7 + np.random.randint(0, 7))\n            events_list.append({\'user_id\': u[\'user_id\'], \'install_date\': u[\'install_date\'], \'order_date\': order_date})\nevents = pd.DataFrame(events_list)\n\n# STEP 1\nevents[\'weeks_since_install\'] = (events[\'order_date\'] - events[\'install_date\']).dt.days // 7\n\n# STEP 2\nevents[\'install_week\'] = events[\'install_date\'].dt.to_period(\'W\')\n\n# STEP 3\ncohort_counts = events.pivot_table(\n    index=\'install_week\',\n    columns=\'weeks_since_install\',\n    values=\'user_id\',\n    aggfunc=\'nunique\',\n).fillna(0).astype(int)\n\n# STEP 4\nretention = cohort_counts.div(cohort_counts[0], axis=0)\n\n# STEP 5\nprint("Cohort Retention Table (% of install cohort ordering each week)")\nprint((retention * 100).round(1))\n\n# Week 1 and Week 4 average retention\nif 1 in retention.columns:\n    print(f\'\\nAvg Week-1 retention: {(retention[1].mean()*100):.1f}%\')\nif 4 in retention.columns:\n    print(f\'Avg Week-4 retention: {(retention[4].mean()*100):.1f}%\')',
+
+    keyInsights: [
+      'pivot_table with aggfunc=\'nunique\' is the right aggregation for cohort retention — you want unique users who returned, not event count. Using \'count\' inflates if users order multiple times in a week.',
+      'div(col, axis=0) broadcasts a Series (Week 0 column) across all columns row-by-row. This is the pandas idiom for "divide each row by its own denominator" and is far cleaner than a loop.',
+      'dt.to_period(\'W\') groups dates into ISO week periods. It\'s more robust than dt.strftime for cohort keys because Period objects sort correctly and display cleanly.',
+      'Week 0 retention will be 100% by definition — every user in the cohort placed at least one order in their install week (that\'s how they got into the dataset). If your Week 0 < 100%, you have a data quality issue upstream.',
+    ],
+  },
+
+  // ─────────────────────────────────────────────
+  // CODE26 — Rolling Window + Anomaly (pandas · Analyst)
+  // ─────────────────────────────────────────────
+  {
+    id: 'code26-pandas-rolling-window',
+    title: '7-Day Rolling Average and Anomaly Detection',
+    subtitle: 'Python · pandas · rolling · shift · time series · Flipkart',
+    track: 'python',
+    difficulty: 'analyst',
+    isFree: false,
+    tags: ['pandas', 'rolling', 'time series', 'anomaly', 'moving average'],
+
+    scenario: {
+      company: 'Flipkart',
+      context: 'Daily GMV has been volatile. The analytics team wants a 7-day rolling average to smooth noise, plus a flag for days where actual GMV deviated from the rolling average by more than 20%. You need to find the anomalous days — these are candidates for RCA.',
+      schema: [
+        { table: 'Python variable already defined:', description: '', columns: [] },
+        { table: 'daily', description: 'DataFrame — one row per day', columns: ['date', 'gmv_cr'] },
+      ],
+      task: 'Compute a 7-day rolling average of GMV. Compute the % deviation from that average. Flag days where |deviation| > 20%. Print the anomalous days sorted by deviation magnitude.',
+    },
+
+    hints: [
+      'Sort by date first — rolling() processes rows in order, so unsorted dates give wrong results',
+      'rolling(7, min_periods=1).mean() uses up to 7 days but works for the first 6 rows too',
+      'pct deviation = (actual - rolling_avg) / rolling_avg * 100',
+      'Use shift(1) on the rolling average if you want a "previous 7 days" average (no look-ahead)',
+      'abs() on the deviation column lets you filter and sort by magnitude regardless of direction',
+    ],
+
+    partialCode: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(21)\ndates = pd.date_range(\'2024-01-01\', periods=90)\nbase_gmv = 500 + np.cumsum(np.random.normal(0, 8, 90))\n# Inject 4 anomalous days\nbase_gmv[15] *= 1.35\nbase_gmv[42] *= 0.72\nbase_gmv[67] *= 1.28\nbase_gmv[81] *= 0.75\ndaily = pd.DataFrame({\'date\': dates, \'gmv_cr\': base_gmv.round(1)})\n\n# STEP 1: sort by date (critical for rolling)\ndaily = ___\n\n# STEP 2: 7-day rolling average (include partial windows at start)\ndaily[\'rolling_7d_avg\'] = ___\n\n# STEP 3: % deviation from rolling average\ndaily[\'deviation_pct\'] = ___\n\n# STEP 4: flag anomalies where |deviation| > 20%\ndaily[\'is_anomaly\'] = ___\n\n# STEP 5: print anomalous days\nanomalies = daily[daily[\'is_anomaly\']].copy()\nanomalies = anomalies.sort_values(\'deviation_pct\', key=abs, ascending=False)\nprint(anomalies[[\'date\', \'gmv_cr\', \'rolling_7d_avg\', \'deviation_pct\']].to_string(index=False))',
+
+    modelAnswer: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(21)\ndates = pd.date_range(\'2024-01-01\', periods=90)\nbase_gmv = 500 + np.cumsum(np.random.normal(0, 8, 90))\nbase_gmv[15] *= 1.35\nbase_gmv[42] *= 0.72\nbase_gmv[67] *= 1.28\nbase_gmv[81] *= 0.75\ndaily = pd.DataFrame({\'date\': dates, \'gmv_cr\': base_gmv.round(1)})\n\n# STEP 1\ndaily = daily.sort_values(\'date\').reset_index(drop=True)\n\n# STEP 2\ndaily[\'rolling_7d_avg\'] = daily[\'gmv_cr\'].rolling(7, min_periods=1).mean().round(1)\n\n# STEP 3\ndaily[\'deviation_pct\'] = ((daily[\'gmv_cr\'] - daily[\'rolling_7d_avg\']) / daily[\'rolling_7d_avg\'] * 100).round(1)\n\n# STEP 4\ndaily[\'is_anomaly\'] = daily[\'deviation_pct\'].abs() > 20\n\n# STEP 5\nanomalies = daily[daily[\'is_anomaly\']].copy()\nanomalies = anomalies.sort_values(\'deviation_pct\', key=abs, ascending=False)\nprint(f\'Anomalous days (|deviation| > 20%): {len(anomalies)}\')\nprint(anomalies[[\'date\', \'gmv_cr\', \'rolling_7d_avg\', \'deviation_pct\']].to_string(index=False))\n\n# Direction breakdown\nn_up = (anomalies[\'deviation_pct\'] > 0).sum()\nn_dn = (anomalies[\'deviation_pct\'] < 0).sum()\nprint(f\'\\nPositive spikes: {n_up}  |  Negative drops: {n_dn}\')',
+
+    keyInsights: [
+      'Always sort by date before rolling(). Rolling operates on row order — if dates are shuffled, your 7-day window is meaningless. This is a common silent bug in interview submissions.',
+      'min_periods=1 prevents NaN for the first 6 rows where a full 7-day window isn\'t available. Without it, your first week has no rolling average — fine for analysis, but looks sloppy to reviewers.',
+      'Use shift(1) if you want a "trailing 7-day average" that excludes today (no look-ahead bias). For anomaly detection, including today is fine since you\'re comparing actual vs average.',
+      'abs() as the key in sort_values(key=abs) is a clean pandas idiom — sorts by magnitude without creating a separate absolute-value column.',
+    ],
+  },
+
+  // ─────────────────────────────────────────────
+  // CODE27 — numpy Percentile Distribution (numpy · Analyst)
+  // ─────────────────────────────────────────────
+  {
+    id: 'code27-numpy-percentile',
+    title: 'Revenue Distribution with Percentiles',
+    subtitle: 'Python · numpy · percentile · distribution analysis · Razorpay',
+    track: 'python',
+    difficulty: 'analyst',
+    isFree: false,
+    tags: ['numpy', 'percentile', 'distribution', 'revenue', 'statistics'],
+
+    scenario: {
+      company: 'Razorpay',
+      context: 'The payments team is investigating transaction value distribution. Averages are misleading because a few large transactions dominate. You need to understand the full distribution — P50, P75, P90, P95, P99 — and determine what % of total revenue comes from transactions above P90.',
+      schema: [
+        { table: 'Python variable already defined:', description: '', columns: [] },
+        { table: 'txn_values', description: 'numpy array — one value per transaction (INR)', columns: [] },
+      ],
+      task: 'Compute percentiles (P25, P50, P75, P90, P95, P99). Compute mean vs median and explain the gap. Find the P90 threshold and compute what % of total revenue comes from transactions above it.',
+    },
+
+    hints: [
+      'np.percentile(arr, [25, 50, 75, 90, 95, 99]) computes multiple percentiles in one call',
+      'mean vs median gap on a right-skewed distribution tells you how much the tail pulls the average up',
+      'txn_values[txn_values > p90_threshold].sum() / txn_values.sum() gives the revenue share above P90',
+      'np.histogram(txn_values, bins=20) gives a quick shape check — print it as a bar chart with *',
+    ],
+
+    partialCode: 'import numpy as np\n\nnp.random.seed(55)\n# Simulate payment transaction values — log-normal (right-skewed)\ntxn_values = np.concatenate([\n    np.random.lognormal(mean=6.5, sigma=1.0, size=9500),   # typical transactions\n    np.random.lognormal(mean=9.5, sigma=0.8, size=500),    # high-value transactions\n]).round(2)\n\nprint(f\'Total transactions: {len(txn_values):,}\')\nprint(f\'Total revenue: INR {txn_values.sum():,.0f}\')\n\n# STEP 1: compute percentiles P25 P50 P75 P90 P95 P99\npercentiles = ___\nlabels = [\'P25\', \'P50\', \'P75\', \'P90\', \'P95\', \'P99\']\nfor label, val in zip(labels, percentiles):\n    print(f\'  {label}: INR {val:,.0f}\')\n\n# STEP 2: mean vs median\nmean_val   = ___\nmedian_val = ___\nprint(f\'\\nMean:   INR {mean_val:,.0f}\')\nprint(f\'Median: INR {median_val:,.0f}\')\nprint(f\'Mean/Median ratio: {mean_val/median_val:.2f}x (skew indicator)\')\n\n# STEP 3: revenue share above P90\np90 = percentiles[___]  # index 3 = P90\nrevenue_above_p90 = ___\nrevenue_share = ___\nprint(f\'\\nTransactions above P90 (INR {p90:,.0f}): {(txn_values > p90).sum():,} ({(txn_values > p90).mean()*100:.1f}% of volume)\')\nprint(f\'Revenue from above-P90 transactions: {revenue_share*100:.1f}% of total\')',
+
+    modelAnswer: 'import numpy as np\n\nnp.random.seed(55)\ntxn_values = np.concatenate([\n    np.random.lognormal(mean=6.5, sigma=1.0, size=9500),\n    np.random.lognormal(mean=9.5, sigma=0.8, size=500),\n]).round(2)\n\nprint(f\'Total transactions: {len(txn_values):,}\')\nprint(f\'Total revenue: INR {txn_values.sum():,.0f}\')\nprint()\n\n# STEP 1\npercentile_values = [25, 50, 75, 90, 95, 99]\npercentiles = np.percentile(txn_values, percentile_values)\nlabels = [\'P25\', \'P50\', \'P75\', \'P90\', \'P95\', \'P99\']\nprint("Distribution percentiles:")\nfor label, val in zip(labels, percentiles):\n    print(f\'  {label}: INR {val:,.0f}\')\n\n# STEP 2\nmean_val   = np.mean(txn_values)\nmedian_val = np.median(txn_values)\nprint(f\'\\nMean:   INR {mean_val:,.0f}\')\nprint(f\'Median: INR {median_val:,.0f}\')\nprint(f\'Mean/Median ratio: {mean_val/median_val:.2f}x  (>1.5 = significant right skew)\')\n\n# STEP 3\np90 = percentiles[3]  # index 3 = P90\nabove_p90 = txn_values[txn_values > p90]\nrevenue_share = above_p90.sum() / txn_values.sum()\nprint(f\'\\nTransactions above P90 (INR {p90:,.0f}):\')\nprint(f\'  Count:          {len(above_p90):,} ({len(above_p90)/len(txn_values)*100:.1f}% of volume)\')\nprint(f\'  Revenue share:  {revenue_share*100:.1f}% of total GMV\')\nprint(f\'  Avg txn value:  INR {above_p90.mean():,.0f}\')\n\n# Bonus: IQR\niqr = percentiles[2] - percentiles[0]  # P75 - P25\nprint(f\'\\nIQR (P75 - P25): INR {iqr:,.0f}\')\nprint(f\'This is the spread of the \'\'middle 50%\'\' of transactions — more robust than std for skewed data.\')',
+
+    keyInsights: [
+      'np.percentile(arr, [p1, p2, ...]) vectorises the computation — one call is faster and cleaner than calling it N times. The result is a numpy array you can zip with labels.',
+      'Mean/Median ratio > 1.5 reliably indicates right-skew. A mean of 2x the median means the top tail is pulling the average up significantly — using mean as "typical transaction value" misleads stakeholders.',
+      'The "10% of transactions = X% of revenue" framing is the Pareto analysis every fintech and e-commerce team runs. Know how to compute it: filter above percentile, sum, divide by total.',
+      'For skewed financial data, always report P50 (median) as the typical value and P90/P95 for the tail. Reporting mean alone is a common analytics mistake that overstates typical transaction size.',
+    ],
+  },
+
+  // ─────────────────────────────────────────────
+  // CODE28 — Resample + WoW Growth (pandas · Senior)
+  // ─────────────────────────────────────────────
+  {
+    id: 'code28-pandas-resample-wow',
+    title: 'Weekly Resampling and WoW Growth',
+    subtitle: 'Python · pandas · resample · pct_change · sort order · Swiggy',
+    track: 'python',
+    difficulty: 'senior',
+    isFree: false,
+    tags: ['pandas', 'resample', 'pct_change', 'time series', 'WoW growth'],
+
+    scenario: {
+      company: 'Swiggy',
+      context: 'You have daily order counts. The business wants weekly totals and week-over-week (WoW) growth. A common mistake is calling pct_change() on unsorted or unindexed data — the result is meaningless. Your job is to resample correctly, sort, compute WoW growth, and flag weeks with negative growth.',
+      schema: [
+        { table: 'Python variable already defined:', description: '', columns: [] },
+        { table: 'daily_orders', description: 'DataFrame — one row per day, possibly unsorted', columns: ['date', 'order_count'] },
+      ],
+      task: 'Set date as index, resample to weekly sums, sort the index, compute WoW % change, and flag weeks where growth was negative. Print the full table.',
+    },
+
+    hints: [
+      'set_index(\'date\') then resample(\'W\').sum() aggregates to week-ending Sundays',
+      'Sort the index with sort_index() before pct_change() — never assume order after resample',
+      'pct_change() * 100 gives % change; round to 1dp for display',
+      'A boolean mask on the WoW column flags negative weeks for RCA prioritisation',
+    ],
+
+    partialCode: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(3)\n# Intentionally shuffled date order\ndates = pd.date_range(\'2024-01-01\', periods=84)  # 12 weeks\ncounts = (1000 + np.cumsum(np.random.normal(20, 40, 84))).clip(500).astype(int)\ndaily_orders = pd.DataFrame({\'date\': dates, \'order_count\': counts})\ndaily_orders = daily_orders.sample(frac=1, random_state=1)  # shuffle!\n\n# STEP 1: set date as index\ndaily_orders = ___\n\n# STEP 2: resample to weekly totals\nweekly = ___\n\n# STEP 3: sort index (critical before pct_change)\nweekly = ___\n\n# STEP 4: WoW growth %\nweekly[\'wow_growth_pct\'] = ___\n\n# STEP 5: flag negative growth weeks\nweekly[\'negative_growth\'] = ___\n\nprint(weekly.round(1).to_string())\nprint(f\'\\nWeeks with negative WoW growth: {weekly[\'negative_growth\'].sum()}\')',
+
+    modelAnswer: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(3)\ndates = pd.date_range(\'2024-01-01\', periods=84)\ncounts = (1000 + np.cumsum(np.random.normal(20, 40, 84))).clip(500).astype(int)\ndaily_orders = pd.DataFrame({\'date\': dates, \'order_count\': counts})\ndaily_orders = daily_orders.sample(frac=1, random_state=1)\n\n# STEP 1\ndaily_orders = daily_orders.set_index(\'date\')\n\n# STEP 2\nweekly = daily_orders.resample(\'W\').sum()\n\n# STEP 3\nweekly = weekly.sort_index()\n\n# STEP 4\nweekly[\'wow_growth_pct\'] = weekly[\'order_count\'].pct_change() * 100\n\n# STEP 5\nweekly[\'negative_growth\'] = weekly[\'wow_growth_pct\'] < 0\n\nprint(weekly.round(1).to_string())\nneg_count = weekly[\'negative_growth\'].sum()\nprint(f\'\\nWeeks with negative WoW growth: {neg_count} / {len(weekly)-1} comparable weeks\')\n\n# Best and worst weeks\nbest  = weekly[\'wow_growth_pct\'].idxmax()\nworst = weekly[\'wow_growth_pct\'].idxmin()\nprint(f\'Best week:  {best.date()} at +{weekly.loc[best,  "wow_growth_pct"]:.1f}%\')\nprint(f\'Worst week: {worst.date()} at {weekly.loc[worst, "wow_growth_pct"]:.1f}%\')',
+
+    keyInsights: [
+      'pct_change() on unsorted data produces garbage — it computes change relative to the previous row in DataFrame order, not in chronological order. This is STF17 in the Spot the Flaw room. Sort before you pct_change. Always.',
+      'resample(\'W\') aggregates to week-ending Sunday by default. Use resample(\'W-MON\') for Monday-ending weeks. Be explicit about the convention — different teams use different week boundaries.',
+      'The first row after pct_change() will always be NaN — there\'s no prior week. Don\'t mistake this for missing data; it\'s expected and should be excluded from any summary stats.',
+      'In interviews: after computing WoW, always identify the worst week and frame it as "this is the week that needs RCA." That moves the analysis from "here\'s the number" to "here\'s what to investigate."',
+    ],
+  },
+
+  // ─────────────────────────────────────────────
+  // CODE29 — collections.Counter Frequency Analysis (Python · Analyst)
+  // ─────────────────────────────────────────────
+  {
+    id: 'code29-collections-counter',
+    title: 'Search Query Frequency Analysis',
+    subtitle: 'Python · collections · Counter · Pareto · Flipkart',
+    track: 'python',
+    difficulty: 'analyst',
+    isFree: false,
+    tags: ['collections', 'Counter', 'frequency', 'Pareto', 'search analytics'],
+
+    scenario: {
+      company: 'Flipkart',
+      context: 'The search team has a log of 50,000 raw search queries. They want to know: what are the top 20 queries by volume, and what fraction of total searches do the top 100 queries cover? This is the Pareto check — if 100 queries cover 60%+ of searches, optimising those 100 queries has outsized impact.',
+      schema: [
+        { table: 'Python variable already defined:', description: '', columns: [] },
+        { table: 'queries', description: 'Python list of raw search strings (lowercased)', columns: [] },
+      ],
+      task: 'Use collections.Counter to count query frequency. Print the top 20. Compute what % of total searches the top 100 queries cover. Compute the Gini-style concentration: what\'s the smallest set of queries covering 50% of all searches?',
+    },
+
+    hints: [
+      'Counter(queries) builds the frequency map in one line',
+      '.most_common(n) returns top-n as [(query, count), ...] sorted by frequency',
+      'sum of top-100 counts / total count = coverage fraction',
+      'Iterate through most_common() accumulating count until cumulative sum >= 50% of total',
+    ],
+
+    partialCode: 'from collections import Counter\nimport numpy as np\n\nnp.random.seed(77)\n# Simulate Zipf-distributed search queries (realistic: few queries dominate)\nvocab = [\'phone\', \'laptop\', \'shoes\', \'shirt\', \'tv\', \'headphones\', \'watch\', \'bag\', \'kurta\',\n         \'charger\', \'case\', \'earphones\', \'dress\', \'jeans\', \'saree\', \'perfume\', \'camera\',\n         \'tablet\', \'keyboard\', \'mouse\'] + [f\'query_{i}\' for i in range(200)]\nzipf_weights = np.array([1/(i+1) for i in range(len(vocab))])\nzipf_weights /= zipf_weights.sum()\nqueries = list(np.random.choice(vocab, size=50000, p=zipf_weights))\n\n# STEP 1: build frequency counter\ncounter = ___\ntotal_searches = ___\nprint(f\'Total searches: {total_searches:,}  |  Unique queries: {len(counter):,}\')\n\n# STEP 2: top 20 queries\nprint(\'\\nTop 20 queries:\')\nprint(f\'{\"Query\":<20} {\"Count\":>8} {\"Share %\":>9}\')\nfor query, count in ___:\n    print(f\'{query:<20} {count:>8,} {count/total_searches*100:>8.2f}%\')\n\n# STEP 3: top-100 coverage\ntop_100_volume = ___\nprint(f\'\\nTop 100 queries cover {top_100_volume/total_searches*100:.1f}% of all searches\')\n\n# STEP 4: smallest set covering 50% of searches\ntarget = total_searches * 0.5\ncumulative = 0\nfor n_queries, (query, count) in enumerate(___, start=1):\n    cumulative += count\n    if cumulative >= target:\n        print(f\'Top {n_queries} queries cover 50% of all searches\')\n        break',
+
+    modelAnswer: 'from collections import Counter\nimport numpy as np\n\nnp.random.seed(77)\nvocab = [\'phone\', \'laptop\', \'shoes\', \'shirt\', \'tv\', \'headphones\', \'watch\', \'bag\', \'kurta\',\n         \'charger\', \'case\', \'earphones\', \'dress\', \'jeans\', \'saree\', \'perfume\', \'camera\',\n         \'tablet\', \'keyboard\', \'mouse\'] + [f\'query_{i}\' for i in range(200)]\nzipf_weights = np.array([1/(i+1) for i in range(len(vocab))])\nzipf_weights /= zipf_weights.sum()\nqueries = list(np.random.choice(vocab, size=50000, p=zipf_weights))\n\n# STEP 1\ncounter = Counter(queries)\ntotal_searches = sum(counter.values())\nprint(f\'Total searches: {total_searches:,}  |  Unique queries: {len(counter):,}\')\n\n# STEP 2\nprint(\'\\nTop 20 queries:\')\nprint(f\'{\"Query\":<20} {\"Count\":>8} {\"Share %\":>9}\')\nfor query, count in counter.most_common(20):\n    print(f\'{query:<20} {count:>8,} {count/total_searches*100:>8.2f}%\')\n\n# STEP 3\ntop_100 = counter.most_common(100)\ntop_100_volume = sum(count for _, count in top_100)\nprint(f\'\\nTop 100 queries: {top_100_volume:,} searches = {top_100_volume/total_searches*100:.1f}% of total\')\n\n# STEP 4\ntarget = total_searches * 0.5\ncumulative = 0\nfor n_queries, (query, count) in enumerate(counter.most_common(), start=1):\n    cumulative += count\n    if cumulative >= target:\n        print(f\'Top {n_queries} queries cover 50% of all searches (Pareto threshold)\')\n        print(f\'That\'\'s {n_queries/len(counter)*100:.1f}% of the unique query vocabulary\')\n        break',
+
+    keyInsights: [
+      'Counter(iterable) is O(n) and returns a dict subclass. most_common(n) returns the top-n items in O(k log n) time. For frequency analysis on any list, this is the fastest path.',
+      'sum(counter.values()) is the correct total — faster than len(original_list) if you\'ve already built the counter and don\'t have the original list anymore.',
+      'The Pareto framing (top-X queries cover Y% of volume) is the standard way to prioritise search optimisation. If top-20 queries cover 40%, fix those 20 before scaling to the long tail.',
+      'Counter works on any hashable: strings, tuples, event types, error codes. In interviews, reach for it any time you need frequency or mode — it\'s cleaner than a groupby on a list.',
+    ],
+  },
+
+  // ─────────────────────────────────────────────
+  // CODE30 — pandas apply + User Classification (pandas · Senior)
+  // ─────────────────────────────────────────────
+  {
+    id: 'code30-pandas-apply-classify',
+    title: 'Classify Users by Behaviour',
+    subtitle: 'Python · pandas · apply · np.select · user segmentation · Zepto',
+    track: 'python',
+    difficulty: 'senior',
+    isFree: false,
+    tags: ['pandas', 'apply', 'np.select', 'segmentation', 'user classification'],
+
+    scenario: {
+      company: 'Zepto',
+      context: 'The retention team wants users segmented into four buckets based on order history: Champion (10+ orders, active in last 7 days), Loyal (5-9 orders, active in last 14 days), At-Risk (any orders, inactive 15-30 days), Dormant (inactive 30+ days). You need to build this classification efficiently — without a slow row-by-row loop.',
+      schema: [
+        { table: 'Python variable already defined:', description: '', columns: [] },
+        { table: 'user_stats', description: 'DataFrame — one row per user, reference date is 2024-03-31', columns: ['user_id', 'total_orders', 'days_since_last_order'] },
+      ],
+      task: 'Classify each user using np.select() (vectorised, no apply loop). Compute the count and % of users in each segment. Print a summary.',
+    },
+
+    hints: [
+      'np.select([cond1, cond2, cond3, cond4], [val1, val2, val3, val4], default=val5) evaluates conditions in order — first match wins',
+      'Define conditions as boolean Series: (df.col > x) & (df.col < y)',
+      'Order conditions from most restrictive to least — Champion before Loyal, or a Loyal user might match Champion criteria with a weaker check',
+      'value_counts(normalize=True) gives segment shares directly',
+    ],
+
+    partialCode: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(13)\nn = 5000\nuser_stats = pd.DataFrame({\n    \'user_id\':              range(1, n+1),\n    \'total_orders\':        np.random.negative_binomial(3, 0.3, n).clip(1),\n    \'days_since_last_order\': np.random.exponential(20, n).astype(int).clip(0, 120),\n})\n\n# STEP 1: define conditions (order matters — most restrictive first)\ncond_champion = ___\ncond_loyal     = ___\ncond_at_risk   = ___\ncond_dormant   = ___\n\n# STEP 2: np.select — vectorised classification\nuser_stats[\'segment\'] = np.select(\n    condlist  = [cond_champion, cond_loyal, cond_at_risk, cond_dormant],\n    choicelist= [\'Champion\',    \'Loyal\',    \'At-Risk\',    \'Dormant\'],\n    default   = \'Dormant\',\n)\n\n# STEP 3: segment summary\nsummary = ___\nprint("User Segment Distribution")\nprint(summary)',
+
+    modelAnswer: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(13)\nn = 5000\nuser_stats = pd.DataFrame({\n    \'user_id\':              range(1, n+1),\n    \'total_orders\':        np.random.negative_binomial(3, 0.3, n).clip(1),\n    \'days_since_last_order\': np.random.exponential(20, n).astype(int).clip(0, 120),\n})\n\n# STEP 1: conditions\ncond_champion = (user_stats[\'total_orders\'] >= 10) & (user_stats[\'days_since_last_order\'] <= 7)\ncond_loyal    = (user_stats[\'total_orders\'] >= 5)  & (user_stats[\'days_since_last_order\'] <= 14)\ncond_at_risk  = (user_stats[\'days_since_last_order\'] > 14) & (user_stats[\'days_since_last_order\'] <= 30)\ncond_dormant  = (user_stats[\'days_since_last_order\'] > 30)\n\n# STEP 2\nuser_stats[\'segment\'] = np.select(\n    condlist   = [cond_champion, cond_loyal, cond_at_risk, cond_dormant],\n    choicelist = [\'Champion\',    \'Loyal\',    \'At-Risk\',    \'Dormant\'],\n    default    = \'Dormant\',\n)\n\n# STEP 3\ncounts = user_stats[\'segment\'].value_counts()\nshares = user_stats[\'segment\'].value_counts(normalize=True) * 100\nsummary = pd.DataFrame({\'count\': counts, \'share_pct\': shares.round(1)})\nprint("User Segment Distribution")\nprint(summary)\nprint(f\'\\nTotal users: {n:,}\')\n\n# Avg orders per segment\nprint(\'\\nAvg orders by segment:\')\nprint(user_stats.groupby(\'segment\')[\'total_orders\'].mean().round(1).sort_values(ascending=False))',
+
+    keyInsights: [
+      'np.select() is the vectorised alternative to apply(lambda row: ...) with if/elif/else. On a 5,000-row DataFrame it is ~50x faster. On 5M rows the difference is minutes vs seconds.',
+      'Condition order in np.select matters — first True condition wins. Define Champion before Loyal, or a 10-order user active in last 5 days could match the Loyal condition and get mis-classified.',
+      'Boolean conditions on DataFrame columns return boolean Series — they can be combined with & (and) and | (or) but must be wrapped in parentheses because of Python operator precedence.',
+      'In interview presentations, always follow a segmentation with "now what?" — Champion users get a loyalty program, At-Risk get a winback campaign. The classification is only useful if it drives action.',
+    ],
+  },
+
+  // ─────────────────────────────────────────────
+  // CODE31 — Cohort LTV Calculation (pandas · Senior)
+  // ─────────────────────────────────────────────
+  {
+    id: 'code31-pandas-cohort-ltv',
+    title: 'Cohort LTV Calculation',
+    subtitle: 'Python · pandas · cumulative revenue · LTV · Meesho',
+    track: 'python',
+    difficulty: 'senior',
+    isFree: false,
+    tags: ['pandas', 'LTV', 'cohort', 'cumulative revenue', 'customer value'],
+
+    scenario: {
+      company: 'Meesho',
+      context: 'The growth team wants LTV (cumulative revenue per acquired user) by monthly acquisition cohort at 30, 60, and 90 days. This tells them which cohort quality is improving over time and whether payback period is improving. You have an orders table. Build the LTV cohort table.',
+      schema: [
+        { table: 'Python variable already defined:', description: '', columns: [] },
+        { table: 'orders', description: 'DataFrame — one row per order', columns: ['user_id', 'first_order_date', 'order_date', 'order_value'] },
+      ],
+      task: 'For each acquisition cohort (month of first order), compute LTV30, LTV60, LTV90 = average cumulative revenue per user by day 30, 60, 90 after acquisition. Display as a pivot table.',
+    },
+
+    hints: [
+      'days_since_acquisition = (order_date - first_order_date).dt.days',
+      'Filter orders to days_since_acquisition <= 30/60/90 then groupby user_id + cohort to get cumulative spend',
+      'Divide total spend by cohort size (unique users in that cohort) to get LTV per user',
+      'Cohort size = orders.groupby(\'cohort_month\')[\'user_id\'].nunique()',
+    ],
+
+    partialCode: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(88)\nuser_ids  = np.arange(1, 2001)\ncohort_starts = pd.date_range(\'2023-10-01\', periods=6, freq=\'MS\')\nfirst_order_dates = np.repeat(cohort_starts, 2000//6)\norders_list = []\nfor uid, fod in zip(user_ids, first_order_dates):\n    n_orders = np.random.poisson(4)\n    for _ in range(max(1, n_orders)):\n        days_offset = int(np.random.exponential(25))\n        orders_list.append({\n            \'user_id\':          uid,\n            \'first_order_date\': fod,\n            \'order_date\':       fod + pd.Timedelta(days=days_offset),\n            \'order_value\':      round(float(np.random.lognormal(4.0, 0.7)), 2),\n        })\norders = pd.DataFrame(orders_list)\n\n# STEP 1: days since acquisition\norders[\'days_since_acq\'] = ___\n\n# STEP 2: acquisition cohort (month of first_order_date)\norders[\'cohort_month\'] = ___\n\n# STEP 3: cohort sizes\ncohort_sizes = ___\n\n# STEP 4: compute LTV at each horizon\ndef cohort_ltv(df, days_cutoff):\n    filtered = df[df[\'days_since_acq\'] <= days_cutoff]\n    spend    = filtered.groupby([\'cohort_month\', \'user_id\'])[\'order_value\'].sum().reset_index()\n    cohort_spend = spend.groupby(\'cohort_month\')[\'order_value\'].sum()\n    return (cohort_spend / cohort_sizes).round(2)\n\nltv = pd.DataFrame({\n    \'LTV_30d\':  cohort_ltv(orders, ___),\n    \'LTV_60d\':  cohort_ltv(orders, ___),\n    \'LTV_90d\':  cohort_ltv(orders, ___),\n})\nprint("Cohort LTV Table (INR per acquired user)")\nprint(ltv)',
+
+    modelAnswer: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(88)\nuser_ids  = np.arange(1, 2001)\ncohort_starts = pd.date_range(\'2023-10-01\', periods=6, freq=\'MS\')\nfirst_order_dates = np.repeat(cohort_starts, 2000//6)\norders_list = []\nfor uid, fod in zip(user_ids, first_order_dates):\n    n_orders = np.random.poisson(4)\n    for _ in range(max(1, n_orders)):\n        days_offset = int(np.random.exponential(25))\n        orders_list.append({\n            \'user_id\':          uid,\n            \'first_order_date\': fod,\n            \'order_date\':       fod + pd.Timedelta(days=days_offset),\n            \'order_value\':      round(float(np.random.lognormal(4.0, 0.7)), 2),\n        })\norders = pd.DataFrame(orders_list)\n\n# STEP 1\norders[\'days_since_acq\'] = (orders[\'order_date\'] - orders[\'first_order_date\']).dt.days\n\n# STEP 2\norders[\'cohort_month\'] = orders[\'first_order_date\'].dt.to_period(\'M\')\n\n# STEP 3\ncohort_sizes = orders.groupby(\'cohort_month\')[\'user_id\'].nunique()\n\n# STEP 4\ndef cohort_ltv(df, days_cutoff):\n    filtered     = df[df[\'days_since_acq\'] <= days_cutoff]\n    spend        = filtered.groupby([\'cohort_month\', \'user_id\'])[\'order_value\'].sum().reset_index()\n    cohort_spend = spend.groupby(\'cohort_month\')[\'order_value\'].sum()\n    return (cohort_spend / cohort_sizes).round(2)\n\nltv = pd.DataFrame({\n    \'LTV_30d\': cohort_ltv(orders, 30),\n    \'LTV_60d\': cohort_ltv(orders, 60),\n    \'LTV_90d\': cohort_ltv(orders, 90),\n})\nprint("Cohort LTV Table (INR per acquired user)")\nprint(ltv)\nprint(f\'\\nLTV_90d / LTV_30d ratio (revenue multiple):\')\nprint((ltv[\'LTV_90d\'] / ltv[\'LTV_30d\']).round(2))',
+
+    keyInsights: [
+      'LTV = total cohort revenue / cohort size, NOT average order value. A user who places 5 orders contributes 5x revenue — average order value misses this. Always aggregate to user level first, then average across users.',
+      'Use dt.to_period(\'M\') for cohort month keys — Period objects sort chronologically and display as "2024-01", which is cleaner than dt.strftime("%Y-%m") for pivot table row labels.',
+      'The LTV_90d / LTV_30d ratio shows revenue acceleration — a ratio of 2.0 means users spend as much in days 31-90 as in the first 30 days. Declining ratios across cohorts signal engagement decay.',
+      'In interviews: connect LTV to CAC. If LTV_90d = INR 800 and CAC = INR 300, payback period is somewhere under 90 days. The team needs LTV at a specific horizon to calculate this — that\'s why you compute at multiple horizons.',
+    ],
+  },
+
+  // ─────────────────────────────────────────────
+  // CODE32 — Data Cleaning + Validation (pandas · Analyst)
+  // ─────────────────────────────────────────────
+  {
+    id: 'code32-pandas-data-cleaning',
+    title: 'Clean and Validate a Messy Events DataFrame',
+    subtitle: 'Python · pandas · data cleaning · NaN · deduplication · type casting',
+    track: 'python',
+    difficulty: 'analyst',
+    isFree: false,
+    tags: ['pandas', 'data cleaning', 'NaN', 'deduplication', 'validation'],
+
+    scenario: {
+      company: 'Generic analytics pipeline',
+      context: 'A raw events DataFrame arrived from the data pipeline with known issues: duplicate events (same user + event + timestamp), NaN in critical columns, an event_value column stored as string instead of float, and some event_ts values that are clearly wrong (year 1970). Clean it and produce a validation report.',
+      schema: [
+        { table: 'Python variable already defined:', description: '', columns: [] },
+        { table: 'raw_events', description: 'DataFrame — messy, one row per event', columns: ['event_id', 'user_id', 'event_name', 'event_ts', 'event_value', 'platform'] },
+      ],
+      task: 'Drop exact duplicate rows. Drop rows where user_id or event_name is null. Cast event_value to float (coerce errors to NaN, then fill with 0). Filter out events where event_ts year < 2020. Print a before/after validation report.',
+    },
+
+    hints: [
+      'drop_duplicates() removes exact row duplicates across all columns',
+      'dropna(subset=[\'user_id\', \'event_name\']) drops rows where any of those columns is null',
+      'pd.to_numeric(col, errors=\'coerce\') converts strings to float, turning unparseable values into NaN',
+      'df[df[\'event_ts\'].dt.year >= 2020] filters to valid timestamps after casting to datetime',
+    ],
+
+    partialCode: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(44)\nn = 5000\nraw_events = pd.DataFrame({\n    \'event_id\':   range(n),\n    \'user_id\':    np.where(np.random.rand(n) < 0.03, np.nan, np.random.randint(1, 1001, n)),\n    \'event_name\': np.where(np.random.rand(n) < 0.02, np.nan,\n                    np.random.choice([\'click\', \'view\', \'purchase\', \'add_to_cart\'], n)),\n    \'event_ts\':   pd.to_datetime(\n                    np.where(np.random.rand(n) < 0.01, \'1970-01-01\',\n                    pd.date_range(\'2024-01-01\', periods=n, freq=\'1min\').astype(str))),\n    \'event_value\': np.where(np.random.rand(n) < 0.04, \'bad_value\',\n                    np.random.lognormal(3, 1, n).round(2).astype(str)),\n    \'platform\':   np.random.choice([\'ios\', \'android\', \'web\'], n),\n})\n# Add 50 duplicate rows\nraw_events = pd.concat([raw_events, raw_events.sample(50, random_state=1)], ignore_index=True)\nn_raw = len(raw_events)\n\nprint(f\'Raw rows: {n_raw}\')\n\n# STEP 1: drop exact duplicates\ndf = ___\nprint(f\'After dedup: {len(df)} rows (removed {n_raw - len(df)})\')\n\n# STEP 2: drop rows with null user_id or event_name\ndf = ___\nprint(f\'After null drop: {len(df)} rows\')\n\n# STEP 3: cast event_value to float (coerce bad strings to NaN, then fill 0)\ndf[\'event_value\'] = ___\nprint(f\'event_value NaNs filled: {(df[\'event_value\'] == 0).sum()} rows set to 0\')\n\n# STEP 4: filter out 1970 timestamps\ndf = ___\nprint(f\'After timestamp filter: {len(df)} rows\')\n\n# Final report\nprint(f\'\\nCleaned: {len(df)} / {n_raw} rows retained ({len(df)/n_raw*100:.1f}%)\')\nprint(df.dtypes)',
+
+    modelAnswer: 'import pandas as pd\nimport numpy as np\n\nnp.random.seed(44)\nn = 5000\nraw_events = pd.DataFrame({\n    \'event_id\':   range(n),\n    \'user_id\':    np.where(np.random.rand(n) < 0.03, np.nan, np.random.randint(1, 1001, n)),\n    \'event_name\': np.where(np.random.rand(n) < 0.02, np.nan,\n                    np.random.choice([\'click\', \'view\', \'purchase\', \'add_to_cart\'], n)),\n    \'event_ts\':   pd.to_datetime(\n                    np.where(np.random.rand(n) < 0.01, \'1970-01-01\',\n                    pd.date_range(\'2024-01-01\', periods=n, freq=\'1min\').astype(str))),\n    \'event_value\': np.where(np.random.rand(n) < 0.04, \'bad_value\',\n                    np.random.lognormal(3, 1, n).round(2).astype(str)),\n    \'platform\':   np.random.choice([\'ios\', \'android\', \'web\'], n),\n})\nraw_events = pd.concat([raw_events, raw_events.sample(50, random_state=1)], ignore_index=True)\nn_raw = len(raw_events)\nprint(f\'Raw rows: {n_raw}\')\n\n# STEP 1\ndf = raw_events.drop_duplicates()\nprint(f\'After dedup: {len(df)} rows (removed {n_raw - len(df)})\')\n\n# STEP 2\ndf = df.dropna(subset=[\'user_id\', \'event_name\'])\nprint(f\'After null drop: {len(df)} rows\')\n\n# STEP 3\ndf = df.copy()\ndf[\'event_value\'] = pd.to_numeric(df[\'event_value\'], errors=\'coerce\').fillna(0)\nbad_values = (df[\'event_value\'] == 0).sum()\nprint(f\'event_value NaNs filled: {bad_values} rows set to 0\')\n\n# STEP 4\ndf = df[df[\'event_ts\'].dt.year >= 2020]\nprint(f\'After timestamp filter: {len(df)} rows\')\n\nprint(f\'\\n=== Validation Report ===\')\nprint(f\'Raw rows:     {n_raw:,}\')\nprint(f\'Clean rows:   {len(df):,}\')\nprint(f\'Rows dropped: {n_raw - len(df):,} ({(n_raw-len(df))/n_raw*100:.1f}%)\')\nprint(f\'\\nFinal dtypes:\')\nprint(df[[ \'user_id\', \'event_name\', \'event_ts\', \'event_value\', \'platform\']].dtypes)',
+
+    keyInsights: [
+      'Always run a validation report — raw count in, clean count out, rows dropped by each step. This is what separates a professional pipeline from a one-off script. Reviewers notice.',
+      'pd.to_numeric(col, errors=\'coerce\') is the right tool for columns that should be numeric but contain garbage strings. errors=\'coerce\' turns unparseable values into NaN silently — then you decide what to do (fill 0, fill median, drop).',
+      'drop_duplicates() without specifying columns removes exact row duplicates across ALL columns. If you only want to deduplicate by key columns (e.g., user_id + event_ts), use drop_duplicates(subset=[\'user_id\', \'event_ts\']).',
+      'df.copy() after chained filtering prevents SettingWithCopyWarning when you then assign to a column. It\'s a one-liner that saves confusing downstream bugs.',
+    ],
+  },
+
 ];
 
 export const codeModulesById = Object.fromEntries(codeModules.map(m => [m.id, m]));

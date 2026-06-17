@@ -96,6 +96,8 @@ const SpotTheFlawBrowser = lazy(() => import('./pages/SpotTheFlawBrowser.jsx').t
 const SpotTheFlawRunner  = lazy(() => import('./components/spotTheFlaw/SpotTheFlawRunner.jsx').then(m => ({ default: m.SpotTheFlawRunner })));
 const TakehomeBrowser  = lazy(() => import('./pages/TakehomeBrowser.jsx').then(m => ({ default: m.TakehomeBrowser })));
 const CheatSheet       = lazy(() => import('./pages/CheatSheet.jsx').then(m => ({ default: m.CheatSheet })));
+const PythonLabBrowser = lazy(() => import('./pages/PythonLabBrowser.jsx').then(m => ({ default: m.PythonLabBrowser })));
+const DimensionalModelBrowser = lazy(() => import('./pages/DimensionalModelBrowser.jsx').then(m => ({ default: m.DimensionalModelBrowser })));
 // StudyRoom: lazy import here when src/study/sm2.js + Supabase migration are ready
 const StudyRoom = lazy(() => import('./pages/StudyRoom.jsx').then(m => ({ default: m.StudyRoom })));
 const TakehomeRunner   = lazy(() => import('./components/takehome/TakehomeRunner.jsx').then(m => ({ default: m.TakehomeRunner })));
@@ -1657,9 +1659,19 @@ export default function App() {
             <CheatSheet onNavigate={navigate} />
           </Suspense>
         )}
-        {page === 'study' && user && (
+        {page === 'python-lab' && (
           <Suspense fallback={null}>
-            <StudyRoom user={user} />
+            <PythonLabBrowser onNavigate={navigate} />
+          </Suspense>
+        )}
+        {page === 'dimensional-modeling' && (
+          <Suspense fallback={null}>
+            <DimensionalModelBrowser onNavigate={navigate} />
+          </Suspense>
+        )}
+        {page === 'study' && (
+          <Suspense fallback={null}>
+            <StudyRoom />
           </Suspense>
         )}
         {page === 'consult' && (

@@ -458,6 +458,12 @@ Two improvements with low implementation cost: (1) Move Failure Patterns, Defens
 
 ## Tier 2 — High impact, more effort
 
+### ~~Dimensional modeling coverage gap~~ → **IN PROGRESS (V5.34.x)**
+Skeleton page shipped (DimensionalModelBrowser.jsx, wired to Sidebar TOOLS + App.jsx route). Coming-soon state with planned curriculum: Star Schema Design, Schema Critique, Flipkart/e-commerce models, Swiggy/delivery models, BI patterns, Interview Patterns. Next: author 3–5 schema-critique cases (tag: `data-modeling`) and build a lightweight runner. Flipkart DA Company Track references this room once cases exist.
+
+### Python execution coverage gap
+PAL covers Python judgment (STF room catches bad pandas code) but cannot simulate "write a cohort analysis in pandas from scratch in 45 minutes" — which Flipkart, PhonePe, and Razorpay actually test. The Code Lab (Pyodide runner) is the right home, but it needs curated DA-specific problem sets: merge/join operations, groupby aggregations, time-series resampling, retention cohort calculation. 4–6 structured problems with an expected output scaffold (not free-form). Gate: Code Lab Tier 1 item above must ship first. Effort: medium (Code Lab must be live; content authoring is straightforward once it is).
+
 ### One-active-session logic
 Users should have 1 active session at a time. New device sign-in invalidates the previous session. Supabase's `signOut({ scope: 'others' })` partially handles this but true automatic invalidation requires a custom `sessions` table + server-side token check on each page load. Skip for v1 — access code model has low sharing-abuse risk currently. Gate: post-Stripe, when paid accounts are active.
 

@@ -4,6 +4,98 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.34.0] — 2026-06-18 [STUDYROOM FIX + DIMENSIONAL MODELING SKELETON]
+
+### StudyRoom auth gate removed + Dimensional Modeling coming-soon page
+
+**StudyRoom fix:**
+Route in App.jsx was gated on `user &&` — `user` is always null in beta (no Supabase auth). Removed the guard and the `user={user}` prop (StudyRoom takes no props). `#/study` now loads for all users.
+
+**Dimensional Modeling skeleton:**
+- `src/pages/DimensionalModelBrowser.jsx` (new) — coming-soon page with 6-area planned curriculum: Star Schema Design, Schema Critique, Flipkart/e-commerce models, Swiggy/delivery models, BI Patterns, Interview Patterns. Why-it-matters banner (Bangalore context). CTAs to RCA Room and SQL Lab.
+- Wired into `src/App.jsx` (lazy import + route `page === 'dimensional-modeling'`)
+- Added to `src/components/layout/Sidebar.jsx` TOOLS section (icon: layers)
+- `IDEAS.md` — dimensional modeling Tier 2 entry marked in progress
+
+**Files changed:** `src/App.jsx`, `src/components/layout/Sidebar.jsx`, `src/pages/DimensionalModelBrowser.jsx` (new), `IDEAS.md`
+
+---
+
+## [5.33.0] — 2026-06-18 [PYTHON MODULES + PYTHON LAB SKELETON]
+
+### 10 Python/pandas modules in Code Lab + Python Lab coming-soon page
+
+**Code Lab — 10 new Python modules (code23–code32):**
+All tagged `track: 'python'`, single-quoted JS, Bangalore company contexts (Swiggy, Flipkart, Zepto, Meesho, Razorpay).
+
+- code23 — pandas groupby + named agg (Swiggy delivery metrics, analyst)
+- code24 — merge safety + dedup (Meesho SKU data, analyst)
+- code25 — pivot_table cohort retention, div(axis=0) (Zepto, senior)
+- code26 — rolling(7).mean() + anomaly flag >20% (Flipkart, analyst)
+- code27 — np.percentile, mean vs median, P90 revenue share (Razorpay, analyst)
+- code28 — resample('W').sum(), sort before pct_change (Swiggy WoW, senior)
+- code29 — collections.Counter, most_common(), Pareto coverage (Flipkart, analyst)
+- code30 — np.select() for Champion/Loyal/At-Risk/Dormant (Zepto, senior)
+- code31 — LTV30/LTV60/LTV90 per acquisition cohort (Meesho, senior)
+- code32 — drop_duplicates, dropna(subset), pd.to_numeric(errors='coerce') (generic, analyst)
+
+**Python Lab skeleton (new page):**
+- `src/pages/PythonLabBrowser.jsx` — coming-soon page with planned curriculum grid (6 areas: Core pandas, Time Series, NumPy & Stats, Python stdlib, End-to-End Tasks, Interview Patterns), status banner, CTA to Code Lab
+- Wired into `src/App.jsx` (lazy import + route `page === 'python-lab'`)
+- Added to `src/components/layout/Sidebar.jsx` TOOLS section
+
+**Files changed:** `src/data/codeModules.js`, `src/pages/PythonLabBrowser.jsx` (new), `src/App.jsx`, `src/components/layout/Sidebar.jsx`
+
+---
+
+## [5.32.3] — 2026-06-18 [HOTFIX: V5.32.2 REGRESSION]
+
+### V5.32.2 regression fix — source files restored from V5.32.1
+
+V5.32.2 accidentally staged the diff between old corrupted source files and V5.32.1 HEAD, deleting STF Python cases, Bangalore tracks, and StudyRoom from live site. Fixed by copying all V5.32.1 source files from clean clone back into repo before committing.
+
+**Files restored:** `src/data/companyTracks.js`, `src/data/spotTheFlawCases.js`, `src/pages/SpotTheFlawBrowser.jsx`, `src/components/shared/ErrorBoundary.jsx`, `src/App.jsx`, `src/study/sm2.js`, `src/study/studyCards.js`, `src/pages/StudyRoom.jsx`
+
+---
+
+## [5.32.2] — 2026-06-18 [BROKEN — see 5.32.3]
+
+Git regression: `.git` copied from fresh clone into corrupted repo caused `git add -A` to stage deletions of V5.32.1 additions. Do not reference this version.
+
+---
+
+## [5.32.1] — 2026-06-18 [DOUBLE-COMMA BUG FIX]
+
+### Two JS syntax crashes fixed (Company Tracks + Spot the Flaw)
+
+Root cause: apply_v532.py injected new array entries with `array_body + ',\n' + new_content` where `array_body` already ended with `},` — producing `},,` double-comma syntax, creating sparse undefined slots in JS arrays, crashing React on map().
+
+**Fixes applied:**
+- `src/data/companyTracks.js` — `},,\n` replaced with `},\n` (Bangalore tracks: swiggy-da, zepto-pa, flipkart-da)
+- `src/data/spotTheFlawCases.js` — same fix (STF13–17 Python cases)
+
+---
+
+## [5.32.0] — 2026-06-18 [BANGALORE TRACKS + STF PYTHON + STUDYROOM + ERRORBOUNDARY]
+
+### Four additions shipped in one session
+
+**1. Bangalore Company Tracks (swiggy-da, zepto-pa, flipkart-da)**
+Added to `src/data/companyTracks.js`. Each track: mentalModel (northStar, lens, drivers, structure, nonNegotiables, answerPattern, seniorLens, watchOuts), interviewStructure[], caseRefs[], playbookArticles, estimatedHours.
+
+**2. STF Python cases (STF13–STF17)**
+Five Spot the Flaw cases covering pandas interview mistakes: many-to-many merge inflation (STF13), fillna(0) on string column (STF14), filter after aggregation (STF15), mean hides tail in skewed data (STF16), pct_change on unsorted DataFrame (STF17). Added \'python\' filter to SpotTheFlawBrowser.jsx.
+
+**3. StudyRoom — localStorage SM-2 spaced repetition**
+`src/study/sm2.js` (SM-2 algorithm), `src/study/studyCards.js` (346 cards), `src/pages/StudyRoom.jsx` (3 views: queue/review/topics). No Supabase — pure localStorage.
+
+**4. ErrorBoundary nav-reset fix**
+Added `getDerivedStateFromProps` to reset on `resetKey` prop change. "Go home" changed to `window.location.reload()`. App.jsx passes `<ErrorBoundary resetKey={page}>`.
+
+**Files changed:** `src/data/companyTracks.js`, `src/data/spotTheFlawCases.js`, `src/pages/SpotTheFlawBrowser.jsx`, `src/study/sm2.js` (new), `src/study/studyCards.js` (new), `src/pages/StudyRoom.jsx` (new), `src/components/shared/ErrorBoundary.jsx`, `src/App.jsx`
+
+---
+
 ## [5.29.0] — 2026-06-10 [UX + NAV]
 
 ### 21-room audit pass — nav labels + missing descriptions

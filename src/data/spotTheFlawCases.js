@@ -411,9 +411,8 @@ export const spotTheFlawCases = [
       'This bug produces plausible-looking percentages in a realistic range, making it easy to accept without questioning.',
       'Before any time-series operation, print the first 5 rows of your time column and verify they are in chronological order.',
     ],
-  },,
+  },
 // Python/Pandas STF cases — STF13–STF17
-// Append inside spotTheFlawCases array before closing ];
 
   {
     id: 'STF13',
