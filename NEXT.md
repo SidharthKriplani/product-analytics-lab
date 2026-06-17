@@ -2,11 +2,11 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: 2026-06-18 (StudyRoom auth fix, Dimensional Modeling skeleton, dark mode fixed)*
+*Last updated: 2026-06-18 (V5.34.4: build fully green — StudyRoom, Python Lab, Dimensional Modeling, STF, codeModules, git mmap resolved)*
 
 ---
 
-## Status — V5.34.0 live. StudyRoom loads. Dark mode fixed. Git repo consolidated.
+## Status — V5.34.4 live. Build green. StudyRoom loads. Python Lab in sidebar. Dimensional Modeling skeleton wired.
 
 Private test still pending. Public distribution blocked until private-test feedback collected.
 
@@ -28,6 +28,8 @@ Private test still pending. Public distribution blocked until private-test feedb
 
 ## Recently shipped
 
+- ✅ V5.34.4 — PythonLabBrowser.jsx committed (was on disk, never in git due to mmap failures); pal-code-progress-v1 added to onResetAllProgress; sitemap updated
+- ✅ V5.34.3 — codeModules.js build fix (unescaped quote line 1330), STF double-comma fix (Progress crash), Python Lab + Dimensional Modeling fully wired in sidebar, code-2 + layers icons added
 - ✅ V5.34.0 — StudyRoom auth gate removed (was gated on `user &&` — null in beta), Dimensional Modeling coming-soon skeleton (Sidebar + App.jsx wired)
 - ✅ V5.33.0 — 10 Python modules in Code Lab (code23–32: pandas groupby/merge/pivot/rolling, numpy percentile, resample WoW, Counter, apply classify, cohort LTV, data cleaning) + Python Lab skeleton page
 - ✅ V5.32.x — STF Python cases (STF13–17), Python filter in STF browser, Bangalore company tracks (Swiggy DA, Zepto PA, Flipkart DA), StudyRoom localStorage (SM-2, 346 cards), ErrorBoundary nav reset fix, dark mode fixed

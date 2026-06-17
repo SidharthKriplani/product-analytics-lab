@@ -4,6 +4,32 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.34.4] — 2026-06-18 [MISSING FILE FIX]
+
+### PythonLabBrowser.jsx added to git
+
+File existed on disk from V5.33.0 but was never committed due to repeated git mmap failures on the iCloud-synced repo path. Vercel build failed with "Module not found" on `./pages/PythonLabBrowser.jsx`. Committed via fresh clone from GitHub to /tmp to bypass filesystem mmap restriction.
+
+Also: `pal-code-progress-v1` added to `onResetAllProgress` in App.jsx (was missing — Python Lab progress would not clear on full reset). `#/python-lab` and `#/dimensional-modeling` added to sitemap.xml.
+
+**Files changed:** `src/pages/PythonLabBrowser.jsx` (added), `src/App.jsx`, `public/sitemap.xml`
+
+---
+
+## [5.34.3] — 2026-06-18 [BUILD FIX + PYTHON LAB SIDEBAR + STF DOUBLE-COMMA]
+
+### codeModules.js build fix, STF double-comma, Python Lab wired in sidebar
+
+Root cause of all Vercel build failures since V5.33.0: unescaped `'` in `modelAnswer` field of code32 module in `src/data/codeModules.js` (line 1330). `print(f\'\\n=== Validation Report ===')` — the closing `'` before `)` terminated the JS string. Fixed to `===\')`.
+
+**STF double-comma fix:** `src/data/spotTheFlawCases.js` line 414 had `},,` (two commas after object close), creating a sparse undefined slot. `Progress.jsx` maps over STF cases and crashed on the undefined slot. Fixed to `},`.
+
+**Python Lab sidebar:** `{ id: 'python-lab', label: 'Python Lab', icon: 'code-2' }` added to Sidebar TOOLS section. `code-2` and `layers` icons were both missing from `Icon.jsx` (returned null silently). Both added.
+
+**Files changed:** `src/data/codeModules.js`, `src/data/spotTheFlawCases.js`, `src/components/layout/Sidebar.jsx`, `src/components/shared/Icon.jsx`, `src/App.jsx`, `src/pages/DimensionalModelBrowser.jsx`, `CHANGELOG.md`, `NEXT.md`, `IDEAS.md`
+
+---
+
 ## [5.34.0] — 2026-06-18 [STUDYROOM FIX + DIMENSIONAL MODELING SKELETON]
 
 ### StudyRoom auth gate removed + Dimensional Modeling coming-soon page

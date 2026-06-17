@@ -1846,7 +1846,7 @@ export default function App() {
                'pal-stat-foundations-progress-v1',
                'pal-bi-progress-v1', 'pal-stf-progress-v1', 'pal-takehome-progress-v1',
                'pal-instrumentation-progress-v1', 'pal-growth-analytics-progress-v1',
-               'pal-challenges-progress-v1', 'pal-bookmarks-v1', 'pal-notes-v1',
+               'pal-challenges-progress-v1', 'pal-code-progress-v1', 'pal-bookmarks-v1', 'pal-notes-v1',
                'pal-metrics-foundation-progress-v1',
                'pal-rca-foundation-progress-v1',
                'pal-exp-foundation-progress-v1',
