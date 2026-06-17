@@ -95,6 +95,8 @@ const BIRunner         = lazy(() => import('./components/bi/BIRunner.jsx').then(
 const SpotTheFlawBrowser = lazy(() => import('./pages/SpotTheFlawBrowser.jsx').then(m => ({ default: m.SpotTheFlawBrowser })));
 const SpotTheFlawRunner  = lazy(() => import('./components/spotTheFlaw/SpotTheFlawRunner.jsx').then(m => ({ default: m.SpotTheFlawRunner })));
 const TakehomeBrowser  = lazy(() => import('./pages/TakehomeBrowser.jsx').then(m => ({ default: m.TakehomeBrowser })));
+const CheatSheet       = lazy(() => import('./pages/CheatSheet.jsx').then(m => ({ default: m.CheatSheet })));
+const StudyRoom        = lazy(() => import('./pages/StudyRoom.jsx').then(m => ({ default: m.StudyRoom })));
 const TakehomeRunner   = lazy(() => import('./components/takehome/TakehomeRunner.jsx').then(m => ({ default: m.TakehomeRunner })));
 const DefenseDocGenerator = lazy(() => import('./pages/DefenseDocGenerator.jsx').then(m => ({ default: m.DefenseDocGenerator })));
 const InstrumentationBrowser = lazy(() => import('./pages/InstrumentationBrowser.jsx').then(m => ({ default: m.InstrumentationBrowser })));
@@ -287,17 +289,33 @@ export default function App() {
     'instrumentation-runner', 'sql-runner',
   ]);
 
-  // Terminal (dark workbench) pages — runners + SQL Lab.
-  // All other pages use the warm Casefile identity regardless of user theme.
+  // Terminal routes — active solving, evidence review, SQL workbench.
+  // Foundations runners are LEARNING pages (reading/interactive lesson) → Casefile.
+  // Browser/listing pages are always Casefile.
   const TERMINAL_PAGES = new Set([
-    'sql-lab',
-    'stats-runner', 'design-runner', 'runner', 'metrics-runner', 'rca-runner',
-    'cases-runner', 'full-loop-runner', 'prioritization-runner', 'behavioral-runner',
-    'estimation-runner', 'growth-runner', 'bi-runner', 'stf-runner', 'growth-analytics-runner',
-    'instrumentation-runner', 'sql-runner', 'takehome-runner',
-    'stat-foundations-runner', 'rca-foundations-runner', 'metrics-foundations-runner',
-    'product-design-runner', 'leadership-lens-runner', 'exp-foundations-runner',
-    'challenges-runner', 'behavioral-runner',
+    // SQL workbench
+    'sql-lab', 'sql-runner',
+    // Case runners — active answer/solve screens
+    'stats-runner',            // active stat problem solving
+    'design-runner',           // active A/B design solving
+    'runner',                  // A/B review evidence runner
+    'metrics-runner',          // active metrics case solving
+    'rca-runner',              // RCA diagnostic workbench
+    'cases-runner',            // business case solving
+    'full-loop-runner',        // full loop solve
+    'prioritization-runner',   // prioritization solve
+    'behavioral-runner',       // behavioral answer entry
+    'estimation-runner',       // estimation solve
+    'growth-analytics-runner', // growth analytics solve
+    'bi-runner',               // BI active case solve
+    'stf-runner',              // spot the flaw solve
+    'takehome-runner',         // take-home solve
+    'instrumentation-runner',  // instrumentation solve
+    'product-design-runner',   // product design solve
+    'leadership-lens-runner',  // leadership solve
+    'challenges-runner',       // challenges solve
+    // NOTE: stat-foundations-runner, rca-foundations-runner, metrics-foundations-runner,
+    // exp-foundations-runner are LESSON/READING pages → stay Casefile mode
   ]);
 
   // Safety-net: if an anonymous user somehow reaches a runner page via direct navigation,
@@ -997,13 +1015,14 @@ export default function App() {
   const isFocusMode = page === 'runner' || page.endsWith('-runner');
 
   return (
-    <div className={`app-layout ${TERMINAL_PAGES.has(page) ? 'terminal-page' : 'casefile-page'}${isFocusMode ? ' focus-mode' : ''}${page === 'sql-lab' ? ' sql-lab-mode' : ''}${!user && page === 'home' ? ' signed-out' : ''}`} style={{ color: 'var(--text)' }}>
+    <div className={`app-layout mode-${TERMINAL_PAGES.has(page) ? 'terminal' : 'casefile'} theme-${theme}${isFocusMode ? ' focus-mode' : ''}${page === 'sql-lab' ? ' sql-lab-mode' : ''}${!user && page === 'home' ? ' signed-out' : ''}`} style={{ color: 'var(--text)' }}>
       <Sidebar
         currentPage={page}
         onNavigate={navigate}
         unlockedStatus={unlocked}
         theme={theme}
         onToggleTheme={toggleTheme}
+        isTerminal={TERMINAL_PAGES.has(page)}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         user={user}
@@ -1632,6 +1651,16 @@ export default function App() {
 
         {page === 'simulator' && <InterviewSimulator unlocked={unlocked} onBack={() => setPage('home')} onNavigate={navigate} />}
         {page === 'ab-interpreter' && <ABTestInterpreter onBack={() => setPage('home')} />}
+        {page === 'cheatsheet' && (
+          <Suspense fallback={null}>
+            <CheatSheet onNavigate={navigate} />
+          </Suspense>
+        )}
+        {page === 'study' && user && (
+          <Suspense fallback={null}>
+            <StudyRoom user={user} />
+          </Suspense>
+        )}
         {page === 'consult' && (
           <Suspense fallback={
               <div style={{ padding: '2rem 2rem 0' }}>

@@ -64,6 +64,7 @@ const FLAT_GROUPS = [
       { id: 'company-tracks', label: 'Company Tracks',   icon: 'building-2' },
       { id: 'defense-doc',    label: 'Defense Strategy', icon: 'shield' },
       { id: 'bookmarks',      label: 'Saved',            icon: 'bookmark' },
+      { id: 'cheatsheet',     label: 'Prep Cheatsheet',  icon: 'file-text' },
     ],
   },
   {
@@ -110,7 +111,9 @@ function getIsActive(itemId, currentPage) {
     || (itemId === 'metrics-foundations' && (currentPage === 'metrics-foundations' || currentPage === 'metrics-foundations-runner'))
     || (itemId === 'rca-foundations'     && (currentPage === 'rca-foundations' || currentPage === 'rca-foundations-runner'))
     || (itemId === 'exp-foundations'     && (currentPage === 'exp-foundations' || currentPage === 'exp-foundations-runner'))
-    || (itemId === 'sql-lab'             && currentPage === 'sql-lab');
+    || (itemId === 'sql-lab'             && currentPage === 'sql-lab')
+    || (itemId === 'cheatsheet'          && currentPage === 'cheatsheet')
+    || (itemId === 'study'               && currentPage === 'study');
 }
 
 function getActiveSubGroup(currentPage) {
@@ -120,7 +123,7 @@ function getActiveSubGroup(currentPage) {
   return null;
 }
 
-export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onToggleTheme, isOpen, onClose, user, onShowAuth }) {
+export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onToggleTheme, isTerminal, isOpen, onClose, user, onShowAuth }) {
   const [expandedSubGroups, setExpandedSubGroups] = useState(() => {
     const active = getActiveSubGroup(currentPage);
     return new Set(active ? [active] : ['experiments']);
@@ -161,6 +164,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
       { id: 'rca-foundations',       label: 'RCA Foundations' },
       { id: 'exp-foundations',       label: 'A/B Foundations' },
       { id: 'foundations',           label: 'Theory Hub' },
+      { id: 'study',                 label: 'Study Room',       icon: 'layers' },
       ...FLAT_GROUPS.flatMap(g => g.items),
     ];
     const item = allItems.find(i => i.id === id);
@@ -289,32 +293,52 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
             </div>
           </button>
 
-          <button
-            onClick={onToggleTheme}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            style={{
-              background: 'none',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '0.27rem 0.52rem',
-              color: 'var(--text-muted)',
-              fontSize: '0.78rem',
-              cursor: 'pointer',
-              lineHeight: 1,
-              flexShrink: 0,
-              transition: 'border-color var(--transition), background var(--transition)',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'var(--border-strong)';
-              e.currentTarget.style.background = 'var(--surface-2)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = 'var(--border)';
-              e.currentTarget.style.background = 'none';
-            }}
-          >
-            {theme === 'dark' ? '☀' : '🌙'}
-          </button>
+          {isTerminal ? (
+            <div
+              title="Terminal Lab uses fixed dark mode"
+              style={{
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '0.27rem 0.52rem',
+                color: 'var(--text-dim)',
+                fontSize: '0.72rem',
+                lineHeight: 1,
+                flexShrink: 0,
+                cursor: 'default',
+                letterSpacing: '0.02em',
+                opacity: 0.6,
+              }}
+            >
+              ◼
+            </div>
+          ) : (
+            <button
+              onClick={onToggleTheme}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              style={{
+                background: 'none',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '0.27rem 0.52rem',
+                color: 'var(--text-muted)',
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                lineHeight: 1,
+                flexShrink: 0,
+                transition: 'border-color var(--transition), background var(--transition)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = 'var(--border-strong)';
+                e.currentTarget.style.background = 'var(--surface-2)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.background = 'none';
+              }}
+            >
+              {theme === 'dark' ? '☀' : '🌙'}
+            </button>
+          )}
         </div>
 
         {/* ── Nav ── */}
@@ -478,6 +502,14 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
               ))}
             </div>
           ))}
+
+          {/* STUDY ROOM — private, email-gated */}
+          {user?.email === 'claudesubscription12@gmail.com' && (
+            <div style={{ marginBottom: '0.1rem' }}>
+              <SectionLabel label="PRIVATE" />
+              <NavItem id="study" />
+            </div>
+          )}
 
         </nav>
 
