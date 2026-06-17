@@ -96,7 +96,8 @@ const SpotTheFlawBrowser = lazy(() => import('./pages/SpotTheFlawBrowser.jsx').t
 const SpotTheFlawRunner  = lazy(() => import('./components/spotTheFlaw/SpotTheFlawRunner.jsx').then(m => ({ default: m.SpotTheFlawRunner })));
 const TakehomeBrowser  = lazy(() => import('./pages/TakehomeBrowser.jsx').then(m => ({ default: m.TakehomeBrowser })));
 const CheatSheet       = lazy(() => import('./pages/CheatSheet.jsx').then(m => ({ default: m.CheatSheet })));
-const StudyRoom        = lazy(() => import('./pages/StudyRoom.jsx').then(m => ({ default: m.StudyRoom })));
+// StudyRoom: lazy import here when src/study/sm2.js + Supabase migration are ready
+// const StudyRoom     = lazy(() => import('./pages/StudyRoom.jsx').then(m => ({ default: m.StudyRoom })));
 const TakehomeRunner   = lazy(() => import('./components/takehome/TakehomeRunner.jsx').then(m => ({ default: m.TakehomeRunner })));
 const DefenseDocGenerator = lazy(() => import('./pages/DefenseDocGenerator.jsx').then(m => ({ default: m.DefenseDocGenerator })));
 const InstrumentationBrowser = lazy(() => import('./pages/InstrumentationBrowser.jsx').then(m => ({ default: m.InstrumentationBrowser })));
@@ -1656,11 +1657,12 @@ export default function App() {
             <CheatSheet onNavigate={navigate} />
           </Suspense>
         )}
-        {page === 'study' && user && (
+        {/* StudyRoom route: uncomment when src/study/sm2.js + Supabase migration are ready */}
+        {/* {page === 'study' && user && (
           <Suspense fallback={null}>
             <StudyRoom user={user} />
           </Suspense>
-        )}
+        )} */}
         {page === 'consult' && (
           <Suspense fallback={
               <div style={{ padding: '2rem 2rem 0' }}>
