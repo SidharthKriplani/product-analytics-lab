@@ -21,7 +21,7 @@ const FLAW_TYPE_LABEL = {
   'sutva':             'SUTVA',
 };
 
-const ALL_FLAW_TYPES = ['All', 'srm', 'peeking', 'simpsons-paradox', 'novelty-effect', 'multiple-testing', 'bad-metric', 'selection-bias', 'sutva'];
+const ALL_FLAW_TYPES = ['All', 'srm', 'peeking', 'simpsons-paradox', 'novelty-effect', 'multiple-testing', 'bad-metric', 'selection-bias', 'sutva', 'python'];
 
 const RATING_COLOR = {
   'caught it': 'var(--green)',
