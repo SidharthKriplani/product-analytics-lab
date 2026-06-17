@@ -147,15 +147,26 @@ npm run dev
 npm_config_cache=/tmp/npm-cache ./node_modules/.bin/vite build --outDir /tmp/dist-output
 ```
 
-### Git lock issue (recurring — sandbox cannot push)
-The sandbox cannot remove `.git/HEAD.lock` across the FUSE mount. When git fails with "cannot lock ref HEAD", the user must run from their Mac terminal:
+### Git commit workflow (MANDATORY — direct git from repo path does not work)
+The repo is in an iCloud-synced folder. `git status`, `git add`, and `git commit` all fail with `fatal: mmap failed: Operation timed out` because iCloud evicts large working-tree files and git tries to mmap them. **Never attempt git operations from the repo path directly.**
+
+Always commit via /tmp clone:
 ```bash
-cd "/Users/ASUS/Documents/GitHub/experimentation-systems-lab"
-rm -f .git/index.lock .git/HEAD.lock
+git clone https://github.com/SidharthKriplani/product-analytics-lab /tmp/pal-push
+
+# Before copying files — check for any files on disk not in HEAD (missed from prior sessions):
+# comm -23 <(find src -type f | sort) <(git ls-tree -r HEAD --name-only | sort)
+
+SRC="/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab"
+# cp each changed file: cp "$SRC/src/..." /tmp/pal-push/src/...
+
+cd /tmp/pal-push
 git add -A
-git commit -m "your message"
+git commit -m "Vx.x.x: description"
 git push origin main
 ```
+
+`/tmp` is local storage — no iCloud, no mmap failures. This is permanent; do not try to fix the underlying mmap issue.
 
 ---
 

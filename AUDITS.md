@@ -39,6 +39,38 @@ Start here when running an audit. Add rows as new types emerge.
 
 ---
 
+## Part XXXIII — V5.34.x Build Audit (2026-06-18)
+
+### 153. ✅ Build Audit — Missing file + statefulness gaps (V5.34.3–V5.34.4)
+
+**Type:** BUILD / Framework / Technical
+
+Three gaps found and resolved in the V5.34.x sprint:
+
+1. **PythonLabBrowser.jsx never committed** — file existed on disk since V5.33.0 but all git commits in that session failed silently due to mmap failures on the iCloud-synced repo path. Vercel build failed with "Module not found" on the next push that reached GitHub. Fixed in V5.34.4 by committing via /tmp clone.
+
+2. **`pal-code-progress-v1` missing from `onResetAllProgress`** — Python Lab (Code Browser) uses this localStorage key but it was not in App.jsx's reset array. A user hitting "Reset All Progress" would not clear Code Lab progress. Fixed in V5.34.5.
+
+3. **`sitemap.xml` missing `/python-lab` and `/dimensional-modeling`** — both routes shipped without sitemap entries. Fixed in V5.34.5.
+
+**Status:** ✅ All three resolved.
+
+---
+
+### 152. ✅ Build Audit — Data file bugs causing build failure + Progress crash (V5.34.3)
+
+**Type:** BUILD / Framework / Technical
+
+Two pre-existing data file bugs found and fixed:
+
+1. **`src/data/codeModules.js` line 1330 — unescaped `'` in `modelAnswer`** — `print(f\'\\n=== Validation Report ===')` had an unescaped closing `'` before `)` that terminated the JS string. Caused every Vercel build from V5.33.0 onwards to fail with a Rolldown parse error. Root cause: the code content had both a `f\'` prefix and a `'` suffix, requiring the suffix to also be escaped as `\'`. Fixed: `===\')`.
+
+2. **`src/data/spotTheFlawCases.js` line 414 — double-comma `},,`** — two commas after object close created a sparse undefined slot in the cases array. `Progress.jsx` maps over STF cases and crashed with "Cannot read properties of undefined" on the undefined slot. Fixed: `},,` → `},`.
+
+**Status:** ✅ Both resolved.
+
+---
+
 ## Part XXXII — V5.25.0 Content Audit Sprint (2026-06-09)
 
 ### 151. ⚠️ Platform UX audit — orientation, nav clarity, room identity, stickiness (2026-06-09)

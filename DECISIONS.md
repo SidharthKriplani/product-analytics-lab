@@ -4,6 +4,26 @@ Prescriptive, present-tense standing rules. This is not build history (that's CH
 
 ---
 
+## Git / Dev Workflow
+
+**All git commits must be made from `/tmp`, not from the repo path.**
+The repo lives in `upskill platforms (4)/product-analytics-lab` which is iCloud-synced. iCloud evicts large files from local cache, causing `fatal: mmap failed: Operation timed out` on `git status`, `git add`, and `git commit`. This affects ALL git operations that access large working-tree files (the large `.js` data files in `src/data/`). The fix: clone to `/tmp`, copy changed files in, commit and push from `/tmp`. Every session that ships code must use this workflow. Do not attempt git operations from the original path — they will fail.
+
+Standard session commit workflow:
+```bash
+git clone https://github.com/SidharthKriplani/product-analytics-lab /tmp/pal-push
+# cp changed files into /tmp/pal-push/...
+cd /tmp/pal-push && git add -A && git commit -m "..." && git push origin main
+```
+
+**Before every push, verify no new files on disk are missing from the GitHub commit.**
+Run `comm -23 <(find src -type f | sort) <(git ls-tree -r HEAD --name-only | sort)` from the repo directory using a git command that works (e.g., `git ls-tree` doesn't need mmap). Any file shown is on disk but not in git — add it to the cp list before committing.
+
+**New room progress keys must be added to `onResetAllProgress` in App.jsx AND to `PROGRESS_KEYS` in `src/utils/syncProgress.js`.**
+Both lists must stay in sync. Missing a key means "Reset All Progress" silently leaves stale data behind.
+
+---
+
 ## Architecture
 
 **No custom backend. Supabase is the only allowed external service (V4.24+).**
