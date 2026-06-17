@@ -14,6 +14,17 @@ export class ErrorBoundary extends React.Component {
     console.error('PAL ErrorBoundary caught:', error, info);
   }
 
+  // Reset whenever the page key changes (App.jsx passes resetKey={page})
+  static getDerivedStateFromProps(props, state) {
+    if (state.hasError && props.resetKey !== state.lastResetKey) {
+      return { hasError: false, lastResetKey: props.resetKey };
+    }
+    if (!state.hasError) {
+      return { lastResetKey: props.resetKey };
+    }
+    return null;
+  }
+
   render() {
     if (this.state.hasError) {
       return (
@@ -32,7 +43,7 @@ export class ErrorBoundary extends React.Component {
               An unexpected error occurred. Your progress is saved — refreshing will restore it.
             </div>
             <button
-              onClick={() => { window.location.href = '/'; }}
+              onClick={() => { window.location.reload(); }}
               style={{
                 padding: '0.55rem 1.4rem', background: 'var(--accent)', color: '#fff',
                 border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700,

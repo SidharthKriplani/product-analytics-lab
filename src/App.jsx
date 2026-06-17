@@ -1077,7 +1077,7 @@ export default function App() {
         </div>
 
         <main style={{ flex: 1, ...(page === 'sql-lab' ? { display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 } : {}) }}>
-          <ErrorBoundary>
+          <ErrorBoundary resetKey={page}>
           <Suspense fallback={
             <div style={{ padding: '2rem 2rem 0' }}>
               {[1,2,3].map(i => (
