@@ -4,6 +4,12 @@ This is the narrative history of PAL. Not a version list (that's CHANGELOG.md) �
 
 ---
 
+### v5.35.0 — ShareLinkButton on all 18 runners + SQL Lab (2026-06-18)
+
+ShareLinkButton component wired into all 18 scenario runners and SQL Lab page. hashRouting.js complete with URL write-back for all rooms. Deployed via HTTPS+PAT push after auth issues. Pushed: ✅
+
+---
+
 ## Origin: One Room, One Question (V1 — 2025)
 
 PAL started as "Experimentation Systems Lab" — a single-room practice tool for product analysts who understood A/B testing theory but struggled applying judgment to real, messy results. The problem it was solving: every existing resource teaches the formulas. None of them put you in the decision meeting.

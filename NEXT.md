@@ -10,6 +10,13 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 Private test still pending. Public distribution blocked until private-test feedback collected.
 
+## Notes for next session
+
+- v5.35.0 fully pushed. product-analytics-lab is live at v5.35.0.
+- GitHub PAT was exposed in chat this session — user must revoke it and generate a fresh one before next push.
+- Git remote is HTTPS with PAT. After regenerate: `git remote set-url origin https://SidharthKriplani:NEW_TOKEN@github.com/SidharthKriplani/product-analytics-lab.git`
+- Pending next session: Quiz Me content, ELI5 mode, LinkedIn posts for PAL
+
 ## Pre-beta gates (user actions, not code)
 
 1. **Confirm `VITE_POSTHOG_KEY` live in Vercel** — check env vars dashboard, establish WAU baseline
