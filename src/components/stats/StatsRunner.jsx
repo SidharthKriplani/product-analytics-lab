@@ -11,6 +11,7 @@ import { TimerButton } from '../shared/TimerButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 // views: 'question' | 'reveal' | 'debrief'
 
@@ -109,13 +110,15 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
 
       {/* Back + header */}
       <div style={{ marginBottom: '1.25rem' }}>
-        <button
-          onClick={onBack}
-          className="pal-back-btn"
-          style={{ marginBottom: '0.75rem' }}
-        >
-          <Icon name="arrow-left" size={14} color="currentColor" />Stats Room
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+          <button
+            onClick={onBack}
+            className="pal-back-btn"
+          >
+            <Icon name="arrow-left" size={14} color="currentColor" />Stats Room
+          </button>
+          <ShareLinkButton room="stats" />
+        </div>
 
         <Breadcrumb crumbs={[
           { label: 'PAL', onClick: onBack },

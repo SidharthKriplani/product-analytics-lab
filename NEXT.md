@@ -2,11 +2,11 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: 2026-06-18 (V5.34.4: build fully green — StudyRoom, Python Lab, Dimensional Modeling, STF, codeModules, git mmap resolved)*
+*Last updated: 2026-06-18 (V5.35.0: ShareLinkButton all 18 runners + SQL Lab, hashRouting.js complete)*
 
 ---
 
-## Status — V5.34.4 live. Build green. StudyRoom loads. Python Lab in sidebar. Dimensional Modeling skeleton wired.
+## Status — V5.35.0 live. Share buttons on all 18 runners + SQL Lab. Deep-link routing complete for all rooms.
 
 Private test still pending. Public distribution blocked until private-test feedback collected.
 
@@ -20,7 +20,7 @@ Private test still pending. Public distribution blocked until private-test feedb
 
 **1. Dimensional modeling cases** — skeleton shipped (V5.34.0). Next: author 3-5 schema-critique cases tagged `data-modeling`. Flipkart DA track references these once live.
 
-**2. Share buttons** — Deep-link routing done (V5.22.0). Add copy-link button to runner headers and SQL Lab problem card.
+**2. ~~Share buttons~~** — ✅ Done V5.35.0. ShareLinkButton on all 18 runners + SQL Lab. hashRouting.js complete for all rooms.
 
 **3. PostHog event wiring** — gate_shown, gate_converted, debrief_viewed, forward_pointer_clicked. Needed for real funnel data.
 
@@ -28,6 +28,7 @@ Private test still pending. Public distribution blocked until private-test feedb
 
 ## Recently shipped
 
+- ✅ V5.35.0 — ShareLinkButton on all 18 runners + SQL Lab; hashRouting.js completed for code, python-lab, dimensional-modeling, study, cheatsheet
 - ✅ V5.34.6 — CodeBrowser + CodeRunner wired into App.jsx (were built but never imported/routed; clicking Code Lab went nowhere)
 - ✅ V5.34.5 — sitemap, code progress reset key, CLAUDE/DECISIONS/AUDITS/NEXT/CHANGELOG updated
 - ✅ V5.34.4 — PythonLabBrowser.jsx committed (was on disk, never in git due to mmap failures); pal-code-progress-v1 added to onResetAllProgress; sitemap updated

@@ -15,6 +15,7 @@ import { GateOverlay } from '../shared/GateOverlay.jsx';
 import { saveAttempt } from '../../utils/progress.js';
 import { track } from '../../utils/analytics.js';
 import { getScoreRank } from '../../utils/scoring.js';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 const SCENARIO_DRAFT_KEY = 'pal-scenario-draft-v1';
@@ -158,6 +159,7 @@ export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, 
           </div>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.83rem', margin: 0 }}>{scenario.subtitle}</p>
         </div>
+        <ShareLinkButton room="review" />
       </div>
 
       {/* ── Workflow hint (pre-submit) ────────────────────────────────── */}

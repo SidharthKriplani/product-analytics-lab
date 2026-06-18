@@ -3,6 +3,7 @@ import { codeModules } from '../../data/codeModules.js';
 import { saveCodeAttempt } from '../../utils/codeProgress.js';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -67,18 +68,21 @@ export function CodeRunner({ caseId, savedProgress, onBack, onNext, onNavigate }
     <div style={{ maxWidth: '820px', margin: '0 auto', padding: '1.5rem 1rem' }}>
 
       {/* Back button */}
-      <button
-        onClick={onBack}
-        style={{
-          background: 'transparent', border: 'none', cursor: 'pointer',
-          fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600,
-          padding: '0 0 1.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem',
-        }}
-        onMouseEnter={e => e.currentTarget.style.color = 'var(--yellow)'}
-        onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
-      >
-        ← Code Room
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+        <button
+          onClick={onBack}
+          style={{
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600,
+            padding: '0', display: 'flex', alignItems: 'center', gap: '0.3rem',
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--yellow)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+        >
+          ← Code Room
+        </button>
+        <ShareLinkButton room="code" />
+      </div>
 
       {/* Header */}
       <div style={{ marginBottom: '1.25rem' }}>

@@ -8,6 +8,7 @@ import { track } from '../../utils/analytics.js';
 import { biCases } from '../../data/biCases.js';
 import { ChartScenario } from './ChartScenario.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const ROOM_KEY = 'bi';
 const NOTES_KEY = 'pal-notes-v1';
@@ -665,16 +666,19 @@ export function BIRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
     return (
       <div>
         <div style={{ maxWidth: '820px', margin: '0 auto', padding: '1rem 1.5rem 0' }}>
-          <button
-            onClick={onBack}
-            style={{
-              background: 'none', border: 'none', color: 'var(--text-muted)',
-              cursor: 'pointer', fontSize: '0.85rem', padding: 0,
-              display: 'flex', alignItems: 'center', gap: '0.3rem',
-            }}
-          >
-            ← BI &amp; Reporting Room
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              onClick={onBack}
+              style={{
+                background: 'none', border: 'none', color: 'var(--text-muted)',
+                cursor: 'pointer', fontSize: '0.85rem', padding: 0,
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+              }}
+            >
+              ← BI &amp; Reporting Room
+            </button>
+            <ShareLinkButton room="bi" />
+          </div>
         </div>
         <SituationScreen caseData={caseData} onBegin={handleBegin} />
       </div>
@@ -685,16 +689,19 @@ export function BIRunner({ caseId, onBack, onNext, unlocked, onNavigate }) {
     return (
       <div>
         <div style={{ maxWidth: '820px', margin: '0 auto', padding: '1rem 1.5rem 0' }}>
-          <button
-            onClick={onBack}
-            style={{
-              background: 'none', border: 'none', color: 'var(--text-muted)',
-              cursor: 'pointer', fontSize: '0.85rem', padding: 0,
-              display: 'flex', alignItems: 'center', gap: '0.3rem',
-            }}
-          >
-            ← BI &amp; Reporting Room
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              onClick={onBack}
+              style={{
+                background: 'none', border: 'none', color: 'var(--text-muted)',
+                cursor: 'pointer', fontSize: '0.85rem', padding: 0,
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+              }}
+            >
+              ← BI &amp; Reporting Room
+            </button>
+            <ShareLinkButton room="bi" />
+          </div>
         </div>
         <ChartScenario caseData={caseData} onBack={onBack} onNext={onNext} onRate={handleChartRate} />
       </div>

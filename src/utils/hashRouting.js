@@ -63,6 +63,10 @@ const PAGE_TO_HASH = {
   'takehome-runner': 'take-home',
   'instrumentation-runner': 'instrumentation',
 
+  // Code Lab
+  'code': 'code-lab',
+  'code-runner': 'code-lab',
+
   // Tools
   'sql-lab': 'sql-lab',
   'playbook': 'playbook',
@@ -71,6 +75,12 @@ const PAGE_TO_HASH = {
   'benchmark': 'benchmark',
   'consult': 'consult',
   'trainer': 'trainer',
+
+  // Learn / standalone pages
+  'python-lab': 'python-lab',
+  'dimensional-modeling': 'dimensional-modeling',
+  'study': 'study',
+  'cheatsheet': 'cheatsheet',
 
   // Track / misc
   'company-tracks': 'company-tracks',
@@ -107,6 +117,7 @@ const RUNNER_ACTIVE_ID_KEY = {
   'metrics-foundations-runner': 'activeMetricsFoundationId',
   'rca-foundations-runner': 'activeRCAFoundationId',
   'exp-foundations-runner': 'activeExpFoundationId',
+  'code-runner': 'activeCodeModuleId',
 };
 
 // Hash segment → browser page value (no runner suffix)
@@ -149,6 +160,11 @@ const HASH_TO_BROWSER_PAGE = {
   'benchmark': 'benchmark',
   'consult': 'consult',
   'trainer': 'trainer',
+  'code-lab': 'code',
+  'python-lab': 'python-lab',
+  'dimensional-modeling': 'dimensional-modeling',
+  'study': 'study',
+  'cheatsheet': 'cheatsheet',
   'company-tracks': 'company-tracks',
   'defense-doc': 'defense-doc',
   'interview-qa': 'interview-qa',
@@ -183,6 +199,7 @@ const HASH_TO_RUNNER_PAGE = {
   'metrics-foundations': 'metrics-foundations-runner',
   'rca-foundations': 'rca-foundations-runner',
   'exp-foundations': 'exp-foundations-runner',
+  'code-lab': 'code-runner',
 };
 
 // Runner page → the open function name to call (used by hashchange handler)
@@ -209,6 +226,7 @@ const RUNNER_OPEN_FN = {
   'metrics-foundations-runner': 'openMetricsFoundationModule',
   'rca-foundations-runner': 'openRCAFoundationModule',
   'exp-foundations-runner': 'openExpFoundationModule',
+  'code-runner': 'openCodeModule',
 };
 
 /**

@@ -4,6 +4,7 @@ import { addBookmark, removeBookmark, isBookmarked, toggleBookmark } from '../..
 import { track } from '../../utils/analytics.js';
 import { growthAnalyticsCases } from '../../data/growthAnalyticsCases.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const ROOM_KEY = 'growth-analytics';
 const NOTES_KEY = 'pal-notes-v1';
@@ -537,16 +538,19 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
     <div style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem' }}>
 
       {/* Back nav */}
-      <button
-        onClick={onBack}
-        style={{
-          background: 'none', border: 'none', color: 'var(--text-muted)',
-          cursor: 'pointer', fontSize: '0.85rem', marginBottom: '1.5rem',
-          padding: 0, display: 'flex', alignItems: 'center', gap: '0.3rem',
-        }}
-      >
-        ← Growth Analytics
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        <button
+          onClick={onBack}
+          style={{
+            background: 'none', border: 'none', color: 'var(--text-muted)',
+            cursor: 'pointer', fontSize: '0.85rem',
+            padding: 0, display: 'flex', alignItems: 'center', gap: '0.3rem',
+          }}
+        >
+          ← Growth Analytics
+        </button>
+        <ShareLinkButton room="growth-analytics" />
+      </div>
 
       {/* Case header */}
       <div style={{ marginBottom: '1.5rem' }}>

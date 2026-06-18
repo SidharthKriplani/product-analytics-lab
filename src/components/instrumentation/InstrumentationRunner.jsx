@@ -9,6 +9,7 @@ import { instrumentationCases } from '../../data/instrumentationCases.js';
 import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const ROOM_KEY = 'instrumentation';
 const NOTES_KEY = 'pal-notes-v1';
@@ -631,16 +632,19 @@ export function InstrumentationRunner({ caseId, onBack, onNext, unlocked, onNavi
     return (
       <div>
         <div style={{ maxWidth: '820px', margin: '0 auto', padding: '1rem 1.5rem 0' }}>
-          <button
-            onClick={onBack}
-            style={{
-              background: 'none', border: 'none', color: 'var(--text-muted)',
-              cursor: 'pointer', fontSize: '0.85rem', padding: 0,
-              display: 'flex', alignItems: 'center', gap: '0.3rem',
-            }}
-          >
-            ← Analytics Instrumentation Room
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              onClick={onBack}
+              style={{
+                background: 'none', border: 'none', color: 'var(--text-muted)',
+                cursor: 'pointer', fontSize: '0.85rem', padding: 0,
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+              }}
+            >
+              ← Analytics Instrumentation Room
+            </button>
+            <ShareLinkButton room="instrumentation" />
+          </div>
         </div>
         <SituationScreen caseData={caseData} onBegin={handleBegin} />
       </div>

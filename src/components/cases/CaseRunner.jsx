@@ -9,6 +9,7 @@ import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 import { GateOverlay } from '../shared/GateOverlay.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 // ─── Seeded shuffle helpers ───
 // Deterministic per caseId+phaseId so the same tester sees the same order
@@ -172,16 +173,19 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '1.5rem 1rem' }}>
 
       {/* Back button */}
-      <button
-        onClick={onBack}
-        style={{
-          background: 'none', border: 'none', color: 'var(--text-muted)',
-          fontSize: '0.78rem', cursor: 'pointer', padding: '0', marginBottom: '1rem',
-          display: 'flex', alignItems: 'center', gap: '0.3rem',
-        }}
-      >
-        ← Cases Room
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+        <button
+          onClick={onBack}
+          style={{
+            background: 'none', border: 'none', color: 'var(--text-muted)',
+            fontSize: '0.78rem', cursor: 'pointer', padding: '0',
+            display: 'flex', alignItems: 'center', gap: '0.3rem',
+          }}
+        >
+          ← Cases Room
+        </button>
+        <ShareLinkButton room="cases" />
+      </div>
 
       <Breadcrumb crumbs={[
         { label: 'PAL', onClick: onBack },

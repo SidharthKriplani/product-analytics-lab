@@ -3,6 +3,7 @@ import { fullLoopCasesById } from '../../data/fullLoopCases.js';
 import { fullLoopSeedData } from '../../data/fullLoopSeedData.js';
 import { saveFullLoopProgress, getFullLoopProgress, clearFullLoopProgress } from '../../utils/fullLoopProgress.js';
 import { track } from '../../utils/analytics.js';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 // ─── SVG Phase Icons ───────────────────────────────────────────────────────
 function IconAlert(props) {
@@ -1971,6 +1972,7 @@ export function FullLoopRunner(props) {
           <IconArrowLeft size={13} />
           Back
         </button>
+        <ShareLinkButton room="full-loop" />
         <div style={{ flex: 1 }}>
           <h1 style={{
             fontSize: '24px', fontWeight: 700, color: 'var(--text)', margin: '0 0 6px',

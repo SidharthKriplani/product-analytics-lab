@@ -4,6 +4,20 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.35.0] — 2026-06-18 [SHAREABLE LINKS — ALL ROOMS]
+
+### Copy-link button + deep-link routing for all rooms
+
+Added `ShareLinkButton` component (shared utility) that copies `window.location.href` to clipboard. App.jsx already keeps the URL hash in sync with page + active case ID via `stateToHash()`, so the current URL is always the correct deep link — the button just exposes it.
+
+Added to 18 practice room runners: Review, RCA, Metrics, Cases, Product Design, Design, Stats, Growth Analytics, Spot the Flaw, Challenges, BI, Prioritization, Behavioral, Estimation, Full Loop, Take-Home, Instrumentation, Code Lab. Also added to SQL Lab problem nav bar.
+
+Fixed `hashRouting.js` — `code`, `code-runner`, `python-lab`, `dimensional-modeling`, `study`, and `cheatsheet` were missing from all four routing maps. These pages now update the URL hash correctly and can be deep-linked.
+
+**Files changed:** `src/utils/hashRouting.js`, `src/components/shared/ShareLinkButton.jsx` (new), `src/pages/SqlLabPage.jsx`, and all 18 runner files.
+
+---
+
 ## [5.34.6] — 2026-06-18 [CODE LAB ROUTING FIX]
 
 ### CodeBrowser + CodeRunner wired into App.jsx

@@ -11,6 +11,7 @@ import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 import { GateOverlay } from '../shared/GateOverlay.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const ROOM_KEY = 'rca';
 
@@ -181,13 +182,15 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '1.5rem 1rem' }}>
 
       {/* Back button */}
-      <button
-        onClick={onBack}
-        className="pal-back-btn"
-        style={{ marginBottom: '1.25rem' }}
-      >
-        <Icon name="arrow-left" size={14} color="currentColor" />RCA Room
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+        <button
+          onClick={onBack}
+          className="pal-back-btn"
+        >
+          <Icon name="arrow-left" size={14} color="currentColor" />RCA Room
+        </button>
+        <ShareLinkButton room="rca" />
+      </div>
 
       <Breadcrumb crumbs={[
         { label: 'PAL', onClick: onBack },

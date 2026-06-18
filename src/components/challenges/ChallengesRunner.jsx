@@ -3,6 +3,7 @@ import { saveChallengesProgress, getChallengesProgress, saveChallengesDraft, loa
 import { track } from '../../utils/analytics.js';
 import { challengesCases } from '../../data/challengesCases.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -144,7 +145,10 @@ export function ChallengesRunner({ caseId, onBack, onNext, unlocked, onNavigate 
   if (screen === 'scenario') {
     return (
       <div style={{ maxWidth: '820px', margin: '0 auto', padding: '1.5rem 1rem' }}>
-        <BackButton onBack={onBack} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+          <BackButton onBack={onBack} />
+          <ShareLinkButton room="challenges" />
+        </div>
 
         {/* Challenge header */}
         <div style={{ marginBottom: '1.5rem' }}>

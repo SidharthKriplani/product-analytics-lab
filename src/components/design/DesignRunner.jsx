@@ -8,6 +8,7 @@ import { ConceptDrawer } from '../concepts/ConceptDrawer.jsx';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { GateOverlay } from '../shared/GateOverlay.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -113,16 +114,19 @@ export function DesignRunner({ caseId, savedProgress, onBack, onGoToReview, onNe
 
       {/* Header */}
       <div style={{ marginBottom: '1.25rem' }}>
-        <button
-          onClick={onBack}
-          style={{
-            background: 'none', border: 'none', color: 'var(--text-muted)',
-            fontSize: '0.78rem', cursor: 'pointer', padding: '0', marginBottom: '0.75rem',
-            display: 'flex', alignItems: 'center', gap: '0.3rem',
-          }}
-        >
-          ← Design Room
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+          <button
+            onClick={onBack}
+            style={{
+              background: 'none', border: 'none', color: 'var(--text-muted)',
+              fontSize: '0.78rem', cursor: 'pointer', padding: '0',
+              display: 'flex', alignItems: 'center', gap: '0.3rem',
+            }}
+          >
+            ← Design Room
+          </button>
+          <ShareLinkButton room="design" />
+        </div>
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
           <div>

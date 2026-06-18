@@ -11,6 +11,7 @@ import { GateOverlay } from '../shared/GateOverlay.jsx';
 import { saveMetricsAttempt, clearMetricsProgress, saveMetricsDraft, loadMetricsDraft, clearMetricsDraft } from '../../utils/metricsProgress.js';
 import { track } from '../../utils/analytics.js';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const ROOM_KEY = 'metrics';
 const NOTES_KEY = 'pal-notes-v1';
@@ -95,13 +96,15 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '2rem 1rem' }}>
 
       {/* Back nav */}
-      <button
-        onClick={onBack}
-        className="pal-back-btn"
-        style={{ marginBottom: '1.25rem' }}
-      >
-        <Icon name="arrow-left" size={14} color="currentColor" />Metrics Room
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+        <button
+          onClick={onBack}
+          className="pal-back-btn"
+        >
+          <Icon name="arrow-left" size={14} color="currentColor" />Metrics Room
+        </button>
+        <ShareLinkButton room="metrics" />
+      </div>
 
       <Breadcrumb crumbs={[
         { label: 'PAL', onClick: onBack },

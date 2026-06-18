@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { datamarts } from '../data/sqlLabDatamarts.js';
 import { track } from '../utils/analytics.js';
+import { ShareLinkButton } from '../components/shared/ShareLinkButton.jsx';
 
 const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3, Forensic: 5 };
 
@@ -935,6 +936,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
             <div style={{ width: 24, height: 24, background: 'var(--teal)', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', color: '#fff', fontWeight: 700 }}>{'<>'}</div>
             <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--teal)' }}>SQL Lab</span>
           </button>
+          <ShareLinkButton room="sql-lab" />
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <button
               onClick={() => { if (problemIdx > 0) setProblemIdx(problemIdx - 1); }}

@@ -4,6 +4,7 @@ import { track } from '../../utils/analytics.js';
 import { takehomeCases } from '../../data/takehomeCases.js';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -117,16 +118,19 @@ export function TakehomeRunner({ caseId, onBack, onNext, onNavigate, unlocked })
     <div style={{ maxWidth: '820px', margin: '0 auto', padding: '2rem 1.5rem' }}>
 
       {/* Back button */}
-      <button
-        onClick={onBack}
-        style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem',
-          padding: 0, display: 'flex', alignItems: 'center', gap: '0.3rem',
-        }}
-      >
-        ← Back to Take-Home Challenges
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        <button
+          onClick={onBack}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--text-muted)', fontSize: '0.85rem',
+            padding: 0, display: 'flex', alignItems: 'center', gap: '0.3rem',
+          }}
+        >
+          ← Back to Take-Home Challenges
+        </button>
+        <ShareLinkButton room="take-home" />
+      </div>
 
       {/* Header */}
       <div style={{ marginBottom: '1.5rem' }}>

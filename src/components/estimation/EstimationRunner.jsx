@@ -5,6 +5,7 @@ import { estimationProblems } from '../../data/estimationProblems.js';
 import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const ROOM_KEY = 'estimation';
 
@@ -134,13 +135,15 @@ export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
   return (
     <div style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       {/* Back */}
-      <button
-        onClick={onBack}
-        className="pal-back-btn"
-        style={{ marginBottom: '1.5rem' }}
-      >
-        <Icon name="arrow-left" size={14} color="currentColor" />Estimation Room
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        <button
+          onClick={onBack}
+          className="pal-back-btn"
+        >
+          <Icon name="arrow-left" size={14} color="currentColor" />Estimation Room
+        </button>
+        <ShareLinkButton room="estimation" />
+      </div>
 
       {/* Problem header */}
       <div style={{ marginBottom: '1.5rem' }}>

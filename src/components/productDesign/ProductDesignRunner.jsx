@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { productDesignScenarios } from '../../data/productDesignScenarios.js';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -362,16 +363,19 @@ export function ProductDesignRunner({ caseId, savedProgress, onBack, onNext, onN
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '1.5rem 1rem 4rem' }}>
 
       {/* Back button */}
-      <button
-        onClick={onBack}
-        style={{
-          background: 'none', border: 'none', color: 'var(--text-muted)',
-          fontSize: '0.78rem', cursor: 'pointer', padding: '0',
-          marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.3rem',
-        }}
-      >
-        ← Product Design Room
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+        <button
+          onClick={onBack}
+          style={{
+            background: 'none', border: 'none', color: 'var(--text-muted)',
+            fontSize: '0.78rem', cursor: 'pointer', padding: '0',
+            display: 'flex', alignItems: 'center', gap: '0.3rem',
+          }}
+        >
+          ← Product Design Room
+        </button>
+        <ShareLinkButton room="product-design" />
+      </div>
 
       {/* Scenario header */}
       <div style={{ marginBottom: '1.5rem' }}>

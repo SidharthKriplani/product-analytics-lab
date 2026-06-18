@@ -3,6 +3,7 @@ import { saveSTFProgress, getSTFProgress, saveSTFDraft, loadSTFDraft, clearSTFDr
 import { track } from '../../utils/analytics.js';
 import { spotTheFlawCases } from '../../data/spotTheFlawCases.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const ROOM_KEY = 'spot-the-flaw';
 function loadNote(id) { try { const d = JSON.parse(localStorage.getItem('pal-notes-v1') || '{}'); return d[ROOM_KEY + ':' + id] || ''; } catch { return ''; } }
@@ -75,16 +76,19 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
       <div style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem' }}>
 
         {/* Back nav */}
-        <button
-          onClick={onBack}
-          style={{
-            background: 'none', border: 'none', color: 'var(--text-muted)',
-            cursor: 'pointer', fontSize: '0.85rem', marginBottom: '1.5rem',
-            padding: 0, display: 'flex', alignItems: 'center', gap: '0.3rem',
-          }}
-        >
-          ← Spot the Flaw
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <button
+            onClick={onBack}
+            style={{
+              background: 'none', border: 'none', color: 'var(--text-muted)',
+              cursor: 'pointer', fontSize: '0.85rem',
+              padding: 0, display: 'flex', alignItems: 'center', gap: '0.3rem',
+            }}
+          >
+            ← Spot the Flaw
+          </button>
+          <ShareLinkButton room="spot-the-flaw" />
+        </div>
 
         {/* Case header */}
         <div style={{ marginBottom: '1.5rem' }}>

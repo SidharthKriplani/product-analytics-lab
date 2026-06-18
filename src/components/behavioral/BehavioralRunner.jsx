@@ -5,6 +5,7 @@ import { behavioralQuestions } from '../../data/behavioralQuestions.js';
 import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const ROOM_KEY = 'behavioral';
 
@@ -194,13 +195,15 @@ export function BehavioralRunner({ caseId, onBack, onNext, onNavigate }) {
   return (
     <div style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       {/* Back */}
-      <button
-        onClick={onBack}
-        className="pal-back-btn"
-        style={{ marginBottom: '1.5rem' }}
-      >
-        <Icon name="arrow-left" size={14} color="currentColor" />Back to Behavioral
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        <button
+          onClick={onBack}
+          className="pal-back-btn"
+        >
+          <Icon name="arrow-left" size={14} color="currentColor" />Back to Behavioral
+        </button>
+        <ShareLinkButton room="behavioral" />
+      </div>
 
       {/* Question header */}
       <div style={{ marginBottom: '1.5rem' }}>

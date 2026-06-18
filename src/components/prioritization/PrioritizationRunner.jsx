@@ -3,6 +3,7 @@ import { savePrioritizationAttempt, getPrioritizationProgress, savePrioritizatio
 import { track } from '../../utils/analytics.js';
 import { prioritizationScenarios } from '../../data/prioritizationScenarios.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
+import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -76,12 +77,15 @@ export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
   return (
     <div style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       {/* Back */}
-      <button
-        onClick={onBack}
-        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem', marginBottom: '1.5rem', padding: 0 }}
-      >
-        ← Back to Prioritization Room
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        <button
+          onClick={onBack}
+          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem', padding: 0 }}
+        >
+          ← Back to Prioritization Room
+        </button>
+        <ShareLinkButton room="prioritization" />
+      </div>
 
       {/* Scenario header */}
       <div style={{ marginBottom: '1.5rem' }}>
