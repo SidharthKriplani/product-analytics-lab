@@ -62,6 +62,7 @@ const JudgmentBank          = lazy(() => import('./pages/JudgmentBank.jsx').then
 const QADashboard           = lazy(() => import('./pages/QADashboard.jsx').then(m => ({ default: m.QADashboard })));
 const Pricing               = lazy(() => import('./pages/Pricing.jsx').then(m => ({ default: m.Pricing })));
 const Plans                 = lazy(() => import('./pages/Plans.jsx').then(m => ({ default: m.Plans })));
+const PathsBrowser          = lazy(() => import('./pages/PathsBrowser.jsx').then(m => ({ default: m.PathsBrowser })));
 
 // Runners — lazy-loaded
 const ScenarioRunner        = lazy(() => import('./components/scenario/ScenarioRunner.jsx').then(m => ({ default: m.ScenarioRunner })));
@@ -1703,6 +1704,11 @@ export default function App() {
             <StudyRoom />
           </Suspense>
         )}
+        {page === 'paths' && (
+          <Suspense fallback={null}>
+            <PathsBrowser onNavigate={navigate} />
+          </Suspense>
+        )}
         {page === 'consult' && (
           <Suspense fallback={
               <div style={{ padding: '2rem 2rem 0' }}>
@@ -1879,7 +1885,8 @@ export default function App() {
                'pal-metrics-foundation-progress-v1',
                'pal-rca-foundation-progress-v1',
                'pal-exp-foundation-progress-v1',
-               'pal-rf-state-v1', 'pal-sf-state-v1'
+               'pal-rf-state-v1', 'pal-sf-state-v1',
+               'pal-paths-progress-v1'
               ].forEach(k => { try { localStorage.removeItem(k); } catch {} });
               // Clear per-scenario product-design progress and legacy per-module state keys
               try {
