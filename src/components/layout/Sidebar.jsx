@@ -117,8 +117,7 @@ function getIsActive(itemId, currentPage) {
     || (itemId === 'cheatsheet'          && currentPage === 'cheatsheet')
     || (itemId === 'python-lab'          && currentPage === 'python-lab')
     || (itemId === 'study'               && currentPage === 'study')
-    || (itemId === 'dimensional-modeling' && currentPage === 'dimensional-modeling')
-    || (itemId === 'paths'               && currentPage === 'paths');
+    || (itemId === 'dimensional-modeling' && currentPage === 'dimensional-modeling');
 }
 
 function getActiveSubGroup(currentPage) {
@@ -170,7 +169,6 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
       { id: 'exp-foundations',       label: 'A/B Foundations' },
       { id: 'foundations',           label: 'Theory Hub' },
       { id: 'study',                 label: 'Study Room',       icon: 'layers' },
-      { id: 'paths',                 label: 'Paths',            icon: 'map' },
       ...FLAT_GROUPS.flatMap(g => g.items),
     ];
     const item = allItems.find(i => i.id === id);
@@ -426,12 +424,6 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                 <NavItem id="plans" />
               </>
             )}
-          </div>
-
-          {/* PATHS */}
-          <div style={{ marginBottom: '0.1rem' }}>
-            <SectionLabel label="PATHS" />
-            <NavItem id="paths" />
           </div>
 
           {/* FOUNDATIONS */}
