@@ -454,6 +454,20 @@ All 25 Forensic problems are `isFree: true`. Forensic is PAL's most distinctive 
 **Navigation IA cleanup**
 Two improvements with low implementation cost: (1) Move Failure Patterns, Defense Strategy, Frameworks (Playbook), and Interview Q&A from TOOLS into LEARN — they're reference/study content, not tools. TOOLS should contain only active utilities (Stats Calc, MCQ Quiz, Bookmarks, Companies). (2) Stats Calc (ab-interpreter) is a sidebar top-level item competing with rooms — it should be accessible from inside the A/B Design or Stats room as a linked tool, not a standalone nav destination. Sidebar.jsx change only.
 
+### Home page USP copy — per-room feature bullet points [WhatsApp feedback, 2026-06-19]
+
+Feedback from advisor: PAL\'s home page doesn\'t communicate what makes each room special. A visitor sees room cards but has no idea that SQL Lab has Forensic debugging cases, or that RCA has a structured 5-phase format. Fix: add 3–4 differentiating bullet points per room, visible on the home page room cards or as an expandable "what\'s in here" strip.
+
+Example for SQL Lab: "Business framing questions · Covers all interview patterns · Difficulty vaults from Easy to Master · Forensic cases test real debugging skill."
+
+**Implementation:** Content work per room (write 3–4 bullets) + small UI change on home page room cards (expandable strip or subtitle row under the card title). The content is the gate — don\'t build the UI until bullets are written for all 17 rooms. Effort: content 1–2 hours, UI 30 min. **Do before private test — this is a first-impression/conversion gap.**
+
+### Paths feature — structured prep tracks [built + reverted 2026-06-19]
+
+Built 4 paths (PA Prep, PM Prep, A/B Testing Deep Dive, SQL Mastery) with a 2-panel browser UI. Reverted because: (a) it was triggered by misreading the session intent, and (b) user noted Paths belongs on the Progress/Profile page, not as a standalone nav destination.
+
+**When to revisit:** Wire paths as a section within Progress.jsx rather than a separate page. The data (pathsData.js, pathsProgress.js, PathsBrowser.jsx) can be rebuilt quickly when needed — the content definitions for all 4 paths were solid. Deferred to post-private-test. Gate: USP home page copy + dimensional modeling cases shipped first.
+
 ### Foundation Path UX — knowledge graph + Simplify pattern [logged 2026-06-19, inspired by GAL Ground Truth]
 
 Observed in GAL\'s Ground Truth post reader: Simplify button (top right), "Part X of Y" series indicator, "Test yourself on this post →" bridge to practice, in-article search, hierarchical series nav with "start here" label. MSL chat surfaced the same gap in their Ground Up series — scaffolding exists but content isn\'t paced for beginners, no visible dependency graph, no interlinking.

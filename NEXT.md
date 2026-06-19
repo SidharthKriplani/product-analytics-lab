@@ -12,10 +12,12 @@ Private test still pending. Public distribution blocked until private-test feedb
 
 ## Notes for next session
 
-- v5.35.0 fully pushed. product-analytics-lab is live at v5.35.0.
-- GitHub PAT was exposed in chat this session — user must revoke it and generate a fresh one before next push.
-- Git remote is HTTPS with PAT. After regenerate: `git remote set-url origin https://SidharthKriplani:NEW_TOKEN@github.com/SidharthKriplani/product-analytics-lab.git`
-- Pending next session: Quiz Me content, ELI5 mode, LinkedIn posts for PAL
+- PAL is live at V5.35.0. Nothing net-shipped this session (Paths built + reverted).
+- **3 orphaned files need manual deletion before next commit:** `src/data/pathsData.js`, `src/utils/pathsProgress.js`, `src/pages/PathsBrowser.jsx` — unwired from App.jsx + Sidebar.jsx but still on disk.
+- App.jsx + Sidebar.jsx are fully reverted (no Paths references). Verify before committing.
+- GitHub PAT: regenerated last session. Use /tmp clone workflow per CLAUDE.md. Never git from repo path directly.
+- **USP home page feature listing** logged in IDEAS.md Tier 1 — advisor feedback, high priority before private test. Content work first (3–4 bullets per room), then UI.
+- **Paths feature** — reverted. Belongs on Progress.jsx as a section, not standalone nav. Data definitions were solid, can be rebuilt quickly. Logged in IDEAS.md.
 
 ## Pre-beta gates (user actions, not code)
 
