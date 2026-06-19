@@ -52,6 +52,8 @@ Private test still pending. Public distribution blocked until private-test feedb
 
 ## Deferred — do not build until after private test feedback
 
+**Foundation Path UX — knowledge graph + Simplify pattern** — Full 6-phase plan logged in IDEAS.md Tier 1 (2026-06-19). Inspired by GAL Ground Truth Simplify button + MSL discussion on knowledge graph gaps. Gate: dimensional modeling cases + PostHog wiring shipped first. Pilot on Stats Foundations only.
+
 **spokenSummary backfill** — RCA05–RCA26 + C01–C25. Subagent writing pass. Non-blocking.
 
 **Stripe / payment** — Post-private test. No timeline.

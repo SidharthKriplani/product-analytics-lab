@@ -454,9 +454,36 @@ All 25 Forensic problems are `isFree: true`. Forensic is PAL's most distinctive 
 **Navigation IA cleanup**
 Two improvements with low implementation cost: (1) Move Failure Patterns, Defense Strategy, Frameworks (Playbook), and Interview Q&A from TOOLS into LEARN — they're reference/study content, not tools. TOOLS should contain only active utilities (Stats Calc, MCQ Quiz, Bookmarks, Companies). (2) Stats Calc (ab-interpreter) is a sidebar top-level item competing with rooms — it should be accessible from inside the A/B Design or Stats room as a linked tool, not a standalone nav destination. Sidebar.jsx change only.
 
+### Foundation Path UX — knowledge graph + Simplify pattern [logged 2026-06-19, inspired by GAL Ground Truth]
+
+Observed in GAL\'s Ground Truth post reader: Simplify button (top right), "Part X of Y" series indicator, "Test yourself on this post →" bridge to practice, in-article search, hierarchical series nav with "start here" label. MSL chat surfaced the same gap in their Ground Up series — scaffolding exists but content isn\'t paced for beginners, no visible dependency graph, no interlinking.
+
+PAL equivalent: the 4 Foundation rooms (Stats, Metrics, RCA, A/B Foundations) are the Ground Truth equivalent. Same diagnosis applies — modules exist and are sequenced, but a beginner hitting sf01 cold doesn\'t know what depends on what, and there\'s no simplified entry mode.
+
+**6-phase sequential plan (do in order, don\'t skip):**
+
+1. **Content audit** — Read each Foundation room\'s modules cold. Flag anywhere a beginner hits a wall (opens with jargon, no intuition, assumes prior context). No code. Produces a list of modules that need Phase 2 rewrites.
+
+2. **Plain English opener** — Add `intuition: \'...\'` field to every Foundation module object. 2–3 sentences: plain language, real-world analogy, "what this unlocks in an interview." Always visible, small visual distinction (light background strip). Data file edits only + 5 lines of render in each Foundation runner. The writing is the work, not the engineering.
+
+3. **Simplify toggle** — On Foundation module reader: click to collapse to intuition + analogy + "what this lets you do." Click again for full technical view. One boolean state + conditional render in the runner. Reuses the `intuition` field from Phase 2. ~20 lines of code.
+
+4. **Dependency strip** — At the top of each module: "← Builds on: [module]" + "→ Unlocks: [module]", clickable. Makes the dependency graph visible without a DAG view. Requires adding `prereq` / `unlocks` fields per module (content decision) + a small strip UI component.
+
+5. **Part X of Y indicator** — Surface module index explicitly in the Foundation runner header. Module index already exists — purely display work. Trivial.
+
+6. **Concept-level "Test yourself" bridge** — Bottom of each Foundation module: deep link to the practice case in the relevant room that exercises exactly this concept. ForwardPointerCard already exists at room level — extend it to concept level with a `relatedCase` field per module. Small engineering, content mapping is the work.
+
+**Build order rationale:** Phases 1–2 are content-only and gate everything else. Phase 3 is the visible payoff. Phases 4–6 build the knowledge graph feel. Total engineering across all 6 phases is ~2–3 hours; the content work is the real investment.
+
+**Gate: do not start until dimensional modeling cases and PostHog wiring are shipped.** Pilot on Stats Foundations first before rolling to all 4 rooms.
+
 ---
 
 ## Tier 2 — High impact, more effort
+
+### Visual trade-off reference cards — "When to use X vs Y"
+Format: side-by-side comparison cards (technique A vs B vs C) covering constraint view, weight/effect behaviour, sparsity, compute cost, best-use-case. PAL-scope examples: t-test vs Mann-Whitney vs chi-square, cohort analysis vs funnel analysis, simple metric vs composite metric, frequentist vs Bayesian A/B, GROUP BY vs window functions. Implementation: supplementary end-of-module content inside Stats Foundations or SQL Lab — not a standalone room. Build when a module cluster feels thin on decision guidance. Do not build as a separate room; do not build ML content (L1/L2/Dropout → ML Systems Lab).
 
 ### ~~Dimensional modeling coverage gap~~ → **IN PROGRESS (V5.34.x)**
 Skeleton page shipped (DimensionalModelBrowser.jsx, wired to Sidebar TOOLS + App.jsx route). Coming-soon state with planned curriculum: Star Schema Design, Schema Critique, Flipkart/e-commerce models, Swiggy/delivery models, BI patterns, Interview Patterns. Next: author 3–5 schema-critique cases (tag: `data-modeling`) and build a lightweight runner. Flipkart DA Company Track references this room once cases exist.
