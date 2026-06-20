@@ -180,6 +180,92 @@ Full diagnosis in PM_AUDIT.md (created this session). Key open findings:
 
 ---
 
+## Part XXXVIII — V5.38.0–V5.40.0 SQL Lab Engine + Content Audit (2026-06-20)
+
+### 163. ✅ Bug — SQL Lab validation race condition on expectedSample (V5.38.0)
+
+**Version:** Fixed V5.38.0
+**Type:** BUILD
+
+`expectedSample` was stored in React state — async, one render behind. `checkQuery()` ran against a stale value, rejecting correct answers intermittently. Fixed: moved to `useRef` (`expectedSampleRef`), set synchronously inside `initDb()` at problem load time. Now always current when `checkQuery()` is called. Also: 4 problems had empty `checkValues` arrays (silent pass-through on fallback path); fixed with real verification values. `expectedRowCount` display bug fixed (wrong count on initial render).
+
+**Files:** `src/pages/SqlLabPage.jsx`, `src/data/sqlLabProblems.js`
+
+---
+
+### 164. ✅ UX — SQL Lab Run/Check split + DEBRIEF_BLOCKS + PAL Exclusive badge (V5.38.1)
+
+**Version:** Fixed V5.38.1
+**Type:** UX / Content Infrastructure
+
+Three changes shipped together: (1) Run and Check split into distinct actions — Run executes and shows results with no verdict; Check validates and gives a pass/fail. Cmd+Enter → checkQuery. (2) DEBRIEF_BLOCKS system: `**Section:**` markers in debrief text now parse into collapsible colored sections (Approach, Interviewer Follow-Up, Context, etc.) — upgrades all existing debriefs retroactively. (3) PAL Exclusive badge on all Forensic problems — the only SQL format of its kind on any prep platform. (4) `beforeWriting` field rendered as yellow judgment prompt above the code editor.
+
+**Files:** `src/pages/SqlLabPage.jsx`
+
+---
+
+### 165. ⚠️ Bug — checkValues '.0' decimal format likely broken on whole-number SUM results (sql-f26–f35)
+
+**Version:** Open — introduced V5.39.0
+**Type:** BUILD / Content Integrity
+
+checkValues in sql-f26 through sql-f35 use `.0` decimal suffix on whole-number aggregation results: e.g., `{ total_disputed: '280.0' }`, `{ total_exposure: '4450.0' }`. The check comparison in SqlLabPage.jsx is:
+
+```js
+String(row[i]) === String(val)
+```
+
+For a REAL column in SQLite returned via sql.js as a whole-number float (e.g., 280.0), JavaScript serializes it as `String(280)` = `'280'` — not `'280.0'`. The comparison `'280' === '280.0'` is false. On the fallback path (when expected sample is not cached), these problems will reject correct answers silently.
+
+**Risk:** Affects all 10 sql-f26–f35 forensic problems on first-run validation. Users write correct SQL, get "wrong answer." Demoralizes tester.
+
+**Fix:** Audit each checkValue in sql-f26–f35 that uses a whole-number float. Remove the `.0` suffix: `'280.0'` → `'280'`, `'4450.0'` → `'4450'`, `'1205.0'` → `'1205'`, etc. Non-whole-number values (e.g., `'249.99'`, `'5689.99'`) are unaffected — `String(249.99)` = `'249.99'` correctly. Verify by running each solution query against the datamart and checking what sql.js actually returns before writing the checkValue.
+
+**Priority:** P0 — fix before any tester uses these problems.
+
+**Files:** `src/data/sqlLabProblems.js` (sql-f26 through sql-f35 checkValues blocks)
+
+---
+
+### 166. ⚠️ UX — Expected output not surfaced until after first query run
+
+**Version:** Open — flagged V5.38.0 audit (SQL_LAB_AUDIT_2026.md §5 Priority 2)
+**Type:** UX
+
+`expectedSampleDisplay` (the correct column headers and sample rows) is computed during `initDb()` and stored in state, but is only rendered inside the results panel — which only appears after the user runs a query. First-time users open a problem with no target: no column names, no row count, no example output. They either guess the schema or write something random to trigger a result. Every other SQL practice platform (DataLemur, StrataScratch, LeetCode) shows the expected output structure before any input. PAL should too.
+
+**Fix:** Move `expectedSampleDisplay` render into the problem panel (above or below the prompt), visible on load. The data is already computed — this is purely a JSX placement change in SqlLabPage.jsx.
+
+**Priority:** High — UX friction for every first-time problem.
+
+**Files:** `src/pages/SqlLabPage.jsx`
+
+---
+
+### 167. ✅ Architecture — SQL Lab schema fragmentation resolved; 13 datamarts as of V5.40.0 (closes #134 partially)
+
+**Version:** Resolved V5.40.0
+**Type:** Architecture
+
+Audit #134 (V4.39.0) flagged 5 datamarts for 130 problems (26 problems/datamart avg) as dangerously thin — users would memorize schema and break the "business question only" framing. Target was 12 datamarts. As of V5.40.0: 13 datamarts exist (ecomm, saas, fintech, consumer, health, gaming, logistics, marketplace, edtech, hr, swiggy + 2 more added across V4–V5). Target exceeded on datamart count. Per-datamart problem density is still uneven — swiggy has 6 problems (below the 10-12 target), and several older datamarts exceed 20 problems. Balance is a secondary concern; the primary fragmentation risk is resolved.
+
+**Files:** `src/data/sqlLabDatamarts.js`
+
+---
+
+### 168. ⚠️ Content — India SQL series covers Swiggy only; Zepto, Zomato, Paytm framing absent
+
+**Version:** Open — V5.40.0 ships Swiggy (sql-sw01–sw06 on swiggy datamart)
+**Type:** Coverage
+
+The India SQL series was motivated by the observation that DataLemur has zero India-specific SQL problems, and PAL's Bangalore DA/PA audience is underserved. V5.40.0 closes this for food delivery (Swiggy). Remaining gaps: quick commerce (Zepto — dark store inventory, slot-level fulfillment), fintech (Paytm/Razorpay — UPI transaction analysis, merchant settlement), social commerce (Meesho already has marketplace problems but no India-specific framing), and ride-sharing (Ola/Rapido). These could use existing datamarts with Indian company framing or warrant new datamarts. The 6-problem Swiggy series is a proof of concept; the full India track needs 15-20 problems across 3-4 companies to be a credible differentiator.
+
+**Priority:** Medium — Swiggy problems shipped and differentiated; expand India track in a dedicated session after checkValues bug (#165) is fixed and V5.40 is live.
+
+**Files:** `src/data/sqlLabProblems.js`, `src/data/sqlLabDatamarts.js`
+
+---
+
 ## Part XXXVII — V5.23.0 beta feedback: Universe View + mobile (2026-06-09)
 
 ### 161. ✅ UX — Universe View has no entry point for beginners
@@ -464,22 +550,23 @@ Critical corrections:
 
 ---
 
-### 132. ⚠️ Content — SQL Lab 8 SQL patterns missing from problem bank
+### 132. ⚠️ Content — SQL Lab 8 SQL patterns missing from problem bank (partially resolved V5.39.0)
 
-**Version:** Open — findings produced V4.39.11; new problems to be authored in Session 5
+**Version:** Open — findings produced V4.39.11; partially addressed V5.39.0
 **Type:** Coverage
 
-After culling, these patterns have zero or near-zero representation:
-1. Date spine / gap-filling (recursive CTE + LEFT JOIN to fill missing dates)
-2. ROWS BETWEEN frame specification (explicit named frame clause as the actual test)
-3. PERCENT_RANK / CUME_DIST (NTILE exists but percentile rank functions absent)
-4. Two valid queries producing different results (NULL handling or JOIN type differences)
-5. Ambiguous-definition problems (metric itself undefined — candidate must interpret)
-6. Syntactically valid but semantically wrong SQL (produces wrong result, no error)
-7. Recursive CTE / hierarchy traversal (org chart, referral tree, category hierarchy)
-8. Full cohort retention curve (month 0/1/2/3 in one result set)
+After culling, these patterns had zero or near-zero representation. Status as of V5.40.0:
 
-**Fix:** Author new problems covering these patterns in Session 5, using new datamarts from Session 4. Full gap list in SQL_LAB_PLAN.md Section 2D.
+1. Date spine / gap-filling (recursive CTE + LEFT JOIN to fill missing dates) — **still missing**
+2. ROWS BETWEEN frame specification (explicit named frame clause as the actual test) — **still missing** (sql-f27 covers missing ORDER BY in SUM OVER but not ROWS BETWEEN syntax specifically)
+3. PERCENT_RANK / CUME_DIST (NTILE exists but percentile rank functions absent) — **still missing**
+4. Two valid queries producing different results (NULL handling or JOIN type differences) — **still missing**
+5. Ambiguous-definition problems (metric itself undefined — candidate must interpret) — **partially addressed** by `beforeWriting` judgment prompts (sql-h01, h02, h04, h07, h11, sw02, sw04); not a full problem format yet
+6. Syntactically valid but semantically wrong SQL (produces wrong result, no error) — **✅ closed** — this is exactly the Forensic format; 35 problems now exist
+7. Recursive CTE / hierarchy traversal (org chart, referral tree, category hierarchy) — **still missing**
+8. Full cohort retention curve (month 0/1/2/3 in one result set) — **partially addressed** by sql-h01 (Jan-to-Feb retention, 2-period); full multi-period curve still missing
+
+**Remaining gap:** Patterns 1, 2, 3, 4, 7 are completely unrepresented. Pattern 8 needs a multi-month extension.
 **Files:** `src/data/sqlLabProblems.js`, `src/data/sqlLabDatamarts.js`
 
 ---
@@ -498,14 +585,13 @@ Target mix: Easy 80/20, Medium 60/40, Hard 50/50, Master 40/60 (technical-spec/s
 
 ---
 
-### 134. ⚠️ Architecture — SQL Lab schema fragmentation insufficient (5 datamarts for 130 problems)
+### 134. ✅ Architecture — SQL Lab schema fragmentation resolved (13 datamarts as of V5.40.0)
 
-**Version:** Open — new datamarts to be designed in Session 4
+**Version:** Resolved V5.40.0 (see audit #167 for full detail)
 **Type:** Architecture / Content Integrity
 
-5 shared datamarts across 130 problems = 26 problems per datamart average. Candidates practicing sequentially will memorize the schema layout, breaking the "business question only" framing. Target: 12 datamarts, 10–12 problems per datamart. New datamarts: gaming, logistics, marketplace, food_delivery, social_network, edtech, hr_analytics. Master problems: standalone schema per problem (never shared).
+Original: 5 datamarts for 130 problems = 26 problems/datamart avg. Target: 12 datamarts, 10-12 problems each. As of V5.40.0: 13 datamarts (ecomm, saas, fintech, consumer, health, gaming, logistics, marketplace, edtech, hr, swiggy + 2 more). Datamarts count target exceeded. Per-datamart density is uneven (swiggy: 6 problems; some older datamarts: 20+) but primary fragmentation risk resolved. Remaining density work is an ongoing content concern, not an architecture fix.
 
-**Fix:** Design 7 new datamarts in Session 4. Full spec in SQL_LAB_PLAN.md Section 3.
 **Files:** `src/data/sqlLabDatamarts.js`
 
 ---

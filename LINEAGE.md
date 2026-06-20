@@ -4,6 +4,32 @@ This is the narrative history of PAL. Not a version list (that's CHANGELOG.md) �
 
 ---
 
+### v5.38.0–v5.40.0 — SQL Lab overhaul: validation engine, Forensic batch, India series (2026-06-20)
+
+Three sessions of SQL Lab work with a single thread: make the practice loop honest and differentiated.
+
+**V5.38.0 — Validation engine repair.** The SQL Lab had a race condition that caused correct answers to be rejected intermittently. `expectedSample` was stored in React state — async, stale by the time `checkQuery()` ran. Fixed by moving it to `useRef` (`expectedSampleRef`), set synchronously inside `initDb()` at problem load. Four problems had empty `checkValues` arrays; fixed with real verification values. `expectedRowCount` display bug fixed (showed wrong count on initial render). Failure messages now return specific diagnostic strings ("Output does not match expected values") instead of a generic error — so users know whether they got columns wrong, row count wrong, or values wrong.
+
+**V5.38.1 — UX split and content infrastructure.** Run and Check split into two distinct actions: Run executes the query and shows results with no verdict; Check validates against expected output. Cmd+Enter triggers Check. `DEBRIEF_BLOCKS` system introduced: `**Section:**` markers in debrief text parse into collapsible colored sections (Approach, Interviewer Follow-Up, etc.) — upgrades every existing debrief automatically. PAL Exclusive badge added to all Forensic problems. `beforeWriting` field introduced — a yellow judgment prompt rendered before the code editor, asking the candidate to state an assumption before writing SQL. This is the only SQL practice tool that does this.
+
+**V5.39.0 — Forensic batch to 35 problems.** 10 new Forensic problems (sql-f26–f35) covering 10 distinct bug classes not previously represented: unfiltered JOIN on multi-status table (Salesforce), SUM OVER window function missing ORDER BY (Shopify), GROUP BY missing a dimension (One Medical), AVG vs SUM on exposed amounts (Revolut), COUNT(*) vs COUNT(DISTINCT) (Intercom), wrong JOIN key (JPMorgan), INNER vs LEFT JOIN drops zero-count rows (Amazon), strftime year grouping instead of month (HubSpot), scalar subquery with = instead of IN (Stripe), second WHERE after GROUP BY should be HAVING (Flipkart). `beforeWriting` prompts added to 5 Hard problems (sql-h01, h02, h04, h07, h11) — the problems where candidates most often skip the definition question and write wrong SQL. Forensic batch now at 35 problems; DataLemur has zero equivalent format.
+
+**V5.40.0 — India SQL series, Swiggy datamart.** Swiggy is the first PAL datamart built around an Indian company. 5 tables: restaurants (12 rows, 5 cities), customers (10, with is_swiggy_one tier), delivery_partners (8, one suspended), orders (25 — 21 delivered, 4 cancelled with NULL delivered_at), order_items (42, price×quantity verified against order totals). Delivery times engineered to produce clean city-level averages: Chennai 19.0 min, Bangalore 25.8, Mumbai 28.0, Hyderabad 37.25, Delhi 40.0. Six problems: sw01 (avg delivery time by city via strftime date math, Medium), sw02 (Swiggy One GMV segmentation with beforeWriting, Hard), sw03 (loyal diners HAVING on (customer, restaurant) pairs, Medium), sw04 (slow delivery partners HAVING on AVG with beforeWriting, Hard), sw05 (restaurant revenue leaderboard LIMIT 5, Hard), sw06 (Forensic — COUNT vs SUM + missing status filter, two independent bugs). This closes the India SQL coverage gap that audit #123 flagged — DataLemur has zero India-specific SQL problems.
+
+**Open risk carried forward:** sql-f26–f35 checkValues were written with '.0' decimal suffix on whole-number SUM results (e.g., `{ total_disputed: '280.0' }`). The check comparison is `String(db_value) === String(checkValue)`. For a whole-number REAL column, sql.js returns a JS integer: `String(280)` = `'280'`, not `'280.0'`. These checkValues will silently reject correct answers on the fallback path. Flagged in AUDITS.md #165. Fix before shipping these problems to testers.
+
+---
+
+### v5.36.0–v5.37.0 — SQL Lab bug fixes + PostHog funnel closed (2026-06-20)
+
+Three high-severity bugs fixed. Stats Foundations modules 26–32 silently refused to open: they existed in `statsFoundationsModules.js` but were missing from `statsFoundationsIndex` in `caseIndex.js` — `openStatFoundationsModule()` hit an early return on `find()` returning undefined. Fixed by adding sf26–sf32 to the index. SQL Lab Q.9 false positive fixed: checkValues had only `{ name: 'Dr. Smith' }` — strengthened to include all 4 expected columns. Column alias confusion now surfaced in the error UI.
+
+PostHog conversion funnel closed: `gate_shown → gate_cta_clicked → [gap] → user_signed_in` had an unmeasured middle step. Fixed with `pendingGateConversionRef` — a ref set true when user clicks sign-in from the gate, cleared when `SIGNED_IN` fires, which triggers `gate_converted` with the originating room. `plans_page_viewed` wired via useEffect on page='plans'. `sql_query_run` wired in SqlLabPage.jsx per attempt.
+
+Deep SQL Lab audit produced `SQL_LAB_AUDIT_2026.md` — full diagnostic covering validation race condition (expectedSample is async React state, should be a ref), checkValues quality breakdown (4 empty, 39 single-key, 57 two-key, 66 three-plus), DataLemur comparison, content gaps, and a prioritized fix plan. The Forensic batch (25 problems, no competitor equivalent) identified as PAL's sharpest SQL differentiator. Strategic docs also produced: `EXPOSURE_MAP.md` (GREEN/YELLOW/RED surface classification), `BETA_FEEDBACK.md` (permanent feedback log, two sessions), `COMPETITIVE_RESEARCH.md` (Dataford/Practicai), `LINKEDIN_STRATEGY.md`. Push pending: V5.36.0 + V5.37.0 committed in /tmp/pal-push, user must `git push` from Mac terminal.
+
+---
+
 ### v5.35.0 — ShareLinkButton on all 18 runners + SQL Lab (2026-06-18)
 
 ShareLinkButton component wired into all 18 scenario runners and SQL Lab page. hashRouting.js complete with URL write-back for all rooms. Deployed via HTTPS+PAT push after auth issues. Pushed: ✅

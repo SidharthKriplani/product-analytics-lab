@@ -13,6 +13,8 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 git clone https://github.com/SidharthKriplani/product-analytics-lab /tmp/pal-push-pal-v540
 cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/src/data/sqlLabDatamarts.js" /tmp/pal-push-pal-v540/src/data/sqlLabDatamarts.js
 cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/src/data/sqlLabProblems.js" /tmp/pal-push-pal-v540/src/data/sqlLabProblems.js
+cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/LINEAGE.md" /tmp/pal-push-pal-v540/LINEAGE.md
+cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/AUDITS.md" /tmp/pal-push-pal-v540/AUDITS.md
 cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/NEXT.md" /tmp/pal-push-pal-v540/NEXT.md
 cd /tmp/pal-push-pal-v540
 git config user.email "claudesubscription12@gmail.com"
@@ -26,17 +28,15 @@ git push origin main
 
 ## Active build queue
 
-**1. SQL Lab P2: show expected output before first run** — Move expectedSampleDisplay into the problem panel so users see it on load (before writing anything). Already computed — just needs to be surfaced earlier in the UI. SQL_LAB_AUDIT_2026.md §5, Priority 2.
+**1. P0 — Fix checkValues '.0' format bug in sql-f26–f35** — 10 Forensic problems have whole-number SUM/AVG results written as `'280.0'`, `'4450.0'`, etc. The check is `String(db_value) === String(checkValue)`. sql.js returns whole-number floats as JS integers: `String(280) = '280'`, not `'280.0'`. Correct answers silently rejected on the fallback path. Audit every checkValue in sql-f26–f35, strip `.0` from whole numbers, leave true decimals (`'249.99'`, `'5689.99'`) unchanged. Fix before any tester runs these. AUDITS.md #165. File: `src/data/sqlLabProblems.js`.
 
-**2. SQL Lab P2: show expected output before first run** — Move expectedSampleDisplay into the problem panel so users see it on load (before writing anything). Already computed — just needs to be surfaced earlier in the UI. SQL_LAB_AUDIT_2026.md §5, Priority 2.
+**2. Show expected output before first run** — Move `expectedSampleDisplay` (already computed in `initDb()`) into the problem panel so users see target columns and sample rows on load before writing anything. Purely a JSX placement change. AUDITS.md #166. File: `src/pages/SqlLabPage.jsx`.
 
-**3. Dimensional modeling cases** — skeleton shipped (V5.34.0). Author 3-5 schema-critique cases tagged `data-modeling`. Flipkart DA track references these once live.
+**3. Delete 3 orphaned files** — `src/data/pathsData.js`, `src/utils/pathsProgress.js`, `src/pages/PathsBrowser.jsx` — unwired but on disk. Manual delete + commit.
 
-**4. Delete 3 orphaned files** — `src/data/pathsData.js`, `src/utils/pathsProgress.js`, `src/pages/PathsBrowser.jsx` — unwired but on disk. Manual delete + commit.
+**4. Dimensional modeling cases** — skeleton shipped (V5.34.0). Author 3-5 schema-critique cases tagged `data-modeling`. Flipkart DA track references these once live.
 
-**5. Debrief section parser** — Parse existing debrief text into collapsible colored blocks using DEBRIEF_BLOCKS system already built. Just needs content audit to confirm all debriefs use ** markers. SQL_LAB_AUDIT_2026.md §5, Priority 4.
-
-**Note: V5.39.0 push** — if not yet pushed, include those files too (sqlLabProblems.js already contains both V5.39 and V5.40 changes).
+**5. SQL patterns still missing from bank** — 5 unrepresented patterns from AUDITS.md #132: date spine/gap-filling, ROWS BETWEEN frame specification, PERCENT_RANK/CUME_DIST, two-valid-queries-different-results, recursive CTE. At least 1 problem per pattern needed for comprehensive coverage.
 
 ---
 
