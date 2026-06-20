@@ -130,7 +130,7 @@ const DIFF_COLOR = {
 };
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard', 'Master', 'Forensic'];
-const ALL_COMPANIES = [...new Set(SORTED_PROBLEMS.map(p => p.datamartId))].sort();
+const ALL_COMPANIES = [...new Set(SORTED_PROBLEMS.map(p => p.company))].sort();
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 
@@ -311,6 +311,13 @@ function ProblemListRow({ p, isSolved, onSelect }) {
           />
         )}
         <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>{p.company}</span>
+        {p.alsoAskedAt && p.alsoAskedAt.length > 0 && (
+          <span title={'Also asked at: ' + p.alsoAskedAt.join(', ')} style={{
+            fontSize: '0.55rem', fontWeight: 700, padding: '1px 4px', borderRadius: '99px',
+            background: 'rgba(20,184,166,0.1)', color: 'var(--teal)',
+            border: '1px solid rgba(20,184,166,0.25)', whiteSpace: 'nowrap', cursor: 'default',
+          }}>+{p.alsoAskedAt.length}</span>
+        )}
       </div>
       {/* Title */}
       <span style={{ flex: 1, fontSize: '0.85rem', fontWeight: 500, color: 'var(--text)', lineHeight: 1.3, minWidth: 0 }}>
@@ -342,7 +349,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
 
   const filtered = SORTED_PROBLEMS.filter(p => {
     if (filterDiffs.size > 0 && !filterDiffs.has(p.difficulty)) return false;
-    if (filterCompany && p.datamartId !== filterCompany) return false;
+    if (filterCompany && p.company !== filterCompany && !(p.alsoAskedAt || []).includes(filterCompany)) return false;
     if (filterStatus === 'solved' && !solved.has(p.id)) return false;
     if (filterStatus === 'unsolved' && solved.has(p.id)) return false;
     if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
@@ -427,7 +434,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
         >
           <option value="">All companies</option>
           {ALL_COMPANIES.map(c => (
-            <option key={c} value={c}>{c} ({SORTED_PROBLEMS.filter(p => p.datamartId === c).length})</option>
+            <option key={c} value={c}>{c} ({SORTED_PROBLEMS.filter(p => p.company === c || (p.alsoAskedAt || []).includes(c)).length})</option>
           ))}
         </select>
 
@@ -1038,7 +1045,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
             {problem.difficulty === 'Forensic' && (
               <span style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.07em', padding: '2px 7px', borderRadius: '4px', background: 'rgba(234,88,12,0.12)', color: '#ea580c', border: '1px solid rgba(234,88,12,0.3)' }}>PAL Exclusive</span>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
               {problem.companyDomain && (
                 <img
                   src={`https://www.google.com/s2/favicons?domain=${problem.companyDomain}&sz=32`}
@@ -1048,6 +1055,19 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                 />
               )}
               <Badge label={problem.company} style={{ background: 'rgba(67,56,202,0.08)', color: 'var(--accent)', borderColor: 'rgba(67,56,202,0.2)' }} />
+              {problem.alsoAskedAt && problem.alsoAskedAt.length > 0 && (
+                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ opacity: 0.5 }}>·</span>
+                  also at
+                  {problem.alsoAskedAt.map(function(c) { return (
+                    <span key={c} style={{
+                      fontSize: '0.62rem', padding: '1px 6px', borderRadius: '4px',
+                      background: 'rgba(20,184,166,0.07)', color: 'var(--teal)',
+                      border: '1px solid rgba(20,184,166,0.2)', whiteSpace: 'nowrap',
+                    }}>{c}</span>
+                  ); })}
+                </span>
+              )}
             </div>
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '5px' }}>
               {problem.roles.map(r => (
