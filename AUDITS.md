@@ -1199,4 +1199,17 @@ In Stat Foundations, the module subtitle appears twice: once in the yellow heade
 ---
 
 
+### 171. ✅ Migration — LLM content migration stripped brokenQuery/brokenOutputNote from Forensic problems
+
+**Version:** Discovered V5.42.0 (2026-06-20)
+**Type:** Content Integrity
+
+`migrate_content.py`'s prompt-replacement regex used `expectedColumns` as its right-side anchor: `(prompt:\s*')(.*?)(',\s*\n\s*expectedColumns)`. In Forensic problems, `brokenQuery` and `brokenOutputNote` sit BETWEEN `prompt` and `expectedColumns`. With `re.DOTALL`, the non-greedy `.*?` consumed these fields as part of the prompt match, then the replacement deleted them. All 36 Forensic problems (f01–f35 + sw06) lost their `brokenQuery` and `brokenOutputNote` fields. brokenQueryReturnsZeroRows was also lost on f04 and f05.
+
+**Fix:** (1) Wrote `repair_forensic.py` to restore `brokenQuery`/`brokenOutputNote` from V5.41.1 git clone for all 36 problems. (2) Re-added `brokenQueryReturnsZeroRows: true` to f04 and f05 manually. (3) Hardened `migrate_content.py` prompt regex to `(prompt:\s*')((?:[^'\\]|\\.)*?)(')` — quote-aware, stops at first unescaped `'`, no longer anchored on a subsequent field name.
+
+**Files:** `src/data/sqlLabProblems.js`, `scripts/migrate_content.py`
+
+---
+
 *Parts XVI–XXIX fully documented. Parts I–XXI archived in AUDITS_ARCHIVE.md.*

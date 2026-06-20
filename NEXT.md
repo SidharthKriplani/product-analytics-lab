@@ -2,27 +2,26 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: 2026-06-20 (V5.41.1: SQL Lab audit 0 T1 failures — 142 fixes across 182 problems. audit_sql_lab.py complete + pre-commit checklist in CLAUDE.md. AUDITS.md #169 closed, #170 opened.)*
+*Last updated: 2026-06-20 (V5.42.0: hintSteps UI + LLM migration (182 problems, Qwen3-8B) + forensic brokenQuery restoration; migrate_content.py prompt regex hardened. AUDITS.md #171 closed.)*
 
 ---
 
-## Status — V5.41.1 ready to commit + push
+## Status — V5.42.0 ready to commit + push
 
-**ACTION REQUIRED:** From Mac terminal:
 ```bash
-git clone https://github.com/SidharthKriplani/product-analytics-lab /tmp/pal-push-pal-v5411
+git clone https://github.com/SidharthKriplani/product-analytics-lab /tmp/pal-push-pal-v542
 SRC="/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab"
-cp "$SRC/src/data/sqlLabProblems.js" /tmp/pal-push-pal-v5411/src/data/sqlLabProblems.js
-cp "$SRC/scripts/audit_sql_lab.py" /tmp/pal-push-pal-v5411/scripts/audit_sql_lab.py
-cp "$SRC/docs/EVAL_RUBRICS.md" /tmp/pal-push-pal-v5411/docs/EVAL_RUBRICS.md
-cp "$SRC/AUDITS.md" /tmp/pal-push-pal-v5411/AUDITS.md
-cp "$SRC/NEXT.md" /tmp/pal-push-pal-v5411/NEXT.md
-cp "$SRC/CLAUDE.md" /tmp/pal-push-pal-v5411/CLAUDE.md
-cd /tmp/pal-push-pal-v5411
+cp "$SRC/src/pages/SqlLabPage.jsx" /tmp/pal-push-pal-v542/src/pages/SqlLabPage.jsx
+cp "$SRC/src/data/sqlLabProblems.js" /tmp/pal-push-pal-v542/src/data/sqlLabProblems.js
+cp "$SRC/scripts/migrate_content.py" /tmp/pal-push-pal-v542/scripts/migrate_content.py
+cp "$SRC/scripts/eval_content_quality.py" /tmp/pal-push-pal-v542/scripts/eval_content_quality.py
+cp "$SRC/AUDITS.md" /tmp/pal-push-pal-v542/AUDITS.md
+cp "$SRC/NEXT.md" /tmp/pal-push-pal-v542/NEXT.md
+cd /tmp/pal-push-pal-v542
 git config user.email "claudesubscription12@gmail.com"
 git config user.name "Avinash"
 git add -A
-git commit -m "V5.41.1: SQL Lab audit clean — 0 T1 failures across 182 problems; audit_sql_lab.py + EVAL_RUBRICS exception for brokenQueryReturnsZeroRows"
+git commit -m "V5.42.0: hintSteps UI + LLM migration (182 problems) + forensic brokenQuery restoration; migrate_content prompt regex hardened"
 git push origin main
 ```
 

@@ -231,6 +231,44 @@ function ResultsTable({ results }) {
   );
 }
 
+// ─── HintStep — named component so each step can own its starterCode toggle state ─
+function HintStep({ step, index }) {
+  var text = typeof step === 'string' ? step : step.text;
+  var code = typeof step === 'string' ? null : step.starterCode;
+  var [codeOpen, setCodeOpen] = useState(false);
+  return (
+    <div style={{
+      padding: '0.55rem 0.75rem', background: 'rgba(20,184,166,0.06)',
+      border: '1px solid rgba(20,184,166,0.2)', borderRadius: '6px',
+      borderLeft: '3px solid var(--teal)',
+      fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.55,
+    }}>
+      <span style={{ fontWeight: 700, color: 'var(--teal)', marginRight: '0.4rem' }}>Hint {index + 1}:</span>
+      {text}
+      {code && (
+        <div style={{ marginTop: '0.45rem' }}>
+          <button
+            onClick={function() { setCodeOpen(function(v) { return !v; }); }}
+            style={{
+              padding: '0.2rem 0.65rem', borderRadius: '4px', fontSize: '0.72rem',
+              background: 'rgba(20,184,166,0.1)', color: 'var(--teal)',
+              border: '1px solid rgba(20,184,166,0.3)', cursor: 'pointer', fontWeight: 500,
+            }}
+          >{codeOpen ? 'Hide starter code' : 'Show starter code'}</button>
+          {codeOpen && (
+            <pre style={{
+              marginTop: '0.4rem', padding: '0.6rem 0.75rem',
+              background: 'var(--surface-2)', border: '1px solid var(--border)',
+              borderRadius: '6px', fontSize: '0.75rem', fontFamily: 'monospace',
+              overflowX: 'auto', color: 'var(--text)', lineHeight: 1.5, whiteSpace: 'pre',
+            }}>{code}</pre>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Browse mode ──────────────────────────────────────────────────────────────
 
 function ProblemListRow({ p, isSolved, onSelect }) {
@@ -1106,12 +1144,13 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
         {/* Hints + Show Solution (pre-reveal) OR Solution + Debrief (post-reveal) */}
         {!revealed ? (() => {
           var maxH = ({ Easy: 1, Medium: 2, Hard: 5, Master: 5 })[problem.difficulty] || 1;
-          var availableHints = (problem.hints || []).length;
-          var hintCap = Math.min(maxH, availableHints);
+          // hintSteps = new format [{text, starterCode?}]; hints = legacy flat strings; both supported
+          var steps = problem.hintSteps || (problem.hints || []).map(function(h) { return { text: h }; });
+          var hintCap = Math.min(maxH, steps.length);
           var allExhausted = hintsShown >= hintCap;
           return (
             <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              {availableHints > 0 && !allExhausted && (
+              {steps.length > 0 && !allExhausted && (
                 <button
                   onClick={function() { track('sql_hint_used', { problemId: problem.id, hintIndex: hintsShown + 1, difficulty: problem.difficulty }); setHintsShown(function(n) { return Math.min(n + 1, hintCap); }); }}
                   style={{
@@ -1122,20 +1161,10 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                   }}
                 >Hint {hintsShown + 1} of {hintCap}</button>
               )}
-              {hintsShown > 0 && problem.hints && (
+              {hintsShown > 0 && (
                 <>
-                  {problem.hints.slice(0, hintsShown).map(function(h, i) {
-                    return (
-                      <div key={i} style={{
-                        padding: '0.55rem 0.75rem', background: 'rgba(20,184,166,0.06)',
-                        border: '1px solid rgba(20,184,166,0.2)', borderRadius: '6px',
-                        borderLeft: '3px solid var(--teal)',
-                        fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.55,
-                      }}>
-                        <span style={{ fontWeight: 700, color: 'var(--teal)', marginRight: '0.4rem' }}>Hint {i + 1}:</span>
-                        {h}
-                      </div>
-                    );
+                  {steps.slice(0, hintsShown).map(function(step, i) {
+                    return <HintStep key={i} step={step} index={i} />;
                   })}
                   {problem.tags && problem.tags.length > 0 && (
                     <div style={{
