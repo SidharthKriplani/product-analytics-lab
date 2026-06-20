@@ -4,6 +4,22 @@ This is the narrative history of PAL. Not a version list (that's CHANGELOG.md) �
 
 ---
 
+### v5.40.1–v5.43.0 — LLM content migration + multi-company tagging (2026-06-21)
+
+Three sessions of content infrastructure work. The SQL Lab problem bank (182 problems) was migrated from a flat hint system to a structured `hintSteps` format using a local Qwen3-8B model (LM Studio), then annotated with multi-company tagging via the same LLM pipeline.
+
+**V5.40.1 — checkValues decimal fix.** The Forensic problems added in V5.39.0 had whole-number SUM/AVG check values written with `.0` suffix (e.g. `{ amount: '280.0' }`). sql.js serialises whole-number REAL columns as integers — `String(280)` not `'280.0'` — so correct answers were silently rejected. Fixed in sql-f29, sql-f31, sql-f34. AUDITS.md #165 closed.
+
+**V5.41.0 — expected output loading UX.** "Loading sample rows…" placeholder shown while sql-wasm initialises; header `borderBottom` always rendered regardless of scroll position. AUDITS.md #166 closed.
+
+**V5.42.0 — hintSteps migration + forensic repair.** `scripts/migrate_content.py` was written to call Qwen3-8B for each of the 182 problems: rewrite the prompt for clarity and generate `hintSteps: [{ text, starterCode? }]` replacing the legacy flat `hints: string[]`. Migration ran in batches with resumability (hintSteps presence = skip). TIMEOUT bumped to 120s for Master-difficulty problems. Critical bug found mid-run: the prompt-replacement regex used `expectedColumns` as its right-side anchor with `re.DOTALL` — in Forensic problems, `brokenQuery` and `brokenOutputNote` sit between `prompt` and `expectedColumns`, so the non-greedy match consumed and deleted them from all 36 Forensic problems. Fixed with `repair_forensic.py` (restored from V5.41.1 git clone) + hardened regex. `eval_content_quality.py` also written and fixed. SqlLabPage.jsx company filter corrected from `datamartId` to actual company names; alsoAskedAt UI added (badge + runner chips). AUDITS.md #171 closed.
+
+**V5.43.0 — alsoAskedAt multi-company tagging (pending tag_companies.py run).** `scripts/tag_companies.py` built: calls Qwen3-8B for each problem to identify 0–3 other companies from the 69-company pool that would plausibly ask the same SQL question. Resumable, validates against pool, caps at 3. Company filter in SqlLabPage.jsx updated to check primary company OR alsoAskedAt.
+
+**Infrastructure decision (2026-06-21):** Consolidated to one strategy session (LinkedIn + cross-lab) + separate per-lab build sessions. `ECOSYSTEM_LEDGER.md` created at `Professional/` root as a shared async ledger between labs.
+
+---
+
 ### v5.38.0–v5.40.0 — SQL Lab overhaul: validation engine, Forensic batch, India series (2026-06-20)
 
 Three sessions of SQL Lab work with a single thread: make the practice loop honest and differentiated.

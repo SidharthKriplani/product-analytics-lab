@@ -4,6 +4,46 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.42.0] — 2026-06-21 [HINTSTEPS MIGRATION + FORENSIC REPAIR + ALSOASKEDAT UI]
+
+### hintSteps LLM migration (182 problems), forensic brokenQuery repair, company filter fix, alsoAskedAt UI
+
+All 182 SQL Lab problems migrated from `hints: string[]` to `hintSteps: [{ text, starterCode? }]` using Qwen3-8B via LM Studio. Prompts rewritten for clarity in the same pass. Migration script (`scripts/migrate_content.py`) was resumable; 8 problems required manual retry due to timeout or parse failure; all resolved. 0 T1 audit failures post-migration.
+
+Critical bug discovered mid-run: the prompt-replacement regex `(prompt:\s*')(.*?)(',\s*\n\s*expectedColumns)` with `re.DOTALL` consumed `brokenQuery` and `brokenOutputNote` as part of the prompt match in Forensic problems (those fields sit between `prompt` and `expectedColumns`), then deleted them in the replacement. All 36 Forensic problems (f01–f35 + sw06) lost these fields. Fixed: (1) `repair_forensic.py` restored both fields from V5.41.1 git clone; (2) `brokenQueryReturnsZeroRows: true` manually re-added to f04 and f05; (3) regex hardened to quote-aware character class `(prompt:\s*')((?:[^'\\]|\\.)*?)(')`.
+
+`eval_content_quality.py` written and fixed: correct model (`qwen/qwen3-8b`), ES module loader via temp `.mjs`, `/no_think` prefix, lowercase format check. Not yet run.
+
+`scripts/tag_companies.py` written: calls Qwen3-8B for each problem to generate `alsoAskedAt: string[]` — 0–3 companies from the 69-company pool that would also ask this SQL question. Resumable, validates against pool, caps at 3. Not yet run (pending V5.43.0).
+
+SqlLabPage.jsx company filter corrected from `datamartId` (internal names) to `p.company` (actual company names). Filter now also checks `p.alsoAskedAt` — multi-company filter counts include secondary matches. alsoAskedAt UI added: `+N` teal badge on problem card (tooltip listing companies) + "also at Company1 Company2" chips in runner header. Both components render conditionally when `alsoAskedAt` is present and non-empty (no-op until tag_companies.py runs).
+
+AUDITS.md: #171 closed (forensic field loss + repair). #172 added (hintSteps complete). #173 added (eval pending). #174 added (alsoAskedAt pending run).
+
+**Files changed:** `src/data/sqlLabProblems.js`, `src/pages/SqlLabPage.jsx`, `scripts/migrate_content.py`, `scripts/eval_content_quality.py`, `scripts/tag_companies.py`, `AUDITS.md`, `NEXT.md`, `LINEAGE.md`, `CHANGELOG.md`
+
+---
+
+## [5.41.0] — 2026-06-20 [EXPECTED OUTPUT LOADING UX]
+
+### "Loading sample rows…" placeholder + header border fix
+
+Expected output panel shows "Loading sample rows…" placeholder while sql-wasm initialises instead of an empty or broken state. Header `borderBottom` now always rendered regardless of scroll position. AUDITS.md #166 closed.
+
+**Files changed:** `src/pages/SqlLabPage.jsx`
+
+---
+
+## [5.40.1] — 2026-06-20 [CHECKVALUES DECIMAL FORMAT FIX]
+
+### Whole-number SUM/AVG checkValues stripped of `.0` suffix
+
+sql.js serialises whole-number REAL columns as JS integers — `String(280)` not `'280.0'`. Three Forensic problems (sql-f29, sql-f31, sql-f34) had check values written with `.0` suffix, causing correct answers to be silently rejected. Fixed by stripping `.0` from affected checkValues. AUDITS.md #165 closed.
+
+**Files changed:** `src/data/sqlLabProblems.js`
+
+---
+
 ## [5.35.0] — 2026-06-18 [SHAREABLE LINKS — ALL ROOMS]
 
 ### Copy-link button + deep-link routing for all rooms

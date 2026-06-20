@@ -1212,4 +1212,41 @@ In Stat Foundations, the module subtitle appears twice: once in the yellow heade
 
 ---
 
+### 172. ✅ Infrastructure — hintSteps migration complete (182 problems)
+
+**Version:** V5.42.0 (2026-06-21)
+**Type:** Content Infrastructure
+
+All 182 SQL Lab problems migrated from flat `hints: string[]` to structured `hintSteps: [{ text, starterCode? }]` via Qwen3-8B (LM Studio, local). Prompts rewritten for clarity. Migration was resumable (hintSteps presence = skip). 8 problems required manual retry (timeout or parse failure); all resolved. 0 T1 audit failures post-migration.
+
+**Files:** `src/data/sqlLabProblems.js`, `scripts/migrate_content.py`
+
+---
+
+### 173. ⚠️ Infrastructure — eval_content_quality.py not yet run against full bank
+
+**Version:** Open — script ready as of V5.42.0 (2026-06-21)
+**Type:** Content Quality
+
+`scripts/eval_content_quality.py` is written and fixed (correct model, ES module loader, /no_think prefix, lowercase format check). Has not been run against all 182 problems. Outputs `scripts/content_quality_report.csv` + `scripts/content_quality_flagged.md`. Run after V5.43.0 commit to get baseline quality scores.
+
+**Fix:** Run `python3 scripts/eval_content_quality.py` from product-analytics-lab/ with LM Studio running. ~30-40 min. Review flagged.md for any score=1 problems.
+
+**Priority:** Medium — no user-facing impact; useful for backlog prioritisation.
+
+---
+
+### 174. ⚠️ Content — alsoAskedAt field not yet populated (tag_companies.py pending)
+
+**Version:** Open — script ready as of V5.42.0 (2026-06-21)
+**Type:** Content / Feature completeness
+
+`scripts/tag_companies.py` is built and tested. SqlLabPage.jsx company filter and alsoAskedAt UI badges are live. But `alsoAskedAt` field is not yet present in `sqlLabProblems.js` — the script has not been run. Company filter shows correct counts for primary company only; +N badges won't appear until the run completes.
+
+**Fix:** Run `python3 scripts/tag_companies.py` from product-analytics-lab/ with LM Studio running. ~10-15 min. Commit result as V5.43.0.
+
+**Priority:** High — feature is half-shipped until this runs.
+
+---
+
 *Parts XVI–XXIX fully documented. Parts I–XXI archived in AUDITS_ARCHIVE.md.*
