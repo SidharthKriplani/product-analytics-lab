@@ -1881,4 +1881,195 @@ export const datamarts = {
     },
   },
 
+  swiggy: {
+    id: 'swiggy',
+    name: 'Swiggy Food Delivery',
+    industry: 'Food Delivery / India',
+    tables: {
+      restaurants: {
+        schema: 'CREATE TABLE restaurants (restaurant_id INTEGER PRIMARY KEY, name TEXT, city TEXT, cuisine_type TEXT, avg_rating REAL, delivery_time_min INTEGER, is_active INTEGER)',
+        columns: [
+          { name: 'restaurant_id', type: 'integer' },
+          { name: 'name', type: 'text' },
+          { name: 'city', type: 'text  Mumbai | Delhi | Bangalore | Hyderabad | Chennai | Pune' },
+          { name: 'cuisine_type', type: 'text  Biryani | Chinese | Pizza | South Indian | Burger | Indian' },
+          { name: 'avg_rating', type: 'real  1-5 customer rating' },
+          { name: 'delivery_time_min', type: 'integer  estimated delivery time in minutes' },
+          { name: 'is_active', type: 'integer  1=active 0=inactive (delisted)' },
+        ],
+        rows: [
+          // restaurant_id, name, city, cuisine_type, avg_rating, delivery_time_min, is_active
+          // Restaurant 9 (Pune, inactive) has no orders — used for is_active filter problems
+          [1,  'Biryani Blues', 'Mumbai',    'Biryani',      4.5, 30, 1],
+          [2,  'Dragon House',  'Delhi',     'Chinese',      4.2, 35, 1],
+          [3,  'Pizza Point',   'Bangalore', 'Pizza',        4.0, 25, 1],
+          [4,  'Dosa Delights', 'Chennai',   'South Indian', 4.7, 20, 1],
+          [5,  'Burger Barn',   'Mumbai',    'Burger',       3.8, 28, 1],
+          [6,  'Tandoor Tales', 'Hyderabad', 'Indian',       4.3, 40, 1],
+          [7,  'Noodle Ninja',  'Bangalore', 'Chinese',      3.9, 32, 1],
+          [8,  'Spice Garden',  'Delhi',     'Indian',       4.6, 38, 1],
+          [9,  'Wok & Roll',    'Pune',      'Chinese',      3.5, 45, 0],
+          [10, 'Idli House',    'Chennai',   'South Indian', 4.8, 18, 1],
+          [11, 'The Grill Co',  'Hyderabad', 'Burger',       4.1, 33, 1],
+          [12, 'Cheesy Crust',  'Mumbai',    'Pizza',        4.4, 27, 1],
+        ],
+      },
+      customers: {
+        schema: 'CREATE TABLE customers (customer_id INTEGER PRIMARY KEY, name TEXT, city TEXT, joined_at TEXT, tier TEXT, is_swiggy_one INTEGER)',
+        columns: [
+          { name: 'customer_id', type: 'integer' },
+          { name: 'name', type: 'text' },
+          { name: 'city', type: 'text  Mumbai | Delhi | Bangalore | Hyderabad | Chennai' },
+          { name: 'joined_at', type: 'text  YYYY-MM-DD' },
+          { name: 'tier', type: 'text  gold | silver | regular' },
+          { name: 'is_swiggy_one', type: 'integer  1=Swiggy One subscriber 0=non-subscriber' },
+        ],
+        rows: [
+          // customer_id, name, city, joined_at, tier, is_swiggy_one
+          // Swiggy One subscribers (is_swiggy_one=1): customers 1,2,3,4,5,7
+          // Non-subscribers (is_swiggy_one=0): customers 6,8,9,10
+          [1,  'Rahul Sharma', 'Mumbai',    '2022-03-10', 'gold',    1],
+          [2,  'Priya Singh',  'Delhi',     '2022-05-15', 'silver',  1],
+          [3,  'Arjun Kumar',  'Bangalore', '2022-07-20', 'gold',    1],
+          [4,  'Kavya Nair',   'Mumbai',    '2023-01-05', 'silver',  1],
+          [5,  'Deepak Patel', 'Hyderabad', '2023-02-14', 'gold',    1],
+          [6,  'Sneha Reddy',  'Chennai',   '2023-04-01', 'regular', 0],
+          [7,  'Vikram Menon', 'Bangalore', '2022-11-30', 'gold',    1],
+          [8,  'Ananya Joshi', 'Delhi',     '2023-06-10', 'silver',  0],
+          [9,  'Rohit Gupta',  'Mumbai',    '2023-08-20', 'regular', 0],
+          [10, 'Meera Iyer',   'Chennai',   '2023-09-15', 'regular', 0],
+        ],
+      },
+      delivery_partners: {
+        schema: 'CREATE TABLE delivery_partners (partner_id INTEGER PRIMARY KEY, name TEXT, city TEXT, vehicle_type TEXT, is_active INTEGER, rating REAL)',
+        columns: [
+          { name: 'partner_id', type: 'integer' },
+          { name: 'name', type: 'text' },
+          { name: 'city', type: 'text  city the partner is based in' },
+          { name: 'vehicle_type', type: 'text  bike | scooter' },
+          { name: 'is_active', type: 'integer  1=active 0=suspended' },
+          { name: 'rating', type: 'real  customer rating 1-5' },
+        ],
+        rows: [
+          // partner_id, name, city, vehicle_type, is_active, rating
+          // Partner 8 (Kiran Rao) is suspended — is_active=0, no deliveries
+          [1, 'Ravi Kumar',    'Mumbai',    'bike',    1, 4.7],
+          [2, 'Suresh Yadav',  'Delhi',     'scooter', 1, 4.3],
+          [3, 'Amit Tiwari',   'Bangalore', 'bike',    1, 4.9],
+          [4, 'Manoj Singh',   'Mumbai',    'scooter', 1, 4.1],
+          [5, 'Deepak Mishra', 'Hyderabad', 'bike',    1, 4.5],
+          [6, 'Sanjay Verma',  'Chennai',   'scooter', 1, 4.8],
+          [7, 'Pradeep Das',   'Bangalore', 'bike',    1, 3.9],
+          [8, 'Kiran Rao',     'Delhi',     'scooter', 0, 4.2],
+        ],
+      },
+      orders: {
+        schema: 'CREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, restaurant_id INTEGER, partner_id INTEGER, placed_at TEXT, delivered_at TEXT, total_amount REAL, status TEXT, payment_mode TEXT)',
+        columns: [
+          { name: 'order_id', type: 'integer' },
+          { name: 'customer_id', type: 'integer  FK customers' },
+          { name: 'restaurant_id', type: 'integer  FK restaurants' },
+          { name: 'partner_id', type: 'integer  FK delivery_partners' },
+          { name: 'placed_at', type: 'text  YYYY-MM-DD HH:MM:SS' },
+          { name: 'delivered_at', type: 'text  YYYY-MM-DD HH:MM:SS — NULL for cancelled orders' },
+          { name: 'total_amount', type: 'real  order value in INR' },
+          { name: 'status', type: 'text  delivered | cancelled' },
+          { name: 'payment_mode', type: 'text  UPI | COD | card' },
+        ],
+        rows: [
+          // order_id, customer_id, restaurant_id, partner_id, placed_at, delivered_at, total_amount, status, payment_mode
+          // 21 delivered, 4 cancelled (orders 7, 10, 15, 20 — delivered_at IS NULL)
+          // Avg delivery time by restaurant city (delivered only):
+          //   Chennai  (rest 4,10):    20+19+18 = 57 min / 3 = 19.0
+          //   Bangalore(rest 3,7):  25+22+30+28+24=129 min / 5 = 25.8
+          //   Mumbai   (rest 1,5,12): 30+30+28+29+26+25=168 min / 6 = 28.0
+          //   Hyderabad(rest 6,11):  40+35+42+32=149 min / 4 = 37.25
+          //   Delhi    (rest 2,8):    35+40+45=120 min / 3 = 40.0
+          [1,  1, 1,  1, '2024-01-05 12:30:00', '2024-01-05 13:00:00', 450.00, 'delivered', 'UPI'],
+          [2,  2, 2,  2, '2024-01-06 19:00:00', '2024-01-06 19:35:00', 320.00, 'delivered', 'card'],
+          [3,  3, 3,  3, '2024-01-08 13:00:00', '2024-01-08 13:25:00', 280.00, 'delivered', 'UPI'],
+          [4,  4, 5,  4, '2024-01-10 20:00:00', '2024-01-10 20:30:00', 190.00, 'delivered', 'UPI'],
+          [5,  5, 6,  5, '2024-01-12 18:30:00', '2024-01-12 19:10:00', 550.00, 'delivered', 'card'],
+          [6,  6, 4,  6, '2024-01-15 12:00:00', '2024-01-15 12:20:00', 120.00, 'delivered', 'COD'],
+          [7,  7, 7,  7, '2024-01-18 14:00:00', null,                   360.00, 'cancelled', 'UPI'],
+          [8,  8, 8,  2, '2024-01-20 19:30:00', '2024-01-20 20:10:00', 480.00, 'delivered', 'card'],
+          [9,  1, 12, 1, '2024-01-22 20:00:00', '2024-01-22 20:28:00', 390.00, 'delivered', 'UPI'],
+          [10, 9, 1,  4, '2024-01-25 18:00:00', null,                   450.00, 'cancelled', 'COD'],
+          [11, 3, 3,  3, '2024-02-01 13:00:00', '2024-02-01 13:22:00', 265.00, 'delivered', 'UPI'],
+          [12, 2, 8,  2, '2024-02-03 19:00:00', '2024-02-03 19:45:00', 520.00, 'delivered', 'card'],
+          [13, 5, 11, 5, '2024-02-05 18:00:00', '2024-02-05 18:35:00', 380.00, 'delivered', 'UPI'],
+          [14, 6, 10, 6, '2024-02-08 12:00:00', '2024-02-08 12:19:00', 145.00, 'delivered', 'COD'],
+          [15, 4, 6,  5, '2024-02-10 19:00:00', null,                   550.00, 'cancelled', 'UPI'],
+          [16, 10,4,  6, '2024-02-12 13:00:00', '2024-02-12 13:18:00', 130.00, 'delivered', 'COD'],
+          [17, 7, 7,  7, '2024-02-15 14:00:00', '2024-02-15 14:30:00', 340.00, 'delivered', 'UPI'],
+          [18, 1, 5,  4, '2024-02-18 20:00:00', '2024-02-18 20:29:00', 210.00, 'delivered', 'card'],
+          [19, 9, 12, 1, '2024-02-20 21:00:00', '2024-02-20 21:26:00', 380.00, 'delivered', 'UPI'],
+          [20, 8, 2,  2, '2024-02-22 19:00:00', null,                   320.00, 'cancelled', 'card'],
+          [21, 3, 7,  3, '2024-03-01 12:00:00', '2024-03-01 12:28:00', 295.00, 'delivered', 'UPI'],
+          [22, 5, 6,  5, '2024-03-05 19:00:00', '2024-03-05 19:42:00', 620.00, 'delivered', 'UPI'],
+          [23, 2, 3,  7, '2024-03-08 13:00:00', '2024-03-08 13:24:00', 260.00, 'delivered', 'card'],
+          [24, 4, 12, 4, '2024-03-10 20:00:00', '2024-03-10 20:25:00', 410.00, 'delivered', 'UPI'],
+          [25, 7, 11, 5, '2024-03-15 18:00:00', '2024-03-15 18:32:00', 420.00, 'delivered', 'card'],
+        ],
+      },
+      order_items: {
+        schema: 'CREATE TABLE order_items (item_id INTEGER PRIMARY KEY, order_id INTEGER, dish_name TEXT, price REAL, quantity INTEGER)',
+        columns: [
+          { name: 'item_id', type: 'integer' },
+          { name: 'order_id', type: 'integer  FK orders' },
+          { name: 'dish_name', type: 'text' },
+          { name: 'price', type: 'real  unit price in INR' },
+          { name: 'quantity', type: 'integer' },
+        ],
+        rows: [
+          // item_id, order_id, dish_name, price, quantity
+          // 2 items per delivered order (21 delivered orders → 42 rows)
+          // price * quantity sums match order total_amount
+          [1,  1,  'Chicken Biryani',       380.00, 1],
+          [2,  1,  'Raita',                  70.00, 1],
+          [3,  2,  'Veg Fried Rice',         160.00, 1],
+          [4,  2,  'Manchurian Gravy',       160.00, 1],
+          [5,  3,  'Margherita Pizza',       220.00, 1],
+          [6,  3,  'Garlic Bread',            60.00, 1],
+          [7,  4,  'Classic Burger',         130.00, 1],
+          [8,  4,  'Fries',                   60.00, 1],
+          [9,  5,  'Butter Chicken',         280.00, 1],
+          [10, 5,  'Garlic Naan',             90.00, 3],
+          [11, 6,  'Masala Dosa',             80.00, 1],
+          [12, 6,  'Idli Sambar',             40.00, 1],
+          [13, 8,  'Paneer Tikka',           280.00, 1],
+          [14, 8,  'Butter Roti',             40.00, 5],
+          [15, 9,  'Pepperoni Pizza',        350.00, 1],
+          [16, 9,  'Garlic Bread',            40.00, 1],
+          [17, 11, 'Veggie Supreme Pizza',   205.00, 1],
+          [18, 11, 'Soft Drink',              60.00, 1],
+          [19, 12, 'Chicken Tikka Masala',   320.00, 1],
+          [20, 12, 'Garlic Naan',            100.00, 2],
+          [21, 13, 'BBQ Burger',             280.00, 1],
+          [22, 13, 'Onion Rings',            100.00, 1],
+          [23, 14, 'Idli Sambar',             80.00, 1],
+          [24, 14, 'Filter Coffee',           65.00, 1],
+          [25, 16, 'Idli Sambar',             70.00, 1],
+          [26, 16, 'Medu Vada',               60.00, 1],
+          [27, 17, 'Chicken Fried Rice',     200.00, 1],
+          [28, 17, 'Manchurian Gravy',       140.00, 1],
+          [29, 18, 'Double Burger',          150.00, 1],
+          [30, 18, 'Fries',                   60.00, 1],
+          [31, 19, 'BBQ Chicken Pizza',      320.00, 1],
+          [32, 19, 'Soft Drink',              60.00, 1],
+          [33, 21, 'Hakka Noodles',          195.00, 1],
+          [34, 21, 'Spring Roll',            100.00, 1],
+          [35, 22, 'Mutton Biryani',         420.00, 1],
+          [36, 22, 'Butter Naan',            200.00, 1],
+          [37, 23, 'Farmhouse Pizza',        200.00, 1],
+          [38, 23, 'Garlic Bread',            60.00, 1],
+          [39, 24, 'Chicken BBQ Pizza',      360.00, 1],
+          [40, 24, 'Soft Drink',              50.00, 1],
+          [41, 25, 'Double Smash Burger',    320.00, 1],
+          [42, 25, 'Loaded Fries',           100.00, 1],
+        ],
+      },
+    },
+  },
+
 };
