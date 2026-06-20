@@ -43,6 +43,20 @@ const DEBRIEF_BLOCKS = [
     bg: 'var(--yellow-bg)',
     border: 'var(--yellow-border)',
   },
+  {
+    pattern: /^\*\*(Interviewer follow-up[^*]*)\*\*:?/,
+    label: 'Interviewer Follow-Up',
+    color: 'var(--purple)',
+    bg: 'rgba(139,92,246,0.07)',
+    border: 'rgba(139,92,246,0.3)',
+  },
+  {
+    pattern: /^\*\*(What (the stakeholder|weak SQL)[^*]*|Ambiguities resolved[^*]*|SQL approach[^*]*)\*\*:?/,
+    label: 'Approach',
+    color: 'var(--teal)',
+    bg: 'rgba(20,184,166,0.05)',
+    border: 'rgba(20,184,166,0.25)',
+  },
 ];
 
 function DebriefBlock({ block, body }) {
@@ -657,7 +671,9 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
       return new Set(stored);
     } catch { return new Set(); }
   });
-  const [expectedSample, setExpectedSample] = useState(null);
+  const expectedSampleRef = useRef(null);
+  const [expectedSampleDisplay, setExpectedSampleDisplay] = useState(null);
+  const [failReason, setFailReason] = useState(null);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const dbRef = useRef(null);
 
@@ -715,7 +731,9 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
     setHasRun(false);
     setCorrect(null);
     setQuery(getStoredQuery(problem.id));
-    setExpectedSample(null);
+    expectedSampleRef.current = null;
+    setExpectedSampleDisplay(null);
+    setFailReason(null);
     setHintsShown(0);
     setElapsedSec(0);
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -757,8 +775,9 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
 
         if (cancelled) return;
         dbRef.current = database;
+        expectedSampleRef.current = sample;
         setDb(database);
-        setExpectedSample(sample);
+        setExpectedSampleDisplay(sample);
         setSqlLoading(false);
       } catch (e) {
         if (!cancelled) {
@@ -772,7 +791,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
     return () => { cancelled = true; };
   }, [problemIdx]);
 
-  function runQuery() {
+  function execQuery(validate) {
     if (!dbRef.current || !query.trim() || !problem) return;
     try {
       const res = dbRef.current.exec(query);
@@ -781,18 +800,34 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
         : { columns: res[0].columns, rows: res[0].values };
       setResults(resultData);
       setRunError(null);
+      if (!validate) {
+        // Run mode: show results, clear any previous verdict
+        setCorrect(null);
+        setFailReason(null);
+        setHasRun(false);
+        return;
+      }
+      // Check mode: validate and record
       setHasRun(true);
-      const isCorrect = validateResults(resultData, problem, expectedSample);
+      const reason = validateResults(resultData, problem, expectedSampleRef.current);
+      const isCorrect = reason === null;
       setCorrect(isCorrect);
+      setFailReason(isCorrect ? null : reason);
+      track('sql_query_run', { problemId: problem.id, difficulty: problem.difficulty, datamartId: problem.datamartId, isCorrect });
       addStoredSub(problem.id, query, isCorrect);
     } catch (e) {
       setRunError(e.message);
       setResults(null);
-      setHasRun(true);
-      setCorrect(false);
-      addStoredSub(problem.id, query, false);
+      setHasRun(validate);
+      if (validate) {
+        setCorrect(false);
+        addStoredSub(problem.id, query, false);
+      }
     }
   }
+
+  function runQuery() { execQuery(false); }
+  function checkQuery() { execQuery(true); }
 
   function sqlValuesMatch(expected, actual) {
     if (expected === null && actual === null) return true;
@@ -829,16 +864,21 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
   }
 
   function validateResults(res, prob, expected) {
-    if (!res || res.rows.length !== prob.expectedRowCount) return false;
+    if (!res || res.rows.length !== prob.expectedRowCount) {
+      var got = res ? res.rows.length : 0;
+      return 'Got ' + got + ' row' + (got !== 1 ? 's' : '') + ', expected ' + prob.expectedRowCount + ' — check your filters and joins';
+    }
     for (var col of prob.expectedColumns) {
-      if (!res.columns.includes(col)) return false;
+      if (!res.columns.includes(col)) {
+        return 'Column \'' + col + '\' not found — check your column aliases (e.g. write AS ' + col + ')';
+      }
     }
     // Primary: compare against computed expected output (catches integer division, rounding bugs)
     if (expected && expected.columns && expected.rows && expected.rows.length === res.rows.length) {
       var colIdx = {};
       res.columns.forEach(function(c, i) { colIdx[c] = i; });
       // 1. Ordered comparison (respects ORDER BY)
-      if (rowArraysMatch(expected.rows, res.rows, expected.columns, colIdx)) return true;
+      if (rowArraysMatch(expected.rows, res.rows, expected.columns, colIdx)) return null;
       // 2. Sort-tolerant comparison (correct data, different order is also accepted)
       var sortedExp = sortRowsStable(expected.rows);
       // Build user rows aligned to expected column order for sorting
@@ -849,8 +889,8 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
         });
       });
       var sortedUser = sortRowsStable(alignedUserRows);
-      if (rowArraysMatch(sortedExp, sortedUser, expected.columns, expected.columns.reduce(function(acc, c, i) { acc[c] = i; return acc; }, {}))) return true;
-      return false;
+      if (rowArraysMatch(sortedExp, sortedUser, expected.columns, expected.columns.reduce(function(acc, c, i) { acc[c] = i; return acc; }, {}))) return null;
+      return 'Values don\'t match the expected output — check your calculations and data types';
     }
     // Fallback to checkValues if expected sample not yet loaded
     var colIdx2 = {};
@@ -863,9 +903,9 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           return i !== undefined && String(row[i]) === String(val);
         });
       });
-      if (!match) return false;
+      if (!match) return 'Output does not match expected values — double-check your query';
     }
-    return true;
+    return null;
   }
 
   function startTimer() {
@@ -879,7 +919,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
   function handleKeyDown(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
-      runQuery();
+      checkQuery();
     }
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -957,6 +997,9 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           {/* Meta row */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
             <Badge label={problem.difficulty} style={{ background: diffStyle.bg, color: diffStyle.text, borderColor: diffStyle.border }} />
+            {problem.difficulty === 'Forensic' && (
+              <span style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.07em', padding: '2px 7px', borderRadius: '4px', background: 'rgba(234,88,12,0.12)', color: '#ea580c', border: '1px solid rgba(234,88,12,0.3)' }}>PAL Exclusive</span>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               {problem.companyDomain && (
                 <img
@@ -978,6 +1021,13 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.55rem', color: 'var(--text)', lineHeight: 1.3 }}>{problem.title}</h2>
           {/* Prompt */}
           <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--text-muted)', margin: 0 }}>{problem.prompt}</p>
+          {/* Judgment prompt — Hard / Master problems only */}
+          {problem.beforeWriting && (
+            <div style={{ marginTop: '0.7rem', padding: '0.5rem 0.75rem', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '6px', borderLeft: '3px solid var(--yellow)' }}>
+              <span style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--yellow)', display: 'block', marginBottom: '0.25rem' }}>Before you write</span>
+              <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.6 }}>{problem.beforeWriting}</p>
+            </div>
+          )}
 
           {/* Forensic broken query */}
           {problem.format === 'forensic' && (
@@ -1000,7 +1050,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
 
         {/* Expected output */}
         <div style={{ marginTop: '0.65rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-          <div style={{ padding: '0.4rem 0.75rem', background: 'var(--surface-2)', borderBottom: expectedSample ? '1px solid var(--border)' : 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+          <div style={{ padding: '0.4rem 0.75rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expected output</span>
             <span style={{ fontSize: '0.6rem', color: 'var(--border)' }}>·</span>
             <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{problem.expectedRowCount} row{problem.expectedRowCount !== 1 ? 's' : ''}</span>
@@ -1010,19 +1060,23 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
               ))}
             </div>
           </div>
-          {expectedSample && (
+          {sqlLoading ? (
+            <div style={{ padding: '0.45rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic', borderTop: '1px solid var(--border)' }}>
+              Loading sample rows…
+            </div>
+          ) : expectedSampleDisplay ? (
             <div style={{ overflowX: 'auto', maxHeight: 180, overflowY: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem', fontFamily: 'monospace' }}>
                 <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                   <tr style={{ background: 'var(--surface)' }}>
-                    {expectedSample.columns.map(col => (
+                    {expectedSampleDisplay.columns.map(col => (
                       <th key={col} style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 600, fontSize: '0.63rem', color: 'var(--teal)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{col}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {expectedSample.rows.map((row, ri) => (
-                    <tr key={ri} style={{ borderBottom: ri < expectedSample.rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                  {expectedSampleDisplay.rows.map((row, ri) => (
+                    <tr key={ri} style={{ borderBottom: ri < expectedSampleDisplay.rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
                       {row.map((cell, ci) => (
                         <td key={ci} style={{ padding: '3px 8px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                           {cell === null ? <span style={{ color: 'var(--border)', fontStyle: 'italic' }}>NULL</span> : String(cell)}
@@ -1033,7 +1087,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                 </tbody>
               </table>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* SQLite note */}
@@ -1213,21 +1267,34 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
             />
 
             {/* Buttons row */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 onClick={runQuery}
-                disabled={!query.trim()}
+                disabled={!query.trim() || !dbRef.current}
                 style={{
-                  padding: '0.45rem 1rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem',
-                  background: 'var(--teal)', color: '#fff', border: 'none', cursor: 'pointer',
-                  opacity: query.trim() ? 1 : 0.4,
+                  padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem',
+                  background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer',
+                  opacity: (query.trim() && dbRef.current) ? 1 : 0.4,
                 }}
+                title="Run your query and see results — no pass/fail verdict"
               >▶ Run</button>
+              <button
+                onClick={checkQuery}
+                disabled={!query.trim() || !dbRef.current}
+                style={{
+                  padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem',
+                  background: 'var(--teal)', color: '#fff', border: 'none', cursor: 'pointer',
+                  opacity: (query.trim() && dbRef.current) ? 1 : 0.4,
+                }}
+                title="Check your answer — validates against the expected output (⌘Enter)"
+              >✓ Check</button>
               {hasRun && correct === true && (
                 <span className="pal-success-ring" style={{ fontSize: '0.78rem', color: 'var(--green)', fontWeight: 600 }}>✓ Correct — well done</span>
               )}
               {hasRun && correct === false && !runError && (
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Output does not match — check row count or column names</span>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                  {failReason || 'Output does not match — check row count, column names, and values.'}
+                </span>
               )}
             </div>
 

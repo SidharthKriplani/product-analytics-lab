@@ -204,7 +204,7 @@ Three changes shipped together: (1) Run and Check split into distinct actions �
 
 ---
 
-### 165. ⚠️ Bug — checkValues '.0' decimal format likely broken on whole-number SUM results (sql-f26–f35)
+### 165. ✅ Bug — checkValues '.0' decimal format fixed in sql-f29, f31, f34 (V5.40.1)
 
 **Version:** Open — introduced V5.39.0
 **Type:** BUILD / Content Integrity
@@ -217,26 +217,22 @@ String(row[i]) === String(val)
 
 For a REAL column in SQLite returned via sql.js as a whole-number float (e.g., 280.0), JavaScript serializes it as `String(280)` = `'280'` — not `'280.0'`. The comparison `'280' === '280.0'` is false. On the fallback path (when expected sample is not cached), these problems will reject correct answers silently.
 
-**Risk:** Affects all 10 sql-f26–f35 forensic problems on first-run validation. Users write correct SQL, get "wrong answer." Demoralizes tester.
+**Root cause confirmed:** Only 3 of the 10 problems had whole-number REAL checkValues. f29 (total_exposure '4450.0', '1205.0'), f31 (total_disputed '280.0', '950.0'), f34 (amount '45.0', '780.0'). The other 7 used text values, COUNT integers, or genuine non-integer floats ('249.99', '329.98') — all serialise correctly.
 
-**Fix:** Audit each checkValue in sql-f26–f35 that uses a whole-number float. Remove the `.0` suffix: `'280.0'` → `'280'`, `'4450.0'` → `'4450'`, `'1205.0'` → `'1205'`, etc. Non-whole-number values (e.g., `'249.99'`, `'5689.99'`) are unaffected — `String(249.99)` = `'249.99'` correctly. Verify by running each solution query against the datamart and checking what sql.js actually returns before writing the checkValue.
+**Fix (V5.40.1):** Stripped `.0` from all 6 affected checkValues. Verified against actual datamart rows before editing: QuickTransfer = txn9(950)+txn31(3500)=4450, FastCash = txn20(780)+txn39(425)=1205; dispute txn7→acct4=280, txn9→acct5=950; txn10.amount=45, txn20.amount=780. String audit OK, brace diff 0.
 
-**Priority:** P0 — fix before any tester uses these problems.
-
-**Files:** `src/data/sqlLabProblems.js` (sql-f26 through sql-f35 checkValues blocks)
+**Files:** `src/data/sqlLabProblems.js` (sql-f29, sql-f31, sql-f34 checkValues)
 
 ---
 
-### 166. ⚠️ UX — Expected output not surfaced until after first query run
+### 166. ✅ UX — Expected output not surfaced until after first query run
 
-**Version:** Open — flagged V5.38.0 audit (SQL_LAB_AUDIT_2026.md §5 Priority 2)
+**Version:** Fixed V5.41.0
 **Type:** UX
 
 `expectedSampleDisplay` (the correct column headers and sample rows) is computed during `initDb()` and stored in state, but is only rendered inside the results panel — which only appears after the user runs a query. First-time users open a problem with no target: no column names, no row count, no example output. They either guess the schema or write something random to trigger a result. Every other SQL practice platform (DataLemur, StrataScratch, LeetCode) shows the expected output structure before any input. PAL should too.
 
-**Fix:** Move `expectedSampleDisplay` render into the problem panel (above or below the prompt), visible on load. The data is already computed — this is purely a JSX placement change in SqlLabPage.jsx.
-
-**Priority:** High — UX friction for every first-time problem.
+**Fix (V5.41.0):** The "Expected output" block was already in the problem panel (left column) but the sample rows were gated on `expectedSampleDisplay !== null`. Changed to: while `sqlLoading` is true, show "Loading sample rows…" placeholder; once `initDb()` completes (typically 1-3s), real sample rows appear. Also fixed header `borderBottom` to always render (was conditionally hidden when no sample yet). File: `src/pages/SqlLabPage.jsx`.
 
 **Files:** `src/pages/SqlLabPage.jsx`
 
