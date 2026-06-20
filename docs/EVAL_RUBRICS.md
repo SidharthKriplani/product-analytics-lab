@@ -34,8 +34,8 @@ The goal: no content ships without passing Tier 1. Tier 2 failures get logged in
 
 #### SQL execution — Forensic-specific
 16. `brokenQuery` runs without error in SQLite (it must execute; the bug is wrong output, not a syntax error)
-17. `brokenQuery` returns non-zero rows (a query that returns 0 rows is a different and less instructive failure mode)
-18. `brokenQuery` output differs from solution output (if they match, the scenario is invalid)
+17. `brokenQuery` returns non-zero rows (a query that returns 0 rows is a different and less instructive failure mode). **Exception:** set `brokenQueryReturnsZeroRows: true` on the problem to explicitly mark zero-row bugs as intentional (e.g. `= NULL` vs `IS NULL` scenarios where returning 0 rows IS the bug). The audit script skips T1-17 and T1-18 for these problems.
+18. `brokenQuery` output differs from solution output (if they match, the scenario is invalid). Skipped when `brokenQueryReturnsZeroRows: true`.
 19. `brokenQuery` references the same primary tables as the solution (cross-table forensic scenarios are valid; completely unrelated tables are not)
 
 #### Determinism

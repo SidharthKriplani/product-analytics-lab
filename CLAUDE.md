@@ -147,6 +147,32 @@ npm run dev
 npm_config_cache=/tmp/npm-cache ./node_modules/.bin/vite build --outDir /tmp/dist-output
 ```
 
+### Pre-commit checks (run before every commit that touches SQL Lab)
+
+```bash
+# 1. SQL Lab audit — 0 T1 failures required before commit
+python3 scripts/audit_sql_lab.py 2>&1 | grep "T1 FAIL"
+# Must print nothing. T2 warnings are logged but don't block.
+
+# 2. Apostrophe audit — catches unescaped ' in single-quoted JS data strings
+python3 -c "
+import re, glob
+broken = []
+for fpath in sorted(glob.glob('src/**/*.js', recursive=True)):
+    for i, line in enumerate(open(fpath).readlines()):
+        if any(p in line for p in [\"q: '\", \"a: '\", \"explanation: '\", \"hint: '\"]):
+            clean = re.sub(r'\"[^\"]*\"', '\"\"', line.replace(\"\\\\\'\", 'XX'))
+            if clean.count(\"'\") % 2 != 0:
+                broken.append(f'{fpath}:{i+1}')
+                print('BROKEN:', fpath, i+1, line.strip()[:80])
+print('OK' if not broken else f'{len(broken)} broken strings — fix before committing')
+"
+
+# 3. Brace diff — catches unclosed JS object/array literals
+node -e "const f=require('fs').readFileSync('src/data/sqlLabProblems.js','utf8'); const o=(f.match(/\{/g)||[]).length, c=(f.match(/\}/g)||[]).length; console.log('Brace diff:', o-c)"
+# Must print 0
+```
+
 ### Git commit workflow (MANDATORY — direct git from repo path does not work)
 The repo is in an iCloud-synced folder. `git status`, `git add`, and `git commit` all fail with `fatal: mmap failed: Operation timed out` because iCloud evicts large working-tree files and git tries to mmap them. **Never attempt git operations from the repo path directly.**
 

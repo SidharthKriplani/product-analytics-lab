@@ -262,25 +262,14 @@ The India SQL series was motivated by the observation that DataLemur has zero In
 
 ---
 
-### 169. ⚠️ Quality — No automated SQL Lab problem validation script
+### 169. ✅ Quality — No automated SQL Lab problem validation script
 
-**Version:** Open — identified V5.41.0 session (2026-06-20)
+**Version:** Opened V5.41.0 (2026-06-20) · **Closed V5.41.0** (2026-06-20)
 **Type:** Quality infrastructure
 
-All 58 SQL Lab problems have been manually verified, but there is no automated pre-commit script that validates them. The `.0` checkValues bug (AUDITS.md #165) shipped and would have silently rejected correct answers from testers — it was caught only because we audited manually mid-session. With the problem bank growing, manual verification does not scale.
+`scripts/audit_sql_lab.py` built and run clean against all 182 problems. Covers 21 T1 checks (block commit) and 8 T2 warnings. Key findings from first run: 142 T1 failures across 7 failure categories — all fixed before commit. Notable fixes: 136 problems in two batch scripts, CTE regex for RECURSIVE CTEs with column lists, `brokenQueryReturnsZeroRows: true` exemption for `= NULL` vs `IS NULL` forensic scenarios (f04, f05), off-by-one brokenQuery redesign (f35), ORDER BY tiebreaker fix (f09). Final run: 0 T1 failures, 38 T2 warnings (isFree coverage — deferred).
 
-A comprehensive validation script (`scripts/audit_sql_lab.py`) needs to cover 21 Tier 1 checks and 8 Tier 2 warnings. Full spec in `docs/EVAL_RUBRICS.md`. Key checks that cannot be done by reading the JS file alone (require running SQLite):
-
-- Solution executes without error; row count == expectedRowCount; column names == expectedColumns
-- All checkValues rows verified against actual output (not just first two)
-- checkValues key names match actual column names
-- ORDER BY present when checkValues imply row ordering
-- Forensic brokenQuery runs, returns non-zero rows, and differs from solution
-- strftime columns are ISO 8601 TEXT
-
-**Fix:** Build `scripts/audit_sql_lab.py`. Extracts problems + datamarts via `node -e` JSON serialization, runs checks via Python `sqlite3`. Add to pre-commit checklist in CLAUDE.md alongside string audit and brace diff. Target: < 30s for 100 problems.
-
-**Priority:** High — run before any SQL Lab content ships. Build in same session as next problem batch (SQL patterns, India expansion).
+Script is now the gate before any SQL Lab content ships. Add to CLAUDE.md pre-commit checklist alongside string audit and brace diff.
 
 **Files:** `scripts/audit_sql_lab.py` (new), `docs/EVAL_RUBRICS.md`, `CLAUDE.md`
 
@@ -1195,6 +1184,17 @@ In Stat Foundations, the module subtitle appears twice: once in the yellow heade
 - Apply the confirmed pattern to all module files across all four foundation directories.
 
 **Files:** `src/components/statsFoundations/modules/`, `src/components/expFoundations/modules/`, `src/components/metricsFoundations/modules/`, `src/components/rcaFoundations/modules/`
+
+### 170. ⚠️ Content — 38 SQL Lab companies have zero free problems (isFree gate)
+
+**Version:** Open — identified V5.41.0 (2026-06-20)
+**Type:** Content coverage
+
+`audit_sql_lab.py` T2 check: 38 companies (DoorDash, Meesho, Amplitude, etc.) have no `isFree: true` problems. Non-paying users land on the SQL Lab filter and see zero accessible content for these companies. Limits discoverability before paywall decision.
+
+**Fix:** Low urgency — beta is fully unlocked (`isUnlocked()` returns true). Revisit when Stripe goes live and paywall activates. At that point, mark at least 1 problem per company as free.
+
+**Priority:** Low — deferred until paywall activation.
 
 ---
 

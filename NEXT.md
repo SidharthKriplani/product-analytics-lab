@@ -2,28 +2,27 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: 2026-06-20 (V5.41.0: expected output loading state + EVAL_RUBRICS.md created + AUDITS.md #169 opened. V5.40.1: checkValues '.0' bug fixed. V5.40.0: Swiggy datamart + 6 India SQL problems.)*
+*Last updated: 2026-06-20 (V5.41.1: SQL Lab audit 0 T1 failures — 142 fixes across 182 problems. audit_sql_lab.py complete + pre-commit checklist in CLAUDE.md. AUDITS.md #169 closed, #170 opened.)*
 
 ---
 
-## Status — V5.41.0 ready to commit + push
+## Status — V5.41.1 ready to commit + push
 
 **ACTION REQUIRED:** From Mac terminal:
 ```bash
-git clone https://github.com/SidharthKriplani/product-analytics-lab /tmp/pal-push-pal-v541
-cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/src/data/sqlLabDatamarts.js" /tmp/pal-push-pal-v541/src/data/sqlLabDatamarts.js
-cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/src/data/sqlLabProblems.js" /tmp/pal-push-pal-v541/src/data/sqlLabProblems.js
-cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/src/pages/SqlLabPage.jsx" /tmp/pal-push-pal-v541/src/pages/SqlLabPage.jsx
-cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/LINEAGE.md" /tmp/pal-push-pal-v541/LINEAGE.md
-cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/AUDITS.md" /tmp/pal-push-pal-v541/AUDITS.md
-cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/NEXT.md" /tmp/pal-push-pal-v541/NEXT.md
-cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/CLAUDE.md" /tmp/pal-push-pal-v541/CLAUDE.md
-cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/docs/EVAL_RUBRICS.md" /tmp/pal-push-pal-v541/docs/EVAL_RUBRICS.md
-cd /tmp/pal-push-pal-v541
+git clone https://github.com/SidharthKriplani/product-analytics-lab /tmp/pal-push-pal-v5411
+SRC="/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab"
+cp "$SRC/src/data/sqlLabProblems.js" /tmp/pal-push-pal-v5411/src/data/sqlLabProblems.js
+cp "$SRC/scripts/audit_sql_lab.py" /tmp/pal-push-pal-v5411/scripts/audit_sql_lab.py
+cp "$SRC/docs/EVAL_RUBRICS.md" /tmp/pal-push-pal-v5411/docs/EVAL_RUBRICS.md
+cp "$SRC/AUDITS.md" /tmp/pal-push-pal-v5411/AUDITS.md
+cp "$SRC/NEXT.md" /tmp/pal-push-pal-v5411/NEXT.md
+cp "$SRC/CLAUDE.md" /tmp/pal-push-pal-v5411/CLAUDE.md
+cd /tmp/pal-push-pal-v5411
 git config user.email "claudesubscription12@gmail.com"
 git config user.name "Avinash"
 git add -A
-git commit -m "V5.41.0: Swiggy datamart + 6 India SQL + checkValues fix + expected output loading state"
+git commit -m "V5.41.1: SQL Lab audit clean — 0 T1 failures across 182 problems; audit_sql_lab.py + EVAL_RUBRICS exception for brokenQueryReturnsZeroRows"
 git push origin main
 ```
 
@@ -31,15 +30,15 @@ git push origin main
 
 ## Active build queue
 
-**1. Build `scripts/audit_sql_lab.py`** — 21 Tier 1 automated checks + 8 Tier 2 warnings per `docs/EVAL_RUBRICS.md`. Extracts problems + datamarts via `node -e`, runs every solution and brokenQuery through Python `sqlite3`. Must pass clean before any new SQL content ships. AUDITS.md #169. Then add to pre-commit checklist in CLAUDE.md.
+**1. Delete 3 orphaned files** — `src/data/pathsData.js`, `src/utils/pathsProgress.js`, `src/pages/PathsBrowser.jsx` — unwired but on disk. Manual delete + commit.
 
-**2. Delete 3 orphaned files** — `src/data/pathsData.js`, `src/utils/pathsProgress.js`, `src/pages/PathsBrowser.jsx` — unwired but on disk. Manual delete + commit.
+**2. SQL patterns still missing from bank** — 5 unrepresented patterns from AUDITS.md #132: date spine/gap-filling, ROWS BETWEEN frame specification, PERCENT_RANK/CUME_DIST, two-valid-queries-different-results, recursive CTE. Run audit script clean before pushing. At least 1 problem per pattern.
 
-**3. SQL patterns still missing from bank** — 5 unrepresented patterns from AUDITS.md #132: date spine/gap-filling, ROWS BETWEEN frame specification, PERCENT_RANK/CUME_DIST, two-valid-queries-different-results, recursive CTE. Run audit script clean before pushing. At least 1 problem per pattern.
+**3. India SQL series expansion** — Swiggy only so far. Razorpay (fintech/UPI) is highest-value next add given audience. Target: 15-20 India problems across 3-4 companies. AUDITS.md #168. Run audit script clean before pushing.
 
-**4. India SQL series expansion** — Swiggy only so far. Razorpay (fintech/UPI) is highest-value next add given audience. Target: 15-20 India problems across 3-4 companies. AUDITS.md #168. Run audit script clean before pushing.
+**4. Dimensional modeling cases** — skeleton shipped (V5.34.0). Author 3-5 schema-critique cases tagged `data-modeling`. Lower urgency than pattern + India coverage.
 
-**5. Dimensional modeling cases** — skeleton shipped (V5.34.0). Author 3-5 schema-critique cases tagged `data-modeling`. Lower urgency than pattern + India coverage.
+**5. isFree coverage** — AUDITS.md #170. 38 companies have zero free problems. Deferred until paywall activates; revisit when Stripe goes live.
 
 ---
 
