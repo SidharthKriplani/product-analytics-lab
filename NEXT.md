@@ -2,7 +2,7 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
-*Last updated: 2026-06-20 (V5.41.0: expected output loading state in problem panel. V5.40.1: checkValues '.0' bug fixed. V5.40.0: Swiggy datamart + 6 India SQL problems.)*
+*Last updated: 2026-06-20 (V5.41.0: expected output loading state + EVAL_RUBRICS.md created + AUDITS.md #169 opened. V5.40.1: checkValues '.0' bug fixed. V5.40.0: Swiggy datamart + 6 India SQL problems.)*
 
 ---
 
@@ -17,6 +17,8 @@ cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-anal
 cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/LINEAGE.md" /tmp/pal-push-pal-v541/LINEAGE.md
 cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/AUDITS.md" /tmp/pal-push-pal-v541/AUDITS.md
 cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/NEXT.md" /tmp/pal-push-pal-v541/NEXT.md
+cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/CLAUDE.md" /tmp/pal-push-pal-v541/CLAUDE.md
+cp "/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab/docs/EVAL_RUBRICS.md" /tmp/pal-push-pal-v541/docs/EVAL_RUBRICS.md
 cd /tmp/pal-push-pal-v541
 git config user.email "claudesubscription12@gmail.com"
 git config user.name "Avinash"
@@ -29,15 +31,15 @@ git push origin main
 
 ## Active build queue
 
-**1. Delete 3 orphaned files** — `src/data/pathsData.js`, `src/utils/pathsProgress.js`, `src/pages/PathsBrowser.jsx` — unwired but on disk. Manual delete + commit.
+**1. Build `scripts/audit_sql_lab.py`** — 21 Tier 1 automated checks + 8 Tier 2 warnings per `docs/EVAL_RUBRICS.md`. Extracts problems + datamarts via `node -e`, runs every solution and brokenQuery through Python `sqlite3`. Must pass clean before any new SQL content ships. AUDITS.md #169. Then add to pre-commit checklist in CLAUDE.md.
 
-**2. Dimensional modeling cases** — skeleton shipped (V5.34.0). Author 3-5 schema-critique cases tagged `data-modeling`. Flipkart DA track references these once live.
+**2. Delete 3 orphaned files** — `src/data/pathsData.js`, `src/utils/pathsProgress.js`, `src/pages/PathsBrowser.jsx` — unwired but on disk. Manual delete + commit.
 
-**3. SQL patterns still missing from bank** — 5 unrepresented patterns from AUDITS.md #132: date spine/gap-filling, ROWS BETWEEN frame specification, PERCENT_RANK/CUME_DIST, two-valid-queries-different-results, recursive CTE. At least 1 problem per pattern needed for comprehensive coverage.
+**3. SQL patterns still missing from bank** — 5 unrepresented patterns from AUDITS.md #132: date spine/gap-filling, ROWS BETWEEN frame specification, PERCENT_RANK/CUME_DIST, two-valid-queries-different-results, recursive CTE. Run audit script clean before pushing. At least 1 problem per pattern.
 
-**4. India SQL series expansion** — Swiggy only so far. Add Zepto (quick-commerce), Razorpay/Paytm (fintech), Ola/Rapido (ride-sharing) datamarts + problems. Target: 15-20 India problems across 3-4 companies. AUDITS.md #168.
+**4. India SQL series expansion** — Swiggy only so far. Razorpay (fintech/UPI) is highest-value next add given audience. Target: 15-20 India problems across 3-4 companies. AUDITS.md #168. Run audit script clean before pushing.
 
-**5. SqlLabPage.jsx UX pass** — (a) keyboard shortcut hint visible next to Check button (currently hidden until first run); (b) problem-level attempt counter in the problem header; (c) check whether `sqlLoading` spinner blocks the schema accordion or just the editor.
+**5. Dimensional modeling cases** — skeleton shipped (V5.34.0). Author 3-5 schema-critique cases tagged `data-modeling`. Lower urgency than pattern + India coverage.
 
 ---
 

@@ -262,6 +262,30 @@ The India SQL series was motivated by the observation that DataLemur has zero In
 
 ---
 
+### 169. ⚠️ Quality — No automated SQL Lab problem validation script
+
+**Version:** Open — identified V5.41.0 session (2026-06-20)
+**Type:** Quality infrastructure
+
+All 58 SQL Lab problems have been manually verified, but there is no automated pre-commit script that validates them. The `.0` checkValues bug (AUDITS.md #165) shipped and would have silently rejected correct answers from testers — it was caught only because we audited manually mid-session. With the problem bank growing, manual verification does not scale.
+
+A comprehensive validation script (`scripts/audit_sql_lab.py`) needs to cover 21 Tier 1 checks and 8 Tier 2 warnings. Full spec in `docs/EVAL_RUBRICS.md`. Key checks that cannot be done by reading the JS file alone (require running SQLite):
+
+- Solution executes without error; row count == expectedRowCount; column names == expectedColumns
+- All checkValues rows verified against actual output (not just first two)
+- checkValues key names match actual column names
+- ORDER BY present when checkValues imply row ordering
+- Forensic brokenQuery runs, returns non-zero rows, and differs from solution
+- strftime columns are ISO 8601 TEXT
+
+**Fix:** Build `scripts/audit_sql_lab.py`. Extracts problems + datamarts via `node -e` JSON serialization, runs checks via Python `sqlite3`. Add to pre-commit checklist in CLAUDE.md alongside string audit and brace diff. Target: < 30s for 100 problems.
+
+**Priority:** High — run before any SQL Lab content ships. Build in same session as next problem batch (SQL patterns, India expansion).
+
+**Files:** `scripts/audit_sql_lab.py` (new), `docs/EVAL_RUBRICS.md`, `CLAUDE.md`
+
+---
+
 ## Part XXXVII — V5.23.0 beta feedback: Universe View + mobile (2026-06-09)
 
 ### 161. ✅ UX — Universe View has no entry point for beginners

@@ -239,6 +239,7 @@ PAL's 1M token context limit gets hit when large source files + spine files + co
 | `METRICS.md` | Tracked events, user funnel, success metrics, localStorage keys. |
 | `docs/CONTENT_QUALITY_BAR.md` | 8-dimension standard every case must pass before shipping. |
 | `docs/SCENARIO_BANK_TAXONOMY.md` | 15 scenario families for the Review Room. |
+| `docs/EVAL_RUBRICS.md` | Per-component quality rubrics — Tier 1 (block commit) + Tier 2 (warn) checks. SQL Lab fully specified; other components pending. Pre-commit script status tracked here. |
 | `ROLLOUT.md` | Beta rollout plan — batches, self-vet checklists, tester briefs, feedback tracking. Operational only; not a backlog. |
 | `SQL_LAB_PLAN.md` | SQL Lab build history — problem count decisions, difficulty rubric, datamart architecture, session log. |
 | `CROSS_LAB.md` | Cross-lab ideas — patterns from MSL/GAL that PAL can borrow, and PAL ideas that belong in sibling repos. |
