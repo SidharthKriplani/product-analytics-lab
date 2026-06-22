@@ -1249,4 +1249,29 @@ All 182 SQL Lab problems migrated from flat `hints: string[]` to structured `hin
 
 ---
 
+## Part XXXVII — V5.44.0 SQL Lab Content Rebuild (2026-06-23)
+
+### 175. ✅ Content gate established + full bank rebuilt to clear it
+
+**Version:** V5.44.0 (2026-06-23)
+**Type:** Content Integrity / Build safety / Eval
+
+Built a content-quality gate (`scripts/sql_content_scan.mjs`, exits non-zero on GATE failures) above the mechanical audit, froze `docs/SQL-CONTENT-STANDARD.md`, and rebuilt all 182 problems to clear both gates (0 failures). Authoring was done from executed output via new `scripts/run_sql.py`. The LLM judge had been blind to this class — it rated 181/182 prompts "clear," including the defective `sql-e86`. Both gates now run clean; wire the content scanner into pre-commit alongside `audit_sql_lab.py`.
+
+### 176. ✅ Solution bug — meesho-04 review fan-out inflated GMV 4×
+
+**Version:** Fixed V5.44.0
+**Type:** Content Integrity (claim-data alignment) / SQL correctness
+
+`sql-meesho-04` joined transactions and reviews in one query (`LEFT JOIN transactions … LEFT JOIN reviews`), fanning out so `SUM(sale_price)` multiplied by review count — TechVault read ₹5,948 vs the true ₹1,487 (×4, four reviews). It passed Tier-1 only because `checkValues` was `[{name:'TechVault'}]` with no numeric value. **Fix:** solution rewritten to pre-aggregate transactions and reviews in separate subqueries; `checkValues` strengthened to lock GMV (1487) + rank, so a regression now fails the mechanical gate. **Lesson:** every checkValue should pin at least one computed numeric, not just a label.
+
+### 177. ✅ Four shipped debriefs carried false numeric claims (found by execution)
+
+**Version:** Fixed V5.44.0
+**Type:** Content staleness / claim-data alignment
+
+Running solutions against the real datamarts exposed debrief claims the data did not support: `sql-sw01` ("forgetting the status filter produces wrong numbers" — it produces identical numbers; AVG skips NULL delivered_at), `sql-h53` (courier 3 "delivered only 3 / 60%" — actually 4/5, 80%), `sql-h51` (blackout "Feb 10–14" — actually Feb 9–14), `sql-meesho-06` ("Electronics has a refund" — the only refund is on a delisted listing the is_active filter correctly excludes; 0% is right). All corrected. **Lesson:** debrief numeric/row claims must be authored from query output, not prose intuition — now standard practice via run_sql.py.
+
+---
+
 *Parts XVI–XXIX fully documented. Parts I–XXI archived in AUDITS_ARCHIVE.md.*

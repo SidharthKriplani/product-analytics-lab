@@ -15,6 +15,11 @@ dist-ssr
 .env.*
 !.env.example
 
+# Transient content-rebuild artifacts (patch inputs + per-batch backups)
+scripts/_patch_*.json
+scripts/_fix7_filler.mjs
+src/data/*.bak-*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -83,15 +83,21 @@ Any tag not in this list should be flagged in Tier 2 review.
 
 ---
 
-### Pre-commit script (to be built)
+### Pre-commit scripts (BUILT — run both clean before any SQL Lab commit)
 
-Target: `scripts/audit_sql_lab.py`
-- Extracts all problems and datamarts from JS files via `node -e` JSON serialization
-- Runs every solution and brokenQuery through Python's `sqlite3` module
-- Reports Tier 1 failures (exit code 1, block commit) and Tier 2 warnings (exit code 0, log to stdout)
-- Should run in < 30 seconds for 100 problems
+**1. Mechanical gate — `scripts/audit_sql_lab.py`** (Tier 1 + Tier 2 above)
+- Extracts problems + datamarts via node, runs every solution and brokenQuery through Python `sqlite3` (with a sql.js numeric-format mimic), checks row counts / columns / checkValues / determinism.
+- Exit 1 on any Tier 1 failure (block commit); Tier 2 warnings to stdout.
 
-**Status:** Not yet built. AUDITS.md #169 (open). Add to NEXT.md when SQL pattern batch ships — run it clean before pushing.
+**2. Content-quality gate (layer 2) — `scripts/sql_content_scan.mjs`** (added 2026-06-23)
+- Deterministic checks the mechanical gate is blind to (the `e86` class). Blocking GATEs: prompt names the technique (GATE2), filler sentence (GATE5), hint hands the solution on the first/only step (GATE6), debrief lacks the wrong-answer-that-runs + catch (GATE7). Non-blocking: missing interviewer follow-up, thin debrief.
+- Exit 1 if any GATE flag remains. `--csv` emits the per-problem ledger (`scripts/sql_content_scan.csv`).
+- Forensic problems are exempt from GATE2/GATE6 (the bug/query is the point).
+
+**3. Authoring/verification helper — `scripts/run_sql.py`**
+- Runs any solution or candidate wrong-query against a datamart (`--problem`, `--diverge`). Used to author debriefs from REAL output and confirm each cited wrong-answer actually runs and diverges. Not a gate, but the reason debrief data-claims are trustworthy.
+
+**Content-quality bar:** see `docs/SQL-CONTENT-STANDARD.md` (frozen standard + gold exemplars). As of 2026-06-23 the full 182-problem bank passes both gates with 0 failures.
 
 ---
 

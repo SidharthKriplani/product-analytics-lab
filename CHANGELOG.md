@@ -4,6 +4,30 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.44.0] — 2026-06-23 [SQL LAB FULL CONTENT REBUILD — 0 CONTENT-GATE FAILURES]
+
+### Content-quality rebuild of all 182 SQL Lab problems against a frozen standard
+
+Established a content-quality layer above the mechanical Tier-1 audit and rebuilt the bank to clear it. The mechanical gate verifies a problem *runs and matches*; the new content gate verifies it is a *good problem* — the dimension the LLM judge was blind to (it had rated 181/182 prompts "clear," including the broken `sql-e86`).
+
+**New standard + tooling (all under `docs/` and `scripts/`):**
+- `docs/SQL-CONTENT-STANDARD.md` — frozen binary checklist (3 hard gates), immutability rules, Forensic fork, stop rule, and 5 gold exemplars (one per tier).
+- `scripts/sql_content_scan.mjs` — deterministic content gate (GATE2 names-technique, GATE5 filler, GATE6 hint-hands-solution, GATE7 weak-debrief); exits non-zero on any GATE failure for pre-commit use; `--csv` writes the ledger.
+- `scripts/run_sql.py` — runs any solution / candidate wrong-query against a datamart (reusing the audit's builder + sql.js numeric mimic) so debriefs are authored from REAL output and every wrong-answer is verified to run and diverge.
+- `scripts/apply_patch.mjs` — single-writer integrator (string/append/raw/hintStep modes) applying edits by exact escaped replacement, no re-serialization.
+
+**Content changes (~45 problems touched, solutions immutable except the one bug):**
+- 8 prompts de-jargoned — technique no longer named (e.g. `sql-e86`, `m16/m29/m32/m43/m57/m76`, `meesho-10`); 2 prompt-vs-checker column mismatches fixed (`m29`, `m43`).
+- 96 filler "Write a SQL query…" sentences removed (89 by safety-checked script, 7 hand-folded where they carried the grain).
+- 16 debriefs rebuilt to the wrong-answer-that-runs + sanity-check + follow-up pattern, authored from executed data (5 Swiggy, 6 Meesho incl. the bug, 5 Hard).
+- 13 hints converted from full-solution dumps to scaffolds; 27 problem-specific interviewer follow-ups added.
+
+**Bugs / false claims fixed (found by execution):**
+- `meesho-04` — double `LEFT JOIN transactions … LEFT JOIN reviews` fanned out, inflating GMV 4× (TechVault ₹5,948 vs true ₹1,487). Solution rewritten to pre-aggregate; checkValues strengthened from `{name}` to lock the figure + ranking so it cannot recur.
+- False debrief claims corrected in `sql-sw01` (status filter does NOT change the AVG — NULLs auto-excluded), `h53` (courier delivered 4/5 not 3), `h51` (gap is Feb 9–14 not 10–14), `meesho-06` (the lone refund is on a delisted listing, so 0% is correct for active catalog).
+
+**Result:** mechanical Tier-1 = 0 failures; content gate = 0 failures across all 182. Files: `src/data/sqlLabProblems.js`, `docs/SQL-CONTENT-STANDARD.md`, `docs/EVAL_RUBRICS.md`, `scripts/{sql_content_scan.mjs,run_sql.py,apply_patch.mjs,strip_filler.mjs}`, `.gitignore`. Not pushed — git pipeline blocked (exposed PAT + two-working-copies).
+
 ## [5.42.0] — 2026-06-21 [HINTSTEPS MIGRATION + FORENSIC REPAIR + ALSOASKEDAT UI]
 
 ### hintSteps LLM migration (182 problems), forensic brokenQuery repair, company filter fix, alsoAskedAt UI
