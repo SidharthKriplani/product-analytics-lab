@@ -21,7 +21,7 @@ The job is to build a good product, not to make every session feel productive.
 
 ## What this project is (5 lines)
 
-**Product Analytics Lab (PAL)** is a browser-based interview prep platform for product analysts and PMs. Users practice judgment calls — not recall — across 17 rooms covering stats, experimentation, RCA, metrics, SQL/Python, product design, prioritization, behavioral, estimation, analytics instrumentation, and A/B foundations. React + Vite SPA, localStorage + optional Supabase auth. Deployed on Vercel. Repo: `github.com/SidharthKriplani/experimentation-systems-lab`. Current version: V4.46.0.
+**Product Analytics Lab (PAL)** is a browser-based interview prep platform for product analysts and PMs. Users practice judgment calls — not recall — across 17 rooms covering stats, experimentation, RCA, metrics, SQL/Python, product design, prioritization, behavioral, estimation, analytics instrumentation, and A/B foundations. React + Vite SPA, localStorage + optional Supabase auth. Deployed on Vercel. Repo: `github.com/SidharthKriplani/product-analytics-lab`. Current version: V4.46.0.
 
 ---
 
@@ -183,7 +183,7 @@ git clone https://github.com/SidharthKriplani/product-analytics-lab /tmp/pal-pus
 # Before copying files — check for any files on disk not in HEAD (missed from prior sessions):
 # comm -23 <(find src -type f | sort) <(git ls-tree -r HEAD --name-only | sort)
 
-SRC="/Users/ASUS/Documents/Professional/GitHub/upskill platforms (4)/product-analytics-lab"
+SRC="/Users/ASUS/Documents/Professional/BreakLabs/labs/product-analytics-lab"
 # cp each changed file: cp "$SRC/src/..." /tmp/pal-push/src/...
 
 cd /tmp/pal-push
