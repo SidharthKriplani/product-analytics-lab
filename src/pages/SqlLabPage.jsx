@@ -1308,7 +1308,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
               spellCheck={false}
               placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Ctrl+Enter to run' : '-- Write your SQL here\n-- Ctrl+Enter to run'}
               style={{
-                width: '100%', minHeight: 'calc(100vh - 180px)', resize: 'vertical', fontFamily: 'monospace',
+                width: '100%', height: '46vh', minHeight: '200px', resize: 'vertical', fontFamily: 'monospace',
                 fontSize: '0.82rem', lineHeight: 1.6, padding: '0.75rem',
                 background: 'var(--surface-2)', border: '1px solid rgba(20,184,166,0.3)',
                 borderRadius: '6px', color: 'var(--text)', outline: 'none', boxSizing: 'border-box',

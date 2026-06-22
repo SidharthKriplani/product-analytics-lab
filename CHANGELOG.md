@@ -4,6 +4,14 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.45.0] — 2026-06-23 [SQL LAB EDITOR HALF-HEIGHT]
+
+### Editor pane capped to ~half the viewport so results show without scrolling
+
+`src/pages/SqlLabPage.jsx` — the query textarea was `minHeight: 'calc(100vh - 180px)'`, nearly full-height, which pushed the Run/Check results panel below the fold (you had to scroll to see output). Changed to `height: '46vh'` with `minHeight: '200px'` (kept `resize: 'vertical'`). The editor now occupies roughly the top half of the right panel and query output renders in the lower half. Single-line CSS change; build verified (843 modules transformed clean).
+
+---
+
 ## [5.44.0] — 2026-06-23 [SQL LAB FULL CONTENT REBUILD — 0 CONTENT-GATE FAILURES]
 
 ### Content-quality rebuild of all 182 SQL Lab problems against a frozen standard
