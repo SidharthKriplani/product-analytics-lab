@@ -1,3 +1,5 @@
+import { BrandMark } from '../shared/BrandMark.jsx';
+
 export function Footer({ onNavigate }) {
   return (
     <footer style={{
@@ -14,9 +16,10 @@ export function Footer({ onNavigate }) {
         flexWrap: 'wrap',
         gap: '0.75rem',
       }}>
-        <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>
-          Product Analytics Lab — V4.17 · 150+ Playable Items
-        </span>
+        {/* Slot 6 — Footer brand: full lockup (break⌇labs · Product Analytics, D-19).
+            The master wordmark carries the "part of BreakLabs" family tie inherently, so the
+            full lockup is used instead of wordmark + redundant "part of BreakLabs" text. */}
+        <BrandMark variant='full' descriptor='Product Analytics' size={15} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>
             Works offline · Private by design · No account required

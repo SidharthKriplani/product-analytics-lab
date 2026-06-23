@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom';
+import { BrandMark } from '../components/shared/BrandMark.jsx';
 
 // Ghost data snippets — analytics content hinting at what waits inside
 const GHOSTS = [
@@ -76,25 +77,8 @@ export function Home({ onNavigate, onShowAuth }) {
           className="pal-landing-el"
           style={{ animationDelay: '0ms', marginBottom: '1.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}
         >
-          <div style={{
-            width: 22, height: 22, flexShrink: 0,
-            background: 'var(--gradient-accent)',
-            borderRadius: 6,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(36,87,214,0.3)',
-          }}>
-            <svg width="13" height="13" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-              <g stroke="#ffffff" strokeLinecap="round" strokeWidth="1.6">
-                <line x1="4" y1="13" x2="22" y2="13"/>
-                <line x1="4" y1="8"  x2="4"  y2="18"/>
-                <line x1="22" y1="8" x2="22" y2="18"/>
-              </g>
-              <circle cx="13" cy="13" r="2.2" fill="#ffffff"/>
-            </svg>
-          </div>
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-            Product Analytics Lab
-          </span>
+          {/* Slot 4 — signed-out hero, brand-forward (BrandMark wordmark, D-19) */}
+          <BrandMark variant='wordmark' size={22} />
         </div>
 
         {/* Headline */}

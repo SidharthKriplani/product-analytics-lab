@@ -1,147 +1,276 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Icon } from '../shared/Icon.jsx';
+import { BrandMark } from '../shared/BrandMark.jsx';
 import { signOut } from '../../utils/auth.js';
 
-const ROOM_SUBGROUPS = [
+// ─── Four-frame IA (HQ DESIGN-STANDARD "THE SIDEBAR STANDARD" + COMPETENCE-MODEL DEC-15) ───
+// KNOW · DO · BUILD · JUDGE are the frames; LIVE is a PAL section; EXTRAS is a quiet
+// bottom catch-all. Domains survive only as sub-groups inside KNOW and JUDGE.
+// See docs/NAV-REFRAME-SPEC.md for the full mapping + rationale.
+const NAV_FRAMES = [
   {
-    id: 'experiments',
-    label: 'Experiments',
-    items: [
-      { id: 'stats',         label: 'Stats' },
-      { id: 'design',        label: 'A/B Design' },
-      { id: 'browser',       label: 'A/B Review' },
-      { id: 'spot-the-flaw', label: 'Spot the Flaw' },
-      { id: 'ab-interpreter', label: 'A/B Interpreter' },
+    id: 'know', label: 'KNOW', icon: 'book-open',
+    subs: [
+      {
+        id: 'foundations', label: 'Foundations',
+        items: [
+          { id: 'stat-foundations',    label: 'Stat Foundations' },
+          { id: 'metrics-foundations', label: 'Metrics Foundations' },
+          { id: 'rca-foundations',     label: 'RCA Foundations' },
+          { id: 'exp-foundations',     label: 'A/B Foundations' },
+        ],
+      },
+      {
+        id: 'learn', label: 'Learn',
+        items: [
+          { id: 'blog',         label: 'Deep Dives' },
+          { id: 'playbook',     label: 'Frameworks' },
+          { id: 'interview-qa', label: 'Interview Q&A' },
+          { id: 'cheatsheet',   label: 'Prep Cheatsheet' },
+          { id: 'failures',     label: 'Analytics Failures' },
+          { id: 'trainer',      label: 'MCQ Quiz' },
+        ],
+      },
     ],
   },
   {
-    id: 'analytics',
-    label: 'Analytics',
+    id: 'do', label: 'DO', icon: 'terminal',
     items: [
-      { id: 'metrics',          label: 'Metrics' },
-      { id: 'rca',              label: 'RCA' },
-      { id: 'cases',            label: 'Analytics Cases' },
-      { id: 'growth-analytics', label: 'Growth Analytics' },
-      { id: 'bi',               label: 'BI & Reporting' },
-      { id: 'instrumentation',  label: 'Instrumentation' },
-      { id: 'full-loop',        label: 'Full Loop' },
-      { id: 'sql-lab',          label: 'SQL Lab' },
+      { id: 'sql-lab',              label: 'SQL Lab' },
+      { id: 'python-lab',           label: 'Python Lab' },
+      { id: 'dimensional-modeling', label: 'Dimensional Modeling' },
     ],
   },
   {
-    id: 'product',
-    label: 'Product',
+    id: 'build', label: 'BUILD', icon: 'hammer',
     items: [
-      { id: 'product-design',  label: 'Product Design' },
-      { id: 'prioritization',  label: 'Prioritization' },
-      { id: 'behavioral',      label: 'Behavioral' },
-      { id: 'estimation',      label: 'Estimation' },
+      { id: 'full-loop',       label: 'Full Loop' },
+      { id: 'instrumentation', label: 'Instrumentation' },
+    ],
+  },
+  {
+    id: 'judge', label: 'JUDGE', icon: 'scale',
+    subs: [
+      {
+        id: 'experiments', label: 'Experiments',
+        items: [
+          { id: 'stats',          label: 'Stats' },
+          { id: 'design',         label: 'A/B Design' },
+          { id: 'browser',        label: 'A/B Review' },
+          { id: 'ab-interpreter', label: 'A/B Interpreter' },
+          { id: 'spot-the-flaw',  label: 'Spot the Flaw' },
+        ],
+      },
+      {
+        id: 'analytics', label: 'Analytics',
+        items: [
+          { id: 'metrics',          label: 'Metrics' },
+          { id: 'rca',              label: 'RCA' },
+          { id: 'cases',            label: 'Analytics Cases' },
+          { id: 'growth-analytics', label: 'Growth Analytics' },
+          { id: 'bi',               label: 'BI & Reporting' },
+        ],
+      },
+      {
+        id: 'product', label: 'Product',
+        items: [
+          { id: 'product-design', label: 'Product Design' },
+          { id: 'prioritization', label: 'Prioritization' },
+          { id: 'estimation',     label: 'Estimation' },
+        ],
+      },
+    ],
+    items: [
+      { id: 'challenges',     label: 'Challenges' },
+      { id: 'company-tracks', label: 'Company Tracks' },
+    ],
+  },
+  {
+    id: 'live', label: 'LIVE', icon: 'mic',
+    items: [
+      { id: 'simulator',   label: 'Mock Interview' },
+      { id: 'defense-doc', label: 'Defense Strategy' },
     ],
   },
 ];
 
-const FLAT_GROUPS = [
-  {
-    label: 'DRILLS',
-    items: [
-      { id: 'challenges', label: 'Challenges',          icon: 'zap' },
-      { id: 'simulator',  label: 'Mock Interview',      icon: 'mic' },
-    ],
-  },
-  {
-    label: 'LEARN',
-    items: [
-      { id: 'blog',         label: 'Deep Dives',        icon: 'book-open' },
-      { id: 'playbook',     label: 'Frameworks',        icon: 'layout' },
-      { id: 'interview-qa', label: 'Interview Q&A',     icon: 'message-square' },
-      { id: 'failures',     label: 'Analytics Failures', icon: 'alert-triangle' },
-    ],
-  },
-  {
-    label: 'TOOLS',
-    items: [
-      { id: 'trainer',        label: 'MCQ Quiz',         icon: 'target' },
-      { id: 'company-tracks', label: 'Company Tracks',   icon: 'building-2' },
-      { id: 'defense-doc',    label: 'Defense Strategy', icon: 'shield' },
-      { id: 'bookmarks',      label: 'Saved',            icon: 'bookmark' },
-      { id: 'cheatsheet',     label: 'Prep Cheatsheet',  icon: 'file-text' },
-      { id: 'python-lab',           label: 'Python Lab',          icon: 'code-2' },
-      { id: 'dimensional-modeling', label: 'Dimensional Modeling', icon: 'layers' },
-    ],
-  },
-  {
-    label: 'TRACK',
-    items: [
-      { id: 'profile',  label: 'Profile',  icon: 'user' },
-      { id: 'progress', label: 'Progress', icon: 'bar-chart' },
-      { id: 'plans',    label: 'Plans',    icon: 'credit-card' },
-    ],
-  },
+// EXTRAS — quiet bottom catch-all (not a frame). Parked / leftover surfaces.
+const EXTRAS_ITEMS = [
+  { id: 'behavioral', label: 'Behavioral' },
+  { id: 'bookmarks',  label: 'Saved' },
+  { id: 'study',      label: 'Study Room' },
 ];
 
-function getIsActive(itemId, currentPage) {
-  return currentPage === itemId
-    || (itemId === 'stats'           && currentPage === 'stats-runner')
-    || (itemId === 'metrics'         && currentPage === 'metrics-runner')
-    || (itemId === 'design'          && currentPage === 'design-runner')
-    || (itemId === 'browser'         && currentPage === 'runner')
-    || (itemId === 'rca'             && currentPage === 'rca-runner')
-    || (itemId === 'cases'           && currentPage === 'cases-runner')
-    || (itemId === 'full-loop'       && currentPage === 'full-loop-runner')
-    || (itemId === 'product-design'  && currentPage === 'product-design-runner')
-    || (itemId === 'prioritization'  && currentPage === 'prioritization-runner')
-    || (itemId === 'behavioral'      && currentPage === 'behavioral-runner')
-    || (itemId === 'estimation'      && currentPage === 'estimation-runner')
-    || (itemId === 'stat-foundations' && currentPage === 'stat-foundations-runner')
-    || (itemId === 'growth-analytics' && currentPage === 'growth-analytics-runner')
-    || (itemId === 'simulator'       && currentPage === 'simulator')
-    || (itemId === 'ab-interpreter'  && currentPage === 'ab-interpreter')
-    || (itemId === 'search'          && currentPage === 'search')
-    || (itemId === 'bookmarks'       && currentPage === 'bookmarks')
-    || (itemId === 'consult'         && currentPage === 'consult')
-    || (itemId === 'trainer'         && currentPage === 'trainer')
-    || (itemId === 'interview-qa'    && currentPage === 'interview-qa')
-    || (itemId === 'failures'        && currentPage === 'failures')
-    || (itemId === 'company-tracks'  && currentPage === 'company-tracks')
-    || (itemId === 'challenges'      && (currentPage === 'challenges' || currentPage === 'challenges-runner'))
-    || (itemId === 'bi'              && (currentPage === 'bi' || currentPage === 'bi-runner'))
-    || (itemId === 'spot-the-flaw'   && (currentPage === 'spot-the-flaw' || currentPage === 'stf-runner'))
-    || (itemId === 'take-home'       && (currentPage === 'take-home' || currentPage === 'takehome-runner'))
-    || (itemId === 'defense-doc'     && currentPage === 'defense-doc')
-    || (itemId === 'instrumentation' && (currentPage === 'instrumentation' || currentPage === 'instrumentation-runner'))
-    || (itemId === 'foundations'     && currentPage === 'foundations')
-    || (itemId === 'metrics-foundations' && (currentPage === 'metrics-foundations' || currentPage === 'metrics-foundations-runner'))
-    || (itemId === 'rca-foundations'     && (currentPage === 'rca-foundations' || currentPage === 'rca-foundations-runner'))
-    || (itemId === 'exp-foundations'     && (currentPage === 'exp-foundations' || currentPage === 'exp-foundations-runner'))
-    || (itemId === 'sql-lab'             && currentPage === 'sql-lab')
-    || (itemId === 'cheatsheet'          && currentPage === 'cheatsheet')
-    || (itemId === 'python-lab'          && currentPage === 'python-lab')
-    || (itemId === 'study'               && currentPage === 'study')
-    || (itemId === 'dimensional-modeling' && currentPage === 'dimensional-modeling');
+// ─── Derived active-state (replaces the old 40-line getIsActive ||-chain) ───
+// A runner sub-page maps back to its base tab id. Most strip the '-runner' suffix;
+// a few don't and need an explicit exception.
+const RUNNER_EXCEPTIONS = {
+  'runner': 'browser',
+  'stf-runner': 'spot-the-flaw',
+  'takehome-runner': 'take-home',
+};
+
+function pageToTab(page) {
+  if (!page) return page;
+  if (RUNNER_EXCEPTIONS[page]) return RUNNER_EXCEPTIONS[page];
+  if (page.endsWith('-runner')) return page.slice(0, -7);
+  return page;
 }
 
-function getActiveSubGroup(currentPage) {
-  for (const sg of ROOM_SUBGROUPS) {
-    if (sg.items.some(item => getIsActive(item.id, currentPage))) return sg.id;
+// Resolve a tab id to its { frame, sub } home by scanning NAV_FRAMES.
+function findFrameAndSub(tab) {
+  for (const f of NAV_FRAMES) {
+    if (f.subs) {
+      for (const s of f.subs) {
+        if (s.items.some(i => i.id === tab)) return { frame: f.id, sub: s.id };
+      }
+    }
+    if (f.items && f.items.some(i => i.id === tab)) return { frame: f.id, sub: null };
   }
-  return null;
+  return { frame: null, sub: null };
+}
+
+// ─── Module-scope components (hoisted so the accordion animates instead of snapping) ───
+function Collapsible({ open, children }) {
+  const ref = useRef(null);
+  const [height, setHeight] = useState(open ? 'auto' : '0px');
+  const mounted = useRef(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (!mounted.current) { mounted.current = true; return; } // no animation on first mount
+    let r1, r2;
+    const onEnd = e => {
+      if (e.target === el && e.propertyName === 'height') {
+        if (open) setHeight('auto'); // snap to auto so nested toggles can grow freely
+        el.removeEventListener('transitionend', onEnd);
+      }
+    };
+    if (open) {
+      setHeight(el.scrollHeight + 'px'); // 0 → measured
+      el.addEventListener('transitionend', onEnd);
+    } else {
+      setHeight(el.scrollHeight + 'px'); // auto → px → 0
+      r1 = requestAnimationFrame(() => { r2 = requestAnimationFrame(() => setHeight('0px')); });
+    }
+    return () => {
+      el.removeEventListener('transitionend', onEnd);
+      if (r1) cancelAnimationFrame(r1);
+      if (r2) cancelAnimationFrame(r2);
+    };
+  }, [open]);
+  return (
+    <div ref={ref} className="pal-collapsible" style={{ height, overflow: 'hidden', transition: 'height 0.30s cubic-bezier(0.33,1,0.68,1)', willChange: 'height' }}>
+      {children}
+    </div>
+  );
+}
+
+function Chevron({ open }) {
+  return (
+    <span style={{
+      fontSize: '0.68rem', opacity: 0.4, flexShrink: 0, display: 'inline-block',
+      transition: 'transform var(--transition)', transform: open ? 'rotate(0deg)' : 'rotate(-90deg)',
+    }}>▾</span>
+  );
+}
+
+function SectionLabel({ label }) {
+  return (
+    <div style={{
+      fontSize: '0.595rem', fontWeight: 700, letterSpacing: '0.11em',
+      color: 'var(--text-muted)', opacity: 0.48,
+      padding: '0.65rem 0.6rem 0.2rem',
+      textTransform: 'uppercase', userSelect: 'none',
+    }}>
+      {label}
+    </div>
+  );
+}
+
+function NavItem({ id, label, icon, indent, currentPage, onNav }) {
+  const isActive = pageToTab(currentPage) === id;
+  return (
+    <button
+      onClick={() => onNav(id)}
+      aria-current={isActive ? 'page' : undefined}
+      className={isActive ? (indent ? 'sidebar-nav-active-sub' : 'sidebar-nav-active') : ''}
+      style={{
+        display: 'flex', alignItems: 'center', gap: '0.45rem',
+        width: '100%', textAlign: 'left',
+        padding: indent ? '0.3rem 0.65rem 0.3rem 1.1rem' : '0.34rem 0.65rem',
+        borderRadius: 'var(--radius-sm)',
+        border: 'none',
+        background: isActive ? undefined : 'transparent',
+        color: isActive ? undefined : 'var(--text-muted)',
+        fontWeight: isActive ? undefined : 400,
+        fontSize: indent ? '0.795rem' : '0.825rem',
+        cursor: 'pointer',
+        transition: 'background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast)',
+        lineHeight: 1.5,
+        letterSpacing: '-0.005em',
+      }}
+      onMouseEnter={e => {
+        if (!isActive) {
+          e.currentTarget.style.background = 'var(--surface-2)';
+          e.currentTarget.style.color = 'var(--text-secondary)';
+        }
+      }}
+      onMouseLeave={e => {
+        if (!isActive) {
+          e.currentTarget.style.background = 'transparent';
+          e.currentTarget.style.color = 'var(--text-muted)';
+        }
+      }}
+    >
+      {icon && <Icon name={icon} size={13} color="currentColor" style={{ opacity: isActive ? 1 : 0.7, flexShrink: 0 }} />}
+      <span>{label}</span>
+    </button>
+  );
+}
+
+// Accordion header for a frame (or a sub-group). One open per level.
+function GroupHeader({ icon, label, open, hasActive, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-expanded={open}
+      style={{
+        display: 'flex', alignItems: 'center', gap: '0.45rem',
+        width: '100%', textAlign: 'left',
+        padding: '0.34rem 0.65rem',
+        borderRadius: 'var(--radius-sm)',
+        border: 'none', background: 'none',
+        color: (open || hasActive) ? 'var(--text-secondary)' : 'var(--text-muted)',
+        fontWeight: (open || hasActive) ? 600 : 500,
+        fontSize: '0.825rem',
+        letterSpacing: '-0.005em',
+        cursor: 'pointer',
+        transition: 'background var(--transition-fast), color var(--transition-fast)',
+        opacity: (open || hasActive) ? 1 : 0.72,
+      }}
+      onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.opacity = '1'; }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = (open || hasActive) ? 'var(--text-secondary)' : 'var(--text-muted)'; e.currentTarget.style.opacity = (open || hasActive) ? '1' : '0.72'; }}
+    >
+      {icon && <Icon name={icon} size={13} color={hasActive ? 'var(--accent)' : 'currentColor'} style={{ opacity: (open || hasActive) ? 1 : 0.62, flexShrink: 0 }} />}
+      <span style={{ flex: 1 }}>{label}</span>
+      <Chevron open={open} />
+    </button>
+  );
 }
 
 export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onToggleTheme, isTerminal, isOpen, onClose, user, onShowAuth }) {
-  const [expandedSubGroups, setExpandedSubGroups] = useState(() => {
-    const active = getActiveSubGroup(currentPage);
-    return new Set(active ? [active] : ['experiments']);
-  });
+  const initial = findFrameAndSub(pageToTab(currentPage));
+  const [openFrame, setOpenFrame] = useState(initial.frame || 'know');
+  const [openSub, setOpenSub] = useState(initial.sub);
 
+  // Follow navigation: opening a tab auto-expands its frame (and sub-group),
+  // still respecting one-open-per-level.
   useEffect(() => {
-    const active = getActiveSubGroup(currentPage);
-    if (active) {
-      setExpandedSubGroups(prev => {
-        if (prev.has(active)) return prev;
-        const next = new Set(prev);
-        next.add(active);
-        return next;
-      });
+    const { frame, sub } = findFrameAndSub(pageToTab(currentPage));
+    if (frame) {
+      setOpenFrame(frame);
+      if (sub) setOpenSub(sub);
     }
   }, [currentPage]);
 
@@ -150,80 +279,19 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
     onClose();
   }
 
-  function toggleSubGroup(id) {
-    setExpandedSubGroups(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  function toggleFrame(id) {
+    setOpenFrame(prev => (prev === id ? null : id));
+  }
+  function toggleSub(id) {
+    setOpenSub(prev => (prev === id ? null : id));
   }
 
-  function NavItem({ id, indent }) {
-    const isActive = getIsActive(id, currentPage);
-    const allItems = [
-      ...ROOM_SUBGROUPS.flatMap(sg => sg.items),
-      { id: 'stat-foundations',      label: 'Stat Foundations' },
-      { id: 'metrics-foundations',   label: 'Metrics Foundations' },
-      { id: 'rca-foundations',       label: 'RCA Foundations' },
-      { id: 'exp-foundations',       label: 'A/B Foundations' },
-      { id: 'foundations',           label: 'Theory Hub' },
-      { id: 'study',                 label: 'Study Room',       icon: 'layers' },
-      ...FLAT_GROUPS.flatMap(g => g.items),
-    ];
-    const item = allItems.find(i => i.id === id);
-    const label = item?.label || id;
-    const icon = item?.icon;
+  const activeTab = pageToTab(currentPage);
 
-    return (
-      <button
-        onClick={() => handleNav(id)}
-        className={isActive ? (indent ? 'sidebar-nav-active-sub' : 'sidebar-nav-active') : ''}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '0.45rem',
-          width: '100%', textAlign: 'left',
-          padding: indent ? '0.3rem 0.65rem 0.3rem 1.1rem' : '0.34rem 0.65rem',
-          borderRadius: 'var(--radius-sm)',
-          border: 'none',
-          background: isActive ? undefined : 'transparent',
-          color: isActive ? undefined : 'var(--text-muted)',
-          fontWeight: isActive ? undefined : 400,
-          fontSize: indent ? '0.795rem' : '0.825rem',
-          cursor: 'pointer',
-          transition: 'background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast)',
-          lineHeight: 1.5,
-          letterSpacing: '-0.005em',
-        }}
-        onMouseEnter={e => {
-          if (!isActive) {
-            e.currentTarget.style.background = 'var(--surface-2)';
-            e.currentTarget.style.color = 'var(--text-secondary)';
-          }
-        }}
-        onMouseLeave={e => {
-          if (!isActive) {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = 'var(--text-muted)';
-          }
-        }}
-      >
-        {icon && <Icon name={icon} size={13} color="currentColor" style={{ opacity: isActive ? 1 : 0.7, flexShrink: 0 }} />}
-        <span>{label}</span>
-      </button>
-    );
-  }
-
-  function SectionLabel({ label }) {
-    return (
-      <div style={{
-        fontSize: '0.595rem', fontWeight: 700, letterSpacing: '0.11em',
-        color: 'var(--text-muted)', opacity: 0.48,
-        padding: '0.65rem 0.6rem 0.2rem',
-        textTransform: 'uppercase', userSelect: 'none',
-      }}>
-        {label}
-      </div>
-    );
+  function frameHasActive(f) {
+    if (f.subs && f.subs.some(s => s.items.some(i => i.id === activeTab))) return true;
+    if (f.items && f.items.some(i => i.id === activeTab)) return true;
+    return false;
   }
 
   return (
@@ -261,40 +329,10 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
             onMouseEnter={e => { e.currentTarget.style.opacity = '0.75'; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
           >
-            <div style={{
-              width: 26, height: 26, flexShrink: 0,
-              background: 'var(--accent)',
-              borderRadius: 7,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(36,87,214,0.35)',
-            }}><svg width="16" height="16" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-                <g stroke="#ffffff" strokeLinecap="round" strokeWidth="1.6">
-                  <line x1="4" y1="13" x2="22" y2="13"/>
-                  <line x1="4" y1="8"  x2="4"  y2="18"/>
-                  <line x1="22" y1="8" x2="22" y2="18"/>
-                </g>
-                <circle cx="13" cy="13" r="2.2" fill="#ffffff"/>
-              </svg></div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.05rem' }}>
-              <span style={{
-                fontWeight: 900,
-                fontSize: '0.92rem',
-                color: 'var(--text)',
-                letterSpacing: '-0.035em',
-                lineHeight: 1.1,
-              }}>
-                Product Analytics
-              </span>
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: 600,
-                color: 'var(--text-dim)',
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-              }}>
-                Lab
-              </span>
-            </div>
+            {/* Slot 1 — primary in-app mark (BrandMark, D-19). Sidebar is 222px, so the
+                lockup degrades to `wordmark`; the 'Product Analytics' descriptor lives in
+                the page/tab title per the spec degrade rule. */}
+            <BrandMark variant='wordmark' size={18} />
           </button>
 
           {isTerminal ? (
@@ -348,13 +386,11 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
         {/* ── Nav ── */}
         <nav style={{ flex: 1, overflowY: 'auto', padding: '0.1rem 0.5rem 0.75rem', scrollbarWidth: 'none' }}>
 
-          {/* TRACK — conditional on auth state */}
+          {/* TRACK — flat, always-visible (auth-conditional) */}
           <div style={{ marginBottom: '0.1rem' }}>
             <SectionLabel label="TRACK" />
-
             {!user ? (
               <>
-                {/* Sign In */}
                 <button
                   onClick={() => { onShowAuth(); onClose(); }}
                   style={{
@@ -374,16 +410,17 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                   <Icon name="user" size={13} color="currentColor" style={{ opacity: 0.7, flexShrink: 0 }} />
                   <span>Sign In</span>
                 </button>
-                <NavItem id="plans" />
+                <NavItem id="plans" label="Plans" currentPage={currentPage} onNav={handleNav} />
+                <NavItem id="progress" label="Progress" currentPage={currentPage} onNav={handleNav} />
               </>
             ) : (
               <>
-                {/* Profile with avatar */}
                 {(() => {
-                  const isActive = getIsActive('profile', currentPage);
+                  const isActive = activeTab === 'profile';
                   return (
                     <button
                       onClick={() => handleNav('profile')}
+                      aria-current={isActive ? 'page' : undefined}
                       className={isActive ? 'sidebar-nav-active' : ''}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '0.45rem',
@@ -421,96 +458,69 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                     </button>
                   );
                 })()}
-                <NavItem id="plans" />
+                <NavItem id="progress" label="Progress" currentPage={currentPage} onNav={handleNav} />
+                <NavItem id="plans" label="Plans" currentPage={currentPage} onNav={handleNav} />
               </>
             )}
           </div>
 
-          {/* FOUNDATIONS */}
-          <SectionLabel label="FOUNDATIONS" />
-          <NavItem id="stat-foundations" />
-          <NavItem id="metrics-foundations" />
-          <NavItem id="rca-foundations" />
-          <NavItem id="exp-foundations" />
-
-          {/* ROOMS (accordion) */}
-          <SectionLabel label="ROOMS" />
-          {ROOM_SUBGROUPS.map(sg => {
-            const isExpanded = expandedSubGroups.has(sg.id);
-            const hasActive = sg.items.some(item => getIsActive(item.id, currentPage));
+          {/* FRAMES — KNOW · DO · BUILD · JUDGE · LIVE (accordion, one open per level) */}
+          {NAV_FRAMES.map(frame => {
+            const open = openFrame === frame.id;
+            const hasActive = frameHasActive(frame);
             return (
-              <div key={sg.id}>
-                <button
-                  onClick={() => toggleSubGroup(sg.id)}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    width: '100%', textAlign: 'left',
-                    padding: '0.3rem 0.65rem',
-                    borderRadius: 'var(--radius-sm)',
-                    border: 'none',
-                    background: 'none',
-                    color: hasActive ? 'var(--text-secondary)' : 'var(--text-muted)',
-                    fontWeight: hasActive ? 600 : 500,
-                    fontSize: '0.825rem',
-                    letterSpacing: '-0.005em',
-                    cursor: 'pointer',
-                    transition: 'background var(--transition-fast), color var(--transition-fast)',
-                    opacity: hasActive ? 1 : 0.68,
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = 'var(--surface-2)';
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = 'none';
-                    e.currentTarget.style.color = hasActive ? 'var(--text-secondary)' : 'var(--text-muted)';
-                    e.currentTarget.style.opacity = hasActive ? '1' : '0.68';
-                  }}
-                >
-                  <span>{sg.label}</span>
-                  <span style={{
-                    fontSize: '0.68rem',
-                    opacity: 0.4,
-                    flexShrink: 0,
-                    display: 'inline-block',
-                    transition: 'transform var(--transition)',
-                    transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
-                  }}>
-                    ▾
-                  </span>
-                </button>
-
-                {isExpanded && (
-                  <div style={{
-                    borderLeft: '1px solid var(--border)',
-                    marginLeft: '0.9rem',
-                    paddingLeft: '0.1rem',
-                    marginBottom: '0.1rem',
-                  }}>
-                    {sg.items.map(item => (
-                      <NavItem key={item.id} id={item.id} indent />
-                    ))}
+              <div key={frame.id}>
+                <GroupHeader
+                  icon={frame.icon}
+                  label={frame.label}
+                  open={open}
+                  hasActive={hasActive}
+                  onClick={() => toggleFrame(frame.id)}
+                />
+                <Collapsible open={open}>
+                  <div style={{ paddingBottom: '0.15rem' }}>
+                    {/* Sub-groups (one open per level, recurses) */}
+                    {frame.subs && frame.subs.map(sub => {
+                      const subOpen = openSub === sub.id;
+                      const subHasActive = sub.items.some(i => i.id === activeTab);
+                      return (
+                        <div key={sub.id} style={{ marginLeft: '0.4rem' }}>
+                          <GroupHeader
+                            label={sub.label}
+                            open={subOpen}
+                            hasActive={subHasActive}
+                            onClick={() => toggleSub(sub.id)}
+                          />
+                          <Collapsible open={subOpen}>
+                            <div style={{ borderLeft: '1px solid var(--border)', marginLeft: '0.9rem', paddingLeft: '0.1rem', marginBottom: '0.1rem' }}>
+                              {sub.items.map(item => (
+                                <NavItem key={item.id} id={item.id} label={item.label} indent currentPage={currentPage} onNav={handleNav} />
+                              ))}
+                            </div>
+                          </Collapsible>
+                        </div>
+                      );
+                    })}
+                    {/* Flat items directly under the frame */}
+                    {frame.items && (
+                      <div style={{ marginLeft: '0.4rem' }}>
+                        {frame.items.map(item => (
+                          <NavItem key={item.id} id={item.id} label={item.label} indent currentPage={currentPage} onNav={handleNav} />
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
+                </Collapsible>
               </div>
             );
           })}
 
-          {/* FLAT GROUPS (PRACTICE, LEARN, TOOLS — TRACK is rendered above Foundations) */}
-          {FLAT_GROUPS.filter(g => g.label !== 'TRACK').map(group => (
-            <div key={group.label} style={{ marginBottom: '0.1rem' }}>
-              <SectionLabel label={group.label} />
-              {group.items.map(item => (
-                <NavItem key={item.id} id={item.id} />
-              ))}
-            </div>
-          ))}
-
-          {/* STUDY ROOM — open in beta */}
-          <div style={{ marginBottom: '0.1rem' }}>
-            <SectionLabel label="STUDY" />
-            <NavItem id="study" />
+          {/* EXTRAS — quiet bottom catch-all (not a frame) */}
+          <div style={{ marginTop: '0.35rem' }}>
+            <SectionLabel label="EXTRAS" />
+            {EXTRAS_ITEMS.map(item => (
+              <NavItem key={item.id} id={item.id} label={item.label} currentPage={currentPage} onNav={handleNav} />
+            ))}
           </div>
 
         </nav>

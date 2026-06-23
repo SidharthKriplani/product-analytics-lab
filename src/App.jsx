@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { GateOverlay } from './components/shared/GateOverlay.jsx';
 import { ErrorBoundary } from './components/shared/ErrorBoundary.jsx';
+import { BrandMark } from './components/shared/BrandMark.jsx';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import { track } from './utils/analytics.js';
 import { stateToHash, parseHash } from './utils/hashRouting.js';
@@ -165,6 +166,7 @@ export default function App() {
   // Helper: call at top of any open handler that requires sign-in.
   // Returns true if the user is not signed in (caller should return early).
   const gateRoomRef = useRef(null);
+  const pendingGateConversionRef = useRef(false); // set true when user clicks sign-in from gate overlay
 
   // guestPreview: case is accessible with no account (1 per room demo)
   // isFree: case is accessible to signed-in free users (broader set)
@@ -256,6 +258,11 @@ export default function App() {
 
   // gate_shown — fires whenever the auth gate becomes visible to a guest.
   // room is set by requireUser(); null means the page-transition nudge fired (post-case).
+  // Track plans page views from all sources (navigate, paywall redirect, gate secondary CTA)
+  useEffect(() => {
+    if (page === 'plans') track('plans_page_viewed', { referrer: prevPageRef.current || 'unknown' });
+  }, [page]); // eslint-disable-line
+
   useEffect(() => {
     if (authGate && !user) {
       track('gate_shown', {
@@ -357,6 +364,10 @@ export default function App() {
           refreshProgress();
           if (event === 'SIGNED_IN') {
             track('user_signed_in', {});
+            if (pendingGateConversionRef.current) {
+              track('gate_converted', { room: gateRoomRef.current || 'unknown' });
+              pendingGateConversionRef.current = false;
+            }
             pushProgressToSupabase(session.user);
             if (!pendingDeepLinkRef.current) setPage(p => p === 'home' ? 'progress' : p);
           }
@@ -1095,6 +1106,10 @@ export default function App() {
           <ErrorBoundary resetKey={page}>
           <Suspense fallback={
             <div style={{ padding: '2rem 2rem 0' }}>
+              {/* Slot 7 — loading/splash brand (BrandMark monogram, D-19) */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                <BrandMark variant='monogram' size={40} />
+              </div>
               {[1,2,3].map(i => (
                 <div key={i} className="pal-shimmer-box" style={{ height: '88px', marginBottom: '1rem', opacity: 1 - i * 0.15 }} />
               ))}
@@ -1913,7 +1928,7 @@ export default function App() {
           title={copy.title}
           body={copy.body}
           ctaLabel="Sign in — it's free →"
-          onCTA={() => { track('gate_cta_clicked', { room: gateRoomRef.current || 'unknown', action: 'sign_in' }); setAuthGate(false); setShowAuth(true); }}
+          onCTA={() => { track('gate_cta_clicked', { room: gateRoomRef.current || 'unknown', action: 'sign_in' }); pendingGateConversionRef.current = true; setAuthGate(false); setShowAuth(true); }}
           secondaryLabel="See what's included"
           onSecondary={() => { track('gate_cta_clicked', { room: gateRoomRef.current || 'unknown', action: 'see_plans' }); setAuthGate(false); setPage('plans'); }}
         />

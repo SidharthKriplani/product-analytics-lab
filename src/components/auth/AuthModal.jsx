@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { signInWithEmail, signInWithGoogle, signInWithGitHub } from '../../utils/auth.js';
+import { BrandMark } from '../shared/BrandMark.jsx';
 
 export function AuthModal({ onClose, onSuccess }) {
   const [step, setStep] = useState('main'); // 'main' | 'sent'
@@ -65,6 +66,11 @@ export function AuthModal({ onClose, onSuccess }) {
             color: 'var(--text-muted)', fontSize: '1.1rem', lineHeight: 1, padding: '0.25rem',
           }}
         >×</button>
+
+        {/* Slot 5 — brand at the sign-in moment (BrandMark wordmark, D-19) */}
+        <div style={{ marginBottom: '1.25rem' }}>
+          <BrandMark variant='wordmark' size={20} />
+        </div>
 
         {step === 'main' && (
           <>

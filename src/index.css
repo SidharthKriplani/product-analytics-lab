@@ -121,98 +121,77 @@
 }
 
 :root[data-theme="dark"] {
-  /* Canvas — terminal workbench dark */
-  --bg: #0D1320;
-  --surface: #121A2A;
-  --surface-2: #172033;
-  --surface-raised: #1C2840;
-
-  /* Borders */
-  --border: #2A3548;
-  --border-subtle: #1E2A40;
-  --border-strong: #3A4E68;
-
-  /* Text */
-  --text: #E8EDF5;
-  --text-secondary: #C5D0E0;
-  --text-muted: #8B98AA;
-  --text-dim: #64748B;
-
-  /* Primary accent — cobalt blue (matches light mode brand) */
-  --accent: #5A8AFF;
-  --accent-hover: #7BA3FF;
-  --accent-light: #7BA3FF;
-  --accent-bg: rgba(90,138,255,0.12);
-  --accent-border: rgba(90,138,255,0.3);
-
-  /* Secondary accent — evidence teal */
-  --teal: #20C7D9;
-  --teal-bg: rgba(32,199,217,0.1);
-  --teal-border: rgba(32,199,217,0.25);
-
-  /* Semantic — green */
-  --green: #22c55e;
-  --green-bg: #0f2c1e;
-  --green-border: #1e6840;
-  --green-text: #86efac;
-
-  /* Semantic — red */
-  --red: #f87171;
-  --red-bg: #2c1212;
-  --red-border: #8c2424;
-  --red-text: #fca5a5;
-
-  /* Semantic — progress amber */
-  --yellow: #F6B73C;
-  --yellow-bg: rgba(246,183,60,0.12);
-  --yellow-border: rgba(246,183,60,0.25);
-  --yellow-text: #F6B73C;
-
-  /* Semantic — purple (accent use only) */
-  --purple: #A78BFA;
-  --purple-bg: rgba(167,139,250,0.1);
-  --purple-border: rgba(167,139,250,0.25);
-  --purple-text: #C4B5FD;
-
-  /* Blue */
+  /* Casefile dark warm — used by portals/modals that render outside app-layout.
+     These must NOT be terminal dark. They follow casefile warm dark. */
+  --bg: #15120D;
+  --surface: #201B14;
+  --surface-2: #251E16;
+  --surface-raised: #2A231A;
+  --border: #3A3024;
+  --border-subtle: #2E2519;
+  --border-strong: #5A4733;
+  --text: #F5EFE4;
+  --text-secondary: #E2D4C2;
+  --text-muted: #B4A693;
+  --text-dim: #8C7B6A;
+  --accent: #7EA2FF;
+  --accent-hover: #A6BCFF;
+  --accent-light: #A6BCFF;
+  --accent-bg: rgba(126,162,255,0.12);
+  --accent-border: rgba(126,162,255,0.28);
+  --teal: #4DB6AC;
+  --teal-bg: rgba(77,182,172,0.12);
+  --teal-border: rgba(77,182,172,0.28);
+  --yellow: #F2B84B;
+  --yellow-bg: rgba(242,184,75,0.12);
+  --yellow-border: rgba(242,184,75,0.28);
+  --yellow-text: #F2B84B;
+  --green: #61D394;
+  --green-bg: rgba(97,211,148,0.1);
+  --green-border: rgba(97,211,148,0.25);
+  --green-text: #61D394;
+  --red: #FF7A70;
+  --red-bg: rgba(255,122,112,0.1);
+  --red-border: rgba(255,122,112,0.25);
+  --red-text: #FF7A70;
+  --purple: #C4A8FF;
+  --purple-bg: rgba(196,168,255,0.1);
+  --purple-border: rgba(196,168,255,0.25);
+  --purple-text: #C4A8FF;
   --blue-text: #93c5fd;
-  --blue-bg: #141f3e;
-  --blue-border: #2d4e98;
-
-  /* Structural */
-  --header-bg: rgba(13, 19, 32, 0.97);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.25);
-  --shadow: 0 2px 8px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.35);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.7), 0 4px 12px rgba(0,0,0,0.45);
-  --shadow-xl: 0 20px 60px rgba(0,0,0,0.8), 0 8px 24px rgba(0,0,0,0.55);
-  --shadow-glow: 0 0 0 3px rgba(36,87,214,0.22);
-  --input-bg: #151929;
-  --radius: 9px;
-  --radius-sm: 5px;
-  --radius-lg: 13px;
-  --radius-xl: 18px;
-
-  /* Gradients */
-  --gradient-accent: linear-gradient(135deg, #5A8AFF 0%, #7BA3FF 100%);
-  --gradient-warm: linear-gradient(135deg, #F6B73C 0%, #E8900A 100%);
-  --gradient-teal: linear-gradient(135deg, #20C7D9 0%, #00A3B4 100%);
-  --gradient-hero: linear-gradient(135deg, rgba(90,138,255,0.1) 0%, rgba(32,199,217,0.05) 50%, rgba(246,183,60,0.03) 100%);
-
-  /* Discovery — insight reveal (warmer amber on dark surface) */
-  --discovery: #F0B352;
-
-  /* Transitions (same as light) */
+  --blue-bg: rgba(147,197,253,0.1);
+  --blue-border: rgba(147,197,253,0.25);
+  --header-bg: rgba(21,18,13,0.97);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow: 0 2px 8px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.25);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.55), 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,0.65), 0 8px 24px rgba(0,0,0,0.45);
+  --shadow-glow: 0 0 0 3px rgba(126,162,255,0.25);
+  --input-bg: #201B14;
+  --gradient-accent: linear-gradient(135deg, #7EA2FF 0%, #A6BCFF 100%);
+  --gradient-warm: linear-gradient(135deg, #F2B84B 0%, #E8900A 100%);
+  --gradient-teal: linear-gradient(135deg, #4DB6AC 0%, #26A69A 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(126,162,255,0.08) 0%, rgba(77,182,172,0.04) 50%, rgba(242,184,75,0.03) 100%);
+  --discovery: #F2B84B;
   --transition-fast: 0.1s ease;
   --transition: 0.16s ease;
   --transition-slow: 0.26s ease;
 }
 
-/* ── Casefile page scope — warm regardless of [data-theme="dark"] ────────── */
-/* Apply to all non-runner page wrappers. Pins warm casefile identity and wins
-   over root dark-mode variables via element-level cascade. */
-.casefile-page,
-html[data-theme="dark"] .casefile-page {
+/* ═══════════════════════════════════════════════════════════════════════════
+   ROUTE MODE + THEME SYSTEM
+   Two independent axes applied as classes on .app-layout:
+     Axis 1 — route mode:  .mode-casefile  |  .mode-terminal
+     Axis 2 — user theme:  .theme-light    |  .theme-dark
+   Combinations:
+     .mode-casefile.theme-light  → warm paper (default)
+     .mode-casefile.theme-dark   → warm dark workbook
+     .mode-terminal              → always dark terminal (ignores theme axis)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Casefile Light (default) ── */
+.mode-casefile {
   --bg: #F4EFE6;
   --surface: #FFFCF4;
   --surface-2: #F8F1E5;
@@ -244,21 +223,85 @@ html[data-theme="dark"] .casefile-page {
   --red-bg: #fef2f2;
   --red-border: #fca5a5;
   --red-text: #7f1d1d;
+  --purple: #6B3FA0;
+  --purple-bg: rgba(107,63,160,0.07);
+  --purple-border: rgba(107,63,160,0.22);
+  --purple-text: #3D2060;
+  --blue-text: #1d4ed8;
+  --blue-bg: #eff6ff;
+  --blue-border: #bfdbfe;
   --header-bg: rgba(255,252,244,0.97);
   --shadow-sm: 0 1px 3px rgba(20,20,20,0.05), 0 1px 2px rgba(20,20,20,0.04);
   --shadow: 0 2px 8px rgba(20,20,20,0.07), 0 1px 3px rgba(20,20,20,0.04);
   --shadow-md: 0 4px 16px rgba(20,20,20,0.08), 0 2px 6px rgba(20,20,20,0.05);
+  --shadow-lg: 0 8px 24px rgba(20,20,20,0.08), 0 4px 10px rgba(20,20,20,0.05);
+  --shadow-xl: 0 16px 48px rgba(20,20,20,0.10), 0 6px 18px rgba(20,20,20,0.06);
   --input-bg: #ffffff;
   --gradient-accent: linear-gradient(135deg, #2457D6 0%, #5A7FE8 100%);
   --gradient-warm: linear-gradient(135deg, #C97706 0%, #E8900A 100%);
+  --gradient-teal: linear-gradient(135deg, #007C89 0%, #00A3B4 100%);
+  --discovery: #E8A033;
   background: #F4EFE6;
   color: #141414;
 }
 
-/* ── Terminal page scope — dark regardless of [data-theme] ───────────────── */
-/* Apply to all runner / SQL Lab wrappers. Opt-in dark workbench. */
-.terminal-page,
-html .terminal-page {
+/* ── Casefile Dark — warm dark workbook (NOT navy/terminal) ── */
+.mode-casefile.theme-dark {
+  --bg: #15120D;
+  --surface: #201B14;
+  --surface-2: #251E16;
+  --surface-raised: #2A231A;
+  --border: #3A3024;
+  --border-subtle: #2E2519;
+  --border-strong: #5A4733;
+  --text: #F5EFE4;
+  --text-secondary: #E2D4C2;
+  --text-muted: #B4A693;
+  --text-dim: #8C7B6A;
+  --accent: #7EA2FF;
+  --accent-hover: #A6BCFF;
+  --accent-light: #A6BCFF;
+  --accent-bg: rgba(126,162,255,0.12);
+  --accent-border: rgba(126,162,255,0.28);
+  --teal: #4DB6AC;
+  --teal-bg: rgba(77,182,172,0.12);
+  --teal-border: rgba(77,182,172,0.28);
+  --yellow: #F2B84B;
+  --yellow-bg: rgba(242,184,75,0.12);
+  --yellow-border: rgba(242,184,75,0.28);
+  --yellow-text: #F2B84B;
+  --green: #61D394;
+  --green-bg: rgba(97,211,148,0.1);
+  --green-border: rgba(97,211,148,0.25);
+  --green-text: #61D394;
+  --red: #FF7A70;
+  --red-bg: rgba(255,122,112,0.1);
+  --red-border: rgba(255,122,112,0.25);
+  --red-text: #FF7A70;
+  --purple: #C4A8FF;
+  --purple-bg: rgba(196,168,255,0.1);
+  --purple-border: rgba(196,168,255,0.25);
+  --purple-text: #C4A8FF;
+  --blue-text: #93c5fd;
+  --blue-bg: rgba(147,197,253,0.1);
+  --blue-border: rgba(147,197,253,0.25);
+  --header-bg: rgba(21,18,13,0.97);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow: 0 2px 8px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.25);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.55), 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,0.65), 0 8px 24px rgba(0,0,0,0.45);
+  --input-bg: #201B14;
+  --gradient-accent: linear-gradient(135deg, #7EA2FF 0%, #A6BCFF 100%);
+  --gradient-warm: linear-gradient(135deg, #F2B84B 0%, #E8900A 100%);
+  --gradient-teal: linear-gradient(135deg, #4DB6AC 0%, #26A69A 100%);
+  --discovery: #F2B84B;
+  background: #15120D;
+  color: #F5EFE4;
+}
+
+/* ── Terminal — always dark workbench (theme axis ignored) ── */
+.mode-terminal {
   --bg: #070A12;
   --surface: #0D1320;
   --surface-2: #121A2A;
@@ -270,11 +313,11 @@ html .terminal-page {
   --text-secondary: #C5D0E0;
   --text-muted: #8B98AA;
   --text-dim: #64748B;
-  --accent: #5A8AFF;
-  --accent-hover: #7BA3FF;
-  --accent-light: #7BA3FF;
-  --accent-bg: rgba(90,138,255,0.12);
-  --accent-border: rgba(90,138,255,0.3);
+  --accent: #6EA8FF;
+  --accent-hover: #93BDFF;
+  --accent-light: #93BDFF;
+  --accent-bg: rgba(110,168,255,0.12);
+  --accent-border: rgba(110,168,255,0.28);
   --teal: #20C7D9;
   --teal-bg: rgba(32,199,217,0.1);
   --teal-border: rgba(32,199,217,0.25);
@@ -283,19 +326,30 @@ html .terminal-page {
   --yellow-border: rgba(246,183,60,0.25);
   --yellow-text: #F6B73C;
   --green: #33D17A;
-  --green-bg: #0f2c1e;
-  --green-border: #1e6840;
-  --green-text: #86efac;
+  --green-bg: rgba(51,209,122,0.1);
+  --green-border: rgba(51,209,122,0.25);
+  --green-text: #33D17A;
   --red: #FF6B6B;
-  --red-bg: #2c1212;
-  --red-border: #8c2424;
-  --red-text: #fca5a5;
+  --red-bg: rgba(255,107,107,0.1);
+  --red-border: rgba(255,107,107,0.25);
+  --red-text: #FF6B6B;
+  --purple: #A78BFA;
+  --purple-bg: rgba(167,139,250,0.1);
+  --purple-border: rgba(167,139,250,0.25);
+  --purple-text: #C4B5FD;
+  --blue-text: #93c5fd;
+  --blue-bg: #141f3e;
+  --blue-border: #2d4e98;
   --header-bg: rgba(7,10,18,0.97);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
   --shadow: 0 2px 8px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.35);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.7), 0 4px 12px rgba(0,0,0,0.45);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,0.8), 0 8px 24px rgba(0,0,0,0.55);
   --input-bg: #0D1320;
-  --gradient-accent: linear-gradient(135deg, #5A8AFF 0%, #7BA3FF 100%);
+  --gradient-accent: linear-gradient(135deg, #6EA8FF 0%, #93BDFF 100%);
+  --gradient-teal: linear-gradient(135deg, #20C7D9 0%, #00A3B4 100%);
+  --discovery: #F6B73C;
   background: #070A12;
   color: #E8EDF5;
 }
@@ -734,6 +788,8 @@ button:not(:disabled):active {
   .pal-loop-draw { animation: none !important; }
   .pal-node-appear { animation: none !important; }
   .pal-shake { animation: none !important; }
+  /* Sidebar accordion (NAV-REFRAME): instant toggle, no height tween */
+  .pal-collapsible { transition: none !important; }
 }
 
 /* ── Utility: card hover lift ────────────────────────────────────────────── */

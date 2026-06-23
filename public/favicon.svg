@@ -1,9 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="7" fill="#6055C8"/>
-  <g stroke="#ffffff" stroke-linecap="round" stroke-width="1.5" fill="none">
-    <line x1="6"  y1="16" x2="26" y2="16"/>
-    <line x1="6"  y1="10" x2="6"  y2="22"/>
-    <line x1="26" y1="10" x2="26" y2="22"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img">
+  <title>BreakLabs</title>
+  <!-- BreakLabs monogram: the red fault-glyph (seam) — constant across all labs (D-19) -->
+  <rect width="32" height="32" rx="8" fill="#15171A"/>
+  <g transform="translate(11.56 3.42) scale(0.74)">
+    <path d="M6 2 L3 11 L9 17 L3 23 L6 32" fill="none" stroke="#FB5247" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
-  <circle cx="16" cy="16" r="2.5" fill="#ffffff"/>
 </svg>

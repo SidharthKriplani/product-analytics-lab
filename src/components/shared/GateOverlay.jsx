@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom';
 import { Icon } from './Icon.jsx';
+import { BrandMark } from './BrandMark.jsx';
 
 /**
  * GateOverlay — reusable locked-state overlay.
@@ -38,6 +39,11 @@ export function GateOverlay({ title, body, ctaLabel, onCTA, secondaryLabel, onSe
           textAlign: 'center',
         }}
       >
+        {/* Slot 5 — brand at the pay/gate moment (BrandMark wordmark, D-19) */}
+        <div style={{ marginBottom: '1rem' }}>
+          <BrandMark variant='wordmark' size={19} />
+        </div>
+
         {/* Icon */}
         <div style={{
           width: 44, height: 44, borderRadius: 10,
