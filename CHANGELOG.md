@@ -4,6 +4,16 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.58.0] — 2026-06-24 [FIX RESULTS TABLE DUP COLUMNS + BROWSER ROW GRID/LOGOS]
+
+### Two fixes: garbled query output on duplicate column names, and list-row alignment
+
+**1. Results table (`ResultsTable` in `SqlLabPage.jsx`).** A query whose output has duplicate column names — e.g. `SELECT *` across joined tables, where `account_id`/`txn_id`/`amount` repeat — rendered a garbled, misaligned header (headers and body cells disagreed). Cause: the header cells used `key={col}`, so React collapsed the duplicate-named columns. Fix: key header cells by index (`key={ci}`). Duplicate-named result columns now render correctly.
+
+**2. Browser list row → CSS grid + company logos (`SqlLabPage.jsx`).** The row was a flexbox and the company name (`white-space: nowrap`, variable width — e.g. "Kaiser Permanente") pushed titles out of alignment. Converted the row to a grid (`12px 62px 72px minmax(0,1fr) auto` → status · difficulty · company · title · tags) so titles align and difficulty is its own fixed block. Replaced the company name text with a fixed-size favicon; added a `CompanyLogos` component that stacks the primary company + `alsoAskedAt` logos with a "+N" overflow (name→domain map harvested from the bank, so it works the moment `alsoAskedAt` is populated). Titles ellipsis-truncate instead of wrapping. Build verified (870 modules). Files: `src/pages/SqlLabPage.jsx`.
+
+**Follow-up:** run `scripts/tag_companies.py` to populate `alsoAskedAt` (currently empty on all 192) so the stacked "+N more" logos light up.
+
 ## [5.57.0] — 2026-06-24 [FIX: CTRL/CMD+F HIJACKED BY CODEMIRROR SEARCH]
 
 ### Ctrl/Cmd+F opened CodeMirror's in-editor find instead of the browser's

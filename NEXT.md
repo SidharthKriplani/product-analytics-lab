@@ -64,6 +64,7 @@ git push origin main
 
 ## Recently shipped
 
+- ✅ 2026-06-24 — **V5.58.0 Results-table dup-column fix + browser row grid/logos + SQL-LAB-SPEC.md.** (1) `SELECT *`-on-joins garbled output fixed (header keyed by index, not column name). (2) List row → CSS grid (status·difficulty·company·title·tags) so titles align + difficulty is its own block; company name text → fixed favicon + `CompanyLogos` stacked "+N" (name→domain map from bank). (3) Wrote `docs/SQL-LAB-SPEC.md` (master spec, cross-links all SQL docs). **Open:** run `tag_companies.py` to populate `alsoAskedAt` so "+N more" logos show. Build verified. File: `SqlLabPage.jsx`.
 - ✅ 2026-06-24 — **V5.57.0 Fix: Ctrl/Cmd+F hijacked by CodeMirror search.** Set `searchKeymap: false` in basicSetup so browser find works in the editor. Build verified. File: `SqlEditor.jsx`.
 - ✅ 2026-06-24 — **V5.56.0 Fix: CodeMirror typing lag / dropped keys.** Inline `schema`/`onCheck` props rebuilt the editor's whole extension set every keystroke. Parent now memoizes `cmSchema` per problem; `SqlEditor` reads onCheck via ref, memoizes extensions on `[schema]`, hoists basicSetup/style. Configures once per problem, not per char. Build verified. Files: `SqlEditor.jsx`, `SqlLabPage.jsx`.
 - ✅ 2026-06-24 — **V5.55.0 Fix: Cmd/Ctrl+Enter (Check) in CodeMirror.** Default keymap's Mod-Enter ("insert blank line") outranked the Check binding; wrapped editor keymap in `Prec.highest`. Build verified. File: `src/components/shared/SqlEditor.jsx`.

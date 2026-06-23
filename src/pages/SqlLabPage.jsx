@@ -214,8 +214,8 @@ function ResultsTable({ results }) {
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', fontFamily: 'monospace' }}>
         <thead>
           <tr style={{ background: 'var(--surface-2)' }}>
-            {results.columns.map(col => (
-              <th key={col} style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600, fontSize: '0.7rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{col}</th>
+            {results.columns.map((col, ci) => (
+              <th key={ci} style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600, fontSize: '0.7rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{col}</th>
             ))}
           </tr>
         </thead>
@@ -275,6 +275,31 @@ function HintStep({ step, index }) {
 
 // ─── Browse mode ──────────────────────────────────────────────────────────────
 
+// Company name -> domain, harvested from the bank so alsoAskedAt names can show logos too.
+const COMPANY_DOMAIN = {};
+SORTED_PROBLEMS.forEach(p => { if (p.company && p.companyDomain && !COMPANY_DOMAIN[p.company]) COMPANY_DOMAIN[p.company] = p.companyDomain; });
+const favicon = domain => 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=32';
+
+// Stacked company logos (primary + alsoAskedAt) with a "+N" overflow — fixed width so
+// rows grid-align regardless of company name length. Hover shows the names.
+function CompanyLogos({ p }) {
+  const all = [{ name: p.company, domain: p.companyDomain }]
+    .concat((p.alsoAskedAt || []).map(n => ({ name: n, domain: COMPANY_DOMAIN[n] })))
+    .filter(c => c.domain);
+  const shown = all.slice(0, 3);
+  const more = all.length - shown.length;
+  return (
+    <div title={all.map(c => c.name).join(' · ')} style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+      {shown.map((c, i) => (
+        <img key={i} src={favicon(c.domain)} alt={c.name}
+          style={{ width: 16, height: 16, borderRadius: 3, objectFit: 'contain', marginLeft: i ? -5 : 0, background: 'var(--surface)', boxShadow: '0 0 0 1.5px var(--surface)' }}
+          onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
+      ))}
+      {more > 0 && <span style={{ fontSize: '0.55rem', fontWeight: 700, marginLeft: 4, color: 'var(--text-muted)' }}>+{more}</span>}
+    </div>
+  );
+}
+
 function ProblemListRow({ p, isSolved, onSelect }) {
   const ds = DIFF_COLOR[p.difficulty] || DIFF_COLOR.Easy;
   return (
@@ -284,7 +309,9 @@ function ProblemListRow({ p, isSolved, onSelect }) {
       onClick={onSelect}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
       style={{
-        display: 'flex', alignItems: 'center', gap: '0.65rem',
+        display: 'grid',
+        gridTemplateColumns: '12px 62px 72px minmax(0, 1fr) auto',
+        alignItems: 'center', gap: '0.6rem',
         padding: '0.55rem 0.85rem',
         borderBottom: '1px solid var(--border)',
         cursor: 'pointer', transition: 'background 0.1s',
@@ -304,27 +331,10 @@ function ProblemListRow({ p, isSolved, onSelect }) {
         background: ds.bg, color: ds.text, border: '1px solid ' + ds.border,
         flexShrink: 0, minWidth: 48, textAlign: 'center',
       }}>{p.difficulty}</span>
-      {/* Company */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, minWidth: 80 }}>
-        {p.companyDomain && (
-          <img
-            src={'https://www.google.com/s2/favicons?domain=' + p.companyDomain + '&sz=32'}
-            alt={p.company}
-            style={{ width: 11, height: 11, borderRadius: 2, objectFit: 'contain' }}
-            onError={e => { e.currentTarget.style.display = 'none'; }}
-          />
-        )}
-        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>{p.company}</span>
-        {p.alsoAskedAt && p.alsoAskedAt.length > 0 && (
-          <span title={'Also asked at: ' + p.alsoAskedAt.join(', ')} style={{
-            fontSize: '0.55rem', fontWeight: 700, padding: '1px 4px', borderRadius: '99px',
-            background: 'rgba(20,184,166,0.1)', color: 'var(--teal)',
-            border: '1px solid rgba(20,184,166,0.25)', whiteSpace: 'nowrap', cursor: 'default',
-          }}>+{p.alsoAskedAt.length}</span>
-        )}
-      </div>
+      {/* Company logos (fixed-width cell → titles align) */}
+      <CompanyLogos p={p} />
       {/* Title */}
-      <span style={{ flex: 1, fontSize: '0.85rem', fontWeight: 500, color: 'var(--text)', lineHeight: 1.3, minWidth: 0 }}>
+      <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text)', lineHeight: 1.3, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {p.title}
       </span>
       {/* Tags */}
