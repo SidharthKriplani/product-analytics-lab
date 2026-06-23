@@ -123,13 +123,13 @@
 :root[data-theme="dark"] {
   /* Casefile dark warm — used by portals/modals that render outside app-layout.
      These must NOT be terminal dark. They follow casefile warm dark. */
-  --bg: #15120D;
-  --surface: #201B14;
-  --surface-2: #251E16;
-  --surface-raised: #2A231A;
-  --border: #3A3024;
-  --border-subtle: #2E2519;
-  --border-strong: #5A4733;
+  --bg: #070A12;
+  --surface: #0D1320;
+  --surface-2: #121A2A;
+  --surface-raised: #172033;
+  --border: #2A3548;
+  --border-subtle: #1E2A40;
+  --border-strong: #3A4E68;
   --text: #F5EFE4;
   --text-secondary: #E2D4C2;
   --text-muted: #B4A693;
@@ -161,14 +161,14 @@
   --blue-text: #93c5fd;
   --blue-bg: rgba(147,197,253,0.1);
   --blue-border: rgba(147,197,253,0.25);
-  --header-bg: rgba(21,18,13,0.97);
+  --header-bg: rgba(7,10,18,0.97);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
   --shadow: 0 2px 8px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.25);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.55), 0 4px 12px rgba(0,0,0,0.35);
   --shadow-xl: 0 20px 60px rgba(0,0,0,0.65), 0 8px 24px rgba(0,0,0,0.45);
   --shadow-glow: 0 0 0 3px rgba(126,162,255,0.25);
-  --input-bg: #201B14;
+  --input-bg: #0D1320;
   --gradient-accent: linear-gradient(135deg, #7EA2FF 0%, #A6BCFF 100%);
   --gradient-warm: linear-gradient(135deg, #F2B84B 0%, #E8900A 100%);
   --gradient-teal: linear-gradient(135deg, #4DB6AC 0%, #26A69A 100%);
@@ -247,13 +247,13 @@
 
 /* ── Casefile Dark — warm dark workbook (NOT navy/terminal) ── */
 .mode-casefile.theme-dark {
-  --bg: #15120D;
-  --surface: #201B14;
-  --surface-2: #251E16;
-  --surface-raised: #2A231A;
-  --border: #3A3024;
-  --border-subtle: #2E2519;
-  --border-strong: #5A4733;
+  --bg: #070A12;
+  --surface: #0D1320;
+  --surface-2: #121A2A;
+  --surface-raised: #172033;
+  --border: #2A3548;
+  --border-subtle: #1E2A40;
+  --border-strong: #3A4E68;
   --text: #F5EFE4;
   --text-secondary: #E2D4C2;
   --text-muted: #B4A693;
@@ -285,18 +285,18 @@
   --blue-text: #93c5fd;
   --blue-bg: rgba(147,197,253,0.1);
   --blue-border: rgba(147,197,253,0.25);
-  --header-bg: rgba(21,18,13,0.97);
+  --header-bg: rgba(7,10,18,0.97);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
   --shadow: 0 2px 8px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.25);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.55), 0 4px 12px rgba(0,0,0,0.35);
   --shadow-xl: 0 20px 60px rgba(0,0,0,0.65), 0 8px 24px rgba(0,0,0,0.45);
-  --input-bg: #201B14;
+  --input-bg: #0D1320;
   --gradient-accent: linear-gradient(135deg, #7EA2FF 0%, #A6BCFF 100%);
   --gradient-warm: linear-gradient(135deg, #F2B84B 0%, #E8900A 100%);
   --gradient-teal: linear-gradient(135deg, #4DB6AC 0%, #26A69A 100%);
   --discovery: #F2B84B;
-  background: #15120D;
+  background: #070A12;
   color: #F5EFE4;
 }
 
