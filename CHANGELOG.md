@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.56.0] — 2026-06-24 [FIX: CODEMIRROR TYPING LAG / DROPPED KEYSTROKES]
+
+### Editor reconfigured its whole extension set on every keystroke
+
+`SqlLabPage` passed the autocomplete `schema` as an inline `Object.fromEntries(...)` and `onCheck` as `checkQuery` — both new references every render. `SqlEditor`'s `extensions` were memoized on `[schema, onCheck]`, so each keystroke (which re-renders the parent) rebuilt the entire CodeMirror extension set (SQL language + autocomplete + keymaps). Under fast typing this dropped keys. Fixes: (1) parent now memoizes the schema per problem (`useMemo([problem])` → `cmSchema`); (2) `SqlEditor` reads `onCheck` via a ref so it's not a dependency, memoizes `extensions` on `[schema]` only, and hoists `basicSetup`/wrapper-style to stable constants. Editor now configures once per problem, not per character — typing is smooth. Build verified (870 modules). Files: `src/components/shared/SqlEditor.jsx`, `src/pages/SqlLabPage.jsx`.
+
 ## [5.55.0] — 2026-06-24 [FIX: CMD/CTRL+ENTER (CHECK) IN CODEMIRROR EDITOR]
 
 ### Cmd/Ctrl+Enter stopped running Check after the CodeMirror swap

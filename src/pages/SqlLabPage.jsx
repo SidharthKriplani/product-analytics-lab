@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { datamarts } from '../data/sqlLabDatamarts.js';
 import { track } from '../utils/analytics.js';
@@ -863,6 +863,12 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
 
   const problem = SORTED_PROBLEMS[problemIdx];
   const dm = problem ? datamarts[problem.datamartId] : null;
+  // Stable autocomplete schema for the editor — recomputed only when the problem changes,
+  // NOT on every keystroke (an inline object here would relag CodeMirror per character).
+  const cmSchema = useMemo(() => {
+    if (!dm) return {};
+    return Object.fromEntries(Object.entries(dm.tables).map(([n, t]) => [n, (t.columns || []).map(c => c.name)]));
+  }, [problem]);
   const diffStyle = problem ? (DIFF_COLOR[problem.difficulty] || DIFF_COLOR.Easy) : DIFF_COLOR.Easy;
 
   // Notify parent of problem changes for hash routing
@@ -1461,7 +1467,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                 value={query}
                 onChange={v => { startTimer(); setQuery(v); if (problem) saveQueryLS(problem.id, v); }}
                 onCheck={checkQuery}
-                schema={Object.fromEntries(Object.entries(dm.tables).map(([n, t]) => [n, (t.columns || []).map(c => c.name)]))}
+                schema={cmSchema}
                 placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Cmd/Ctrl+Enter to run' : '-- Write your SQL here\n-- Cmd/Ctrl+Enter to run'}
                 height="46vh"
               />
