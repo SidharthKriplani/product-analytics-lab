@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.60.0] — 2026-06-24 [DIFFICULTY CHIPS → UNIFORM FIXED-WIDTH BLOCKS]
+
+### Difficulty pills now fill their grid cell so they form a clean column
+
+After the grid redesign (V5.58), difficulty pills still hugged their text ("Hard" narrower than "Master"), leaving a ragged column. Changed the chip to `display:block; width:100%; box-sizing:border-box` (centered) and widened the difficulty grid track to 66px, so every chip is the same width — an aligned column of independent blocks. Build verified. File: `src/pages/SqlLabPage.jsx`.
+
 ## [5.59.0] — 2026-06-24 [POPULATE alsoAskedAt (DETERMINISTIC, NO-LLM) → STACKED LOGOS LIGHT UP]
 
 ### Company multi-tagging without LM Studio

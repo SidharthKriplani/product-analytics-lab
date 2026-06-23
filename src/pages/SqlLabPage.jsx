@@ -310,7 +310,7 @@ function ProblemListRow({ p, isSolved, onSelect }) {
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
       style={{
         display: 'grid',
-        gridTemplateColumns: '12px 62px 72px minmax(0, 1fr) auto',
+        gridTemplateColumns: '12px 66px 72px minmax(0, 1fr) auto',
         alignItems: 'center', gap: '0.6rem',
         padding: '0.55rem 0.85rem',
         borderBottom: '1px solid var(--border)',
@@ -327,9 +327,9 @@ function ProblemListRow({ p, isSolved, onSelect }) {
       }} />
       {/* Difficulty */}
       <span style={{
-        fontSize: '0.62rem', fontWeight: 700, padding: '1px 7px', borderRadius: '99px',
+        fontSize: '0.62rem', fontWeight: 700, padding: '2px 0', borderRadius: '99px',
         background: ds.bg, color: ds.text, border: '1px solid ' + ds.border,
-        flexShrink: 0, minWidth: 48, textAlign: 'center',
+        display: 'block', width: '100%', boxSizing: 'border-box', textAlign: 'center',
       }}>{p.difficulty}</span>
       {/* Company logos (fixed-width cell → titles align) */}
       <CompanyLogos p={p} />

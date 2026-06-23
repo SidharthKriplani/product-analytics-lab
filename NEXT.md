@@ -64,6 +64,7 @@ git push origin main
 
 ## Recently shipped
 
+- ✅ 2026-06-24 — **V5.60.0 Difficulty chips → uniform fixed-width blocks.** Chips now fill their 66px grid cell (display:block, width:100%, centered) so they form a clean aligned column. Build verified. File: `SqlLabPage.jsx`.
 - ✅ 2026-06-24 — **V5.59.0 Populated alsoAskedAt (no-LLM) → stacked company logos light up.** New `scripts/tag_companies_domain.py` (deterministic same-datamart peers, seeded shuffle); 183/192 tagged. LLM `tag_companies.py` couldn't run here (needs LM Studio); available for richer re-pass. Gates green. Files: `tag_companies_domain.py`, `sqlLabProblems.js`.
 - ✅ 2026-06-24 — **V5.58.0 Results-table dup-column fix + browser row grid/logos + SQL-LAB-SPEC.md.** (1) `SELECT *`-on-joins garbled output fixed (header keyed by index, not column name). (2) List row → CSS grid (status·difficulty·company·title·tags) so titles align + difficulty is its own block; company name text → fixed favicon + `CompanyLogos` stacked "+N" (name→domain map from bank). (3) Wrote `docs/SQL-LAB-SPEC.md` (master spec, cross-links all SQL docs). **Open:** run `tag_companies.py` to populate `alsoAskedAt` so "+N more" logos show. Build verified. File: `SqlLabPage.jsx`.
 - ✅ 2026-06-24 — **V5.57.0 Fix: Ctrl/Cmd+F hijacked by CodeMirror search.** Set `searchKeymap: false` in basicSetup so browser find works in the editor. Build verified. File: `SqlEditor.jsx`.
