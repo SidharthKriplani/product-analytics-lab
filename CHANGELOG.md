@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.52.0] — 2026-06-24 [SQL EDITOR — CMD+/ COMMENT TOGGLE]
+
+### Cmd+/ (Ctrl+/) now toggles SQL line comments in the editor
+
+The SQL Lab editor is a plain `<textarea>`, so it never had a comment shortcut — Cmd+/ did nothing (not a setting; the feature didn't exist). Added a branch to `handleKeyDown` in `src/pages/SqlLabPage.jsx`: Cmd+/ or Ctrl+/ toggles `-- ` comments across the selected line(s) (or the current line with no selection), comment-vs-uncomment decided by whether all non-blank selected lines are already commented; selection is preserved. Joins the existing Cmd+Enter (check) and Tab (2-space indent) handlers. Build verified (844 modules transformed). File: `src/pages/SqlLabPage.jsx`.
+
 ## [5.51.0] — 2026-06-24 [DIFFICULTY RUBRIC + EASY-TIER RECALIBRATION]
 
 ### SQL difficulty rubric established; 7 mis-tiered Easy problems moved to Medium
