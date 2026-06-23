@@ -438,9 +438,9 @@ table { border-collapse: collapse; }
   left: 0; top: 0; bottom: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  border-right: 2px solid var(--border-strong);
+  border-right: none;
   background: var(--surface);
-  box-shadow: 1px 0 0 var(--border-subtle), 4px 0 16px rgba(0,0,0,0.04);
+  box-shadow: 4px 0 16px rgba(0,0,0,0.04);
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -543,7 +543,7 @@ table { border-collapse: collapse; }
   background: var(--header-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: none;
   align-items: center;
   padding-left: 1rem;
   padding-right: 1rem;

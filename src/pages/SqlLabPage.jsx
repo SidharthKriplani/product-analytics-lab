@@ -126,11 +126,11 @@ function DebriefPanel({ text }) {
 const SORTED_PROBLEMS = [...sqlLabProblems].sort((a, b) => DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty]);
 
 const DIFF_COLOR = {
-  Easy:     { bg: 'var(--green-bg,  rgba(16,185,129,0.08))',  text: 'var(--green)',  border: 'var(--green-border,  rgba(16,185,129,0.25))' },
-  Medium:   { bg: 'var(--yellow-bg, rgba(245,158,11,0.08))',  text: 'var(--yellow)', border: 'var(--yellow-border, rgba(245,158,11,0.25))' },
-  Hard:     { bg: 'var(--red-bg,    rgba(239,68,68,0.08))',   text: 'var(--red)',    border: 'var(--red-border,    rgba(239,68,68,0.25))' },
-  Master:   { bg: 'var(--purple-bg, rgba(139,92,246,0.08))',  text: 'var(--purple)', border: 'var(--purple-border, rgba(139,92,246,0.25))' },
-  Forensic: { bg: 'rgba(234,88,12,0.10)',                     text: '#ea580c',       border: 'rgba(234,88,12,0.35)' },
+  Easy:     { bg: 'var(--green-bg,  rgba(16,185,129,0.08))',  text: 'var(--green)',  border: 'var(--green-border,  rgba(16,185,129,0.25))', solid: '#10b981', on: '#06140d' },
+  Medium:   { bg: 'var(--yellow-bg, rgba(245,158,11,0.08))',  text: 'var(--yellow)', border: 'var(--yellow-border, rgba(245,158,11,0.25))', solid: '#f59e0b', on: '#1a1205' },
+  Hard:     { bg: 'var(--red-bg,    rgba(239,68,68,0.08))',   text: 'var(--red)',    border: 'var(--red-border,    rgba(239,68,68,0.25))', solid: '#ef4444', on: '#ffffff' },
+  Master:   { bg: 'var(--purple-bg, rgba(139,92,246,0.08))',  text: 'var(--purple)', border: 'var(--purple-border, rgba(139,92,246,0.25))', solid: '#8b5cf6', on: '#ffffff' },
+  Forensic: { bg: 'rgba(234,88,12,0.10)',                     text: '#ea580c',       border: 'rgba(234,88,12,0.35)',                        solid: '#ea580c', on: '#ffffff' },
 };
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard', 'Master', 'Forensic'];
@@ -209,12 +209,20 @@ function ResultsTable({ results }) {
   if (!results || results.columns.length === 0) {
     return <div style={{ padding: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Query returned no rows.</div>;
   }
+  // Disambiguate duplicate column names (e.g. SELECT u.user_id, e.user_id → two 'user_id'
+  // columns). The data is fine and index-aligned; we just label repeats #2, #3 so a real
+  // duplicate reads clearly instead of looking like a misaligned bug.
+  const seen = {};
+  const headerLabels = results.columns.map(col => {
+    seen[col] = (seen[col] || 0) + 1;
+    return seen[col] > 1 ? col + ' #' + seen[col] : col;
+  });
   return (
     <div style={{ overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', fontFamily: 'monospace' }}>
         <thead>
           <tr style={{ background: 'var(--surface-2)' }}>
-            {results.columns.map((col, ci) => (
+            {headerLabels.map((col, ci) => (
               <th key={ci} style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600, fontSize: '0.7rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{col}</th>
             ))}
           </tr>
@@ -325,11 +333,13 @@ function ProblemListRow({ p, isSolved, onSelect }) {
         background: isSolved ? 'var(--green)' : 'var(--border)',
         border: isSolved ? 'none' : '1.5px solid var(--border)',
       }} />
-      {/* Difficulty */}
+      {/* Difficulty — solid, uniform, self-contained block (one fixed size per row) */}
       <span style={{
-        fontSize: '0.62rem', fontWeight: 700, padding: '2px 0', borderRadius: '99px',
-        background: ds.bg, color: ds.text, border: '1px solid ' + ds.border,
+        fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.02em',
+        padding: '4px 0', borderRadius: '4px',
+        background: ds.solid, color: ds.on, border: 'none',
         display: 'block', width: '100%', boxSizing: 'border-box', textAlign: 'center',
+        textTransform: 'uppercase',
       }}>{p.difficulty}</span>
       {/* Company logos (fixed-width cell → titles align) */}
       <CompanyLogos p={p} />
@@ -481,16 +491,18 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
         overflow: 'hidden',
         marginBottom: '2rem',
       }}>
-        {/* List header */}
+        {/* List header — same grid template as ProblemListRow so labels sit over columns */}
         <div style={{
-          display: 'flex', alignItems: 'center', gap: '0.65rem',
+          display: 'grid',
+          gridTemplateColumns: '12px 66px 72px minmax(0, 1fr) auto',
+          alignItems: 'center', gap: '0.6rem',
           padding: '0.4rem 0.85rem',
           background: 'var(--surface-2)', borderBottom: '1px solid var(--border)',
         }}>
-          <span style={{ width: 7, flexShrink: 0 }} />
-          <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', minWidth: 48 }}>Level</span>
-          <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', minWidth: 80 }}>Company</span>
-          <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', flex: 1 }}>Problem</span>
+          <span />
+          <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', textAlign: 'center' }}>Level</span>
+          <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)' }}>Company</span>
+          <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)' }}>Problem</span>
           <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)' }}>Topics</span>
         </div>
         {filtered.length === 0 ? (

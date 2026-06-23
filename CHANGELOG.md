@@ -4,6 +4,16 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.62.0] — 2026-06-24 [DIFFICULTY BLOCKS · DE-RAIL · DUP-COLUMN TABLE FIX]
+
+Three fixes from a live review pass:
+
+1. **Results table dup-column bug.** A join selecting `user_id` from two tables returns sql.js columns `["user_id","user_id","event_name"]` with aligned rows `[1,1,"app_open"]` — verified by running sql.js directly. The garble (event_name shoved aside, data under wrong header) was a React reconciliation bug from the old `key={col}` reusing DOM nodes across duplicate names as results changed; the source already had `key={ci}` but the live site predated it, so it ships now. Also disambiguate duplicate headers in `ResultsTable` (`user_id`, `user_id #2`) so a real duplicate reads as intentional, not broken. File: `SqlLabPage.jsx`.
+
+2. **Difficulty → solid uniform block.** `ProblemListRow` difficulty badge was a translucent rounded pill. Now a solid, fixed-size rectangular block (square `4px` corners, solid per-level fill via new `DIFF_COLOR[d].solid`/`.on`, uppercase, identical width/height every row). Browse list header converted from mismatched flex widths to the same grid template as the rows so column labels sit over their columns. File: `SqlLabPage.jsx`.
+
+3. **De-rail (A + B).** Removed the two structural divider lines the user flagged: the sidebar's 2px `border-right` plus the 1px hairline baked into its `box-shadow` (kept only the soft blur for depth) — the prominent left rail on every page — and the top-bar `border-bottom`. Files: `index.css` (`.app-sidebar`, `.mobile-topbar`). Note: on desktop there is no global top bar in markup, so if a specific top line persists on a screen it's a per-section border to point at.
+
 ## [5.61.0] — 2026-06-24 [TAG ALL SAME-INDUSTRY COMPANIES (UNCAP alsoAskedAt)]
 
 ### Company tagging widened — top companies now show realistic problem counts
