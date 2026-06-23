@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.55.0] — 2026-06-24 [FIX: CMD/CTRL+ENTER (CHECK) IN CODEMIRROR EDITOR]
+
+### Cmd/Ctrl+Enter stopped running Check after the CodeMirror swap
+
+CodeMirror's default keymap binds `Mod-Enter` to "insert blank line," which outranked the custom Check binding in `SqlEditor.jsx`, so Cmd/Ctrl+Enter inserted a line instead of running the query. Fix: wrapped the editor's keymap in `Prec.highest(...)` so the Check / comment / indent bindings take priority over the default keymap (`src/components/shared/SqlEditor.jsx`; `Prec` imported from `@uiw/react-codemirror`, no new dep). Build verified (870 modules). Cmd/Ctrl+Enter = Check, Cmd/Ctrl+/ = comment, Tab/Shift-Tab = indent now all win over defaults.
+
 ## [5.54.0] — 2026-06-24 [FIX: GLOBAL SHORTCUTS FIRED WHILE TYPING IN CODEMIRROR]
 
 ### Single-key shortcuts (s, m, r, …) navigated away while typing in the SQL editor
