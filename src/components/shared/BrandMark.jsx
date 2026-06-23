@@ -4,8 +4,8 @@
 // descriptor — a deliberate override of HQ's assigned indigo track accent (Sidharth's call).
 // PAL token map (spec → PAL CSS vars): --ink-hi → --text, --ink-low → --text-dim,
 // --rim → --border, --surface and --font-mono are used as-is.
-const SEAM = '#FB5247';          // brand red — the fault-glyph (CONSTANT — do not change)
-const PAL_ACCENT = 'var(--accent)'; // PAL signature blue — descriptor only (seam stays red)
+const SEAM = '#FB5247';      // brand red — the fault-glyph (CONSTANT — do not change)
+const PAL_ACCENT = '#5A7FE8'; // PAL signature blue — fixed bright blue, reads on dark + light (descriptor only; seam stays red)
 
 function Seam({ h = 28 }) {
   const w = Math.round(h * 0.32);
