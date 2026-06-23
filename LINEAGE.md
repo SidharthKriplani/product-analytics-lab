@@ -4,6 +4,18 @@ This is the narrative history of PAL. Not a version list (that's CHANGELOG.md) �
 
 ---
 
+### v5.46.0 — PAL joins the BreakLabs house brand, and its nav grows up (2026-06-23)
+
+The session PAL stopped looking like a standalone product and started looking like one lab in a family. Three identity-level shifts landed together.
+
+First, the **brand**. PAL had carried its own purple confidence-interval mark since the beginning. HQ's D-19 unification replaced it with the shared `break⌇labs` wordmark and its red fault-seam — the constant every lab now wears — leaving only a per-lab descriptor to say which lab you're in. PAL is the canonical-UI owner, so the `BrandMark` component was authored here first and wired into all seven brand surfaces. The one place PAL asserted itself: the descriptor stayed PAL's own blue, not the indigo the spec handed it — a small act of identity inside the shared frame.
+
+Second, the **nav**. The sidebar had grown by accretion into domain buckets (Experiments, Analytics, Product, Drills, Tools…). It was rebuilt onto the four-frame competence model — KNOW, DO, BUILD, JUDGE — that governs every BreakLabs lab, so a user now reads the product as a ladder from recall to judgment rather than a pile of rooms. PAL diverged from the shared spec in two deliberate ways: it kept its own cross-cutting space as a **LIVE** simulation section plus a quiet **EXTRAS** drawer instead of the spec's PREP&ASSESS, and it refused the mobile bottom-nav the standard prescribes — PAL's sidebar is its mobile nav, full stop. Under the hood the hand-maintained active-state chain and the snap-open menus were replaced with a derived, animated, accessible accordion.
+
+Third, a **course-correction on taste**. The dark theme had drifted, in an earlier redesign, from PAL's original navy to a warm "casefile" brown-black. It was pulled back to the navy. Small thing, but it's the through-line of this whole session: the house brand sets the frame, and within it PAL keeps the blues it was always known by.
+
+The work shipped to production the same day; the only drag was a tangled two-working-copies git situation and an iCloud-evicted asset that stalled the build — infrastructure, not design.
+
 ### v5.40.1–v5.43.0 — LLM content migration + multi-company tagging (2026-06-21)
 
 Three sessions of content infrastructure work. The SQL Lab problem bank (182 problems) was migrated from a flat hint system to a structured `hintSteps` format using a local Qwen3-8B model (LM Studio), then annotated with multi-company tagging via the same LLM pipeline.

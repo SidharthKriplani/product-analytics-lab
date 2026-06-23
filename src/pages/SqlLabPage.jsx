@@ -687,6 +687,127 @@ function StudyPlanModal({ solved, onClose, onApply }) {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
+// ─── Judgment layer — the multi-method / dial / MCQ surface (JUDGE frame) ──────
+// Renders only when a problem carries a genuine fork (>= 2 methods). Single-method
+// / empty-dial problems return null, so this is safe to drop on every problem.
+function JudgmentLayer({ problem }) {
+  const methods = problem.methods || [];
+  const dial = problem.dial || { axes: [], rules: [] };
+  const mcqs = problem.mcqs || [];
+  const [openSql, setOpenSql] = useState(null);
+  const [picks, setPicks] = useState({});
+  if (methods.length < 2) return null;
+
+  const nameById = {};
+  methods.forEach(function (m) { nameById[m.id] = m.name; });
+  const canonical = problem.canonicalMethodId;
+
+  function badge(color, bg) {
+    return { padding: '1px 6px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: color, background: bg, whiteSpace: 'nowrap' };
+  }
+  const subhead = { fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--purple)', marginBottom: '0.4rem' };
+
+  return (
+    <div style={{
+      borderLeft: '3px solid var(--purple)',
+      background: 'var(--purple-bg, rgba(107,63,160,0.06))',
+      borderRadius: '0 8px 8px 0',
+      padding: '0.85rem 1rem',
+      display: 'flex', flexDirection: 'column', gap: '0.85rem',
+    }}>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--purple)' }}>
+        Judgment layer — more than one valid answer
+      </div>
+
+      {/* Methods */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+        {methods.map(function (m) {
+          const isOpen = openSql === m.id;
+          return (
+            <div key={m.id} style={{ border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--surface)', overflow: 'hidden' }}>
+              <button onClick={function () { setOpenSql(isOpen ? null : m.id); }} style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.5rem 0.7rem', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <span style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text)', flex: 1 }}>{m.name}</span>
+                {m.id === canonical && <span style={badge('var(--teal)', 'var(--teal-bg, rgba(0,124,137,0.1))')}>Reference</span>}
+                {m.isTrap && <span style={badge('var(--red, #dc2626)', 'var(--red-bg, rgba(220,38,38,0.1))')}>Trap · runs, wrong</span>}
+                <span style={{ fontSize: '0.7rem', opacity: 0.5, color: 'var(--text-muted)' }}>{isOpen ? '▾' : '▸'}</span>
+              </button>
+              {isOpen && (
+                <div style={{ padding: '0 0.7rem 0.6rem' }}>
+                  <pre style={{ margin: '0 0 0.5rem', padding: '0.5rem', background: 'var(--surface-2)', borderRadius: '4px', fontSize: '0.74rem', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: 1.5, color: 'var(--text)' }}>{m.sql}</pre>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+                    <strong style={{ color: 'var(--text)' }}>Tradeoff:</strong> {m.tradeoff}<br />
+                    <strong style={{ color: 'var(--text)' }}>Breaks when:</strong> {m.breaksWhen}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Dial */}
+      {dial.rules && dial.rules.length > 0 && (
+        <div>
+          <div style={subhead}>Which method when</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            {dial.rules.map(function (r, i) {
+              const when = Object.keys(r.when || {}).map(function (k) { return k + ' = ' + r.when[k]; }).join(' · ');
+              const best = (r.ranking && r.ranking[0]) ? (nameById[r.ranking[0]] || r.ranking[0]) : null;
+              return (
+                <div key={i} style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  <span style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'var(--text-muted)' }}>{when || 'default'}</span>
+                  {best ? <> {'→'} <strong style={{ color: 'var(--text)' }}>{best}</strong></> : null}
+                  {r.reason ? ' — ' + r.reason : ''}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* MCQs */}
+      {mcqs.length > 0 && (
+        <div>
+          <div style={subhead}>Test your judgment</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            {mcqs.map(function (q) {
+              const pick = picks[q.id];
+              return (
+                <div key={q.id} style={{ border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--surface)', padding: '0.6rem 0.7rem' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.5rem', lineHeight: 1.5 }}>{q.stem}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                    {(q.options || []).map(function (optId) {
+                      const chosen = pick === optId;
+                      const isAns = optId === q.answerId;
+                      let bg = 'var(--surface-2)', col = 'var(--text-muted)', bd = 'var(--border)';
+                      if (pick) {
+                        if (isAns) { bg = 'var(--green-bg, rgba(22,163,74,0.12))'; col = 'var(--green-text, var(--green))'; bd = 'var(--green)'; }
+                        else if (chosen) { bg = 'var(--red-bg, rgba(220,38,38,0.1))'; col = 'var(--red-text, var(--red))'; bd = 'var(--red)'; }
+                      }
+                      return (
+                        <button key={optId} disabled={!!pick} onClick={function () { setPicks(function (p) { const n = Object.assign({}, p); n[q.id] = optId; return n; }); }}
+                          style={{ padding: '0.3rem 0.6rem', borderRadius: '5px', fontSize: '0.76rem', fontWeight: 500, background: bg, color: col, border: '1px solid ' + bd, cursor: pick ? 'default' : 'pointer' }}>
+                          {nameById[optId] || optId}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {pick && (
+                    <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', lineHeight: 1.55, color: 'var(--text-secondary)' }}>
+                      <strong style={{ color: pick === q.answerId ? 'var(--green)' : 'var(--red, #dc2626)' }}>{pick === q.answerId ? 'Correct — ' : 'Not quite — '}</strong>
+                      {q.explanation}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
   const [mode, setMode] = useState(initialProblemId ? 'solve' : 'browse');
   const [problemIdx, setProblemIdx] = useState(function () {
@@ -1244,6 +1365,8 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                 <DebriefPanel text={problem.debrief} />
               </div>
             )}
+            {/* Judgment layer — methods / dial / MCQs (renders only when the problem has a fork) */}
+            <JudgmentLayer problem={problem} />
             {/* Next problem button */}
             <button
               className={correct === true ? 'pal-glow-pulse' : ''}

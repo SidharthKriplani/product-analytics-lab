@@ -198,6 +198,41 @@ export const datamarts = {
           [25, 11, '2024-02-25', 150, 'tablet',  'paid',     0],
         ],
       },
+      signups: {
+        schema: 'CREATE TABLE signups (signup_id INTEGER PRIMARY KEY, user_id INTEGER, referrer_url TEXT, signed_up_at TEXT)',
+        columns: [
+          { name: 'signup_id', type: 'integer' },
+          { name: 'user_id', type: 'integer' },
+          { name: 'referrer_url', type: 'text  full landing URL; NULL or empty = direct / typed-in' },
+          { name: 'signed_up_at', type: 'text  YYYY-MM-DD' },
+        ],
+        rows: [
+          // signup_id, user_id, referrer_url, signed_up_at
+          // Domain (scheme stripped, text before first /) groups these as:
+          //   www.google.com 5 (ids 1,2,8,13,17) | t.co 3 (3,10,16) | direct 2 (NULL id 7, empty id 12)
+          //   news.ycombinator.com 2 (6,18) | www.facebook.com 2 (4,14) | m.facebook.com 1 (5)
+          //   www.bing.com 1 (9) | www.reddit.com 1 (11) | duckduckgo.com 1 (15)
+          // Only ids 1,4,8 carry an explicit utm_source param; most have none (raw query strings vary).
+          [1,  101, 'https://www.google.com/search?q=running+shoes&utm_source=google',        '2024-05-01'],
+          [2,  102, 'https://www.google.com/search?q=yoga+mat',                                '2024-05-01'],
+          [3,  103, 'https://t.co/aB3xZ',                                                      '2024-05-02'],
+          [4,  104, 'https://www.facebook.com/ads?utm_source=facebook&utm_campaign=spring',    '2024-05-02'],
+          [5,  105, 'https://m.facebook.com/story',                                            '2024-05-03'],
+          [6,  106, 'https://news.ycombinator.com/item?id=39021',                              '2024-05-03'],
+          [7,  107, null,                                                                       '2024-05-04'],
+          [8,  108, 'https://www.google.com/search?q=desk+lamp&utm_source=google',             '2024-05-04'],
+          [9,  109, 'https://www.bing.com/search?q=headphones',                                '2024-05-05'],
+          [10, 110, 'https://t.co/Qw9Lm',                                                      '2024-05-05'],
+          [11, 111, 'https://www.reddit.com/r/buyitforlife/comments/abc',                      '2024-05-06'],
+          [12, 112, '',                                                                         '2024-05-06'],
+          [13, 113, 'https://www.google.com/search?q=smart+watch',                             '2024-05-07'],
+          [14, 114, 'https://www.facebook.com/groups/deals',                                   '2024-05-07'],
+          [15, 115, 'https://duckduckgo.com/?q=plant+pot',                                     '2024-05-08'],
+          [16, 116, 'https://t.co/Zx1Kp',                                                      '2024-05-08'],
+          [17, 117, 'https://www.google.com/',                                                 '2024-05-09'],
+          [18, 118, 'https://news.ycombinator.com/newest',                                     '2024-05-09'],
+        ],
+      },
     },
   },
 
@@ -389,6 +424,80 @@ export const datamarts = {
           [50, 20, 'export',         '2024-03-25', 8],
         ],
       },
+      service_status: {
+        schema: 'CREATE TABLE service_status (check_id INTEGER PRIMARY KEY, service TEXT, status TEXT, checked_at TEXT)',
+        columns: [
+          { name: 'check_id', type: 'integer' },
+          { name: 'service', type: 'text  api | web | payments' },
+          { name: 'status', type: 'text  up | down  (result of a health probe)' },
+          { name: 'checked_at', type: 'text  YYYY-MM-DD HH:MM  probe runs every 5 minutes' },
+        ],
+        rows: [
+          // check_id, service, status, checked_at
+          // Health probe every 5 min. Consecutive 'down' rows = one outage; an 'up' between them ends it.
+          // Collapsing consecutive down-runs into windows (start=first down, end=last down) yields 5 outages:
+          //   api: 09:10-09:20 (3 down checks) and 09:35 (1 down check)
+          //   web: 09:00-09:05 (2 down checks) and 09:20-09:35 (4 down checks)
+          //   payments: 09:15-09:20 (2 down checks)
+          // Grouping all of a service's down checks together (ignoring the 'up' recoveries) wrongly
+          // merges api's two outages into one 25-min window and web's two into one 35-min window.
+          [1,  'api',      'up',   '2024-03-01 09:00'],
+          [2,  'api',      'up',   '2024-03-01 09:05'],
+          [3,  'api',      'down', '2024-03-01 09:10'],
+          [4,  'api',      'down', '2024-03-01 09:15'],
+          [5,  'api',      'down', '2024-03-01 09:20'],
+          [6,  'api',      'up',   '2024-03-01 09:25'],
+          [7,  'api',      'up',   '2024-03-01 09:30'],
+          [8,  'api',      'down', '2024-03-01 09:35'],
+          [9,  'api',      'up',   '2024-03-01 09:40'],
+          [10, 'web',      'down', '2024-03-01 09:00'],
+          [11, 'web',      'down', '2024-03-01 09:05'],
+          [12, 'web',      'up',   '2024-03-01 09:10'],
+          [13, 'web',      'up',   '2024-03-01 09:15'],
+          [14, 'web',      'down', '2024-03-01 09:20'],
+          [15, 'web',      'down', '2024-03-01 09:25'],
+          [16, 'web',      'down', '2024-03-01 09:30'],
+          [17, 'web',      'down', '2024-03-01 09:35'],
+          [18, 'web',      'up',   '2024-03-01 09:40'],
+          [19, 'payments', 'up',   '2024-03-01 09:00'],
+          [20, 'payments', 'up',   '2024-03-01 09:05'],
+          [21, 'payments', 'up',   '2024-03-01 09:10'],
+          [22, 'payments', 'down', '2024-03-01 09:15'],
+          [23, 'payments', 'down', '2024-03-01 09:20'],
+          [24, 'payments', 'up',   '2024-03-01 09:25'],
+        ],
+      },
+      employees: {
+        schema: 'CREATE TABLE employees (employee_id INTEGER PRIMARY KEY, name TEXT, manager_id INTEGER, title TEXT)',
+        columns: [
+          { name: 'employee_id', type: 'integer' },
+          { name: 'name', type: 'text' },
+          { name: 'manager_id', type: 'integer  FK employees.employee_id; NULL for the CEO (org root)' },
+          { name: 'title', type: 'text' },
+        ],
+        rows: [
+          // employee_id, name, manager_id, title
+          // Self-referencing org chart, 5 levels deep. Depth (CEO = 1):
+          //   L1 CEO: 1            L2 VPs: 2,3         L3 managers/director: 4,5,6
+          //   L4: 7,8,9,10,11      L5: 12,13 (under 7), 14 (under 10)
+          // Walking employee -> manager to the root gives each person's depth; a fixed number of
+          // self-joins caps depth at the number of joins written, flattening the deepest layer.
+          [1,  'Dana Reyes',   null, 'CEO'],
+          [2,  'Marcus Hale',  1,    'VP Engineering'],
+          [3,  'Priya Anand',  1,    'VP Sales'],
+          [4,  'Tom Becker',   2,    'Engineering Manager'],
+          [5,  'Sara Kim',     2,    'Engineering Manager'],
+          [6,  'Leo Martin',   3,    'Sales Director'],
+          [7,  'Ava Singh',    4,    'Senior Engineer'],
+          [8,  'Noah West',    4,    'Engineer'],
+          [9,  'Mia Flores',   5,    'Senior Engineer'],
+          [10, 'Jay Patel',    6,    'Account Executive'],
+          [11, 'Ella Brooks',  6,    'Account Executive'],
+          [12, 'Ryan Cole',    7,    'Junior Engineer'],
+          [13, 'Zoe Adams',    7,    'Junior Engineer'],
+          [14, 'Owen Diaz',    10,   'Sales Development Rep'],
+        ],
+      },
     },
   },
 
@@ -555,6 +664,32 @@ export const datamarts = {
           [4, 37, '2024-04-16', null,          null,   490.00],
           [5, 9,  '2024-01-29', '2024-02-20', 'won',  950.00],
           [6, 31, '2024-04-02', null,          null,   3500.00],
+        ],
+      },
+      contacts: {
+        schema: 'CREATE TABLE contacts (id INTEGER PRIMARY KEY, email TEXT, created_at TEXT)',
+        columns: [
+          { name: 'id', type: 'integer  insertion order — lower id = entered first' },
+          { name: 'email', type: 'text  marketing contact email; several appear more than once' },
+          { name: 'created_at', type: 'text  YYYY-MM-DD  when this row was inserted' },
+        ],
+        rows: [
+          // id, email, created_at
+          // Duplicated emails: alice (ids 1,3,7), bob (2,5,11), carol (4,9), eve (8,12).
+          // Original (first-entered) row per email = min id: 1,2,4,6,8,10 — these are the keepers.
+          // Duplicate rows to remove: 3,5,7,9,11,12.
+          [1,  'alice@shop.com', '2024-01-05'],
+          [2,  'bob@shop.com',   '2024-01-06'],
+          [3,  'alice@shop.com', '2024-01-10'],
+          [4,  'carol@shop.com', '2024-01-11'],
+          [5,  'bob@shop.com',   '2024-01-12'],
+          [6,  'dan@shop.com',   '2024-01-13'],
+          [7,  'alice@shop.com', '2024-01-15'],
+          [8,  'eve@shop.com',   '2024-01-16'],
+          [9,  'carol@shop.com', '2024-01-18'],
+          [10, 'frank@shop.com', '2024-01-20'],
+          [11, 'bob@shop.com',   '2024-01-22'],
+          [12, 'eve@shop.com',   '2024-01-25'],
         ],
       },
     },
@@ -742,6 +877,53 @@ export const datamarts = {
           [28, 11, 6, 'view',    '2023-11-28'],
           [29, 9,  7, 'view',    '2023-12-02'],
           [30, 12, 8, 'view',    '2023-12-06'],
+        ],
+      },
+      clickstream: {
+        schema: 'CREATE TABLE clickstream (event_id INTEGER PRIMARY KEY, user_id INTEGER, event_name TEXT, occurred_at TEXT)',
+        columns: [
+          { name: 'event_id', type: 'integer' },
+          { name: 'user_id', type: 'integer  FK users' },
+          { name: 'event_name', type: 'text  app_open | content_view | like | share | comment | purchase' },
+          { name: 'occurred_at', type: 'text  YYYY-MM-DD HH:MM  minute-level timestamp' },
+        ],
+        rows: [
+          // event_id, user_id, event_name, occurred_at  (timestamps to the minute)
+          // Session rule: a gap > 30 min from a user\'s previous event starts a new session.
+          // user 1: 09:00,09:10,09:25 then 11:00 (95-min gap) -> 2 sessions (3 events + 1 event)
+          // user 2: 14:00,14:20,14:45,15:10 all <=30 min apart -> 1 continuous session (4 events)
+          // user 3: 08:00,08:15 | 09:00 (45-min gap) | 12:30,12:50 (210-min gap) -> 3 sessions
+          // user 4: 10:00,10:30 (exactly 30, NOT > 30, same session) then 11:05 (35-min gap) -> 2 sessions
+          // user 5: 18:00,18:25,18:50,19:15,19:40 all 25 min apart -> 1 long session (5 events)
+          // user 6: single event -> 1 session
+          // user 7: 07:00,07:20 | 08:30 (70-min gap) -> 2 sessions
+          // Rows are interleaved by global time so a query that forgets PARTITION BY user_id
+          // chains one user\'s last event into the next user\'s first and miscounts sessions.
+          [1,  6,  'app_open',     '2024-02-01 06:30'],
+          [2,  3,  'app_open',     '2024-02-01 08:00'],
+          [3,  7,  'app_open',     '2024-02-01 07:00'],
+          [4,  3,  'content_view', '2024-02-01 08:15'],
+          [5,  7,  'content_view', '2024-02-01 07:20'],
+          [6,  1,  'app_open',     '2024-02-01 09:00'],
+          [7,  3,  'like',         '2024-02-01 09:00'],
+          [8,  1,  'content_view', '2024-02-01 09:10'],
+          [9,  1,  'like',         '2024-02-01 09:25'],
+          [10, 7,  'app_open',     '2024-02-01 08:30'],
+          [11, 4,  'app_open',     '2024-02-01 10:00'],
+          [12, 4,  'content_view', '2024-02-01 10:30'],
+          [13, 1,  'share',        '2024-02-01 11:00'],
+          [14, 4,  'like',         '2024-02-01 11:05'],
+          [15, 3,  'comment',      '2024-02-01 12:30'],
+          [16, 3,  'share',        '2024-02-01 12:50'],
+          [17, 2,  'app_open',     '2024-02-01 14:00'],
+          [18, 2,  'content_view', '2024-02-01 14:20'],
+          [19, 2,  'like',         '2024-02-01 14:45'],
+          [20, 2,  'comment',      '2024-02-01 15:10'],
+          [21, 5,  'app_open',     '2024-02-01 18:00'],
+          [22, 5,  'content_view', '2024-02-01 18:25'],
+          [23, 5,  'like',         '2024-02-01 18:50'],
+          [24, 5,  'share',        '2024-02-01 19:15'],
+          [25, 5,  'purchase',     '2024-02-01 19:40'],
         ],
       },
     },

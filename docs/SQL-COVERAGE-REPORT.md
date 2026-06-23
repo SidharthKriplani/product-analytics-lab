@@ -2,6 +2,8 @@
 
 _Created 2026-06-22. Audits the 182-problem SQL Lab bank against `docs/SQL-VARIETY-BENCHMARK.md` (the 18-category bar derived from DataLemur / StrataScratch / LeetCode SQL 50 + Advanced 50 / HackerRank / Mode / InterviewQuery / SQLZoo). Audit/content only — no problems built this pass. Method and proposals below._
 
+> **✅ UPDATE 2026-06-23 (V5.47.0): gaps closed.** All 10 proposed specs were built and shipped (propose-only/unpushed) — sess1/sess2, med1/med2, gaps2/gaps3, set1, rec1, str1, dedup1 — taking the bank 182 → 192. The two previously-MISSING categories (sessionization, string) and the thin tier (true median, gaps-and-islands, set ops, recursive, dedup) are now covered. New headline: **18/18 benchmark categories have ≥1 problem.** Five new seed tables added: `clickstream` (consumer), `service_status` + `employees` (saas), `signups` (ecomm), `contacts` (fintech). The original audit below is preserved as the pre-build snapshot.
+
 ---
 
 ## Method

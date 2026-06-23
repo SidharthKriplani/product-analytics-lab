@@ -4,6 +4,59 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.48.0] — 2026-06-23 [JUDGMENT LAYER — HARNESS + FULL HARD/MASTER TIER (54 PROBLEMS)]
+
+### First slice of the multi-method judgment layer (the productized JUDGE frame)
+
+Implements `docs/JUDGMENT-LAYER-SPIKE.md` for a pilot set — the per-problem `methods[] / dial / mcqs / canonicalMethodId / isTrap` schema, plus the verification harness the spike said was the costly, easy-to-skip part. Additive and back-compatible: existing `solution`/`checkValues`/`debrief` stay the canonical correctness check; `methods[]` is the new judgment surface.
+
+- **New harness `scripts/verify_methods.py`** (reuses `audit_sql_lab.py`'s db builder). Per problem with `methods[]`: runs every method and asserts non-trap methods are byte-identical to `solution`, trap methods (`isTrap:true`) run AND diverge, and `canonicalMethodId` resolves to a non-trap method that matches `solution`. Added gate: every MCQ option/answerId must reference a real method id (prevents dial/MCQ drift). Exits non-zero on failure — a new pre-commit gate, same tier as the apostrophe/brace audits.
+- **6 pilot problems** got `methods[]`/`dial`/`mcqs` (22 methods total, all executed-verified): `sql-m13` latest-per-account (window/correlated/selfjoin/aggregate — the spike's worked pattern + ties fork), `sql-m14` rank-within-category (ROW_NUMBER/RANK/DENSE_RANK), `sql-med1` median (midpoint/count-over + AVG trap), `sql-med2` p90 (nearest-rank/cume_dist + PERCENT_RANK-drop trap), `sql-rec1` org depth (recursive vs fixed-joins trap), `sql-sess1` sessionization (strftime vs julianday trap). Each trap reuses the problem's existing "wrong answer that runs"; dial/MCQ cost reasoning cites mechanism (nested-loop O(n·m), shuffle+sort, float boundary) with magnitudes marked illustrative.
+
+- **Scaled to the FULL Hard/Master tier** (6 batches, each subagent-built + independently gate-verified): **54 problems now carry the layer, 169 methods, all harness-verified** (non-traps byte-match `solution`, traps run+diverge). Spans top-N-per-group, rank-within-group, median/percentile, gaps-and-islands, sessionization, recursion, anti-join, cohort/retention, ratio, MoM, interval-overlap. The honesty rule (spike §3.3) held: **4 genuine single-method composite scorers got an empty dial** (`sql-master01` risk scoring, `sql-master04` account health, `sql-master10` high-risk flagging, `sql-h10` merchant exposure) rather than a faked fork — the empty dial is itself the "this is fluency, not judgment" signal.
+- **Side benefit — ~13 stale debriefs fixed.** Authoring each method against the live seed surfaced legacy debrief prose whose "wrong answer"/forensic-trap claims no longer diverged on the current data (`sql-h02`, `h07`, `h17`, `h24`, `h10`, `h32`, `master01`, `master05`, `master12`, `master13`, `master19`, `master21`, `master25`). Each stale claim was rewritten to the genuinely-divergent trap with verified numbers; methods were always correct, only the prose had drifted.
+
+Difficulty-gates the rest: Easy/Medium stay single-method (empty dial = the signal they're fluency-only).
+
+- **Runner UI built** (`src/pages/SqlLabPage.jsx` → new module-scope `JudgmentLayer` component). After the solution reveals, a purple JUDGE-frame panel renders: collapsible method cards (name + SQL + tradeoff + "breaks when", a teal *Reference* badge on the canonical and a red *Trap · runs, wrong* badge on `isTrap` methods), a "which method when" dial (each rule's conditions → best method + reason), and interactive MCQs that grade the pick and reveal the cost explanation. `JudgmentLayer` returns null when `methods.length < 2`, so it's safe on every problem and shows nothing on empty-dial/unlayered ones.
+
+Gates green: harness 54/54 pass (169 methods, 0 failures), audit 0 T1 (count unchanged at 192), content scan 0 flags, brace 0; `SqlLabPage.jsx` parses clean. Files: `scripts/verify_methods.py` (new), `src/data/sqlLabProblems.js`, `src/pages/SqlLabPage.jsx`. **Propose-only — not pushed.**
+
+---
+
+## [5.47.0] — 2026-06-23 [SQL COVERAGE GAPS CLOSED — 18/18 BENCHMARK CATEGORIES]
+
+### 10 new SQL Lab problems built against the Variety Benchmark gaps (182 → 192)
+
+Closed the gaps `docs/SQL-COVERAGE-REPORT.md` flagged vs the 18-category benchmark. Every problem's `checkValues` derived from REAL executed output (`scripts/run_sql.py`) and every debrief built from a wrong-answer variant that genuinely runs-but-diverges (the V5.44 standard). 5 new seed tables added, each to an existing datamart, no existing table touched.
+
+- **Sessionization (was 0):** `sql-sess1` (Hard) sessionize a clickstream by 30-min gap; `sql-sess2` (Master) sessions/user + avg visit length. Needed a new timestamped `clickstream` table in `consumer` (the existing `events` table is date-only). Used `strftime('%s')` integer-second gap math — `julianday()` evaluates a clean 30-min gap as `30.0000002` min and wrongly trips `> 30` (now the `>` vs `>=` teaching point).
+- **True median (was 0 — the 3 prior "median" problems all used PERCENT_RANK):** `sql-med1` (Medium) median order value by channel via ROW_NUMBER midpoint; `sql-med2` (Hard) p90 delivery time per city.
+- **Gaps-and-islands (was 1):** `sql-gaps2` (Hard) longest consecutive order-day streak; `sql-gaps3` (Hard) collapse status pings into outage windows (new `service_status` table in `saas`).
+- **Set ops (was 1):** `sql-set1` (Medium) retained vs churned YoY via INTERSECT/EXCEPT.
+- **Recursive (was 2):** `sql-rec1` (Hard) org reporting-chain depth via recursive CTE (new `employees` table in `saas`).
+- **String (was 0):** `sql-str1` (Medium) parse domain/utm_source from referrer URL (new `signups` table in `ecomm`).
+- **Dedup (was thin):** `sql-dedup1` (Easy) delete-dup-emails-keep-min-id classic (new `contacts` table in `fintech`).
+
+Gates all green: `audit_sql_lab.py` 0 T1 failures (192 loaded), `sql_content_scan.mjs` 0 content flags, apostrophe audit OK, brace diff 0. Only non-blocking T2 warnings: descriptive category tags (sessionization/set-ops/etc.) outside the controlled vocab — intentional. Files: `src/data/sqlLabProblems.js`, `src/data/sqlLabDatamarts.js`. **Propose-only — not yet pushed.**
+
+---
+
+## [5.46.0] — 2026-06-23 [BREAKLABS BRAND (D-19) + FOUR-FRAME NAV + NAVY DARK THEME]
+
+Three landed-and-deployed changes this session. All built on macOS and pushed to the live remote via the `/tmp`-clone overlay (the mounted copy's git is stale at V5.32.2 — two-working-copies issue, NEXT.md; version numbers here continue the mounted CHANGELOG and may need reconciliation with the remote once the copies are merged).
+
+### 1. BreakLabs logo rollout (D-19, HQ/BRANDMARK-ROLLOUT.md)
+New `src/components/shared/BrandMark.jsx` — the canonical co-brand lockup: `break⌇labs` wordmark + red fault-seam (`#FB5247`, the cross-lab constant) + a per-lab descriptor. Variants: `full` (inline), `wordmark`, `monogram`, and `stacked` (added so the sidebar shows the descriptor under the wordmark within the 222px rail). Wired into all 7 placement slots: sidebar logo, favicon (new monogram glyph), OG share card (regenerated 1200×630), Home hero, AuthModal + GateOverlay, Footer (full lockup), and the App loading splash (monogram). Old `public/favicon.svg` + `public/og-image.png` archived to `public/_legacy/` (D-18). **PAL override:** the descriptor uses PAL's signature blue `#5A7FE8`, not the indigo `#6366F1` the spec assigned PAL (Sidharth's call) — noted in the BrandMark header + HQ/LEDGER. Files: `BrandMark.jsx` (new), `Sidebar.jsx`, `Home.jsx`, `AuthModal.jsx`, `GateOverlay.jsx`, `Footer.jsx`, `App.jsx`, `Icon.jsx`, `public/favicon.svg`, `public/og-image.png`, `public/_legacy/*`.
+
+### 2. Four-frame accordion nav (HQ DESIGN-STANDARD "THE SIDEBAR STANDARD", DEC-15)
+`src/components/layout/Sidebar.jsx` rewritten from domain sections (FOUNDATIONS/ROOMS/DRILLS/LEARN/TOOLS) to the four frames **KNOW · DO · BUILD · JUDGE**, plus a **LIVE** section (Mock Interview + Defense Strategy) and a quiet bottom **EXTRAS** catch-all (Behavioral · Saved · Study Room) — PAL's replacement for the spec's single PREP&ASSESS slot. Old Experiments/Analytics/Product groups survive as sub-groups inside JUDGE; Stats + Estimation retagged JUDGE (Sidharth's call, overriding the FOUR-FRAME-AUDIT fluency tag). Engine upgrades per the standard: one-open-per-level accordion (single `openFrame`/`openSub`), measured-height `Collapsible` (animates `scrollHeight`, hoisted to module scope so it doesn't snap), a derived `pageToTab` active-state replacing the 40-line `getIsActive` ||-chain, `aria-expanded`/`aria-current`, and frame icons (`terminal`/`hammer`/`scale`/`more-horizontal` added to `Icon.jsx`). **PAL declines the mobile BottomNav** the spec calls for — the sidebar drawer is PAL's mobile nav (Sidharth's call). All 38 nav ids verified to route; Babel-parse clean. Spec: `docs/NAV-REFRAME-SPEC.md` (new). Files: `Sidebar.jsx`, `Icon.jsx`, `index.css` (reduced-motion guard for `.pal-collapsible`).
+
+### 3. Dark theme restored to navy
+`src/index.css` — the dark theme's warm "casefile" palette (`--bg #15120D` brown-black) was reverted to the earlier navy (`--bg #070A12`, surfaces `#0D1320`/`#121A2A`/`#172033`, borders `#2A35..`) in both dark blocks (`:root[data-theme="dark"]` and `.mode-casefile.theme-dark`), keeping the blue accent. Restores PAL's earlier blue dark look (Sidharth's call). Light/cream theme untouched.
+
+---
+
 ## [5.45.0] — 2026-06-23 [SQL LAB EDITOR HALF-HEIGHT]
 
 ### Editor pane capped to ~half the viewport so results show without scrolling
