@@ -1265,7 +1265,33 @@ Built a content-quality gate (`scripts/sql_content_scan.mjs`, exits non-zero on 
 
 `sql-meesho-04` joined transactions and reviews in one query (`LEFT JOIN transactions … LEFT JOIN reviews`), fanning out so `SUM(sale_price)` multiplied by review count — TechVault read ₹5,948 vs the true ₹1,487 (×4, four reviews). It passed Tier-1 only because `checkValues` was `[{name:'TechVault'}]` with no numeric value. **Fix:** solution rewritten to pre-aggregate transactions and reviews in separate subqueries; `checkValues` strengthened to lock GMV (1487) + rank, so a regression now fails the mechanical gate. **Lesson:** every checkValue should pin at least one computed numeric, not just a label.
 
-### 177. ✅ Four shipped debriefs carried false numeric claims (found by execution)
+### 178. ✅ Easy-tier difficulty miscalibration — 7 problems above Easy, incl. the on-ramp (sql-e01) — FIXED V5.51.0
+
+**Version:** ✅ Applied V5.51.0 (2026-06-24)
+**Type:** Content Integrity / Difficulty Tier Consistency / First-Time User
+
+Audited all 50 Easy problems by what the solution actually requires. Three buckets:
+- **Mis-tiered → Medium (7):** `sql-e01`, `sql-e11`, `sql-e72` (anti-joins: LEFT JOIN + IS NULL), `sql-dedup1` (correlated subquery), `sql-e03`, `sql-e10`, `sql-e42` (3-table joins). None is genuine beginner SQL.
+- **Borderline (18):** single 2-table INNER joins (some + HAVING) — defensible as Easy, the tier ceiling.
+- **Genuinely Easy (25):** single-table SELECT / WHERE / GROUP BY.
+
+**On-ramp issue:** `sql-e01` (an anti-join) is problem 1/192 — the first thing a beginner hits. Reclassifying it to Medium auto-fixes the lead (next Easy in array order is `sql-e02`, a plain GROUP BY).
+
+**Resolution (V5.51.0):** all 7 reclassified to `difficulty: 'Medium'` (Easy 50→43, Medium 55→62). `sql-e01` is no longer the lead — first problem is now a true single-table GROUP BY. Gates re-verified green. The 18 borderline 2-table inner joins kept as the Easy ceiling.
+
+### 179. ⚠️ Medium-tier audit + SQL difficulty rubric established
+
+**Version:** Open (2026-06-24) — rubric shipped (`docs/SQL-DIFFICULTY-RUBRIC.md`); Medium re-tiers propose-only
+**Type:** Content Integrity / Difficulty Tier Consistency
+
+Wrote `docs/SQL-DIFFICULTY-RUBRIC.md` — tier = MAX(mechanical load, conceptual load); single window function = Medium (NOT Hard); basic 2-table inner join = Easy; explicit window frames / 2+ windows / gaps-islands / sessionization / recursion / 3+ CTE = Hard; multi-CTE analytics narrative = Master; plus a **consistency rule** (same primary pattern ⇒ same tier).
+
+Audited Medium against it. A naive classifier flagged 80/156 disagreements, but ~73 are threshold noise (single window functions read as "advanced"; basic joins read as Medium) + the conceptual axis the classifier can't see — so **the Medium tier is largely correctly tiered; not mass-flipping.** Real findings to review (propose-only, judgment calls):
+- **Consistency mismatch:** `sql-m47` "Rolling 3-Order Average" (Medium) and `sql-h52` "Rolling 3-Attempt Average" (Hard) are the *same* pattern — `AVG() OVER (… ROWS BETWEEN 2 PRECEDING …)` — tiered differently. Pick one tier for both (a single framed window leans Medium).
+- **`sql-med1`** (true median via multi-CTE window-midpoint) is conceptually Hard, currently Medium.
+- `sql-m26` "Session Gap Analysis" verified correctly Medium (single LAG gap, not sessionization).
+
+No auto-flips on Medium — these need a tier decision. The rubric's consistency rule should be run bank-wide (group by primary pattern, flag multi-tier patterns) as the durable check.
 
 **Version:** Fixed V5.44.0
 **Type:** Content staleness / claim-data alignment

@@ -4,6 +4,14 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.51.0] — 2026-06-24 [DIFFICULTY RUBRIC + EASY-TIER RECALIBRATION]
+
+### SQL difficulty rubric established; 7 mis-tiered Easy problems moved to Medium
+
+Added `docs/SQL-DIFFICULTY-RUBRIC.md` — the standard for assigning `difficulty`: tier = MAX(mechanical load, conceptual load), with concrete per-tier signals (single window fn = Medium; explicit frames / 2+ windows / gaps-islands / recursion / 3+ CTE = Hard; multi-CTE narrative = Master) and a consistency rule (same primary pattern ⇒ same tier).
+
+Audited the Easy tier (50 problems) against it and reclassified 7 that were unambiguously above Easy → Medium: `sql-e01`, `sql-e11`, `sql-e72` (anti-joins), `sql-dedup1` (correlated subquery), `sql-e03`, `sql-e10`, `sql-e42` (3-table joins). Easy 50→43, Medium 55→62. Fixes the on-ramp: problem 1 was an anti-join (`sql-e01`); the lead is now a true single-table GROUP BY. Medium tier audited too — found largely correct (single window functions are correctly Medium); flagged a consistency mismatch (`m47`/`h52` same rolling-window pattern, different tiers) and `med1` for review — propose-only, no Medium flips applied. `difficulty` is metadata (not gate-validated); gates re-verified green. AUDITS.md #178 (✅) + #179. Files: `src/data/sqlLabProblems.js`, `docs/SQL-DIFFICULTY-RUBRIC.md`.
+
 ## [5.50.0] — 2026-06-24 [FIX SQL LAB DEEP-LINK ROUTING — ALWAYS DEFAULTED TO sql-e01]
 
 ### Deep links to a specific SQL problem (#/sql-lab/sql-e86) opened sql-e01 instead
