@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.61.0] — 2026-06-24 [TAG ALL SAME-INDUSTRY COMPANIES (UNCAP alsoAskedAt)]
+
+### Company tagging widened — top companies now show realistic problem counts
+
+The V5.59 tagger capped `alsoAskedAt` at 3 peers, so every row showed "3 logos +1" and top companies looked thin (Google filtered to just 4 problems). Removed the cap in `scripts/tag_companies_domain.py` — each problem is now tagged with ALL other companies sharing its datamart (= its industry), since a basic ecomm join is genuinely asked at every ecomm company. Re-ran: avg 9.7 companies/problem (ecomm problems carry all 14 ecomm peers, etc.). Company-filter counts are now realistic — Google/Amazon 4→50, eBay 66. Row UI unchanged (3 logos + "+N"). The per-problem-id seeded shuffle still varies which 3 logos show first. Parse OK, mechanical + content gates green. Note: this is same-*industry* tagging; cross-industry generalist tagging (e.g. Google asks every domain) would need the LLM `tag_companies.py` or a curated generalist list. Files: `scripts/tag_companies_domain.py`, `src/data/sqlLabProblems.js`.
+
 ## [5.60.0] — 2026-06-24 [DIFFICULTY CHIPS → UNIFORM FIXED-WIDTH BLOCKS]
 
 ### Difficulty pills now fill their grid cell so they form a clean column

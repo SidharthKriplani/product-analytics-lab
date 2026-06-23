@@ -14,7 +14,8 @@ import json, re, subprocess, sys, os, tempfile, random
 
 JS_PATH = "src/data/sqlLabProblems.js"
 DRY_RUN = '--dry-run' in sys.argv
-MAX_PEERS = 3
+# Tag ALL same-datamart (same-industry) companies — a basic ecomm join is asked at every
+# ecomm company, so the company filter should reflect that. The row UI shows 3 logos + "+N".
 
 
 def load_problems():
@@ -64,8 +65,8 @@ def main():
         pid, comp, dm = p['id'], p.get('company'), p.get('datamartId')
         peers = [c for c in pools.get(dm, []) if c != comp]
         rnd = random.Random(pid)                 # deterministic per problem
-        rnd.shuffle(peers)
-        chosen = peers[:MAX_PEERS]
+        rnd.shuffle(peers)                       # shuffle only varies WHICH 3 logos show first
+        chosen = peers                           # tag ALL applicable same-industry companies
         counts[len(chosen)] = counts.get(len(chosen), 0) + 1
         if not DRY_RUN:
             content = patch(content, pid, chosen)
