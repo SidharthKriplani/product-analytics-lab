@@ -136,6 +136,13 @@ const WALL_TESTIMONIALS = [
     role: 'Data Engineer Intern · SQL Lab',
     quote: 'The Forensic SQL problems changed how I approach queries. Instead of just writing SQL that runs, I started checking whether the output actually makes sense — catching things like integer division silently zeroing out results. That habit alone is worth more than solving 50 standard problems.',
   },
+  {
+    img: '/testimonials/anjali.jpg',
+    name: 'Anjali Yemmanur',
+    href: 'https://www.linkedin.com/in/anjaliyemmanur/',
+    role: 'BI, Metrics & RCA tracks',
+    quote: 'Beyond solving analytical problems and learning frameworks, PAL developed the business and product side — data storytelling, stakeholder communication, decision-making. I now find myself thinking like a data professional presenting insights and recommendations to stakeholders, not just analyzing data and writing observations.',
+  },
 ];
 const TESTIMONIALS = [
   { img: '/testimonials/amaya.jpg',    name: 'Amaya',     href: 'https://www.linkedin.com/in/amaya-bhuyan-91986119b/', role: 'Statistics',     quote: 'I always knew exactly what to focus on next — it felt like a real foundation, not just memorising.' },
@@ -146,6 +153,7 @@ const TESTIMONIALS = [
   { img: '/testimonials/parth.jpg',  name: 'Parth',     href: 'https://www.linkedin.com/in/parthgandhip/',            role: 'Senior Data Analyst', quote: 'PAL feels less like interview prep and more like actual on-the-job training.' },
   { img: '/testimonials/faizan.jpg', name: 'Faizan',    href: 'https://www.linkedin.com/in/faizanxmulla/',            role: 'Data Analyst · IIT Madras', quote: 'I\'ve seen many interview platforms — nothing like this for product analytics.' },
   { img: '/testimonials/rytham.jpg', name: 'Rytham',    href: 'https://www.linkedin.com/in/rythamb47/',               role: 'Data Engineer Intern · SQL Lab', quote: 'Forensic SQL taught me to check whether the output makes sense — not just whether the query runs.' },
+  { img: '/testimonials/anjali.jpg', name: 'Anjali',    href: 'https://www.linkedin.com/in/anjaliyemmanur/',          role: 'BI & Product', quote: 'I think like a data professional presenting insights and recommendations to stakeholders — not just analyzing data and writing observations.' },
 ];
 
 function TestimonialTicker() {
@@ -253,73 +261,6 @@ function TestimonialWall() {
         >
           Show more &darr;
         </button>
-      )}
-    </div>
-  );
-}
-
-const FEEDBACK_KEY = 'pal-pricing-feedback-v1';
-
-function PricingFeedback() {
-  const [value, setValue] = useState('');
-  const [submitted, setSubmitted] = useState(function () {
-    try { return !!localStorage.getItem(FEEDBACK_KEY); } catch (_) { return false; }
-  });
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (!value.trim()) return;
-    try { localStorage.setItem(FEEDBACK_KEY, value.trim()); } catch (_) { /* noop */ }
-    setSubmitted(true);
-  }
-
-  return (
-    <div style={{
-      border: '1px solid var(--border)',
-      borderRadius: '12px',
-      padding: '1.25rem 1.5rem',
-      background: 'var(--surface)',
-      marginBottom: '1.75rem',
-      textAlign: 'center',
-    }}>
-      <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text)', margin: '0 0 0.75rem' }}>
-        Would you pay for this?
-      </p>
-      {submitted ? (
-        <p style={{ fontSize: '0.78rem', color: 'var(--teal)', margin: 0, fontWeight: 600 }}>
-          Thanks — your feedback is saved.
-        </p>
-      ) : (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            value={value}
-            onChange={e => setValue(e.target.value)}
-            placeholder="Yes / No / Maybe — tell us why"
-            style={{
-              border: '1px solid var(--border)', borderRadius: '8px',
-              padding: '0.5rem 0.75rem', fontSize: '0.82rem',
-              color: 'var(--text)', background: 'var(--surface)',
-              outline: 'none', fontFamily: 'inherit', width: '280px', maxWidth: '100%',
-            }}
-            onFocus={e => { e.currentTarget.style.borderColor = 'var(--teal)'; }}
-            onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
-          />
-          <button
-            type="submit"
-            disabled={!value.trim()}
-            style={{
-              padding: '0.5rem 1rem',
-              background: value.trim() ? 'var(--teal)' : 'var(--surface)',
-              color: value.trim() ? '#fff' : 'var(--text-muted)',
-              border: '1px solid var(--border)',
-              borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700,
-              cursor: value.trim() ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
-            }}
-          >
-            Submit
-          </button>
-        </form>
       )}
     </div>
   );
@@ -435,9 +376,6 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
           </div>
         ))}
       </div>
-
-      {/* ── Pricing feedback ── */}
-      <PricingFeedback />
 
       {/* ── Beta access section (quiet) ── */}
       <div style={{

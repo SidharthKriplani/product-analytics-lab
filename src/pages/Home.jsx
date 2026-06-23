@@ -312,6 +312,13 @@ export function Home({ onNavigate, onShowAuth }) {
             img: '/testimonials/swapnil.jpg',
             role: 'Data Scientist',
           },
+          {
+            quote: "I think like a data professional presenting insights and recommendations to stakeholders — not just analyzing data and writing observations.",
+            name: 'Anjali Yemmanur',
+            href: 'https://www.linkedin.com/in/anjaliyemmanur/',
+            img: '/testimonials/anjali.jpg',
+            role: 'BI & Product',
+          },
         ].map(t => (
           <div key={t.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column' }}>
             <p style={{ fontSize: '0.78rem', color: 'var(--text)', lineHeight: 1.6, margin: '0 0 0.875rem', fontStyle: 'italic', flex: 1 }}>
