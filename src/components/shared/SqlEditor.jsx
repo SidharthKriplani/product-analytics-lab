@@ -15,6 +15,7 @@ const BASIC_SETUP = {
   autocompletion: true,   // automatic, fires on typing
   bracketMatching: true,
   closeBrackets: true,
+  searchKeymap: false,    // let Ctrl/Cmd+F reach the browser's find, not CodeMirror's
 };
 const WRAP_STYLE = { fontSize: '0.82rem', border: '1px solid rgba(20,184,166,0.3)', borderRadius: '6px', overflow: 'hidden' };
 

@@ -64,6 +64,7 @@ git push origin main
 
 ## Recently shipped
 
+- ✅ 2026-06-24 — **V5.57.0 Fix: Ctrl/Cmd+F hijacked by CodeMirror search.** Set `searchKeymap: false` in basicSetup so browser find works in the editor. Build verified. File: `SqlEditor.jsx`.
 - ✅ 2026-06-24 — **V5.56.0 Fix: CodeMirror typing lag / dropped keys.** Inline `schema`/`onCheck` props rebuilt the editor's whole extension set every keystroke. Parent now memoizes `cmSchema` per problem; `SqlEditor` reads onCheck via ref, memoizes extensions on `[schema]`, hoists basicSetup/style. Configures once per problem, not per char. Build verified. Files: `SqlEditor.jsx`, `SqlLabPage.jsx`.
 - ✅ 2026-06-24 — **V5.55.0 Fix: Cmd/Ctrl+Enter (Check) in CodeMirror.** Default keymap's Mod-Enter ("insert blank line") outranked the Check binding; wrapped editor keymap in `Prec.highest`. Build verified. File: `src/components/shared/SqlEditor.jsx`.
 - ✅ 2026-06-24 — **V5.54.0 Fix: global single-key shortcuts (s/m/r/…) fired while typing in CodeMirror.** `useKeyboardShortcuts` only skipped input/textarea/select; CodeMirror is a contenteditable div. Added `activeElement.isContentEditable` to the guard. Build verified. File: `src/hooks/useKeyboardShortcuts.js`.

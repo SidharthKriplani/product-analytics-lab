@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.57.0] — 2026-06-24 [FIX: CTRL/CMD+F HIJACKED BY CODEMIRROR SEARCH]
+
+### Ctrl/Cmd+F opened CodeMirror's in-editor find instead of the browser's
+
+CodeMirror's `basicSetup` enables `searchKeymap` by default, which binds Mod-F to its own search panel — intercepting the browser's page find while the editor is focused. Set `searchKeymap: false` in `SqlEditor.jsx`'s basicSetup so Ctrl/Cmd+F passes through to the browser. Build verified (870 modules). File: `src/components/shared/SqlEditor.jsx`.
+
 ## [5.56.0] — 2026-06-24 [FIX: CODEMIRROR TYPING LAG / DROPPED KEYSTROKES]
 
 ### Editor reconfigured its whole extension set on every keystroke
