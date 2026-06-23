@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.54.0] — 2026-06-24 [FIX: GLOBAL SHORTCUTS FIRED WHILE TYPING IN CODEMIRROR]
+
+### Single-key shortcuts (s, m, r, …) navigated away while typing in the SQL editor
+
+After the CodeMirror swap (V5.53), typing `s` in the editor jumped to the Stats room, etc. Cause: `useKeyboardShortcuts` skipped its global single-key shortcuts only when `document.activeElement` was an `input`/`textarea`/`select` — but CodeMirror's editing surface is a `contenteditable` div, which passed the guard, so every letter shortcut fired mid-typing. Fix: also skip when `activeElement.isContentEditable` is true (`src/hooks/useKeyboardShortcuts.js`). One-line guard; build verified (870 modules). Affects all single-key shortcuts in any contenteditable surface, present and future.
+
 ## [5.53.0] — 2026-06-24 [SQL EDITOR → CODEMIRROR 6 (HIGHLIGHTING + SCHEMA AUTOCOMPLETE)]
 
 ### Replaced the plain textarea with CodeMirror 6 behind a flag

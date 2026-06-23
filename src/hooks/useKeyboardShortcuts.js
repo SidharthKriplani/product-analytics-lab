@@ -9,9 +9,11 @@ import { useEffect } from 'react';
 export function useKeyboardShortcuts(shortcuts) {
   useEffect(() => {
     function handleKeyDown(e) {
-      // Skip when typing in a form element
-      const tag = document.activeElement?.tagName?.toLowerCase();
-      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      // Skip when typing in a form element OR a contenteditable surface
+      // (CodeMirror's editor is a contenteditable div, not a <textarea>).
+      const ae = document.activeElement;
+      const tag = ae?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || ae?.isContentEditable) return;
 
       for (const shortcut of shortcuts) {
         const keyMatches = e.key === shortcut.key;
