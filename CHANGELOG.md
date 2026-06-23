@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.53.0] — 2026-06-24 [SQL EDITOR → CODEMIRROR 6 (HIGHLIGHTING + SCHEMA AUTOCOMPLETE)]
+
+### Replaced the plain textarea with CodeMirror 6 behind a flag
+
+Per `docs/CODEMIRROR-SWAP-SPEC.md`. New `src/components/shared/SqlEditor.jsx` (uses `@uiw/react-codemirror` + `@codemirror/lang-sql`) wired into `SqlLabPage.jsx` behind `USE_CM_EDITOR` (true; textarea retained as one-line fallback for a few days, then remove). Delivers: SQL syntax highlighting; **indentation keeper** (Enter continues the previous indent); **schema-aware autocomplete, names-only** — table + column names of the *current problem's* datamart, fed from `datamarts[problem.datamartId].tables[*].columns`, fires automatically on typing; Tab/Shift-Tab block indent; native Cmd/Ctrl+/ comment toggle; Cmd/Ctrl+Enter = Check. Deliberately NO full-query/AI completion (interview-prep philosophy: cut typos, don't do the thinking). Deps added to package.json: `@uiw/react-codemirror`, `@codemirror/lang-sql`, `@codemirror/commands`, `@codemirror/view`, `@codemirror/autocomplete` (~26 modules, lands in the lazy SQL Lab chunk only). Build verified: 870 modules transformed. The hand-rolled Tab + Cmd+/ handlers (V5.52) remain only on the textarea fallback and retire when the flag is removed. Files: `src/components/shared/SqlEditor.jsx`, `src/pages/SqlLabPage.jsx`, `package.json`, `package-lock.json`.
+
 ## [5.52.0] — 2026-06-24 [SQL EDITOR — CMD+/ COMMENT TOGGLE]
 
 ### Cmd+/ (Ctrl+/) now toggles SQL line comments in the editor
