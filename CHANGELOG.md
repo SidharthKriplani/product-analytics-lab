@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.59.0] — 2026-06-24 [POPULATE alsoAskedAt (DETERMINISTIC, NO-LLM) → STACKED LOGOS LIGHT UP]
+
+### Company multi-tagging without LM Studio
+
+The stacked "+N more" company logos (V5.58) had no data — `alsoAskedAt` was empty on all 192 problems, and the existing `tag_companies.py` requires a local LM Studio (Qwen3-8B) server. Wrote `scripts/tag_companies_domain.py`: a deterministic tagger that sets `alsoAskedAt` to up to 3 OTHER companies sharing the same datamart (datamarts are industry-themed, so peers are same-industry), with a per-problem-id seeded shuffle so the same datamart doesn't show identical peers on every row. Ran it: 183/192 problems tagged (167 with 3 peers, 6 with 2, 10 with 1; 9 empty = single-company datamarts like Swiggy/Workday). Parse OK, mechanical + content gates green. The LLM `tag_companies.py` remains for a richer re-pass (`--force`). Files: `scripts/tag_companies_domain.py`, `src/data/sqlLabProblems.js`.
+
 ## [5.58.0] — 2026-06-24 [FIX RESULTS TABLE DUP COLUMNS + BROWSER ROW GRID/LOGOS]
 
 ### Two fixes: garbled query output on duplicate column names, and list-row alignment
