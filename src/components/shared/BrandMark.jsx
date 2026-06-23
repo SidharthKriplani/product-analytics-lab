@@ -1,10 +1,11 @@
 // BrandMark.jsx — canonical BreakLabs lockup (D-19, HQ/BRANDMARK-ROLLOUT.md).
 // House rule: single quotes. Constant across all labs: seam red + wordmark.
-// Per lab: descriptor text + accent (PAL = 'Product Analytics' / indigo #6366F1).
+// Per lab: descriptor text + accent. PAL uses its OWN signature blue (var(--accent)) for the
+// descriptor — a deliberate override of HQ's assigned indigo track accent (Sidharth's call).
 // PAL token map (spec → PAL CSS vars): --ink-hi → --text, --ink-low → --text-dim,
 // --rim → --border, --surface and --font-mono are used as-is.
-const SEAM = '#FB5247';      // brand red — the fault-glyph (CONSTANT — do not change)
-const PAL_ACCENT = '#6366F1'; // PAL track accent — indigo (descriptor only)
+const SEAM = '#FB5247';          // brand red — the fault-glyph (CONSTANT — do not change)
+const PAL_ACCENT = 'var(--accent)'; // PAL signature blue — descriptor only (seam stays red)
 
 function Seam({ h = 28 }) {
   const w = Math.round(h * 0.32);
@@ -24,6 +25,22 @@ export function BrandMark({ variant = 'full', descriptor = '', accent = PAL_ACCE
         width: size, height: size, borderRadius: Math.round(size * 0.24),
         background: 'var(--surface, #15171A)', border: '1px solid var(--border, #2A2D31)' }}>
         <Seam h={Math.round(size * 0.62)} />
+      </span>
+    );
+  }
+  if (variant === 'stacked') {
+    // wordmark on top, descriptor stacked below (for narrow rails like the sidebar)
+    return (
+      <span aria-label={descriptor ? 'BreakLabs ' + descriptor : 'BreakLabs'}
+        style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', fontFamily: 'var(--font-mono)', lineHeight: 1.12 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', fontWeight: 500, letterSpacing: '-0.01em', color: 'var(--text, #F2F3F5)', fontSize: size }}>
+          break<Seam h={size} />labs
+        </span>
+        {descriptor && (
+          <span style={{ color: accent, fontSize: Math.round(size * 0.52), fontWeight: 600, letterSpacing: '0.02em', marginTop: '0.12em' }}>
+            {descriptor}
+          </span>
+        )}
       </span>
     );
   }

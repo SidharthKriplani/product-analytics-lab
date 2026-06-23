@@ -329,10 +329,10 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
             onMouseEnter={e => { e.currentTarget.style.opacity = '0.75'; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
           >
-            {/* Slot 1 — primary in-app mark (BrandMark, D-19). Sidebar is 222px, so the
-                lockup degrades to `wordmark`; the 'Product Analytics' descriptor lives in
-                the page/tab title per the spec degrade rule. */}
-            <BrandMark variant='wordmark' size={18} />
+            {/* Slot 1 — primary in-app mark (BrandMark, D-19). Stacked so the
+                'Product Analytics' descriptor sits under the break⌇labs wordmark
+                without overflowing the 222px rail. */}
+            <BrandMark variant='stacked' descriptor='Product Analytics' size={17} />
           </button>
 
           {isTerminal ? (
