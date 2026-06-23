@@ -16,12 +16,12 @@ Scores each problem on 1-3:
   broken_note_acc — (Forensic only) 1=inaccurate  2=partial  3=precisely describes wrong output + why it misleads
 """
 
-import csv, json, re, subprocess, sys, time
+import csv, json, os, re, subprocess, sys, tempfile, time
 import requests
 
 BASE_URL = "http://127.0.0.1:1234"
-MODEL    = "qwen2.5-7b-instruct"
-TIMEOUT  = 45  # seconds per call
+MODEL    = "qwen/qwen3-8b"
+TIMEOUT  = 60  # seconds per call
 
 SYSTEM_PROMPT = """You are a strict content quality reviewer for a SQL interview prep platform.
 Users are product analysts and data scientists preparing for interviews. They need:
@@ -32,7 +32,7 @@ Users are product analysts and data scientists preparing for interviews. They ne
 You return JSON only. No markdown, no explanation outside the JSON."""
 
 def build_user_prompt(p):
-    is_forensic = p.get('format') == 'Forensic'
+    is_forensic = p.get('format') == 'forensic'
     hints_text  = json.dumps(p.get('hints', []), indent=2)
     debrief     = (p.get('debrief', '') or '')[:700]
     broken_note = p.get('brokenOutputNote', '') if is_forensic else None
@@ -83,7 +83,7 @@ def call_lm(p):
             "model": MODEL,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user",   "content": build_user_prompt(p)},
+                {"role": "user",   "content": "/no_think\n\n" + build_user_prompt(p)},
             ],
             "temperature": 0,
             "max_tokens":  250,
@@ -92,6 +92,7 @@ def call_lm(p):
     )
     resp.raise_for_status()
     text = resp.json()["choices"][0]["message"]["content"].strip()
+    text = re.sub(r'<think>[\s\S]*?</think>', '', text).strip()
     m = re.search(r'\{[\s\S]*\}', text)
     if not m:
         raise ValueError(f"No JSON in response: {text[:200]}")
@@ -99,11 +100,22 @@ def call_lm(p):
 
 
 def load_problems():
-    out = subprocess.check_output(
-        ["node", "-e", "const p=require('./src/data/sqlLabProblems.js'); process.stdout.write(JSON.stringify(p.problems))"],
-        text=True,
-    )
-    return json.loads(out)
+    problems_abs = os.path.abspath("src/data/sqlLabProblems.js")
+    mjs_src = f"""
+import {{ sqlLabProblems }} from '{problems_abs}';
+process.stdout.write(JSON.stringify(sqlLabProblems));
+"""
+    with tempfile.NamedTemporaryFile(suffix='.mjs', mode='w', delete=False) as f:
+        f.write(mjs_src)
+        tmp_path = f.name
+    try:
+        result = subprocess.run(['node', tmp_path], capture_output=True, text=True, timeout=30)
+        if result.returncode != 0:
+            print(f"ERROR: node extraction failed:\n{result.stderr}")
+            sys.exit(1)
+        return json.loads(result.stdout)
+    finally:
+        os.unlink(tmp_path)
 
 
 def main():

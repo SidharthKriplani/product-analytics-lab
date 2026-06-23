@@ -266,6 +266,13 @@ export const statsFoundationsIndex = [
   { id: 'sf23', isFree: false, title: 'Regression Discontinuity' },
   { id: 'sf24', isFree: false, title: 'Synthetic Control' },
   { id: 'sf25', isFree: false, title: 'Instrumental Variables' },
+  { id: 'sf26', isFree: true,  title: 'Bayesian Thinking' },
+  { id: 'sf27', isFree: true,  title: 'Effect Size' },
+  { id: 'sf28', isFree: true,  title: 'Bootstrap Resampling' },
+  { id: 'sf29', isFree: true,  title: 'Chi-Square Test' },
+  { id: 'sf30', isFree: true,  title: 'SUTVA' },
+  { id: 'sf31', isFree: true,  title: 'ANOVA' },
+  { id: 'sf32', isFree: true,  title: 'Non-Parametric Tests' },
 ];
 
 export const growthAnalyticsIndex = [

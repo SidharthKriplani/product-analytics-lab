@@ -3,8 +3,12 @@ import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { datamarts } from '../data/sqlLabDatamarts.js';
 import { track } from '../utils/analytics.js';
 import { ShareLinkButton } from '../components/shared/ShareLinkButton.jsx';
+import { SqlEditor } from '../components/shared/SqlEditor.jsx';
 
 const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3, Forensic: 5 };
+// V5.53: CodeMirror editor (highlighting + schema autocomplete + indent keeper).
+// Set to false to fall back to the plain textarea while dogfooding.
+const USE_CM_EDITOR = true;
 
 function renderInline(text) {
   return text.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
@@ -817,6 +821,14 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
     }
     return 0;
   });
+  // Deep-link fix: the hash often resolves AFTER this component mounts (auth settle),
+  // so the lazy initializer above sees a null id and defaults to problem 0 (sql-e01).
+  // When the real id arrives as a prop, jump to it instead of staying on the default.
+  useEffect(function () {
+    if (!initialProblemId) return;
+    var idx = SORTED_PROBLEMS.findIndex(function (p) { return p.id === initialProblemId; });
+    if (idx >= 0) { setProblemIdx(idx); setMode('solve'); }
+  }, [initialProblemId]);
   const [db, setDb] = useState(null);
   const [sqlLoading, setSqlLoading] = useState(true);
   const [sqlError, setSqlError] = useState(null);
@@ -1098,6 +1110,30 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
       requestAnimationFrame(() => {
         el.selectionStart = start + 2;
         el.selectionEnd = start + 2;
+      });
+    }
+    // Cmd+/ or Ctrl+/ : toggle SQL line comments on the selected line(s)
+    if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+      e.preventDefault();
+      const el = e.target;
+      const val = el.value;
+      const blockStart = val.lastIndexOf('\n', el.selectionStart - 1) + 1;
+      let blockEnd = val.indexOf('\n', el.selectionEnd);
+      if (blockEnd === -1) blockEnd = val.length;
+      const block = val.slice(blockStart, blockEnd);
+      const lines = block.split('\n');
+      const allCommented = lines.filter(l => l.trim() !== '').every(l => l.trimStart().startsWith('--'));
+      const newLines = allCommented
+        ? lines.map(l => l.replace(/^(\s*)--\s?/, '$1'))
+        : lines.map(l => l.trim() === '' ? l : l.replace(/^(\s*)/, '$1-- '));
+      const newBlock = newLines.join('\n');
+      const newQ = val.slice(0, blockStart) + newBlock + val.slice(blockEnd);
+      setQuery(newQ);
+      if (problem) saveQueryLS(problem.id, newQ);
+      const delta = newBlock.length - block.length;
+      requestAnimationFrame(() => {
+        el.selectionStart = blockStart;
+        el.selectionEnd = blockEnd + delta;
       });
     }
   }
@@ -1420,6 +1456,16 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
 
         {!sqlLoading && !sqlError && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {USE_CM_EDITOR ? (
+              <SqlEditor
+                value={query}
+                onChange={v => { startTimer(); setQuery(v); if (problem) saveQueryLS(problem.id, v); }}
+                onCheck={checkQuery}
+                schema={Object.fromEntries(Object.entries(dm.tables).map(([n, t]) => [n, (t.columns || []).map(c => c.name)]))}
+                placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Cmd/Ctrl+Enter to run' : '-- Write your SQL here\n-- Cmd/Ctrl+Enter to run'}
+                height="46vh"
+              />
+            ) : (
             <textarea
               value={query}
               onChange={e => {
@@ -1437,6 +1483,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                 borderRadius: '6px', color: 'var(--text)', outline: 'none', boxSizing: 'border-box',
               }}
             />
+            )}
 
             {/* Buttons row */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
