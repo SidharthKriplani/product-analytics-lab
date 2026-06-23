@@ -4,6 +4,23 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.50.0] — 2026-06-24 [FIX SQL LAB DEEP-LINK ROUTING — ALWAYS DEFAULTED TO sql-e01]
+
+### Deep links to a specific SQL problem (#/sql-lab/sql-e86) opened sql-e01 instead
+
+`src/pages/SqlLabPage.jsx` — `problemIdx` was set only by a lazy `useState` initializer that reads `initialProblemId` once at mount. On a deep link the hash resolves *after* the component mounts (it waits for auth to settle), so the initializer saw a null id and defaulted to index 0 (`sql-e01`); when the real id arrived as a prop moments later, nothing re-read it. Added a `useEffect([initialProblemId])` that, when the id changes after mount, finds the matching problem and jumps to it (`setProblemIdx` + `setMode('solve')`). Deep links and the share button now land on the correct problem. Build verified (844 modules transformed). One-effect fix; no other behavior changed.
+
+## [5.49.0] — 2026-06-24 [REMOVE PRICING-FEEDBACK WIDGET + ANJALI TESTIMONIAL]
+
+### Small UI/content pass
+
+- **Removed the "Would you pay for this?" pricing-feedback widget** from `src/pages/Plans.jsx` — the `PricingFeedback` component, its `FEEDBACK_KEY`, and its render. PAL doesn't need an in-app willingness-to-pay probe; the element is being handed to the Programming Lab (PL) as a generic feedback widget.
+- **Added the Anjali Yemmanur testimonial** to all three testimonial lists — the full `WALL_TESTIMONIALS` + short `TESTIMONIALS` ticker (`Plans.jsx`) and the Home strip (`Home.jsx`). Quote trimmed to her product-thinking line ("…thinking like a data professional presenting insights and recommendations to stakeholders, not just analyzing data"). Image at `public/testimonials/anjali.jpg` (present, name-matched). Both files parse clean.
+
+Files: `src/pages/Plans.jsx`, `src/pages/Home.jsx`, `public/testimonials/anjali.jpg`. **Propose-only — not pushed.**
+
+---
+
 ## [5.48.0] — 2026-06-23 [JUDGMENT LAYER — HARNESS + RUNNER UI + ALL HARD/MASTER/MEDIUM (106 PROBLEMS)]
 
 ### First slice of the multi-method judgment layer (the productized JUDGE frame)

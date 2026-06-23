@@ -4,6 +4,12 @@ This is the narrative history of PAL. Not a version list (that's CHANGELOG.md) �
 
 ---
 
+### v5.47.0–v5.49.0 — PAL gets deep, picks its visual future, and starts mentoring its siblings (2026-06-23/24)
+
+The session that turned PAL from "good content" into "deep content with a spine." The SQL bank first closed its coverage gaps (18/18 against the variety benchmark), then grew the thing that's now its signature: a **judgment layer** on all 106 Hard/Master/Medium problems. Every problem with more than one valid answer now shows the alternatives, a "which method when" dial, and a runs-but-wrong trap — all machine-verified by a new harness, and surfaced in the runner. Authoring it against the live data quietly corrected ~25 stale debriefs along the way, so the bank came out more accurate than it went in.
+
+Then two things that weren't code. PAL **chose its visual future** — a "judgment terminal" on the navy + monospace developer-tool aesthetic, with the red `break⌇labs` seam as a system-wide fault-line (the brand's intensity made literal) — validated against 2026 design trends and deliberately sequenced behind shipping and distribution. And PAL started acting like the **eldest sibling**: it wrote two mentorship handoffs to the Programming Lab — one transmitting the SQL-Lab depth model (content + judgment + verification, mapped to pandas), one transmitting the Foundations teaching model and pushing PL to build an interactive KNOW frame instead of just graders. The lab stopped being only a product and started being a template the rest of BreakLabs is measured against. (Housekeeping in the same arc: the "would you pay?" probe removed, Anjali's testimonial added — V5.49.0.)
+
 ### v5.46.0 — PAL joins the BreakLabs house brand, and its nav grows up (2026-06-23)
 
 The session PAL stopped looking like a standalone product and started looking like one lab in a family. Three identity-level shifts landed together.

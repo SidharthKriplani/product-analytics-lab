@@ -48,9 +48,35 @@ Events fire from `src/App.jsx` (navigation events) and directly from runner comp
 | `forward_pointer_clicked` | User clicks any button on ForwardPointerCard after debrief | `{ room: string, button: 'next_case'\|'defense_doc'\|'company_tracks' }` |
 | `debrief_copied` | User clicks the DebriefCopyButton and clipboard write succeeds | `{ room: string, difficulty: string }` |
 
+### Events added V5.37.0
+| Event | When it fires | Properties |
+|---|---|---|
+| `gate_converted` | User signed in via Supabase AND `pendingGateConversionRef` was true (sign-in triggered from gate overlay) | `{ room: string\|'unknown' }` |
+| `plans_page_viewed` | Plans page renders — catches all entry paths: navigate(), paywall redirect, gate secondary CTA | `{ referrer: string\|'unknown' }` |
+| `sql_query_run` | User runs a SQL query and gets a result (correct or incorrect) — intermediate step before `sql_problem_solved` | `{ problemId: string, difficulty: string, datamartId: string, isCorrect: boolean }` |
+
+### Upcoming events — spec only (wire when features are built)
+
+**Onboarding questionnaire** (3-question intake on first visit):
+| Event | When it fires | Properties |
+|---|---|---|
+| `onboarding_shown` | Questionnaire modal/screen renders for a first-time visitor | `{}` |
+| `onboarding_completed` | User submits all 3 answers | `{ persona: 'beginner'\|'intermediate'\|'experienced'\|'urgent', role: string, timeline: string, experience: string }` |
+| `onboarding_skipped` | User dismisses questionnaire without completing | `{ step_reached: number }` |
+
+localStorage key: `pal-user-persona` — stores `{ persona, role, timeline, experience, completedAt }` once questionnaire is done.
+
+**JD prep plan** (paste JD → get targeted prep plan):
+| Event | When it fires | Properties |
+|---|---|---|
+| `prep_plan_generated` | User submits a JD and plan renders | `{ role_family: 'PAL'\|'MSL'\|'GAL'\|'mixed', seniority: 'junior'\|'mid'\|'senior', lab_route: string }` |
+| `prep_plan_module_clicked` | User clicks a recommended module/room link from the prep plan | `{ module_id: string, room: string, plan_type: '3day'\|'7day'\|'14day' }` |
+| `prep_plan_saved` | User saves plan to localStorage | `{ role_family: string }` |
+
+localStorage key: `pal-prep-plan-v1` — stores last generated plan `{ jdSnippet, roleFamily, seniority, labRoute, generatedAt }`.
+
 ### Events not yet tracked (remaining gaps)
-- Debrief revealed (requires changes to all 17 runners — deferred)
-- Hint expanded (SQL Lab — low priority)
+- `debrief_viewed` — debrief panel rendered (requires changes to all 17 runners — deferred until scroll-depth tracking is viable)
 - Playbook article opened, Search query, Bookmark added/removed
 - Interview Simulator session completed, MCQ Trainer session scored, Defense Doc generated
 - `user_signed_out` — low priority
