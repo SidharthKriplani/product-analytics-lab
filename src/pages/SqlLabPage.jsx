@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { datamarts } from '../data/sqlLabDatamarts.js';
+import { COMPANY_DOMAINS } from '../data/companyDirectory.js';
 import { track } from '../utils/analytics.js';
 import { ShareLinkButton } from '../components/shared/ShareLinkButton.jsx';
 import { SqlEditor } from '../components/shared/SqlEditor.jsx';
@@ -135,6 +136,7 @@ const DIFF_COLOR = {
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard', 'Master', 'Forensic'];
 const ALL_COMPANIES = [...new Set(SORTED_PROBLEMS.map(p => p.company))].sort();
+const ALL_TOPICS = [...new Set(SORTED_PROBLEMS.flatMap(p => p.tags || []))].sort();
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 
@@ -283,8 +285,9 @@ function HintStep({ step, index }) {
 
 // ─── Browse mode ──────────────────────────────────────────────────────────────
 
-// Company name -> domain, harvested from the bank so alsoAskedAt names can show logos too.
-const COMPANY_DOMAIN = {};
+// Company name -> domain. Seed from the curated directory (covers all alsoAskedAt names),
+// then let each problem's own companyDomain fill any primary not in the directory.
+const COMPANY_DOMAIN = { ...COMPANY_DOMAINS };
 SORTED_PROBLEMS.forEach(p => { if (p.company && p.companyDomain && !COMPANY_DOMAIN[p.company]) COMPANY_DOMAIN[p.company] = p.companyDomain; });
 const favicon = domain => 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=32';
 
@@ -308,7 +311,7 @@ function CompanyLogos({ p }) {
   );
 }
 
-function ProblemListRow({ p, isSolved, onSelect }) {
+function ProblemListRow({ p, isSolved, onSelect, i = 0 }) {
   const ds = DIFF_COLOR[p.difficulty] || DIFF_COLOR.Easy;
   return (
     <div
@@ -316,7 +319,9 @@ function ProblemListRow({ p, isSolved, onSelect }) {
       tabIndex={0}
       onClick={onSelect}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
+      className="pal-card-enter"
       style={{
+        animationDelay: Math.min(i * 16, 320) + 'ms',
         display: 'grid',
         gridTemplateColumns: '12px 66px 72px minmax(0, 1fr) auto',
         alignItems: 'center', gap: '0.6rem',
@@ -363,26 +368,42 @@ function ProblemListRow({ p, isSolved, onSelect }) {
   );
 }
 
+function askedAtCount(p) { return 1 + ((p.alsoAskedAt || []).length); }
+
 function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
-  const [filterDiffs, setFilterDiffs] = useState(new Set());
+  const [filterDiff, setFilterDiff] = useState('');      // single-select
   const [filterCompany, setFilterCompany] = useState('');
+  const [filterTopic, setFilterTopic] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [sortBy, setSortBy] = useState('default');
   const [search, setSearch] = useState('');
 
   const solvedCount = SORTED_PROBLEMS.filter(p => solved.has(p.id)).length;
 
+  // All filters AND-combine.
   const filtered = SORTED_PROBLEMS.filter(p => {
-    if (filterDiffs.size > 0 && !filterDiffs.has(p.difficulty)) return false;
+    if (filterDiff && p.difficulty !== filterDiff) return false;
     if (filterCompany && p.company !== filterCompany && !(p.alsoAskedAt || []).includes(filterCompany)) return false;
+    if (filterTopic && !(p.tags || []).includes(filterTopic)) return false;
     if (filterStatus === 'solved' && !solved.has(p.id)) return false;
     if (filterStatus === 'unsolved' && solved.has(p.id)) return false;
     if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
-  function toggleDiff(d) {
-    setFilterDiffs(prev => { const n = new Set(prev); if (n.has(d)) n.delete(d); else n.add(d); return n; });
+  const displayed = filtered.slice();
+  if (sortBy === 'asked') displayed.sort((a, b) => askedAtCount(b) - askedAtCount(a));
+  else if (sortBy === 'difficulty') displayed.sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
+  else if (sortBy === 'quickest') displayed.sort((a, b) => (a.estimatedMin || 99) - (b.estimatedMin || 99));
+
+  // Changing any filter/sort remounts the list so rows re-run the entrance animation.
+  const listKey = [filterDiff, filterCompany, filterTopic, filterStatus, sortBy, search].join('|');
+
+  function toggleDiff(d) { setFilterDiff(prev => (prev === d ? '' : d)); }
+  function clearAll() {
+    setFilterDiff(''); setFilterCompany(''); setFilterTopic(''); setFilterStatus('all'); setSortBy('default'); setSearch('');
   }
+  const anyFilter = filterDiff || filterCompany || filterTopic || filterStatus !== 'all' || search;
 
   return (
     <div className="sql-lab-browse-panel">
@@ -425,21 +446,25 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
           }}
         />
 
-        {/* Difficulty chips */}
+        {/* Difficulty chips — single-select (click again to clear) */}
         {DIFFICULTIES.map(d => {
-          const active = filterDiffs.has(d);
+          const active = filterDiff === d;
           const ds = DIFF_COLOR[d];
           return (
             <button
               key={d}
               onClick={() => toggleDiff(d)}
               style={{
-                padding: '2px 9px', borderRadius: '99px', fontSize: '0.68rem', fontWeight: 600,
+                padding: '2px 10px', borderRadius: '99px', fontSize: '0.68rem', fontWeight: 600,
                 cursor: 'pointer', border: '1px solid',
                 background: active ? ds.bg : 'var(--surface-2)',
                 color: active ? ds.text : 'var(--text-muted)',
                 borderColor: active ? ds.border : 'var(--border)',
+                transition: 'background 0.15s, color 0.15s, border-color 0.15s, transform 0.08s',
               }}
+              onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.94)'; }}
+              onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
             >{active ? '✓ ' : ''}{d}</button>
           );
         })}
@@ -453,7 +478,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
             background: filterCompany ? 'rgba(20,184,166,0.08)' : 'var(--surface-2)',
             color: filterCompany ? 'var(--teal)' : 'var(--text-muted)',
             border: filterCompany ? '1px solid rgba(20,184,166,0.35)' : '1px solid var(--border)',
-            cursor: 'pointer', outline: 'none',
+            cursor: 'pointer', outline: 'none', transition: 'background 0.15s, color 0.15s, border-color 0.15s',
           }}
         >
           <option value="">All companies</option>
@@ -462,24 +487,69 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
           ))}
         </select>
 
+        {/* Topic dropdown */}
+        <select
+          value={filterTopic}
+          onChange={e => setFilterTopic(e.target.value)}
+          style={{
+            padding: '3px 0.6rem', borderRadius: '6px', fontSize: '0.72rem',
+            background: filterTopic ? 'rgba(20,184,166,0.08)' : 'var(--surface-2)',
+            color: filterTopic ? 'var(--teal)' : 'var(--text-muted)',
+            border: filterTopic ? '1px solid rgba(20,184,166,0.35)' : '1px solid var(--border)',
+            cursor: 'pointer', outline: 'none', transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+          }}
+        >
+          <option value="">All topics</option>
+          {ALL_TOPICS.map(t => (
+            <option key={t} value={t}>{t} ({SORTED_PROBLEMS.filter(p => (p.tags || []).includes(t)).length})</option>
+          ))}
+        </select>
+
+        {/* Sort dropdown */}
+        <select
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value)}
+          style={{
+            padding: '3px 0.6rem', borderRadius: '6px', fontSize: '0.72rem',
+            background: sortBy !== 'default' ? 'rgba(20,184,166,0.08)' : 'var(--surface-2)',
+            color: sortBy !== 'default' ? 'var(--teal)' : 'var(--text-muted)',
+            border: sortBy !== 'default' ? '1px solid rgba(20,184,166,0.35)' : '1px solid var(--border)',
+            cursor: 'pointer', outline: 'none', transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+          }}
+        >
+          <option value="default">Sort: Default</option>
+          <option value="asked">Most asked</option>
+          <option value="difficulty">Difficulty</option>
+          <option value="quickest">Quickest</option>
+        </select>
+
         {/* Status filter */}
         {['all', 'unsolved', 'solved'].map(s => (
           <button
             key={s}
             onClick={() => setFilterStatus(s)}
             style={{
-              padding: '2px 9px', borderRadius: '99px', fontSize: '0.68rem', fontWeight: 600,
+              padding: '2px 10px', borderRadius: '99px', fontSize: '0.68rem', fontWeight: 600,
               cursor: 'pointer', border: '1px solid',
               background: filterStatus === s ? 'rgba(20,184,166,0.1)' : 'var(--surface-2)',
               color: filterStatus === s ? 'var(--teal)' : 'var(--text-muted)',
               borderColor: filterStatus === s ? 'rgba(20,184,166,0.35)' : 'var(--border)',
+              transition: 'background 0.15s, color 0.15s, border-color 0.15s',
             }}
           >{s === 'all' ? 'All' : s === 'solved' ? '✓ Solved' : '○ Unsolved'}</button>
         ))}
 
-        {/* Count */}
-        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
-          {filtered.length}{filtered.length !== SORTED_PROBLEMS.length ? ' / ' + SORTED_PROBLEMS.length : ''} problems
+        {/* Clear + count */}
+        <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginLeft: 'auto' }}>
+          {anyFilter && (
+            <button
+              onClick={clearAll}
+              style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '99px', padding: '2px 10px', fontSize: '0.66rem', fontWeight: 600, color: 'var(--text-muted)', cursor: 'pointer' }}
+            >Clear ✕</button>
+          )}
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+            {displayed.length}{displayed.length !== SORTED_PROBLEMS.length ? ' / ' + SORTED_PROBLEMS.length : ''} problems
+          </span>
         </span>
       </div>
 
@@ -505,14 +575,17 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
           <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)' }}>Problem</span>
           <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)' }}>Topics</span>
         </div>
-        {filtered.length === 0 ? (
+        {displayed.length === 0 ? (
           <div style={{ padding: '2rem', textAlign: 'center', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
             No problems match these filters.
           </div>
         ) : (
-          filtered.map(p => (
-            <ProblemListRow key={p.id} p={p} isSolved={solved.has(p.id)} onSelect={() => onSelect(p.id)} />
-          ))
+          // key changes on any filter/sort → list remounts → rows re-run the staggered entrance
+          <div key={listKey}>
+            {displayed.map((p, i) => (
+              <ProblemListRow key={p.id} p={p} i={i} isSolved={solved.has(p.id)} onSelect={() => onSelect(p.id)} />
+            ))}
+          </div>
         )}
       </div>
     </div>
@@ -1241,16 +1314,19 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
               )}
               <Badge label={problem.company} style={{ background: 'rgba(67,56,202,0.08)', color: 'var(--accent)', borderColor: 'rgba(67,56,202,0.2)' }} />
               {problem.alsoAskedAt && problem.alsoAskedAt.length > 0 && (
-                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span title={'Also asked at: ' + problem.alsoAskedAt.join(', ')} style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span style={{ opacity: 0.5 }}>·</span>
                   also at
-                  {problem.alsoAskedAt.map(function(c) { return (
+                  {problem.alsoAskedAt.slice(0, 4).map(function(c) { return (
                     <span key={c} style={{
                       fontSize: '0.62rem', padding: '1px 6px', borderRadius: '4px',
                       background: 'rgba(20,184,166,0.07)', color: 'var(--teal)',
                       border: '1px solid rgba(20,184,166,0.2)', whiteSpace: 'nowrap',
                     }}>{c}</span>
                   ); })}
+                  {problem.alsoAskedAt.length > 4 && (
+                    <span style={{ fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>+{problem.alsoAskedAt.length - 4} more</span>
+                  )}
                 </span>
               )}
             </div>

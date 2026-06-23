@@ -4,6 +4,17 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.63.0] — 2026-06-24 [CURATED INDIA+GLOBAL TAGS · FILTERS · SORT · ANIMATIONS]
+
+Replaces the V5.61 blanket tagging (which made "+N" meaningless and bloated the solve-view header) with a real system, and overhauls the browse-list filtering.
+
+- **Curated, weighted, India+global company tags.** New `scripts/tag_companies_curated.py` + `src/data/companyDirectory.js` (136 companies, name→domain). Each datamart has a hand-built roster mixing Indian firms (Flipkart, Meesho, Razorpay, PhonePe, Swiggy, Zomato, Zoho, Freshworks, Delhivery, Dream11, Practo…) and global firms that hire PA/PM in India. Per problem: tag count scales by difficulty (Easy ~6-8 … Master/Forensic ~1-3) so fundamentals are "asked at" more companies than rare patterns; companies are picked by deterministic weighted sampling (Efraimidis-Spirakis, seeded by problem id) so big/generalist firms surface most and the set is stable. Top frequencies now realistic: Amazon 28, Meesho 28, Shopify 24, Flipkart 21, Swiggy 21, Stripe 20. `SqlLabPage.jsx` now imports `COMPANY_DOMAINS` so every tagged company resolves a logo.
+- **Solve-view overflow bug fixed.** `alsoAskedAt` chips capped at 4 + "+N more" (full list on hover) — no more 12-company wall across the header.
+- **Browse filters reworked.** Difficulty is now single-select (click again to clear) per the "all-selected makes no sense" note. Added a topic filter (from `tags`, with counts) and a sort dropdown (Default / Most asked / Difficulty / Quickest). All filters AND-combine (difficulty + company + topic + status + search), plus a Clear ✕ button. "Most asked" sorts by tag count — meaningful now that tags are curated.
+- **Smooth interactions.** Filter chips have transitions + press-scale; changing any filter/sort remounts the list (`listKey`) so rows re-run the staggered `.pal-card-enter` entrance (reduced-motion safe). List header already gridded in V5.62 — column labels align with rows once V5.62/63 deploys.
+
+Files: `scripts/tag_companies_curated.py` (new), `src/data/companyDirectory.js` (new), `src/data/sqlLabProblems.js` (re-tagged), `src/pages/SqlLabPage.jsx`. Gates: parse 192 ✓, mechanical Tier-1 ✓, content scan ✓. Note: primaries `Klaviyo` and `Express Scripts` aren't in the roster (their own logo still resolves via `companyDomain`).
+
 ## [5.62.0] — 2026-06-24 [DIFFICULTY BLOCKS · DE-RAIL · DUP-COLUMN TABLE FIX]
 
 Three fixes from a live review pass:
