@@ -92,16 +92,17 @@ export function getNextProfileAsk(profile) {
   // exclusively in the ReadinessWidget on the Progress page, so we never surface
   // a "Set a target company" banner across the app shell.
 
-  // 4. No résumé uploaded.
-  if (!resume) {
-    return {
-      id: 'resume-add',
-      kind: 'add',
-      nav: 'profile',
-      message: 'Upload your résumé so recruiters viewing your profile can reach you.',
-      ctaLabel: 'Add',
-    };
-  }
+  // 4. No résumé uploaded. — ARCHIVED (résumé feature parked). Restore this block
+  // to bring the résumé nudge back.
+  // if (!resume) {
+  //   return {
+  //     id: 'resume-add',
+  //     kind: 'add',
+  //     nav: 'profile',
+  //     message: 'Upload your résumé so recruiters viewing your profile can reach you.',
+  //     ctaLabel: 'Add',
+  //   };
+  // }
 
   // 5. Employment present but stale (quarterly re-confirm).
   if (isOlderThan(empConfirmedAt, EMPLOYMENT_STALE_MS)) {
@@ -115,16 +116,17 @@ export function getNextProfileAsk(profile) {
     };
   }
 
-  // 6. Résumé present but stale (refresh ~every 6 months).
-  if (isOlderThan(resumeUpdatedAt, RESUME_STALE_MS)) {
-    return {
-      id: 'resume-stale',
-      kind: 'add',
-      nav: 'profile',
-      message: 'Time to refresh your résumé? A current one helps recruiters take you seriously.',
-      ctaLabel: 'Refresh',
-    };
-  }
+  // 6. Résumé present but stale. — ARCHIVED (résumé feature parked). Restore to
+  // bring the résumé-refresh nudge back.
+  // if (isOlderThan(resumeUpdatedAt, RESUME_STALE_MS)) {
+  //   return {
+  //     id: 'resume-stale',
+  //     kind: 'add',
+  //     nav: 'profile',
+  //     message: 'Time to refresh your résumé? A current one helps recruiters take you seriously.',
+  //     ctaLabel: 'Refresh',
+  //   };
+  // }
 
   return null;
 }

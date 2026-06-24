@@ -2,6 +2,45 @@
 
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
+---
+
+## ⭐ CURRENT STATE — 2026-06-25 (V5.97.0)
+
+PAL is live on Vercel (productanalyticslab.com). Build clean at 895 modules. Recent sessions:
+- **V5.94** — design-system foundation (`RoomHeader`/`FilterBar`/`CaseCard`), global rails killed, Community feed v1.
+- **V5.95** — design system rolled to every room browser, Simulator → mock-onsite gold, About/Profile/Progress/Plans/Pricing refreshed.
+- **V5.96** — SQL Easy-tier ramp fixed to spec (bullets in batches 1&2 / schema fade relevant→all→all; batch-3 = normal), Community feed hidden from nav.
+- **V5.97** — Résumé + Defense Strategy archived (this session).
+
+**Archived (parked, code kept, trivially reversible):**
+- **Résumé** — `profileCompletion.js` resume-add/resume-stale nudges commented; `ProfilePage.jsx` résumé block gated behind `{false &&}`; `PublicProfile.jsx` résumé link removed. `resume.js` + migration columns left in place.
+- **Defense Strategy** — nav item commented in `Sidebar.jsx`; route `#/defense-doc` + `DefenseDocGenerator.jsx` preserved.
+- **Community feed** — nav item commented (V5.96); route + `Community.jsx` + `feed.js` preserved.
+
+**Pending on Sidharth (server-side — I can't do these):**
+- Run `docs/migrations/2026-06_public_profiles.sql` + `docs/migrations/2026-06_feed.sql` in Supabase.
+- ⚠ **Rotate the exposed GitHub PAT** in `.git/config` (open since 2026-06-22 — see the git block below). Critical BEFORE any cross-lab Supabase wiring.
+
+---
+
+## 🧭 STRATEGIC DIRECTION — BreakLabs 3-layer (UNDER DISCUSSION — not decided)
+
+Next week: start wiring all 4 labs (GAL GenAI-Systems, MSL ML-Systems, PL Programming Lab, PAL). **Ungate from access code, KEEP the signup gate.** Former pay-gated content → reframed as **exclusive community content**. Proposed three layers:
+
+- **L1 — shared shell** (account / social / meta): profile, progress\*, plans, feed, leaderboard, community, a BreakLabs about. *(pushback: progress + leaderboard are really per-lab — L1 should be a thin roll-up; detail lives at L2.)*
+- **L2 — the labs** — each a "door" with its own **universe** + about + lab-specific content; later gated per subscription. PAL's `UniverseView.jsx` (Analyst Universe) is the prototype → recommend relocating it OUT of Progress to be PAL's L2 front door, and fixing its label collisions.
+- **L3 — shared tooling**: SQL Lab (in PAL) + PyLab (in PL). Any single lab subscription unlocks BOTH.
+
+**Open decisions to lock before wiring (eventual home: HQ/DECISIONS.md):**
+- **D1** Progress + leaderboard — L1 aggregate vs L2 per-lab? (rec: thin L1 roll-up, real data at L2)
+- **D2** one cross-lab feed vs per-lab feeds? (rec: one cross-lab feed — per-lab feeds will be ghost towns)
+- **D3** entitlement matrix — is content free-with-signup, with a subscription buying community + L3 + cross-lab access? what does community cost? (rec: content free-with-signup; sub = community + L3 + lab access)
+- **D4** shared-Supabase backbone + shared shell package vs monorepo on one root domain? (rec: ONE shared Supabase + a `@breaklabs/shell` package first; keep labs as separate deploys)
+
+**Foundational blockers (from cross-lab recon):** each lab is a separate Vercel deploy + (likely) its own Supabase; React 18 (GAL/MSL) vs 19 (PL/PAL). A shared L1 needs ONE shared Supabase (single identity / feed / leaderboard) consumed by a shared component package. Rotate the exposed PAL secret first.
+
+---
+
 ## ✅ DONE (2026-06-23) — BreakLabs logo (D-19) + four-frame nav + navy theme [V5.46.0, deployed]
 D-19 logo rollout COMPLETE in PAL (canonical owner): `BrandMark` built + all 7 slots wired + favicon/OG rebranded + old assets archived to `_legacy/`. **Descriptor = PAL's own blue `#5A7FE8`, not the spec's indigo** (Sidharth's override). Four-frame sidebar reframe also shipped (KNOW/DO/BUILD/JUDGE + LIVE + EXTRAS; PAL declines the mobile BottomNav; spec `docs/NAV-REFRAME-SPEC.md`). Dark theme reverted warm→navy `#070A12`. All logged: CHANGELOG V5.46.0, LINEAGE, HQ/LEDGER (PAL ✓; MSL still pending). Built on macOS + deployed to Vercel.
 
@@ -64,6 +103,11 @@ git push origin main
 
 ## Recently shipped
 
+- ✅ 2026-06-25 — **V5.97.0 Résumé + Defense Strategy archived.** Both parked (code kept, reversible): résumé nudges/input/public-link gated off; Defense Strategy nav item commented. Files: `profileCompletion.js`, `ProfilePage.jsx`, `PublicProfile.jsx`, `Sidebar.jsx`. Build 895 ✓.
+- ✅ 2026-06-25 — **V5.96.0 SQL Easy-ramp fixed to spec + feed hidden.** Ramp: bullets ride batches 1&2 (one bullet per output column), schema fades relevant-tables→all→all-normal; batch 3 = identical to the other ~180. Relevant tables derived from each problem's `solution` SQL. Feed removed from nav (route kept). Files: `SqlLabPage.jsx`, `Sidebar.jsx`.
+- ✅ 2026-06-25 — **V5.95.0 Design-system rollout + Simulator gold + page refresh.** Unified `RoomHeader`/`FilterBar`/`CaseCard` across every room browser (chip-walls → dropdowns, no rails); Simulator → staged mock-onsite (per-round timer, interviewer framing, report card); About/Profile/Progress/Plans/Pricing refreshed.
+- ✅ 2026-06-25 — **V5.94.0 Design-system foundation + rails killed + Community feed v1.** Shared components; global "Set a target" rail + colored card/nav rails removed; Company Tracks + Library reskinned; feed (`Community.jsx` + `feed.js`, needs `2026-06_feed.sql`).
+- ✅ (earlier June) — SQL beginner level (movies datamart + ~18 sequential lessons), full SVG/emoji sweep (`Icon.jsx` 84 icons + `HQ/shared/Icon.jsx`), nav flatten (3→2 levels), Options/Describe toggle, readiness countdown, spaced-repetition review queue, capture-at-sign-in, employment fields + monthly reminder + company logos, depth content (A/B Design, Instrumentation, Growth, Spot-the-Flaw). Full detail in CHANGELOG.md.
 - ✅ 2026-06-24 — **V5.60.0 Difficulty chips → uniform fixed-width blocks.** Chips now fill their 66px grid cell (display:block, width:100%, centered) so they form a clean aligned column. Build verified. File: `SqlLabPage.jsx`.
 - ✅ 2026-06-24 — **V5.59.0 Populated alsoAskedAt (no-LLM) → stacked company logos light up.** New `scripts/tag_companies_domain.py` (deterministic same-datamart peers, seeded shuffle); 183/192 tagged. LLM `tag_companies.py` couldn't run here (needs LM Studio); available for richer re-pass. Gates green. Files: `tag_companies_domain.py`, `sqlLabProblems.js`.
 - ✅ 2026-06-24 — **V5.58.0 Results-table dup-column fix + browser row grid/logos + SQL-LAB-SPEC.md.** (1) `SELECT *`-on-joins garbled output fixed (header keyed by index, not column name). (2) List row → CSS grid (status·difficulty·company·title·tags) so titles align + difficulty is its own block; company name text → fixed favicon + `CompanyLogos` stacked "+N" (name→domain map from bank). (3) Wrote `docs/SQL-LAB-SPEC.md` (master spec, cross-links all SQL docs). **Open:** run `tag_companies.py` to populate `alsoAskedAt` so "+N more" logos show. Build verified. File: `SqlLabPage.jsx`.

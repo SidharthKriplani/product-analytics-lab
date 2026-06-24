@@ -4,6 +4,18 @@ Tiered build backlog. **In Progress** = actively being built this session. **Tie
 
 ---
 
+## 🎯 Product-design backlog — from HQ D-24 / `PRODUCT-DESIGN.md` (added 2026-06-24)
+
+_PAL is the **pilot** for identity capture (HQ D-24; full spec `HQ/IDENTITY-CAPTURE-SPEC.md`). Solve one by one. Two preconditions before the identity build: (a) rotate PAL's exposed GitHub PAT + reconcile the two-working-copies tangle; (b) the PostHog-baseline pause below. The full spec gets mirrored into `docs/` when a build session picks it up._
+
+- **[decided] Identity capture at investment.** Unified BreakLabs account — reuse the Career-OS / **GSL Supabase** stack (GSL already runs Supabase auth). No signup wall. Optional, benefit-framed modal *after the first short streak (≈3 solved) and after Aha* — "save your streak/progress." Email-first; merge existing localStorage on login. Builds on the access-code freemium gate + `GateOverlay`. → closes the ghost-collector leak.
+- **[Tier 1] Progressive profiling = the India-company hook.** Ask target company *after* capture; unlock that company's specific traps (Swiggy/Zepto/Flipkart/Meesho/PhonePe) — turns a profile field into a Pull.
+- **[Tier 2] Aha "first break" cold-start.** Drop new visitors into ONE curated opener (SRM / peeking / Simpson's) in <60 sec — not the 192-case browse. Kill choice overload; speed to the first glass-box reveal.
+- **[Tier 2] Hooked retention loop.** Streak + varied reveal + a daily return-trigger (newsletter "today's break"). Streak = the mantra made literal.
+- **[Tier 3] Usability gate (Nielsen 10 + Norman).** Audit discoverability/signifiers (frames × domains × 192 = a lot of surface), visibility-of-status, recognition-over-recall. JTBD copy: lead with "survive the interview's hardest follow-up," not "practice problems."
+
+---
+
 ## In Progress
 
 **PAUSED — feature building suspended as of V4.25.1.**
@@ -762,7 +774,9 @@ Running Python (Pandas) as an alternative to SQL for solving SQL Lab problems. R
 
 | Idea | Reason |
 |---|---|
-| Social features (leaderboards, score sharing, community) | Distorts motivation toward proxy metrics; users optimise for score not learning |
+| **Résumé (parked 2026-06-25, V5.97)** | Product call to not pursue for now. UI archived behind flags; `resume.js` + migration columns kept. Reversible. |
+| **Defense Strategy (parked 2026-06-25, V5.97)** | Product call to not pursue for now. Nav item commented; route + `DefenseDocGenerator.jsx` kept. Reversible. |
+| ~~Social features (leaderboards, score sharing, community)~~ — **REVERSED 2026-06-25** | Originally retired (proxy-metric risk). Since built (leaderboard, public profiles, Community feed v1) and now the explicit strategic direction: former pay-gated content → exclusive community content. See NEXT.md → Strategic Direction. |
 | Mobile app | Content is inherently desktop — tables, charts, multi-column layouts don't translate |
 | Video content | Passive, expensive to produce, doesn't differentiate from every other prep course |
 | LMS structure (required curriculum, forced sequence, completion gates) | Implies a course; PAL is a practice space you return to, not a course you complete |

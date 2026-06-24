@@ -74,7 +74,7 @@ const NAV_FRAMES = [
     items: [
       { id: 'review-queue',   label: 'Review' },
       { id: 'simulator',      label: 'Mock Interview' },
-      { id: 'defense-doc',    label: 'Defense Strategy' },
+      // { id: 'defense-doc',    label: 'Defense Strategy' }, // ARCHIVED — feature parked; route still at #/defense-doc
       { id: 'company-tracks', label: 'Company Tracks' },
       // { id: 'community-feed', label: 'Feed' }, // hidden for now — route still works at #/community-feed
     ],

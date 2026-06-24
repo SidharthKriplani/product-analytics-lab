@@ -443,7 +443,8 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
             ) : null}
           </div>
 
-          {/* ── Résumé (optional pasted link) ── */}
+          {/* ── Résumé (optional pasted link) ── ARCHIVED: résumé feature parked. Flip false→true to restore. */}
+          {false && (
           <div style={{ borderTop: '1px solid var(--border)', marginTop: '1.1rem', paddingTop: '1rem' }}>
             <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
               Résumé
@@ -512,6 +513,7 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
               </div>
             ) : null}
           </div>
+          )}
 
           {/* ── Current role & company ── */}
           <div style={{ borderTop: '1px solid var(--border)', marginTop: '1.1rem', paddingTop: '1rem' }}>

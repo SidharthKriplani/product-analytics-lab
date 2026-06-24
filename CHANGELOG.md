@@ -4,6 +4,15 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.97.0] — 2026-06-25 [RÉSUMÉ + DEFENSE STRATEGY ARCHIVED]
+
+**Both features parked (code kept, fully reversible) per product call to not pursue résumé or Defense Strategy for now.**
+
+- **Résumé.** The résumé-add / résumé-stale nudges are commented out in `profileCompletion.js` (LinkedIn + employment nudges untouched) — this removes the "Upload your résumé so recruiters…" banner. The résumé input block on `ProfilePage.jsx` is gated behind `{false && (…)}`. The "View résumé" link on `PublicProfile.jsx` is removed (the contact row now keys off LinkedIn only). `resume.js` and the `resume_url` / `resume_updated_at` migration columns are left in place — restoring is uncommenting + flipping one `false`.
+- **Defense Strategy.** Nav item commented out in `Sidebar.jsx` (LIVE group). Route `#/defense-doc` and `DefenseDocGenerator.jsx` preserved — un-hiding is a one-line uncomment.
+
+Build 895 modules clean. No data or schema changes.
+
 ## [5.96.0] — 2026-06-25 [SQL RAMP FIX · FEED HIDDEN]
 
 **SQL Easy-tier ramp corrected to spec.** The scaffolding that fades across the first 15 Easy problems is now the *schema help*, with the deliverable bullets carried through batches 1 and 2 (not the thing that disappears). Batch 1/3: bullets + only the tables the solution actually uses (derived by whole-word matching each table name against the problem's stored `solution` SQL — no per-problem data edits, stays correct if a solution changes). Batch 2/3: bullets + **all** tables, force-expanded, so the learner finds which ones they need. Batch 3/3: no bullets + all tables in the normal collapsible accordion — identical to the other ~180 problems. Bullets now spell out each output column as its own line ("For each matching row, return: …") since the old comma-list ("Output 3 columns: a, b, c") was the exact line beginners misread. Removed the misplaced `SchemaNamesOnly` "explore via SELECT *" rung (it was wrongly sitting at batch 2). Marker labels updated (1 Full scaffolding · 2 All tables — find the ones you need · 3 On your own). `SqlLabPage.jsx` only; build 895 modules clean.

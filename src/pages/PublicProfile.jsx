@@ -221,7 +221,7 @@ function Profile({ profile, standing }) {
           </div>
         </div>
 
-        {(profile.linkedin_url || profile.resume_url) && (
+        {profile.linkedin_url && (
           <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '1.2rem' }}>
             {profile.linkedin_url && (
               <a
@@ -238,21 +238,7 @@ function Profile({ profile, standing }) {
                 View LinkedIn &rarr;
               </a>
             )}
-            {profile.resume_url && (
-              <a
-                href={profile.resume_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                  background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '8px',
-                  padding: '0.5rem 0.95rem', fontSize: '0.82rem', fontWeight: 700,
-                  color: 'var(--text)', textDecoration: 'none',
-                }}
-              >
-                View résumé &rarr;
-              </a>
-            )}
+            {/* Résumé link ARCHIVED (résumé feature parked). */}
           </div>
         )}
       </div>
