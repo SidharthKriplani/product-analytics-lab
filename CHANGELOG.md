@@ -4,6 +4,10 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.83.1] — 2026-06-24 [PUBLIC PROFILE ENRICHMENT]
+
+The first public-profile page shipped too thin (just name + total). Rewrote `PublicProfile.jsx` to earn the click using data that needs no migration: it now fetches the leaderboard alongside the profile and shows **rank with a medal** (gold/silver/bronze for top 3, as an avatar badge + rank pill), a **stat strip** (Solved · Rank #N of M · Standing), and a **gap-to-next** line ("+29 to catch #2" / "+7 ahead of #2"). The room-breakdown bars and LinkedIn button still render when present (they populate once the Supabase migration runs). Builds clean (877 modules transformed). Note: `var(--orange)`/`var(--blue)` room accents in InterviewSimulator are off-theme but render via hex fallbacks — left as-is intentionally.
+
 ## [5.83.0] — 2026-06-24 [POST-CONSOLIDATION POLISH — TABS, LIVE TRIO, PUBLIC PROFILES]
 
 Follow-up to the consolidation: fix how the merged rooms present, fold the orphan BUILD frame, elevate the three LIVE features, and add public profiles + an optional LinkedIn.
