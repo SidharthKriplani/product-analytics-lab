@@ -756,7 +756,7 @@ export default function App() {
     { key: 'h', action: () => setPage('home') },
     { key: 't', action: () => navigate('trainer') },
     { key: 'i', action: () => navigate('interview-qa') },
-    { key: 'c', action: () => navigate('consult') },
+    // Archived V5.81.0 — Consultation Space (orphan experiment); 'c' shortcut removed.
     { key: 'x', action: () => navigate('challenges') },
     { key: 'b', action: () => navigate('bi') },
     { key: 'd', action: () => navigate('defense-doc') },
@@ -1462,17 +1462,7 @@ export default function App() {
         )}
 
         {/* ── Take-Home Room ── */}
-        {page === 'take-home' && (
-          <Suspense fallback={
-              <div style={{ padding: '2rem 2rem 0' }}>
-                {[1,2,3].map(i => (
-                  <div key={i} className="pal-shimmer-box" style={{ height: '88px', marginBottom: '1rem', opacity: 1 - i * 0.15 }} />
-                ))}
-              </div>
-            }>
-            <TakehomeBrowser onSelectCase={openTakehomeCase} unlocked={unlocked} onOpenArticle={openPlaybookArticle} />
-          </Suspense>
-        )}
+        {/* Archived V5.81.0 — Take-Home (orphan room, never in nav). Browser route removed; TakehomeBrowser/Runner + takehomeCases dormant. See docs/PAL-PORTFOLIO-AUDIT.md → Retired. */}
         {page === 'takehome-runner' && activeTakehomeCaseId && (
           <Suspense fallback={
               <div style={{ padding: '2rem 2rem 0' }}>
@@ -1613,9 +1603,9 @@ export default function App() {
         {page === 'interview-qa' && (
           <InterviewQABrowser unlocked={unlocked} onBack={() => navigate('home')} />
         )}
-        {page === 'map' && <RoomMap onNavigate={navigate} />}
+        {/* Archived V5.81.0 — RoomMap (orphan, unlinked). */}
         {page === 'failures' && <FailuresCatalog onNavigate={navigate} />}
-        {page === 'bank' && <JudgmentBank onNavigate={navigate} />}
+        {/* Archived V5.81.0 — JudgmentBank (orphan, unlinked). */}
         {page === 'blog' && (
           <BlogBrowser onNavigate={navigate} />
         )}

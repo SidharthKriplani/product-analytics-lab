@@ -97,4 +97,11 @@ Archiving = nav + route removed, component files kept dormant in `src/` (lazy-lo
 **V5.80.0**
 - **Dimensional Modeling** — nav item (KNOW→DO) + `page==='dimensional-modeling'` route removed. `DimensionalModelBrowser.jsx` + data dormant. *Reason:* analytics-engineering, off PAL scope. *Restore:* re-add the DO nav item + the route block.
 - **Study Room** — nav item (EXTRAS) + `page==='study'` route removed. `StudyRoom.jsx` + `studyCards.js` dormant. *Reason:* no nameable distinct job; overlaps Saved/MCQ. *Restore:* re-add EXTRAS item + route. *Residual:* `CheatSheet.jsx` has 3 daily-plan steps that point at the Study Room (`room:'study'`) — clean up when the Learn shelf merges into Deep Dives.
+**V5.81.0 — orphan sweep** (surfaces that were routed but unlinked / hidden):
+- **JudgmentBank** (`bank`) — route removed; `JudgmentBank.jsx` dormant. Was a "browse all rooms/levels" index with zero links anywhere (unreachable). *Restore:* re-add `{page==='bank'}` route.
+- **RoomMap** (`map`) — route removed; `RoomMap.jsx` dormant. Visual room overview, effectively unlinked. *Restore:* re-add route + a nav/Home link if wanted.
+- **Consultation Space** (`consult`) — the hidden `c` keyboard shortcut removed (its only entry); route block left dormant + unreachable. Stale experiment. *Restore:* re-add the `c` shortcut.
+- **Take-Home** (`take-home`) — browser route removed; `TakehomeBrowser`/`TakehomeRunner` + `takehomeCases` dormant. A real room that was never in the nav. *Restore:* re-add the browser route + a nav item (KNOW→DO or JUDGE) if surfacing it.
+- Kept off-nav on purpose: **Benchmark** (home-CTA funnel) and **QA Dashboard** (internal footer tool) — not archived.
+
 - **Behavioral** — standalone nav entry (EXTRAS) removed ONLY; **route kept on purpose.** It is load-bearing: the Interview Simulator's behavioral round, Company Tracks behavioral sets, two Learning Paths (pm-5 / others), Defense Strategy mapping, the MCQ Trainer's `behavioral` category, Progress, and Search all consume it. A full cut requires untangling those first — deferred pending a decision (recommendation: keep it boxed, since a behavioral round is a real interview stage and it's wired into the Simulator). *Restore nav:* re-add the EXTRAS item.

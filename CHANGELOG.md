@@ -4,6 +4,10 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.81.0] — 2026-06-24 [ORPHAN SWEEP — ARCHIVE JUDGMENTBANK, ROOMMAP, CONSULT, TAKE-HOME]
+
+The portfolio audit's blind spot was nav-only; a full route enumeration surfaced 6 orphan surfaces (routed, not in nav). Archived the 4 cruft/limbo ones (reversible — routes out, files dormant): **JudgmentBank** (unlinked browse-index), **RoomMap** (unlinked overview), **Consultation Space** (reachable only via a hidden `c` keypress, now removed — stale experiment), **Take-Home** (a real room never surfaced in nav). Kept off-nav on purpose: **Benchmark** (home-CTA funnel diagnostic) and **QA Dashboard** (internal footer tool). App.jsx parses. Retire log + restore steps in `docs/PAL-PORTFOLIO-AUDIT.md`. Still pending (decided, not yet executed): BI cut (needs ref-scrub), A/B Interpreter cut.
+
 ## [5.80.0] — 2026-06-24 [PORTFOLIO CUTS — ARCHIVE DIM-MODELING, STUDY ROOM; BOX BEHAVIORAL]
 
 Acted on the first (zero-risk) batch of the portfolio audit. Archiving = nav + route out, component files dormant (reversible).
