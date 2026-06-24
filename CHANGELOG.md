@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.96.0] — 2026-06-25 [SQL RAMP FIX · FEED HIDDEN]
+
+**SQL Easy-tier ramp corrected to spec.** The scaffolding that fades across the first 15 Easy problems is now the *schema help*, with the deliverable bullets carried through batches 1 and 2 (not the thing that disappears). Batch 1/3: bullets + only the tables the solution actually uses (derived by whole-word matching each table name against the problem's stored `solution` SQL — no per-problem data edits, stays correct if a solution changes). Batch 2/3: bullets + **all** tables, force-expanded, so the learner finds which ones they need. Batch 3/3: no bullets + all tables in the normal collapsible accordion — identical to the other ~180 problems. Bullets now spell out each output column as its own line ("For each matching row, return: …") since the old comma-list ("Output 3 columns: a, b, c") was the exact line beginners misread. Removed the misplaced `SchemaNamesOnly` "explore via SELECT *" rung (it was wrongly sitting at batch 2). Marker labels updated (1 Full scaffolding · 2 All tables — find the ones you need · 3 On your own). `SqlLabPage.jsx` only; build 895 modules clean.
+
+**Community feed hidden from nav.** "Feed" removed from the LIVE group in the sidebar (one commented line). Route `#/community-feed` and all feed code preserved — un-hiding is a one-line uncomment.
+
 ## [5.95.0] — 2026-06-25 [DESIGN-SYSTEM ROLLOUT · SIMULATOR GOLD · PAGE REFRESH]
 
 **Design system rolled to every room.** RoomHeader + FilterBar (dropdowns) + CaseCard applied across all room browsers: Metrics (+ Growth tab), RCA, Analytics Cases, Product Design, Prioritization, Spot the Flaw, A/B Judgment (Scenario), A/B Design, Instrumentation, Growth Analytics, Challenges, and the shared FoundationBrowser (all 4 Foundations). Chip-walls → dropdown filters everywhere; per-card colored rails removed; one consistent layout. SQL Lab browse left as-is (special surface). All room filtering/lock/progress logic preserved — presentation only.

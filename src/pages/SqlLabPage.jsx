@@ -147,30 +147,40 @@ function easyRampStage(problem) {
   return Math.floor(i / 5) + 1; // 0–4 → 1, 5–9 → 2, 10–14 → 3
 }
 
-// Derive learner-facing bullet requirements at RENDER time from the problem's own
+// Derive learner-facing requirements at RENDER time from the problem's own
 // expected* fields + prompt. Nothing stored on the problem; pure presentation.
+// Returns a STRUCTURED shape so each output column reads as its own bullet — the
+// comma-list ('Output 3 columns: a, b, c') was the exact line beginners misread.
 function deriveRequirements(problem) {
-  if (!problem) return [];
-  const bullets = [];
+  if (!problem) return null;
+  const columns = problem.expectedColumns || [];
   const rc = problem.expectedRowCount;
-  if (typeof rc === 'number') {
-    bullets.push('Return exactly ' + rc + ' row' + (rc === 1 ? '' : 's'));
-  }
-  const cols = problem.expectedColumns || [];
-  if (cols.length === 1) {
-    bullets.push('Output one column: ' + cols[0]);
-  } else if (cols.length > 1) {
-    bullets.push('Output ' + cols.length + ' columns: ' + cols.join(', '));
-  }
   // Pull the sort instruction straight out of the prompt sentence, if present.
+  let order = null;
   const prompt = problem.prompt || '';
   const sortMatch = prompt.match(/\b(?:ordered?|sort(?:ed)?)\b[^.]*\bby\b[^.]*/i);
   if (sortMatch) {
     let phrase = sortMatch[0].trim().replace(/[\s,;]+$/, '');
-    phrase = phrase.charAt(0).toUpperCase() + phrase.slice(1);
-    bullets.push(phrase);
+    order = phrase.charAt(0).toUpperCase() + phrase.slice(1);
   }
-  return bullets;
+  if (!columns.length && typeof rc !== 'number' && !order) return null;
+  return { columns, order, rowCount: typeof rc === 'number' ? rc : null };
+}
+
+// Which datamart tables a problem's reference solution actually touches — derived
+// by whole-word matching each table name against the stored `solution` SQL. Used
+// by the Stage-1 ramp to show ONLY the tables the answer needs (no hunting). Falls
+// back to every table if nothing matches (defensive; shouldn't happen).
+function solutionTables(problem, dm) {
+  if (!dm) return [];
+  const all = Object.keys(dm.tables);
+  const sql = (problem && problem.solution) || '';
+  if (!sql) return all;
+  const used = all.filter(name => {
+    const safe = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp('\\b' + safe + '\\b', 'i').test(sql);
+  });
+  return used.length ? used : all;
 }
 
 const DIFF_COLOR = {
@@ -218,9 +228,17 @@ function Badge({ label, style }) {
   );
 }
 
-function SchemaAccordion({ dm, open, onToggle }) {
+// onlyTables (optional): when given, render ONLY those tables (Stage-1 ramp shows
+// just the tables the solution needs). Header reflects the filtered set. When the
+// toggle is collapsible the chevron shows; force-open callers pass onToggle=undefined.
+function SchemaAccordion({ dm, open, onToggle, onlyTables }) {
   if (!dm) return null;
-  const tableNames = Object.keys(dm.tables);
+  const allNames = Object.keys(dm.tables);
+  const filtered = (onlyTables && onlyTables.length) ? allNames.filter(n => onlyTables.includes(n)) : allNames;
+  const scoped = onlyTables && onlyTables.length > 0;
+  const headerText = scoped
+    ? 'Schema — tables you need (' + filtered.length + ')'
+    : 'Schema — ' + dm.name + ' (' + allNames.length + ' tables)';
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden', marginTop: '0.75rem' }}>
       <button
@@ -228,21 +246,21 @@ function SchemaAccordion({ dm, open, onToggle }) {
         style={{
           width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '0.5rem 0.75rem', background: 'var(--surface-2)', border: 'none',
-          cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 500,
+          cursor: onToggle ? 'pointer' : 'default', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 500,
         }}
       >
-        <span>Schema — {dm.name} ({tableNames.length} tables)</span>
-        <span style={{ fontSize: '0.65rem', transition: 'transform 0.2s', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
+        <span>{headerText}</span>
+        {onToggle && <span style={{ fontSize: '0.65rem', transition: 'transform 0.2s', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>}
       </button>
       {open && (
         <div style={{ padding: '0.6rem 0.75rem', background: 'var(--surface)', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '0.6rem' }}>
-          {Object.entries(dm.tables).map(([tableName, table]) => (
+          {filtered.map(tableName => (
             <div key={tableName} style={{ padding: '0.4rem 0.5rem', background: 'var(--surface-2)', borderRadius: '6px', border: '1px solid var(--border)' }}>
               <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', fontWeight: 700, color: 'var(--teal)', marginBottom: '4px' }}>
                 {tableName}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-                {table.columns.map(col => (
+                {dm.tables[tableName].columns.map(col => (
                   <span key={col.name} style={{ fontSize: '0.65rem', fontFamily: 'monospace', padding: '1px 5px', borderRadius: '3px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{col.name}</span>
                 ))}
               </div>
@@ -259,7 +277,7 @@ function SchemaAccordion({ dm, open, onToggle }) {
 // Small, deliberate "Training wheels: N/3" marker so the fade reads as intentional
 // pedagogy, not inconsistent UI. Stage 3 still shows the marker (wheels coming off).
 function RampMarker({ stage }) {
-  const labels = { 1: 'Full scaffolding', 2: 'Schema only — explore it yourself', 3: 'Almost on your own' };
+  const labels = { 1: 'Full scaffolding', 2: 'All tables — find the ones you need', 3: 'On your own' };
   return (
     <div style={{
       display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
@@ -276,10 +294,14 @@ function RampMarker({ stage }) {
   );
 }
 
-// Stage 1 only: explicit bullet requirements derived from the problem's expected*
-// fields + prompt. Renders nothing if no requirements could be derived.
-function RequirementsBlock({ bullets }) {
-  if (!bullets || bullets.length === 0) return null;
+// Stages 1 & 2: spell out the deliverable as separate bullets — one per output
+// column — so the 'return a, b, c' line nobody parsed becomes a checklist. Order
+// and row-count ride along underneath. Renders nothing if nothing could be derived.
+function RequirementsBlock({ req }) {
+  if (!req) return null;
+  const { columns = [], order, rowCount } = req;
+  const liStyle = { display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.8rem', color: 'var(--text)', lineHeight: 1.5 };
+  const check = <span style={{ flexShrink: 0, marginTop: '1px' }}><Icon name='check' size={12} color='var(--teal)' /></span>;
   return (
     <div style={{
       marginTop: '0.65rem', padding: '0.6rem 0.85rem',
@@ -290,40 +312,27 @@ function RequirementsBlock({ bullets }) {
       <div style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--teal)', marginBottom: '0.4rem' }}>
         Your result should
       </div>
-      <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-        {bullets.map((b, i) => (
-          <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.8rem', color: 'var(--text)', lineHeight: 1.5 }}>
-            <span style={{ flexShrink: 0, marginTop: '1px' }}><Icon name='check' size={12} color='var(--teal)' /></span>
-            <span>{b}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-// Stage 2 only: table NAMES only — no sample rows, no column types/names — plus a
-// one-line nudge to explore the data via SELECT *. Pushes the learner to self-serve.
-function SchemaNamesOnly({ dm }) {
-  if (!dm) return null;
-  const tableNames = Object.keys(dm.tables);
-  const firstTable = tableNames[0];
-  return (
-    <div style={{ marginTop: '0.75rem', border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden' }}>
-      <div style={{ padding: '0.5rem 0.75rem', background: 'var(--surface-2)', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 500 }}>
-        Tables — {dm.name} ({tableNames.length})
-      </div>
-      <div style={{ padding: '0.6rem 0.75rem', background: 'var(--surface)', display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
-        {tableNames.map(name => (
-          <span key={name} style={{ fontFamily: 'monospace', fontSize: '0.74rem', fontWeight: 700, color: 'var(--teal)', padding: '2px 8px', borderRadius: '5px', background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
-            {name}
-          </span>
-        ))}
-      </div>
-      <div style={{ padding: '0.4rem 0.75rem', background: 'var(--surface-2)', borderTop: '1px solid var(--border)', fontSize: '0.72rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-        <Icon name='compass' size={12} color='currentColor' />
-        <span>Tip: run <code style={{ fontFamily: 'monospace', color: 'var(--teal)' }}>SELECT * FROM {firstTable || 'table'}</code> to see the columns and data.</span>
-      </div>
+      {columns.length > 0 && (
+        <>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+            For each matching row, return:
+          </div>
+          <ul style={{ margin: '0 0 0.3rem', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+            {columns.map(c => (
+              <li key={c} style={liStyle}>
+                {check}
+                <code style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--text)' }}>{c}</code>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {(order || rowCount !== null) && (
+        <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {order && <li style={liStyle}>{check}<span>{order}</span></li>}
+          {rowCount !== null && <li style={liStyle}>{check}<span>Return exactly {rowCount} row{rowCount === 1 ? '' : 's'}</span></li>}
+        </ul>
+      )}
     </div>
   );
 }
@@ -1116,7 +1125,10 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
   // Easy-tier scaffolding ramp: which fade-batch (1/2/3) this problem falls in.
   // 0 = no ramp (default rendering). Derived requirements computed only for stage 1.
   const rampStage = easyRampStage(problem);
-  const rampRequirements = useMemo(() => (rampStage === 1 ? deriveRequirements(problem) : []), [problem, rampStage]);
+  // Bullets show on stages 1 & 2 (gone by stage 3). Stage 1 also scopes the schema
+  // to only the tables the solution touches; stages 2 & 3 show every table.
+  const rampRequirements = useMemo(() => ((rampStage === 1 || rampStage === 2) ? deriveRequirements(problem) : null), [problem, rampStage]);
+  const rampTables = useMemo(() => (rampStage === 1 ? solutionTables(problem, dm) : null), [problem, rampStage, dm]);
 
   // Notify parent of problem changes for hash routing
   useEffect(() => {
@@ -1500,8 +1512,8 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--text-muted)', margin: 0 }}>{problem.prompt}</p>
           {/* Easy-tier scaffolding ramp marker — deliberate "training wheels" cue */}
           {rampStage > 0 && <RampMarker stage={rampStage} />}
-          {/* Stage 1: derived bullet requirements above the editor */}
-          {rampStage === 1 && <RequirementsBlock bullets={rampRequirements} />}
+          {/* Stages 1 & 2: deliverable spelled out as bullets above the editor */}
+          {(rampStage === 1 || rampStage === 2) && <RequirementsBlock req={rampRequirements} />}
           {/* Judgment prompt — Hard / Master problems only */}
           {problem.beforeWriting && (
             <div style={{ marginTop: '0.7rem', padding: '0.5rem 0.75rem', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '6px', borderLeft: '3px solid var(--yellow)' }}>
@@ -1526,17 +1538,17 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           )}
         </div>
 
-        {/* Schema — ramp-gated. Stage 2 hides rows/types (names only + explore nudge);
-            Stage 1 force-expands the full preview with rows/types; otherwise normal accordion. */}
-        {rampStage === 2 ? (
-          <SchemaNamesOnly dm={dm} />
-        ) : (
-          <SchemaAccordion
-            dm={dm}
-            open={rampStage === 1 ? true : schemaOpen}
-            onToggle={rampStage === 1 ? undefined : () => setSchemaOpen(o => !o)}
-          />
-        )}
+        {/* Schema — ramp-gated.
+            Stage 1: ONLY the tables the solution needs, force-expanded (no hunting).
+            Stage 2: ALL tables, force-expanded (learner finds which ones they need).
+            Stage 3 / no-ramp: normal collapsible accordion, all tables — same as the
+            other 180-odd problems. */}
+        <SchemaAccordion
+          dm={dm}
+          onlyTables={rampStage === 1 ? rampTables : null}
+          open={(rampStage === 1 || rampStage === 2) ? true : schemaOpen}
+          onToggle={(rampStage === 1 || rampStage === 2) ? undefined : () => setSchemaOpen(o => !o)}
+        />
 
         {/* Expected output */}
         <div style={{ marginTop: '0.65rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
