@@ -13,6 +13,9 @@ export const expFoundationModules = [
     tags: ['causality', 'randomization', 'why-ab'],
     keyInsight: 'A PM points at a chart: "Power users who used the new search feature retained at 85% vs 60% for users who didn\'t. It\'s working." You pause. Power users are different people — they seek out features, they have more intent, they\'d retain better regardless. Observational data conflates treatment with selection: users who see a feature differ from those who don\'t in every way you can\'t measure. Random assignment is the only mechanism that breaks this confound and makes causal claims valid.',
     connection: 'Every experiment in the Review Room and Design Room rests on this principle. If you cannot articulate why randomization enables causal inference, you cannot defend your experiment design under pressure.',
+    playbookLinks: [
+      { id: 'experiment-design', label: 'Experiment Design' },
+    ],
   },
   {
     id: 'ef02',
@@ -23,8 +26,12 @@ export const expFoundationModules = [
     isFree: true,
     estimatedMin: 6,
     tags: ['randomization unit', 'spillover', 'network effects'],
-    keyInsight: 'You randomize a checkout UI change at the session level. A user gets the new variant on visit one, the old on visit two, and files a support ticket about the inconsistent experience. Meanwhile your false positive rate is inflated because sessions from the same user end up in both groups. The randomization unit must match the unit of analysis. Mismatches create bad user experiences and broken statistics simultaneously — and network effects add a third problem that only cluster-level randomization solves.',
+    keyInsight: 'You randomize a checkout UI change at the session level. A user gets the new variant on visit one, the old on visit two, and files a support ticket about the inconsistent experience. The deeper problem is statistical: that user\'s repeated sessions are NOT independent observations, but a naive test treats them as if they were. Correlated sessions carry less information than independent ones, so the test underestimates the true variance and overstates significance — you ship a "winner" that isn\'t real. The fix is the core rule: the randomization unit must match the unit of analysis. Randomize by user when you analyze users. (Interference between users — network effects — is a separate failure mode covered in ef11.)',
     connection: 'SRM (module 5) often traces back to a mismatch between the assignment unit and the logging unit. Understanding randomization units first prevents you from misdiagnosing data quality issues as bias.',
+    playbookLinks: [
+      { id: 'randomization-unit', label: 'Randomization Unit' },
+      { id: 'experiment-design', label: 'Experiment Design' },
+    ],
   },
   {
     id: 'ef03',
@@ -37,6 +44,10 @@ export const expFoundationModules = [
     tags: ['power', 'MDE', 'sample size', 'alpha', 'beta'],
     keyInsight: 'Your PM wants to detect a 1% lift in conversion. You run the power calculation: 14 million users per arm, 22 weeks at current traffic. The conversation goes quiet. Required sample size scales with 1/MDE squared — halving the detectable effect quadruples runtime. Most teams underpower experiments by setting ambitious targets without checking them against actual traffic. Run the calculation before committing to a timeline, not after the experiment is already live.',
     connection: 'Power analysis is the gate to every experiment. Without it, a null result is uninterpretable — you don\'t know if there was no effect or if you simply couldn\'t detect it. This module is prerequisite for modules 4 through 7.',
+    playbookLinks: [
+      { id: 'statistical-power', label: 'Statistical Power' },
+      { id: 'sample-size-calculation', label: 'Sample Size Calculation' },
+    ],
   },
   {
     id: 'ef04',
@@ -61,6 +72,10 @@ export const expFoundationModules = [
     tags: ['SRM', 'assignment', 'data quality'],
     keyInsight: 'You launch a 50/50 split and after a week the dashboard shows 52% in control, 48% in treatment. Small difference — but a chi-square test says it\'s not noise. This is a Sample Ratio Mismatch, and it means the groups are no longer comparable. Maybe a bot filter fired differently, maybe the assignment logic had a bug. Whatever the cause, you cannot interpret the results. Pause the experiment, diagnose the cause, and relaunch. Drawing conclusions from an SRM-compromised test is worse than running no test at all.',
     connection: 'SRM is the data quality check for experiments — the same instinct that makes you check tracking before blaming the product in RCA. Always run an SRM check before interpreting experiment results.',
+    playbookLinks: [
+      { id: 'srm', label: 'Sample Ratio Mismatch' },
+      { id: 'experiment-design', label: 'Experiment Design' },
+    ],
   },
   {
     id: 'ef06',
@@ -73,6 +88,10 @@ export const expFoundationModules = [
     tags: ['novelty effect', 'learning effect', 'long-run'],
     keyInsight: 'You check the experiment after three days: +8% engagement, looking great. You call it early and ship. Two weeks later engagement has settled back to baseline — worse than before because users learned the new pattern and found it annoying. The first days of a new UI measure curiosity, not value. Initial lift from novelty often decays to steady-state or below. Running an experiment long enough to capture stable behaviour — at least one full weekly cycle, usually 2-4 weeks — is the only way to know if you\'re measuring a real effect.',
     connection: 'The novelty effect is the temporal equivalent of the mix shift in RCA. Just as you segment by cohort to find mix shifts, you segment by time to find novelty decay. Both are about not trusting aggregate snapshots.',
+    playbookLinks: [
+      { id: 'long-run-validity', label: 'Long-Run Validity' },
+      { id: 'experiment-design', label: 'Experiment Design' },
+    ],
   },
   {
     id: 'ef07',
@@ -83,8 +102,12 @@ export const expFoundationModules = [
     isFree: true,
     estimatedMin: 7,
     tags: ['multiple testing', 'FWER', 'guardrail metrics', 'Bonferroni'],
-    keyInsight: 'Your experiment readout has 20 metrics. Three show p < 0.05. The team wants to highlight all three as wins. But at alpha=0.05, you expect one false positive just by chance across 20 tests — statistically, at least one of those "wins" is noise. The more metrics you test, the more likely you are to find something significant that isn\'t real. Bonferroni correction divides alpha by the number of tests, which is conservative but prevents you from celebrating phantom results.',
+    keyInsight: 'Your experiment readout has 20 metrics. Three show p < 0.05. The team wants to highlight all three as wins. But at alpha=0.05, you EXPECT about one false positive by chance across 20 tests — so at least one of those three "wins" is likely noise. The more metrics you test, the more likely you are to find something significant that isn\'t real. Bonferroni correction divides alpha by the number of tests, which is conservative but prevents you from celebrating phantom results.',
     connection: 'Guardrail metrics (the ones you watch to catch regressions you did not target) are a designed response to the multiple testing problem. Knowing the theory lets you defend why you use a stricter threshold for guardrails than for primary metrics.',
+    playbookLinks: [
+      { id: 'multiple-testing', label: 'Multiple Testing' },
+      { id: 'experiment-design', label: 'Experiment Design' },
+    ],
   },
   {
     id: 'ef08',
@@ -95,7 +118,7 @@ export const expFoundationModules = [
     isFree: true,
     estimatedMin: 10,
     tags: ['a/a testing', 'platform validation', 'false positives'],
-    keyInsight: 'Before your team runs its first live experiment on the new platform, you split users 50/50 and give both groups the exact same experience. After two weeks the test shows p = 0.02 — "significant." That\'s a problem. An A/A test should show no significant difference because nothing changed. If it does, your randomization logic is broken or your variance estimation is wrong. Every experiment you run on that platform is compromised until you fix it. A/A testing is not optional hygiene — it\'s the baseline.',
+    keyInsight: 'Before trusting a new platform, you run an A/A test — both groups get the identical experience — and it comes back p = 0.02. A junior analyst panics: "Significant! The platform is broken." Not so fast. Under a working platform, roughly 5% of A/A tests will show p < 0.05 purely by chance, so one significant A/A is exactly what you\'d expect, not proof of a bug. You validate a platform by running MANY A/A tests and checking the p-value distribution: it should be roughly uniform, with a false positive rate near alpha (about 5%). The alarm bell is a PATTERN — far too many significant results, or a p-value distribution skewed toward 0. That signals broken randomization or wrong (usually underestimated) variance. One significant A/A is noise; a skewed distribution across many is the real signal.',
     connection: 'A/A testing is a prerequisite to trusting any A/B result. If your platform has systematic bias, every experiment you run is compromised. Interviewers use A/A scenarios to probe whether you validate infrastructure before drawing conclusions.',
     playbookLinks: [
       { id: 'experiment-design', label: 'Experiment Design' },

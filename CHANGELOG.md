@@ -4,6 +4,14 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.75.0] — 2026-06-24 [FOUNDATIONS CONTENT FIXES — APPLIED & VERIFIED]
+
+Worked the V5.74.0 punch list to completion across all four foundation rooms (fix → re-score → iterate → verify), one reviewer-fixer per room, then independent verification.
+- **4 must-fixes applied & read-back-verified:** ef08 (A/A — a single significant A/A isn't proof; validate via the p-value distribution across many A/A tests), rf07 (metric-tree identity made dimensionally valid + "a drop can span multiple nodes"), mf13 (re-cut to own null≠no-effect / MDE / CI-width; duplication with mf08 + contradicting numbers removed), sf26 (Bayesian credible interval now conditioned on the prior).
+- **Factual score-4 items fixed:** sf16 (log-transform changes the estimand), sf29 (goodness-of-fit vs independence chi-square), sf32 (Mann-Whitney ≠ median test), sf28 (bootstrap can't invent info), sf23 (McCrary two-sided), sf09 (CLT heavy-tail caveat), sf01/sf05/sf06 (definitional precision), mf06 (validate leading→lagging link), mf05/mf12 (guardrail redundancy split), mf10 (re-angled vs mf03), rf05 (mix-shift vs Simpson's), rf09 (single-YoY softened), rf10 (buckets can overlap), ef07 (probabilistic wording), ef02 (non-independence framing).
+- **Deterministic gate:** Tier 1 clean; Tier 2 8 → 1 (added playbookLinks to ef01–ef07 except ef04). All four data files parse (15/15/17/32).
+- Files: `src/data/{expFoundationModules,rcaFoundationModules,metricsFoundationModules,statsFoundationsModules}.js`, `docs/FOUNDATIONS-AUDIT.md`.
+
 ## [5.74.0] — 2026-06-24 [FOUNDATIONS TIER-3 AUDIT — THE END GOAL, DELIVERED]
 
 The original goal: audit Foundations content against the eval rubric to find real problems. The local LLMs couldn't do the judgment half (proven over V5.71–5.73), so this pass was done by frontier-model review (me + 3 parallel reviewers), one per room. New doc: `docs/FOUNDATIONS-AUDIT.md` — per-module score (1–5) + evidence for all 79 modules, prioritized fix lists per room.

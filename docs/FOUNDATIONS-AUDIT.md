@@ -8,7 +8,13 @@ Deterministic findings (from `audit_foundations.mjs`) are folded in where releva
 
 ---
 
-## Headline — 4 must-fixes across 79 modules
+## STATUS (V5.75.0): ALL FIXES APPLIED & VERIFIED
+
+The 4 must-fixes (ef08, rf07, mf13, sf26) + all factual score-4 items were rewritten, re-scored to 5/5, and independently spot-checked. Deterministic Tier-2 warnings 8 → 1 (only ef04 playbook-links left). All four files parse. The audit below is the record of what was found; everything actionable has been resolved.
+
+---
+
+## Headline — 4 must-fixes across 79 modules (RESOLVED)
 
 The audit discriminated (not all-5, not carpet-flag): ~64 of 79 modules are clean 5s, four are genuine score-3 content problems, and ~11 are score-4 polish items. The four that can actually mislead a candidate:
 
