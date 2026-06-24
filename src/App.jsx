@@ -100,6 +100,7 @@ const SpotTheFlawBrowser = lazy(() => import('./pages/SpotTheFlawBrowser.jsx').t
 const SpotTheFlawRunner  = lazy(() => import('./components/spotTheFlaw/SpotTheFlawRunner.jsx').then(m => ({ default: m.SpotTheFlawRunner })));
 const TakehomeBrowser  = lazy(() => import('./pages/TakehomeBrowser.jsx').then(m => ({ default: m.TakehomeBrowser })));
 const CheatSheet       = lazy(() => import('./pages/CheatSheet.jsx').then(m => ({ default: m.CheatSheet })));
+const Library          = lazy(() => import('./pages/Library.jsx').then(m => ({ default: m.Library })));
 const CodeBrowser      = lazy(() => import('./pages/CodeBrowser.jsx').then(m => ({ default: m.CodeBrowser })));
 const CodeRunner       = lazy(() => import('./components/code/CodeRunner.jsx').then(m => ({ default: m.CodeRunner })));
 const PythonLabBrowser = lazy(() => import('./pages/PythonLabBrowser.jsx').then(m => ({ default: m.PythonLabBrowser })));
@@ -1133,7 +1134,7 @@ export default function App() {
             key={activeStatsModuleId}
             caseId={activeStatsModuleId}
             savedProgress={getStatsProgress(activeStatsModuleId)}
-            onBack={() => navigate('stats')}
+            onBack={() => navigate('browser')}
             onGoToReview={id => openScenario(id)}
             onGoToDesign={id => openDesignScenario(id)}
             onNext={nextStatsModuleId ? () => { setActiveStatsModuleId(nextStatsModuleId); } : null}
@@ -1143,7 +1144,7 @@ export default function App() {
 
         {/* ── Metrics Room ── */}
         {page === 'metrics' && (
-          <MetricsBrowser onSelectCase={openMetricsCase} unlocked={unlocked} onUnlock={() => navigate('unlock')} onOpenArticle={openPlaybookArticle} onNavigate={navigate} />
+          <MetricsBrowser onSelectCase={openMetricsCase} onSelectGrowth={openGrowthAnalyticsCase} unlocked={unlocked} onUnlock={() => navigate('unlock')} onOpenArticle={openPlaybookArticle} onNavigate={navigate} />
         )}
         {page === 'metrics-runner' && activeMetricsCaseId && (
           <MetricsRunner
@@ -1184,6 +1185,7 @@ export default function App() {
           <ScenarioBrowser
             allProgress={progressSnapshot}
             onSelect={id => { openScenario(id); refreshProgress(); }}
+            onSelectStats={openStatsModule}
             unlocked={unlocked}
             onUnlock={() => navigate('unlock')}
             onOpenArticle={openPlaybookArticle}
@@ -1271,7 +1273,7 @@ export default function App() {
           <FullLoopRunner
             key={activeFullLoopId}
             caseId={activeFullLoopId}
-            onBack={() => navigate('full-loop')}
+            onBack={() => navigate('challenges')}
             onNext={nextFullLoopId ? () => openFullLoopCase(nextFullLoopId) : undefined}
             unlocked={unlocked}
           />
@@ -1359,7 +1361,7 @@ export default function App() {
             key={activeGrowthAnalyticsId}
             caseId={activeGrowthAnalyticsId}
             unlocked={unlocked}
-            onBack={() => navigate('growth-analytics')}
+            onBack={() => navigate('metrics')}
             onNext={nextGrowthAnalyticsId ? () => openGrowthAnalyticsCase(nextGrowthAnalyticsId) : undefined}
             onNavigate={navigate}
           />
@@ -1676,10 +1678,15 @@ export default function App() {
         )}
 
         {page === 'simulator' && <InterviewSimulator unlocked={unlocked} onBack={() => setPage('home')} onNavigate={navigate} />}
-        {page === 'ab-interpreter' && <ABTestInterpreter onBack={() => setPage('home')} />}
+        {/* Archived V5.82.0 — A/B Interpreter (calculator utility, low merit). */}
         {page === 'cheatsheet' && (
           <Suspense fallback={null}>
             <CheatSheet onNavigate={navigate} />
+          </Suspense>
+        )}
+        {page === 'library' && (
+          <Suspense fallback={null}>
+            <Library onNavigate={navigate} />
           </Suspense>
         )}
         {(page === 'code' || page === 'code-runner') && (
@@ -1777,6 +1784,7 @@ export default function App() {
             }>
             <ChallengesBrowser
               onSelectChallenge={openChallenge}
+              onSelectFullLoop={openFullLoopCase}
               unlocked={unlocked}
             />
           </Suspense>

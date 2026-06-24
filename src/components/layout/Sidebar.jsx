@@ -23,12 +23,7 @@ const NAV_FRAMES = [
       {
         id: 'learn', label: 'Learn',
         items: [
-          { id: 'blog',         label: 'Deep Dives' },
-          { id: 'playbook',     label: 'Frameworks' },
-          { id: 'interview-qa', label: 'Interview Q&A' },
-          { id: 'cheatsheet',   label: 'Prep Cheatsheet' },
-          { id: 'failures',     label: 'Analytics Failures' },
-          { id: 'trainer',      label: 'MCQ Quiz' },
+          { id: 'library', label: 'Library' },
         ],
       },
     ],
@@ -43,7 +38,6 @@ const NAV_FRAMES = [
   {
     id: 'build', label: 'BUILD', icon: 'hammer',
     items: [
-      { id: 'full-loop',       label: 'Full Loop' },
       { id: 'instrumentation', label: 'Instrumentation' },
     ],
   },
@@ -53,10 +47,8 @@ const NAV_FRAMES = [
       {
         id: 'experiments', label: 'Experiments',
         items: [
-          { id: 'stats',          label: 'Stats' },
           { id: 'design',         label: 'A/B Design' },
-          { id: 'browser',        label: 'A/B Review' },
-          { id: 'ab-interpreter', label: 'A/B Interpreter' },
+          { id: 'browser',        label: 'A/B Judgment' },
           { id: 'spot-the-flaw',  label: 'Spot the Flaw' },
         ],
       },
@@ -66,8 +58,6 @@ const NAV_FRAMES = [
           { id: 'metrics',          label: 'Metrics' },
           { id: 'rca',              label: 'RCA' },
           { id: 'cases',            label: 'Analytics Cases' },
-          { id: 'growth-analytics', label: 'Growth Analytics' },
-          { id: 'bi',               label: 'BI & Reporting' },
         ],
       },
       {
@@ -81,14 +71,14 @@ const NAV_FRAMES = [
     ],
     items: [
       { id: 'challenges',     label: 'Challenges' },
-      { id: 'company-tracks', label: 'Company Tracks' },
     ],
   },
   {
     id: 'live', label: 'LIVE', icon: 'mic',
     items: [
-      { id: 'simulator',   label: 'Mock Interview' },
-      { id: 'defense-doc', label: 'Defense Strategy' },
+      { id: 'simulator',      label: 'Mock Interview' },
+      { id: 'defense-doc',    label: 'Defense Strategy' },
+      { id: 'company-tracks', label: 'Company Tracks' },
     ],
   },
 ];
@@ -108,6 +98,7 @@ const COMMUNITY_URL = 'https://chat.whatsapp.com/JbIaqV87fwh8Ym3ufH5CFx?mode=gi_
 // a few don't and need an explicit exception.
 const RUNNER_EXCEPTIONS = {
   'runner': 'browser',
+  'stats-runner': 'browser', // Stats claim-checks now live inside A/B Judgment
   'stf-runner': 'spot-the-flaw',
   'takehome-runner': 'take-home',
 };

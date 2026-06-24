@@ -1,11 +1,20 @@
 import { useState } from 'react';
 import { Icon } from '../components/shared/Icon.jsx';
 import { challengesCases } from '../data/challengesCases.js';
+import { fullLoopCases } from '../data/fullLoopCases.js';
 import { getAllChallengesProgress } from '../utils/challengesProgress.js';
+import { getAllFullLoopProgress } from '../utils/fullLoopProgress.js';
 
 const DIFF_CFG = {
   senior: { label: 'Senior', color: 'var(--yellow)',  bg: 'var(--yellow-bg)',  border: 'var(--yellow-border)' },
   staff:  { label: 'Staff',  color: 'var(--red)',     bg: 'var(--red-bg)',     border: 'var(--red-border)' },
+};
+
+// Full Loop cases use analyst/senior/staff
+const FL_DIFF_CFG = {
+  analyst: { label: 'Analyst', color: 'var(--teal)',   bg: 'var(--teal-bg)',   border: 'var(--teal-border)' },
+  senior:  { label: 'Senior',  color: 'var(--yellow)', bg: 'var(--yellow-bg)', border: 'var(--yellow-border)' },
+  staff:   { label: 'Staff',   color: 'var(--red)',    bg: 'var(--red-bg)',    border: 'var(--red-border)' },
 };
 
 const RATING_COLOR = {
@@ -40,8 +49,15 @@ const sortedCases = [...challengesCases].sort((a, b) => {
   return (order[a.difficulty] ?? 9) - (order[b.difficulty] ?? 9);
 });
 
-export function ChallengesBrowser({ onSelectChallenge, unlocked }) {
+// Full Loop — end-to-end cases, sorted analyst -> senior -> staff
+const sortedFullLoop = [...fullLoopCases].sort((a, b) => {
+  const order = { analyst: 0, senior: 1, staff: 2 };
+  return (order[a.difficulty] ?? 9) - (order[b.difficulty] ?? 9);
+});
+
+export function ChallengesBrowser({ onSelectChallenge, onSelectFullLoop, unlocked }) {
   const allProgress = getAllChallengesProgress();
+  const flProgress = getAllFullLoopProgress();
   const completedCount = Object.keys(allProgress).length;
   const [hoveredId, setHoveredId] = useState(null);
   const [filterDiff, setFilterDiff] = useState('all');
@@ -322,6 +338,177 @@ export function ChallengesBrowser({ onSelectChallenge, unlocked }) {
             </div>
           );
         })}
+      </div>
+
+      {/* ── Full Loop — end-to-end cases ── */}
+      <div style={{ marginTop: '2.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+          <span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name='layers' size={15} color='var(--teal)' />
+          </span>
+          <div>
+            <div style={{
+              fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase',
+              letterSpacing: '0.1em', color: 'var(--teal)', marginBottom: '0.1rem',
+            }}>
+              End-to-End
+            </div>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
+              Full Loop
+            </h2>
+          </div>
+        </div>
+
+        <p style={{
+          color: 'var(--text-muted)', fontSize: '0.9rem',
+          margin: '0 0 1.1rem', maxWidth: '640px', lineHeight: 1.6,
+        }}>
+          A single ambiguous symptom, taken all the way through: frame the problem, decompose it MECE, design the schema, write the query chain, and synthesize a recommendation. These are not multi-room collisions — they are one investigation carried from alert to answer.
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(400px, 100%), 1fr))',
+          gap: '1rem',
+        }}>
+          {sortedFullLoop.map((m, index) => {
+            const prog = flProgress[m.id];
+            const isLocked = !m.isFree && !unlocked;
+            const diffCfg = FL_DIFF_CFG[m.difficulty] || FL_DIFF_CFG.analyst;
+            const isHovered = hoveredId === m.id;
+
+            return (
+              <div
+                key={m.id}
+                className="pal-card-enter pal-card-hover"
+                role="button"
+                tabIndex={0}
+                onClick={() => onSelectFullLoop?.(m.id)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectFullLoop?.(m.id);
+                  }
+                }}
+                onMouseEnter={() => setHoveredId(m.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                style={{
+                  animationDelay: String(Math.min(index * 28, 400)) + 'ms',
+                  background: 'var(--surface)',
+                  border: '1px solid ' + (isHovered ? 'var(--teal-border)' : 'var(--border)'),
+                  borderLeft: '3px solid var(--teal)',
+                  borderRadius: '10px',
+                  padding: '1.25rem',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.15s, box-shadow 0.15s',
+                  opacity: isLocked ? 0.7 : 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                  boxShadow: isHovered ? '0 2px 12px rgba(20,184,166,0.08)' : 'none',
+                  position: 'relative',
+                }}
+              >
+                {/* Top row: ID + badges */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                  <span style={{
+                    fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-dim)',
+                    letterSpacing: '0.06em', textTransform: 'uppercase',
+                  }}>
+                    {m.id}
+                  </span>
+
+                  <span style={{
+                    fontSize: '0.7rem', fontWeight: 600,
+                    color: 'var(--teal)', background: 'var(--teal-bg)', border: '1px solid var(--teal-border)',
+                    borderRadius: '4px', padding: '0.1rem 0.4rem',
+                  }}>
+                    Full Loop
+                  </span>
+
+                  <span style={{
+                    fontSize: '0.7rem', fontWeight: 600,
+                    color: diffCfg.color, background: diffCfg.bg, border: `1px solid ${diffCfg.border}`,
+                    borderRadius: '4px', padding: '0.1rem 0.4rem',
+                  }}>
+                    {diffCfg.label}
+                  </span>
+
+                  <span style={{
+                    fontSize: '0.7rem', fontWeight: 500,
+                    color: 'var(--text-dim)', background: 'var(--surface-2)', border: '1px solid var(--border-subtle)',
+                    borderRadius: '4px', padding: '0.1rem 0.4rem',
+                  }}>
+                    {m.domain}
+                  </span>
+
+                  {m.isFree && (
+                    <span style={{
+                      fontSize: '0.7rem', fontWeight: 600,
+                      color: 'var(--green)', background: 'var(--green-bg)', border: '1px solid var(--green-border)',
+                      borderRadius: '4px', padding: '0.1rem 0.4rem', marginLeft: 'auto',
+                    }}>
+                      Free
+                    </span>
+                  )}
+
+                  {isLocked && <span style={{ fontSize: '0.8rem', marginLeft: 'auto' }}>🔒</span>}
+
+                  {prog && (
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)' }}>
+                      ✓
+                    </span>
+                  )}
+                </div>
+
+                {/* Title */}
+                <div>
+                  <div style={{
+                    fontWeight: 700, fontSize: '1rem', color: 'var(--text)',
+                    marginBottom: '0.2rem', lineHeight: 1.3,
+                  }}>
+                    {m.title}
+                  </div>
+                  <div style={{ fontSize: '0.83rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                    5-phase investigation — frame, decompose, schema, query chain, synthesis.
+                  </div>
+                </div>
+
+                {/* CTA row */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '0.25rem' }}>
+                  {prog ? (
+                    <span style={{
+                      fontSize: '0.75rem', fontWeight: 600,
+                      color: 'var(--green)',
+                      background: 'var(--surface-2)', border: '1px solid var(--border)',
+                      borderRadius: '6px', padding: '0.3rem 0.7rem',
+                    }}>
+                      ✓ Completed
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+
+                  <button
+                    onClick={e => { e.stopPropagation(); onSelectFullLoop?.(m.id); }}
+                    style={{
+                      background: isHovered ? 'var(--teal-bg)' : 'transparent',
+                      border: `1px solid ${isHovered ? 'var(--teal-border)' : 'var(--border)'}`,
+                      color: isHovered ? 'var(--teal)' : 'var(--text-muted)',
+                      borderRadius: '6px',
+                      padding: '0.35rem 0.85rem',
+                      fontSize: '0.78rem', fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'transform var(--transition), box-shadow var(--transition), border-color var(--transition)',
+                    }}
+                  >
+                    Start Full Loop →
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

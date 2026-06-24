@@ -4,6 +4,24 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.82.0] — 2026-06-24 [PORTFOLIO CONSOLIDATION — CUTS + 4 MERGES EXECUTED]
+
+Executed the full portfolio plan. Net: the practice surface count drops to ~15 legible rooms.
+
+**Cuts / moves (Tier 1):**
+- MCQ Quiz — removed standalone nav + (route dormant); MCQ lives on as the Simulator's MCQ mode (already uses `trainerMCQ`).
+- A/B Interpreter — archived (calculator utility, route removed).
+- BI & Reporting — removed from nav; **route kept** (woven into Defense Strategy / Company Tracks, like Behavioral — boxed, not blanked).
+- Company Tracks — moved JUDGE → **LIVE** (it's prep orchestration, beside Mock Interview + Defense Strategy).
+
+**Merges (each: surface room B's cases as a tagged section in room A's browser, reuse B's runner, remove B's nav, keep routes):**
+- **Library** — the 5 Learn entries (Deep Dives, Frameworks, Interview Q&A, Prep Cheatsheet, Analytics Failures) collapsed into one "Library" door (new `Library.jsx` landing, 5 cards). Cheatsheet's dead Study-Room steps removed.
+- **Full Loop → Challenges** — the 10 Full-Loop cases now appear as an "End-to-End" section in the Challenges browser (reuses FullLoopRunner). BUILD now = Instrumentation only.
+- **Growth Analytics → Metrics** — 12 growth cases now a "Growth Analytics" section in the Metrics browser (reuses GrowthAnalyticsRunner).
+- **Stats + A/B Review → "A/B Judgment"** — the 20 Stats claim-checks now a "Claim Checks" section in the A/B Review browser (reuses StatsRunner); the room is renamed "A/B Judgment" (id `browser`). ~52 cases in one room.
+
+All edited files parse (App, Sidebar, ScenarioBrowser, MetricsBrowser, ChallengesBrowser, Library, CheatSheet). Routes/runners for merged rooms kept intact (reachable from their new homes + Progress/search). Final nav: KNOW (Foundations×4 + Library) · DO (SQL Lab, Programming Lab↗) · BUILD (Instrumentation) · JUDGE (A/B Design, A/B Judgment, Spot-the-Flaw · Metrics, RCA, Analytics Cases · Product Design, Prioritization, Estimation · Challenges) · LIVE (Mock Interview, Defense Strategy, Company Tracks).
+
 ## [5.81.0] — 2026-06-24 [ORPHAN SWEEP — ARCHIVE JUDGMENTBANK, ROOMMAP, CONSULT, TAKE-HOME]
 
 The portfolio audit's blind spot was nav-only; a full route enumeration surfaced 6 orphan surfaces (routed, not in nav). Archived the 4 cruft/limbo ones (reversible — routes out, files dormant): **JudgmentBank** (unlinked browse-index), **RoomMap** (unlinked overview), **Consultation Space** (reachable only via a hidden `c` keypress, now removed — stale experiment), **Take-Home** (a real room never surfaced in nav). Kept off-nav on purpose: **Benchmark** (home-CTA funnel diagnostic) and **QA Dashboard** (internal footer tool). App.jsx parses. Retire log + restore steps in `docs/PAL-PORTFOLIO-AUDIT.md`. Still pending (decided, not yet executed): BI cut (needs ref-scrub), A/B Interpreter cut.

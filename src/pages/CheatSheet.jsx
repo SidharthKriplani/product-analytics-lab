@@ -19,7 +19,6 @@ const PREP_PLANS = [
       { label: 'Run 3 full cases per day', detail: 'Mix Metrics, RCA, and Scenarios. Don\'t repeat the same room two days in a row.', room: 'cases-runner' },
       { label: 'Complete any unfinished Foundation rooms', detail: 'Stats Foundations → Metrics Foundations → RCA Foundations → A/B Foundations. In that order if you haven\'t done them.', room: 'foundations' },
       { label: '10 SQL problems per day', detail: 'Start Easy, move to Medium by day 3. Do at least 2 Forensic problems per day — these train trap detection.', room: 'sql-lab' },
-      { label: 'Daily Study Room review', detail: 'Open the Study Room and clear your due queue. Even 10 cards/day compounds.', room: 'study' },
       { label: 'One Company Track end-to-end', detail: 'Pick the company you\'re targeting. Read the mental model, run all the cases, read the director pressure cards.', room: 'company-tracks' },
       { label: 'Run Full Loop once', detail: 'The 5-phase investigation (Problem → Decomp → Schema → SQL → Synthesis) is the closest PAL gets to a real take-home.', room: 'full-loop-runner' },
     ],
@@ -34,7 +33,6 @@ const PREP_PLANS = [
       { label: 'Identify your 2 weakest rooms', detail: 'Check Progress page. Lowest completion % or most recent wrong answers. Focus only on those.', room: 'progress' },
       { label: '5 cases per day in weak rooms only', detail: 'Repetition on your actual gaps — not the rooms you\'re already comfortable in.', room: null },
       { label: 'Forensic SQL batch (f01–f25)', detail: 'All 25 forensic problems. These are short. The point is trap recognition — integer division, NULL in NOT IN, wrong GROUP BY dimension.', room: 'sql-lab' },
-      { label: 'Clear all overdue Study Room cards', detail: 'Any card with due_date in the past. Don\'t add new cards — only clear the backlog.', room: 'study' },
       { label: 'Ship/No-Ship decisions — 5 scenarios', detail: 'These are the highest-signal interview moment. Practice reading ambiguous readouts and making a call.', room: 'runner' },
       { label: 'No new material on day 3', detail: 'Day 3 is consolidation only. Review, don\'t learn. Trust what you\'ve built.', room: null },
     ],
@@ -63,7 +61,6 @@ const PREP_PLANS = [
     steps: [
       { label: 'SQL date/time cheat sheet', detail: 'Interval syntax, DATE_TRUNC, EXTRACT. The stuff that blanks under pressure.', room: null },
       { label: 'Window functions quick reference', detail: 'ROW_NUMBER vs RANK, LAG/LEAD, running totals. Confirm the PARTITION BY reflex.', room: null },
-      { label: 'Your 3 weakest Study Room cards', detail: 'Just those 3. The ones with the most lapses. Read front and back once.', room: 'study' },
       { label: 'RCA first-cut checklist', detail: 'Data issue → internal change → external → segment. The routing, not the analysis.', room: null },
       { label: 'Eat something. Stop studying 1 hour before.', detail: 'Seriously. Your recall is better when you\'re not in fight-or-flight.', room: null },
     ],
