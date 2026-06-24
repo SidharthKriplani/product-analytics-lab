@@ -1067,7 +1067,6 @@ function Module_EF07({ onComplete }) {
 
   // Grid of 20 squares — color expected FP count red
   var gridSquares = [];
-  var fpCount = Math.round(numMetrics * 0.05 * 20 / numMetrics); // proportion in 20-square grid
   var fpInGrid = Math.min(20, Math.round(pAtLeastOne * 20));
   for (var sq = 0; sq < 20; sq++) {
     gridSquares.push(sq < fpInGrid ? 'fp' : 'ok');
@@ -1214,15 +1213,18 @@ function Module_EF08({ onComplete }) {
 
   useEffect(function() { saveEFState('ef08', { answer: answer, revealed: revealed }); }, [answer, revealed]);
 
-  // Pre-generate 30 deterministic p-values — seeded formula, clamped 0.01–0.95
+  // Pre-generate 30 deterministic p-values — seeded formula, clamped 0.012–0.95.
+  // Benign A/A: p sits comfortably above 0.05 nearly every day, dipping below
+  // exactly once (~1 in 20) and only barely — random chance, not a real signal.
   const pValues = Array.from({ length: 30 }, function(_, i) {
-    var raw = Math.sin(i * 1.7 + 0.3) * 0.15 + 0.2 + (i < 15 ? -0.1 : 0.05);
-    return Math.max(0.01, Math.min(0.95, raw));
+    var raw = 0.45 + Math.sin(i * 0.9 + 0.7) * 0.28;
+    if (i === 17) raw = 0.04; // the single shallow dip — just under threshold
+    return Math.max(0.012, Math.min(0.95, raw));
   });
 
-  // Day index where p first dips below 0.05 (expect around day 9–11)
+  // Day index where p first dips below 0.05 (the single benign crossing)
   var crossDay = pValues.findIndex(function(v) { return v < 0.05; });
-  if (crossDay === -1) crossDay = 9;
+  if (crossDay === -1) crossDay = 17;
 
   // SVG layout constants
   var svgW = 560;

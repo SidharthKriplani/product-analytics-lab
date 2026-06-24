@@ -295,7 +295,7 @@ function Module_RF02({ onComplete }) {
       <div style={{ marginBottom: '1.25rem' }}>
         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          DAU is down 12%. Three teams are already investigating different theories simultaneously — growth thinks it\'s a campaign expiry, product suspects the onboarding flow, and engineering just rolled back a deploy that may or may not be related. The VP of Product pings you: &quot;Can someone please just tell me what happened?&quot;
+          DAU is down 18%. Three teams are already investigating different theories simultaneously — growth thinks it\'s a campaign expiry, product suspects the onboarding flow, and engineering just rolled back a deploy that may or may not be related. The VP of Product pings you: &quot;Can someone please just tell me what happened?&quot;
         </p>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
           The first mistake everyone is making: they jumped straight to hypotheses. Before you can diagnose why DAU dropped, you need to decompose DAU into its component parts. Is it new users? Returning users? A specific platform? A single geography? Without decomposition, every theory sounds equally plausible, and every team wastes time investigating in parallel.
@@ -731,7 +731,7 @@ function Module_RF04({ onComplete }) {
 
 // ── Module rf05: When the Aggregate Lies ───────────────────────────────────
 function Module_RF05({ onComplete }) {
-  const EXISTING_RETENTION = 38;
+  const EXISTING_RETENTION = 36;
   const CAMPAIGN_RETENTION = 14;
   const BASELINE_NEW_PCT = 18;
 
@@ -765,7 +765,7 @@ function Module_RF05({ onComplete }) {
       <div style={{ marginBottom: '1.25rem' }}>
         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          D7 retention looks flat at the aggregate level — 32% this week, 32% last week. The PM marks it green in the weekly review and moves on. But something feels off when you pull cohort-level data. Existing users still retain at 38%. Campaign users retain at 14%. Both numbers are unchanged. So why does the aggregate feel wrong?
+          D7 retention looks flat at the aggregate level — 32% this week, 32% last week. The PM marks it green in the weekly review and moves on. But something feels off when you pull cohort-level data. Existing users still retain at 36%. Campaign users retain at 14%. Both numbers are unchanged. So why does the aggregate feel wrong?
         </p>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0 0', fontSize: '0.9rem' }}>
           This is Simpson\'s paradox in practice — the aggregate can move in the opposite direction from every subgroup when the mix of subgroups shifts. A big acquisition campaign floods your user base with low-retention users, and the blended number drops even though nobody\'s experience got worse. If you only look at the top line, you miss it entirely. This module lets you manipulate the mix directly and watch the paradox unfold.
@@ -3136,6 +3136,8 @@ function Module_RF15({ onComplete }) {
 
   var allRanked = hyps.every(function(h) { return userRanks[h.id] != null; });
 
+  var correctRankCount = hyps.filter(function(h) { return userRanks[h.id] === h.rank; }).length;
+
   function advanceScenario() {
     if (scenarioIdx < SCENARIOS_RF15.length - 1) {
       setScenarioIdx(scenarioIdx + 1);
@@ -3258,6 +3260,15 @@ function Module_RF15({ onComplete }) {
                         <span style={{ fontSize: '0.71rem', padding: '0.1rem 0.45rem', borderRadius: '20px', background: 'var(--teal-bg)', color: 'var(--teal)', fontWeight: 700, border: '1px solid var(--teal-border)' }}>
                           Investigate {RANK_LABELS[h.rank]}
                         </span>
+                        {userRanks[h.id] === h.rank ? (
+                          <span style={{ fontSize: '0.71rem', padding: '0.1rem 0.45rem', borderRadius: '20px', background: 'var(--teal-bg)', color: 'var(--teal)', fontWeight: 700, border: '1px solid var(--teal-border)' }}>
+                            ✓ Your rank matched
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '0.71rem', padding: '0.1rem 0.45rem', borderRadius: '20px', background: 'var(--yellow-bg)', color: 'var(--yellow)', fontWeight: 700, border: '1px solid var(--yellow-border)' }}>
+                            You ranked {RANK_LABELS[userRanks[h.id]]} — off
+                          </span>
+                        )}
                       </div>
                       <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5, fontStyle: 'italic' }}>
                         {h.rationale}
@@ -3279,6 +3290,15 @@ function Module_RF15({ onComplete }) {
 
       {revealed && (
         <div>
+          <div style={{
+            padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', marginBottom: '0.75rem',
+            background: correctRankCount === hyps.length ? 'var(--teal-bg)' : 'var(--yellow-bg)',
+            border: '1px solid ' + (correctRankCount === hyps.length ? 'var(--teal-border)' : 'var(--yellow-border)'),
+            color: correctRankCount === hyps.length ? 'var(--teal)' : 'var(--yellow)',
+            fontWeight: 700, fontSize: '0.88rem',
+          }}>
+            {correctRankCount}/{hyps.length} correct{correctRankCount < hyps.length ? ' — review the ranks that did not match the expert order' : ' — perfect ranking'}
+          </div>
           <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.75rem', fontSize: '0.82rem', color: 'var(--teal)', lineHeight: 1.5 }}>
             <strong>Key insight:</strong> {scenario.keyInsight}
           </div>

@@ -3,9 +3,14 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell,
 } from 'recharts';
 
+// Aggregate rates are the segment-weighted averages of SEGMENT_DATA below, so the
+// arithmetic reconciles:
+//   Treatment = (6.1*8200 + 12.4*1800) / 10000 = 7.234%  → 7.2
+//   Control   = (5.8*2100 + 11.9*7900) / 10000 = 10.619% → 10.6
+// Paradox holds: Control wins in aggregate, yet Treatment wins within every segment.
 const AGG_DATA = [
-  { name: 'Treatment', conversion: 8.2, fill: 'var(--accent)' },
-  { name: 'Control', conversion: 9.1, fill: 'var(--teal)' },
+  { name: 'Treatment', conversion: 7.2, fill: 'var(--accent)' },
+  { name: 'Control', conversion: 10.6, fill: 'var(--teal)' },
 ];
 
 const SEGMENT_DATA = [
@@ -129,18 +134,18 @@ export function Module15_SimpsonsParadox({ module, onNext }) {
           <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 140, background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '0.7rem 1rem' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: 4 }}>Treatment</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--accent)' }}>8.2%</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--accent)' }}>7.2%</div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>10,000 users total</div>
             </div>
             <div style={{ flex: 1, minWidth: 140, background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius)', padding: '0.7rem 1rem' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', marginBottom: 4 }}>Control</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--green)' }}>9.1%</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--green)' }}>10.6%</div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>10,000 users total</div>
             </div>
           </div>
 
           <div style={{ marginTop: '0.75rem', background: 'var(--red-bg)', border: '1px solid var(--red-border)', borderRadius: 'var(--radius)', padding: '0.65rem 1rem', fontSize: '0.83rem', color: 'var(--red)' }}>
-            Aggregated result: <strong>Control wins</strong> by +0.9 pp. You'd ship the old checkout. But wait — toggle to segment view.
+            Aggregated result: <strong>Control wins</strong> by +3.4 pp. You'd ship the old checkout. But wait — toggle to segment view.
           </div>
         </div>
       )}

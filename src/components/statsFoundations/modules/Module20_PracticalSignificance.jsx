@@ -55,11 +55,17 @@ function getMatrixPosition(pValue, cohH) {
   return { x, y };
 }
 
+// Y axis: large effect is UP (y=0.25), small effect is DOWN (y=0.75).
+// X axis: significant is RIGHT (x=0.75), not significant is LEFT (x=0.25).
+//   top-right    = significant + large  → Ship it (green)
+//   bottom-right = significant + small  → False alarm (red): real-but-trivial effect
+//   top-left     = not sig  + large     → Game changer (purple): promising, needs more data
+//   bottom-left  = not sig  + small     → Keep running (yellow)
 const QUADRANTS = [
-  { label: 'False alarm', x: MAT_PAD + MAT_INNER_W * 0.75, y: MAT_PAD + MAT_INNER_H * 0.25, anchor: 'middle', color: 'var(--red)' },
-  { label: 'Ship it', x: MAT_PAD + MAT_INNER_W * 0.75, y: MAT_PAD + MAT_INNER_H * 0.75, anchor: 'middle', color: 'var(--green)' },
-  { label: 'Keep running', x: MAT_PAD + MAT_INNER_W * 0.25, y: MAT_PAD + MAT_INNER_H * 0.75, anchor: 'middle', color: 'var(--yellow-text)' },
+  { label: 'Ship it', x: MAT_PAD + MAT_INNER_W * 0.75, y: MAT_PAD + MAT_INNER_H * 0.25, anchor: 'middle', color: 'var(--green)' },
+  { label: 'False alarm', x: MAT_PAD + MAT_INNER_W * 0.75, y: MAT_PAD + MAT_INNER_H * 0.75, anchor: 'middle', color: 'var(--red)' },
   { label: 'Game changer', x: MAT_PAD + MAT_INNER_W * 0.25, y: MAT_PAD + MAT_INNER_H * 0.25, anchor: 'middle', color: 'var(--purple)' },
+  { label: 'Keep running', x: MAT_PAD + MAT_INNER_W * 0.25, y: MAT_PAD + MAT_INNER_H * 0.75, anchor: 'middle', color: 'var(--yellow-text)' },
 ];
 
 export function Module20_PracticalSignificance({ module, onNext }) {
@@ -194,11 +200,12 @@ export function Module20_PracticalSignificance({ module, onNext }) {
           Significance × Practical impact matrix — yellow dot = your result
         </div>
         <svg viewBox={`0 0 ${MAT_W} ${MAT_H}`} width="100%" style={{ maxWidth: 360, display: 'block', margin: '0 auto' }}>
-          {/* Background quadrants */}
+          {/* Background quadrants — top-left: Game changer (purple), top-right: Ship it (green),
+              bottom-left: Keep running (yellow), bottom-right: False alarm (red) */}
           <rect x={MAT_PAD} y={MAT_PAD} width={MAT_INNER_W / 2} height={MAT_INNER_H / 2} fill="var(--purple-bg)" opacity={0.4} />
-          <rect x={MAT_PAD + MAT_INNER_W / 2} y={MAT_PAD} width={MAT_INNER_W / 2} height={MAT_INNER_H / 2} fill="var(--red-bg)" opacity={0.4} />
+          <rect x={MAT_PAD + MAT_INNER_W / 2} y={MAT_PAD} width={MAT_INNER_W / 2} height={MAT_INNER_H / 2} fill="var(--green-bg)" opacity={0.4} />
           <rect x={MAT_PAD} y={MAT_PAD + MAT_INNER_H / 2} width={MAT_INNER_W / 2} height={MAT_INNER_H / 2} fill="var(--yellow-bg)" opacity={0.4} />
-          <rect x={MAT_PAD + MAT_INNER_W / 2} y={MAT_PAD + MAT_INNER_H / 2} width={MAT_INNER_W / 2} height={MAT_INNER_H / 2} fill="var(--green-bg)" opacity={0.4} />
+          <rect x={MAT_PAD + MAT_INNER_W / 2} y={MAT_PAD + MAT_INNER_H / 2} width={MAT_INNER_W / 2} height={MAT_INNER_H / 2} fill="var(--red-bg)" opacity={0.4} />
 
           {/* Grid lines */}
           <line x1={MAT_PAD} y1={MAT_PAD + MAT_INNER_H / 2} x2={MAT_PAD + MAT_INNER_W} y2={MAT_PAD + MAT_INNER_H / 2} stroke="var(--border)" strokeWidth={1} strokeDasharray="4,3" />

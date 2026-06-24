@@ -8,7 +8,19 @@ Deterministic findings (from `audit_foundations.mjs`) are folded in where releva
 
 ---
 
-## STATUS (V5.75.0): ALL FIXES APPLIED & VERIFIED
+## STATUS (V5.76.0): DATA + INTERACTIVE LAYER AUDITED & FIXED
+
+V5.75 fixed the written content. V5.76 audited + fixed the INTERACTIVE layer (the runners — ~9.4k lines across Exp/RCA/Metrics + 32 Stats components). Coverage is strong (every module has a load-bearing interactive + check). Real bugs found & fixed (the data audit could not see these):
+- **ef08** A/A chart rendered a *broken* test while the answer said benign → reshaped to one shallow dip. **ef07** dead code removed.
+- **rf05** retention numbers reconciled to a true 32% baseline; **rf15** ranking interaction now scored vs expert; **rf02** copy fixed.
+- **mf09** WRONG answer key fixed (largest absolute drop = Visit→Signup, 5,800); **mf08** prose sample sizes reconciled to the widget's formula; **mf16** margin double-count fixed.
+- **Module13** z-table off-by-one (required n overstated ~34%); **Module12** power gauge now two-sample (read 97.8% where it claimed 80%); **Module20** inverted practical-significance matrix de-inverted; **Module15** Simpson's aggregate reconciled with its segments; **Module10** CI card label now dynamic; **Module32** illustrative p-values relabeled + caveat added. All 9 files parse.
+
+**OPEN — needs a design call:** mf13 and mf10 *runner interactives* still teach the OLD concept (metric-sensitivity / mix-shift) because the V5.75 data re-angle (mf13→false-negatives, mf10→flat-rate) was not mirrored in the runner. Resolve by rebuilding those two interactives to match the new data, or reverting those two data re-angles.
+
+---
+
+## STATUS (V5.75.0): WRITTEN CONTENT FIXES APPLIED & VERIFIED
 
 The 4 must-fixes (ef08, rf07, mf13, sf26) + all factual score-4 items were rewritten, re-scored to 5/5, and independently spot-checked. Deterministic Tier-2 warnings 8 → 1 (only ef04 playbook-links left). All four files parse. The audit below is the record of what was found; everything actionable has been resolved.
 

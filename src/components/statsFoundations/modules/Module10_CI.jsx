@@ -162,7 +162,7 @@ export function Module10_CI({ module, onNext }) {
           { label: 'z* critical value', value: conf.z.toFixed(3), color: 'var(--purple)' },
           { label: 'SE = σ/√n', value: se.toFixed(3), color: 'var(--teal)' },
           { label: 'Margin of error', value: `±${moe.toFixed(2)}`, color: 'var(--accent)' },
-          { label: '95% CI', value: `[${ciLo.toFixed(1)}, ${ciHi.toFixed(1)}]`, color: 'var(--green)' },
+          { label: `${conf.label} CI`, value: `[${ciLo.toFixed(1)}, ${ciHi.toFixed(1)}]`, color: 'var(--green)' },
         ].map(card => (
           <div key={card.label} style={{
             flex: 1, minWidth: 120,

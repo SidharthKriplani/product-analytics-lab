@@ -72,9 +72,11 @@ export function Module12_Power({ module, onNext }) {
   const [n, setN] = useState(500);
   const [alpha, setAlpha] = useState(0.05);
 
-  // SE in normalized units (σ=1 for both dists, SE=1/sqrt(n) since we're working in SD units)
-  // H0: mean=0, H1: mean=effectSize, both with sigma=1/sqrt(n)
-  const se = 1 / Math.sqrt(n);
+  // SE of the difference between two means (two-sample), in SD units.
+  // SE = sqrt(σ²/n + σ²/n) = sqrt(2/n) with σ=1 per group. This matches the
+  // two-sample formulas used for requiredN and mde below, so power, MDE, and
+  // required-n all share one model.
+  const se = Math.sqrt(2 / n);
   const zAlpha = ALPHA_Z[alpha];
 
   // Critical value on the x-axis (effect size scale)
@@ -89,7 +91,9 @@ export function Module12_Power({ module, onNext }) {
   const requiredN = Math.ceil(2 * Math.pow((zAlpha + zBeta80) / effectSize, 2));
 
   // MDE: at current n, what's the minimum detectable effect (80% power)?
-  const mde = (zAlpha + zBeta80) * se * Math.sqrt(2);
+  // se already = sqrt(2/n), the two-sample SE of the difference, so MDE = (zAlpha + zBeta80) * se.
+  // This is the exact inverse of requiredN: at n = requiredN, mde === effectSize.
+  const mde = (zAlpha + zBeta80) * se;
 
   // SVG scale
   const xMin = -X_RANGE_HALF * se;

@@ -1148,7 +1148,7 @@ function Module_MF08({ module, onNext }) {
       { id: 'd', text: 'Neither — use a composite metric that blends revenue and conversion into one score.' },
     ],
     correct: 'b',
-    explanation: 'At CV=375% and MDE=2%, revenue per user needs roughly 14 million users per arm. At CV=85% and MDE=2%, add-to-cart rate needs about 700K per arm — a 20x reduction. The practical move: use the sensitive metric (add-to-cart rate) as the primary to ship decisions quickly, and track revenue per user as a secondary or validate via a longer holdout. Option C wastes power on correction. Option D creates an uninterpretable metric. The key insight is that sensitivity is a practical constraint, not just a statistical one — it determines whether you ship in 2 weeks or 6 months.',
+    explanation: 'At CV=375% and MDE=2%, revenue per user needs roughly 560,000 users per arm. At CV=85% and MDE=2%, add-to-cart rate needs about 29,000 per arm — nearly a 20x reduction. The practical move: use the sensitive metric (add-to-cart rate) as the primary to ship decisions quickly, and track revenue per user as a secondary or validate via a longer holdout. Option C wastes power on correction. Option D creates an uninterpretable metric. The key insight is that sensitivity is a practical constraint, not just a statistical one — it determines whether you ship in 2 weeks or 6 months.',
   };
 
   return (
@@ -1161,7 +1161,7 @@ function Module_MF08({ module, onNext }) {
           Your team just ran a 4-week A/B test on the checkout flow. The primary metric was revenue per user. After 50,000 users per arm, the result came back p=0.21 — inconclusive. The PM is frustrated: "Did the feature work or not?"
         </p>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          You pull the numbers. Revenue per user has a standard deviation of $45 and a mean of $12. That is a coefficient of variation (CV) of 375%. To detect a 5% lift with 80% power, you would have needed roughly 4.7 million users per arm — not 50K. The test was never going to work with this metric. The feature might be great. You will never know, because the metric was too noisy to hear the signal.
+          You pull the numbers. Revenue per user has a standard deviation of $45 and a mean of $12. That is a coefficient of variation (CV) of 375%. To detect a 5% lift with 80% power, you would have needed roughly 90,000 users per arm — and to detect a 2% lift, over 560,000 per arm, far beyond the 50K you ran. The test was never going to work with this metric. The feature might be great. You will never know, because the metric was too noisy to hear the signal.
         </p>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
           This is the sensitivity trade-off: high-variance metrics like revenue capture what you care about but are nearly impossible to move in a test. Low-variance proxies like conversion rate detect effects fast but only matter if they predict the outcome you care about.
@@ -1294,7 +1294,7 @@ const MF09_MCQ = {
     'Form complete → Email verify (500 users lost)',
     'Email verify → Profile done (700 users lost)',
   ],
-  correct: 'Signup click → Form complete (2,100 users lost)',
+  correct: 'Visit → Signup click (5,800 users lost)',
   explanation: 'Visit to Signup click loses 5,800 users in absolute terms — that is the largest single-step drop. Signup click to Form complete loses 2,100. End-to-end conversion fixation misses this; the largest absolute loss is always the priority.',
 };
 
@@ -2656,7 +2656,7 @@ function Module_MF16({ module, onNext }) {
       <div>
         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          The growth team doubled signups last quarter. Everyone is celebrating — except finance. They&apos;re reporting that contribution margin went negative for the first time. The growth team spent aggressively on paid acquisition, pushing CAC from $12 to $35. Meanwhile, ARPU stayed flat at $8/month and the average user churns after 10 months. The math doesn&apos;t work: you&apos;re spending $35 to acquire users worth $52 in lifetime value, but after cost of goods sold only $34 remains. You&apos;re losing money on every new user.
+          The growth team doubled signups last quarter. Everyone is celebrating — except finance. They&apos;re reporting that contribution margin went negative for the first time. The growth team spent aggressively on paid acquisition, pushing CAC from $12 to $35. Meanwhile, ARPU stayed flat at $8/month and the average user churns after 10 months. The math doesn&apos;t work: each user generates $80 in gross revenue over their lifetime ($8/month for 10 months), but after a 65% gross margin only $52 of lifetime value remains — and you&apos;re spending $35 to acquire them. You&apos;re losing money on every new user.
         </p>
       </div>
 

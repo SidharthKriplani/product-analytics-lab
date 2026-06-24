@@ -167,7 +167,7 @@ export function Module32_NonParametric({ module, onNext }) {
           borderRadius: 'var(--radius)', padding: '1rem 1.25rem',
         }}>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>
-            T-test (assumes normality)
+            T-test (assumes normality) — illustrative
           </div>
           <div style={{ fontSize: '1.3rem', fontWeight: 900, color: tSig ? 'var(--green)' : 'var(--red)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
             p = {tP.toFixed(3)}
@@ -183,7 +183,7 @@ export function Module32_NonParametric({ module, onNext }) {
           borderRadius: 'var(--radius)', padding: '1rem 1.25rem',
         }}>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>
-            Mann-Whitney U (rank-based)
+            Mann-Whitney U (rank-based) — illustrative
           </div>
           <div style={{ fontSize: '1.3rem', fontWeight: 900, color: mwSig ? 'var(--green)' : 'var(--red)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
             p = {mwP.toFixed(3)}
@@ -192,6 +192,10 @@ export function Module32_NonParametric({ module, onNext }) {
             {mwSig ? 'Significant (p < 0.05)' : 'Not significant (p >= 0.05)'}
           </div>
         </div>
+      </div>
+
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+        These p-values are illustrative — chosen to show the divergence, not computed from the histogram above. In practice, at large n the t-test stays valid via the Central Limit Theorem even on skewed data, and Mann-Whitney U tests for stochastic dominance (whether one group tends to be larger), not equality of means.
       </div>
 
       {disagree && (

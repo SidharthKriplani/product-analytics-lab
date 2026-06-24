@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 // ── Math helpers ──────────────────────────────────────────────────────────────
 
 const zAlphaMap = { 0.01: 2.576, 0.05: 1.96, 0.10: 1.645 };
-const zBetaMap  = { 0.70: 0.842, 0.80: 1.282, 0.90: 1.645 };
+const zBetaMap  = { 0.70: 0.524, 0.80: 0.842, 0.90: 1.282 };
 
 function sampleSizePerVariant(p, relMDE, alpha, power) {
   const p2 = p * (1 + relMDE / 100);

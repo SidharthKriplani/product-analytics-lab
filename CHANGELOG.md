@@ -4,6 +4,16 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.76.0] — 2026-06-24 [FOUNDATIONS INTERACTIVE LAYER — AUDIT + FIX]
+
+Closed the rubric's interactive requirement: audited the runner/interactive layer (Exp/RCA/Metrics runners ~9.4k lines + 32 Stats module components) and fixed real bugs the data audit couldn't see. Coverage confirmed strong (every module has a load-bearing interactive + check). Fixes (all 9 touched files parse):
+- **ef08** — A/A chart generator rendered a pathological test (~7/30 days significant, clustered at the floor) while the answer key called it benign random chance; reshaped to one shallow ~0.04 dip matching the lesson. **ef07** — removed dead `fpCount`.
+- **rf05** — `EXISTING_RETENTION` 38→36 so the aggregate reconciles to the stated 32%→28%. **rf15** — the hypothesis-ranking interaction now scores user vs expert (per-item + N/4 banner) instead of being ungraded. **rf02** — "12%"→"18%" copy fix.
+- **mf09** — fixed a WRONG answer key (largest absolute funnel drop is Visit→Signup 5,800, not 2,100; the explanation already said so). **mf08** — prose sample sizes (4.7M/14M/700K) reconciled to the widget formula (90K/562K/29K). **mf16** — removed a margin double-count in prose.
+- **Module13** — `zBetaMap` was shifted one row (overstated required n ~34%); corrected. **Module12** — power gauge used one-sample SE while required-n used two-sample (read 97.8% where it claimed 80%); unified to two-sample. **Module20** — the 2×2 practical-significance matrix was inverted on the Y axis (significant+large landed in red "false alarm"); de-inverted. **Module15** — Simpson's aggregate (8.2/9.1) didn't reconcile with segments; set to 7.2/10.6 (+ display strings). **Module10** — CI card hardcoded "95% CI"; now dynamic. **Module32** — hardcoded t-vs-MW p-values relabeled illustrative + CLT/stochastic-dominance caveat.
+
+**Open (design call):** mf13 + mf10 runner interactives still teach the pre-V5.75 concept (sensitivity / mix-shift) — rebuild to match the re-angled data, or revert those two data re-angles. Files: the 3 foundation runners + 6 Stats module components.
+
 ## [5.75.0] — 2026-06-24 [FOUNDATIONS CONTENT FIXES — APPLIED & VERIFIED]
 
 Worked the V5.74.0 punch list to completion across all four foundation rooms (fix → re-score → iterate → verify), one reviewer-fixer per room, then independent verification.
