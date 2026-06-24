@@ -14,6 +14,8 @@ import { interviewQA } from '../data/interviewQA.js';
 const DEEP_DIVE_COUNT = 81;   // written long-form essays (all posts are written; no stubs)
 const FAILURE_COUNT = 25;     // dissected real-world failures
 
+// Monochrome shelf: no per-card rainbow accent. Each destination is icon +
+// title + meta + one-liner + a single-accent "Explore" affordance.
 const LIBRARY_CARDS = [
   {
     id: 'blog',
@@ -21,7 +23,6 @@ const LIBRARY_CARDS = [
     icon: 'book-open',
     meta: DEEP_DIVE_COUNT + ' essays',
     description: 'Long-form essays unpacking the concepts behind the cases — the why under the what.',
-    color: 'var(--accent)',
   },
   {
     id: 'playbook',
@@ -29,7 +30,6 @@ const LIBRARY_CARDS = [
     icon: 'layers',
     meta: 'Every room',
     description: 'Reusable structures for metrics, RCA, experiments, and product sense — grab one mid-case.',
-    color: 'var(--teal)',
   },
   {
     id: 'interview-qa',
@@ -37,7 +37,6 @@ const LIBRARY_CARDS = [
     icon: 'file-text',
     meta: interviewQA.length + ' questions',
     description: 'Common interview questions with model answers and the reasoning behind them.',
-    color: 'var(--purple)',
   },
   {
     id: 'cheatsheet',
@@ -45,7 +44,6 @@ const LIBRARY_CARDS = [
     icon: 'calculator',
     meta: 'Quick reference',
     description: 'Time-boxed prep plans plus last-minute SQL, stats, and metrics references.',
-    color: 'var(--yellow)',
   },
   {
     id: 'failures',
@@ -53,7 +51,6 @@ const LIBRARY_CARDS = [
     icon: 'alert-triangle',
     meta: FAILURE_COUNT + ' cases',
     description: 'Real-world analytics mistakes, dissected — the cause, the fix, and what they teach.',
-    color: 'var(--red)',
   },
 ];
 
@@ -99,7 +96,6 @@ export function Library({ onNavigate }) {
               style={{
                 background: 'var(--surface)',
                 border: '1px solid var(--border)',
-                borderTop: '3px solid ' + card.color,
                 borderRadius: '14px',
                 padding: '1.4rem 1.5rem 1.25rem',
                 display: 'flex',
@@ -110,20 +106,31 @@ export function Library({ onNavigate }) {
                 fontFamily: 'inherit',
                 animationDelay: (index * 30) + 'ms',
               }}
+              onMouseEnter={e => {
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.borderColor = 'var(--border-strong, var(--border))';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.borderColor = 'var(--border)';
+              }}
             >
-              {/* Top row: icon tile + meta chip */}
+              {/* Top row: neutral icon tile + muted meta pill */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
                 <span style={{
                   width: '42px', height: '42px', borderRadius: '11px', flexShrink: 0,
                   background: 'var(--surface-2)', border: '1px solid var(--border)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <Icon name={card.icon} size={20} color={card.color} />
+                  <Icon name={card.icon} size={20} color="var(--text-muted)" />
                 </span>
                 <span style={{
-                  fontSize: '0.7rem', fontWeight: 700, color: card.color,
+                  fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)',
                   background: 'var(--surface-2)', border: '1px solid var(--border)',
                   borderRadius: '999px', padding: '0.2rem 0.6rem', whiteSpace: 'nowrap',
+                  letterSpacing: '0.01em',
                 }}>
                   {card.meta}
                 </span>
@@ -139,10 +146,10 @@ export function Library({ onNavigate }) {
                 {card.description}
               </p>
 
-              {/* Footer */}
+              {/* Footer — single accent affordance */}
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.35rem',
-                fontSize: '0.82rem', fontWeight: 700, color: card.color, marginTop: '0.1rem',
+                fontSize: '0.82rem', fontWeight: 700, color: 'var(--accent)', marginTop: '0.1rem',
               }}>
                 Explore <span aria-hidden="true">&rarr;</span>
               </div>

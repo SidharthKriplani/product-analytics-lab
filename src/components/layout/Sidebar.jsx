@@ -76,6 +76,7 @@ const NAV_FRAMES = [
       { id: 'simulator',      label: 'Mock Interview' },
       { id: 'defense-doc',    label: 'Defense Strategy' },
       { id: 'company-tracks', label: 'Company Tracks' },
+      { id: 'community-feed', label: 'Feed' },
     ],
   },
 ];

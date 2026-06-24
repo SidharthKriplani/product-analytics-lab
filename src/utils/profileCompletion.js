@@ -6,10 +6,12 @@
 // Priority order:
 //   1. employment-add   — role/company not set        -> Profile
 //   2. linkedin-add     — no LinkedIn                  -> Profile
-//   3. target-add       — no target company set        -> Progress (readiness widget)
-//   4. resume-add       — no resume uploaded           -> Profile
-//   5. employment-stale — employment older than 90d    -> Profile (re-confirm)
-//   6. resume-stale     — resume older than 180d       -> Profile (refresh)
+//   3. resume-add       — no resume uploaded           -> Profile
+//   4. employment-stale — employment older than 90d    -> Profile (re-confirm)
+//   5. resume-stale     — resume older than 180d       -> Profile (refresh)
+//
+// Target company is deliberately NOT a global ask — setting a target lives only
+// in the ReadinessWidget on the Progress page (no app-wide "set a target" banner).
 //
 // Everything is guarded: works pre-migration and when fields are absent. Absent
 // is treated as "not set" — which is fine, it just means we prompt for it.
@@ -20,7 +22,6 @@
 //   linkedin    -> profile.linkedin_url + pal-linkedin-url-v1
 //   resume      -> profile.resume_url + pal-resume-url-v1
 //   resume ts   -> profile.resume_updated_at (no local ts kept; absent = not stale-checked)
-//   target co   -> localStorage pal-target-company-v1 (set by ReadinessWidget)
 
 // Cadence thresholds.
 export const EMPLOYMENT_STALE_MS = 90 * 24 * 60 * 60 * 1000;  // quarterly
@@ -32,7 +33,6 @@ const ROLE_LS_KEY           = 'pal-role-v1';
 const COMPANY_CONFIRMED_KEY = 'pal-company-confirmed-v1';
 const LINKEDIN_LS_KEY       = 'pal-linkedin-url-v1';
 const RESUME_URL_LS_KEY     = 'pal-resume-url-v1';
-const TARGET_COMPANY_KEY    = 'pal-target-company-v1';
 
 function readLocal(key) {
   try { return localStorage.getItem(key) || ''; }
@@ -62,7 +62,6 @@ export function getNextProfileAsk(profile) {
   const role      = p.current_role    || readLocal(ROLE_LS_KEY);
   const linkedin  = p.linkedin_url    || readLocal(LINKEDIN_LS_KEY);
   const resume    = p.resume_url      || readLocal(RESUME_URL_LS_KEY);
-  const target    = readLocal(TARGET_COMPANY_KEY);
 
   const empConfirmedAt = p.company_updated_at || readLocal(COMPANY_CONFIRMED_KEY);
   const resumeUpdatedAt = p.resume_updated_at || null;
@@ -89,16 +88,9 @@ export function getNextProfileAsk(profile) {
     };
   }
 
-  // 3. No target company set (drives the readiness countdown).
-  if (!target) {
-    return {
-      id: 'target-add',
-      kind: 'add',
-      nav: 'progress',
-      message: 'Set a target company to focus your prep and track readiness toward it.',
-      ctaLabel: 'Set target',
-    };
-  }
+  // Target company is intentionally NOT a global nudge — setting a target lives
+  // exclusively in the ReadinessWidget on the Progress page, so we never surface
+  // a "Set a target company" banner across the app shell.
 
   // 4. No résumé uploaded.
   if (!resume) {

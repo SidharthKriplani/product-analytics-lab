@@ -4,6 +4,18 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.94.0] — 2026-06-25 [DESIGN-SYSTEM FOUNDATION · RAILS KILLED · COMMUNITY FEED v1]
+
+**Shared design system (the fix for the drift).** New `RoomHeader`, `FilterBar` (compact dropdown filters, replaces chip-walls), and `CaseCard` (one unified monochrome card — no colored rails). Applied to Estimation as the reference room: its three chip-walls are now Difficulty/Category/Topic/Status dropdowns + a Sort. (Rollout to the other ~13 rooms is the next task.)
+
+**Rails killed.** Removed the global "Set a target" top banner (target-setting lives only in the Progress readiness widget); the active-nav colored left-rail is now a subtle fill, not a bar.
+
+**Reskins.** Company Tracks cards de-toyed (hairline border, bigger logo, single-accent progress, neutral pills — no chunky colored strip/ring). Library de-railed to a clean editorial shelf (no colored top strips).
+
+**Community feed v1.** New `Community` page (`#/community-feed`, "Feed" under LIVE) with three streams — Referrals / Questions / Wins — posts tied to profiles (avatar, name, role@company), upvotes, target-company tag, a Report stub. `src/utils/feed.js` guarded; points tally (posts×5 + upvotes×1) shown on the profile. **Needs `docs/migrations/2026-06_feed.sql`** (two tables + RLS). Points→subscription-discount is deferred to phase 2. Degrades to "coming soon" until the migration runs.
+
+Build: 896 modules clean.
+
 ## [5.93.0] — 2026-06-25 [RÉSUMÉ AS LINK · AVATAR ON PUBLIC PROFILE · MIGRATION FIX]
 
 **Résumé is a link, not a hosted file.** Dropped the Supabase Storage upload (no bucket, no PII hosting liability). `resume.js` now exposes `setMyResumeLink`/`removeMyResume`; ProfilePage takes a pasted URL (Drive/Dropbox/personal site); PublicProfile shows "View résumé →". Guarded like the LinkedIn field.

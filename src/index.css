@@ -864,18 +864,18 @@ button:not(:disabled):active {
   border-radius: 99px;
 }
 
-/* ── Sidebar active pill ─────────────────────────────────────────────────── */
+/* ── Sidebar active state ────────────────────────────────────────────────── */
+/* Railless: a faint accent-tint fill + accent text marks the active item. No
+   colored left bar / border-left (monochrome shell). */
 .sidebar-nav-active {
   background: var(--accent-bg) !important;
   color: var(--accent) !important;
   font-weight: 600 !important;
-  box-shadow: inset 3px 0 0 var(--accent) !important;
 }
 .sidebar-nav-active-sub {
   background: var(--accent-bg) !important;
   color: var(--accent) !important;
   font-weight: 600 !important;
-  box-shadow: inset 2px 0 0 var(--accent) !important;
 }
 
 /* ── Tab bar ─────────────────────────────────────────────────────────────── */

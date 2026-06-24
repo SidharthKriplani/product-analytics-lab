@@ -62,6 +62,7 @@ const ProfilePage           = lazy(() => import('./pages/ProfilePage.jsx').then(
 const Unlock                = lazy(() => import('./pages/Unlock.jsx').then(m => ({ default: m.Unlock })));
 const About                 = lazy(() => import('./pages/About.jsx').then(m => ({ default: m.About })));
 const Leaderboard           = lazy(() => import('./pages/Leaderboard.jsx').then(m => ({ default: m.Leaderboard })));
+const Community             = lazy(() => import('./pages/Community.jsx').then(m => ({ default: m.Community })));
 const PublicProfile         = lazy(() => import('./pages/PublicProfile.jsx').then(m => ({ default: m.PublicProfile })));
 const RoomMap               = lazy(() => import('./pages/RoomMap.jsx').then(m => ({ default: m.RoomMap })));
 const FailuresCatalog       = lazy(() => import('./pages/FailuresCatalog.jsx').then(m => ({ default: m.FailuresCatalog })));
@@ -1631,6 +1632,9 @@ export default function App() {
         )}
         {page === 'about' && <About />}
         {page === 'leaderboard' && <Leaderboard user={user} onOpenProfile={openPublicProfile} />}
+        {page === 'community-feed' && (
+          <Community user={user} onShowAuth={() => setShowAuth(true)} onNavigate={navigate} />
+        )}
         {page === 'public-profile' && publicProfileUserId && (
           <PublicProfile userId={publicProfileUserId} onNavigate={navigate} />
         )}

@@ -3,6 +3,7 @@ import { signOut } from '../utils/auth.js';
 import { getBookmarks } from '../utils/bookmarks.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from '../utils/syncProgress.js';
 import { updateMyLinkedin, updateMyEmployment, fetchPublicProfile } from '../utils/leaderboard.js';
+import { getMyPoints } from '../utils/feed.js';
 import { setMyResumeLink, removeMyResume, getLocalResumeUrl } from '../utils/resume.js';
 import { COMPANIES, PROFILE_ROLES } from '../data/companyList.js';
 import { CompanyLogo } from '../components/shared/CompanyLogo.jsx';
@@ -166,6 +167,9 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
   // idle | saving | saved | local | invalid | error
   const [resumeStatus, setResumeStatus] = useState('idle');
 
+  // ── Community feed points (guarded — 0 if no backend / migration pending) ──
+  const [feedPoints, setFeedPoints] = useState(0);
+
   // Hydrate from the server profile when signed in — this is the source of truth
   // once the migration has run; falls back silently to the local values otherwise.
   useEffect(() => {
@@ -176,6 +180,18 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
       if (p.current_role) setEmpRole(p.current_role);
       if (p.current_company) setEmpCompany(p.current_company);
       if (p.resume_url) { setResumeUrl(p.resume_url); setResumeInput(p.resume_url); }
+    });
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // Community feed points tally — guarded; silently stays 0 if the feed backend /
+  // migration isn't there yet.
+  useEffect(() => {
+    let cancelled = false;
+    if (!user) return;
+    getMyPoints(user).then(res => {
+      if (cancelled) return;
+      setFeedPoints((res && res.points) || 0);
     });
     return () => { cancelled = true; };
   }, [user]);
@@ -625,6 +641,9 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
               { label: 'Cases done',    value: stats.totalCases },
               { label: 'Rooms active',  value: stats.roomsActive },
               { label: 'Bookmarks',     value: getBookmarks().length },
+              // Feed points — only surfaced once the user has any (keeps a missing
+              // backend from showing a misleading 0).
+              ...(feedPoints > 0 ? [{ label: 'Feed points', value: feedPoints }] : []),
             ].map(s => (
               <div key={s.label} style={{
                 textAlign: 'center', padding: '0.7rem 0.4rem',
