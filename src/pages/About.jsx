@@ -6,7 +6,7 @@ export function About() {
 
 The gap PAL fills: most prep resources teach you what A/B testing, RCA, and metric design are. Very few give you practice making judgment calls under realistic business pressure with messy, ambiguous data. PAL puts you in the decision, not the definition.
 
-17 rooms. 150+ cases. SQL Lab with 130 problems. Foundation modules across Stats, Experimentation, RCA, and Metrics. Every case tests judgment, not recall.`,
+17 rooms. 150+ cases. SQL Lab with 192 problems. Foundation modules across Stats, Experimentation, RCA, and Metrics. Every case tests judgment, not recall.`,
     },
     {
       title: "Who it's for",
@@ -33,7 +33,7 @@ Already familiar with the core concepts, prepping for a specific interview:
 → Start with Defense Strategy (under Tools). Paste your job description, self-rate your gaps, pick your time horizon. Your personalized day plan tells you which rooms to hit in what order.
 
 Practicing specific skills:
-→ Use Global Search (/) to find cases by topic. SQL Lab is the structured SQL/Python problem bank — 130 problems ordered by difficulty with hints and a timer. MCQ Trainer for fast recall drilling.
+→ Use Global Search (/) to find cases by topic. SQL Lab is the structured SQL/Python problem bank — 192 problems ordered by difficulty with hints and a timer. MCQ Trainer for fast recall drilling.
 
 Tracking progress:
 → Progress page shows completion by room, role readiness score, a practice heatmap, and recommended next steps.`,
@@ -59,7 +59,7 @@ Core analytics practice rooms:
 — Analytics Instrumentation Room: design event schemas and debug tracking failures
 
 Practice tools:
-— SQL Lab: 130 graded problems (50 Analyst / 40 Senior / 25 Staff / 15 Master Vault)
+— SQL Lab: 192 graded problems across Easy, Medium, Hard, Master, and Forensic levels
 — Code Room: Python + SQL execution environment
 — MCQ Trainer: 40 multiple-choice questions across core concepts
 — Interview Simulator: timed practice sessions with role-specific question banks
@@ -124,6 +124,42 @@ Deployed on Vercel. Works offline once loaded. Free to use with access code; ful
           </div>
         </div>
       ))}
+
+      {/* Feedback & contact */}
+      <div style={{
+        marginTop: '0.5rem', padding: '1.3rem 1.45rem',
+        background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px',
+      }}>
+        <h2 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
+          Feedback, issues & suggestions
+        </h2>
+        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 1.1rem' }}>
+          PAL is built and maintained by Sidharth Kriplani. Found a bug, have feedback, or want to
+          suggest a problem or a room? Reach out — every message is read.
+        </p>
+        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <a
+            href="mailto:sidharthkriplani@gmail.com"
+            style={{
+              display: 'inline-flex', alignItems: 'center', padding: '0.5rem 1rem',
+              background: 'var(--teal)', color: '#fff', borderRadius: '8px',
+              fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none',
+            }}
+          >Email Sidharth</a>
+          <a
+            href="https://www.linkedin.com/in/sidharth-kriplani"
+            target="_blank" rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex', alignItems: 'center', padding: '0.5rem 1rem',
+              background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)',
+              borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none',
+            }}
+          >Connect on LinkedIn</a>
+        </div>
+        <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: '0.9rem 0 0' }}>
+          sidharthkriplani@gmail.com · linkedin.com/in/sidharth-kriplani
+        </p>
+      </div>
     </div>
   );
 }

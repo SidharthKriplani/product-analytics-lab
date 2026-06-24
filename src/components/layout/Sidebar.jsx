@@ -99,6 +99,7 @@ const EXTRAS_ITEMS = [
   { id: 'behavioral', label: 'Behavioral' },
   { id: 'bookmarks',  label: 'Saved' },
   { id: 'study',      label: 'Study Room' },
+  { id: 'about',      label: 'About' },
 ];
 
 // ─── Derived active-state (replaces the old 40-line getIsActive ||-chain) ───

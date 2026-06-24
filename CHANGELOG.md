@@ -4,6 +4,10 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.64.0] — 2026-06-24 [ABOUT: CONTACT SECTION + SIDEBAR LINK]
+
+The About page existed and was routed (`page === 'about'`) but had no sidebar entry, so it was unreachable in-app. Added `{ id: 'about', label: 'About' }` to `EXTRAS_ITEMS` in `Sidebar.jsx`. Added a "Feedback, issues & suggestions" card to `About.jsx` with a mailto button (sidharthkriplani@gmail.com) and a LinkedIn link (linkedin.com/in/sidharth-kriplani, pulled from Sidharth's profile skill). Also corrected the stale "130 problems" → "192" in three spots and replaced the old Analyst/Senior/Staff SQL distribution line with the current Easy/Medium/Hard/Master/Forensic levels. Files: `src/pages/About.jsx`, `src/components/layout/Sidebar.jsx`. Note: other About stats are still stale (17 rooms / 150+ cases / Analyst-Senior-Staff taxonomy elsewhere) — not touched this pass. Leaderboard + discussion board deferred pending a backend decision.
+
 ## [5.63.0] — 2026-06-24 [CURATED INDIA+GLOBAL TAGS · FILTERS · SORT · ANIMATIONS]
 
 Replaces the V5.61 blanket tagging (which made "+N" meaningless and bloated the solve-view header) with a real system, and overhauls the browse-list filtering.
