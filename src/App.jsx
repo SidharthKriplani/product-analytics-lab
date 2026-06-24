@@ -1702,16 +1702,8 @@ export default function App() {
             <ProgrammingLabMoved />
           </Suspense>
         )}
-        {page === 'dimensional-modeling' && (
-          <Suspense fallback={null}>
-            <DimensionalModelBrowser onNavigate={navigate} />
-          </Suspense>
-        )}
-        {page === 'study' && (
-          <Suspense fallback={null}>
-            <StudyRoom />
-          </Suspense>
-        )}
+        {/* Archived V5.80.0 — Dimensional Modeling (data-eng drift) + Study Room (no distinct job).
+            Nav + route removed; DimensionalModelBrowser/StudyRoom files kept dormant. See docs/PAL-PORTFOLIO-AUDIT.md → Retired. */}
         {page === 'consult' && (
           <Suspense fallback={
               <div style={{ padding: '2rem 2rem 0' }}>

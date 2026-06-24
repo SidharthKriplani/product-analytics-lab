@@ -38,7 +38,6 @@ const NAV_FRAMES = [
     items: [
       { id: 'sql-lab',              label: 'SQL Lab' },
       { id: 'python-lab',           label: 'Programming Lab', href: 'https://programming-lab.vercel.app/' },
-      { id: 'dimensional-modeling', label: 'Dimensional Modeling' },
     ],
   },
   {
@@ -96,9 +95,7 @@ const NAV_FRAMES = [
 
 // EXTRAS — quiet bottom catch-all (not a frame). Parked / leftover surfaces.
 const EXTRAS_ITEMS = [
-  { id: 'behavioral',  label: 'Behavioral' },
   { id: 'bookmarks',   label: 'Saved' },
-  { id: 'study',       label: 'Study Room' },
   { id: 'leaderboard', label: 'Leaderboard' },
   { id: 'about',       label: 'About' },
 ];

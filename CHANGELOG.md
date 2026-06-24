@@ -4,6 +4,20 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.80.0] — 2026-06-24 [PORTFOLIO CUTS — ARCHIVE DIM-MODELING, STUDY ROOM; BOX BEHAVIORAL]
+
+Acted on the first (zero-risk) batch of the portfolio audit. Archiving = nav + route out, component files dormant (reversible).
+- **Dimensional Modeling** — removed from nav (DO) + route; `DimensionalModelBrowser` dormant. (Off-scope: analytics-engineering.)
+- **Study Room** — removed from nav (EXTRAS) + route; `StudyRoom` dormant. (No distinct job.) Residual flagged: 3 CheatSheet steps still reference it — clean up at the Learn-shelf merge.
+- **Behavioral** — removed standalone EXTRAS nav entry only; **route kept** because it's load-bearing (Interview Simulator behavioral round, Company Tracks, 2 Learning Paths, Defense Strategy, MCQ category, Progress, Search). Full cut deferred — needs an untangle decision; recommend keeping it boxed.
+- `App.jsx` + `Sidebar.jsx` parse OK. Retire log + restore steps in `docs/PAL-PORTFOLIO-AUDIT.md`. Files: `src/App.jsx`, `src/components/layout/Sidebar.jsx`, docs.
+
+## [5.79.0] — 2026-06-24 [PAL PRODUCT-PORTFOLIO RUBRIC + FULL AUDIT]
+
+A level up from content quality to portfolio strategy — "should this component exist?" not "is it good?"
+- **`docs/PAL-PRODUCT-RUBRIC.md`** — the component-exists rubric: 6 dimensions (distinct job / on-identity / pillar+funnel / interview-relevance / reaches-content-bar / value>carry-cost), verdict rule (cut / spin-out / merge / rework / keep), portfolio checks (count vs maintainer capacity, 10-second nav legibility, pillar balance). Biased to cut/merge.
+- **`docs/PAL-PORTFOLIO-AUDIT.md`** — ran all 34 content/practice components through it. Headline: **~34 → ~20.** Sprawl concentrates in two clusters: the Learn/reference shelf (Deep Dives + Frameworks + Cheatsheet + Interview Q&A + Failures → ~2) and the experiment shelf (Stats + A/B Review + A/B Interpreter → 1 readout-judgment room). Cuts: Dimensional Modeling (data-eng drift), Study Room (no distinct job), Behavioral (off-wedge). Merge Full Loop → Challenges. Keeps: SQL Lab, the 4 Foundations, Metrics/RCA/Analytics Cases/Instrumentation, A/B Design, Spot-the-Flaw, Product/Prioritization/Estimation, Mock Interview, Defense Strategy, Company Tracks, MCQ (boxed). Watch: Growth Analytics + BI (overlap Metrics/Cases). Doc only — no nav changes applied yet.
+
 ## [5.78.0] — 2026-06-24 [MCQ LENGTH-BIAS RESOLVED + RCA & BUSINESS CASES AUDITED]
 
 - **MCQ length-bias fully fixed.** Rebalanced the 25 remaining items where the correct answer was the longest option (tightened the correct option / lengthened the most plausible distractor, preserving correctness and adding no ambiguity). Now 0 of 40 have the correct answer as the strict-longest; keyed gate Tier-2 went 29 → 0.
