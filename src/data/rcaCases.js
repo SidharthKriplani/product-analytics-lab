@@ -3623,7 +3623,7 @@ export const rcaCases = [
     domain: 'payments',
     linkedConceptIds: ['segmentation', 'data-quality-check', 'funnel-decomposition'],
     context: {
-      metricMovement: 'Payment success rate in Brazil dropped from 88% to 41% overnight',
+      metricMovement: 'Payment success rate in Brazil dropped from 88% to 47% overnight',
       businessImpact: 'Brazil is 14% of GMV; $280k/day at risk',
       timeWindow: 'Drop overnight, detected at 06:00 UTC',
       knownFacts: [

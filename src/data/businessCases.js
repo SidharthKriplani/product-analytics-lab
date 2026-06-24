@@ -1952,7 +1952,7 @@ export const businessCases = [
           {
             id: 'a',
             label:
-              '"Target $1.2M from infrastructure optimization and low-ROI marketing channel pruning first. Model the remaining $800k from vendor rationalization. Hold headcount flat. Frame the story for investors as \'improving unit economics while sustaining growth\' — not \'cutting costs.\'',
+              '"Target $1.2M from infrastructure optimization and low-ROI marketing channel pruning first. Model the remaining $800k from vendor rationalization. Hold headcount flat. Frame the story for investors as \'improving unit economics while sustaining growth\' — not \'cutting costs.\'"',
             isCorrect: true,
             level: 'strong',
             feedback:
@@ -3220,7 +3220,7 @@ export const businessCases = [
         'Treating false positive rate as a quality metric rather than a business risk metric',
         'Deploying full automation before testing triage-only deployment'
       ],
-      interviewPhrase: '"8% false positive rate on creator content removal is too high for full automation — at scale, that\'s thousands of wrongful removals per day that appeals can\'t process. The right architecture is AI-as-triage: AI flags and prioritizes, humans make removal decisions. This scales moderation capacity without exposing creators to automated wrongful removal. It also generates labeled training data to improve the model toward a threshold where full automation becomes safe.\n\n**Weak answer:** The candidate recommends full AI automation immediately because the 92% accuracy looks strong and the headcount savings are compelling, treating accuracy as a product-quality metric rather than a business risk metric without calculating how many wrongful creator removals 8% false positives produces at the platform\'s actual daily content volume. **Interviewer follow-up that exposes it:** \'Your platform processes 500,000 pieces of creator content per day. At 8% false positive rate, how many creators experience wrongful content removal daily, what\'s the appeals queue capacity needed to process those within 24 hours, and what happens to creator supply if even 2% of wrongfully-removed creators permanently leave the platform?\'"',
+      interviewPhrase: '"8% false positive rate on creator content removal is too high for full automation — at scale, that\'s thousands of wrongful removals per day that appeals can\'t process. The right architecture is AI-as-triage: AI flags and prioritizes, humans make removal decisions. This scales moderation capacity without exposing creators to automated wrongful removal. It also generates labeled training data to improve the model toward a threshold where full automation becomes safe.\n\n**Weak answer:** The candidate recommends full AI automation immediately because the 94% accuracy looks strong and the headcount savings are compelling, treating accuracy as a product-quality metric rather than a business risk metric without calculating how many wrongful creator removals 8% false positives produces at the platform\'s actual daily content volume. **Interviewer follow-up that exposes it:** \'Your platform processes 500,000 pieces of creator content per day. At 8% false positive rate, how many creators experience wrongful content removal daily, what\'s the appeals queue capacity needed to process those within 24 hours, and what happens to creator supply if even 2% of wrongfully-removed creators permanently leave the platform?\'"',
     },
   },
 

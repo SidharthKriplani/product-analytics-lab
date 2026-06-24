@@ -4,6 +4,13 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.78.0] — 2026-06-24 [MCQ LENGTH-BIAS RESOLVED + RCA & BUSINESS CASES AUDITED]
+
+- **MCQ length-bias fully fixed.** Rebalanced the 25 remaining items where the correct answer was the longest option (tightened the correct option / lengthened the most plausible distractor, preserving correctness and adding no ambiguity). Now 0 of 40 have the correct answer as the strict-longest; keyed gate Tier-2 went 29 → 0.
+- **RCA Cases (28) audited (Archetype C).** 26/28 clean on numbers/diagnosis/SQL/judgment. Fixed **RCA22**: the stated post-drop success rate (41%) didn't reconcile with its own segment splits (Pix 71%@28% + cards 29%@92% = 47%) → corrected to 47% (segment values are load-bearing across the debrief). Arithmetic + SQL spot-verified across the keyed cases.
+- **Business Cases (23) audited (Archetype C).** 21/23 clean. Fixed **C18** (weak-answer cited 92% accuracy vs the case's 94% everywhere else) and **C10** (unbalanced quote in a recommend option). Funnel/unit-economics arithmetic spot-verified.
+- Gates green; `trainerMCQ` 40 / `rcaCases` 28 / `businessCases` 23 all parse. Files: `src/data/{trainerMCQ,rcaCases,businessCases}.js`.
+
 ## [5.77.0] — 2026-06-24 [mf13/mf10 REBUILT + KEYED ROOMS AUDITED & FIXED]
 
 Closed the V5.76 open item and ran the loop on the keyed rooms.

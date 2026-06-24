@@ -15,12 +15,12 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'Nothing — p = 0.03 directly gives the probability the null hypothesis is true.',
+        text: 'Nothing is wrong — under standard frequentist inference, p = 0.03 is exactly the posterior probability that the null hypothesis is true given the observed data.',
         correct: false,
       },
       {
         id: 'b',
-        text: 'The p-value is the probability of observing data at least this extreme given the null is true, not the probability that the null is true.',
+        text: 'It inverts the conditional: p is P(data this extreme | null true), not P(null true | data).',
         correct: true,
       },
       {
@@ -48,12 +48,12 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'There is a 95% probability the true uplift lies between 1.2% and 3.8%.',
+        text: 'There is a 95% probability the true uplift lies between 1.2% and 3.8%, since the interval is the range that captures the parameter with 95% certainty.',
         correct: false,
       },
       {
         id: 'b',
-        text: 'If we repeated this experiment many times, about 95% of the resulting intervals would contain the true population parameter.',
+        text: 'Across many repetitions of the experiment, about 95% of such intervals would contain the true parameter.',
         correct: true,
       },
       {
@@ -86,12 +86,12 @@ export const trainerMCQ = [
       },
       {
         id: 'b',
-        text: 'A significant result from an underpowered study has a high false-positive rate and likely overestimates the true effect size (winner\'s curse).',
+        text: 'A significant result from an underpowered study likely overestimates the true effect (winner\'s curse).',
         correct: true,
       },
       {
         id: 'c',
-        text: 'Low power only affects Type II errors; a significant result is still reliable.',
+        text: 'Low power influences only Type II errors, so a result that crosses the significance threshold remains fully reliable and unbiased regardless of the study\'s power.',
         correct: false,
       },
       {
@@ -177,12 +177,12 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'Yes — the result is highly statistically significant, so the feature is valuable.',
+        text: 'Yes — the result is highly statistically significant (p < 0.001), and a result this significant proves the feature delivers meaningful business value.',
         correct: false,
       },
       {
         id: 'b',
-        text: 'Not necessarily — statistical significance does not imply practical significance; the business impact must be evaluated separately.',
+        text: 'Not necessarily — statistical significance is not practical significance; business impact must be assessed separately.',
         correct: true,
       },
       {
@@ -260,12 +260,12 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'Type I: failing to detect a real effect. Type II: detecting an effect that does not exist.',
+        text: 'Type I error means failing to detect a real effect that exists (a false negative), while Type II error means detecting an effect that is not actually there (a false positive).',
         correct: false,
       },
       {
         id: 'b',
-        text: 'Type I: concluding a feature works when it does not (false positive). Type II: concluding no effect when there is a real one (false negative).',
+        text: 'Type I: concluding a feature works when it does not (false positive). Type II: missing a real effect (false negative).',
         correct: true,
       },
       {
@@ -302,12 +302,12 @@ export const trainerMCQ = [
       },
       {
         id: 'b',
-        text: 'Sample ratio mismatch (SRM) — the unequal split suggests a bug in randomization or logging that may invalidate results.',
+        text: 'Sample ratio mismatch (SRM) — the unequal split signals a randomization or logging bug that can invalidate results.',
         correct: true,
       },
       {
         id: 'c',
-        text: 'Network effect — treatment users are influencing control users, inflating one group.',
+        text: 'Network effect — treatment users are influencing control users through the product, which pulls extra users into one arm and inflates that group\'s count.',
         correct: false,
       },
       {
@@ -331,12 +331,12 @@ export const trainerMCQ = [
       { id: 'a', text: 'The experiment suffered from Simpson\'s paradox over time.', correct: false },
       {
         id: 'b',
-        text: 'Novelty effect — users initially over-engaged with the new experience but reverted to baseline behavior as the novelty wore off.',
+        text: 'Novelty effect — users over-engaged with the new experience at first, then reverted to baseline as it wore off.',
         correct: true,
       },
       {
         id: 'c',
-        text: 'Survivorship bias — low-engagement users dropped off, leaving only engaged users in week four.',
+        text: 'Survivorship bias — low-engagement users gradually dropped out of the test, leaving only highly engaged users behind in week four, which mechanically dragged the measured CTR back down toward baseline.',
         correct: false,
       },
       {
@@ -425,12 +425,12 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'It is fine as long as you only stop when the result is significant — a significant p-value is valid whenever it appears.',
+        text: 'It is fine as long as you only stop when the result is significant — a p-value below 0.05 is valid whenever it appears, no matter how many times you checked along the way.',
         correct: false,
       },
       {
         id: 'b',
-        text: 'Repeated peeking inflates the Type I error rate far above α = 0.05 because you get multiple chances to cross the threshold by chance.',
+        text: 'Repeated peeking inflates the Type I error rate far above α = 0.05 — each look is another chance at a false positive.',
         correct: true,
       },
       {
@@ -459,12 +459,12 @@ export const trainerMCQ = [
       { id: 'a', text: 'A standard A/B test on all current users.', correct: false },
       {
         id: 'b',
-        text: 'A holdout test — keep a small percentage of users permanently on the old algorithm as a control group.',
+        text: 'A holdout test — keep a small slice of users on the old algorithm as a long-running control.',
         correct: true,
       },
       {
         id: 'c',
-        text: 'A before/after analysis comparing metrics from the week before and after launch.',
+        text: 'A before/after analysis comparing the metric in the week before launch against the week after, attributing any difference to the new algorithm.',
         correct: false,
       },
       {
@@ -570,12 +570,12 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'The treatment effect is underestimated — control users benefit from treatment users\' increased activity (spillover), narrowing the apparent gap between groups.',
+        text: 'Underestimated — spillover lifts control via treatment users\' activity, shrinking the gap.',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The treatment effect is overestimated — treatment users share their new experience with control users, making control look worse.',
+        text: 'The treatment effect is overestimated — treatment users showcase their upgraded experience to connected control users, which discourages those control users and drags the control group\'s metrics down.',
         correct: false,
       },
       {
@@ -605,10 +605,10 @@ export const trainerMCQ = [
     question:
       'A consumer app has DAU = 2M and MAU = 20M. What does the DAU/MAU ratio of 10% indicate?',
     options: [
-      { id: 'a', text: 'The app has strong retention — 10% of monthly users are highly active.', correct: false },
+      { id: 'a', text: 'The app has strong retention — a 10% DAU/MAU ratio means 10% of the monthly base are highly active power users who anchor the product\'s engagement.', correct: false },
       {
         id: 'b',
-        text: 'Low stickiness — on average, an active user only opens the app about 3 days per month, suggesting weak habit formation.',
+        text: 'Low stickiness — the average monthly user opens the app only about 3 days a month, a sign of weak habit formation.',
         correct: true,
       },
       { id: 'c', text: 'The app is growing rapidly — DAU is 10% of MAU.', correct: false },
@@ -647,9 +647,9 @@ export const trainerMCQ = [
     question:
       'A startup has LTV = $120 and CAC = $80. Their investor says this is not yet healthy enough to scale marketing. What is the likely reason?',
     options: [
-      { id: 'a', text: 'LTV/CAC of 1.5 is below the commonly cited benchmark of 3:1 needed for sustainable unit economics.', correct: true },
+      { id: 'a', text: 'LTV/CAC of 1.5 sits below the 3:1 benchmark for sustainable unit economics.', correct: true },
       { id: 'b', text: 'LTV is too high relative to CAC, suggesting the product is underpriced.', correct: false },
-      { id: 'c', text: 'LTV/CAC should equal 1.0 for breakeven; 1.5 means the company is overspending on CAC.', correct: false },
+      { id: 'c', text: 'The target LTV/CAC ratio is 1.0 for breakeven, so a ratio of 1.5 means the company is overspending on acquisition and burning margin on every customer it adds.', correct: false },
       { id: 'd', text: 'The 3:1 benchmark only applies to SaaS, not consumer products.', correct: false },
     ],
     explanation:
@@ -671,7 +671,7 @@ export const trainerMCQ = [
       },
       {
         id: 'b',
-        text: 'Cohort analysis — cross-sectional analysis over-represents retained users because churned users are no longer in the current user base.',
+        text: 'Cohort analysis — the cross-sectional view over-represents retained users, since churned users have already left the current base.',
         correct: true,
       },
       {
@@ -681,7 +681,7 @@ export const trainerMCQ = [
       },
       {
         id: 'd',
-        text: 'Cross-sectional analysis — cohort analysis suffers from survivorship bias in newer cohorts.',
+        text: 'Cross-sectional analysis — it is cohort analysis that suffers from survivorship bias, because newer cohorts have not yet been observed long enough to reveal their true 30-day retention.',
         correct: false,
       },
     ],
@@ -742,12 +742,12 @@ export const trainerMCQ = [
       },
       {
         id: 'b',
-        text: 'Likely negative — the notifications are force-inflating DAU by annoying users into opening the app, causing accelerated churn.',
+        text: 'Likely negative — notifications force-inflate DAU by nagging users into opening the app, driving faster churn.',
         correct: true,
       },
       {
         id: 'c',
-        text: 'Neutral — DAU and retention measure different things and should not be compared.',
+        text: 'Neutral — DAU and retention measure fundamentally different things, so a movement in one carries no information about the other and the two results should never be weighed against each other.',
         correct: false,
       },
       {
@@ -771,10 +771,10 @@ export const trainerMCQ = [
       { id: 'a', text: 'Activation metrics measure revenue; engagement metrics measure usage.', correct: false },
       {
         id: 'b',
-        text: 'Activation metrics measure whether a new user has reached the "aha moment" (first value experience); engagement metrics measure ongoing interaction frequency and depth for all users.',
+        text: 'Activation captures whether a new user reached the "aha moment"; engagement measures ongoing interaction depth across all users.',
         correct: true,
       },
-      { id: 'c', text: 'Activation is a one-time metric; engagement is measured continuously — they are otherwise identical in what they measure.', correct: false },
+      { id: 'c', text: 'Activation is measured once and engagement is measured continuously, but apart from that timing difference the two are identical and track exactly the same underlying behavior across the user base.', correct: false },
       { id: 'd', text: 'Engagement metrics apply only to B2C products; activation metrics apply to B2B.', correct: false },
     ],
     explanation:
@@ -792,10 +792,10 @@ export const trainerMCQ = [
       { id: 'a', text: 'The app has been downloaded 1 million times in the first month.', correct: false },
       {
         id: 'b',
-        text: 'Organic retention curves flatten above zero (users continue using the app without re-acquisition) and NPS exceeds 40.',
+        text: 'Organic retention curves flatten above zero and NPS exceeds 40.',
         correct: true,
       },
-      { id: 'c', text: 'The app has received positive press coverage in major tech publications.', correct: false },
+      { id: 'c', text: 'The app has earned glowing press coverage across major tech publications and is being widely cited by journalists as one of the breakout consumer products of the year.', correct: false },
       { id: 'd', text: 'The team has achieved a 10% week-over-week DAU growth rate.', correct: false },
     ],
     explanation:
@@ -813,11 +813,11 @@ export const trainerMCQ = [
       { id: 'a', text: 'Immediately run an A/B test on the checkout flow.', correct: false },
       {
         id: 'b',
-        text: 'Decompose each component: measure whether Visits, CR, or AOV changed, then segment each by device, geography, traffic source, and user segment.',
+        text: 'Decompose the tree: find whether Visits, CR, or AOV moved, then segment that component by device, geo, source, and user type.',
         correct: true,
       },
       { id: 'c', text: 'Compare this week\'s revenue to last year\'s same week.', correct: false },
-      { id: 'd', text: 'Check server uptime and load times first — technical issues are the most common cause.', correct: false },
+      { id: 'd', text: 'Check server uptime and page load times first, because technical outages and latency are statistically the most common driver of revenue drops and should always be ruled out before any metric decomposition.', correct: false },
     ],
     explanation:
       'A metric tree diagnosis starts by isolating which leaf node changed. If Visits are stable, CR dropped, and AOV is stable, the problem lies in conversion — then you drill into CR by segment (mobile vs. desktop, new vs. returning, checkout step drop-off). Running an A/B test (Option A) makes sense only after you know what to test. Year-over-year comparison (Option C) helps contextualize but does not identify the root cause. Technical issues (Option D) are one possible cause but should be one branch of investigation, not the first assumption.',
@@ -854,12 +854,12 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'ICE does not account for how many users will be affected, making two features with vastly different reach score equally if I, C, and E are identical.',
+        text: 'ICE ignores Reach, so two features with very different audience sizes score equally when I, C, and E match.',
         correct: true,
       },
       {
         id: 'b',
-        text: 'ICE conflates implementation Ease with business value, which can push low-effort but low-impact work to the top.',
+        text: 'ICE conflates implementation Ease with business value in a way RICE does not, which systematically pushes low-effort but low-impact work to the top of the backlog ahead of harder, more valuable bets.',
         correct: false,
       },
       {
@@ -887,12 +887,12 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'Products should be built for customer demographics (age, gender, location) since those predict the jobs customers need done.',
+        text: 'Products should be built around customer demographics such as age, gender, and location, because JTBD holds that those demographic attributes are what reliably predict the jobs a customer needs to get done.',
         correct: false,
       },
       {
         id: 'b',
-        text: 'Roadmap decisions should prioritize the functional, social, and emotional dimensions of the job users are trying to accomplish, not feature requests at face value.',
+        text: 'Prioritize the functional, social, and emotional dimensions of the job users are trying to do, not feature requests at face value.',
         correct: true,
       },
       {
@@ -925,12 +925,12 @@ export const trainerMCQ = [
       },
       {
         id: 'b',
-        text: 'Network effects create a defensible moat: the value of the platform comes from the density of participants, which a new entrant cannot replicate quickly even with lower prices.',
+        text: 'Network effects create a moat: platform value comes from participant density, which a new entrant cannot replicate quickly even at lower prices.',
         correct: true,
       },
       {
         id: 'c',
-        text: 'Price competition does not affect marketplace businesses because supply and demand automatically re-equilibrate.',
+        text: 'Price competition simply does not affect marketplace businesses, because supply and demand automatically re-equilibrate to clear the market at whatever price level the incumbent and the new entrant settle on.',
         correct: false,
       },
       {
@@ -954,11 +954,11 @@ export const trainerMCQ = [
       { id: 'a', text: 'A/B test the feature with full functionality on 50% of users.', correct: false },
       {
         id: 'b',
-        text: 'Fake door (painted door) test — show the premium feature as available, measure click-through, then display a "coming soon" message to gauge demand without building.',
+        text: 'Fake door (painted door) test — surface the feature, measure click-through, then show "coming soon" to gauge demand.',
         correct: true,
       },
       { id: 'c', text: 'Survey existing users: "Would you pay $X for this feature?"', correct: false },
-      { id: 'd', text: 'Launch the feature to all users for free to measure organic adoption before deciding on pricing.', correct: false },
+      { id: 'd', text: 'Launch the full feature to all users for free first, measure how many adopt it organically over a few months, and use that adoption curve to decide both whether and how much to charge later.', correct: false },
     ],
     explanation:
       'A fake door test measures revealed preference (actual clicks on a buy/upgrade button) rather than stated preference (survey responses), which is far more predictive of real conversion. Users often say they would pay for something but do not when it launches. Building the full feature first (Option A) wastes engineering effort if demand is low. Option C (survey) measures intent, not behavior. Option D gives away value and creates a downgrade problem when you try to charge later. The fake door surfaces demand signal at near-zero development cost.',
@@ -973,8 +973,8 @@ export const trainerMCQ = [
       'When writing OKRs, which of the following is the best Key Result?',
     options: [
       { id: 'a', text: 'Improve user experience in Q3.', correct: false },
-      { id: 'b', text: 'Increase 30-day retention from 28% to 35% by end of Q3.', correct: true },
-      { id: 'c', text: 'Launch the new onboarding flow by August 15.', correct: false },
+      { id: 'b', text: 'Lift 30-day retention from 28% to 35% by end of Q3.', correct: true },
+      { id: 'c', text: 'Ship the redesigned multi-step onboarding flow and roll it out to all new users by August 15.', correct: false },
       { id: 'd', text: 'Achieve strong product-market fit by Q3.', correct: false },
     ],
     explanation:
@@ -1029,12 +1029,12 @@ export const trainerMCQ = [
       },
       {
         id: 'b',
-        text: 'A version of a product with just enough features to be usable by early customers who can provide feedback to guide future development.',
+        text: 'A version with just enough features that early customers will use it and give feedback to guide development.',
         correct: true,
       },
       {
         id: 'c',
-        text: 'The simplest version of a product that can be shipped without embarrassing the team — polished enough for a public launch.',
+        text: 'The simplest version of a product that can be shipped without embarrassing the team — polished enough for a full public launch and broad press coverage from day one.',
         correct: false,
       },
       {
@@ -1062,12 +1062,12 @@ export const trainerMCQ = [
       },
       {
         id: 'b',
-        text: 'Exit survey at cancellation (attitudinal) + cohort analysis of usage patterns before churn (behavioral) + user interviews with recently churned users.',
+        text: 'Exit survey (attitudinal) + pre-churn usage cohort analysis (behavioral) + interviews with churned users.',
         correct: true,
       },
       {
         id: 'c',
-        text: 'A/B test of different cancellation flows to reduce involuntary churn.',
+        text: 'A/B test several different cancellation-flow designs against each other and pick whichever variant lowers the cancellation rate the most, treating that as the full explanation for why users churn.',
         correct: false,
       },
       {
@@ -1095,7 +1095,7 @@ export const trainerMCQ = [
       },
       {
         id: 'b',
-        text: 'Demographic segments are internally heterogeneous in product behavior — users with different usage patterns but the same demographics require different product interventions.',
+        text: 'Demographic segments are internally heterogeneous in behavior — same demographics, very different usage, so they need different interventions.',
         correct: true,
       },
       {
