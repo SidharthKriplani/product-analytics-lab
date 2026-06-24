@@ -256,16 +256,12 @@ function GroupHeader({ icon, label, open, hasActive, onClick }) {
 export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onToggleTheme, isTerminal, isOpen, onClose, user, onShowAuth }) {
   const initial = findFrameAndSub(pageToTab(currentPage));
   const [openFrame, setOpenFrame] = useState(initial.frame || 'know');
-  const [openSub, setOpenSub] = useState(initial.sub);
 
   // Follow navigation: opening a tab auto-expands its frame (and sub-group),
   // still respecting one-open-per-level.
   useEffect(() => {
-    const { frame, sub } = findFrameAndSub(pageToTab(currentPage));
-    if (frame) {
-      setOpenFrame(frame);
-      if (sub) setOpenSub(sub);
-    }
+    const { frame } = findFrameAndSub(pageToTab(currentPage));
+    if (frame) setOpenFrame(frame);
   }, [currentPage]);
 
   function handleNav(id) {
@@ -275,9 +271,6 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
 
   function toggleFrame(id) {
     setOpenFrame(prev => (prev === id ? null : id));
-  }
-  function toggleSub(id) {
-    setOpenSub(prev => (prev === id ? null : id));
   }
 
   const activeTab = pageToTab(currentPage);
@@ -473,25 +466,26 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                 />
                 <Collapsible open={open}>
                   <div style={{ paddingBottom: '0.15rem' }}>
-                    {/* Sub-groups (one open per level, recurses) */}
+                    {/* Sub-groups — FLATTENED: inline labels, no second collapse.
+                        Opening a frame reveals all its rooms at once (one click from L1 to a room). */}
                     {frame.subs && frame.subs.map(sub => {
-                      const subOpen = openSub === sub.id;
                       const subHasActive = sub.items.some(i => i.id === activeTab);
                       return (
-                        <div key={sub.id} style={{ marginLeft: '0.4rem' }}>
-                          <GroupHeader
-                            label={sub.label}
-                            open={subOpen}
-                            hasActive={subHasActive}
-                            onClick={() => toggleSub(sub.id)}
-                          />
-                          <Collapsible open={subOpen}>
-                            <div style={{ borderLeft: '1px solid var(--border)', marginLeft: '0.9rem', paddingLeft: '0.1rem', marginBottom: '0.1rem' }}>
-                              {sub.items.map(item => (
-                                <NavItem key={item.id} id={item.id} label={item.label} href={item.href} indent currentPage={currentPage} onNav={handleNav} />
-                              ))}
-                            </div>
-                          </Collapsible>
+                        <div key={sub.id} style={{ marginLeft: '0.4rem', marginTop: '0.1rem' }}>
+                          <div style={{
+                            fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em',
+                            color: subHasActive ? 'var(--text-secondary)' : 'var(--text-muted)',
+                            opacity: subHasActive ? 0.85 : 0.5,
+                            textTransform: 'uppercase', userSelect: 'none',
+                            padding: '0.35rem 0.65rem 0.15rem',
+                          }}>
+                            {sub.label}
+                          </div>
+                          <div style={{ borderLeft: '1px solid var(--border)', marginLeft: '0.9rem', paddingLeft: '0.1rem', marginBottom: '0.1rem' }}>
+                            {sub.items.map(item => (
+                              <NavItem key={item.id} id={item.id} label={item.label} href={item.href} indent currentPage={currentPage} onNav={handleNav} />
+                            ))}
+                          </div>
                         </div>
                       );
                     })}

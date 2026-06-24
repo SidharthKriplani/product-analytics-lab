@@ -4,6 +4,10 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.89.0] — 2026-06-24 [NAV FLATTEN — 2 LEVELS]
+
+Removed the third nav level. Previously: frame (L1) → subgroup accordion (L2) → rooms (L3), requiring two clicks to reach a room. Now opening a frame (KNOW/JUDGE) reveals **all** its rooms at once, with the old subgroup names (Foundations, Learn, Experiments, Analytics, Product) rendered as lightweight inline **section labels** — no second collapse. DO and LIVE were already flat. Dropped the `openSub`/`toggleSub` state and the per-subgroup `GroupHeader`/`Collapsible`. The grouping stays visible (important for JUDGE's ~10 rooms) but the dig is gone. Builds clean (881 modules). Also: `HQ/shared/Icon.jsx` + `HQ/ICON-SYSTEM.md` added so the other labs can adopt the monochrome icon system.
+
 ## [5.88.0] — 2026-06-24 [EMOJI → SVG SWEEP (MONOCHROME INSTRUMENT)]
 
 Removed colorful/text-glyph emojis app-wide in favor of monochrome SVG icons, per the "Monochrome Instrument" aesthetic.
