@@ -5,6 +5,7 @@ import { StatsScoreReveal } from './StatsScoreReveal.jsx';
 import { StatsConceptPanel } from './StatsConceptPanel.jsx';
 import { ConceptDrawer } from '../concepts/ConceptDrawer.jsx';
 import { saveStatsAttempt, clearStatsProgress } from '../../utils/statsProgress.js';
+import { recordSrOutcome } from '../../utils/srQueue.js';
 import { track } from '../../utils/analytics.js';
 import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
@@ -12,6 +13,8 @@ import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { DescribePanel } from '../shared/DescribePanel.jsx';
+import { AnswerModeToggle, loadAnswerMode, saveAnswerMode } from '../shared/AnswerModeToggle.jsx';
 
 // views: 'question' | 'reveal' | 'debrief'
 
@@ -40,9 +43,82 @@ const DIFFICULTY_CFG = {
   staff:        { label: 'Staff',        color: 'var(--red)',       bg: 'var(--red-bg)',     border: 'var(--red-border)' },
 };
 
+// ─── Describe-mode derivation ───
+// Key points = the correct option's rationale + the senior read's short answer and
+// the trap each distractor falls into, distilled. Keywords come from the verdict.
+function deriveStatsSalientKeywords(text) {
+  if (!text) return [];
+  const tokens = String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 4);
+  const seen = new Set();
+  const out = [];
+  for (const t of tokens) { if (!seen.has(t)) { seen.add(t); out.push(t); } if (out.length >= 5) break; }
+  return out;
+}
+function deriveStatsKeyPoints(module) {
+  const points = [];
+  const correct = (module.options || []).find(o => o.level === 'correct' || o.level === 'strong');
+  const sr = module.seniorRead || {};
+  if (correct) {
+    points.push({
+      id: 'verdict', text: 'The right verdict: ' + correct.label, shortLabel: 'Verdict',
+      keywords: deriveStatsSalientKeywords(correct.label),
+    });
+  }
+  if (sr.shortAnswer) {
+    points.push({
+      id: 'short', text: 'Senior read: ' + sr.shortAnswer, shortLabel: 'Senior read',
+      keywords: deriveStatsSalientKeywords(sr.shortAnswer),
+    });
+  }
+  if (sr.commonMistake) {
+    points.push({
+      id: 'trap', text: 'Avoid the trap: ' + String(sr.commonMistake).split('**')[0].trim(), shortLabel: 'Common trap',
+      keywords: deriveStatsSalientKeywords(sr.commonMistake),
+    });
+  }
+  return points;
+}
+function StatsModelAnswer({ module }) {
+  const sr = module.seniorRead || {};
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {sr.shortAnswer && (
+        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.55 }}>
+          {sr.shortAnswer}
+        </div>
+      )}
+      {sr.why && (
+        <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+          {sr.why}
+        </p>
+      )}
+      {sr.interviewPhrase && (
+        <p style={{ fontSize: '0.85rem', color: 'var(--text)', margin: 0, lineHeight: 1.65, fontStyle: 'italic' }}>
+          {sr.interviewPhrase}
+        </p>
+      )}
+      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
+        The full concept breakdown and linked concepts appear in the debrief below.
+      </p>
+    </div>
+  );
+}
+
 export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoToDesign, onNext, onNavigate }) {
   const module = statsModules.find(m => m.id === caseId);
   const [view, setView] = useState(savedProgress?.selectedOptionId ? 'debrief' : 'question');
+  const [answerMode, setAnswerMode] = useState(loadAnswerMode());
+  function handleAnswerModeChange(mode) { setAnswerMode(mode); saveAnswerMode(mode); }
+  function handleStatsDescribeContinue() {
+    setSubmitted(true);
+    track('case_completed', { room: 'stats', id: module.id, mode: 'describe' });
+    setView('debrief');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   const [selectedId, setSelectedId] = useState(savedProgress?.selectedOptionId || null);
   const [submitted, setSubmitted] = useState(!!savedProgress?.selectedOptionId);
   const [openConceptId, setOpenConceptId] = useState(null);
@@ -79,6 +155,11 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
   }
 
   const selectedOption = module.options.find(o => o.id === selectedId);
+  // In Describe mode the user never picks an option, so fall back to the correct
+  // option for the debrief panel (which is verdict-agnostic in describe mode).
+  const debriefOption = selectedOption
+    || module.options.find(o => o.level === 'correct' || o.level === 'strong')
+    || module.options[0];
   const diffCfg = DIFFICULTY_CFG[module.difficulty] || DIFFICULTY_CFG.foundational;
 
   function handleSubmit() {
@@ -88,6 +169,7 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
     setAnswerFeedback(isCorrect ? 'pal-success-ring' : 'pal-shake');
     setTimeout(() => setAnswerFeedback(''), isCorrect ? 700 : 420);
     saveStatsAttempt(module.id, selectedId, opt.level);
+    recordSrOutcome({ room: 'stats', caseId: module.id, title: module.title, correct: isCorrect });
     track('case_completed', { room: 'stats', id: module.id, rating: opt.level });
     setSubmitted(true);
     setView('reveal');
@@ -159,8 +241,51 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
         )}
       </div>
 
-      {/* Question view */}
-      {view === 'question' && (
+      {/* Answer mode toggle — only before submitting */}
+      {view === 'question' && !submitted && (
+        <AnswerModeToggle value={answerMode} onChange={handleAnswerModeChange} accent="teal" />
+      )}
+
+      {/* Describe mode — type your own verdict first, then reveal + self-assess */}
+      {view === 'question' && answerMode === 'describe' && (
+        <div style={{
+          border: '1px solid var(--border)', borderRadius: 'var(--radius)',
+          background: 'var(--surface)', padding: '1.5rem',
+        }}>
+          {/* Restate the claim under evaluation */}
+          {module.claim && (
+            <div style={{
+              background: 'var(--surface-2)', border: '1px solid var(--border-subtle)',
+              borderLeft: '3px solid var(--teal)', borderRadius: 'var(--radius-sm)',
+              padding: '0.8rem 1rem', marginBottom: '1.25rem',
+              fontSize: '0.88rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.55,
+            }}>
+              {module.claim}
+            </div>
+          )}
+          <DescribePanel
+            keyPoints={deriveStatsKeyPoints(module)}
+            modelAnswer={<StatsModelAnswer module={module} />}
+            onRevealed={() => track('describe_revealed', { room: 'stats', id: module.id })}
+          />
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              onClick={handleStatsDescribeContinue}
+              style={{
+                background: 'var(--surface-2)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)', padding: '0.55rem 1.1rem',
+                fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-secondary)',
+                cursor: 'pointer', transition: 'all 0.12s', width: '100%',
+              }}
+            >
+              Continue to full debrief →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Question view — Options mode (existing MCQ flow, untouched) */}
+      {view === 'question' && answerMode === 'options' && (
         <div style={{
           border: '1px solid var(--border)', borderRadius: 'var(--radius)',
           background: 'var(--surface)', overflow: 'hidden',
@@ -241,7 +366,7 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
       )}
 
       {/* Debrief view */}
-      {view === 'debrief' && selectedOption && (
+      {view === 'debrief' && debriefOption && (
         <div className="pal-reveal-in" style={{
           border: '1px solid var(--border)', borderRadius: 'var(--radius)',
           background: 'var(--surface)', padding: '1.5rem',
@@ -254,7 +379,7 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
           </div>
           <StatsConceptPanel
             module={module}
-            selectedOption={selectedOption}
+            selectedOption={debriefOption}
             onOpenConcept={handleOpenConcept}
             onGoToReview={onGoToReview}
             onGoToDesign={onGoToDesign}

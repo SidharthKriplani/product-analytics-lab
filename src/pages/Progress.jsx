@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { UniverseView } from '../components/shared/UniverseView.jsx';
+import { ReadinessWidget } from '../components/shared/ReadinessWidget.jsx';
 import { Icon } from '../components/shared/Icon.jsx';
 
 // Set to false to soft-hide the Universe view toggle without removing code
@@ -587,6 +588,9 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
       )}
 
       {!universeView && <>
+
+      {/* Readiness countdown — headline "are you ready for your interview" metric */}
+      <ReadinessWidget allProgress={allRoomProgress} onNavigate={onNavigate} />
 
       {/* Returning user next-suggestion card — shown when user has prior activity */}
       {totalCompleted > 0 && nextSuggested && (

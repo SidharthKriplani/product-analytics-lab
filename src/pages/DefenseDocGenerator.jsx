@@ -13,6 +13,7 @@ import { estimationProblems } from '../data/estimationProblems.js';
 import { statsFoundationsModules } from '../data/statsFoundationsModules.js';
 import { growthAnalyticsCases } from '../data/growthAnalyticsCases.js';
 import { Icon } from '../components/shared/Icon.jsx';
+import { computeReadiness } from '../components/shared/ReadinessWidget.jsx';
 
 // ─── Keyword → Room mapping ───────────────────────────────────────────────────
 const KEYWORD_MAP = [
@@ -382,6 +383,57 @@ function loadSavedPlanSteps() {
   } catch { return []; }
 }
 
+// Compact readiness for the Defense page: build a {label, completed} array keyed
+// by the SAME labels ReadinessWidget.computeReadiness expects, sourced from the
+// localStorage progress stores. We pass no `total`, so computeReadiness uses its
+// ROOM_CAP as the per-room target — an honest "solved enough to be credible" cut.
+const READINESS_STORE_BY_LABEL = {
+  'Metrics':              'pal-metrics-progress-v2',
+  'RCA':                  'pal-rca-progress-v2',
+  'Cases':                'pal-cases-progress-v2',
+  'Stats':                'pal-stats-progress-v1',
+  'Growth Analytics':     'pal-growth-analytics-progress-v1',
+  'BI':                   'pal-bi-progress-v1',
+  'Spot the Flaw':        'pal-stf-progress-v1',
+  'Instrumentation':      'pal-instrumentation-progress-v1',
+  'Behavioral':           'pal-behavioral-progress-v1',
+  'Estimation':           'pal-estimation-progress-v1',
+  'Metrics Foundations':  'pal-metrics-foundation-progress-v1',
+  'RCA Foundations':      'pal-rca-foundation-progress-v1',
+  'Exp Foundations':      'pal-exp-foundation-progress-v1',
+  'Stat Foundations':     'pal-stat-foundations-progress-v1',
+};
+
+function buildReadinessRooms() {
+  const rooms = [];
+  Object.keys(READINESS_STORE_BY_LABEL).forEach(function(label) {
+    let completed = 0;
+    try {
+      const store = JSON.parse(localStorage.getItem(READINESS_STORE_BY_LABEL[label]) || '{}');
+      completed = Object.keys(store).length;
+    } catch {}
+    rooms.push({ label: label, completed: completed });
+  });
+  // SQL Lab solved set is stored as an array, not an object map.
+  try {
+    const solved = JSON.parse(localStorage.getItem('pal-sql-lab-solved-v1') || '[]');
+    rooms.push({ label: 'SQL Lab', completed: Array.isArray(solved) ? solved.length : 0 });
+  } catch { rooms.push({ label: 'SQL Lab', completed: 0 }); }
+  return rooms;
+}
+
+function daysUntilTarget() {
+  try {
+    const iso = localStorage.getItem('pal-target-date-v1');
+    if (!iso) return null;
+    const target = new Date(iso + 'T00:00:00');
+    if (isNaN(target.getTime())) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.round((target.getTime() - today.getTime()) / 86400000);
+  } catch { return null; }
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocked }) {
   const allData = { scenarios, designScenarios, statsModules, metricCases, rcaCases, businessCases, productDesignScenarios, codeModules, prioritizationScenarios, behavioralQuestions, estimationProblems, statsFoundationsModules, growthAnalyticsCases };
@@ -510,6 +562,17 @@ export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocke
                 <p style={{ margin: '0 0 0.65rem', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                   {done} of {planSteps.length} cases done{daysAgo !== null ? ` · generated ${daysAgo === 0 ? 'today' : daysAgo + (daysAgo === 1 ? ' day ago' : ' days ago')}` : ''}.
                 </p>
+                {(() => {
+                  const td = daysUntilTarget();
+                  if (td == null) return null;
+                  const ready = computeReadiness(buildReadinessRooms()).score;
+                  const dayLabel = td < 0 ? 'date passed' : td === 0 ? 'today' : td + ' day' + (td === 1 ? '' : 's') + ' out';
+                  return (
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--purple)', marginBottom: '0.65rem' }}>
+                      {dayLabel} · {ready}% ready
+                    </div>
+                  );
+                })()}
                 <div style={{ height: 5, background: 'var(--surface-2)', borderRadius: 99, overflow: 'hidden', marginBottom: '0.65rem' }}>
                   <div style={{ height: '100%', width: pct + '%', background: 'var(--purple)', borderRadius: 99, transition: 'width 0.3s' }} />
                 </div>

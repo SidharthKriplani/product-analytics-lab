@@ -12,6 +12,8 @@ import { saveMetricsAttempt, clearMetricsProgress, saveMetricsDraft, loadMetrics
 import { track } from '../../utils/analytics.js';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { DescribePanel } from '../shared/DescribePanel.jsx';
+import { AnswerModeToggle, loadAnswerMode, saveAnswerMode } from '../shared/AnswerModeToggle.jsx';
 
 const ROOM_KEY = 'metrics';
 const NOTES_KEY = 'pal-notes-v1';
@@ -42,6 +44,57 @@ function computeScore(metricCase, fieldChoices) {
   return { score, maxScore, level, pct };
 }
 
+// ─── Describe-mode derivation ────────────────────────────────────────────────
+// Free-text fields mirror the metric design the user is asked to produce.
+function deriveDescribeFields(metricCase) {
+  return (metricCase.fields || []).map(f => ({
+    id: f.id,
+    label: f.label,
+    placeholder: f.prompt || 'Name the metric and justify it...',
+  }));
+}
+// Key points = the authoritative metric tree (name + role) from the senior design,
+// plus a guardrail-discipline reminder. Keywords come from the metric name.
+function deriveMetricKeyPoints(metricCase) {
+  const smd = metricCase.seniorMetricDesign;
+  if (!smd || !Array.isArray(smd.metricTree)) return [];
+  return smd.metricTree.map((node, i) => ({
+    id: 'mt' + i,
+    text: (node.role ? node.role.charAt(0).toUpperCase() + node.role.slice(1) + ': ' : '') + node.name + ' — ' + node.rationale,
+    shortLabel: node.name,
+    keywords: deriveKeywordsFromName(node.name),
+  }));
+}
+function deriveKeywordsFromName(name) {
+  if (!name) return [];
+  // Keep the distinctive multi-word phrase plus its salient tokens.
+  const tokens = String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 3);
+  return [String(name).toLowerCase(), ...tokens].slice(0, 5);
+}
+// Model answer node = senior summary + interview phrase.
+function MetricModelAnswer({ metricCase }) {
+  const smd = metricCase.seniorMetricDesign || {};
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.7 }}>
+        {smd.summary}
+      </p>
+      {smd.interviewPhrase && (
+        <p style={{ fontSize: '0.85rem', color: 'var(--text)', margin: 0, lineHeight: 1.65, fontStyle: 'italic' }}>
+          &ldquo;{smd.interviewPhrase}&rdquo;
+        </p>
+      )}
+      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
+        Full metric tree, common mistakes, and linked scenarios appear in the debrief below.
+      </p>
+    </div>
+  );
+}
+
 export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onGoToReview, onNext, onNavigate, user, onShowAuth }) {
   const metricCase = metricCases.find(m => m.id === caseId);
   const hasExisting = !!(savedProgress && savedProgress.fieldChoices);
@@ -51,6 +104,8 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
     hasExisting ? savedProgress.fieldChoices : (_draft || {})
   );
   const [view, setView] = useState(hasExisting ? 'debrief' : 'question');
+  const [answerMode, setAnswerMode] = useState(loadAnswerMode());
+  function handleAnswerModeChange(mode) { setAnswerMode(mode); saveAnswerMode(mode); }
 
   useEffect(function() {
     if (!hasExisting) saveMetricsDraft(metricCase.id, fieldChoices);
@@ -89,6 +144,15 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
     setSubmitted(false);
     setScoreResult(null);
     setView('question');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Describe mode: no MCQ score — the user self-assesses, then proceeds straight
+  // to the full debrief (skipping the score-reveal screen).
+  function handleDescribeContinue() {
+    setSubmitted(true);
+    track('case_completed', { room: 'metrics', id: metricCase.id, mode: 'describe' });
+    setView('debrief');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -139,7 +203,38 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
       {/* Question view */}
       {view === 'question' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.25rem' }}>
-          {metricCase.fields.map(field => (
+          {!submitted && (
+            <AnswerModeToggle value={answerMode} onChange={handleAnswerModeChange} accent="green" />
+          )}
+
+          {/* Describe mode — type your own metric design first, then reveal + self-assess */}
+          {answerMode === 'describe' && !submitted && (
+            <DescribePanel
+              fields={deriveDescribeFields(metricCase)}
+              keyPoints={deriveMetricKeyPoints(metricCase)}
+              modelAnswer={<MetricModelAnswer metricCase={metricCase} />}
+              onRevealed={() => track('describe_revealed', { room: 'metrics', id: metricCase.id })}
+            />
+          )}
+
+          {answerMode === 'describe' && !submitted && (
+            <div style={{ paddingTop: '0.25rem' }}>
+              <button
+                onClick={handleDescribeContinue}
+                style={{
+                  background: 'var(--surface-2)', border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius)', padding: '0.6rem 1.25rem',
+                  fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)',
+                  cursor: 'pointer', transition: 'all 0.1s', width: '100%',
+                }}
+              >
+                Continue to full debrief →
+              </button>
+            </div>
+          )}
+
+          {/* Options mode — existing scaffolded multiple-choice flow (untouched) */}
+          {answerMode === 'options' && metricCase.fields.map(field => (
             <MetricChoicePanel
               key={field.id}
               field={field}
@@ -149,7 +244,7 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
             />
           ))}
 
-          {!submitted && (
+          {answerMode === 'options' && !submitted && (
             <div style={{ paddingTop: '0.5rem' }}>
               <button
                 onClick={handleSubmit}

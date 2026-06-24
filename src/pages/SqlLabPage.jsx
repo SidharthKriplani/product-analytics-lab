@@ -128,6 +128,51 @@ function DebriefPanel({ text }) {
 
 const SORTED_PROBLEMS = [...sqlLabProblems].sort((a, b) => DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty]);
 
+// ─── Easy-tier scaffolding ramp (training wheels) ─────────────────────────────
+// As a learner moves through the FIRST 15 Easy problems — in the exact order the lab
+// presents them (Easy sorts to the front of SORTED_PROBLEMS; the sort is stable so
+// these stay in source order) — scaffolding fades in 3 batches of 5:
+//   Stage 1 (Easy #1–5):  explicit bullet requirements  + schema preview WITH rows/types.
+//   Stage 2 (Easy #6–10): no bullets, schema NAMES only  + "run SELECT *" nudge.
+//   Stage 3 (Easy #11–15): no bullets, normal schema (closest to the real experience).
+// Everything else (Easy #16+, and all non-Easy) gets stage 0 = no ramp, default render.
+// Identified off the same SORTED_PROBLEMS the browser uses, by actual difficulty field
+// (NOT the sql-e ID prefix — some sql-eNN problems are tagged Medium).
+const EASY_RAMP_IDS = SORTED_PROBLEMS.filter(p => p.difficulty === 'Easy').slice(0, 15).map(p => p.id);
+
+function easyRampStage(problem) {
+  if (!problem) return 0;
+  const i = EASY_RAMP_IDS.indexOf(problem.id);
+  if (i < 0) return 0;        // not in the first 15 Easy → no ramp
+  return Math.floor(i / 5) + 1; // 0–4 → 1, 5–9 → 2, 10–14 → 3
+}
+
+// Derive learner-facing bullet requirements at RENDER time from the problem's own
+// expected* fields + prompt. Nothing stored on the problem; pure presentation.
+function deriveRequirements(problem) {
+  if (!problem) return [];
+  const bullets = [];
+  const rc = problem.expectedRowCount;
+  if (typeof rc === 'number') {
+    bullets.push('Return exactly ' + rc + ' row' + (rc === 1 ? '' : 's'));
+  }
+  const cols = problem.expectedColumns || [];
+  if (cols.length === 1) {
+    bullets.push('Output one column: ' + cols[0]);
+  } else if (cols.length > 1) {
+    bullets.push('Output ' + cols.length + ' columns: ' + cols.join(', '));
+  }
+  // Pull the sort instruction straight out of the prompt sentence, if present.
+  const prompt = problem.prompt || '';
+  const sortMatch = prompt.match(/\b(?:ordered?|sort(?:ed)?)\b[^.]*\bby\b[^.]*/i);
+  if (sortMatch) {
+    let phrase = sortMatch[0].trim().replace(/[\s,;]+$/, '');
+    phrase = phrase.charAt(0).toUpperCase() + phrase.slice(1);
+    bullets.push(phrase);
+  }
+  return bullets;
+}
+
 const DIFF_COLOR = {
   Easy:     { bg: 'var(--green-bg,  rgba(16,185,129,0.08))',  text: 'var(--green)',  border: 'var(--green-border,  rgba(16,185,129,0.25))', solid: '#10b981', on: '#06140d' },
   Medium:   { bg: 'var(--yellow-bg, rgba(245,158,11,0.08))',  text: 'var(--yellow)', border: 'var(--yellow-border, rgba(245,158,11,0.25))', solid: '#f59e0b', on: '#1a1205' },
@@ -205,6 +250,80 @@ function SchemaAccordion({ dm, open, onToggle }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Easy-tier ramp UI ────────────────────────────────────────────────────────
+
+// Small, deliberate "Training wheels: N/3" marker so the fade reads as intentional
+// pedagogy, not inconsistent UI. Stage 3 still shows the marker (wheels coming off).
+function RampMarker({ stage }) {
+  const labels = { 1: 'Full scaffolding', 2: 'Schema only — explore it yourself', 3: 'Almost on your own' };
+  return (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+      marginTop: '0.65rem', padding: '0.25rem 0.6rem', borderRadius: '99px',
+      background: 'var(--teal-bg, rgba(20,184,166,0.08))',
+      border: '1px solid var(--teal-border, rgba(20,184,166,0.25))',
+    }}>
+      <Icon name='graduation-cap' size={13} color='var(--teal)' />
+      <span style={{ fontSize: '0.66rem', fontWeight: 700, color: 'var(--teal)', letterSpacing: '0.02em' }}>
+        Training wheels {stage}/3
+      </span>
+      <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>· {labels[stage]}</span>
+    </div>
+  );
+}
+
+// Stage 1 only: explicit bullet requirements derived from the problem's expected*
+// fields + prompt. Renders nothing if no requirements could be derived.
+function RequirementsBlock({ bullets }) {
+  if (!bullets || bullets.length === 0) return null;
+  return (
+    <div style={{
+      marginTop: '0.65rem', padding: '0.6rem 0.85rem',
+      background: 'var(--teal-bg, rgba(20,184,166,0.06))',
+      border: '1px solid var(--teal-border, rgba(20,184,166,0.25))',
+      borderRadius: '8px', borderLeft: '3px solid var(--teal)',
+    }}>
+      <div style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--teal)', marginBottom: '0.4rem' }}>
+        Your result should
+      </div>
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+        {bullets.map((b, i) => (
+          <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.8rem', color: 'var(--text)', lineHeight: 1.5 }}>
+            <span style={{ flexShrink: 0, marginTop: '1px' }}><Icon name='check' size={12} color='var(--teal)' /></span>
+            <span>{b}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// Stage 2 only: table NAMES only — no sample rows, no column types/names — plus a
+// one-line nudge to explore the data via SELECT *. Pushes the learner to self-serve.
+function SchemaNamesOnly({ dm }) {
+  if (!dm) return null;
+  const tableNames = Object.keys(dm.tables);
+  const firstTable = tableNames[0];
+  return (
+    <div style={{ marginTop: '0.75rem', border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden' }}>
+      <div style={{ padding: '0.5rem 0.75rem', background: 'var(--surface-2)', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 500 }}>
+        Tables — {dm.name} ({tableNames.length})
+      </div>
+      <div style={{ padding: '0.6rem 0.75rem', background: 'var(--surface)', display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+        {tableNames.map(name => (
+          <span key={name} style={{ fontFamily: 'monospace', fontSize: '0.74rem', fontWeight: 700, color: 'var(--teal)', padding: '2px 8px', borderRadius: '5px', background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+            {name}
+          </span>
+        ))}
+      </div>
+      <div style={{ padding: '0.4rem 0.75rem', background: 'var(--surface-2)', borderTop: '1px solid var(--border)', fontSize: '0.72rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <Icon name='compass' size={12} color='currentColor' />
+        <span>Tip: run <code style={{ fontFamily: 'monospace', color: 'var(--teal)' }}>SELECT * FROM {firstTable || 'table'}</code> to see the columns and data.</span>
+      </div>
     </div>
   );
 }
@@ -994,6 +1113,11 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
   }, [problem]);
   const diffStyle = problem ? (DIFF_COLOR[problem.difficulty] || DIFF_COLOR.Easy) : DIFF_COLOR.Easy;
 
+  // Easy-tier scaffolding ramp: which fade-batch (1/2/3) this problem falls in.
+  // 0 = no ramp (default rendering). Derived requirements computed only for stage 1.
+  const rampStage = easyRampStage(problem);
+  const rampRequirements = useMemo(() => (rampStage === 1 ? deriveRequirements(problem) : []), [problem, rampStage]);
+
   // Notify parent of problem changes for hash routing
   useEffect(() => {
     if (onProblemChange && problem) onProblemChange(problem.id);
@@ -1374,6 +1498,10 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.55rem', color: 'var(--text)', lineHeight: 1.3 }}>{problem.title}</h2>
           {/* Prompt */}
           <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--text-muted)', margin: 0 }}>{problem.prompt}</p>
+          {/* Easy-tier scaffolding ramp marker — deliberate "training wheels" cue */}
+          {rampStage > 0 && <RampMarker stage={rampStage} />}
+          {/* Stage 1: derived bullet requirements above the editor */}
+          {rampStage === 1 && <RequirementsBlock bullets={rampRequirements} />}
           {/* Judgment prompt — Hard / Master problems only */}
           {problem.beforeWriting && (
             <div style={{ marginTop: '0.7rem', padding: '0.5rem 0.75rem', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '6px', borderLeft: '3px solid var(--yellow)' }}>
@@ -1398,8 +1526,17 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           )}
         </div>
 
-        {/* Schema accordion */}
-        <SchemaAccordion dm={dm} open={schemaOpen} onToggle={() => setSchemaOpen(o => !o)} />
+        {/* Schema — ramp-gated. Stage 2 hides rows/types (names only + explore nudge);
+            Stage 1 force-expands the full preview with rows/types; otherwise normal accordion. */}
+        {rampStage === 2 ? (
+          <SchemaNamesOnly dm={dm} />
+        ) : (
+          <SchemaAccordion
+            dm={dm}
+            open={rampStage === 1 ? true : schemaOpen}
+            onToggle={rampStage === 1 ? undefined : () => setSchemaOpen(o => !o)}
+          />
+        )}
 
         {/* Expected output */}
         <div style={{ marginTop: '0.65rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>

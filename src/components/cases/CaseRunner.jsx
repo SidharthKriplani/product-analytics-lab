@@ -11,6 +11,8 @@ import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 import { GateOverlay } from '../shared/GateOverlay.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 import { Icon } from '../shared/Icon.jsx';
+import { DescribePanel } from '../shared/DescribePanel.jsx';
+import { AnswerModeToggle, loadAnswerMode, saveAnswerMode } from '../shared/AnswerModeToggle.jsx';
 
 // ─── Seeded shuffle helpers ───
 // Deterministic per caseId+phaseId so the same tester sees the same order
@@ -94,6 +96,69 @@ function computeScore(businessCase, phaseChoices) {
   return { score, maxScore, level, pct };
 }
 
+// ─── Describe-mode derivation ───
+// Key points = the senior answer's recommendation + key framing, plus the strong
+// option for each phase. Keywords come from the phase label and strong option.
+function deriveCaseSalientKeywords(text) {
+  if (!text) return [];
+  const tokens = String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 4);
+  const seen = new Set();
+  const out = [];
+  for (const t of tokens) { if (!seen.has(t)) { seen.add(t); out.push(t); } if (out.length >= 5) break; }
+  return out;
+}
+function deriveCaseKeyPoints(businessCase) {
+  const points = [];
+  const sa = businessCase.seniorAnswer || {};
+  if (sa.recommendation) {
+    points.push({
+      id: 'rec', text: 'Recommendation: ' + sa.recommendation, shortLabel: 'Recommendation',
+      keywords: deriveCaseSalientKeywords(sa.recommendation),
+    });
+  }
+  if (sa.keyFraming) {
+    points.push({
+      id: 'framing', text: 'Key framing: ' + sa.keyFraming, shortLabel: 'Framing',
+      keywords: deriveCaseSalientKeywords(sa.keyFraming),
+    });
+  }
+  for (const phase of (businessCase.phases || [])) {
+    const strong = (phase.options || []).find(o => o.level === 'strong');
+    if (!strong) continue;
+    const label = PHASE_LABELS[phase.id] || phase.label || phase.id;
+    points.push({
+      id: phase.id, text: label + ': ' + strong.label, shortLabel: label,
+      keywords: deriveCaseSalientKeywords(strong.label + ' ' + label),
+    });
+  }
+  return points;
+}
+function CaseModelAnswer({ businessCase }) {
+  const sa = businessCase.seniorAnswer || {};
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.55 }}>
+        {sa.recommendation}
+      </div>
+      <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.7 }}>
+        {sa.reasoning}
+      </p>
+      {sa.interviewPhrase && (
+        <p style={{ fontSize: '0.85rem', color: 'var(--text)', margin: 0, lineHeight: 1.65, fontStyle: 'italic' }}>
+          {sa.interviewPhrase}
+        </p>
+      )}
+      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
+        Full reasoning, key framing, and common mistakes appear in the debrief below.
+      </p>
+    </div>
+  );
+}
+
 // ─── Main Runner ───
 
 export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, onNavigate, user, onShowAuth }) {
@@ -103,6 +168,13 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
   const [phaseChoices, setPhaseChoices] = useState({});          // phaseId → optionId (pending)
   const [submittedChoices, setSubmittedChoices] = useState(_draft ? (_draft.submittedChoices || {}) : {});  // phaseId → optionId (confirmed)
   const [view, setView] = useState(savedProgress ? 'debrief' : 'analysis');
+  const [answerMode, setAnswerMode] = useState(loadAnswerMode());
+  function handleAnswerModeChange(mode) { setAnswerMode(mode); saveAnswerMode(mode); }
+  function handleCaseDescribeContinue() {
+    track('case_completed', { room: 'cases', id: businessCase.id, mode: 'describe' });
+    setView('debrief');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   useEffect(function() {
     if (view === 'analysis') {
@@ -214,6 +286,35 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
           {/* Context panel */}
           <CaseContextPanel context={businessCase.context} />
 
+          <AnswerModeToggle value={answerMode} onChange={handleAnswerModeChange} accent="purple" />
+
+          {/* Describe mode — structure your own recommendation first, then reveal + self-assess */}
+          {answerMode === 'describe' && (
+            <>
+              <DescribePanel
+                keyPoints={deriveCaseKeyPoints(businessCase)}
+                modelAnswer={<CaseModelAnswer businessCase={businessCase} />}
+                onRevealed={() => track('describe_revealed', { room: 'cases', id: businessCase.id })}
+              />
+              <div style={{ marginTop: '1rem' }}>
+                <button
+                  onClick={handleCaseDescribeContinue}
+                  style={{
+                    background: 'var(--surface-2)', border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)', padding: '0.55rem 1.1rem',
+                    fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-secondary)',
+                    cursor: 'pointer', transition: 'all 0.12s', width: '100%',
+                  }}
+                >
+                  Continue to full debrief →
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Options mode — existing scaffolded phase-by-phase flow (untouched) */}
+          {answerMode === 'options' && (
+          <>
           {/* Completed phases — collapsed indicators */}
           {Object.keys(submittedChoices).length > 0 && (
             <CompletedPhasesBar
@@ -271,6 +372,8 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
               </button>
             )}
           </div>
+          </>
+          )}
         </>
       )}
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { saveSTFProgress, getSTFProgress, saveSTFDraft, loadSTFDraft, clearSTFDraft } from '../../utils/spotTheFlawProgress.js';
+import { recordSrOutcome } from '../../utils/srQueue.js';
 import { track } from '../../utils/analytics.js';
 import { spotTheFlawCases } from '../../data/spotTheFlawCases.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
@@ -59,6 +60,8 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
     clearSTFDraft(caseData.id);
     setRating(r);
     saveSTFProgress(caseData.id, r);
+    // Only a clean catch counts as correct; partial / missed re-surface in the SR queue.
+    recordSrOutcome({ room: 'spot-the-flaw', caseId: caseData.id, title: caseData.title, correct: r === 'caught it' });
     track('case_completed', { room: 'spot-the-flaw', id: caseData.id, rating: r });
   }
 

@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom';
 import { BrandMark } from '../components/shared/BrandMark.jsx';
+import { Icon } from '../components/shared/Icon.jsx';
 
 // Ghost data snippets — analytics content hinting at what waits inside
 const GHOSTS = [
@@ -13,7 +14,7 @@ const GHOSTS = [
   { text: 'p-value: 0.001', top: '8%', right: '18%', delay: '3.6s', dur: '6s'  },
 ];
 
-export function Home({ onNavigate, onShowAuth }) {
+export function Home({ onNavigate, onShowAuth, onOpenAha }) {
   return (
     <div style={{
       position: 'relative',
@@ -128,6 +129,51 @@ export function Home({ onNavigate, onShowAuth }) {
           Train on ambiguous metrics, A/B tests, RCA, instrumentation gaps, and ship/no-ship decisions —
           with structured cases and rubric-based feedback.
         </p>
+
+        {/* Aha speedrun — curated first break, launches STF01 logged-out (no sign-up) */}
+        <button
+          type="button"
+          onClick={() => onOpenAha && onOpenAha()}
+          className="pal-landing-el pal-card-hover"
+          style={{
+            animationDelay: '300ms',
+            display: 'block',
+            width: '100%',
+            maxWidth: 460,
+            margin: '0 auto 1.5rem',
+            textAlign: 'left',
+            background: 'var(--surface)',
+            border: '1px solid var(--red)',
+            borderRadius: '14px',
+            padding: '1.1rem 1.25rem',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            color: 'var(--text)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.55rem' }}>
+            <Icon name="search" size={15} color="var(--red)" strokeWidth={2} />
+            <span style={{
+              fontSize: '0.68rem', fontWeight: 700, color: 'var(--red)',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+            }}>
+              Try one now — no sign-up
+            </span>
+          </div>
+          <p style={{
+            fontSize: '0.95rem', fontWeight: 700, lineHeight: 1.35,
+            color: 'var(--text)', margin: '0 0 0.4rem', letterSpacing: '-0.01em',
+          }}>
+            This A/B test won at p=0.002. It is worthless. Spot why in 60 seconds.
+          </p>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+            fontSize: '0.82rem', fontWeight: 600, color: 'var(--red)',
+          }}>
+            Spot the flaw
+            <Icon name="arrow-right" size={14} color="var(--red)" strokeWidth={2} />
+          </span>
+        </button>
 
         {/* BreakLabs four-pillar one-liner */}
         <p

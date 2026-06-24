@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Icon } from '../shared/Icon.jsx';
 import { BrandMark } from '../shared/BrandMark.jsx';
 import { signOut } from '../../utils/auth.js';
+import { getSrStats } from '../../utils/srQueue.js';
 
 // ─── Four-frame IA (HQ DESIGN-STANDARD "THE SIDEBAR STANDARD" + COMPETENCE-MODEL DEC-15) ───
 // KNOW · DO · BUILD · JUDGE are the frames; LIVE is a PAL section; EXTRAS is a quiet
@@ -71,6 +72,7 @@ const NAV_FRAMES = [
   {
     id: 'live', label: 'LIVE', icon: 'mic',
     items: [
+      { id: 'review-queue',   label: 'Review' },
       { id: 'simulator',      label: 'Mock Interview' },
       { id: 'defense-doc',    label: 'Defense Strategy' },
       { id: 'company-tracks', label: 'Company Tracks' },
@@ -176,7 +178,7 @@ function SectionLabel({ label }) {
   );
 }
 
-function NavItem({ id, label, icon, indent, currentPage, onNav, href }) {
+function NavItem({ id, label, icon, indent, currentPage, onNav, href, badge }) {
   // External link (e.g. a sibling BreakLabs app) — opens in a new tab, never "active".
   const isActive = !href && pageToTab(currentPage) === id;
   const baseStyle = {
@@ -219,6 +221,21 @@ function NavItem({ id, label, icon, indent, currentPage, onNav, href }) {
     >
       {icon && <Icon name={icon} size={13} color="currentColor" style={{ opacity: isActive ? 1 : 0.7, flexShrink: 0 }} />}
       <span>{label}</span>
+      {badge > 0 && (
+        <span
+          className="pal-pop"
+          aria-label={badge + ' due'}
+          style={{
+            marginLeft: 'auto', flexShrink: 0,
+            minWidth: 16, height: 16, padding: '0 5px',
+            borderRadius: 8, background: 'var(--teal)', color: '#fff',
+            fontSize: '0.62rem', fontWeight: 800, lineHeight: '16px',
+            textAlign: 'center', letterSpacing: 0,
+          }}
+        >
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </button>
   );
 }
@@ -256,6 +273,10 @@ function GroupHeader({ icon, label, open, hasActive, onClick }) {
 export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onToggleTheme, isTerminal, isOpen, onClose, user, onShowAuth }) {
   const initial = findFrameAndSub(pageToTab(currentPage));
   const [openFrame, setOpenFrame] = useState(initial.frame || 'know');
+
+  // SR due-count badge (Review item). Recomputed on each render / navigation
+  // so clearing the queue updates the badge as the user moves around.
+  const srDue = getSrStats().due;
 
   // Follow navigation: opening a tab auto-expands its frame (and sub-group),
   // still respecting one-open-per-level.
@@ -493,7 +514,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                     {frame.items && (
                       <div style={{ marginLeft: '0.4rem' }}>
                         {frame.items.map(item => (
-                          <NavItem key={item.id} id={item.id} label={item.label} href={item.href} indent currentPage={currentPage} onNav={handleNav} />
+                          <NavItem key={item.id} id={item.id} label={item.label} href={item.href} indent currentPage={currentPage} onNav={handleNav} badge={item.id === 'review-queue' ? srDue : undefined} />
                         ))}
                       </div>
                     )}

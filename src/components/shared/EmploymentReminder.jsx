@@ -1,107 +1,86 @@
 import { useState, useEffect } from 'react';
 import { fetchPublicProfile, confirmMyEmployment } from '../../utils/leaderboard.js';
+import { getNextProfileAsk } from '../../utils/profileCompletion.js';
 
-// Monthly in-app nudge: prompts a signed-in user to confirm or update their
-// current company + role so the community can refer them. Degrades gracefully
-// before the DB migration runs — it reads company_updated_at from the server
-// profile when present, and otherwise falls back entirely to localStorage.
+// Progressive-profiling nudge for signed-in users. Surfaces the SINGLE highest-
+// priority outstanding profile item at a time (one ask, never a pile-up), each
+// benefit-framed and linking to the relevant Profile section / readiness widget.
 //
-// State source of truth for "when did they last confirm?":
-//   * server: profile.company_updated_at (once the migration has run)
-//   * local fallback: localStorage 'pal-company-confirmed-v1' (always written by
-//     updateMyEmployment / confirmMyEmployment in utils/leaderboard.js)
-// If that timestamp is null/missing OR older than 30 days, the banner shows.
+// The priority logic lives in utils/profileCompletion.js (getNextProfileAsk):
+//   1. employment not set   -> ask employment        (Profile)
+//   2. no LinkedIn          -> ask LinkedIn          (Profile)
+//   3. no target company    -> ask target            (Progress / readiness)
+//   4. no résumé            -> ask résumé            (Profile)
+//   5. employment stale 90d -> re-confirm employment (Profile)  [quarterly]
+//   6. résumé stale 180d    -> refresh résumé        (Profile)
 //
-// Dismiss [x] hides it for this browser session only (sessionStorage); it
-// reappears next session until the user confirms or updates.
+// Cadence: employment freshness is QUARTERLY (90 days, not monthly) and résumé
+// freshness is ~half-yearly (180 days) — résumés go stale slower than jobs.
+//
+// Degrades gracefully before the DB migration runs: getNextProfileAsk reads the
+// server profile when present and otherwise falls back entirely to localStorage.
+// Absent fields are treated as "not set", which is fine for prompting.
+//
+// Dismiss [x] hides the current ask for this browser session only (sessionStorage),
+// keyed by ask id so dismissing one ask doesn't suppress a different, higher-value
+// one later. It reappears next session until the user resolves it.
 
-const COMPANY_LS_KEY        = 'pal-company-v1';
-const ROLE_LS_KEY           = 'pal-role-v1';
-const COMPANY_CONFIRMED_KEY = 'pal-company-confirmed-v1';
-const SESSION_DISMISS_KEY   = 'pal-emp-reminder-dismissed-v1';
-const THIRTY_DAYS_MS        = 30 * 24 * 60 * 60 * 1000;
+const SESSION_DISMISS_PREFIX = 'pal-profile-ask-dismissed-v1:';
 
-function readLocal(key) {
-  try { return localStorage.getItem(key) || ''; }
-  catch { return ''; }
-}
-
-function isStale(iso) {
-  if (!iso) return true;
-  const t = Date.parse(iso);
-  if (Number.isNaN(t)) return true;
-  return Date.now() - t > THIRTY_DAYS_MS;
+function isDismissed(askId) {
+  try { return !!sessionStorage.getItem(SESSION_DISMISS_PREFIX + askId); }
+  catch { return false; }
 }
 
 export function EmploymentReminder({ user, onNavigate }) {
-  // 'hidden' until we know whether to show; then 'confirm' (has company) or 'add' (none).
-  const [mode, setMode] = useState('hidden');
-  const [company, setCompany] = useState('');
-  const [role, setRole] = useState('');
+  // ask is null until we know what (if anything) to show.
+  const [ask, setAsk] = useState(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    if (!user) { setMode('hidden'); return; }
+    if (!user) { setAsk(null); return; }
 
-    // Session dismiss wins for this browser session.
-    try {
-      if (sessionStorage.getItem(SESSION_DISMISS_KEY)) { setMode('hidden'); return; }
-    } catch { /* ignore */ }
-
-    // Seed from local immediately so the banner can render without a network round-trip.
-    const localCompany   = readLocal(COMPANY_LS_KEY);
-    const localRole       = readLocal(ROLE_LS_KEY);
-    const localConfirmed = readLocal(COMPANY_CONFIRMED_KEY);
-
-    function decide(serverCompany, serverRole, confirmedAt) {
-      const co = serverCompany || localCompany;
-      const ro = serverRole || localRole;
-      setCompany(co);
-      setRole(ro);
-      if (!co) { setMode('add'); return; }
-      if (isStale(confirmedAt)) { setMode('confirm'); return; }
-      setMode('hidden');
+    function decide(profile) {
+      const next = getNextProfileAsk(profile);
+      if (!next || isDismissed(next.id)) { setAsk(null); return; }
+      setAsk(next);
     }
 
-    // Decide from local first (no flash), then refine from the server profile.
-    decide('', '', localConfirmed);
+    // Decide from local-only first (no network flash), then refine from server.
+    decide(null);
 
     fetchPublicProfile(user.id).then(p => {
       if (cancelled) return;
-      if (!p) { decide('', '', localConfirmed); return; }
-      // Prefer the server's company_updated_at; fall back to local confirmed ts.
-      decide(p.current_company, p.current_role, p.company_updated_at || localConfirmed);
+      decide(p); // p may be null — getNextProfileAsk falls back to localStorage
     }).catch(() => { /* keep the local-derived decision */ });
 
     return () => { cancelled = true; };
   }, [user]);
 
-  if (mode === 'hidden') return null;
+  if (!ask) return null;
 
   function dismiss() {
-    try { sessionStorage.setItem(SESSION_DISMISS_KEY, '1'); } catch { /* ignore */ }
-    setMode('hidden');
+    try { sessionStorage.setItem(SESSION_DISMISS_PREFIX + ask.id, '1'); } catch { /* ignore */ }
+    setAsk(null);
   }
 
+  // 'Still accurate' — lightweight confirm that bumps company_updated_at.
   async function stillAccurate() {
     if (busy) return;
     setBusy(true);
-    await confirmMyEmployment(user); // bumps company_updated_at + local confirmed ts
+    await confirmMyEmployment(user);
     setBusy(false);
-    setMode('hidden');
+    setAsk(null);
   }
 
-  function goToProfile() {
-    if (onNavigate) onNavigate('profile');
-    setMode('hidden');
+  function goTo(nav) {
+    if (onNavigate) onNavigate(nav || 'profile');
+    setAsk(null);
   }
 
-  const isAdd = mode === 'add';
-  const message = isAdd
-    ? 'Add your company & role so the community can refer you.'
-    : 'Still at ' + company + (role ? ' as ' + role : '') + '? Keep it current so the community can refer you.';
+  const isConfirm = ask.kind === 'confirm';
 
   return (
     <div
@@ -117,22 +96,11 @@ export function EmploymentReminder({ user, onNavigate }) {
       }}
     >
       <div style={{ flex: 1, minWidth: '180px', fontSize: '0.83rem', color: 'var(--text)', fontWeight: 600 }}>
-        {message}
+        {ask.message}
       </div>
 
       <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', flexShrink: 0 }}>
-        {isAdd ? (
-          <button
-            onClick={goToProfile}
-            style={{
-              background: 'var(--accent)', color: '#fff', border: 'none',
-              borderRadius: '6px', padding: '0.38rem 0.85rem',
-              fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer',
-            }}
-          >
-            Add
-          </button>
-        ) : (
+        {isConfirm ? (
           <>
             <button
               onClick={stillAccurate}
@@ -147,7 +115,7 @@ export function EmploymentReminder({ user, onNavigate }) {
               {busy ? 'Saving...' : 'Still accurate'}
             </button>
             <button
-              onClick={goToProfile}
+              onClick={() => goTo(ask.nav)}
               style={{
                 background: 'var(--surface)', color: 'var(--text)',
                 border: '1px solid var(--border)',
@@ -158,6 +126,17 @@ export function EmploymentReminder({ user, onNavigate }) {
               Update
             </button>
           </>
+        ) : (
+          <button
+            onClick={() => goTo(ask.nav)}
+            style={{
+              background: 'var(--accent)', color: '#fff', border: 'none',
+              borderRadius: '6px', padding: '0.38rem 0.85rem',
+              fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            {ask.ctaLabel || 'Add'}
+          </button>
         )}
 
         <button

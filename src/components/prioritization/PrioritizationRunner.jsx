@@ -5,6 +5,8 @@ import { prioritizationScenarios } from '../../data/prioritizationScenarios.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 import { Icon } from '../shared/Icon.jsx';
+import { DescribePanel } from '../shared/DescribePanel.jsx';
+import { AnswerModeToggle, loadAnswerMode, saveAnswerMode } from '../shared/AnswerModeToggle.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -35,6 +37,45 @@ const RATING_STYLE = {
   miss:    { color: 'var(--red)',    bg: 'var(--red-bg)',    border: 'var(--red-border)' },
 };
 
+// ─── Describe-mode derivation ───
+// Key points = the scenario's key takeaways (the correct ranking rationale).
+// Keywords come from each takeaway.
+function derivePriSalientKeywords(text) {
+  if (!text) return [];
+  const tokens = String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 4);
+  const seen = new Set();
+  const out = [];
+  for (const t of tokens) { if (!seen.has(t)) { seen.add(t); out.push(t); } if (out.length >= 5) break; }
+  return out;
+}
+function derivePriKeyPoints(scenario) {
+  return (scenario.keyTakeaways || []).map((t, i) => ({
+    id: 'kt' + i, text: t, shortLabel: 'Takeaway ' + (i + 1),
+    keywords: derivePriSalientKeywords(t),
+  }));
+}
+function PriModelAnswer({ scenario }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+      <ModelAnswerDisplay scenario={scenario} />
+      {scenario.keyTakeaways && scenario.keyTakeaways.length > 0 && (
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '0.78rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.4rem' }}>
+            Key Takeaways
+          </div>
+          <ul style={{ margin: 0, paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.8 }}>
+            {scenario.keyTakeaways.map((t, i) => <li key={i}>{t}</li>)}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
   const scenario = prioritizationScenarios.find(s => s.id === caseId);
   const existing = getPrioritizationProgress(scenario.id);
@@ -44,6 +85,13 @@ export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
   });
   const [revealed, setRevealed] = useState(!!existing?.rating);
   const [rating, setRating] = useState(existing?.rating || null);
+  const [answerMode, setAnswerMode] = useState(loadAnswerMode());
+  function handleAnswerModeChange(mode) { setAnswerMode(mode); saveAnswerMode(mode); }
+  function handlePriDescribeContinue() {
+    track('case_completed', { room: 'prioritization', id: scenario.id, mode: 'describe' });
+    setRevealed(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   const [hintsOpen, setHintsOpen] = useState(false);
   const [frameworkOpen, setFrameworkOpen] = useState(false);
   const [note, setNote] = useState(() => getNotes('prioritization', scenario.id));
@@ -256,8 +304,37 @@ export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
         </div>
       )}
 
-      {/* Response area */}
+      {/* Answer mode toggle — before revealing */}
       {!revealed && (
+        <AnswerModeToggle value={answerMode} onChange={handleAnswerModeChange} accent="yellow" />
+      )}
+
+      {/* Describe mode — write your prioritization, then reveal the model answer + self-assess */}
+      {!revealed && answerMode === 'describe' && (
+        <>
+          <DescribePanel
+            keyPoints={derivePriKeyPoints(scenario)}
+            modelAnswer={<PriModelAnswer scenario={scenario} />}
+            onRevealed={() => track('describe_revealed', { room: 'prioritization', id: scenario.id })}
+          />
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              onClick={handlePriDescribeContinue}
+              style={{
+                background: 'var(--surface-2)', border: '1px solid var(--border)',
+                borderRadius: '7px', padding: '0.55rem 1.1rem',
+                fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-secondary)',
+                cursor: 'pointer', transition: 'all 0.12s', width: '100%',
+              }}
+            >
+              Continue to full debrief →
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Response area — Options mode (existing scaffolded write-and-reveal flow, untouched) */}
+      {!revealed && answerMode === 'options' && (
         <>
           <textarea
             value={response}

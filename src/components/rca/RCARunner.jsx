@@ -12,8 +12,71 @@ import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 import { GateOverlay } from '../shared/GateOverlay.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { DescribePanel } from '../shared/DescribePanel.jsx';
+import { AnswerModeToggle, loadAnswerMode, saveAnswerMode } from '../shared/AnswerModeToggle.jsx';
 
 const ROOM_KEY = 'rca';
+
+// ─── Describe-mode derivation ────────────────────────────────────────────────
+// Key points = the diagnosis steps the user should have reasoned through (the
+// strong-option labels) plus the senior likely-cause. Keywords come from the
+// step label and the strong option text.
+function deriveRCAKeyPoints(rcaCase) {
+  const points = [];
+  const sd = rcaCase.seniorDiagnosis || {};
+  if (sd.likelyCause) {
+    points.push({
+      id: 'cause',
+      text: 'Root cause: ' + sd.likelyCause,
+      shortLabel: 'Root cause',
+      keywords: deriveSalientKeywords(sd.likelyCause),
+    });
+  }
+  for (const step of (rcaCase.diagnosisSteps || [])) {
+    const strong = (step.options || []).find(o => o.level === 'strong');
+    if (!strong) continue;
+    points.push({
+      id: step.id,
+      text: step.label + ': ' + strong.label,
+      shortLabel: step.label,
+      keywords: deriveSalientKeywords(strong.label + ' ' + step.label),
+    });
+  }
+  return points;
+}
+function deriveSalientKeywords(text) {
+  if (!text) return [];
+  const tokens = String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 4);
+  const seen = new Set();
+  const out = [];
+  for (const t of tokens) { if (!seen.has(t)) { seen.add(t); out.push(t); } if (out.length >= 5) break; }
+  return out;
+}
+function RCAModelAnswer({ rcaCase }) {
+  const sd = rcaCase.seniorDiagnosis || {};
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text)', lineHeight: 1.4 }}>
+        {sd.likelyCause}
+      </div>
+      <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.7 }}>
+        {sd.reasoning}
+      </p>
+      {sd.interviewPhrase && (
+        <p style={{ fontSize: '0.85rem', color: 'var(--text)', margin: 0, lineHeight: 1.65, fontStyle: 'italic' }}>
+          &ldquo;{sd.interviewPhrase}&rdquo;
+        </p>
+      )}
+      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
+        Full validation plan, recommendation, and common mistakes appear in the debrief below.
+      </p>
+    </div>
+  );
+}
 
 function loadNote(room, id) {
   try {
@@ -74,6 +137,13 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
   const _rcaDraft = !savedProgress ? loadRCADraft(caseId) : null;
   const startView = savedProgress ? 'debrief' : 'diagnosis';
   const [view, setView] = useState(startView);
+  const [answerMode, setAnswerMode] = useState(loadAnswerMode());
+  function handleAnswerModeChange(mode) { setAnswerMode(mode); saveAnswerMode(mode); }
+  function handleRCADescribeContinue() {
+    track('case_completed', { room: 'rca', id: rcaCase.id, mode: 'describe' });
+    setView('debrief');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   const [currentStepIndex, setCurrentStepIndex] = useState(_rcaDraft ? (_rcaDraft.currentStepIndex || 0) : 0);
   const [stepChoices, setStepChoices] = useState(_rcaDraft ? (_rcaDraft.stepChoices || {}) : (savedProgress?.stepChoices || {}));
   const [pendingChoice, setPendingChoice] = useState(null); // selected but not yet submitted
@@ -230,6 +300,35 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
       {view === 'diagnosis' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
 
+          <AnswerModeToggle value={answerMode} onChange={handleAnswerModeChange} accent="yellow" />
+
+          {/* Describe mode — write your full diagnosis first, then reveal + self-assess */}
+          {answerMode === 'describe' && (
+            <>
+              <DescribePanel
+                keyPoints={deriveRCAKeyPoints(rcaCase)}
+                modelAnswer={<RCAModelAnswer rcaCase={rcaCase} />}
+                onRevealed={() => track('describe_revealed', { room: 'rca', id: rcaCase.id })}
+              />
+              <div style={{ paddingTop: '0.25rem' }}>
+                <button
+                  onClick={handleRCADescribeContinue}
+                  style={{
+                    background: 'var(--surface-2)', border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius)', padding: '0.6rem 1.25rem',
+                    fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)',
+                    cursor: 'pointer', transition: 'all 0.1s', width: '100%',
+                  }}
+                >
+                  Continue to full debrief →
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Options mode — existing scaffolded step-by-step flow (untouched) */}
+          {answerMode === 'options' && (
+          <>
           {/* Completed steps (collapsed) */}
           {steps.slice(0, currentStepIndex).map((step, i) => {
             const chosenId = stepChoices[step.id];
@@ -316,6 +415,8 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
               </button>
             )}
           </div>
+          </>
+          )}
         </div>
       )}
 

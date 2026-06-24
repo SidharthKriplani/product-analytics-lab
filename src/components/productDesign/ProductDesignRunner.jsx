@@ -4,6 +4,8 @@ import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 import { Icon } from '../shared/Icon.jsx';
+import { DescribePanel } from '../shared/DescribePanel.jsx';
+import { AnswerModeToggle, loadAnswerMode, saveAnswerMode } from '../shared/AnswerModeToggle.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -166,17 +168,19 @@ function DebriefView({ scenario, responses, ratings, result, onRetry, onBack, on
         textAlign: 'center',
       }}>
         <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', color: levelCfg.color, marginBottom: '0.4rem' }}>
-          Overall Assessment
+          {result ? 'Overall Assessment' : 'Self-Review'}
         </div>
         <div style={{ fontSize: '1.5rem', fontWeight: 900, color: levelCfg.color, marginBottom: '0.25rem' }}>
-          {levelCfg.label}
+          {result ? levelCfg.label : 'Compare & Reflect'}
         </div>
         <div style={{ fontSize: '0.83rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '0.75rem' }}>
-          {levelCfg.desc}
+          {result ? levelCfg.desc : 'You wrote your own answer. Compare it against the model answer for each phase below.'}
         </div>
-        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-          {result?.score}/{result?.maxScore} phases rated strong or partial
-        </div>
+        {result && (
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            {result.score}/{result.maxScore} phases rated strong or partial
+          </div>
+        )}
       </div>
 
       {/* Phase-by-phase breakdown */}
@@ -290,6 +294,66 @@ function DebriefView({ scenario, responses, ratings, result, onRetry, onBack, on
   );
 }
 
+// ─── Describe-mode derivation ───────────────────────────────────────────────
+// One free-text field per phase mirrors the real design walkthrough. Key points
+// come from each phase's criteria (its first/strongest criterion) plus the phase
+// label, so the self-assess checklist maps to the framework phases.
+function derivePdSalientKeywords(text) {
+  if (!text) return [];
+  const tokens = String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 4);
+  const seen = new Set();
+  const out = [];
+  for (const t of tokens) { if (!seen.has(t)) { seen.add(t); out.push(t); } if (out.length >= 5) break; }
+  return out;
+}
+function derivePdFields(scenario) {
+  return (scenario.phases || []).map(phase => ({
+    id: phase.id,
+    label: phase.label,
+    placeholder: phase.prompt || 'Your answer for this phase...',
+  }));
+}
+function derivePdKeyPoints(scenario) {
+  return (scenario.phases || []).map(phase => {
+    const firstCriterion = (phase.criteria && phase.criteria.length) ? phase.criteria[0] : '';
+    const text = phase.label + ': ' + (firstCriterion || 'cover this phase clearly');
+    return {
+      id: phase.id, text, shortLabel: phase.label,
+      keywords: derivePdSalientKeywords((firstCriterion || '') + ' ' + phase.label),
+    };
+  });
+}
+function PdModelAnswer({ scenario }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+      {(scenario.phases || []).map(phase => (
+        <div key={phase.id}>
+          <div style={{
+            fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase',
+            letterSpacing: '0.07em', color: 'var(--purple)', marginBottom: '0.35rem',
+          }}>
+            {phase.label}
+          </div>
+          {phase.criteria && phase.criteria.length > 0 && (
+            <ul style={{ margin: '0 0 0.5rem', padding: '0 0 0 1.1rem', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+              {phase.criteria.map((c, i) => (
+                <li key={i} style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>{c}</li>
+              ))}
+            </ul>
+          )}
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+            {phase.modelAnswer}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Main Runner ──────────────────────────────────────────────────────────────
 export function ProductDesignRunner({ caseId, savedProgress, onBack, onNext, onNavigate }) {
   const scenario = productDesignScenarios.find(s => s.id === caseId);
@@ -299,6 +363,14 @@ export function ProductDesignRunner({ caseId, savedProgress, onBack, onNext, onN
   const [completedPhaseIds, setCompletedPhaseIds] = useState(savedProgress?.completedPhaseIds || []);
   const [view, setView] = useState(savedProgress?.result ? 'debrief' : 'writing'); // 'writing' | 'reveal' | 'debrief'
   const [result, setResult] = useState(savedProgress?.result || null);
+  const [answerMode, setAnswerMode] = useState(loadAnswerMode());
+  function handleAnswerModeChange(mode) { setAnswerMode(mode); saveAnswerMode(mode); }
+  function handlePdDescribeContinue() {
+    track('case_completed', { room: 'product-design', id: scenario.id, mode: 'describe' });
+    setResult(null); // no per-phase self-rating in describe mode — debrief shows model answers only
+    setView('debrief');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   const [note, setNote] = useState(() => getNotes('product-design', scenario.id));
   useEffect(() => { setNote(getNotes('product-design', scenario.id)); }, [scenario.id]);
 
@@ -449,8 +521,38 @@ export function ProductDesignRunner({ caseId, savedProgress, onBack, onNext, onN
         </>
       )}
 
-      {/* ── Writing / Reveal views ── */}
-      {view !== 'debrief' && (
+      {/* Answer mode toggle — only in the writing view before any reveal */}
+      {view === 'writing' && (
+        <AnswerModeToggle value={answerMode} onChange={handleAnswerModeChange} accent="purple" />
+      )}
+
+      {/* ── Describe mode — answer all phases in one pass, then reveal + self-assess ── */}
+      {view === 'writing' && answerMode === 'describe' && (
+        <>
+          <DescribePanel
+            fields={derivePdFields(scenario)}
+            keyPoints={derivePdKeyPoints(scenario)}
+            modelAnswer={<PdModelAnswer scenario={scenario} />}
+            onRevealed={() => track('describe_revealed', { room: 'product-design', id: scenario.id })}
+          />
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              onClick={handlePdDescribeContinue}
+              style={{
+                background: 'var(--surface-2)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)', padding: '0.55rem 1.1rem',
+                fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-secondary)',
+                cursor: 'pointer', transition: 'all 0.12s', width: '100%',
+              }}
+            >
+              Continue to full debrief →
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ── Writing / Reveal views — Options mode (existing phase-by-phase flow, untouched) ── */}
+      {view !== 'debrief' && !(view === 'writing' && answerMode === 'describe') && (
         <>
           <PhaseNav
             phases={phases}

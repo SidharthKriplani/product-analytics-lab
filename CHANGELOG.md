@@ -4,6 +4,32 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.92.0] — 2026-06-25 [SPACED-REPETITION REVIEW QUEUE · RESUME UPLOAD]
+
+**Spaced-repetition review queue.** New `src/utils/srQueue.js` (Leitner: a miss schedules box 1 ~1d; correct reviews promote 1→3→7→21d, then retire). New `src/pages/ReviewQueue.jsx` (`#/review-queue`) lists due items, deep-linking into each case via the room's existing open-fn. New **Review** item under LIVE with a due-count badge. Outcome capture wired into Stats, Spot-the-Flaw, and Trainer runners (the foundation runners' bespoke per-module scoring was left for a later pass).
+
+**Resume upload.** New `src/utils/resume.js` — `uploadResume` (PDF ≤5MB → Storage bucket `resumes` at `<uid>/resume.pdf` → `resume_url` on the profile row), `removeMyResume`, guarded (`storage-pending`/`migration-pending` → localStorage fallback, never throws). ProfilePage gets a Résumé section (upload/replace/remove + view link); PublicProfile shows a "View résumé →" button. Migration extended with `resume_url`/`resume_updated_at` + a documented `resumes` bucket + RLS policy block; `docs/RESUME-UPLOAD-SETUP.md` added. **Needs a one-time Supabase Storage bucket setup** (you) — degrades gracefully until then.
+
+Build: 889 modules clean.
+
+## [5.91.0] — 2026-06-25 [SQL EASY RAMP · AHA COLD-START]
+
+**SQL Easy-tier scaffolding ramp.** The first 15 Easy problems in the main SQL Lab now fade scaffolding in 3 batches of 5 (`easyRampStage` helper in SqlLabPage, derived at render time — no data changes): batch 1 = derived bullet requirements + schema force-expanded with rows/types; batch 2 = no bullets, table names only + "run SELECT * to explore" tip; batch 3 = unscaffolded (the real experience). A small "Training wheels N/3" marker makes the fade read as deliberate. Validation/correctness untouched.
+
+**Aha cold-start opener.** A curated first-break hero on the landing (Home.jsx) — "This A/B test won at p=0.002. It is worthless. Spot why in 60 seconds." → launches STF01 (Spot the Flaw, SRM) directly, logged-out, no signup wall (the case is free + guestPreview). Reuses App's existing `openSTFCase` open-fn (keeps tracking/paywall logic). Monochrome, Icon-based, on-brand.
+
+Build: 886 modules clean.
+
+## [5.90.0] — 2026-06-25 [DESCRIBE MODE · READINESS COUNTDOWN · COMPANY LOGOS]
+
+**Options ↔ Describe toggle (all judgment runners).** New `src/components/shared/DescribePanel.jsx` + `AnswerModeToggle.jsx`. Every run now offers a per-user mode (persisted, `pal-answer-mode-v1`): **Options** = the existing scaffolded MCQ flow (default, untouched); **Describe** = type your own answer first (real-interview reps), with a client-side coverage nudge (which key points your text hit), then reveal the model answer + a self-assessment checklist (no auto-grading — honest self-assess, mirroring the Simulator). Wired into Metrics, RCA, Analytics Cases, Product Design, Prioritization, Estimation, and Stats runners; each derives key points + model answer from the case's existing rubric/model content. Addresses the community's "options feel like cheat codes" feedback.
+
+**Readiness countdown.** New `src/components/shared/ReadinessWidget.jsx` (+ `computeReadiness` helper). Set a target interview date + optional target company; shows an *estimated readiness %* (mean capped per-room coverage across 15 key rooms), a band (Just starting → Sharp), a days-to-date countdown, and a "Next: practice <weakest room>" deep-link. Rendered atop Progress; a compact "X days out · Y% ready" line added to Defense Strategy. Keys: `pal-target-date-v1`, `pal-target-company-v1`. (HQ PD-L3: PAL is a cram-tool-to-a-date.)
+
+**Company logos.** New `src/data/companyDomains.js` (319 curated name→domain + heuristic fallback) + `src/components/shared/CompanyLogo.jsx` (favicon with graceful initial-badge fallback, never a broken image). Shown next to the company on PublicProfile + ProfilePage.
+
+Build: 886 modules transform clean.
+
 ## [5.89.0] — 2026-06-24 [NAV FLATTEN — 2 LEVELS]
 
 Removed the third nav level. Previously: frame (L1) → subgroup accordion (L2) → rooms (L3), requiring two clicks to reach a room. Now opening a frame (KNOW/JUDGE) reveals **all** its rooms at once, with the old subgroup names (Foundations, Learn, Experiments, Analytics, Product) rendered as lightweight inline **section labels** — no second collapse. DO and LIVE were already flat. Dropped the `openSub`/`toggleSub` state and the per-subgroup `GroupHeader`/`Collapsible`. The grouping stays visible (important for JUDGE's ~10 rooms) but the dig is gone. Builds clean (881 modules). Also: `HQ/shared/Icon.jsx` + `HQ/ICON-SYSTEM.md` added so the other labs can adopt the monochrome icon system.

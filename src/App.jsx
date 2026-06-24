@@ -9,6 +9,7 @@ import { onAuthStateChange } from './utils/auth.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from './utils/syncProgress.js';
 import { upsertLeaderboardRow } from './utils/leaderboard.js';
 import { EmploymentReminder } from './components/shared/EmploymentReminder.jsx';
+import { CaptureNudge } from './components/shared/CaptureNudge.jsx';
 // Slim index — id, isFree, title only (for routing and paywall checks)
 import {
   scenarioIndex, designScenarioIndex, statsModuleIndex, metricCaseIndex,
@@ -93,6 +94,7 @@ const SearchPage              = lazy(() => import('./pages/SearchPage.jsx').then
 const BookmarksBrowser        = lazy(() => import('./pages/BookmarksBrowser.jsx').then(m => ({ default: m.BookmarksBrowser })));
 const ConsultationSpace = lazy(() => import('./pages/ConsultationSpace.jsx').then(m => ({ default: m.ConsultationSpace })));
 const Trainer           = lazy(() => import('./pages/Trainer.jsx').then(m => ({ default: m.Trainer })));
+const ReviewQueue       = lazy(() => import('./pages/ReviewQueue.jsx').then(m => ({ default: m.ReviewQueue })));
 const CompanyTracks     = lazy(() => import('./pages/CompanyTracks.jsx').then(m => ({ default: m.CompanyTracks })));
 const InterviewQABrowser = lazy(() => import('./pages/InterviewQABrowser.jsx').then(m => ({ default: m.InterviewQABrowser })));
 const ChallengesBrowser = lazy(() => import('./pages/ChallengesBrowser.jsx').then(m => ({ default: m.ChallengesBrowser })));
@@ -1127,6 +1129,10 @@ export default function App() {
           )}
         </div>
 
+        {/* Capture-at-investment sign-in nudge — LOGGED-OUT only, once they've invested (>=3 solved). */}
+        {/* Mutually exclusive with EmploymentReminder by design: that one is LOGGED-IN only. */}
+        <CaptureNudge user={user} onShowAuth={() => setShowAuth(true)} />
+
         {/* Monthly "is your employment current?" nudge — degrades gracefully pre-migration */}
         <EmploymentReminder user={user} onNavigate={navigate} />
 
@@ -1145,7 +1151,7 @@ export default function App() {
           }>
         <div key={page} className={page === 'sql-lab' ? 'sql-lab-page-wrap' : 'pal-page-enter'}>
         {page === 'home' && (
-          <Home onNavigate={navigate} onShowAuth={() => setShowAuth(true)} />
+          <Home onNavigate={navigate} onShowAuth={() => setShowAuth(true)} onOpenAha={() => openSTFCase('STF01')} />
         )}
 
         {/* ── Stats Room ── */}
@@ -1764,6 +1770,46 @@ export default function App() {
             <Trainer onBack={() => setPage('home')} />
           </Suspense>
         )}
+        {page === 'review-queue' && (
+          <Suspense fallback={
+              <div style={{ padding: '2rem 2rem 0' }}>
+                {[1,2,3].map(i => (
+                  <div key={i} className="pal-shimmer-box" style={{ height: '88px', marginBottom: '1rem', opacity: 1 - i * 0.15 }} />
+                ))}
+              </div>
+            }>
+            <ReviewQueue
+              onNavigate={(targetPage, itemId) => {
+                // Deep-link an SR item back into its case when an opener exists;
+                // otherwise just land on the room browser.
+                if (itemId) {
+                  switch (targetPage) {
+                    case 'stats':                openStatsModule(itemId); break;
+                    case 'spot-the-flaw':        openSTFCase(itemId); break;
+                    case 'metrics':              openMetricsCase(itemId); break;
+                    case 'rca':                  openRCACase(itemId); break;
+                    case 'cases':                openBusinessCase(itemId); break;
+                    case 'design':               openDesignScenario(itemId); break;
+                    case 'browser':              openScenario(itemId); break;
+                    case 'product-design':       openPDScenario(itemId); break;
+                    case 'prioritization':       openPrioritizationScenario(itemId); break;
+                    case 'estimation':           openEstimationProblem(itemId); break;
+                    case 'instrumentation':      openInstrumentationCase(itemId); break;
+                    case 'challenges':           openChallenge(itemId); break;
+                    case 'bi':                   openBICase(itemId); break;
+                    case 'stat-foundations':     openStatFoundationsModule(itemId); break;
+                    case 'metrics-foundations':  openMetricsFoundationModule(itemId); break;
+                    case 'rca-foundations':      openRCAFoundationModule(itemId); break;
+                    case 'exp-foundations':      openExpFoundationModule(itemId); break;
+                    default:                     navigate(targetPage);
+                  }
+                } else {
+                  navigate(targetPage);
+                }
+              }}
+            />
+          </Suspense>
+        )}
         {page === 'company-tracks' && (
           <Suspense fallback={
               <div style={{ padding: '2rem 2rem 0' }}>
@@ -1904,7 +1950,7 @@ export default function App() {
                'pal-metrics-foundation-progress-v1',
                'pal-rca-foundation-progress-v1',
                'pal-exp-foundation-progress-v1',
-               'pal-rf-state-v1', 'pal-sf-state-v1'
+               'pal-rf-state-v1', 'pal-sf-state-v1', 'pal-sr-queue-v1'
               ].forEach(k => { try { localStorage.removeItem(k); } catch {} });
               // Clear per-scenario product-design progress and legacy per-module state keys
               try {

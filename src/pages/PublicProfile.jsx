@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchPublicProfile, fetchLeaderboard } from '../utils/leaderboard.js';
 import { supabase } from '../utils/supabase.js';
+import { CompanyLogo } from '../components/shared/CompanyLogo.jsx';
 
 // Friendly labels for the room_breakdown chips (keyed by the short ids written
 // by computeRoomBreakdown() in utils/leaderboard.js). Unknown ids fall back to
@@ -179,9 +180,14 @@ function Profile({ profile, standing }) {
               {profile.display_name}
             </div>
             {(profile.current_role || profile.current_company) && (
-              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)', marginTop: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {profile.current_role || 'Analyst'}
-                {profile.current_company ? ' at ' + profile.current_company : ''}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)', marginTop: '0.2rem', minWidth: 0 }}>
+                {profile.current_company && (
+                  <CompanyLogo company={profile.current_company} size={18} />
+                )}
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {profile.current_role || 'Analyst'}
+                  {profile.current_company ? ' at ' + profile.current_company : ''}
+                </span>
               </div>
             )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
@@ -202,20 +208,39 @@ function Profile({ profile, standing }) {
           </div>
         </div>
 
-        {profile.linkedin_url && (
-          <a
-            href={profile.linkedin_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '1.2rem',
-              background: 'var(--accent-bg, var(--surface-2))', border: '1px solid var(--accent-border, var(--border))', borderRadius: '8px',
-              padding: '0.5rem 0.95rem', fontSize: '0.82rem', fontWeight: 700,
-              color: 'var(--accent)', textDecoration: 'none',
-            }}
-          >
-            View LinkedIn &rarr;
-          </a>
+        {(profile.linkedin_url || profile.resume_url) && (
+          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '1.2rem' }}>
+            {profile.linkedin_url && (
+              <a
+                href={profile.linkedin_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                  background: 'var(--accent-bg, var(--surface-2))', border: '1px solid var(--accent-border, var(--border))', borderRadius: '8px',
+                  padding: '0.5rem 0.95rem', fontSize: '0.82rem', fontWeight: 700,
+                  color: 'var(--accent)', textDecoration: 'none',
+                }}
+              >
+                View LinkedIn &rarr;
+              </a>
+            )}
+            {profile.resume_url && (
+              <a
+                href={profile.resume_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                  background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '8px',
+                  padding: '0.5rem 0.95rem', fontSize: '0.82rem', fontWeight: 700,
+                  color: 'var(--text)', textDecoration: 'none',
+                }}
+              >
+                View résumé &rarr;
+              </a>
+            )}
+          </div>
         )}
       </div>
 

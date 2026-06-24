@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { trainerMCQ, trainerMCQByCategory } from '../data/trainerMCQ.js';
+import { recordSrOutcome } from '../utils/srQueue.js';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { Icon } from '../components/shared/Icon.jsx';
 
@@ -932,6 +933,12 @@ export function Trainer({ onBack }) {
 
   function handleAnswer(optionId) {
     setAnswers((prev) => ({ ...prev, [currentIndex]: optionId }));
+    // Capture the graded outcome for the spaced-repetition queue.
+    const q = questions[currentIndex];
+    if (q) {
+      const isCorrect = !!q.options.find((o) => o.id === optionId)?.correct;
+      recordSrOutcome({ room: 'trainer', caseId: q.id, title: q.question, correct: isCorrect });
+    }
   }
 
   function handleNext() {

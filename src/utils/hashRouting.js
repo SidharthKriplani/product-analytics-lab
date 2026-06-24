@@ -76,6 +76,7 @@ const PAGE_TO_HASH = {
   'benchmark': 'benchmark',
   'consult': 'consult',
   'trainer': 'trainer',
+  'review-queue': 'review-queue',
 
   // Learn / standalone pages
   'python-lab': 'python-lab',
@@ -163,6 +164,7 @@ const HASH_TO_BROWSER_PAGE = {
   'benchmark': 'benchmark',
   'consult': 'consult',
   'trainer': 'trainer',
+  'review-queue': 'review-queue',
   'code-lab': 'code',
   'python-lab': 'python-lab',
   'dimensional-modeling': 'dimensional-modeling',

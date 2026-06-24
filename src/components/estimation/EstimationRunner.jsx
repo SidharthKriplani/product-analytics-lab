@@ -6,6 +6,8 @@ import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { DescribePanel } from '../shared/DescribePanel.jsx';
+import { AnswerModeToggle, loadAnswerMode, saveAnswerMode } from '../shared/AnswerModeToggle.jsx';
 
 const ROOM_KEY = 'estimation';
 
@@ -60,6 +62,66 @@ const CATEGORY_LABEL = {
   'capacity':        'Capacity',
 };
 
+// ─── Describe-mode derivation ───
+// Key points = the model estimate's key assumptions + the final estimate, plus
+// the strong-answer markers. Keywords come from each assumption / marker.
+function deriveEstSalientKeywords(text) {
+  if (!text) return [];
+  const tokens = String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 4);
+  const seen = new Set();
+  const out = [];
+  for (const t of tokens) { if (!seen.has(t)) { seen.add(t); out.push(t); } if (out.length >= 5) break; }
+  return out;
+}
+function deriveEstKeyPoints(problem) {
+  const points = [];
+  const ma = problem.modelAnswer || {};
+  if (ma.finalEstimate) {
+    points.push({
+      id: 'final', text: 'Lands near the model estimate: ' + ma.finalEstimate, shortLabel: 'Final estimate',
+      keywords: deriveEstSalientKeywords(ma.finalEstimate),
+    });
+  }
+  (ma.keyAssumptions || []).forEach((a, i) => {
+    points.push({
+      id: 'assume' + i, text: 'Assumption: ' + a, shortLabel: 'Assumption ' + (i + 1),
+      keywords: deriveEstSalientKeywords(a),
+    });
+  });
+  // Cap at the most salient strong-answer markers so the checklist stays focused.
+  (problem.strongAnswerMarkers || []).slice(0, 3).forEach((m, i) => {
+    points.push({
+      id: 'marker' + i, text: m, shortLabel: 'Strong move ' + (i + 1),
+      keywords: deriveEstSalientKeywords(m),
+    });
+  });
+  return points;
+}
+function EstModelAnswer({ problem }) {
+  const ma = problem.modelAnswer || {};
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {ma.finalEstimate && (
+        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.55 }}>
+          {ma.finalEstimate}
+        </div>
+      )}
+      {ma.walkthrough && (
+        <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>
+          {ma.walkthrough}
+        </p>
+      )}
+      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
+        Key assumptions, sanity checks, and common mistakes appear in the debrief below.
+      </p>
+    </div>
+  );
+}
+
 export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
   const problem = estimationProblems.find(p => p.id === caseId);
   const existing = getEstimationProgress(problem.id);
@@ -69,6 +131,13 @@ export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
   });
   const [revealed, setRevealed] = useState(!!existing?.rating);
   const [rating, setRating] = useState(existing?.rating || null);
+  const [answerMode, setAnswerMode] = useState(loadAnswerMode());
+  function handleAnswerModeChange(mode) { setAnswerMode(mode); saveAnswerMode(mode); }
+  function handleEstDescribeContinue() {
+    track('case_completed', { room: 'estimation', id: problem.id, mode: 'describe' });
+    setRevealed(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   const [frameworkOpen, setFrameworkOpen] = useState(false);
   const [hintsOpen, setHintsOpen] = useState(false);
   const [userNote, setUserNote] = useState('');
@@ -252,8 +321,37 @@ export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
         </div>
       )}
 
-      {/* Response area */}
+      {/* Answer mode toggle — before revealing */}
       {!revealed && (
+        <AnswerModeToggle value={answerMode} onChange={handleAnswerModeChange} accent="teal" />
+      )}
+
+      {/* Describe mode — type your estimate, then reveal the model answer + self-assess */}
+      {!revealed && answerMode === 'describe' && (
+        <>
+          <DescribePanel
+            keyPoints={deriveEstKeyPoints(problem)}
+            modelAnswer={<EstModelAnswer problem={problem} />}
+            onRevealed={() => track('describe_revealed', { room: 'estimation', id: problem.id })}
+          />
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              onClick={handleEstDescribeContinue}
+              style={{
+                background: 'var(--surface-2)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)', padding: '0.55rem 1.1rem',
+                fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-secondary)',
+                cursor: 'pointer', transition: 'all 0.12s', width: '100%',
+              }}
+            >
+              Continue to full debrief →
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Response area — Options mode (existing scaffolded write-and-reveal flow, untouched) */}
+      {!revealed && answerMode === 'options' && (
         <>
           <textarea
             value={response}

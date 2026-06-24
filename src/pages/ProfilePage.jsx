@@ -3,7 +3,9 @@ import { signOut } from '../utils/auth.js';
 import { getBookmarks } from '../utils/bookmarks.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from '../utils/syncProgress.js';
 import { updateMyLinkedin, updateMyEmployment, fetchPublicProfile } from '../utils/leaderboard.js';
+import { uploadResume, removeMyResume, getLocalResumeUrl } from '../utils/resume.js';
 import { COMPANIES, PROFILE_ROLES } from '../data/companyList.js';
+import { CompanyLogo } from '../components/shared/CompanyLogo.jsx';
 
 const LINKEDIN_LS_KEY = 'pal-linkedin-url-v1';
 const COMPANY_LS_KEY  = 'pal-company-v1';
@@ -158,6 +160,11 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
   // idle | saving | saved | local | invalid | error
   const [empStatus, setEmpStatus] = useState('idle');
 
+  // ── Résumé (optional PDF upload) ──
+  const [resumeUrl, setResumeUrl] = useState(() => getLocalResumeUrl());
+  // idle | uploading | saved | local | invalid | error
+  const [resumeStatus, setResumeStatus] = useState('idle');
+
   // Hydrate from the server profile when signed in — this is the source of truth
   // once the migration has run; falls back silently to the local values otherwise.
   useEffect(() => {
@@ -167,6 +174,7 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
       if (cancelled || !p) return;
       if (p.current_role) setEmpRole(p.current_role);
       if (p.current_company) setEmpCompany(p.current_company);
+      if (p.resume_url) setResumeUrl(p.resume_url);
     });
     return () => { cancelled = true; };
   }, [user]);
@@ -215,6 +223,31 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
       setLinkedinStatus('error');
     }
     setTimeout(() => setLinkedinStatus('idle'), 4000);
+  }
+
+  async function handleResumeFile(e) {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file) return;
+    setResumeStatus('uploading');
+    const res = await uploadResume(user, file);
+    if (res.url) setResumeUrl(res.url);
+    if (res.ok) {
+      setResumeStatus('saved');
+    } else if (res.reason === 'invalid-file') {
+      setResumeStatus('invalid');
+    } else if (res.reason === 'storage-pending' || res.reason === 'migration-pending' || res.reason === 'no-backend') {
+      setResumeStatus('local');
+    } else {
+      setResumeStatus('error');
+    }
+    setTimeout(() => setResumeStatus('idle'), 4000);
+  }
+
+  async function handleRemoveResume() {
+    setResumeUrl('');
+    setResumeStatus('idle');
+    await removeMyResume(user);
   }
 
   // ── Not signed in ────────────────────────────────────────────────────────────
@@ -388,11 +421,80 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
             ) : null}
           </div>
 
+          {/* ── Résumé (optional PDF upload) ── */}
+          <div style={{ borderTop: '1px solid var(--border)', marginTop: '1.1rem', paddingTop: '1rem' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
+              Résumé
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              {resumeUrl && (
+                <a
+                  href={resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ ...btnBase, textDecoration: 'none', display: 'inline-block' }}
+                >
+                  View résumé
+                </a>
+              )}
+              <label style={{ ...btnBase, display: 'inline-block', opacity: resumeStatus === 'uploading' ? 0.6 : 1 }}>
+                {resumeStatus === 'uploading' ? 'Uploading...' : resumeUrl ? 'Replace PDF' : 'Upload PDF'}
+                <input
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  style={{ display: 'none' }}
+                  disabled={resumeStatus === 'uploading'}
+                  onChange={handleResumeFile}
+                />
+              </label>
+              {resumeUrl && (
+                <button
+                  onClick={handleRemoveResume}
+                  style={{ ...btnBase, color: 'var(--red, #dc2626)' }}
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+
+            {/* Status / nudge line */}
+            {resumeStatus === 'saved' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--green, #059669)', marginTop: '0.45rem' }}>
+                Saved. Recruiters viewing your profile can now download your résumé.
+              </div>
+            ) : resumeStatus === 'local' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
+                Saved locally — syncing soon.
+              </div>
+            ) : resumeStatus === 'invalid' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--red, #dc2626)', marginTop: '0.45rem' }}>
+                Please choose a PDF under 5MB.
+              </div>
+            ) : resumeStatus === 'error' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--red, #dc2626)', marginTop: '0.45rem' }}>
+                Could not upload right now — try again in a moment.
+              </div>
+            ) : (
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
+                PDF only, up to 5MB. Shown on your public profile so recruiters can reach you.
+              </div>
+            )}
+          </div>
+
           {/* ── Current role & company ── */}
           <div style={{ borderTop: '1px solid var(--border)', marginTop: '1.1rem', paddingTop: '1rem' }}>
             <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
               Current role &amp; company
             </div>
+
+            {(empRole || empCompany) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.55rem', minWidth: 0 }}>
+                {empCompany && <CompanyLogo company={empCompany} size={18} />}
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {empRole || 'Analyst'}{empCompany ? ' at ' + empCompany : ''}
+                </span>
+              </div>
+            )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {/* Role select */}
