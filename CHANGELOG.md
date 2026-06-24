@@ -4,6 +4,16 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.66.0] — 2026-06-24 [PYTHON LAB → PROGRAMMING LAB (EXTERNAL)]
+
+The in-app Python practice graduated into its own BreakLabs app, Programming Lab (programming-lab.vercel.app — "the SWE-for-data fluency lab"). PAL now points there instead of hosting it in-app.
+
+- **`Sidebar.jsx`** — `NavItem` now supports an `href` prop: when present it renders an external `<a target="_blank">` with a `↗` indicator instead of an in-app button (and is never marked active). Threaded `item.href` through both nav render call sites. The DO-group item is now `{ id: 'python-lab', label: 'Programming Lab', href: 'https://programming-lab.vercel.app/' }` — a one-click external link.
+- **`ProgrammingLabMoved.jsx`** (new) — a "now its own app" landing with the Programming Lab tagline and an Open button. The `page === 'python-lab'` route renders this instead of `PythonLabBrowser`, so every other internal path (RoomMap, learning paths, search, deep links to `#/python-lab`) redirects consistently.
+- **`App.jsx`** — lazy-imports `ProgrammingLabMoved`; route swapped. `PythonLabBrowser` import left in place (dormant) in case the in-app lab is ever restored.
+
+Not touched: the older `code` (Code Lab) route and scattered "Python Lab" labels in RoomMap/learning-paths/search still exist — clicking them lands on the redirect, but their tile text isn't renamed yet. Flagged for a follow-up if a full rename is wanted. Files: `src/components/layout/Sidebar.jsx`, `src/pages/ProgrammingLabMoved.jsx` (new), `src/App.jsx`.
+
 ## [5.65.0] — 2026-06-24 [LEADERBOARD + WHATSAPP COMMUNITY]
 
 Adds a real, Supabase-backed leaderboard (ranks signed-in users by total solved across all rooms) and a Community link to the WhatsApp group. Decisions: names from Google/GitHub OAuth metadata with an anonymous `Analyst-XXXX` fallback for email-only sign-ins; ranked by total problems/modules solved across all 17 rooms; all-time board for v1.

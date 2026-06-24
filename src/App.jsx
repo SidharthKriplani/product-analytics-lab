@@ -103,6 +103,7 @@ const CheatSheet       = lazy(() => import('./pages/CheatSheet.jsx').then(m => (
 const CodeBrowser      = lazy(() => import('./pages/CodeBrowser.jsx').then(m => ({ default: m.CodeBrowser })));
 const CodeRunner       = lazy(() => import('./components/code/CodeRunner.jsx').then(m => ({ default: m.CodeRunner })));
 const PythonLabBrowser = lazy(() => import('./pages/PythonLabBrowser.jsx').then(m => ({ default: m.PythonLabBrowser })));
+const ProgrammingLabMoved = lazy(() => import('./pages/ProgrammingLabMoved.jsx').then(m => ({ default: m.ProgrammingLabMoved })));
 const DimensionalModelBrowser = lazy(() => import('./pages/DimensionalModelBrowser.jsx').then(m => ({ default: m.DimensionalModelBrowser })));
 // StudyRoom: lazy import here when src/study/sm2.js + Supabase migration are ready
 const StudyRoom = lazy(() => import('./pages/StudyRoom.jsx').then(m => ({ default: m.StudyRoom })));
@@ -1709,7 +1710,7 @@ export default function App() {
         )}
         {page === 'python-lab' && (
           <Suspense fallback={null}>
-            <PythonLabBrowser onNavigate={navigate} />
+            <ProgrammingLabMoved />
           </Suspense>
         )}
         {page === 'dimensional-modeling' && (

@@ -37,7 +37,7 @@ const NAV_FRAMES = [
     id: 'do', label: 'DO', icon: 'terminal',
     items: [
       { id: 'sql-lab',              label: 'SQL Lab' },
-      { id: 'python-lab',           label: 'Python Lab' },
+      { id: 'python-lab',           label: 'Programming Lab', href: 'https://programming-lab.vercel.app/' },
       { id: 'dimensional-modeling', label: 'Dimensional Modeling' },
     ],
   },
@@ -193,40 +193,46 @@ function SectionLabel({ label }) {
   );
 }
 
-function NavItem({ id, label, icon, indent, currentPage, onNav }) {
-  const isActive = pageToTab(currentPage) === id;
+function NavItem({ id, label, icon, indent, currentPage, onNav, href }) {
+  // External link (e.g. a sibling BreakLabs app) — opens in a new tab, never "active".
+  const isActive = !href && pageToTab(currentPage) === id;
+  const baseStyle = {
+    display: 'flex', alignItems: 'center', gap: '0.45rem',
+    width: '100%', textAlign: 'left', boxSizing: 'border-box',
+    padding: indent ? '0.3rem 0.65rem 0.3rem 1.1rem' : '0.34rem 0.65rem',
+    borderRadius: 'var(--radius-sm)',
+    border: 'none',
+    background: isActive ? undefined : 'transparent',
+    color: isActive ? undefined : 'var(--text-muted)',
+    fontWeight: isActive ? undefined : 400,
+    fontSize: indent ? '0.795rem' : '0.825rem',
+    cursor: 'pointer',
+    transition: 'background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast)',
+    lineHeight: 1.5,
+    letterSpacing: '-0.005em',
+    textDecoration: 'none',
+  };
+  const onEnter = e => { if (!isActive) { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; } };
+  const onLeave = e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; } };
+
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" style={baseStyle} onMouseEnter={onEnter} onMouseLeave={onLeave}>
+        {icon && <Icon name={icon} size={13} color="currentColor" style={{ opacity: 0.7, flexShrink: 0 }} />}
+        <span>{label}</span>
+        <span style={{ marginLeft: 'auto', fontSize: '0.7rem', opacity: 0.55 }} aria-hidden="true">↗</span>
+      </a>
+    );
+  }
+
   return (
     <button
       onClick={() => onNav(id)}
       aria-current={isActive ? 'page' : undefined}
       className={isActive ? (indent ? 'sidebar-nav-active-sub' : 'sidebar-nav-active') : ''}
-      style={{
-        display: 'flex', alignItems: 'center', gap: '0.45rem',
-        width: '100%', textAlign: 'left',
-        padding: indent ? '0.3rem 0.65rem 0.3rem 1.1rem' : '0.34rem 0.65rem',
-        borderRadius: 'var(--radius-sm)',
-        border: 'none',
-        background: isActive ? undefined : 'transparent',
-        color: isActive ? undefined : 'var(--text-muted)',
-        fontWeight: isActive ? undefined : 400,
-        fontSize: indent ? '0.795rem' : '0.825rem',
-        cursor: 'pointer',
-        transition: 'background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast)',
-        lineHeight: 1.5,
-        letterSpacing: '-0.005em',
-      }}
-      onMouseEnter={e => {
-        if (!isActive) {
-          e.currentTarget.style.background = 'var(--surface-2)';
-          e.currentTarget.style.color = 'var(--text-secondary)';
-        }
-      }}
-      onMouseLeave={e => {
-        if (!isActive) {
-          e.currentTarget.style.background = 'transparent';
-          e.currentTarget.style.color = 'var(--text-muted)';
-        }
-      }}
+      style={baseStyle}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
     >
       {icon && <Icon name={icon} size={13} color="currentColor" style={{ opacity: isActive ? 1 : 0.7, flexShrink: 0 }} />}
       <span>{label}</span>
@@ -499,7 +505,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                           <Collapsible open={subOpen}>
                             <div style={{ borderLeft: '1px solid var(--border)', marginLeft: '0.9rem', paddingLeft: '0.1rem', marginBottom: '0.1rem' }}>
                               {sub.items.map(item => (
-                                <NavItem key={item.id} id={item.id} label={item.label} indent currentPage={currentPage} onNav={handleNav} />
+                                <NavItem key={item.id} id={item.id} label={item.label} href={item.href} indent currentPage={currentPage} onNav={handleNav} />
                               ))}
                             </div>
                           </Collapsible>
@@ -510,7 +516,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                     {frame.items && (
                       <div style={{ marginLeft: '0.4rem' }}>
                         {frame.items.map(item => (
-                          <NavItem key={item.id} id={item.id} label={item.label} indent currentPage={currentPage} onNav={handleNav} />
+                          <NavItem key={item.id} id={item.id} label={item.label} href={item.href} indent currentPage={currentPage} onNav={handleNav} />
                         ))}
                       </div>
                     )}
