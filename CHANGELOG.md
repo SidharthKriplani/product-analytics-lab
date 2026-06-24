@@ -4,6 +4,22 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.84.0] — 2026-06-24 [RUBRIC-DRIVEN: SIMULATOR REBUILD, TRACKS, LIBRARY, PILLAR FIX]
+
+Driven by a depth audit (`docs/DEPTH-AUDIT.md`) of every component. Decision this round: UI first, content fills deferred.
+
+**Pillar fix.** Instrumentation moved DO → JUDGE/Analytics. It's a *judgment* room (event-schema design, tracking debug), not a fluency tool like SQL/Programming — folding it into DO was a mis-group. DO is back to SQL Lab + Programming Lab.
+
+**Simulator — full rebuild** (not a bolt-on). (1) **Structured role rounds**: `ROLE_ROUNDS` replaces the random draw with ordered interview loops per role (e.g. Product Analyst: metrics → stats → rca → estimation → product-design); `buildSession` walks the template to the chosen length, each question labeled "Round N · Room". (2) **Model-answer self-grade**: open questions now render the case's rubric/key-points (`strongAnswerMarkers`/`keyTakeaways`/`keyPrinciples`/phase criteria) as a checklist you tick; coverage = checked/total. (3) **Blended scorecard**: overallPct now combines MCQ accuracy + self-ratings + open-answer coverage; per-room coverage shown; weakest rooms → "Practice this" deep-links. (4) **Immersion**: setup is now a "Control Room" card with a loop-order preview; active screen leads with round framing + a prominent timer. Preserved timer, speech, MCQ flow, history, tier→difficulty.
+
+**Company Tracks.** (1) Grid card **visual rebuild**: accent top bar, larger logo, role/level badge, an obvious labeled progress bar + ring, cleaner hierarchy, context-aware CTA, hover lift. (2) **+8 companies** (15 → 23): DoorDash, Coinbase, Microsoft, LinkedIn, PhonePe, Paytm, CRED, Ola (Uber already existed). Each on the rich schema with company-specific mental models + director cards; all 181 caseRefs verified to resolve to real cases; data-file syntax rules honored.
+
+**Library — landing rebuilt.** Icons per section, honest meta (live Interview-Q&A count = 26, written Deep-Dives count = 12 not the stubbed 41, Failures = 25), better cards. **Honest finding:** Deep Dives is 12 written essays of ~41 listed — 29 are stubs. The landing now reflects the real number; hiding/writing the stubs inside the Deep Dives page is a deferred content task.
+
+**Defense Strategy** audited against the same rubric — verdict OK→RICH after the V5.83 heatmap + progress ring; deliberately not gold-plated.
+
+Verification: all touched files pass esbuild; full Vite build transformed 877 modules (only the environmental public/ asset-copy step fails, excluded from push).
+
 ## [5.83.1] — 2026-06-24 [PUBLIC PROFILE ENRICHMENT]
 
 The first public-profile page shipped too thin (just name + total). Rewrote `PublicProfile.jsx` to earn the click using data that needs no migration: it now fetches the leaderboard alongside the profile and shows **rank with a medal** (gold/silver/bronze for top 3, as an avatar badge + rank pill), a **stat strip** (Solved · Rank #N of M · Standing), and a **gap-to-next** line ("+29 to catch #2" / "+7 ahead of #2"). The room-breakdown bars and LinkedIn button still render when present (they populate once the Supabase migration runs). Builds clean (877 modules transformed). Note: `var(--orange)`/`var(--blue)` room accents in InterviewSimulator are off-theme but render via hex fallbacks — left as-is intentionally.

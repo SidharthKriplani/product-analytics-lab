@@ -189,98 +189,153 @@ function CompanyCard({ track, onSelect, index }) {
   const rooms = getUniqueRooms(track);
   const totalCases = getTotalCases(track);
   const completedCount = getCompletedCount(track);
+  const accent = track.color || 'var(--accent)';
+  const progressPct = totalCases > 0 ? Math.round((completedCount / totalCases) * 100) : 0;
+  const isComplete = totalCases > 0 && completedCount === totalCases;
+  const isStarted = completedCount > 0;
+  const barColor = isComplete ? 'var(--green)' : accent;
 
   return (
     <div
       className="pal-card-enter pal-card-hover"
+      onClick={() => onSelect(track)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(track); } }}
       style={{
+        position: 'relative',
         background: 'var(--surface)',
         border: '1px solid var(--border)',
-        borderRadius: '12px',
-        padding: '1.5rem',
+        borderRadius: '14px',
+        padding: '0',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1rem',
-        cursor: 'default',
+        cursor: 'pointer',
+        overflow: 'hidden',
         animationDelay: (Math.min((index || 0) * 28, 400)) + 'ms',
       }}
       onMouseEnter={e => {
         e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-        e.currentTarget.style.transform = 'translateY(-1px)';
+        e.currentTarget.style.transform = 'translateY(-3px)';
+        e.currentTarget.style.borderColor = 'color-mix(in srgb, ' + accent + ' 45%, var(--border))';
       }}
       onMouseLeave={e => {
         e.currentTarget.style.boxShadow = 'none';
         e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.borderColor = 'var(--border)';
       }}
     >
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.875rem' }}>
-        <CompanyAvatar track={track} size={44} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.2 }}>
-            {track.company}
-          </div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-            {track.role}
-          </div>
-          {track.comingSoonRoles && track.comingSoonRoles.length > 0 && (
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.25rem' }}>
-              + {track.comingSoonRoles.length} more roles coming
+      {/* Accent top bar — track color */}
+      <div style={{
+        height: '4px',
+        width: '100%',
+        background: 'linear-gradient(90deg, ' + accent + ', color-mix(in srgb, ' + accent + ' 35%, transparent))',
+        flexShrink: 0,
+      }} />
+
+      <div style={{ padding: '1.4rem 1.5rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.15rem', flex: 1 }}>
+        {/* Header: logo + name/role + progress ring */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+          <CompanyAvatar track={track} size={56} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '1.18rem', fontWeight: 800, color: 'var(--text)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
+              {track.company}
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.45rem' }}>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '2px 9px',
+                borderRadius: '6px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                color: accent,
+                background: 'color-mix(in srgb, ' + accent + ' 13%, transparent)',
+                border: '1px solid color-mix(in srgb, ' + accent + ' 28%, transparent)',
+                letterSpacing: '0.01em',
+                lineHeight: 1.3,
+              }}>
+                {track.roleLabel || track.role}
+              </span>
+              {track.comingSoonRoles && track.comingSoonRoles.length > 0 && (
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 500 }}>
+                  +{track.comingSoonRoles.length} more soon
+                </span>
+              )}
+            </div>
+          </div>
+          <ProgressRing done={completedCount} total={totalCases} color={accent} />
+        </div>
+
+        {/* Description */}
+        <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
+          {track.description}
+        </p>
+
+        {/* Room badges */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+          {rooms.map(room => <RoomBadge key={room} room={room} />)}
+        </div>
+
+        {/* Progress bar — completion at a glance */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.4rem' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {isComplete ? 'Completed' : (isStarted ? 'In progress' : 'Not started')}
+            </span>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: isComplete ? 'var(--green)' : (isStarted ? 'var(--text)' : 'var(--text-dim)') }}>
+              {completedCount} / {totalCases} cases
+            </span>
+          </div>
+          <div style={{ height: '7px', background: 'var(--border)', borderRadius: '999px', overflow: 'hidden' }}>
+            <div style={{
+              height: '100%',
+              width: progressPct + '%',
+              background: barColor,
+              borderRadius: '999px',
+              transition: 'width 0.3s ease',
+            }} />
+          </div>
+        </div>
+
+        {/* Meta row: cases · hours · articles */}
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.55rem', color: 'var(--text-dim)', fontSize: '0.8rem' }}>
+          <span style={{ fontWeight: 600 }}>{totalCases} cases</span>
+          <span style={{ opacity: 0.5 }}>·</span>
+          <span style={{ fontWeight: 600 }}>{track.estimatedHours}h</span>
+          {track.playbookArticles?.length > 0 && (
+            <>
+              <span style={{ opacity: 0.5 }}>·</span>
+              <span style={{ fontWeight: 600 }}>{track.playbookArticles.length} articles</span>
+            </>
           )}
         </div>
-        <ProgressRing done={completedCount} total={totalCases} color={track.color} />
+
+        {/* CTA */}
+        <button
+          onClick={e => { e.stopPropagation(); onSelect(track); }}
+          style={{
+            background: isComplete ? 'var(--green)' : accent,
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '9px',
+            padding: '0.7rem 1rem',
+            fontSize: '0.875rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.4rem',
+            transition: 'opacity 0.15s ease, filter 0.15s ease',
+            marginTop: 'auto',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.07)'; }}
+          onMouseLeave={e => { e.currentTarget.style.filter = 'none'; }}
+        >
+          {isComplete ? 'Review Track →' : (isStarted ? 'Continue Prep →' : 'Start Prep Track →')}
+        </button>
       </div>
-
-      <div style={{ height: '1px', background: 'var(--border-subtle)' }} />
-
-      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
-        {track.description}
-      </p>
-
-      {/* Room badges */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-        {rooms.map(room => <RoomBadge key={room} room={room} />)}
-      </div>
-
-      {/* Stats */}
-      <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-          {totalCases} cases
-        </span>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-          {track.estimatedHours}h estimated
-        </span>
-        {track.playbookArticles?.length > 0 && (
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-            {track.playbookArticles.length} articles
-          </span>
-        )}
-      </div>
-
-      <button
-        onClick={() => onSelect(track)}
-        style={{
-          background: 'var(--accent)',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '8px',
-          padding: '0.6rem 1rem',
-          fontSize: '0.875rem',
-          fontWeight: 600,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.4rem',
-          transition: 'opacity 0.15s ease',
-          marginTop: 'auto',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
-        onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-      >
-        Start Prep Track →
-      </button>
     </div>
   );
 }

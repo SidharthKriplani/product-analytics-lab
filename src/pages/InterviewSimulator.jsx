@@ -36,78 +36,53 @@ function pickRandomByTier(arr, seed, tier) {
   return arr[seed % arr.length];
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Room registry — every room the simulator can draw from. Each entry knows
+// its pool, its display label, and its hash route. ROLE_ROUNDS below reference
+// these keys; buildSession resolves a key → { room, label, case } at draw time.
+// ─────────────────────────────────────────────────────────────────────────
+const ROOM_REGISTRY = {
+  metrics: { pool: metricCases, label: 'Metrics' },
+  stats: { pool: statsModules, label: 'Statistics' },
+  rca: { pool: rcaCases, label: 'RCA' },
+  estimation: { pool: estimationProblems, label: 'Estimation' },
+  behavioral: { pool: behavioralQuestions, label: 'Behavioral' },
+  'product-design': { pool: productDesignScenarios, label: 'Product Design' },
+  prioritization: { pool: prioritizationScenarios, label: 'Prioritization' },
+  cases: { pool: businessCases, label: 'Business Case' },
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// ROLE_ROUNDS — per role, an ORDERED interview loop that mirrors a real onsite.
+// buildSession walks this template IN ORDER to fill `sessionLength` questions,
+// cycling the template if the requested length exceeds its length. Each step
+// draws one case from that room's pool via the tier-aware pick.
+// ─────────────────────────────────────────────────────────────────────────
+const ROLE_ROUNDS = {
+  'product-analyst': ['metrics', 'stats', 'rca', 'estimation', 'product-design'],
+  'business-analyst': ['cases', 'metrics', 'rca', 'prioritization'],
+  'data-analyst': ['stats', 'metrics', 'rca', 'cases'],
+  pm: ['product-design', 'prioritization', 'cases', 'behavioral'],
+};
+
 function buildSession(role, tier, seed, count = 5) {
-  // ─────────────────────────────────────────
-  // Data-focused roles (Product Analyst, Business Analyst, Data Analyst)
-  // ─────────────────────────────────────────
-  const productAnalystQuestions = [
-    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed, tier) },
-    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed + 1, tier) },
-    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 2, tier) },
-    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 3, tier) },
-    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 4, tier) },
-    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed + 5, tier) },
-    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 6, tier) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandomByTier(behavioralQuestions, seed + 7, tier) },
-    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 8, tier) },
-    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed + 9, tier) },
-    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 10, tier) },
-    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 11, tier) },
-  ];
-
-  const businessAnalystQuestions = [
-    { room: 'cases', label: 'Business Case', case: pickRandomByTier(businessCases, seed, tier) },
-    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 1, tier) },
-    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 2, tier) },
-    { room: 'cases', label: 'Business Case', case: pickRandomByTier(businessCases, seed + 3, tier) },
-    { room: 'prioritization', label: 'Prioritization', case: pickRandomByTier(prioritizationScenarios, seed + 4, tier) },
-    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 5, tier) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandomByTier(behavioralQuestions, seed + 6, tier) },
-    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 7, tier) },
-    { room: 'cases', label: 'Business Case', case: pickRandomByTier(businessCases, seed + 8, tier) },
-    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 9, tier) },
-    { room: 'prioritization', label: 'Prioritization', case: pickRandomByTier(prioritizationScenarios, seed + 10, tier) },
-    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 11, tier) },
-  ];
-
-  const dataAnalystQuestions = [
-    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed, tier) },
-    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 1, tier) },
-    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 2, tier) },
-    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed + 3, tier) },
-    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 4, tier) },
-    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 5, tier) },
-    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 6, tier) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandomByTier(behavioralQuestions, seed + 7, tier) },
-    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed + 8, tier) },
-    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 9, tier) },
-    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 10, tier) },
-    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 11, tier) },
-  ];
-
-  const pmQuestions = [
-    { room: 'product-design', label: 'Product Design', case: pickRandomByTier(productDesignScenarios, seed, tier) },
-    { room: 'prioritization', label: 'Prioritization', case: pickRandomByTier(prioritizationScenarios, seed + 1, tier) },
-    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 2, tier) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandomByTier(behavioralQuestions, seed + 3, tier) },
-    { room: 'cases', label: 'Business Case', case: pickRandomByTier(businessCases, seed + 4, tier) },
-    { room: 'product-design', label: 'Product Design', case: pickRandomByTier(productDesignScenarios, seed + 5, tier) },
-    { room: 'prioritization', label: 'Prioritization', case: pickRandomByTier(prioritizationScenarios, seed + 6, tier) },
-    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 7, tier) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandomByTier(behavioralQuestions, seed + 8, tier) },
-    { room: 'cases', label: 'Business Case', case: pickRandomByTier(businessCases, seed + 9, tier) },
-    { room: 'product-design', label: 'Product Design', case: pickRandomByTier(productDesignScenarios, seed + 10, tier) },
-    { room: 'prioritization', label: 'Prioritization', case: pickRandomByTier(prioritizationScenarios, seed + 11, tier) },
-  ];
-
-  // Select question pool by role
-  let questionPool;
-  if (role === 'product-analyst') questionPool = productAnalystQuestions;
-  else if (role === 'business-analyst') questionPool = businessAnalystQuestions;
-  else if (role === 'data-analyst') questionPool = dataAnalystQuestions;
-  else questionPool = pmQuestions;
-
-  return questionPool.slice(0, count);
+  const template = ROLE_ROUNDS[role] || ROLE_ROUNDS.pm;
+  const session = [];
+  for (let i = 0; i < count; i++) {
+    const roomKey = template[i % template.length];
+    const room = ROOM_REGISTRY[roomKey] || ROOM_REGISTRY.metrics;
+    const roundIndex = i + 1;
+    session.push({
+      room: roomKey,
+      label: room.label,
+      roundIndex,
+      // Round label like 'Round 2 · RCA' — surfaced in the active + debrief views.
+      roundLabel: `Round ${roundIndex} · ${room.label}`,
+      // seed + i keeps draws distinct per step and deterministic per day.
+      case: pickRandomByTier(room.pool, seed + i, tier),
+    });
+  }
+  return session;
 }
 
 function formatTime(seconds) {
@@ -143,6 +118,30 @@ function getCaseModelAnswer(roomCase) {
   if (roomCase.fullAnalysis) return roomCase.fullAnalysis;
   if (roomCase.keyInsight) return roomCase.keyInsight;
   return 'Model answer not available for this case type. Review the framework steps and grading criteria.';
+}
+
+// Extract a flat checklist of model-answer key points for an open question.
+// Different rooms store this differently, so probe a priority order of known
+// array fields and return the first non-empty string[]:
+//   - strongAnswerMarkers  (estimationProblems, behavioralQuestions)
+//   - keyTakeaways         (prioritizationScenarios)
+//   - keyPrinciples        (behavioralQuestions, alt)
+//   - phases[].criteria    (productDesignScenarios — flattened across phases)
+// MCQ-structured rooms (metrics / stats / rca / cases) expose no flat rubric,
+// so this returns [] and those cases fall back to Strong/OK/Miss self-rating.
+function getCaseRubric(roomCase) {
+  if (!roomCase) return [];
+  const isStrArray = (v) => Array.isArray(v) && v.length > 0 && v.every(x => typeof x === 'string');
+  if (isStrArray(roomCase.strongAnswerMarkers)) return roomCase.strongAnswerMarkers;
+  if (isStrArray(roomCase.keyTakeaways)) return roomCase.keyTakeaways;
+  if (isStrArray(roomCase.keyPrinciples)) return roomCase.keyPrinciples;
+  if (Array.isArray(roomCase.phases)) {
+    const flat = roomCase.phases
+      .flatMap(p => (Array.isArray(p?.criteria) ? p.criteria : []))
+      .filter(x => typeof x === 'string');
+    if (flat.length > 0) return flat;
+  }
+  return [];
 }
 
 const ROOM_COLORS = {
@@ -204,6 +203,23 @@ const SESSION_MODE_OPTIONS = [
   { label: 'Mixed', value: 'mixed' },
 ];
 
+const ROLE_OPTIONS = [
+  { key: 'product-analyst', label: 'Product Analyst' },
+  { key: 'business-analyst', label: 'Business Analyst' },
+  { key: 'data-analyst', label: 'Data Analyst' },
+  { key: 'pm', label: 'PM / TPM' },
+];
+
+// Build the human-readable round order for a role (used on the setup card).
+function roleLoopLabels(roleKey) {
+  const template = ROLE_ROUNDS[roleKey] || [];
+  return template.map(k => ROOM_REGISTRY[k]?.label || k);
+}
+
+function roleDisplayLabel(roleKey) {
+  return ROLE_OPTIONS.find(r => r.key === roleKey)?.label || 'Candidate';
+}
+
 // Speech Recognition support check (module scope, evaluated once)
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const hasSpeech = !!SpeechRecognition;
@@ -215,7 +231,7 @@ export function InterviewSimulator({ onBack, onNavigate, unlocked }) {
         <InterviewSimulatorInner onBack={onBack} onNavigate={onNavigate} />
         <GateOverlay
           title="Interview Simulator"
-          body="Timed end-to-end mock with a randomized case set — designed to replicate the actual interview clock pressure. Part of the full lab."
+          body="A timed, staged mock loop — role-specific rounds, model-answer self-grading, and a full debrief. Designed to replicate the actual interview clock pressure. Part of the full lab."
           ctaLabel="Unlock the full lab →"
           onCTA={() => onNavigate('unlock')}
         />
@@ -237,6 +253,8 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
   const [revealedCases, setRevealedCases] = useState(new Set());
   const [notes, setNotes] = useState({});
   const [ratings, setRatings] = useState({});
+  // Model-answer self-grade coverage: { [questionIndex]: Set(checkedPointIndex) }
+  const [coverage, setCoverage] = useState({});
   // MCQ state
   const [mcqQuestions, setMcqQuestions] = useState([]); // MCQ picked per question index
   const [mcqAnswers, setMcqAnswers] = useState({}); // { [questionIndex]: optionId }
@@ -281,6 +299,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
     setRevealedCases(new Set());
     setNotes({});
     setRatings({});
+    setCoverage({});
     setMcqAnswers({});
     setMcqScores({ correct: 0, total: 0 });
     // Pre-pick MCQ questions for each index
@@ -295,6 +314,16 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
       if (next.has(idx)) next.delete(idx);
       else next.add(idx);
       return next;
+    });
+  }
+
+  // Toggle a single rubric point as "covered" for an open question.
+  function toggleCoveragePoint(questionIndex, pointIndex) {
+    setCoverage(prev => {
+      const current = new Set(prev[questionIndex] || []);
+      if (current.has(pointIndex)) current.delete(pointIndex);
+      else current.add(pointIndex);
+      return { ...prev, [questionIndex]: current };
     });
   }
 
@@ -338,11 +367,17 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
         sessionMode,
         elapsedSeconds: elapsed,
         mcqScores,
-        cases: session.map((s, i) => ({
-          id: s.case?.id || `case-${i}`,
-          room: s.room,
-          rating: ratings[i] || null,
-        })),
+        cases: session.map((s, i) => {
+          const rubric = getCaseRubric(s.case);
+          const checked = coverage[i] ? coverage[i].size : 0;
+          return {
+            id: s.case?.id || `case-${i}`,
+            room: s.room,
+            roundIndex: s.roundIndex,
+            rating: ratings[i] || null,
+            coverage: rubric.length > 0 ? { checked, total: rubric.length } : null,
+          };
+        }),
       });
       localStorage.setItem('pal-sim-history-v1', JSON.stringify(history.slice(0, 20)));
     } catch {}
@@ -376,10 +411,12 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
     setIsListening(true);
   }
 
-  // ── Screen 1: Setup ──────────────────────────────────────────────
+  // ── Screen 1: Setup (control room) ───────────────────────────────
   if (screen === 'setup') {
+    const ready = role && tier;
+    const previewLoop = role ? roleLoopLabels(role) : [];
     return (
-      <div className="pal-page-enter" style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <div className="pal-page-enter" style={{ maxWidth: '640px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         <button
           onClick={onBack}
           style={{
@@ -394,10 +431,10 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
         <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
           Interview Simulator
         </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.75rem', lineHeight: 1.6 }}>
-          Strings real cases into a timed loop — no hints mid-session, no feedback until it is over. Debriefs the full session afterward so you see patterns, not just individual answers.
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+          A staged mock loop. Each round mirrors a real onsite — ordered by role, timed end-to-end, no feedback until the debrief. Open answers get a model-answer self-grade so you see exactly what you covered.
         </p>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.75rem' }}>
           <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.55rem', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
             ~ Scripted — not live model inference
           </span>
@@ -405,163 +442,205 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
             Cases drawn from real PAL case bank
           </span>
         </div>
-        <p style={{ display: 'none' }}>
-        </p>
 
-        {/* Role selector */}
-        <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            Role
+        {/* Control room card — every control lives in one focused panel */}
+        <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '14px',
+          padding: '1.5rem',
+        }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>
+            Control Room
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.5rem' }}>
-            {[
-              { key: 'product-analyst', label: 'Product Analyst', sub: 'Metrics · Stats · RCA · Estimation' },
-              { key: 'business-analyst', label: 'Business Analyst', sub: 'Cases · Metrics · RCA · Prioritization' },
-              { key: 'data-analyst', label: 'Data Analyst', sub: 'Stats · Metrics · RCA focus' },
-              { key: 'pm', label: 'PM / TPM', sub: 'Product Design · Prioritization · Cases' },
-            ].map(r => (
-              <button
-                key={r.key}
-                onClick={() => setRole(r.key)}
-                style={{
-                  background: role === r.key ? 'var(--accent-bg)' : 'var(--surface)',
-                  border: role === r.key ? '2px solid var(--accent)' : '1px solid var(--border)',
-                  borderRadius: 'var(--radius)',
-                  padding: '0.7rem 0.9rem',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'border-color 0.12s, background 0.12s',
-                }}
-              >
-                <div style={{ fontWeight: 700, fontSize: '0.92rem', color: role === r.key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.2rem', letterSpacing: '-0.01em' }}>
-                  {r.label}
-                </div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', lineHeight: 1.4 }}>
-                  {r.sub}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {/* Tier selector */}
-        {role && (
+          {/* Role selector */}
           <div style={{ marginBottom: '1.25rem' }}>
             <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              Level
+              Role
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              {[
-                { key: 'senior', label: 'Senior', sub: 'Challenging cases' },
-                { key: 'staff', label: 'Staff', sub: 'Most difficult cases' },
-              ].map(t => (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(200px, 100%), 1fr))', gap: '0.5rem' }}>
+              {ROLE_OPTIONS.map(r => {
+                const loop = roleLoopLabels(r.key).join(' · ');
+                return (
+                  <button
+                    key={r.key}
+                    onClick={() => setRole(r.key)}
+                    style={{
+                      background: role === r.key ? 'var(--accent-bg)' : 'var(--surface-2)',
+                      border: role === r.key ? '2px solid var(--accent)' : '1px solid var(--border)',
+                      borderRadius: 'var(--radius)',
+                      padding: '0.7rem 0.9rem',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'border-color 0.12s, background 0.12s',
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, fontSize: '0.92rem', color: role === r.key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.2rem', letterSpacing: '-0.01em' }}>
+                      {r.label}
+                    </div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', lineHeight: 1.4 }}>
+                      {loop}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Round order preview — reinforces the staged loop */}
+          {role && (
+            <div className="pal-reveal-in" style={{ marginBottom: '1.25rem' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Loop order
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                {previewLoop.map((label, i) => (
+                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <span style={{
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      padding: '0.22rem 0.6rem',
+                      borderRadius: '20px',
+                      background: 'var(--surface-2)',
+                      border: `1px solid ${ROOM_COLORS[ROLE_ROUNDS[role][i]] || 'var(--border)'}`,
+                      color: 'var(--text)',
+                    }}>
+                      {i + 1}. {label}
+                    </span>
+                    {i < previewLoop.length - 1 && (
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>→</span>
+                    )}
+                  </span>
+                ))}
+              </div>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.72rem', margin: '0.5rem 0 0' }}>
+                Rounds cycle this order until your chosen length is filled.
+              </p>
+            </div>
+          )}
+
+          {/* Tier selector */}
+          {role && (
+            <div style={{ marginBottom: '1.25rem' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Level
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {[
+                  { key: 'senior', label: 'Senior', sub: 'Challenging cases' },
+                  { key: 'staff', label: 'Staff', sub: 'Most difficult cases' },
+                ].map(t => (
+                  <button
+                    key={t.key}
+                    onClick={() => setTier(t.key)}
+                    style={{
+                      background: tier === t.key ? 'var(--accent-bg)' : 'var(--surface-2)',
+                      border: tier === t.key ? '2px solid var(--accent)' : '1px solid var(--border)',
+                      borderRadius: 'var(--radius)',
+                      padding: '0.55rem 0.9rem',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'border-color 0.12s, background 0.12s',
+                      flex: 1,
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: tier === t.key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.1rem' }}>
+                      {t.label}
+                    </div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                      {t.sub}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Session Length selector */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Session Length
+            </div>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {SESSION_LENGTH_OPTIONS.map(opt => (
                 <button
-                  key={t.key}
-                  onClick={() => setTier(t.key)}
+                  key={opt.count}
+                  onClick={() => setSessionLength(opt.count)}
                   style={{
-                    background: tier === t.key ? 'var(--accent-bg)' : 'var(--surface)',
-                    border: tier === t.key ? '2px solid var(--accent)' : '1px solid var(--border)',
-                    borderRadius: 'var(--radius)',
-                    padding: '0.55rem 0.9rem',
+                    background: sessionLength === opt.count ? 'var(--accent-bg)' : 'var(--surface-2)',
+                    border: sessionLength === opt.count ? '2px solid var(--accent)' : '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.3rem 0.8rem',
+                    color: sessionLength === opt.count ? 'var(--accent)' : 'var(--text-muted)',
+                    fontSize: '0.82rem',
+                    fontWeight: sessionLength === opt.count ? 700 : 500,
                     cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'border-color 0.12s, background 0.12s',
-                    flex: 1,
+                    transition: 'all 0.1s',
                   }}
                 >
-                  <div style={{ fontWeight: 700, fontSize: '0.88rem', color: tier === t.key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.1rem' }}>
-                    {t.label}
-                  </div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-                    {t.sub}
-                  </div>
+                  {opt.label} ({opt.count}Q)
                 </button>
               ))}
             </div>
           </div>
-        )}
 
-        {/* Session Length selector */}
-        <div style={{ marginBottom: '1rem' }}>
-          <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            Session Length
-          </div>
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-            {SESSION_LENGTH_OPTIONS.map(opt => (
-              <button
-                key={opt.count}
-                onClick={() => setSessionLength(opt.count)}
-                style={{
-                  background: sessionLength === opt.count ? 'var(--accent-bg)' : 'var(--surface)',
-                  border: sessionLength === opt.count ? '2px solid var(--accent)' : '1px solid var(--border)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '0.3rem 0.8rem',
-                  color: sessionLength === opt.count ? 'var(--accent)' : 'var(--text-muted)',
-                  fontSize: '0.82rem',
-                  fontWeight: sessionLength === opt.count ? 700 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.1s',
-                }}
-              >
-                {opt.label} ({opt.count}Q)
-              </button>
-            ))}
+          {/* Mode selector */}
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Mode
+            </div>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {SESSION_MODE_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setSessionMode(opt.value)}
+                  style={{
+                    background: sessionMode === opt.value ? 'var(--accent-bg)' : 'var(--surface-2)',
+                    border: sessionMode === opt.value ? '2px solid var(--accent)' : '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.3rem 0.8rem',
+                    color: sessionMode === opt.value ? 'var(--accent)' : 'var(--text-muted)',
+                    fontSize: '0.82rem',
+                    fontWeight: sessionMode === opt.value ? 700 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.1s',
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: '0.4rem 0 0' }}>
+              {sessionMode === 'open' && 'Write your answer, then self-grade against the model-answer checklist.'}
+              {sessionMode === 'mcq' && 'Choose from 4 options — immediate feedback after each.'}
+              {sessionMode === 'mixed' && 'Alternates: even rounds = MCQ, odd rounds = open-ended.'}
+            </p>
           </div>
         </div>
 
-        {/* Mode selector */}
-        <div style={{ marginBottom: '1.75rem' }}>
-          <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            Mode
-          </div>
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-            {SESSION_MODE_OPTIONS.map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => setSessionMode(opt.value)}
-                style={{
-                  background: sessionMode === opt.value ? 'var(--accent-bg)' : 'var(--surface)',
-                  border: sessionMode === opt.value ? '2px solid var(--accent)' : '1px solid var(--border)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '0.3rem 0.8rem',
-                  color: sessionMode === opt.value ? 'var(--accent)' : 'var(--text-muted)',
-                  fontSize: '0.82rem',
-                  fontWeight: sessionMode === opt.value ? 700 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.1s',
-                }}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: '0.4rem 0 0' }}>
-            {sessionMode === 'open' && 'Write your answers to case prompts.'}
-            {sessionMode === 'mcq' && 'Choose from 4 options — immediate feedback after each.'}
-            {sessionMode === 'mixed' && 'Alternates: even questions = MCQ, odd questions = open-ended.'}
-          </p>
-        </div>
-
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '1.25rem', lineHeight: 1.5 }}>
-          Cases are drawn randomly from your selected role. Timer starts when you begin.
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: '1.25rem 0', lineHeight: 1.5 }}>
+          Rounds run in order for your role. The timer starts the moment you begin.
         </p>
 
         <button
           onClick={startSimulation}
-          disabled={!role || !tier}
+          disabled={!ready}
+          className={ready ? 'pal-glow-pulse' : undefined}
           style={{
-            background: (role && tier) ? 'var(--accent)' : 'var(--surface-2)',
-            color: (role && tier) ? '#000' : 'var(--text-muted)',
+            background: ready ? 'var(--accent)' : 'var(--surface-2)',
+            color: ready ? '#000' : 'var(--text-muted)',
             border: 'none',
             borderRadius: '8px',
-            padding: '0.75rem 2rem',
+            padding: '0.8rem 2rem',
             fontSize: '1rem',
             fontWeight: 700,
-            cursor: (role && tier) ? 'pointer' : 'not-allowed',
+            cursor: ready ? 'pointer' : 'not-allowed',
             transition: 'background 0.15s',
+            width: '100%',
           }}
         >
-          Start Simulation →
+          Begin Interview →
         </button>
       </div>
     );
@@ -578,6 +657,8 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
     const mcqQ = isMCQQuestion ? mcqQuestions[currentCaseIndex] : null;
     const mcqAnswered = mcqAnswers[currentCaseIndex] !== undefined;
     const selectedOptionId = mcqAnswers[currentCaseIndex];
+    const rubric = isMCQQuestion ? [] : getCaseRubric(roomCase);
+    const checkedSet = coverage[currentCaseIndex] || new Set();
 
     const casePromptText =
       (typeof getCasePrompt(roomCase) === 'string'
@@ -614,55 +695,26 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
 
     return (
       <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-        {/* Progress + Timer bar */}
+        {/* Round framing + prominent timer */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          marginBottom: '2rem', flexWrap: 'wrap', gap: '0.75rem',
+          marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem',
         }}>
-          {/* Progress rail — one segment per case, colored by self-rating */}
-          <div
-            className="pal-card-enter"
-            style={{ display: 'flex', gap: '0.3rem', flex: 1, minWidth: 0, flexWrap: 'wrap' }}
-            aria-label={`Case ${currentCaseIndex + 1} of ${sessionLength}`}
-          >
-            {session.map((s, i) => {
-              const isCurrent = i === currentCaseIndex;
-              const wasRevealed = revealedCases.has(i);
-              const wasMcqAnswered = mcqAnswers[i] !== undefined;
-              const rating = ratings[i];
-              const ratingColor =
-                rating === 'strong' ? 'var(--green)'
-                : rating === 'ok' ? 'var(--yellow)'
-                : rating === 'miss' ? 'var(--red)'
-                : null;
-              const answered = rating || wasRevealed || wasMcqAnswered;
-              const segBg = isCurrent
-                ? 'var(--accent)'
-                : ratingColor
-                  ? ratingColor
-                  : answered
-                    ? 'var(--text-muted)'
-                    : 'var(--border)';
-              return (
-                <div
-                  key={i}
-                  title={`Case ${i + 1}${rating ? ' · ' + rating : ''}`}
-                  style={{
-                    height: '6px',
-                    flex: '1 1 0',
-                    minWidth: '14px',
-                    borderRadius: '20px',
-                    background: segBg,
-                    opacity: isCurrent ? 1 : answered ? 0.95 : 0.55,
-                    transform: isCurrent ? 'scaleY(1.5)' : 'scaleY(1)',
-                    transition: 'background 0.18s, transform 0.18s, opacity 0.18s',
-                  }}
-                />
-              );
-            })}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {/* Mode badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <span style={{
+              background: roomColor,
+              color: '#fff',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              padding: '0.3rem 0.8rem',
+              borderRadius: '20px',
+              letterSpacing: '0.02em',
+            }}>
+              Round {currentCaseIndex + 1} of {sessionLength}
+            </span>
+            <span style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>
+              {current?.label}
+            </span>
             <span style={{
               fontSize: '0.72rem',
               fontWeight: 600,
@@ -672,17 +724,77 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
               color: 'var(--text-muted)',
               border: '1px solid var(--border)',
             }}>
-              {sessionMode === 'open' ? 'Open-ended' : sessionMode === 'mcq' ? 'MCQ' : 'Mixed'}
+              {isMCQQuestion ? 'MCQ' : 'Open-ended'}
             </span>
-            <div style={{
-              fontFamily: 'monospace',
-              fontSize: '1rem',
-              color: elapsed > 2700 ? 'var(--orange, #f97316)' : 'var(--text-muted)',
-              fontWeight: 600,
-            }}>
-              ⏱ {formatTime(elapsed)}
-            </div>
           </div>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            fontFamily: 'monospace',
+            fontSize: '1.35rem',
+            fontWeight: 700,
+            color: elapsed > 2700 ? 'var(--orange, #f97316)' : 'var(--text)',
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border)',
+            borderRadius: '10px',
+            padding: '0.3rem 0.85rem',
+          }}>
+            <span style={{ fontSize: '1rem' }}>⏱</span> {formatTime(elapsed)}
+          </div>
+        </div>
+
+        {/* Progress rail — one segment per round, colored by rating / coverage */}
+        <div
+          className="pal-card-enter"
+          style={{ display: 'flex', gap: '0.3rem', marginBottom: '2rem', flexWrap: 'wrap' }}
+          aria-label={`Round ${currentCaseIndex + 1} of ${sessionLength}`}
+        >
+          {session.map((s, i) => {
+            const isCurrent = i === currentCaseIndex;
+            const wasRevealed = revealedCases.has(i);
+            const wasMcqAnswered = mcqAnswers[i] !== undefined;
+            const rating = ratings[i];
+            // Coverage-derived color (open questions with a rubric): map ratio to band.
+            const iRubric = getCaseRubric(s.case);
+            const iChecked = coverage[i] ? coverage[i].size : 0;
+            const covRatio = iRubric.length > 0 ? iChecked / iRubric.length : null;
+            const covColor =
+              covRatio === null ? null
+                : covRatio >= 0.75 ? 'var(--green)'
+                : covRatio >= 0.4 ? 'var(--yellow)'
+                : covRatio > 0 ? 'var(--red)'
+                : null;
+            const ratingColor =
+              rating === 'strong' ? 'var(--green)'
+              : rating === 'ok' ? 'var(--yellow)'
+              : rating === 'miss' ? 'var(--red)'
+              : null;
+            const answered = rating || wasRevealed || wasMcqAnswered || (covRatio !== null && iChecked > 0);
+            const segBg = isCurrent
+              ? 'var(--accent)'
+              : ratingColor
+                ? ratingColor
+                : covColor
+                  ? covColor
+                  : answered
+                    ? 'var(--text-muted)'
+                    : 'var(--border)';
+            return (
+              <div
+                key={i}
+                title={`Round ${i + 1}${rating ? ' · ' + rating : covRatio !== null ? ' · ' + iChecked + '/' + iRubric.length : ''}`}
+                style={{
+                  height: '6px',
+                  flex: '1 1 0',
+                  minWidth: '14px',
+                  borderRadius: '20px',
+                  background: segBg,
+                  opacity: isCurrent ? 1 : answered ? 0.95 : 0.55,
+                  transform: isCurrent ? 'scaleY(1.5)' : 'scaleY(1)',
+                  transition: 'background 0.18s, transform 0.18s, opacity 0.18s',
+                }}
+              />
+            );
+          })}
         </div>
 
         {/* Case card */}
@@ -692,40 +804,8 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           borderRadius: '12px',
           padding: '1.75rem',
           marginBottom: '1.25rem',
+          borderTop: `3px solid ${roomColor}`,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
-            <span style={{
-              background: roomColor,
-              color: '#fff',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '0.2rem 0.6rem',
-              borderRadius: '20px',
-              letterSpacing: '0.03em',
-              textTransform: 'uppercase',
-            }}>
-              {current?.label}
-            </span>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-              Case {currentCaseIndex + 1} of {sessionLength}
-            </span>
-            {isMCQQuestion && (
-              <span style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                padding: '0.2rem 0.6rem',
-                borderRadius: '20px',
-                background: 'var(--surface-2)',
-                color: 'var(--text-muted)',
-                border: '1px solid var(--border)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.03em',
-              }}>
-                MCQ
-              </span>
-            )}
-          </div>
-
           {isMCQQuestion && mcqQ ? (
             /* MCQ question view */
             <div>
@@ -789,7 +869,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                 {casePromptText}
               </p>
 
-              {/* Reveal toggle */}
+              {/* Reveal: model answer + self-grade checklist */}
               {isRevealed && (
                 <div style={{
                   marginTop: '1.25rem',
@@ -804,6 +884,55 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                   <p style={{ color: 'var(--text)', fontSize: '0.87rem', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
                     {getCaseModelAnswer(roomCase)}
                   </p>
+
+                  {/* Self-grade checklist — tick each key point you covered */}
+                  {rubric.length > 0 && (
+                    <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.6rem' }}>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Self-grade — tick what you covered
+                        </div>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--accent)' }}>
+                          {checkedSet.size} / {rubric.length}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        {rubric.map((point, pi) => {
+                          const checked = checkedSet.has(pi);
+                          return (
+                            <button
+                              key={pi}
+                              onClick={() => toggleCoveragePoint(currentCaseIndex, pi)}
+                              style={{
+                                display: 'flex', alignItems: 'flex-start', gap: '0.6rem',
+                                width: '100%', textAlign: 'left',
+                                background: checked ? 'var(--green-bg, rgba(34,197,94,0.1))' : 'var(--surface)',
+                                border: `1px solid ${checked ? 'var(--green-border, var(--green))' : 'var(--border)'}`,
+                                borderRadius: '8px',
+                                padding: '0.6rem 0.75rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.12s',
+                              }}
+                            >
+                              <span style={{
+                                minWidth: 20, height: 20, marginTop: '1px',
+                                borderRadius: '5px',
+                                background: checked ? 'var(--green)' : 'transparent',
+                                border: `1.5px solid ${checked ? 'var(--green)' : 'var(--border)'}`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: '#fff', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0,
+                              }}>
+                                {checked ? '✓' : ''}
+                              </span>
+                              <span style={{ fontSize: '0.85rem', lineHeight: 1.55, color: checked ? 'var(--text)' : 'var(--text-muted)' }}>
+                                {point}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -868,13 +997,14 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                 cursor: 'pointer',
               }}
             >
-              {isRevealed ? 'Hide Answer' : 'Reveal Answer'}
+              {isRevealed ? 'Hide Answer' : 'Reveal Answer & Self-Grade'}
             </button>
           )}
 
           <button
             onClick={handleNext}
             disabled={isMCQQuestion && !mcqAnswered}
+            className={!(isMCQQuestion && !mcqAnswered) && (isRevealed || mcqAnswered) ? 'pal-glow-pulse' : undefined}
             style={{
               background: isMCQQuestion && !mcqAnswered ? 'var(--surface-2)' : 'var(--accent)',
               border: 'none',
@@ -887,7 +1017,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
               marginLeft: 'auto',
             }}
           >
-            {isLast ? 'Finish →' : 'Next Case →'}
+            {isLast ? 'Finish →' : 'Next Round →'}
           </button>
         </div>
       </div>
@@ -904,11 +1034,12 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
 
     const sessionLengthLabel = SESSION_LENGTH_OPTIONS.find(o => o.count === sessionLength)?.label || 'Standard';
     const sessionModeLabel = SESSION_MODE_OPTIONS.find(o => o.value === sessionMode)?.label || 'Open-ended';
-    const roleLabel = role === 'ds' ? 'Data / Product Analyst' : 'PM / TPM / Product Lead';
+    const roleLabel = roleDisplayLabel(role);
     const hasMCQResults = sessionMode === 'mcq' || sessionMode === 'mixed';
 
     // ── Scorecard computation ──────────────────────────────────────
-    // Per-room breakdown reusing existing session/mcq/ratings data.
+    // Per-room breakdown reusing existing session/mcq/ratings data, now with
+    // open-answer coverage folded in.
     const roomStats = {};
     session.forEach((s, i) => {
       const key = s.room;
@@ -922,6 +1053,8 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           strong: 0,
           ok: 0,
           miss: 0,
+          covChecked: 0,
+          covTotal: 0,
         };
       }
       const r = roomStats[key];
@@ -935,6 +1068,12 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
         if (ratings[i] === 'strong') r.strong += 1;
         else if (ratings[i] === 'ok') r.ok += 1;
         else if (ratings[i] === 'miss') r.miss += 1;
+        // Coverage from the model-answer self-grade (open questions with a rubric).
+        const rubric = getCaseRubric(s.case);
+        if (rubric.length > 0) {
+          r.covChecked += coverage[i] ? coverage[i].size : 0;
+          r.covTotal += rubric.length;
+        }
       }
     });
     const roomBreakdown = Object.values(roomStats);
@@ -946,17 +1085,30 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
     });
     const totalRated = ratingTally.strong + ratingTally.ok + ratingTally.miss;
 
-    // Overall verdict — combine MCQ accuracy (if any) and self-ratings.
+    // Open-answer coverage tally across the whole session.
+    let covCheckedTotal = 0;
+    let covPointsTotal = 0;
+    session.forEach((s, i) => {
+      if (isQuestionMCQ(i)) return;
+      const rubric = getCaseRubric(s.case);
+      if (rubric.length > 0) {
+        covCheckedTotal += coverage[i] ? coverage[i].size : 0;
+        covPointsTotal += rubric.length;
+      }
+    });
+
+    // Overall verdict — blend MCQ accuracy, self-ratings, AND open-answer coverage.
     const mcqPct = mcqScores.total > 0 ? mcqScores.correct / mcqScores.total : null;
     // Self-rating score: Strong=1, OK=0.5, Miss=0.
     const ratingPct = totalRated > 0
       ? (ratingTally.strong + ratingTally.ok * 0.5) / totalRated
       : null;
-    let overallPct;
-    if (mcqPct !== null && ratingPct !== null) overallPct = (mcqPct + ratingPct) / 2;
-    else if (mcqPct !== null) overallPct = mcqPct;
-    else if (ratingPct !== null) overallPct = ratingPct;
-    else overallPct = null;
+    // Coverage score: checked points / total rubric points across open questions.
+    const coveragePct = covPointsTotal > 0 ? covCheckedTotal / covPointsTotal : null;
+    const components = [mcqPct, ratingPct, coveragePct].filter(v => v !== null);
+    const overallPct = components.length > 0
+      ? components.reduce((a, b) => a + b, 0) / components.length
+      : null;
 
     let verdictLabel, verdictColor, verdictBg;
     if (overallPct === null) {
@@ -977,14 +1129,18 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
       verdictBg = 'var(--red-bg, rgba(239,68,68,0.1))';
     }
 
-    // Weakest rooms for "Practice this" deep-links: rank by lowest MCQ % then
-    // most Misses. Only rooms with a known route get a button.
+    // Weakest rooms for "Practice this" deep-links: rank by lowest combined
+    // signal (MCQ %, self-rating, coverage), then most Misses. Only rooms with
+    // a known route get a button.
     const weakestRooms = roomBreakdown
       .map(r => {
-        const score = r.mcqTotal > 0
-          ? r.mcqCorrect / r.mcqTotal
-          : (r.strong + r.ok * 0.5) / Math.max(1, r.strong + r.ok + r.miss);
-        const signal = r.mcqTotal > 0 || (r.strong + r.ok + r.miss) > 0;
+        const parts = [];
+        if (r.mcqTotal > 0) parts.push(r.mcqCorrect / r.mcqTotal);
+        const ratedN = r.strong + r.ok + r.miss;
+        if (ratedN > 0) parts.push((r.strong + r.ok * 0.5) / ratedN);
+        if (r.covTotal > 0) parts.push(r.covChecked / r.covTotal);
+        const score = parts.length > 0 ? parts.reduce((a, b) => a + b, 0) / parts.length : 1;
+        const signal = parts.length > 0;
         return { ...r, score, signal };
       })
       .filter(r => r.signal && r.score < 0.75 && ROOM_ROUTES[r.room])
@@ -1014,12 +1170,21 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           </p>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
             Total time: <strong style={{ color: 'var(--text)' }}>{formatTime(elapsed)}</strong>
-            {hasMCQResults && (
+            {hasMCQResults && mcqScores.total > 0 && (
               <>
                 {' · '}
                 MCQ score:{' '}
                 <strong style={{ color: mcqScores.correct === mcqScores.total ? 'var(--green)' : mcqScores.correct / mcqScores.total >= 0.6 ? 'var(--accent)' : 'var(--orange, #f97316)' }}>
                   {mcqScores.correct} / {mcqScores.total} correct
+                </strong>
+              </>
+            )}
+            {coveragePct !== null && (
+              <>
+                {' · '}
+                Coverage:{' '}
+                <strong style={{ color: coveragePct >= 0.75 ? 'var(--green)' : coveragePct >= 0.4 ? 'var(--yellow)' : 'var(--orange, #f97316)' }}>
+                  {covCheckedTotal} / {covPointsTotal} points
                 </strong>
               </>
             )}
@@ -1061,13 +1226,19 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                 <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', fontFamily: 'monospace' }}>{formatTime(elapsed)}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cases</div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rounds</div>
                 <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)' }}>{session.length}</div>
               </div>
               {hasMCQResults && mcqScores.total > 0 && (
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>MCQ</div>
                   <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)' }}>{Math.round(mcqPct * 100)}%</div>
+                </div>
+              )}
+              {coveragePct !== null && (
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Coverage</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)' }}>{Math.round(coveragePct * 100)}%</div>
                 </div>
               )}
               {totalRated > 0 && (
@@ -1104,6 +1275,8 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
               const roomColor = ROOM_COLORS[r.room] || 'var(--accent)';
               const hasMcq = r.mcqTotal > 0;
               const pct = hasMcq ? Math.round((r.mcqCorrect / r.mcqTotal) * 100) : null;
+              const hasCov = r.covTotal > 0;
+              const covPct = hasCov ? Math.round((r.covChecked / r.covTotal) * 100) : null;
               return (
                 <div
                   key={r.room}
@@ -1130,20 +1303,27 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                     {pillar}
                   </span>
                   <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                    {r.total} {r.total === 1 ? 'case' : 'cases'}
+                    {r.total} {r.total === 1 ? 'round' : 'rounds'}
                   </span>
-                  <span style={{ marginLeft: 'auto', fontSize: '0.82rem', fontWeight: 700 }}>
-                    {hasMcq ? (
+                  <span style={{ marginLeft: 'auto', fontSize: '0.82rem', fontWeight: 700, display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    {hasMcq && (
                       <span style={{ color: pct >= 75 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)' }}>
                         {pct}% correct
                       </span>
-                    ) : (r.strong + r.ok + r.miss) > 0 ? (
+                    )}
+                    {hasCov && (
+                      <span style={{ color: covPct >= 75 ? 'var(--green)' : covPct >= 40 ? 'var(--yellow)' : 'var(--red)' }}>
+                        {r.covChecked}/{r.covTotal} covered
+                      </span>
+                    )}
+                    {!hasMcq && !hasCov && (r.strong + r.ok + r.miss) > 0 && (
                       <span style={{ color: 'var(--text-muted)' }}>
                         {r.strong > 0 && <span style={{ color: 'var(--green)' }}>{r.strong}S </span>}
                         {r.ok > 0 && <span style={{ color: 'var(--yellow)' }}>{r.ok}OK </span>}
                         {r.miss > 0 && <span style={{ color: 'var(--red)' }}>{r.miss}M</span>}
                       </span>
-                    ) : (
+                    )}
+                    {!hasMcq && !hasCov && (r.strong + r.ok + r.miss) === 0 && (
                       <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontStyle: 'italic' }}>not rated</span>
                     )}
                   </span>
@@ -1195,6 +1375,8 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
             const answeredId = mcqAnswers[i];
             const chosenOption = mcqQ?.options.find(o => o.id === answeredId);
             const wasCorrect = chosenOption?.correct === true;
+            const rubric = wasQuestionMCQ ? [] : getCaseRubric(roomCase);
+            const checkedSet = coverage[i] || new Set();
 
             return (
               <div
@@ -1207,6 +1389,17 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                  <span style={{
+                    background: 'var(--surface-2)',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    padding: '0.18rem 0.55rem',
+                    borderRadius: '20px',
+                    border: '1px solid var(--border)',
+                  }}>
+                    Round {i + 1}
+                  </span>
                   <span style={{
                     background: roomColor,
                     color: '#fff',
@@ -1248,6 +1441,19 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                       border: `1px solid ${wasCorrect ? 'var(--green-border)' : 'var(--red-border)'}`,
                     }}>
                       {wasCorrect ? '✓ Correct' : '✗ Wrong'}
+                    </span>
+                  )}
+                  {!wasQuestionMCQ && rubric.length > 0 && (
+                    <span style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      padding: '0.18rem 0.55rem',
+                      borderRadius: '20px',
+                      background: 'var(--surface-2)',
+                      color: 'var(--accent)',
+                      border: '1px solid var(--border)',
+                    }}>
+                      {checkedSet.size}/{rubric.length} covered
                     </span>
                   )}
                 </div>
@@ -1306,33 +1512,82 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                       </p>
                     </div>
 
-                    {/* Self-rating */}
-                    <div>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        Self-Rate
+                    {/* Coverage checklist recap (cases with a rubric) */}
+                    {rubric.length > 0 ? (
+                      <div style={{ marginBottom: '0.25rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Coverage
+                          </div>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--accent)' }}>
+                            {checkedSet.size} / {rubric.length}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                          {rubric.map((point, pi) => {
+                            const checked = checkedSet.has(pi);
+                            return (
+                              <button
+                                key={pi}
+                                onClick={() => toggleCoveragePoint(i, pi)}
+                                style={{
+                                  display: 'flex', alignItems: 'flex-start', gap: '0.6rem',
+                                  width: '100%', textAlign: 'left',
+                                  background: checked ? 'var(--green-bg, rgba(34,197,94,0.1))' : 'var(--surface-2)',
+                                  border: `1px solid ${checked ? 'var(--green-border, var(--green))' : 'var(--border)'}`,
+                                  borderRadius: '8px',
+                                  padding: '0.55rem 0.7rem',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.12s',
+                                }}
+                              >
+                                <span style={{
+                                  minWidth: 18, height: 18, marginTop: '1px',
+                                  borderRadius: '5px',
+                                  background: checked ? 'var(--green)' : 'transparent',
+                                  border: `1.5px solid ${checked ? 'var(--green)' : 'var(--border)'}`,
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  color: '#fff', fontSize: '0.65rem', fontWeight: 700, flexShrink: 0,
+                                }}>
+                                  {checked ? '✓' : ''}
+                                </span>
+                                <span style={{ fontSize: '0.83rem', lineHeight: 1.5, color: checked ? 'var(--text)' : 'var(--text-muted)' }}>
+                                  {point}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        {RATING_OPTIONS.map(opt => (
-                          <button
-                            key={opt.value}
-                            onClick={() => setRatings(r => ({ ...r, [i]: opt.value }))}
-                            style={{
-                              background: ratings[i] === opt.value ? opt.color : 'var(--surface-2)',
-                              border: ratings[i] === opt.value ? `2px solid ${opt.color}` : '2px solid var(--border)',
-                              borderRadius: '6px',
-                              padding: '0.35rem 0.9rem',
-                              color: ratings[i] === opt.value ? '#fff' : 'var(--text-muted)',
-                              fontSize: '0.82rem',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              transition: 'all 0.12s',
-                            }}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
+                    ) : (
+                      /* Self-rating fallback (cases without a rubric array) */
+                      <div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Self-Rate
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          {RATING_OPTIONS.map(opt => (
+                            <button
+                              key={opt.value}
+                              onClick={() => setRatings(r => ({ ...r, [i]: opt.value }))}
+                              style={{
+                                background: ratings[i] === opt.value ? opt.color : 'var(--surface-2)',
+                                border: ratings[i] === opt.value ? `2px solid ${opt.color}` : '2px solid var(--border)',
+                                borderRadius: '6px',
+                                padding: '0.35rem 0.9rem',
+                                color: ratings[i] === opt.value ? '#fff' : 'var(--text-muted)',
+                                fontSize: '0.82rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.12s',
+                              }}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
               </div>
@@ -1356,7 +1611,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                 Session Score
               </div>
               <div style={{ fontSize: '2rem', fontWeight: 700 }}>
-                {hasMCQResults ? `${mcqScores.correct}/${mcqScores.total}` : 'Complete'}
+                {overallPct !== null ? `${Math.round(overallPct * 100)}%` : 'Complete'}
               </div>
               <div style={{ fontSize: '0.82rem', color: 'rgba(0,0,0,0.65)', marginTop: '0.2rem' }}>
                 {sessionLengthLabel} · {roleLabel} · {formatTime(elapsed)}
@@ -1364,10 +1619,11 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
             </div>
             <button
               onClick={() => {
-                const summary = hasMCQResults
-                  ? `PAL: ${mcqScores.correct}/${mcqScores.total} · ${Math.round((mcqScores.correct / mcqScores.total) * 100)}% · ${roleLabel} · ${formatTime(elapsed)}`
-                  : `PAL: ${sessionLengthLabel} complete · ${roleLabel} · ${formatTime(elapsed)}`;
-                navigator.clipboard.writeText(summary);
+                const overall = overallPct !== null ? `${Math.round(overallPct * 100)}%` : 'complete';
+                const parts = [`PAL Sim: ${overall}`, roleLabel, `${session.length} rounds`, formatTime(elapsed)];
+                if (hasMCQResults && mcqScores.total > 0) parts.push(`MCQ ${mcqScores.correct}/${mcqScores.total}`);
+                if (coveragePct !== null) parts.push(`Coverage ${covCheckedTotal}/${covPointsTotal}`);
+                navigator.clipboard.writeText(parts.join(' · '));
                 alert('Score copied to clipboard!');
               }}
               style={{

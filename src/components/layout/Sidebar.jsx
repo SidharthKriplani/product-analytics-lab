@@ -33,7 +33,6 @@ const NAV_FRAMES = [
     items: [
       { id: 'sql-lab',              label: 'SQL Lab' },
       { id: 'python-lab',           label: 'Programming Lab', href: 'https://programming-lab.vercel.app/' },
-      { id: 'instrumentation',      label: 'Instrumentation' },
     ],
   },
   {
@@ -53,6 +52,7 @@ const NAV_FRAMES = [
           { id: 'metrics',          label: 'Metrics' },
           { id: 'rca',              label: 'RCA' },
           { id: 'cases',            label: 'Analytics Cases' },
+          { id: 'instrumentation',  label: 'Instrumentation' },
         ],
       },
       {
