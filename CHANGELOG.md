@@ -4,6 +4,16 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.93.0] — 2026-06-25 [RÉSUMÉ AS LINK · AVATAR ON PUBLIC PROFILE · MIGRATION FIX]
+
+**Résumé is a link, not a hosted file.** Dropped the Supabase Storage upload (no bucket, no PII hosting liability). `resume.js` now exposes `setMyResumeLink`/`removeMyResume`; ProfilePage takes a pasted URL (Drive/Dropbox/personal site); PublicProfile shows "View résumé →". Guarded like the LinkedIn field.
+
+**Avatar on public profiles.** Added `avatar_url` to the leaderboard row (written from OAuth `user_metadata.avatar_url` on sign-in/sync); PublicProfile hero now shows the user's Google/GitHub photo with the initials badge as fallback.
+
+**Migration fix.** `current_role` is a Postgres reserved word — now quoted (`"current_role"`) so the ALTER runs; `avatar_url` added; the résumé Storage-bucket section removed.
+
+Build: 891 modules clean.
+
 ## [5.92.0] — 2026-06-25 [SPACED-REPETITION REVIEW QUEUE · RESUME UPLOAD]
 
 **Spaced-repetition review queue.** New `src/utils/srQueue.js` (Leitner: a miss schedules box 1 ~1d; correct reviews promote 1→3→7→21d, then retire). New `src/pages/ReviewQueue.jsx` (`#/review-queue`) lists due items, deep-linking into each case via the room's existing open-fn. New **Review** item under LIVE with a due-count badge. Outcome capture wired into Stats, Spot-the-Flaw, and Trainer runners (the foundation runners' bespoke per-module scoring was left for a later pass).

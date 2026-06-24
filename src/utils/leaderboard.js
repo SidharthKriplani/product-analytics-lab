@@ -145,7 +145,12 @@ export async function upsertLeaderboardRow(user, extra = {}) {
     total_solved: computeTotalSolved(),
     updated_at: new Date().toISOString(),
   };
-  const full = { ...base, room_breakdown: computeRoomBreakdown(), ...extra };
+  const full = {
+    ...base,
+    room_breakdown: computeRoomBreakdown(),
+    avatar_url: user.user_metadata?.avatar_url || null,
+    ...extra,
+  };
   try {
     const { error } = await supabase.from('leaderboard').upsert(full, { onConflict: 'user_id' });
     if (!error) return;
@@ -273,7 +278,7 @@ export async function confirmMyEmployment(user) {
 // miss / no backend.
 export async function fetchPublicProfile(userId) {
   if (!supabase || !userId) return null;
-  const RICH = 'user_id, display_name, total_solved, updated_at, linkedin_url, room_breakdown, current_company, current_role, company_updated_at, resume_url';
+  const RICH = 'user_id, display_name, total_solved, updated_at, linkedin_url, room_breakdown, current_company, current_role, company_updated_at, resume_url, avatar_url';
   const BASE = 'user_id, display_name, total_solved, updated_at';
 
   async function run(cols) {
@@ -313,6 +318,7 @@ function normalizeProfile(row) {
     current_role: row.current_role || null,
     company_updated_at: row.company_updated_at || null,
     resume_url: row.resume_url || null,
+    avatar_url: row.avatar_url || null,
   };
 }
 

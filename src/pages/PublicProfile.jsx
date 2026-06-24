@@ -120,6 +120,7 @@ function StatTile({ value, label, sub, color }) {
 }
 
 function Profile({ profile, standing }) {
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const since = memberSince(profile.updated_at);
   const breakdown = profile.room_breakdown && typeof profile.room_breakdown === 'object'
     ? Object.entries(profile.room_breakdown).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1])
@@ -155,14 +156,26 @@ function Profile({ profile, standing }) {
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1.5rem' }}>
         <div style={{ display: 'flex', gap: '1.1rem', alignItems: 'center' }}>
           <div style={{ position: 'relative', flexShrink: 0 }}>
-            <div style={{
-              width: '64px', height: '64px', borderRadius: '50%',
-              background: 'var(--accent-bg, var(--surface-2))', border: '2.5px solid ' + accentRing,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent)',
-            }}>
-              {initialsFromName(profile.display_name)}
-            </div>
+            {profile.avatar_url && !avatarFailed ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.display_name || 'avatar'}
+                onError={() => setAvatarFailed(true)}
+                style={{
+                  width: '64px', height: '64px', borderRadius: '50%',
+                  objectFit: 'cover', border: '2.5px solid ' + accentRing,
+                }}
+              />
+            ) : (
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '50%',
+                background: 'var(--accent-bg, var(--surface-2))', border: '2.5px solid ' + accentRing,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent)',
+              }}>
+                {initialsFromName(profile.display_name)}
+              </div>
+            )}
             {medal && (
               <div title={medal.label} style={{
                 position: 'absolute', bottom: '-4px', right: '-4px',

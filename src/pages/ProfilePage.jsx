@@ -3,7 +3,7 @@ import { signOut } from '../utils/auth.js';
 import { getBookmarks } from '../utils/bookmarks.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from '../utils/syncProgress.js';
 import { updateMyLinkedin, updateMyEmployment, fetchPublicProfile } from '../utils/leaderboard.js';
-import { uploadResume, removeMyResume, getLocalResumeUrl } from '../utils/resume.js';
+import { setMyResumeLink, removeMyResume, getLocalResumeUrl } from '../utils/resume.js';
 import { COMPANIES, PROFILE_ROLES } from '../data/companyList.js';
 import { CompanyLogo } from '../components/shared/CompanyLogo.jsx';
 
@@ -160,9 +160,10 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
   // idle | saving | saved | local | invalid | error
   const [empStatus, setEmpStatus] = useState('idle');
 
-  // ── Résumé (optional PDF upload) ──
-  const [resumeUrl, setResumeUrl] = useState(() => getLocalResumeUrl());
-  // idle | uploading | saved | local | invalid | error
+  // ── Résumé (optional pasted link) ──
+  const [resumeUrl, setResumeUrl] = useState(() => getLocalResumeUrl()); // saved/displayed URL
+  const [resumeInput, setResumeInput] = useState(() => getLocalResumeUrl()); // editable input
+  // idle | saving | saved | local | invalid | error
   const [resumeStatus, setResumeStatus] = useState('idle');
 
   // Hydrate from the server profile when signed in — this is the source of truth
@@ -174,7 +175,7 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
       if (cancelled || !p) return;
       if (p.current_role) setEmpRole(p.current_role);
       if (p.current_company) setEmpCompany(p.current_company);
-      if (p.resume_url) setResumeUrl(p.resume_url);
+      if (p.resume_url) { setResumeUrl(p.resume_url); setResumeInput(p.resume_url); }
     });
     return () => { cancelled = true; };
   }, [user]);
@@ -225,18 +226,21 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
     setTimeout(() => setLinkedinStatus('idle'), 4000);
   }
 
-  async function handleResumeFile(e) {
-    const file = e.target.files && e.target.files[0];
-    e.target.value = ''; // allow re-selecting the same file
-    if (!file) return;
-    setResumeStatus('uploading');
-    const res = await uploadResume(user, file);
+  async function handleSaveResume() {
+    const url = resumeInput.trim();
+    if (url && !url.toLowerCase().startsWith('http')) {
+      setResumeStatus('invalid');
+      setTimeout(() => setResumeStatus('idle'), 3500);
+      return;
+    }
+    setResumeStatus('saving');
+    const res = await setMyResumeLink(user, url);
     if (res.url) setResumeUrl(res.url);
     if (res.ok) {
       setResumeStatus('saved');
-    } else if (res.reason === 'invalid-file') {
+    } else if (res.reason === 'invalid') {
       setResumeStatus('invalid');
-    } else if (res.reason === 'storage-pending' || res.reason === 'migration-pending' || res.reason === 'no-backend') {
+    } else if (res.reason === 'migration-pending' || res.reason === 'no-backend') {
       setResumeStatus('local');
     } else {
       setResumeStatus('error');
@@ -246,6 +250,7 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
 
   async function handleRemoveResume() {
     setResumeUrl('');
+    setResumeInput('');
     setResumeStatus('idle');
     await removeMyResume(user);
   }
@@ -421,46 +426,56 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
             ) : null}
           </div>
 
-          {/* ── Résumé (optional PDF upload) ── */}
+          {/* ── Résumé (optional pasted link) ── */}
           <div style={{ borderTop: '1px solid var(--border)', marginTop: '1.1rem', paddingTop: '1rem' }}>
             <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
               Résumé
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              {resumeUrl && (
+              <input
+                type="url"
+                value={resumeInput}
+                onChange={e => setResumeInput(e.target.value)}
+                placeholder="Link to your résumé (Google Drive, Dropbox, personal site)…"
+                style={{
+                  flex: 1, minWidth: '180px',
+                  background: 'var(--surface-2)', border: '1px solid var(--border)',
+                  borderRadius: '6px', padding: '0.4rem 0.6rem',
+                  fontSize: '0.82rem', color: 'var(--text)',
+                }}
+              />
+              <button
+                onClick={handleSaveResume}
+                disabled={resumeStatus === 'saving'}
+                style={{ ...btnBase, flexShrink: 0, opacity: resumeStatus === 'saving' ? 0.6 : 1 }}
+              >
+                {resumeStatus === 'saving' ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+
+            {resumeUrl && (
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center', marginTop: '0.5rem' }}>
                 <a
                   href={resumeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ ...btnBase, textDecoration: 'none', display: 'inline-block' }}
+                  style={{ fontSize: '0.78rem', color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}
                 >
-                  View résumé
+                  View résumé &rarr;
                 </a>
-              )}
-              <label style={{ ...btnBase, display: 'inline-block', opacity: resumeStatus === 'uploading' ? 0.6 : 1 }}>
-                {resumeStatus === 'uploading' ? 'Uploading...' : resumeUrl ? 'Replace PDF' : 'Upload PDF'}
-                <input
-                  type="file"
-                  accept="application/pdf,.pdf"
-                  style={{ display: 'none' }}
-                  disabled={resumeStatus === 'uploading'}
-                  onChange={handleResumeFile}
-                />
-              </label>
-              {resumeUrl && (
                 <button
                   onClick={handleRemoveResume}
-                  style={{ ...btnBase, color: 'var(--red, #dc2626)' }}
+                  style={{ background: 'none', border: 'none', padding: 0, fontSize: '0.78rem', color: 'var(--red, #dc2626)', fontWeight: 600, cursor: 'pointer' }}
                 >
                   Remove
                 </button>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Status / nudge line */}
             {resumeStatus === 'saved' ? (
               <div style={{ fontSize: '0.74rem', color: 'var(--green, #059669)', marginTop: '0.45rem' }}>
-                Saved. Recruiters viewing your profile can now download your résumé.
+                Saved. Recruiters viewing your profile can now open your résumé.
               </div>
             ) : resumeStatus === 'local' ? (
               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
@@ -468,17 +483,17 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
               </div>
             ) : resumeStatus === 'invalid' ? (
               <div style={{ fontSize: '0.74rem', color: 'var(--red, #dc2626)', marginTop: '0.45rem' }}>
-                Please choose a PDF under 5MB.
+                That does not look like a link. It should start with http.
               </div>
             ) : resumeStatus === 'error' ? (
               <div style={{ fontSize: '0.74rem', color: 'var(--red, #dc2626)', marginTop: '0.45rem' }}>
-                Could not upload right now — try again in a moment.
+                Could not save right now — saved locally for now.
               </div>
-            ) : (
+            ) : !resumeUrl ? (
               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
-                PDF only, up to 5MB. Shown on your public profile so recruiters can reach you.
+                Paste a link to your résumé. Shown on your public profile so recruiters can reach you.
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* ── Current role & company ── */}

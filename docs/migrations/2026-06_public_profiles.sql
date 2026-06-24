@@ -34,20 +34,27 @@
 -- email_reminded_at:  when the monthly EMAIL reminder edge function last emailed
 --                     this user (throttle so it never double-sends in a cycle).
 --                     Used only by supabase/functions/employment-reminder.
--- resume_url:         public (or signed) URL of the user's uploaded résumé PDF,
---                     stored in the 'resumes' Storage bucket at `${uid}/resume.pdf`.
---                     Shown as a "View résumé" link on the public profile (opt-in
---                     by virtue of the user uploading it). Nullable.
--- resume_updated_at:  when the résumé was last uploaded/replaced. Nullable.
+-- resume_url:         URL of the user's résumé, pasted by the user (Google Drive,
+--                     Dropbox, personal site, etc.). Shown as a "View résumé" link
+--                     on the public profile (opt-in by virtue of the user adding
+--                     it). No file is hosted by us. Nullable.
+-- resume_updated_at:  when the résumé link was last set/replaced. Nullable.
+-- avatar_url:         the user's OAuth avatar (Google/GitHub), copied from
+--                     user.user_metadata.avatar_url on sign-in/sync. Shown on the
+--                     public profile hero. Nullable.
+--
+-- NOTE: current_role is QUOTED below because `current_role` is a Postgres
+-- reserved word and fails to add/select unquoted.
 alter table leaderboard
   add column if not exists linkedin_url       text,
   add column if not exists room_breakdown     jsonb,
   add column if not exists current_company    text,
-  add column if not exists current_role       text,
+  add column if not exists "current_role"     text,
   add column if not exists company_updated_at timestamptz,
   add column if not exists email_reminded_at  timestamptz,
   add column if not exists resume_url         text,
-  add column if not exists resume_updated_at  timestamptz;
+  add column if not exists resume_updated_at  timestamptz,
+  add column if not exists avatar_url         text;
 
 -- 2. Row Level Security -----------------------------------------------------
 -- The leaderboard is ALREADY publicly readable. The original schema created:
@@ -89,62 +96,6 @@ alter table leaderboard
 --       for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 --   end if;
 -- end $$;
-
--- ============================================================================
--- 3. Storage bucket for résumé uploads  (REQUIRED for the résumé feature)
--- ----------------------------------------------------------------------------
--- The résumé feature uploads a PDF to a Storage bucket named 'resumes' at the
--- path `${auth.uid()}/resume.pdf` and writes the resulting URL to
--- leaderboard.resume_url (added above).
---
--- Buckets CANNOT be created from this SQL editor migration the same way a table
--- is — create the bucket in the Supabase Dashboard (Storage -> New bucket), then
--- run the policy SQL below. The app DEGRADES GRACEFULLY until this exists:
--- uploadResume() returns { ok:false, reason:'storage-pending' } (bucket missing)
--- or 'migration-pending' (resume_url column missing) instead of throwing, and the
--- UI shows "Saved locally — syncing soon". See docs/RESUME-UPLOAD-SETUP.md.
---
--- STEPS:
---   1. Dashboard -> Storage -> New bucket
---        Name:   resumes
---        Public: ON   (simplest — résumés are reachable via a public URL on the
---                      public profile. If you prefer private, leave Public OFF;
---                      uploadResume() falls back to a 1-year signed URL.)
---   2. Run the RLS policies below in the SQL editor (operate on storage.objects).
---
--- Each user may upload/update/delete ONLY objects under their own `${uid}/...`
--- prefix; résumés are readable for the public profile.
---
--- -- (a) Anyone can read objects in the 'resumes' bucket (public profile link).
--- --     Skip this if the bucket is Public ON (already world-readable) AND you
--- --     use public URLs; keep it if you want explicit control.
--- create policy "Public read resumes"
---   on storage.objects for select
---   using ( bucket_id = 'resumes' );
---
--- -- (b) A user can upload only into their own folder: resumes/<their-uid>/...
--- create policy "Users upload own resume"
---   on storage.objects for insert
---   with check (
---     bucket_id = 'resumes'
---     and (storage.foldername(name))[1] = auth.uid()::text
---   );
---
--- -- (c) A user can overwrite (upsert) only their own résumé.
--- create policy "Users update own resume"
---   on storage.objects for update
---   using (
---     bucket_id = 'resumes'
---     and (storage.foldername(name))[1] = auth.uid()::text
---   );
---
--- -- (d) A user can delete only their own résumé.
--- create policy "Users delete own resume"
---   on storage.objects for delete
---   using (
---     bucket_id = 'resumes'
---     and (storage.foldername(name))[1] = auth.uid()::text
---   );
 
 -- ============================================================================
 -- End migration.
