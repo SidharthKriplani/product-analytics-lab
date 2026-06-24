@@ -1,16 +1,19 @@
 -- ============================================================================
 -- Migration: Public profiles (2026-06)
 -- ----------------------------------------------------------------------------
--- Adds two OPTIONAL columns to the existing `leaderboard` table so that
--- clickable public profiles (reached via #/u/<userId>) can show a LinkedIn link
--- and a per-room solved breakdown.
+-- Adds OPTIONAL columns to the existing `leaderboard` table so that clickable
+-- public profiles (reached via #/u/<userId>) can show a LinkedIn link, a
+-- per-room solved breakdown, and the user's current employment (company + role)
+-- which doubles as the referral payload + the monthly "is this still current?"
+-- reminder.
 --
 -- The application is written to DEGRADE GRACEFULLY before this runs:
---   * fetchPublicProfile() selects the rich columns first and retries with the
---     base columns if they are absent.
---   * updateMyLinkedin() returns { ok:false, reason:'migration-pending' } (and
---     the UI falls back to localStorage / user metadata) if linkedin_url is
---     missing.
+--   * fetchPublicProfile() selects the rich columns first (incl. current_company,
+--     current_role, company_updated_at) and retries with the base columns if any
+--     are absent.
+--   * updateMyLinkedin() / updateMyEmployment() / confirmMyEmployment() return
+--     { ok:false, reason:'migration-pending' } (and the UI falls back to
+--     localStorage) if their columns are missing.
 --   * upsertLeaderboardRow() retries without room_breakdown / linkedin_url if
 --     those columns do not exist.
 -- Running this migration simply lets those values persist server-side.
@@ -19,12 +22,25 @@
 -- ============================================================================
 
 -- 1. New columns ------------------------------------------------------------
--- linkedin_url:    the user's LinkedIn profile URL (nullable, optional).
--- room_breakdown:  a small JSON map of { roomId: solvedCount }, e.g.
---                  { "stats": 8, "sql-lab": 23, "rca": 4 }.
+-- linkedin_url:       the user's LinkedIn profile URL (nullable, optional).
+-- room_breakdown:     a small JSON map of { roomId: solvedCount }, e.g.
+--                     { "stats": 8, "sql-lab": 23, "rca": 4 }.
+-- current_company:    the user's current employer, a canonical value from
+--                     src/data/companyList.js COMPANIES (nullable, optional).
+-- current_role:       the user's current role, from PROFILE_ROLES (nullable).
+-- company_updated_at: when the employment was last set/confirmed. The monthly
+--                     in-app reminder shows when this is null or older than 30
+--                     days; the "Still accurate" button bumps it to now().
+-- email_reminded_at:  when the monthly EMAIL reminder edge function last emailed
+--                     this user (throttle so it never double-sends in a cycle).
+--                     Used only by supabase/functions/employment-reminder.
 alter table leaderboard
-  add column if not exists linkedin_url   text,
-  add column if not exists room_breakdown jsonb;
+  add column if not exists linkedin_url       text,
+  add column if not exists room_breakdown     jsonb,
+  add column if not exists current_company    text,
+  add column if not exists current_role       text,
+  add column if not exists company_updated_at timestamptz,
+  add column if not exists email_reminded_at  timestamptz;
 
 -- 2. Row Level Security -----------------------------------------------------
 -- The leaderboard is ALREADY publicly readable. The original schema created:

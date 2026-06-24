@@ -4,6 +4,22 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.85.0] — 2026-06-24 [PROFILE EMPLOYMENT + MONTHLY COMPANY REMINDER]
+
+Referrals in the community run off current company + role, so people need to keep them accurate. Adds the fields, the referral payload, and a monthly reminder. All guarded to work before the DB migration runs.
+
+**Canonical company list.** New `src/data/companyList.js` — `COMPANIES` (571 researched India + global employers: unicorns/startups, big-tech India GCCs, SaaS, IT services/consulting, analytics firms, banks/finance, conglomerates) + `PROFILE_ROLES` (18 analyst/PM titles). Sorted, deduped, `'Other / Not listed'` as the escape hatch so a strict dropdown never hard-blocks anyone.
+
+**Employment on the profile.** ProfilePage gains a "Current role & company" section: role `<select>` + a STRICT searchable company dropdown (filter-and-pick, no free text — keeps referral matching clean). Saving stamps `company_updated_at`. PublicProfile shows `<role> at <company>` under the name — the referral payload.
+
+**Monthly reminder — in-app nudge.** New `EmploymentReminder.jsx`, mounted in the app shell for signed-in users. If `company_updated_at` is null or >30 days old, a dismissible banner: "Still at <company> as <role>? Keep it current so the community can refer you" → [Still accurate] (bumps the timestamp via `confirmMyEmployment`) / [Update] (→ profile). No company set → "Add your company & role." Dismiss is per-session; reappears until confirmed.
+
+**Monthly reminder — email (deferred deploy).** `supabase/functions/employment-reminder/index.ts` — an edge function that emails users whose company is stale (>30d), throttled via `email_reminded_at`. Plus `docs/EMAIL-REMINDER-SETUP.md` (deploy + schedule steps). Not deployed — needs the user's Supabase + email-provider keys. The in-app nudge is live regardless.
+
+**Util + migration.** `leaderboard.js`: `updateMyEmployment`, `confirmMyEmployment`, and `fetchPublicProfile`/`normalizeProfile` extended for the new fields — all retry-without-column guarded. The migration `docs/migrations/2026-06_public_profiles.sql` now also adds `current_company`, `current_role`, `company_updated_at`, `email_reminded_at` (one migration to run).
+
+Verified: full Vite build transformed 879 modules; edge function parses; company list deduped + integrity-checked.
+
 ## [5.84.0] — 2026-06-24 [RUBRIC-DRIVEN: SIMULATOR REBUILD, TRACKS, LIBRARY, PILLAR FIX]
 
 Driven by a depth audit (`docs/DEPTH-AUDIT.md`) of every component. Decision this round: UI first, content fills deferred.

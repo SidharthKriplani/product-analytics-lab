@@ -197,12 +197,83 @@ export async function updateMyLinkedin(user, url) {
   }
 }
 
+// localStorage fallback keys for employment fields — written alongside any
+// server upsert so the value persists across reloads before the migration runs.
+const COMPANY_LS_KEY        = 'pal-company-v1';
+const ROLE_LS_KEY           = 'pal-role-v1';
+const COMPANY_CONFIRMED_KEY = 'pal-company-confirmed-v1';
+
+// Upsert just the current user's employment (current_company, current_role) and
+// stamp company_updated_at = now. Returns { ok, reason }. If the columns don't
+// exist yet, returns { ok:false, reason:'migration-pending' } instead of throwing,
+// so the caller can fall back to local storage. Always writes a localStorage
+// fallback regardless of the server result.
+export async function updateMyEmployment(user, { company, role } = {}) {
+  const now = new Date().toISOString();
+  // Always keep a local copy so the value persists across reloads pre-migration.
+  try {
+    localStorage.setItem(COMPANY_LS_KEY, company || '');
+    localStorage.setItem(ROLE_LS_KEY, role || '');
+    localStorage.setItem(COMPANY_CONFIRMED_KEY, now);
+  } catch { /* ignore */ }
+
+  if (!supabase || !user) return { ok: false, reason: 'no-backend' };
+  const row = {
+    user_id: user.id,
+    display_name: getDisplayName(user),
+    total_solved: computeTotalSolved(),
+    current_company: company || null,
+    current_role: role || null,
+    company_updated_at: now,
+    updated_at: now,
+  };
+  try {
+    const { error } = await supabase.from('leaderboard').upsert(row, { onConflict: 'user_id' });
+    if (!error) return { ok: true };
+    if (isMissingColumnError(error)) return { ok: false, reason: 'migration-pending' };
+    console.warn('[PAL leaderboard] employment upsert failed:', error.message);
+    return { ok: false, reason: 'error' };
+  } catch (e) {
+    console.warn('[PAL leaderboard] employment upsert threw:', e && e.message);
+    return { ok: false, reason: 'error' };
+  }
+}
+
+// Lightweight confirm — used by the monthly reminder's "Still accurate" button.
+// Just bumps company_updated_at = now (and the localStorage confirmed timestamp)
+// without touching the company/role values. Returns { ok, reason }; guarded the
+// same way as updateMyEmployment.
+export async function confirmMyEmployment(user) {
+  const now = new Date().toISOString();
+  try { localStorage.setItem(COMPANY_CONFIRMED_KEY, now); } catch { /* ignore */ }
+
+  if (!supabase || !user) return { ok: false, reason: 'no-backend' };
+  const row = {
+    user_id: user.id,
+    display_name: getDisplayName(user),
+    total_solved: computeTotalSolved(),
+    company_updated_at: now,
+    updated_at: now,
+  };
+  try {
+    const { error } = await supabase.from('leaderboard').upsert(row, { onConflict: 'user_id' });
+    if (!error) return { ok: true };
+    if (isMissingColumnError(error)) return { ok: false, reason: 'migration-pending' };
+    console.warn('[PAL leaderboard] employment confirm failed:', error.message);
+    return { ok: false, reason: 'error' };
+  } catch (e) {
+    console.warn('[PAL leaderboard] employment confirm threw:', e && e.message);
+    return { ok: false, reason: 'error' };
+  }
+}
+
 // Fetch a single user's public profile row. Tries the richer column set first
-// (linkedin_url, room_breakdown); if those columns are absent, retries with the
-// base columns. Returns a normalized object, or null on miss / no backend.
+// (linkedin_url, room_breakdown, employment); if those columns are absent,
+// retries with the base columns. Returns a normalized object, or null on
+// miss / no backend.
 export async function fetchPublicProfile(userId) {
   if (!supabase || !userId) return null;
-  const RICH = 'user_id, display_name, total_solved, updated_at, linkedin_url, room_breakdown';
+  const RICH = 'user_id, display_name, total_solved, updated_at, linkedin_url, room_breakdown, current_company, current_role, company_updated_at';
   const BASE = 'user_id, display_name, total_solved, updated_at';
 
   async function run(cols) {
@@ -238,6 +309,9 @@ function normalizeProfile(row) {
     updated_at: row.updated_at || null,
     linkedin_url: row.linkedin_url || null,
     room_breakdown: breakdown,
+    current_company: row.current_company || null,
+    current_role: row.current_role || null,
+    company_updated_at: row.company_updated_at || null,
   };
 }
 

@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signOut } from '../utils/auth.js';
 import { getBookmarks } from '../utils/bookmarks.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from '../utils/syncProgress.js';
-import { updateMyLinkedin } from '../utils/leaderboard.js';
+import { updateMyLinkedin, updateMyEmployment, fetchPublicProfile } from '../utils/leaderboard.js';
+import { COMPANIES, PROFILE_ROLES } from '../data/companyList.js';
 
 const LINKEDIN_LS_KEY = 'pal-linkedin-url-v1';
+const COMPANY_LS_KEY  = 'pal-company-v1';
+const ROLE_LS_KEY     = 'pal-role-v1';
 
 // Read the user's current LinkedIn URL — prefer auth metadata, then the local
 // fallback written when the DB column does not exist yet.
@@ -12,6 +15,13 @@ function getInitialLinkedin(user) {
   const fromMeta = user?.user_metadata?.linkedin_url;
   if (fromMeta) return fromMeta;
   try { return localStorage.getItem(LINKEDIN_LS_KEY) || ''; }
+  catch { return ''; }
+}
+
+// Read the locally-cached employment value (the immediate, no-network source of
+// truth; the fetched profile, when present, overrides it).
+function getLocal(key) {
+  try { return localStorage.getItem(key) || ''; }
   catch { return ''; }
 }
 
@@ -139,6 +149,52 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
   const [linkedin, setLinkedin] = useState(() => getInitialLinkedin(user));
   // idle | saving | saved | local | invalid | error
   const [linkedinStatus, setLinkedinStatus] = useState('idle');
+
+  // ── Employment (current role + company) ──
+  const [empRole, setEmpRole]       = useState(() => getLocal(ROLE_LS_KEY));
+  const [empCompany, setEmpCompany] = useState(() => getLocal(COMPANY_LS_KEY));
+  const [companyQuery, setCompanyQuery] = useState(''); // text filter for the dropdown
+  const [companyOpen, setCompanyOpen]   = useState(false);
+  // idle | saving | saved | local | invalid | error
+  const [empStatus, setEmpStatus] = useState('idle');
+
+  // Hydrate from the server profile when signed in — this is the source of truth
+  // once the migration has run; falls back silently to the local values otherwise.
+  useEffect(() => {
+    let cancelled = false;
+    if (!user) return;
+    fetchPublicProfile(user.id).then(p => {
+      if (cancelled || !p) return;
+      if (p.current_role) setEmpRole(p.current_role);
+      if (p.current_company) setEmpCompany(p.current_company);
+    });
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // STRICT dropdown: filter COMPANIES by the typed query, but the user must pick
+  // a value from the list (incl. 'Other / Not listed') — no free-text submit.
+  const filteredCompanies = companyQuery.trim()
+    ? COMPANIES.filter(c => c.toLowerCase().includes(companyQuery.trim().toLowerCase()))
+    : COMPANIES;
+
+  async function handleSaveEmployment() {
+    // Strict: company must be a canonical value from the list.
+    if (empCompany && !COMPANIES.includes(empCompany)) {
+      setEmpStatus('invalid');
+      setTimeout(() => setEmpStatus('idle'), 3500);
+      return;
+    }
+    setEmpStatus('saving');
+    const res = await updateMyEmployment(user, { company: empCompany, role: empRole });
+    if (res.ok) {
+      setEmpStatus('saved');
+    } else if (res.reason === 'migration-pending' || res.reason === 'no-backend') {
+      setEmpStatus('local');
+    } else {
+      setEmpStatus('error');
+    }
+    setTimeout(() => setEmpStatus('idle'), 4000);
+  }
 
   async function handleSaveLinkedin() {
     const url = linkedin.trim();
@@ -328,6 +384,117 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
             ) : !linkedin.trim() ? (
               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
                 Add your LinkedIn so recruiters viewing the leaderboard can find you.
+              </div>
+            ) : null}
+          </div>
+
+          {/* ── Current role & company ── */}
+          <div style={{ borderTop: '1px solid var(--border)', marginTop: '1.1rem', paddingTop: '1rem' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
+              Current role &amp; company
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {/* Role select */}
+              <select
+                value={empRole}
+                onChange={e => setEmpRole(e.target.value)}
+                style={{
+                  background: 'var(--surface-2)', border: '1px solid var(--border)',
+                  borderRadius: '6px', padding: '0.4rem 0.6rem',
+                  fontSize: '0.82rem', color: 'var(--text)',
+                }}
+              >
+                <option value="">Select your role…</option>
+                {PROFILE_ROLES.map(r => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+
+              {/* Company — strict searchable dropdown */}
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  value={companyOpen ? companyQuery : empCompany}
+                  onFocus={() => { setCompanyOpen(true); setCompanyQuery(''); }}
+                  onBlur={() => setTimeout(() => setCompanyOpen(false), 150)}
+                  onChange={e => { setCompanyQuery(e.target.value); setCompanyOpen(true); }}
+                  placeholder="Search your company…"
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    background: 'var(--surface-2)', border: '1px solid var(--border)',
+                    borderRadius: '6px', padding: '0.4rem 0.6rem',
+                    fontSize: '0.82rem', color: 'var(--text)',
+                  }}
+                />
+                {companyOpen && (
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 20,
+                    maxHeight: '220px', overflowY: 'auto',
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+                  }}>
+                    {filteredCompanies.length === 0 ? (
+                      <div style={{ padding: '0.55rem 0.7rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        No match. Pick &lsquo;Other / Not listed&rsquo;.
+                      </div>
+                    ) : (
+                      filteredCompanies.map(c => (
+                        <button
+                          key={c}
+                          type="button"
+                          onMouseDown={() => {
+                            setEmpCompany(c);
+                            setCompanyQuery('');
+                            setCompanyOpen(false);
+                          }}
+                          style={{
+                            display: 'block', width: '100%', textAlign: 'left',
+                            background: c === empCompany ? 'var(--surface-2)' : 'none',
+                            border: 'none', borderBottom: '1px solid var(--border)',
+                            padding: '0.5rem 0.7rem', fontSize: '0.82rem',
+                            color: 'var(--text)', cursor: 'pointer',
+                          }}
+                        >
+                          {c}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <button
+                  onClick={handleSaveEmployment}
+                  disabled={empStatus === 'saving'}
+                  style={{ ...btnBase, opacity: empStatus === 'saving' ? 0.6 : 1 }}
+                >
+                  {empStatus === 'saving' ? 'Saving...' : 'Save role & company'}
+                </button>
+              </div>
+            </div>
+
+            {/* Status / nudge line */}
+            {empStatus === 'saved' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--green, #059669)', marginTop: '0.45rem' }}>
+                Saved. The community can now see where you work.
+              </div>
+            ) : empStatus === 'local' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
+                Saved locally — syncing soon.
+              </div>
+            ) : empStatus === 'invalid' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--red, #dc2626)', marginTop: '0.45rem' }}>
+                Please pick a company from the list.
+              </div>
+            ) : empStatus === 'error' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--red, #dc2626)', marginTop: '0.45rem' }}>
+                Could not save right now — saved locally for now.
+              </div>
+            ) : (!empCompany && !empRole) ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
+                Add your company &amp; role so the community can refer you.
               </div>
             ) : null}
           </div>

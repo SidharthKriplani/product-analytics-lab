@@ -178,6 +178,12 @@ function Profile({ profile, standing }) {
             <div style={{ fontWeight: 800, fontSize: '1.35rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {profile.display_name}
             </div>
+            {(profile.current_role || profile.current_company) && (
+              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)', marginTop: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {profile.current_role || 'Analyst'}
+                {profile.current_company ? ' at ' + profile.current_company : ''}
+              </div>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
               {rank && (
                 <span style={{

@@ -8,6 +8,7 @@ import { stateToHash, parseHash } from './utils/hashRouting.js';
 import { onAuthStateChange } from './utils/auth.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from './utils/syncProgress.js';
 import { upsertLeaderboardRow } from './utils/leaderboard.js';
+import { EmploymentReminder } from './components/shared/EmploymentReminder.jsx';
 // Slim index — id, isFree, title only (for routing and paywall checks)
 import {
   scenarioIndex, designScenarioIndex, statsModuleIndex, metricCaseIndex,
@@ -1124,6 +1125,9 @@ export default function App() {
             </div>
           )}
         </div>
+
+        {/* Monthly "is your employment current?" nudge — degrades gracefully pre-migration */}
+        <EmploymentReminder user={user} onNavigate={navigate} />
 
         <main style={{ flex: 1, ...(page === 'sql-lab' ? { display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 } : {}) }}>
           <ErrorBoundary resetKey={page}>
