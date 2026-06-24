@@ -4,6 +4,26 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.71.0] — 2026-06-24 [FOUNDATIONS AUDIT HARNESS (DETERMINISTIC + LM STUDIO)]
+
+Built the first room audit harness, Foundations, on the three-layer model (deterministic → local-LLM triage → human adjudication) — designed to keep token burn off the cloud.
+- **`scripts/audit_foundations.mjs`** (deterministic, no LLM): Tier 1 (required fields, unique ids, contiguous index, difficulty set, typed fields, progress-key registration) + Tier 2 (thin keyInsight/connection, est-time outliers 4–12, tags, missing playbookLinks). Ran clean: **0 Tier 1**, 8 Tier 2 (sf06 thin connection; ef01–ef07 missing playbookLinks). Confirms the 79 Foundation modules (stats 32 / exp 15 / metrics 17 / rca 15) are structurally sound.
+- **`scripts/triage_foundations.py`** (local LM Studio, zero cloud tokens): per-module semantic over-flagging against the Tier-3 rubric → ranked `foundations_triage.csv` shortlist. Recall-biased net, not a judge — "ok" is not a clearance. Mirrors the existing LM Studio scripts (`qwen/qwen3-8b` @ 127.0.0.1:1234, `/no_think`, JSON extraction).
+- **`docs/EVAL_RUBRICS.md`** — marked Foundations automation BUILT with the run commands + current result.
+
+Note (not fixed): About-page Foundation counts are stale (says 25/12/13/15; actual 32/15/17/15).
+
+## [5.70.0] — 2026-06-24 [TIER-3 HUMAN GATE + RUBRICS FOR EVERY ROOM]
+
+`docs/EVAL_RUBRICS.md` — completed the rubric system so every room is held against one.
+- Added **Tier 3 — human review** to the universal backbone: a one-person-runnable protocol (blind solve-through; the 3 questions — would it come up / judgment-not-recall / is it interesting; red-team the answer; sample-don't-boil-the-ocean, data-pointed once usage exists; cut boring-but-correct; log to AUDITS). This is the semantic gate the mechanical/heuristic gates can't run.
+- Added **room archetypes** A (executable — SQL), B (discrete keyed answer), C (rubric-scored judgment), D (teaching modules), each with Tier 1/2/3, and a **room→archetype map** covering all remaining rooms (Stats, Spot the Flaw, A/B Interpreter, Experiment Review, MCQ, Metrics, Experiment Design, RCA, Cases, Product Design, Prioritization, Estimation, Instrumentation, Growth Analytics, BI, Take-Home, Full Loop, Behavioral, Challenges, Dimensional Modeling, Playbook) with per-room deltas. Replaced the old "rubrics pending" table — nothing is pending now.
+
+## [5.69.0] — 2026-06-24 [HOMEPAGE FOUR-PILLAR LINE + FOUNDATION ROOMS RUBRIC]
+
+- **`Home.jsx`** — surfaced the BreakLabs four-pillar line on the signed-out hero (under the subtext): "Part of BreakLabs — the four pillars every technical interview tests: recall, depth, fluency, and **judgment**. PAL owns judgment." Judgment highlighted in accent; uses `.pal-landing-el` entrance.
+- **`docs/EVAL_RUBRICS.md`** — added a reusable **Universal room rubric backbone** (9 dimensions, with the explicit principle that a room is only as auto-gradable as its answers are executable) and a concrete **Foundation rooms rubric** (Stat/RCA/Metrics/Exp Foundations): Tier 1 auto (schema, build-safety, MCQ key validity, progress-key registration), Tier 2 warns (check-for-understanding, load-bearing interactive, pacing, progression), and a manual review checklist (factual/statistical correctness is the gate that matters and stays human). Proposed `scripts/audit_foundations.mjs` as the automation. Updated the pending-rubrics table.
+
 ## [5.68.0] — 2026-06-24 [ABOUT: BREAKLABS FOUR-PILLAR FRAMING]
 
 Added a "Part of BreakLabs" section to the About page framing PAL within the BreakLabs four-pillar model — recall, depth, fluency, judgment — with each pillar anchored to where it's trained (recall → MCQ Trainer, depth → Foundation rooms, fluency → Programming Lab, judgment → PAL practice rooms). Reinforces PAL's positioning: judgment is the wedge most tools skip. Tightened the user's "every IT professional" to "every technical interview — and the job itself" since BreakLabs is data/analytics/SWE-for-data/ML, not general IT. File: `src/pages/About.jsx`.

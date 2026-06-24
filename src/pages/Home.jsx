@@ -129,6 +129,19 @@ export function Home({ onNavigate, onShowAuth }) {
           with structured cases and rubric-based feedback.
         </p>
 
+        {/* BreakLabs four-pillar one-liner */}
+        <p
+          className="pal-landing-el"
+          style={{
+            animationDelay: '380ms',
+            fontSize: '0.8rem', lineHeight: 1.6, color: 'var(--text-muted)',
+            margin: '0 0 1.5rem', maxWidth: 460, marginLeft: 'auto', marginRight: 'auto',
+          }}
+        >
+          Part of <strong style={{ color: 'var(--text)', fontWeight: 700 }}>BreakLabs</strong> — the four pillars every technical interview tests:{' '}
+          recall, depth, fluency, and <strong style={{ color: 'var(--accent)', fontWeight: 700 }}>judgment</strong>. PAL owns judgment.
+        </p>
+
         {/* Role chips */}
         <div
           className="pal-landing-el"
