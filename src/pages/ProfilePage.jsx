@@ -36,6 +36,7 @@ const ROOM_CONFIGS = [
   { key: 'pal-metrics-progress-v2',          name: 'Metrics',         type: 'attempts_num' },
   { key: 'pal-rca-progress-v2',              name: 'RCA',             type: 'attempts_num' },
   { key: 'pal-cases-progress-v2',            name: 'Cases',           type: 'attempts_num' },
+  { key: 'pal-design-progress-v1',           name: 'A/B Design',      type: 'attempts_num' },
   { key: 'pal-behavioral-progress-v1',       name: 'Behavioral',      type: 'rating' },
   { key: 'pal-estimation-progress-v1',       name: 'Estimation',      type: 'rating' },
   { key: 'pal-growth-analytics-progress-v1', name: 'Growth',          type: 'rating' },
@@ -752,7 +753,7 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
                   </div>
                   <button
                     onClick={() => onNavigate('sql-lab')}
-                    style={{ background: 'none', border: 'none', padding: 0, fontSize: '0.76rem', color: 'var(--teal)', fontWeight: 600, cursor: 'pointer' }}
+                    style={{ background: 'none', border: 'none', padding: 0, fontSize: '0.76rem', color: 'var(--accent)', fontWeight: 600, cursor: 'pointer' }}
                   >
                     Open SQL Lab &rarr;
                   </button>
@@ -762,7 +763,7 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
                   <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '0.55rem' }}>No plan yet</div>
                   <button
                     onClick={() => onNavigate('sql-lab')}
-                    style={{ background: 'none', border: 'none', padding: 0, fontSize: '0.76rem', color: 'var(--teal)', fontWeight: 600, cursor: 'pointer' }}
+                    style={{ background: 'none', border: 'none', padding: 0, fontSize: '0.76rem', color: 'var(--accent)', fontWeight: 600, cursor: 'pointer' }}
                   >
                     Set one up &rarr;
                   </button>

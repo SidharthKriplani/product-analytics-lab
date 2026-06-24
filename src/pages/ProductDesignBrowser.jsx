@@ -1,100 +1,113 @@
 import { useState } from 'react';
-import { Icon } from '../components/shared/Icon.jsx';
 import { productDesignScenarios } from '../data/productDesignScenarios.js';
 import { getAllProductDesignProgress } from '../utils/productDesignProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
-import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
+import { RoomHeader } from '../components/shared/RoomHeader.jsx';
+import { FilterBar } from '../components/shared/FilterBar.jsx';
+import { CaseCard } from '../components/shared/CaseCard.jsx';
 
-const DIFFICULTY_CONFIG = {
-  medium: { label: 'Mid-Level', color: 'var(--accent)', bg: 'var(--accent-bg)', border: 'var(--accent-border)' },
-  hard:   { label: 'Senior',    color: 'var(--purple)', bg: 'var(--purple-bg)', border: 'var(--purple-border)' },
+const DIFF_ORDER = { medium: 0, analyst: 0, senior: 1, hard: 1, staff: 2 };
+
+const LEVEL_LABEL = {
+  excellent: 'Excellent', strong: 'Strong', developing: 'Developing', needs_practice: 'Try Again',
 };
 
-const LEVEL_CONFIG = {
-  excellent:     { label: 'Excellent',   color: 'var(--teal)' },
-  strong:        { label: 'Strong',      color: 'var(--green)' },
-  developing:    { label: 'Developing',  color: 'var(--yellow)' },
-  needs_practice:{ label: 'Try Again',   color: 'var(--text-muted)' },
-};
+// Derive unique difficulties + categories from data.
+const ALL_DIFFICULTIES = (() => {
+  const set = new Set();
+  productDesignScenarios.forEach(s => { if (s.difficulty) set.add(s.difficulty); });
+  return Array.from(set).sort((a, b) => (DIFF_ORDER[a] ?? 9) - (DIFF_ORDER[b] ?? 9) || a.localeCompare(b));
+})();
 
-function DifficultyBadge({ difficulty }) {
-  const cfg = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.medium;
-  return (
-    <span style={{
-      fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-      color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
-      borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.45rem',
-    }}>
-      {cfg.label}
-    </span>
-  );
-}
-
-function CategoryBadge({ category }) {
-  return (
-    <span style={{
-      fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
-      color: 'var(--text-muted)', background: 'var(--surface-2)', border: '1px solid var(--border)',
-      borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.45rem',
-    }}>
-      {category}
-    </span>
-  );
-}
+const ALL_CATEGORIES = (() => {
+  const set = new Set();
+  productDesignScenarios.forEach(s => { if (s.category) set.add(s.category); });
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
+})();
 
 export function ProductDesignBrowser({ onSelectScenario, unlocked, onUnlock, onOpenArticle }) {
   const [theoryActive, setTheoryActive] = useState(false);
-  const [diffFilter, setDiffFilter] = useState('all');
+  const [activeDifficulty, setActiveDifficulty] = useState('All');
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeStatus, setActiveStatus] = useState('All');
   const allProgress = getAllProductDesignProgress();
-
-  const diffCounts = {
-    all: productDesignScenarios.length,
-    analyst: productDesignScenarios.filter(s => s.difficulty === 'analyst').length,
-    senior: productDesignScenarios.filter(s => s.difficulty === 'senior').length,
-    staff: productDesignScenarios.filter(s => s.difficulty === 'staff').length,
-  };
 
   const completedIds = new Set(
     Object.keys(allProgress).filter(id => allProgress[id]?.completedPhaseIds?.length > 0)
   );
+  const completedCount = completedIds.size;
   const firstUnstartedId = productDesignScenarios.find(s => !completedIds.has(s.id))?.id;
 
-  return (
-    <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
+  const displayScenarios = productDesignScenarios.filter(s => {
+    const diffMatch = activeDifficulty === 'All' || s.difficulty === activeDifficulty;
+    const catMatch = activeCategory === 'All' || s.category === activeCategory;
+    const isDone = completedIds.has(s.id);
+    const statusMatch =
+      activeStatus === 'All' ||
+      (activeStatus === 'solved' && isDone) ||
+      (activeStatus === 'unsolved' && !isDone);
+    return diffMatch && catMatch && statusMatch;
+  });
 
-      {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
-          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon name='layout' size={18} color='var(--purple)' />
-          </span>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>Product Design Practice</h1>
-        </div>
-        <p style={{
-          fontSize: '0.88rem', color: 'var(--text-secondary)',
-          margin: '0 0 1rem', lineHeight: 1.6, maxWidth: '580px',
-        }}>
-          Product design questions fail not because candidates lack ideas but because they skip the hard part — defining who the user is before proposing solutions, or prioritizing without a defensible rationale. This room trains the full arc: from scoping the problem correctly through to defending your prioritization when the interviewer pushes back.
-        </p>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-            background: 'var(--purple-bg)', border: '1px solid var(--purple-border)',
-            borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.6rem',
-            fontSize: '0.72rem', color: 'var(--purple)',
-          }}>
-            ◆ 5 phases per scenario
-          </div>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-            background: 'var(--surface-2)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.6rem',
-            fontSize: '0.72rem', color: 'var(--text-muted)',
-          }}>
-            Self-scored with model answers
-          </div>
-        </div>
-      </div>
+  const filters = [
+    {
+      id: 'difficulty',
+      label: 'Difficulty',
+      value: activeDifficulty,
+      onChange: setActiveDifficulty,
+      options: [
+        { value: 'All', label: 'All' },
+        ...ALL_DIFFICULTIES.map(d => ({
+          value: d,
+          label: d.charAt(0).toUpperCase() + d.slice(1),
+          count: productDesignScenarios.filter(s => s.difficulty === d).length,
+        })),
+      ],
+    },
+    {
+      id: 'category',
+      label: 'Category',
+      value: activeCategory,
+      onChange: setActiveCategory,
+      options: [
+        { value: 'All', label: 'All' },
+        ...ALL_CATEGORIES.map(c => ({
+          value: c,
+          label: c,
+          count: productDesignScenarios.filter(s => s.category === c).length,
+        })),
+      ],
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      value: activeStatus,
+      onChange: setActiveStatus,
+      options: [
+        { value: 'All', label: 'All' },
+        { value: 'unsolved', label: 'Unsolved', count: productDesignScenarios.length - completedCount },
+        { value: 'solved', label: 'Solved', count: completedCount },
+      ],
+    },
+  ];
+
+  const clearAll = () => {
+    setActiveDifficulty('All');
+    setActiveCategory('All');
+    setActiveStatus('All');
+  };
+
+  return (
+    <div className='pal-page-enter' style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
+      <RoomHeader
+        icon='layout'
+        accent='purple'
+        eyebrow='Product Design Room'
+        title='Product Design Practice'
+        blurb={'Product design questions fail not because candidates lack ideas but because they skip the hard part — defining who the user is before proposing solutions, or prioritizing without a defensible rationale. This room trains the full arc: from scoping the problem correctly through to defending your prioritization when the interviewer pushes back.'}
+        solved={completedCount}
+        total={productDesignScenarios.length}
+      />
 
       {/* Theory / Cases tab bar */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
@@ -120,145 +133,68 @@ export function ProductDesignBrowser({ onSelectScenario, unlocked, onUnlock, onO
 
       {/* Scenario cards */}
       {!theoryActive && (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
-        {productDesignScenarios.filter(s => diffFilter === 'all' || s.difficulty === diffFilter).map((scenario, idx) => {
-          const progress = allProgress[scenario.id];
-          const result = progress?.result;
-          const levelCfg = result ? LEVEL_CONFIG[result.level] : null;
-          const isLocked = !scenario.isFree && !unlocked;
-          const phasesComplete = progress?.completedPhaseIds?.length || 0;
-          const diffCfg = DIFFICULTY_CONFIG[scenario.difficulty] || DIFFICULTY_CONFIG.medium;
-          const isNextUnstarted = scenario.id === firstUnstartedId;
-
-          return (
-            <div
-              key={scenario.id}
-              className="pal-card-enter pal-card-hover"
-              style={{
-                animationDelay: (Math.min(idx * 28, 400)) + 'ms',
-                border: '1.5px solid var(--border)',
-                borderLeft: isNextUnstarted ? '3px solid var(--purple)' : '3px solid ' + diffCfg.color,
-                borderRadius: 'var(--radius)',
-                background: 'var(--surface)',
-                padding: '1.1rem 1.25rem',
-                cursor: 'pointer',
-                transition: 'transform var(--transition), box-shadow var(--transition), border-color var(--transition)',
-                opacity: isLocked ? 0.7 : 1,
-                position: 'relative',
-              }}
-              onClick={() => isLocked ? onUnlock?.() : onSelectScenario(scenario.id)}
-              onMouseEnter={e => {
-                if (!isLocked) {
-                  e.currentTarget.style.borderColor = 'var(--purple-border)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow)'; e.currentTarget.style.transform = 'translateY(-2px)';
-                }
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              {isNextUnstarted && (
-                <span style={{
-                  position: 'absolute', top: '0.6rem', right: '0.7rem',
-                  fontSize: '0.68rem', fontWeight: 700,
-                  color: 'var(--purple)', background: 'var(--purple-bg)',
-                  border: '1px solid var(--purple-border)',
-                  borderRadius: 4, padding: '0.1rem 0.4rem',
-                }}>
-                  Next →
-                </span>
-              )}
-              {/* Badges row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                {/* Company dot */}
-                <span style={{
-                  fontSize: '0.68rem', fontWeight: 700,
-                  color: scenario.companyColor || 'var(--accent)',
-                  background: 'var(--surface-2)', border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.45rem',
-                }}>
-                  {scenario.company}
-                </span>
-                <DifficultyBadge difficulty={scenario.difficulty} />
-                <CategoryBadge category={scenario.category} />
-                {scenario.isFree && idx === 0 && (
-                  <span style={{
-                    fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                    color: 'var(--green)', background: 'var(--green-bg)', border: '1px solid var(--green-border)',
-                    borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.4rem',
-                  }}>
-                    Free
-                  </span>
-                )}
-                {isLocked && (
-                  <span style={{
-                    fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)',
-                    marginLeft: 'auto',
-                  }}>
-                    <Icon name='lock' size={11} color='currentColor' /> Unlock
-                  </span>
-                )}
-              </div>
-
-              {/* Title */}
-              <div style={{
-                fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)',
-                lineHeight: 1.35, marginBottom: '0.35rem',
-              }}>
-                {scenario.title}
-              </div>
-
-              {/* Prompt preview */}
-              <div style={{
-                fontSize: '0.8rem', color: 'var(--text-muted)',
-                lineHeight: 1.55, marginBottom: '0.6rem',
-                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}>
-                {scenario.prompt.split('\n\n')[0]}
-              </div>
-
-              {/* Footer row */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  {/* Phase progress pips */}
-                  <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
-                    {scenario.phases.map((p, i) => (
-                      <div key={p.id} style={{
-                        width: '6px', height: '6px', borderRadius: '50%',
-                        background: i < phasesComplete ? 'var(--purple)' : 'var(--border)',
-                        transition: 'background 0.15s',
-                      }} />
-                    ))}
-                  </div>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                    {phasesComplete === 0
-                      ? '5 phases'
-                      : phasesComplete === scenario.phases.length
-                        ? 'Completed'
-                        : `${phasesComplete}/${scenario.phases.length} phases`}
-                  </span>
-                </div>
-
-                {levelCfg && (
-                  <span style={{
-                    fontSize: '0.7rem', fontWeight: 700,
-                    color: levelCfg.color,
-                  }}>
-                    {levelCfg.label}
-                  </span>
-                )}
-
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
-                  ~25 min →
-                </span>
-              </div>
+      <>
+        <FilterBar filters={filters} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {displayScenarios.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+              No scenarios match those filters.{' '}
+              <button onClick={clearAll} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', fontSize: '0.875rem', textDecoration: 'underline' }}>
+                Clear filters
+              </button>
             </div>
-          );
-        })}
-      </div>
+          )}
+
+          {displayScenarios.map(scenario => {
+            const progress = allProgress[scenario.id];
+            const result = progress?.result;
+            const isLocked = !scenario.isFree && !unlocked;
+            const phasesComplete = progress?.completedPhaseIds?.length || 0;
+            const totalPhases = scenario.phases.length;
+            const isDone = completedIds.has(scenario.id);
+            const isNextUnstarted = scenario.id === firstUnstartedId;
+
+            const tags = [scenario.company, scenario.category].filter(Boolean);
+
+            let meta;
+            if (result) {
+              meta = LEVEL_LABEL[result.level] || result.level;
+            } else if (phasesComplete > 0 && phasesComplete < totalPhases) {
+              meta = `${phasesComplete}/${totalPhases} phases`;
+            } else if (!isLocked) {
+              meta = `${totalPhases} phases`;
+            }
+
+            const nextBadge = isNextUnstarted ? (
+              <span style={{
+                fontSize: '0.66rem', fontWeight: 700,
+                color: 'var(--purple)', background: 'var(--purple-bg)',
+                border: '1px solid var(--purple-border)',
+                borderRadius: 4, padding: '0.08rem 0.4rem',
+              }}>
+                Next
+              </span>
+            ) : null;
+
+            return (
+              <CaseCard
+                key={scenario.id}
+                id={scenario.id}
+                title={scenario.title}
+                subtitle={scenario.prompt ? scenario.prompt.split('\n\n')[0] : undefined}
+                tags={tags}
+                difficulty={scenario.difficulty}
+                accent='purple'
+                status={isDone ? 'solved' : undefined}
+                locked={isLocked}
+                meta={meta}
+                badge={nextBadge}
+                onClick={() => (isLocked ? onUnlock?.() : onSelectScenario(scenario.id))}
+              />
+            );
+          })}
+        </div>
+      </>
       )}
 
       {theoryActive && (

@@ -282,21 +282,14 @@ function MetricAtlasPanel({ activeCategory, onSetCategory, onClose }) {
 }
 import { metricCases } from '../data/metricCases.js';
 import { growthAnalyticsCases } from '../data/growthAnalyticsCases.js';
-import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { SegmentedTabs } from '../components/shared/SegmentedTabs.jsx';
 import { getMetricsProgress } from '../utils/metricsProgress.js';
 import { getGrowthAnalyticsProgress } from '../utils/growthAnalyticsProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.jsx';
-
-const DIFF_CFG = {
-  foundational: { label: 'Foundational', color: 'var(--blue-text)', bg: 'var(--blue-bg)',   border: 'var(--blue-border)' },
-  analyst:      { label: 'Analyst',      color: 'var(--blue-text)', bg: 'var(--blue-bg)',   border: 'var(--blue-border)' },
-  intermediate: { label: 'Intermediate', color: 'var(--yellow)',    bg: 'var(--yellow-bg)', border: 'var(--yellow-border)' },
-  senior:       { label: 'Senior',       color: 'var(--yellow)',    bg: 'var(--yellow-bg)', border: 'var(--yellow-border)' },
-  advanced:     { label: 'Advanced',     color: 'var(--purple)',    bg: 'var(--purple-bg)', border: 'var(--purple-border)' },
-  staff:        { label: 'Staff',        color: 'var(--teal)',      bg: 'var(--teal-bg)',   border: 'var(--teal-border)' },
-};
+import { RoomHeader } from '../components/shared/RoomHeader.jsx';
+import { FilterBar } from '../components/shared/FilterBar.jsx';
+import { CaseCard } from '../components/shared/CaseCard.jsx';
 
 const LEVEL_CFG = {
   staff:   { label: 'Staff-level',   color: 'var(--purple)',    bg: 'var(--purple-bg)',  border: 'var(--purple-border)' },
@@ -309,40 +302,113 @@ const DIFF_ORDER = { analyst: 0, foundational: 0, intermediate: 1, senior: 1, ad
 
 // Growth Analytics cases — analyst/senior/staff, surfaced as a tagged section
 // inside the Metrics room (cohorts/funnels/growth metrics overlap metric work).
-const GA_DIFF_CFG = {
-  analyst: { label: 'Analyst', color: 'var(--teal)',   bg: 'var(--teal-bg)',   border: 'var(--teal-border)' },
-  senior:  { label: 'Senior',  color: 'var(--yellow)', bg: 'var(--yellow-bg)', border: 'var(--yellow-border)' },
-  staff:   { label: 'Staff',   color: 'var(--red)',    bg: 'var(--red-bg)',    border: 'var(--red-border)' },
-};
-
 const sortedGrowth = [...growthAnalyticsCases].sort((a, b) => {
   const order = { analyst: 0, senior: 1, staff: 2 };
   return (order[a.difficulty] ?? 9) - (order[b.difficulty] ?? 9);
 });
 
+// Derive Metrics-section filter dimensions from data (so 'advanced' etc. surface).
+const METRIC_DIFFICULTIES = (() => {
+  const set = new Set();
+  metricCases.forEach(c => { if (c.difficulty) set.add(c.difficulty); });
+  return Array.from(set).sort((a, b) => (DIFF_ORDER[a] ?? 9) - (DIFF_ORDER[b] ?? 9) || a.localeCompare(b));
+})();
+
+const METRIC_DOMAINS = (() => {
+  const set = new Set();
+  metricCases.forEach(c => { if (c.domain) set.add(c.domain); });
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
+})();
+
 export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnlock, onOpenArticle, onNavigate }) {
   const [section, setSection] = useState('metrics');
   const [sortBy, setSortBy] = useState('default');
   const [theoryActive, setTheoryActive] = useState(false);
-  const [diffFilter, setDiffFilter] = useState('all');
+  const [activeDifficulty, setActiveDifficulty] = useState('All');
+  const [activeDomain, setActiveDomain] = useState('All');
+  const [activeStatus, setActiveStatus] = useState('All');
   const [atlasOpen, setAtlasOpen] = useState(false);
   const [atlasCategory, setAtlasCategory] = useState('growth');
-  const completedCount = metricCases.filter(c => getMetricsProgress(c.id)).length;
 
-  const diffCounts = {
-    all: metricCases.length,
-    analyst: metricCases.filter(c => c.difficulty === 'analyst').length,
-    senior: metricCases.filter(c => c.difficulty === 'senior').length,
-    staff: metricCases.filter(c => c.difficulty === 'staff').length,
-  };
+  const completedMetricIds = new Set(metricCases.filter(c => getMetricsProgress(c.id)).map(c => c.id));
+  const completedCount = completedMetricIds.size;
 
-  const baseCases = sortBy === 'difficulty'
-    ? [...metricCases].sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 1) - (DIFF_ORDER[b.difficulty] ?? 1))
-    : metricCases;
+  // AND logic across all active Metrics-section filters.
+  let displayCases = metricCases.filter(c => {
+    const diffMatch = activeDifficulty === 'All' || c.difficulty === activeDifficulty;
+    const domainMatch = activeDomain === 'All' || c.domain === activeDomain;
+    const isDone = completedMetricIds.has(c.id);
+    const statusMatch =
+      activeStatus === 'All' ||
+      (activeStatus === 'solved' && isDone) ||
+      (activeStatus === 'unsolved' && !isDone);
+    return diffMatch && domainMatch && statusMatch;
+  });
 
-  const displayCases = baseCases.filter(c => diffFilter === 'all' || c.difficulty === diffFilter);
+  if (sortBy === 'difficulty') {
+    displayCases = [...displayCases].sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 1) - (DIFF_ORDER[b.difficulty] ?? 1));
+  }
 
   const firstUnstartedId = metricCases.find(mc => !getMetricsProgress(mc.id))?.id;
+
+  const metricFilters = [
+    {
+      id: 'difficulty',
+      label: 'Difficulty',
+      value: activeDifficulty,
+      onChange: setActiveDifficulty,
+      options: [
+        { value: 'All', label: 'All' },
+        ...METRIC_DIFFICULTIES.map(d => ({
+          value: d,
+          label: d.charAt(0).toUpperCase() + d.slice(1),
+          count: metricCases.filter(c => c.difficulty === d).length,
+        })),
+      ],
+    },
+    {
+      id: 'domain',
+      label: 'Domain',
+      value: activeDomain,
+      onChange: setActiveDomain,
+      options: [
+        { value: 'All', label: 'All' },
+        ...METRIC_DOMAINS.map(d => ({
+          value: d,
+          label: d,
+          count: metricCases.filter(c => c.domain === d).length,
+        })),
+      ],
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      value: activeStatus,
+      onChange: setActiveStatus,
+      options: [
+        { value: 'All', label: 'All' },
+        { value: 'unsolved', label: 'Unsolved', count: metricCases.length - completedCount },
+        { value: 'solved', label: 'Solved', count: completedCount },
+      ],
+    },
+  ];
+
+  const metricSort = {
+    id: 'sort',
+    label: 'Sort',
+    value: sortBy,
+    onChange: setSortBy,
+    options: [
+      { value: 'default', label: 'Default' },
+      { value: 'difficulty', label: 'By Difficulty' },
+    ],
+  };
+
+  const clearMetricFilters = () => {
+    setActiveDifficulty('All');
+    setActiveDomain('All');
+    setActiveStatus('All');
+  };
 
   return (
     <div className="pal-page-enter" style={{ maxWidth: atlasOpen ? '1160px' : '800px', margin: '0 auto', padding: '2rem 1rem', transition: 'max-width 0.2s' }}>
@@ -350,48 +416,33 @@ export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnloc
     <div style={{ flex: 1, minWidth: 0 }}>
 
       {/* Header */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--green-bg)', border: '1px solid var(--green-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon name='bar-chart' size={18} color='var(--green)' />
-          </span>
-          <div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--green)', marginBottom: '0.15rem' }}>
-              Metrics Room
-            </div>
-            <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
-              Metric Design
-            </h1>
-          </div>
-        </div>
-        <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '540px' }}>
-          The most common interview failure is picking the obvious metric and defending it under pressure — but interviewers want to see you spot the metric that games, the denominator that shifts, the guardrail you forgot. This room trains the full decision: not just what to measure, but why that specific metric and what breaks if you get it wrong.
-        </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-          <RoomBadge />
-          <button
-            onClick={() => setAtlasOpen(o => !o)}
-            style={{
-              marginLeft: 'auto',
-              display: 'flex', alignItems: 'center', gap: '0.35rem',
-              background: atlasOpen ? 'var(--green-bg)' : 'var(--surface-2)',
-              border: '1px solid ' + (atlasOpen ? 'var(--green-border)' : 'var(--border)'),
-              borderRadius: '6px', padding: '0.28rem 0.65rem',
-              fontSize: '0.73rem', fontWeight: 600,
-              color: atlasOpen ? 'var(--green)' : 'var(--text-muted)',
-              cursor: 'pointer',
-            }}
-          >
-            <Icon name='book-open' size={12} color={atlasOpen ? 'var(--green)' : 'var(--text-muted)'} />
-            Metric Atlas
-          </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: 96, height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.min(100, Math.round(completedCount / metricCases.length * 100))}%`, background: 'var(--green)', borderRadius: 2, transition: 'width 0.4s' }} />
-            </div>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{completedCount}/{metricCases.length}</span>
-          </div>
-        </div>
+      <RoomHeader
+        icon='bar-chart'
+        accent='green'
+        eyebrow='Metrics Room'
+        title='Metric Design'
+        blurb={'The most common interview failure is picking the obvious metric and defending it under pressure — but interviewers want to see you spot the metric that games, the denominator that shifts, the guardrail you forgot. This room trains the full decision: not just what to measure, but why that specific metric and what breaks if you get it wrong.'}
+        solved={completedCount}
+        total={metricCases.length}
+      />
+
+      {/* Metric Atlas toggle */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', marginTop: '-0.75rem' }}>
+        <button
+          onClick={() => setAtlasOpen(o => !o)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.35rem',
+            background: atlasOpen ? 'var(--green-bg)' : 'var(--surface-2)',
+            border: '1px solid ' + (atlasOpen ? 'var(--green-border)' : 'var(--border)'),
+            borderRadius: '6px', padding: '0.28rem 0.65rem',
+            fontSize: '0.73rem', fontWeight: 600,
+            color: atlasOpen ? 'var(--green)' : 'var(--text-muted)',
+            cursor: 'pointer',
+          }}
+        >
+          <Icon name='book-open' size={12} color={atlasOpen ? 'var(--green)' : 'var(--text-muted)'} />
+          Metric Atlas
+        </button>
       </div>
 
       {/* Foundation nudge */}
@@ -434,127 +485,65 @@ export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnloc
         })}
       </div>
 
-      {/* Sort controls */}
+      {/* Dropdown filter row */}
       {!theoryActive && (
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12, justifyContent: 'flex-end' }}>
-        {['default', 'difficulty'].map(opt => (
-          <button key={opt} onClick={() => setSortBy(opt)} className={`pal-sort-btn${sortBy === opt ? ' active' : ''}`}>{opt === 'default' ? 'Default' : 'By Difficulty'}</button>
-        ))}
-      </div>
+        <FilterBar filters={metricFilters} sort={metricSort} />
       )}
 
-      {/* Difficulty filter chips */}
+      {/* Case cards */}
       {!theoryActive && (
-        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
-      )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {displayCases.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            No cases match those filters.{' '}
+            <button onClick={clearMetricFilters} style={{ background: 'none', border: 'none', color: 'var(--green)', cursor: 'pointer', fontSize: '0.875rem', textDecoration: 'underline' }}>
+              Clear filters
+            </button>
+          </div>
+        )}
 
-      {/* Case cards grid */}
-      {!theoryActive && (
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))',
-        gap: '0.85rem',
-      }}>
-        {displayCases.map((mc, index) => {
+        {displayCases.map(mc => {
           const progress = getMetricsProgress(mc.id);
           const levelCfg = progress?.bestLevel ? LEVEL_CFG[progress.bestLevel] : null;
-          const diffCfg = DIFF_CFG[mc.difficulty] || DIFF_CFG.analyst;
           const isLocked = !mc.isFree && !unlocked;
+          const isDone = completedMetricIds.has(mc.id);
           const isNextUnstarted = mc.id === firstUnstartedId;
 
+          const tags = [mc.domain].filter(Boolean);
+
+          let meta;
+          if (levelCfg) {
+            meta = levelCfg.label;
+          } else if (progress) {
+            meta = `${progress.attempts} attempt${progress.attempts !== 1 ? 's' : ''}`;
+          }
+
+          const nextBadge = isNextUnstarted ? (
+            <span style={{
+              fontSize: '0.66rem', fontWeight: 700,
+              color: 'var(--green)', background: 'var(--green-bg)',
+              border: '1px solid var(--green-border)',
+              borderRadius: 4, padding: '0.08rem 0.4rem',
+            }}>
+              Next
+            </span>
+          ) : null;
+
           return (
-            <div
+            <CaseCard
               key={mc.id}
-              className="pal-card-enter pal-card-hover"
-              role="button"
-              tabIndex={0}
-              onClick={() => isLocked ? (onUnlock && onUnlock()) : onSelectCase(mc.id)}
-              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); isLocked ? (onUnlock && onUnlock()) : onSelectCase(mc.id); } }}
-              style={{
-                animationDelay: (Math.min(index * 28, 400)) + 'ms',
-                background: 'var(--surface)',
-                border: '1.5px solid var(--border)',
-                borderLeft: isNextUnstarted ? '3px solid var(--green)' : '1.5px solid var(--border)',
-                borderRadius: 'var(--radius)',
-                padding: '1.25rem',
-                cursor: 'pointer',
-                transition: 'transform var(--transition), box-shadow var(--transition), border-color var(--transition)',
-                display: 'flex', flexDirection: 'column', gap: '0.6rem',
-                position: 'relative',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'var(--green-border)';
-                e.currentTarget.style.boxShadow = 'var(--shadow)'; e.currentTarget.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              {isNextUnstarted && (
-                <span style={{
-                  position: 'absolute', top: '0.6rem', right: '0.7rem',
-                  fontSize: '0.68rem', fontWeight: 700,
-                  color: 'var(--green)', background: 'var(--green-bg)',
-                  border: '1px solid var(--green-border)',
-                  borderRadius: 4, padding: '0.1rem 0.4rem',
-                }}>
-                  Next →
-                </span>
-              )}
-              {/* Badges row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-                <span style={{
-                  fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                  color: diffCfg.color, background: diffCfg.bg, border: `1px solid ${diffCfg.border}`,
-                  borderRadius: 'var(--radius-sm)', padding: '0.08rem 0.35rem',
-                }}>{diffCfg.label}</span>
-                <span style={{
-                  fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                  color: 'var(--text-dim)', background: 'var(--surface-2)', border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-sm)', padding: '0.08rem 0.35rem',
-                }}>{mc.domain}</span>
-                {levelCfg && (
-                  <span style={{
-                    fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                    color: levelCfg.color, background: levelCfg.bg, border: `1px solid ${levelCfg.border}`,
-                    borderRadius: 'var(--radius-sm)', padding: '0.08rem 0.35rem',
-                  }}><Icon name='check' size={11} color='currentColor' /> {levelCfg.label}</span>
-                )}
-              </div>
-
-              {/* Title + subtitle */}
-              <div>
-                <h3 style={{ fontSize: '0.97rem', fontWeight: 800, color: 'var(--text)', margin: '0 0 0.2rem', letterSpacing: '-0.01em', lineHeight: 1.35 }}>
-                  {mc.title}
-                </h3>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
-                  {mc.subtitle}
-                </p>
-              </div>
-
-              {/* Context trap hint */}
-              <p style={{
-                fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5,
-                borderLeft: '2px solid var(--border-subtle)', paddingLeft: '0.6rem',
-              }}>
-                {mc.context.trap}
-              </p>
-
-              {/* Bottom row */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-                {progress ? (
-                  <span style={{ fontSize: '0.73rem', color: 'var(--text-dim)' }}>
-                    {progress.attempts} attempt{progress.attempts !== 1 ? 's' : ''} · Resume →
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '0.73rem', color: 'var(--text-dim)' }}>Not started</span>
-                )}
-                {!isLocked && (
-                  <span style={{ fontSize: '0.78rem', color: 'var(--green)', fontWeight: 600 }}>→</span>
-                )}
-              </div>
-            </div>
+              id={mc.id}
+              title={mc.title}
+              subtitle={mc.subtitle || mc.context?.trap}
+              tags={tags}
+              difficulty={mc.difficulty}
+              accent='green'
+              status={isDone ? 'solved' : undefined}
+              locked={isLocked}
+              meta={meta}
+              badge={nextBadge}
+              onClick={() => (isLocked ? (onUnlock && onUnlock()) : onSelectCase(mc.id))}
+            />
           );
         })}
       </div>
@@ -616,98 +605,27 @@ export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnloc
           Growth decomposition, retention curves, loop analysis, and the acquisition-vs-retention calls that define senior growth analyst interviews. These cases live alongside metric design because the levers — cohorts, funnels, stickiness — are the same.
         </p>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))',
-          gap: '0.85rem',
-        }}>
-          {sortedGrowth.map((m, index) => {
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {sortedGrowth.map(m => {
             const prog = getGrowthAnalyticsProgress(m.id);
             const isLocked = !m.isFree && !unlocked;
-            const diffCfg = GA_DIFF_CFG[m.difficulty] || GA_DIFF_CFG.analyst;
+            const tags = ['Growth Analytics', m.domain].filter(Boolean);
+            const meta = prog ? `${prog.attempts} attempt${prog.attempts !== 1 ? 's' : ''}` : undefined;
 
             return (
-              <div
+              <CaseCard
                 key={m.id}
-                className="pal-card-enter pal-card-hover"
-                role="button"
-                tabIndex={0}
-                onClick={() => isLocked ? (onUnlock && onUnlock()) : onSelectGrowth?.(m.id)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    isLocked ? (onUnlock && onUnlock()) : onSelectGrowth?.(m.id);
-                  }
-                }}
-                style={{
-                  animationDelay: String(Math.min(index * 28, 400)) + 'ms',
-                  background: 'var(--surface)',
-                  border: '1.5px solid var(--border)',
-                  borderLeft: '3px solid var(--teal)',
-                  borderRadius: 'var(--radius)',
-                  padding: '1.25rem',
-                  cursor: 'pointer',
-                  transition: 'transform var(--transition), box-shadow var(--transition), border-color var(--transition)',
-                  opacity: isLocked ? 0.7 : 1,
-                  display: 'flex', flexDirection: 'column', gap: '0.6rem',
-                  position: 'relative',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = 'var(--teal-border)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow)'; e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'var(--border)';
-                  e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                {/* Badges row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-                  <span style={{
-                    fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                    color: 'var(--teal)', background: 'var(--teal-bg)', border: '1px solid var(--teal-border)',
-                    borderRadius: 'var(--radius-sm)', padding: '0.08rem 0.35rem',
-                  }}>Growth Analytics</span>
-                  <span style={{
-                    fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                    color: diffCfg.color, background: diffCfg.bg, border: `1px solid ${diffCfg.border}`,
-                    borderRadius: 'var(--radius-sm)', padding: '0.08rem 0.35rem',
-                  }}>{diffCfg.label}</span>
-                  <span style={{
-                    fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                    color: 'var(--text-dim)', background: 'var(--surface-2)', border: '1px solid var(--border)',
-                    borderRadius: 'var(--radius-sm)', padding: '0.08rem 0.35rem',
-                  }}>{m.domain}</span>
-                  {isLocked && <span style={{ fontSize: '0.8rem', marginLeft: 'auto' }}><Icon name='lock' size={13} color='currentColor' /></span>}
-                  {prog && (
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', marginLeft: 'auto' }}><Icon name='check' size={11} color='currentColor' /></span>
-                  )}
-                </div>
-
-                {/* Title + subtitle */}
-                <div>
-                  <h3 style={{ fontSize: '0.97rem', fontWeight: 800, color: 'var(--text)', margin: '0 0 0.2rem', letterSpacing: '-0.01em', lineHeight: 1.35 }}>
-                    {m.title}
-                  </h3>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
-                    {m.subtitle}
-                  </p>
-                </div>
-
-                {/* Bottom row */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-                  {prog ? (
-                    <span style={{ fontSize: '0.73rem', color: 'var(--text-dim)' }}>
-                      {prog.attempts} attempt{prog.attempts !== 1 ? 's' : ''} · Resume →
-                    </span>
-                  ) : (
-                    <span style={{ fontSize: '0.73rem', color: 'var(--text-dim)' }}>Not started</span>
-                  )}
-                  {!isLocked && (
-                    <span style={{ fontSize: '0.78rem', color: 'var(--teal)', fontWeight: 600 }}>→</span>
-                  )}
-                </div>
-              </div>
+                id={m.id}
+                title={m.title}
+                subtitle={m.subtitle}
+                tags={tags}
+                difficulty={m.difficulty}
+                accent='teal'
+                status={prog ? 'solved' : undefined}
+                locked={isLocked}
+                meta={meta}
+                onClick={() => (isLocked ? (onUnlock && onUnlock()) : onSelectGrowth?.(m.id))}
+              />
             );
           })}
         </div>
@@ -727,31 +645,5 @@ export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnloc
 
     </div>
   </div>
-  );
-}
-
-function RoomBadge() {
-  return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-      background: 'var(--green-bg)', border: '1px solid var(--green-border)',
-      borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.6rem',
-      fontSize: '0.75rem', color: 'var(--green)', fontWeight: 700,
-    }}>
-      Metrics · {metricCases.length} Cases
-    </div>
-  );
-}
-
-function StatPill({ n, label, color }) {
-  return (
-    <div style={{
-      background: 'var(--surface-2)', border: '1px solid var(--border-subtle)',
-      borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.7rem',
-      display: 'flex', alignItems: 'baseline', gap: '0.3rem',
-    }}>
-      <span style={{ fontSize: '1rem', fontWeight: 800, color: color || 'var(--green)', lineHeight: 1 }}>{n}</span>
-      <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>{label}</span>
-    </div>
   );
 }

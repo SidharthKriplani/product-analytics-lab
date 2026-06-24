@@ -92,6 +92,25 @@ function formatTime(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+// Soft per-round target window — the "real conditions" pacing cue. Rounds aren't
+// hard-capped (no auto-advance), but the timer shows green inside the window,
+// amber past it, so the candidate feels the clock the way a real loop does.
+const ROUND_TARGET_SECONDS = 12 * 60; // ~12 min/round soft target
+const ROUND_WARN_SECONDS = 8 * 60;    // under 8 min reads as "moving fast"
+
+// Interviewer framing line per room — opens each round like a staged loop, not a
+// quiz. One-question focus per screen; this is the human voice at the top.
+const ROOM_INTERVIEWER_PROMPT = {
+  metrics: 'your metrics interviewer asks',
+  stats: 'your stats interviewer asks',
+  rca: 'your RCA interviewer asks',
+  estimation: 'your estimation interviewer asks',
+  behavioral: 'your hiring manager asks',
+  'product-design': 'your product-design interviewer asks',
+  prioritization: 'your prioritization interviewer asks',
+  cases: 'your case interviewer asks',
+};
+
 function getCasePrompt(roomCase) {
   if (!roomCase) return '';
   return (
@@ -145,17 +164,6 @@ function getCaseRubric(roomCase) {
   return [];
 }
 
-const ROOM_COLORS = {
-  stats: 'var(--purple)',
-  rca: 'var(--orange, #f97316)',
-  metrics: 'var(--green)',
-  estimation: 'var(--blue, #3b82f6)',
-  behavioral: 'var(--accent)',
-  'product-design': 'var(--purple)',
-  prioritization: 'var(--green)',
-  cases: 'var(--orange, #f97316)',
-};
-
 // Room key → hash route for the room's landing page.
 // Keys match the `room` field set in buildSession; routes confirmed against
 // src/utils/hashRouting.js PAGE_TO_HASH (the room key IS the hash segment for these).
@@ -182,13 +190,6 @@ const ROOM_PILLARS = {
   cases: 'Judgment',
   'product-design': 'Judgment',
   prioritization: 'Judgment',
-};
-
-const PILLAR_COLORS = {
-  Recall: 'var(--yellow)',
-  Fluency: 'var(--blue, #3b82f6)',
-  Behavioral: 'var(--accent)',
-  Judgment: 'var(--green)',
 };
 
 const SESSION_LENGTH_OPTIONS = [
@@ -251,6 +252,10 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
   const [session, setSession] = useState(null);
   const [currentCaseIndex, setCurrentCaseIndex] = useState(0);
   const [elapsed, setElapsed] = useState(0);
+  // Per-round elapsed (resets each round) — the prominent "real conditions" clock.
+  const [roundElapsed, setRoundElapsed] = useState(0);
+  // Time spent per round, captured on advance — surfaced in the scorecard.
+  const [roundTimes, setRoundTimes] = useState({});
   const [revealedCases, setRevealedCases] = useState(new Set());
   const [notes, setNotes] = useState({});
   const [ratings, setRatings] = useState({});
@@ -270,12 +275,18 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
     if (screen === 'active') {
       intervalRef.current = setInterval(() => {
         setElapsed(e => e + 1);
+        setRoundElapsed(e => e + 1);
       }, 1000);
     } else {
       clearInterval(intervalRef.current);
     }
     return () => clearInterval(intervalRef.current);
   }, [screen]);
+
+  // Reset the per-round clock whenever the active round changes.
+  useEffect(() => {
+    if (screen === 'active') setRoundElapsed(0);
+  }, [currentCaseIndex, screen]);
 
   // Stop speech recognition when navigating away from active screen
   useEffect(() => {
@@ -297,6 +308,8 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
     setSession(built);
     setCurrentCaseIndex(0);
     setElapsed(0);
+    setRoundElapsed(0);
+    setRoundTimes({});
     setRevealedCases(new Set());
     setNotes({});
     setRatings({});
@@ -346,17 +359,26 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
       recognitionRef.current?.stop();
       setIsListening(false);
     }
+    // Capture the time spent on this round before moving on.
+    const spent = roundElapsed;
+    setRoundTimes(prev => ({ ...prev, [currentCaseIndex]: spent }));
     if (currentCaseIndex < sessionLength - 1) {
       setCurrentCaseIndex(i => i + 1);
     } else {
-      finishSimulation();
+      finishSimulation(spent);
     }
   }
 
-  function finishSimulation() {
+  function finishSimulation(lastRoundSpent) {
     clearInterval(intervalRef.current);
     recognitionRef.current?.stop();
     setIsListening(false);
+    // Final round's time may arrive via handleNext before state has flushed.
+    const finalRoundTimes = lastRoundSpent !== undefined
+      ? { ...roundTimes, [currentCaseIndex]: lastRoundSpent }
+      : roundTimes;
+    // Persist into state so the debrief scorecard can list every round's time.
+    setRoundTimes(finalRoundTimes);
     // Save to localStorage
     try {
       const history = JSON.parse(localStorage.getItem('pal-sim-history-v1') || '[]');
@@ -376,6 +398,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
             room: s.room,
             roundIndex: s.roundIndex,
             rating: ratings[i] || null,
+            seconds: finalRoundTimes[i] ?? null,
             coverage: rubric.length > 0 ? { checked, total: rubric.length } : null,
           };
         }),
@@ -426,21 +449,24 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
             display: 'flex', alignItems: 'center', gap: '0.4rem',
           }}
         >
-          ← Back
+          <Icon name='arrow-left' size={14} color='currentColor' /> Back
         </button>
 
-        <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
+        <div style={{ fontSize: '0.66rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.16em', marginBottom: '0.5rem' }}>
+          Mock Onsite
+        </div>
+        <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
           Interview Simulator
         </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.25rem', lineHeight: 1.6 }}>
-          A staged mock loop. Each round mirrors a real onsite — ordered by role, timed end-to-end, no feedback until the debrief. Open answers get a model-answer self-grade so you see exactly what you covered.
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: '1.25rem', lineHeight: 1.65, maxWidth: '52ch' }}>
+          A staged mock onsite — {sessionLength} timed rounds, ordered for your role, no feedback until the debrief. You walk in cold, work the clock, then read your report card.
         </p>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.75rem' }}>
-          <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.55rem', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
-            ~ Scripted — not live model inference
+          <span style={{ fontSize: '0.68rem', fontWeight: 600, background: 'transparent', border: '1px solid var(--border)', borderRadius: '20px', padding: '0.22rem 0.7rem', color: 'var(--text-muted)', letterSpacing: '0.02em' }}>
+            Scripted loop — not live model inference
           </span>
-          <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.55rem', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
-            Cases drawn from real PAL case bank
+          <span style={{ fontSize: '0.68rem', fontWeight: 600, background: 'transparent', border: '1px solid var(--border)', borderRadius: '20px', padding: '0.22rem 0.7rem', color: 'var(--text-muted)', letterSpacing: '0.02em' }}>
+            Cases drawn from the real PAL bank
           </span>
         </div>
 
@@ -495,28 +521,32 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
               <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                 Loop order
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
                 {previewLoop.map((label, i) => (
-                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
                     <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
                       fontSize: '0.74rem',
-                      fontWeight: 700,
-                      padding: '0.22rem 0.6rem',
+                      fontWeight: 600,
+                      padding: '0.24rem 0.65rem',
                       borderRadius: '20px',
-                      background: 'var(--surface-2)',
-                      border: `1px solid ${ROOM_COLORS[ROLE_ROUNDS[role][i]] || 'var(--border)'}`,
+                      background: 'transparent',
+                      border: '1px solid var(--border)',
                       color: 'var(--text)',
                     }}>
-                      {i + 1}. {label}
+                      <span style={{ color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums', fontSize: '0.7rem' }}>{i + 1}</span>
+                      {label}
                     </span>
                     {i < previewLoop.length - 1 && (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>→</span>
+                      <Icon name='chevron-right' size={12} color='var(--text-muted)' />
                     )}
                   </span>
                 ))}
               </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.72rem', margin: '0.5rem 0 0' }}>
-                Rounds cycle this order until your chosen length is filled.
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.72rem', margin: '0.55rem 0 0', lineHeight: 1.5 }}>
+                {previewLoop.length >= sessionLength
+                  ? `Your ${sessionLength}-round loop runs the first ${sessionLength} of these in order.`
+                  : `Rounds cycle this order until all ${sessionLength} are filled.`}
               </p>
             </div>
           )}
@@ -620,8 +650,9 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           </div>
         </div>
 
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: '1.25rem 0', lineHeight: 1.5 }}>
-          Rounds run in order for your role. The timer starts the moment you begin.
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: '1.25rem 0', lineHeight: 1.55, display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+          <Icon name='timer' size={14} color='var(--text-muted)' />
+          The clock starts the moment you begin — there is no pausing a round.
         </p>
 
         <button
@@ -653,7 +684,6 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
     const roomCase = current?.case;
     const isLast = currentCaseIndex === sessionLength - 1;
     const isRevealed = revealedCases.has(currentCaseIndex);
-    const roomColor = ROOM_COLORS[current?.room] || 'var(--accent)';
     const isMCQQuestion = isQuestionMCQ(currentCaseIndex);
     const mcqQ = isMCQQuestion ? mcqQuestions[currentCaseIndex] : null;
     const mcqAnswered = mcqAnswers[currentCaseIndex] !== undefined;
@@ -696,102 +726,109 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
 
     return (
       <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-        {/* Round framing + prominent timer */}
+        {/* Round framing + prominent per-round timer */}
         <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem',
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+          marginBottom: '0.85rem', flexWrap: 'wrap', gap: '1rem',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <span style={{
-              background: roomColor,
-              color: '#fff',
-              fontSize: '0.78rem',
-              fontWeight: 800,
-              padding: '0.3rem 0.8rem',
-              borderRadius: '20px',
-              letterSpacing: '0.02em',
-            }}>
-              Round {currentCaseIndex + 1} of {sessionLength}
-            </span>
-            <span style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>
-              {current?.label}
-            </span>
-            <span style={{
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              padding: '0.18rem 0.55rem',
-              borderRadius: '20px',
-              background: 'var(--surface-2)',
-              color: 'var(--text-muted)',
-              border: '1px solid var(--border)',
-            }}>
-              {isMCQQuestion ? 'MCQ' : 'Open-ended'}
-            </span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.3rem' }}>
+              <span style={{
+                fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)',
+                textTransform: 'uppercase', letterSpacing: '0.14em',
+                fontVariantNumeric: 'tabular-nums',
+              }}>
+                Round {currentCaseIndex + 1} of {sessionLength}
+              </span>
+              <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--border)' }} />
+              <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.015em' }}>
+                {current?.label}
+              </span>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 600,
+                padding: '0.14rem 0.5rem',
+                borderRadius: '20px',
+                background: 'transparent',
+                color: 'var(--text-muted)',
+                border: '1px solid var(--border)',
+              }}>
+                {isMCQQuestion ? 'MCQ' : 'Open-ended'}
+              </span>
+            </div>
           </div>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '0.5rem',
-            fontFamily: 'monospace',
-            fontSize: '1.35rem',
-            fontWeight: 700,
-            color: elapsed > 2700 ? 'var(--orange, #f97316)' : 'var(--text)',
-            background: 'var(--surface-2)',
-            border: '1px solid var(--border)',
-            borderRadius: '10px',
-            padding: '0.3rem 0.85rem',
-          }}>
-            <span style={{ fontSize: '1rem' }}><Icon name='timer' size={16} color='currentColor' /></span> {formatTime(elapsed)}
+          {/* Prominent per-round timer; overall elapsed sits quietly beneath it */}
+          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              fontVariantNumeric: 'tabular-nums',
+              color: roundElapsed >= ROUND_TARGET_SECONDS
+                ? 'var(--accent)'
+                : 'var(--text)',
+              lineHeight: 1,
+            }}>
+              <Icon name='timer' size={17} color='currentColor' />
+              {formatTime(roundElapsed)}
+            </div>
+            <div style={{
+              fontSize: '0.66rem', fontWeight: 600, color: 'var(--text-muted)',
+              letterSpacing: '0.04em', marginTop: '0.3rem',
+              fontVariantNumeric: 'tabular-nums',
+            }}>
+              {roundElapsed >= ROUND_TARGET_SECONDS
+                ? 'OVER TARGET'
+                : roundElapsed < ROUND_WARN_SECONDS
+                  ? `TARGET ~${Math.round(ROUND_TARGET_SECONDS / 60)} MIN`
+                  : 'WRAP IT UP'}
+              {'  ·  '}
+              TOTAL {formatTime(elapsed)}
+            </div>
           </div>
         </div>
 
-        {/* Progress rail — one segment per round, colored by rating / coverage */}
+        {/* Interviewer framing line — opens the round like a staged loop */}
+        {!isMCQQuestion && (
+          <p style={{
+            color: 'var(--text-muted)', fontSize: '0.86rem', lineHeight: 1.55,
+            margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+          }}>
+            <Icon name='user' size={14} color='var(--text-muted)' />
+            <span>
+              Round {currentCaseIndex + 1} — {ROOM_INTERVIEWER_PROMPT[current?.room] || 'your interviewer asks'}:
+            </span>
+          </p>
+        )}
+
+        {/* Round rail — one dot per round. Monochrome by design: no pass/fail
+            colour leaks before the debrief. Past rounds fill, current glows
+            accent, future rounds stay hairline. */}
         <div
           className="pal-card-enter"
-          style={{ display: 'flex', gap: '0.3rem', marginBottom: '2rem', flexWrap: 'wrap' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '1.75rem', flexWrap: 'wrap' }}
           aria-label={`Round ${currentCaseIndex + 1} of ${sessionLength}`}
         >
           {session.map((s, i) => {
             const isCurrent = i === currentCaseIndex;
-            const wasRevealed = revealedCases.has(i);
-            const wasMcqAnswered = mcqAnswers[i] !== undefined;
-            const rating = ratings[i];
-            // Coverage-derived color (open questions with a rubric): map ratio to band.
-            const iRubric = getCaseRubric(s.case);
-            const iChecked = coverage[i] ? coverage[i].size : 0;
-            const covRatio = iRubric.length > 0 ? iChecked / iRubric.length : null;
-            const covColor =
-              covRatio === null ? null
-                : covRatio >= 0.75 ? 'var(--green)'
-                : covRatio >= 0.4 ? 'var(--yellow)'
-                : covRatio > 0 ? 'var(--red)'
-                : null;
-            const ratingColor =
-              rating === 'strong' ? 'var(--green)'
-              : rating === 'ok' ? 'var(--yellow)'
-              : rating === 'miss' ? 'var(--red)'
-              : null;
-            const answered = rating || wasRevealed || wasMcqAnswered || (covRatio !== null && iChecked > 0);
-            const segBg = isCurrent
-              ? 'var(--accent)'
-              : ratingColor
-                ? ratingColor
-                : covColor
-                  ? covColor
-                  : answered
-                    ? 'var(--text-muted)'
-                    : 'var(--border)';
+            const isPast = i < currentCaseIndex;
             return (
               <div
                 key={i}
-                title={`Round ${i + 1}${rating ? ' · ' + rating : covRatio !== null ? ' · ' + iChecked + '/' + iRubric.length : ''}`}
+                title={`Round ${i + 1} · ${s.label}${isPast ? ' (done)' : isCurrent ? ' (now)' : ''}`}
                 style={{
-                  height: '6px',
-                  flex: '1 1 0',
-                  minWidth: '14px',
+                  width: isCurrent ? '26px' : '8px',
+                  height: '8px',
                   borderRadius: '20px',
-                  background: segBg,
-                  opacity: isCurrent ? 1 : answered ? 0.95 : 0.55,
-                  transform: isCurrent ? 'scaleY(1.5)' : 'scaleY(1)',
-                  transition: 'background 0.18s, transform 0.18s, opacity 0.18s',
+                  background: isCurrent
+                    ? 'var(--accent)'
+                    : isPast
+                      ? 'var(--text-muted)'
+                      : 'transparent',
+                  border: isPast || isCurrent ? 'none' : '1px solid var(--border)',
+                  opacity: isCurrent ? 1 : isPast ? 0.85 : 1,
+                  transition: 'width 0.2s, background 0.2s, opacity 0.2s',
                 }}
               />
             );
@@ -805,7 +842,6 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           borderRadius: '12px',
           padding: '1.75rem',
           marginBottom: '1.25rem',
-          borderTop: `3px solid ${roomColor}`,
         }}>
           {isMCQQuestion && mcqQ ? (
             /* MCQ question view */
@@ -854,7 +890,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                   lineHeight: 1.65,
                   color: 'var(--text)',
                 }}>
-                  <span style={{ fontWeight: 700, color: 'var(--yellow, #eab308)', marginRight: 6 }}>Explanation</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.72rem', marginRight: 6 }}>Why</span>
                   {mcqQ.explanation}
                 </div>
               )}
@@ -877,7 +913,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                   padding: '1rem',
                   background: 'var(--surface-2)',
                   borderRadius: '8px',
-                  borderLeft: `3px solid ${roomColor}`,
+                  border: '1px solid var(--border)',
                 }}>
                   <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Model Answer
@@ -1111,23 +1147,19 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
       ? components.reduce((a, b) => a + b, 0) / components.length
       : null;
 
-    let verdictLabel, verdictColor, verdictBg;
+    let verdictLabel, verdictColor;
     if (overallPct === null) {
       verdictLabel = 'Session complete';
       verdictColor = 'var(--text)';
-      verdictBg = 'var(--surface-2)';
     } else if (overallPct >= 0.8) {
       verdictLabel = 'Strong showing';
       verdictColor = 'var(--green)';
-      verdictBg = 'var(--green-bg, rgba(34,197,94,0.1))';
     } else if (overallPct >= 0.55) {
       verdictLabel = 'Solid, with gaps';
       verdictColor = 'var(--yellow)';
-      verdictBg = 'var(--yellow-bg, rgba(234,179,8,0.1))';
     } else {
       verdictLabel = 'Needs work';
       verdictColor = 'var(--red)';
-      verdictBg = 'var(--red-bg, rgba(239,68,68,0.1))';
     }
 
     // Weakest rooms for "Practice this" deep-links: rank by lowest combined
@@ -1150,21 +1182,24 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
 
     return (
       <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
-            Debrief
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ fontSize: '0.66rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.16em', marginBottom: '0.5rem' }}>
+            Scorecard
+          </div>
+          <h1 style={{ fontSize: '1.85rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
+            Your mock onsite report
           </h1>
           {/* Session config summary */}
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '0.5rem' }}>
             <span style={{
               display: 'inline-block',
-              background: 'var(--surface-2)',
+              background: 'transparent',
               border: '1px solid var(--border)',
-              borderRadius: '6px',
-              padding: '0.2rem 0.65rem',
-              fontSize: '0.8rem',
+              borderRadius: '20px',
+              padding: '0.2rem 0.7rem',
+              fontSize: '0.78rem',
               fontWeight: 600,
-              color: 'var(--text)',
+              color: 'var(--text-muted)',
             }}>
               {sessionLengthLabel} {sessionLength}Q · {roleLabel} · {sessionModeLabel}
             </span>
@@ -1192,12 +1227,14 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           </p>
         </div>
 
-        {/* ── Verdict band ── */}
+        {/* ── Verdict band — monochrome card; the verdict colour is the single
+            semantic accent (a thin top hairline + the headline text). ── */}
         <div
           className="pal-reveal-in"
           style={{
-            background: verdictBg,
-            border: `1px solid ${verdictColor}`,
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderTop: `2px solid ${verdictColor}`,
             borderRadius: '12px',
             padding: '1.25rem 1.5rem',
             marginBottom: '1.25rem',
@@ -1208,13 +1245,13 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
             flexWrap: 'wrap', gap: '0.75rem',
           }}>
             <div>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.25rem' }}>
-                Overall
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.3rem' }}>
+                Overall verdict
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: verdictColor, letterSpacing: '-0.01em' }}>
+              <div style={{ fontSize: '1.55rem', fontWeight: 700, color: verdictColor, letterSpacing: '-0.015em' }}>
                 {verdictLabel}
                 {overallPct !== null && (
-                  <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-muted)', marginLeft: '0.5rem', fontVariantNumeric: 'tabular-nums' }}>
                     {Math.round(overallPct * 100)}%
                   </span>
                 )}
@@ -1224,7 +1261,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
             <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', fontFamily: 'monospace' }}>{formatTime(elapsed)}</div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontVariantNumeric: 'tabular-nums' }}>{formatTime(elapsed)}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rounds</div>
@@ -1258,6 +1295,96 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           </div>
         </div>
 
+        {/* ── Rounds timeline — every round listed with its time + result, the
+            way a real loop debrief walks each interviewer in order. ── */}
+        <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          marginBottom: '1.25rem',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>
+              The loop, round by round
+            </h3>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              {session.length} rounds · {formatTime(elapsed)} total
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {session.map((s, i) => {
+              const wasMCQ = isQuestionMCQ(i);
+              const secs = roundTimes[i];
+              const overTarget = secs != null && secs >= ROUND_TARGET_SECONDS;
+              // Compact per-round result chip.
+              let resultLabel = 'Not rated';
+              let resultColor = 'var(--text-muted)';
+              if (wasMCQ && mcqAnswers[i] !== undefined) {
+                const q = mcqQuestions[i];
+                const correct = q?.options.find(o => o.id === mcqAnswers[i])?.correct === true;
+                resultLabel = correct ? 'Correct' : 'Wrong';
+                resultColor = correct ? 'var(--green)' : 'var(--red)';
+              } else if (!wasMCQ) {
+                const iRubric = getCaseRubric(s.case);
+                if (iRubric.length > 0) {
+                  const checked = coverage[i] ? coverage[i].size : 0;
+                  resultLabel = `${checked}/${iRubric.length} covered`;
+                  const ratio = checked / iRubric.length;
+                  resultColor = ratio >= 0.75 ? 'var(--green)' : ratio >= 0.4 ? 'var(--yellow)' : 'var(--text-muted)';
+                } else if (ratings[i]) {
+                  const map = { strong: ['Strong', 'var(--green)'], ok: ['OK', 'var(--yellow)'], miss: ['Miss', 'var(--red)'] };
+                  [resultLabel, resultColor] = map[ratings[i]] || [resultLabel, resultColor];
+                }
+              }
+              return (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                    padding: '0.7rem 0',
+                    borderTop: i === 0 ? 'none' : '1px solid var(--border)',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <span style={{
+                    minWidth: 22, height: 22, borderRadius: '50%',
+                    border: '1px solid var(--border)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)',
+                    fontVariantNumeric: 'tabular-nums', flexShrink: 0,
+                  }}>
+                    {i + 1}
+                  </span>
+                  <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: '0.88rem' }}>
+                    {s.label}
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    {wasMCQ ? 'MCQ' : 'Open'}
+                  </span>
+                  <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.9rem', flexWrap: 'wrap' }}>
+                    {secs != null && (
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                        fontSize: '0.78rem', fontWeight: 700,
+                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                        fontVariantNumeric: 'tabular-nums',
+                        color: overTarget ? 'var(--accent)' : 'var(--text)',
+                      }}>
+                        <Icon name='timer' size={13} color='currentColor' />
+                        {formatTime(secs)}
+                      </span>
+                    )}
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: resultColor }}>
+                      {resultLabel}
+                    </span>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* ── Per-room breakdown ── */}
         <div style={{
           background: 'var(--surface)',
@@ -1267,13 +1394,11 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           marginBottom: '1.25rem',
         }}>
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1rem' }}>
-            By Room
+            By room
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
             {roomBreakdown.map(r => {
               const pillar = ROOM_PILLARS[r.room] || 'Judgment';
-              const pillarColor = PILLAR_COLORS[pillar] || 'var(--text-muted)';
-              const roomColor = ROOM_COLORS[r.room] || 'var(--accent)';
               const hasMcq = r.mcqTotal > 0;
               const pct = hasMcq ? Math.round((r.mcqCorrect / r.mcqTotal) * 100) : null;
               const hasCov = r.covTotal > 0;
@@ -1284,10 +1409,10 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                   style={{
                     display: 'flex', alignItems: 'center', gap: '0.6rem',
                     flexWrap: 'wrap',
-                    padding: '0.6rem 0.75rem',
+                    padding: '0.65rem 0.85rem',
                     background: 'var(--surface-2)',
                     borderRadius: '8px',
-                    borderLeft: `3px solid ${roomColor}`,
+                    border: '1px solid var(--border)',
                   }}
                 >
                   <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: '0.88rem' }}>
@@ -1295,11 +1420,11 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                   </span>
                   <span style={{
                     fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    padding: '0.12rem 0.45rem', borderRadius: '20px',
-                    color: pillarColor,
-                    background: 'var(--surface)',
-                    border: `1px solid ${pillarColor}`,
+                    letterSpacing: '0.06em',
+                    padding: '0.12rem 0.5rem', borderRadius: '20px',
+                    color: 'var(--text-muted)',
+                    background: 'transparent',
+                    border: '1px solid var(--border)',
                   }}>
                     {pillar}
                   </span>
@@ -1333,11 +1458,11 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
             })}
           </div>
 
-          {/* Practice this → deep-links for weakest rooms */}
+          {/* Weakest areas → "Practice this" deep-links */}
           {weakestRooms.length > 0 && (
             <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
-                Practice your weak spots
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.6rem' }}>
+                Weakest areas — drill these next
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {weakestRooms.map(r => {
@@ -1348,8 +1473,9 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                       className="pal-card-hover"
                       onClick={() => { window.location.hash = '#/' + route; }}
                       style={{
-                        background: 'var(--surface-2)',
-                        border: `1px solid ${ROOM_COLORS[r.room] || 'var(--accent)'}`,
+                        display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                        background: 'transparent',
+                        border: '1px solid var(--border)',
                         borderRadius: '8px',
                         padding: '0.5rem 0.9rem',
                         color: 'var(--text)',
@@ -1358,7 +1484,8 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                         cursor: 'pointer',
                       }}
                     >
-                      Practice {r.label} →
+                      Practice {r.label}
+                      <Icon name='arrow-right' size={13} color='var(--accent)' />
                     </button>
                   );
                 })}
@@ -1370,7 +1497,6 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {session.map((s, i) => {
             const roomCase = s?.case;
-            const roomColor = ROOM_COLORS[s?.room] || 'var(--accent)';
             const wasQuestionMCQ = isQuestionMCQ(i);
             const mcqQ = wasQuestionMCQ ? mcqQuestions[i] : null;
             const answeredId = mcqAnswers[i];
@@ -1402,17 +1528,30 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                     Round {i + 1}
                   </span>
                   <span style={{
-                    background: roomColor,
-                    color: '#fff',
+                    background: 'transparent',
+                    color: 'var(--text)',
                     fontSize: '0.7rem',
                     fontWeight: 700,
                     padding: '0.18rem 0.55rem',
                     borderRadius: '20px',
+                    border: '1px solid var(--border)',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.03em',
+                    letterSpacing: '0.05em',
                   }}>
                     {s.label}
                   </span>
+                  {roundTimes[i] != null && (
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                      fontSize: '0.7rem', fontWeight: 700,
+                      color: 'var(--text-muted)',
+                      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}>
+                      <Icon name='timer' size={12} color='currentColor' />
+                      {formatTime(roundTimes[i])}
+                    </span>
+                  )}
                   {wasQuestionMCQ && (
                     <span style={{
                       fontSize: '0.7rem',
@@ -1476,7 +1615,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                           </div>
                         )}
                         <div style={{ marginTop: '0.6rem', color: 'var(--text)', fontSize: '0.83rem' }}>
-                          <span style={{ fontWeight: 700, color: 'var(--yellow, #eab308)', marginRight: 4 }}>Explanation</span>
+                          <span style={{ fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.72rem', marginRight: 6 }}>Why</span>
                           {mcqQ.explanation}
                         </div>
                       </div>
@@ -1508,7 +1647,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                       <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                         Model Answer
                       </div>
-                      <p style={{ color: 'var(--text-secondary, var(--text-muted))', fontSize: '0.87rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', padding: '0.75rem', background: 'var(--surface-2)', borderRadius: '6px', borderLeft: `3px solid ${roomColor}` }}>
+                      <p style={{ color: 'var(--text-secondary, var(--text-muted))', fontSize: '0.87rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', padding: '0.75rem', background: 'var(--surface-2)', borderRadius: '6px', border: '1px solid var(--border)' }}>
                         {getCaseModelAnswer(roomCase)}
                       </p>
                     </div>
@@ -1596,25 +1735,24 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           })}
         </div>
 
-        {/* Shareable score summary card */}
+        {/* Shareable score summary card — monochrome; the score is the one accent */}
         <div style={{
-          background: 'linear-gradient(135deg, var(--accent), var(--accent-bg))',
-          border: '2px solid var(--accent)',
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
           padding: '1.5rem',
           marginTop: '2rem',
           marginBottom: '1.5rem',
-          color: '#000',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'rgba(0,0,0,0.7)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.3rem' }}>
-                Session Score
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.3rem' }}>
+                Session score
               </div>
-              <div style={{ fontSize: '2rem', fontWeight: 700 }}>
+              <div style={{ fontSize: '2.1rem', fontWeight: 700, color: 'var(--accent)', letterSpacing: '-0.02em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                 {overallPct !== null ? `${Math.round(overallPct * 100)}%` : 'Complete'}
               </div>
-              <div style={{ fontSize: '0.82rem', color: 'rgba(0,0,0,0.65)', marginTop: '0.2rem' }}>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
                 {sessionLengthLabel} · {roleLabel} · {formatTime(elapsed)}
               </div>
             </div>
@@ -1627,21 +1765,21 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                 navigator.clipboard.writeText(parts.join(' · '));
                 alert('Score copied to clipboard!');
               }}
+              className="pal-card-hover"
               style={{
-                background: 'rgba(0,0,0,0.15)',
-                border: 'none',
-                borderRadius: '6px',
+                display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                background: 'transparent',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
                 padding: '0.5rem 1rem',
-                color: '#000',
+                color: 'var(--text)',
                 fontSize: '0.85rem',
-                fontWeight: 600,
+                fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.12s',
               }}
-              onMouseEnter={(e) => e.target.style.background = 'rgba(0,0,0,0.25)'}
-              onMouseLeave={(e) => e.target.style.background = 'rgba(0,0,0,0.15)'}
             >
-              <Icon name='clipboard' size={14} color='currentColor' /> Copy Score
+              <Icon name='clipboard' size={14} color='currentColor' /> Copy score
             </button>
           </div>
         </div>

@@ -1,122 +1,135 @@
-import { Icon } from '../components/shared/Icon.jsx';
 import { useState } from 'react';
 import { rcaCases } from '../data/rcaCases.js';
 import { getRCAProgress } from '../utils/rcaProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
-import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.jsx';
+import { RoomHeader } from '../components/shared/RoomHeader.jsx';
+import { FilterBar } from '../components/shared/FilterBar.jsx';
+import { CaseCard } from '../components/shared/CaseCard.jsx';
 
-const DIFF_CFG = {
-  analyst: { label: 'Analyst', color: 'var(--accent)', bg: 'var(--accent-bg)', border: 'var(--accent-border)' },
-  senior:  { label: 'Senior',  color: 'var(--teal)',   bg: 'var(--teal-bg)',   border: 'var(--teal-border)' },
-  staff:   { label: 'Staff',   color: 'var(--yellow)',  bg: 'var(--yellow-bg)', border: 'var(--yellow-border)' },
+const DOMAIN_LABEL = {
+  growth: 'Growth', search: 'Search', engagement: 'Engagement',
+  marketplace: 'Marketplace', retention: 'Retention', monetization: 'Monetization',
 };
 
-const DOMAIN_CFG = {
-  growth:   { label: 'Growth',   color: 'var(--blue-text)', bg: 'var(--blue-bg)' },
-  search:   { label: 'Search',   color: 'var(--teal)',      bg: 'var(--teal-bg)' },
-  engagement: { label: 'Engagement', color: 'var(--accent)', bg: 'var(--accent-bg)' },
-  marketplace: { label: 'Marketplace', color: 'var(--purple)', bg: 'var(--purple-bg)' },
-  retention: { label: 'Retention', color: 'var(--green)',  bg: 'var(--green-bg)' },
-  monetization: { label: 'Monetization', color: 'var(--yellow)', bg: 'var(--yellow-bg)' },
-};
-
-const LEVEL_LABEL = {
-  staff:   'Staff-Level',
-  senior:  'Senior',
-  analyst: 'Analyst',
-  junior:  'Junior',
-};
-
-const LEVEL_COLOR = {
-  staff:   'var(--teal)',
-  senior:  'var(--accent)',
-  analyst: 'var(--yellow)',
-  junior:  'var(--red)',
-};
-
-const LEVEL_BG = {
-  staff:   'var(--teal-bg)',
-  senior:  'var(--accent-bg)',
-  analyst: 'var(--yellow-bg)',
-  junior:  'var(--red-bg)',
-};
-
-function Tag({ label, color, bg, border }) {
-  return (
-    <span style={{
-      fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em',
-      color, background: bg, border: `1px solid ${border || color}`,
-      borderRadius: 'var(--radius-sm)', padding: '0.15rem 0.45rem',
-    }}>
-      {label}
-    </span>
-  );
-}
+const LEVEL_LABEL = { staff: 'Staff-Level', senior: 'Senior', analyst: 'Analyst', junior: 'Junior' };
 
 const DIFF_ORDER = { analyst: 0, foundational: 0, intermediate: 1, senior: 1, advanced: 2, staff: 2 };
+
+// Derive unique difficulties + domains from data (so 'advanced' etc. surface).
+const ALL_DIFFICULTIES = (() => {
+  const diffs = new Set();
+  rcaCases.forEach(c => { if (c.difficulty) diffs.add(c.difficulty); });
+  return Array.from(diffs).sort((a, b) => (DIFF_ORDER[a] ?? 9) - (DIFF_ORDER[b] ?? 9) || a.localeCompare(b));
+})();
+
+const ALL_DOMAINS = (() => {
+  const set = new Set();
+  rcaCases.forEach(c => { if (c.domain) set.add(c.domain); });
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
+})();
 
 export function RCABrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle, onNavigate }) {
   const [sortBy, setSortBy] = useState('default');
   const [theoryActive, setTheoryActive] = useState(false);
-  const [diffFilter, setDiffFilter] = useState('all');
-  const completedCount = rcaCases.filter(c => getRCAProgress(c.id)).length;
+  const [activeDifficulty, setActiveDifficulty] = useState('All');
+  const [activeDomain, setActiveDomain] = useState('All');
+  const [activeStatus, setActiveStatus] = useState('All');
 
-  const diffCounts = {
-    all: rcaCases.length,
-    analyst: rcaCases.filter(c => c.difficulty === 'analyst').length,
-    senior: rcaCases.filter(c => c.difficulty === 'senior').length,
-    staff: rcaCases.filter(c => c.difficulty === 'staff').length,
-  };
+  const completedIds = new Set(rcaCases.filter(c => getRCAProgress(c.id)).map(c => c.id));
+  const completedCount = completedIds.size;
 
-  const displayCases = (sortBy === 'difficulty'
-    ? [...rcaCases].sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 1) - (DIFF_ORDER[b.difficulty] ?? 1))
-    : rcaCases
-  ).filter(c => diffFilter === 'all' || c.difficulty === diffFilter);
+  let displayCases = rcaCases.filter(c => {
+    const diffMatch = activeDifficulty === 'All' || c.difficulty === activeDifficulty;
+    const domainMatch = activeDomain === 'All' || c.domain === activeDomain;
+    const isDone = completedIds.has(c.id);
+    const statusMatch =
+      activeStatus === 'All' ||
+      (activeStatus === 'solved' && isDone) ||
+      (activeStatus === 'unsolved' && !isDone);
+    return diffMatch && domainMatch && statusMatch;
+  });
+
+  if (sortBy === 'difficulty') {
+    displayCases = [...displayCases].sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 1) - (DIFF_ORDER[b.difficulty] ?? 1));
+  }
 
   const firstUnstartedId = rcaCases.find(c => !getRCAProgress(c.id))?.id;
 
-  return (
-    <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
+  const filters = [
+    {
+      id: 'difficulty',
+      label: 'Difficulty',
+      value: activeDifficulty,
+      onChange: setActiveDifficulty,
+      options: [
+        { value: 'All', label: 'All' },
+        ...ALL_DIFFICULTIES.map(d => ({
+          value: d,
+          label: d.charAt(0).toUpperCase() + d.slice(1),
+          count: rcaCases.filter(c => c.difficulty === d).length,
+        })),
+      ],
+    },
+    {
+      id: 'domain',
+      label: 'Domain',
+      value: activeDomain,
+      onChange: setActiveDomain,
+      options: [
+        { value: 'All', label: 'All' },
+        ...ALL_DOMAINS.map(d => ({
+          value: d,
+          label: DOMAIN_LABEL[d] || d,
+          count: rcaCases.filter(c => c.domain === d).length,
+        })),
+      ],
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      value: activeStatus,
+      onChange: setActiveStatus,
+      options: [
+        { value: 'All', label: 'All' },
+        { value: 'unsolved', label: 'Unsolved', count: rcaCases.length - completedCount },
+        { value: 'solved', label: 'Solved', count: completedCount },
+      ],
+    },
+  ];
 
-      {/* Header */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon name='search' size={18} color='var(--yellow)' />
-          </span>
-          <div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--yellow)', marginBottom: '0.15rem' }}>
-              RCA Room
-            </div>
-            <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
-              Root Cause Analysis
-            </h1>
-          </div>
-        </div>
-        <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '540px' }}>
-          The most common RCA failure is jumping to an explanation before ruling out data issues, external factors, or mix shift — then defending it when the interviewer pushes back. This room builds the diagnostic instinct: given a metric movement and raw context, what do you check first, in what order, and why does each cut either confirm or eliminate a hypothesis?
-        </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-          <span style={{
-            fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
-            color: 'var(--yellow)', background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)',
-            borderRadius: 'var(--radius-sm)', padding: '0.2rem 0.55rem',
-          }}>
-            RCA · {rcaCases.length} Cases
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: 96, height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.min(100, Math.round(completedCount / rcaCases.length * 100))}%`, background: 'var(--yellow)', borderRadius: 2, transition: 'width 0.4s' }} />
-            </div>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{completedCount}/{rcaCases.length}</span>
-          </div>
-        </div>
-      </div>
+  const sort = {
+    id: 'sort',
+    label: 'Sort',
+    value: sortBy,
+    onChange: setSortBy,
+    options: [
+      { value: 'default', label: 'Default' },
+      { value: 'difficulty', label: 'By Difficulty' },
+    ],
+  };
+
+  const clearAll = () => {
+    setActiveDifficulty('All');
+    setActiveDomain('All');
+    setActiveStatus('All');
+  };
+
+  return (
+    <div className='pal-page-enter' style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
+      <RoomHeader
+        icon='search'
+        accent='yellow'
+        eyebrow='RCA Room'
+        title='Root Cause Analysis'
+        blurb={'The most common RCA failure is jumping to an explanation before ruling out data issues, external factors, or mix shift — then defending it when the interviewer pushes back. This room builds the diagnostic instinct: given a metric movement and raw context, what do you check first, in what order, and why does each cut either confirm or eliminate a hypothesis?'}
+        solved={completedCount}
+        total={rcaCases.length}
+      />
 
       {/* Foundation nudge */}
       {onNavigate && (
-        <FoundationNudgeCard foundationRoom="rca-foundations" foundationLabel="RCA Foundations" onNavigate={onNavigate} />
+        <FoundationNudgeCard foundationRoom='rca-foundations' foundationLabel='RCA Foundations' onNavigate={onNavigate} />
       )}
 
       {/* Theory / Cases tab bar */}
@@ -141,38 +154,58 @@ export function RCABrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle, on
         })}
       </div>
 
-      {!theoryActive && (
-        <DifficultyChips value={diffFilter} onChange={setDiffFilter} counts={diffCounts} />
-      )}
-
-      {!theoryActive && (
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12, justifyContent: 'flex-end' }}>
-        {['default', 'difficulty'].map(opt => (
-          <button key={opt} onClick={() => setSortBy(opt)} className={`pal-sort-btn${sortBy === opt ? ' active' : ''}`}>{opt === 'default' ? 'Default' : 'By Difficulty'}</button>
-        ))}
-      </div>
-      )}
+      {!theoryActive && <FilterBar filters={filters} sort={sort} />}
 
       {/* Case cards */}
       {!theoryActive && (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-        {displayCases.map((c, index) => {
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {displayCases.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            No cases match those filters.{' '}
+            <button onClick={clearAll} style={{ background: 'none', border: 'none', color: 'var(--yellow)', cursor: 'pointer', fontSize: '0.875rem', textDecoration: 'underline' }}>
+              Clear filters
+            </button>
+          </div>
+        )}
+
+        {displayCases.map(c => {
           const progress = getRCAProgress(c.id);
-          const diffCfg = DIFF_CFG[c.difficulty] || DIFF_CFG.analyst;
-          const domainCfg = DOMAIN_CFG[c.domain] || DOMAIN_CFG.growth;
+          const isLocked = !c.isFree && !unlocked;
+          const isDone = completedIds.has(c.id);
+          const isNextUnstarted = c.id === firstUnstartedId;
+
+          const tags = [DOMAIN_LABEL[c.domain] || c.domain].filter(Boolean);
+
+          let meta;
+          if (progress && !isLocked) {
+            meta = `${LEVEL_LABEL[progress.level] || progress.level} · ${progress.score}/${progress.maxScore ?? 10}`;
+          }
+
+          const nextBadge = isNextUnstarted ? (
+            <span style={{
+              fontSize: '0.66rem', fontWeight: 700,
+              color: 'var(--yellow)', background: 'var(--yellow-bg)',
+              border: '1px solid var(--yellow-border)',
+              borderRadius: 4, padding: '0.08rem 0.4rem',
+            }}>
+              Next
+            </span>
+          ) : null;
 
           return (
             <CaseCard
               key={c.id}
-              index={index}
-              rcaCase={c}
-              progress={progress}
-              isLocked={!c.isFree && !unlocked}
-              diffCfg={diffCfg}
-              domainCfg={domainCfg}
-              onSelectCase={onSelectCase}
-              onUnlock={onUnlock}
-              isNextUnstarted={c.id === firstUnstartedId}
+              id={c.id}
+              title={c.title}
+              subtitle={c.subtitle || c.context?.metricMovement}
+              tags={tags}
+              difficulty={c.difficulty}
+              accent='yellow'
+              status={isDone ? 'solved' : undefined}
+              locked={isLocked}
+              meta={meta}
+              badge={nextBadge}
+              onClick={() => (isLocked ? onUnlock && onUnlock() : onSelectCase(c.id))}
             />
           );
         })}
@@ -203,109 +236,6 @@ export function RCABrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle, on
               </button>
             ))}
           </div>
-        </div>
-      )}
-
-    </div>
-  );
-}
-
-function CaseCard({ rcaCase, index, progress, isLocked, diffCfg, domainCfg, onSelectCase, onUnlock, isNextUnstarted }) {
-  const levelColor = progress ? LEVEL_COLOR[progress.level] : null;
-  const levelBg = progress ? LEVEL_BG[progress.level] : null;
-
-  function handleClick() {
-    if (isLocked) {
-      onUnlock && onUnlock();
-    } else {
-      onSelectCase(rcaCase.id);
-    }
-  }
-
-  return (
-    <div
-      className="pal-card-enter pal-card-hover"
-      role="button"
-      tabIndex={0}
-      onClick={handleClick}
-      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
-      style={{
-        animationDelay: (Math.min(index * 28, 400)) + 'ms',
-        background: 'var(--surface)',
-        border: '1px solid var(--border)',
-        borderLeft: isNextUnstarted ? '3px solid var(--teal)' : '3px solid ' + diffCfg.color,
-        borderRadius: 'var(--radius)',
-        padding: '1.1rem 1.25rem',
-        cursor: 'pointer',
-        opacity: isLocked ? 0.65 : 1,
-        transition: 'border-color 0.12s, box-shadow 0.12s',
-        position: 'relative',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'var(--yellow-border)';
-        e.currentTarget.style.boxShadow = 'var(--shadow)'; e.currentTarget.style.transform = 'translateY(-2px)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = 'var(--border)';
-        e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)';
-      }}
-    >
-      {isNextUnstarted && (
-        <span style={{
-          position: 'absolute', top: '0.6rem', right: '0.7rem',
-          fontSize: '0.68rem', fontWeight: 700,
-          color: 'var(--teal)', background: 'var(--teal-bg)',
-          border: '1px solid var(--teal-border)',
-          borderRadius: 4, padding: '0.1rem 0.4rem',
-        }}>
-          Next →
-        </span>
-      )}
-      {/* Top row: tags + status */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.55rem', flexWrap: 'wrap' }}>
-        <Tag label={domainCfg.label} color={domainCfg.color} bg={domainCfg.bg} />
-        <Tag label={diffCfg.label} color={diffCfg.color} bg={diffCfg.bg} border={diffCfg.border} />
-        {progress && !isLocked && (
-          <span style={{
-            marginLeft: 'auto', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-            color: levelColor, background: levelBg, border: `1px solid ${levelColor}`,
-            borderRadius: 'var(--radius-sm)', padding: '0.15rem 0.45rem',
-          }}>
-            {LEVEL_LABEL[progress.level]} · {progress.score}/{progress.maxScore ?? 10}
-          </span>
-        )}
-      </div>
-
-      {/* Title + subtitle */}
-      <div style={{ marginBottom: '0.6rem' }}>
-        <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.3 }}>
-          {rcaCase.title}
-        </div>
-        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-          {rcaCase.subtitle}
-        </div>
-      </div>
-
-      {/* Metric movement callout */}
-      <div style={{
-        background: 'var(--yellow-bg)',
-        border: '1px solid var(--yellow-border)',
-        borderRadius: 'var(--radius-sm)',
-        padding: '0.5rem 0.75rem',
-        fontSize: '0.8rem',
-        color: 'var(--text)',
-        lineHeight: 1.5,
-      }}>
-        <span style={{ fontWeight: 700, color: 'var(--yellow)', marginRight: '0.4rem', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          Movement
-        </span>
-        {rcaCase.context.metricMovement}
-      </div>
-
-      {/* Completion indicator */}
-      {progress && (
-        <div style={{ marginTop: '0.6rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-          Completed {progress.attempts} time{progress.attempts !== 1 ? 's' : ''} · Click to review
         </div>
       )}
     </div>

@@ -1,65 +1,92 @@
 import { useState } from 'react';
 import { designScenarios } from '../data/designScenarios.js';
-import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getAllDesignProgress } from '../utils/designProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.jsx';
-import { Icon } from '../components/shared/Icon.jsx';
+import { RoomHeader } from '../components/shared/RoomHeader.jsx';
+import { FilterBar } from '../components/shared/FilterBar.jsx';
+import { CaseCard } from '../components/shared/CaseCard.jsx';
 
-const LEVEL_COLORS = {
-  staff_level:   { color: 'var(--teal)',      bg: 'var(--teal-bg)',   border: 'var(--teal-border)' },
-  senior_ready:  { color: 'var(--accent)',    bg: 'var(--accent-bg)', border: 'var(--accent-border)' },
-  analyst_ready: { color: 'var(--blue-text)', bg: 'var(--blue-bg)',   border: 'var(--blue-border)' },
-};
-
-const DESIGN_DIFF_CFG = {
-  analyst: { color: 'var(--blue-text)' },
-  senior:  { color: 'var(--accent)' },
-  staff:   { color: 'var(--teal)' },
-};
+const DIFF_ORDER = { analyst: 0, senior: 1, staff: 2 };
 
 export function DesignBrowser({ onSelectScenario, onOpenArticle, onNavigate }) {
   const [theoryActive, setTheoryActive] = useState(false);
+  const [diffFilter, setDiffFilter] = useState('all');
+  const [industryFilter, setIndustryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const allProgress = getAllDesignProgress();
 
   const completedIds = new Set(Object.keys(allProgress));
+  const completedCount = completedIds.size;
   const firstUnstartedId = designScenarios.find(s => !completedIds.has(s.id))?.id;
+  const industries = [...new Set(designScenarios.map(s => s.industry).filter(Boolean))];
+
+  // ── Filtering (AND semantics) ──
+  const filtered = designScenarios.filter(s => {
+    if (diffFilter !== 'all' && s.difficulty !== diffFilter) return false;
+    if (industryFilter !== 'all' && s.industry !== industryFilter) return false;
+    const isDone = completedIds.has(s.id);
+    if (statusFilter === 'completed' && !isDone) return false;
+    if (statusFilter === 'unstarted' && isDone) return false;
+    return true;
+  });
+
+  const filters = [
+    {
+      id: 'difficulty',
+      label: 'Difficulty',
+      value: diffFilter,
+      onChange: setDiffFilter,
+      options: [
+        { value: 'all', label: 'All levels' },
+        { value: 'analyst', label: 'Analyst', count: designScenarios.filter(s => s.difficulty === 'analyst').length },
+        { value: 'senior', label: 'Senior', count: designScenarios.filter(s => s.difficulty === 'senior').length },
+        { value: 'staff', label: 'Staff', count: designScenarios.filter(s => s.difficulty === 'staff').length },
+      ],
+    },
+    {
+      id: 'industry',
+      label: 'Industry',
+      value: industryFilter,
+      onChange: setIndustryFilter,
+      options: [
+        { value: 'all', label: 'All industries' },
+        ...industries.map(i => ({ value: i, label: i, count: designScenarios.filter(s => s.industry === i).length })),
+      ],
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      value: statusFilter,
+      onChange: setStatusFilter,
+      options: [
+        { value: 'all', label: 'All' },
+        { value: 'unstarted', label: 'Unstarted', count: designScenarios.length - completedCount },
+        { value: 'completed', label: 'Done', count: completedCount },
+      ],
+    },
+  ];
 
   return (
     <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
 
-      {/* Header */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <div style={{
-          fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
-          color: 'var(--teal)', marginBottom: '0.4rem',
-        }}>
-          Design Room
-        </div>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text)', margin: '0 0 0.5rem', letterSpacing: '-0.02em' }}>
-          Experiment Design
-        </h1>
-        <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '540px' }}>
-          Most experiment mistakes are locked in before a single user is assigned — wrong randomization unit, primary metric that cannot move the business, no decision rule for the ambiguous outcome. Design forces you to make every call upfront, blind to the results, so you discover your reasoning gaps before they corrupt a live experiment.
-        </p>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-          background: 'var(--accent-bg)', border: '1px solid var(--accent-border)',
-          borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.6rem',
-          fontSize: '0.75rem', color: 'var(--accent)',
-        }}>
-          <span>◆</span>
-          <span>Pairs with Review Room scenarios</span>
-        </div>
-      </div>
+      <RoomHeader
+        icon='target'
+        accent='accent'
+        eyebrow='Design Room'
+        title='Experiment Design'
+        blurb={'Most experiment mistakes are locked in before a single user is assigned — wrong randomization unit, primary metric that cannot move the business, no decision rule for the ambiguous outcome. Design forces you to make every call upfront, blind to the results, so you discover your reasoning gaps before they corrupt a live experiment. Pairs with the Review Room readouts.'}
+        solved={completedCount}
+        total={designScenarios.length}
+      />
 
       {/* Foundation nudge */}
       {onNavigate && (
         <FoundationNudgeCard foundationRoom="exp-foundations" foundationLabel="Exp Foundations" onNavigate={onNavigate} />
       )}
 
-      {/* Theory / Cases tab bar */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+      {/* Cases / Theory toggle */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
         {['Cases', 'Theory'].map(tab => {
           const active = tab === 'Theory' ? theoryActive : !theoryActive;
           return (
@@ -80,110 +107,59 @@ export function DesignBrowser({ onSelectScenario, onOpenArticle, onNavigate }) {
         })}
       </div>
 
+      {/* Filters */}
+      {!theoryActive && <FilterBar filters={filters} />}
+
       {/* Scenario cards */}
       {!theoryActive && (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-        {designScenarios.map((scenario, index) => {
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {filtered.map(scenario => {
           const progress = allProgress[scenario.id];
-          const bestLevel = progress?.bestLevel;
-          const levelCfg = bestLevel ? LEVEL_COLORS[bestLevel] : null;
-          const diffCfg = DESIGN_DIFF_CFG[scenario.difficulty] || { color: 'var(--accent)' };
+          const isDone = completedIds.has(scenario.id);
           const isNextUnstarted = scenario.id === firstUnstartedId;
 
+          const tags = [
+            scenario.industry,
+            scenario.pairedReviewScenarioId ? 'Paired' : null,
+            progress?.bestLevel ? progress.bestLevel.replace(/_/g, ' ') : null,
+          ].filter(Boolean);
+
+          const meta = progress?.attempts > 0
+            ? `${progress.attempts} attempt${progress.attempts > 1 ? 's' : ''} · Best ${Math.round((progress.bestScore || 0) * 100)}%`
+            : undefined;
+
+          const nextBadge = isNextUnstarted ? (
+            <span style={{
+              fontSize: '0.66rem', fontWeight: 700,
+              color: 'var(--accent)', background: 'var(--accent-bg)',
+              border: '1px solid var(--accent-border)',
+              borderRadius: 4, padding: '0.08rem 0.4rem',
+            }}>
+              Next
+            </span>
+          ) : null;
+
           return (
-            <div
+            <CaseCard
               key={scenario.id}
-              className="pal-card-enter pal-card-hover"
-              style={{
-                animationDelay: (Math.min(index * 28, 400)) + 'ms',
-                border: '1.5px solid var(--border)',
-                borderLeft: isNextUnstarted ? '3px solid var(--accent)' : '3px solid ' + diffCfg.color,
-                borderRadius: 'var(--radius)',
-                background: 'var(--surface)',
-                padding: '1.1rem 1.25rem',
-                cursor: 'pointer',
-                transition: 'transform var(--transition), box-shadow var(--transition), border-color var(--transition)',
-                position: 'relative',
-              }}
-              role="button"
-              tabIndex={0}
+              id={scenario.id}
+              title={scenario.title}
+              subtitle={scenario.subtitle}
+              tags={tags}
+              difficulty={scenario.difficulty}
+              accent='accent'
+              status={isDone ? 'solved' : undefined}
+              meta={meta}
+              badge={nextBadge}
               onClick={() => onSelectScenario(scenario.id)}
-              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectScenario(scenario.id); } }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'var(--accent-border)';
-                e.currentTarget.style.boxShadow = 'var(--shadow)'; e.currentTarget.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              {isNextUnstarted && (
-                <span style={{
-                  position: 'absolute', top: '0.6rem', right: '0.7rem',
-                  fontSize: '0.68rem', fontWeight: 700,
-                  color: 'var(--accent)', background: 'var(--accent-bg)',
-                  border: '1px solid var(--accent-border)',
-                  borderRadius: 4, padding: '0.1rem 0.4rem',
-                }}>
-                  Next →
-                </span>
-              )}
-              {/* Badges row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.45rem', flexWrap: 'wrap' }}>
-                <DifficultyBadge difficulty={scenario.difficulty} />
-                <IndustryBadge industry={scenario.industry} />
-                {scenario.pairedReviewScenarioId && (
-                  <span style={{
-                    fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                    color: 'var(--accent)', background: 'var(--accent-bg)', border: '1px solid var(--accent-border)',
-                    borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.4rem',
-                  }}>◆ Paired</span>
-                )}
-                {levelCfg && (
-                  <span style={{
-                    fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-                    color: levelCfg.color, background: levelCfg.bg, border: `1px solid ${levelCfg.border}`,
-                    borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.4rem',
-                  }}>{progress.bestLevel.replace(/_/g, ' ')}</span>
-                )}
-              </div>
-
-              {/* Title + subtitle */}
-              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text)', margin: '0 0 0.2rem', letterSpacing: '-0.01em' }}>
-                {scenario.title}
-              </h3>
-              <p style={{ fontSize: '0.83rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                {scenario.subtitle}
-              </p>
-
-              {/* Progress */}
-              <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {progress?.attempts > 0 ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-                      {progress.attempts} attempt{progress.attempts > 1 ? 's' : ''} ·{' '}
-                      Best: {Math.round((progress.bestScore || 0) * 100)}%
-                    </span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--accent)', fontWeight: 600 }}>
-                      Resume →
-                    </span>
-                  </div>
-                ) : (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-                    Not started
-                  </span>
-                )}
-
-                {scenario.pairedReviewScenarioId && (
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                    Pairs with {scenario.pairedReviewScenarioId.replace(/^s\d+-/, '').replace(/-/g, ' ')} <Icon name='move-horizontal' size={12} color='currentColor' />
-                  </span>
-                )}
-              </div>
-            </div>
+            />
           );
         })}
+        {filtered.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            No scenarios match this filter.
+          </div>
+        )}
       </div>
       )}
 
@@ -215,31 +191,5 @@ export function DesignBrowser({ onSelectScenario, onOpenArticle, onNavigate }) {
       )}
 
     </div>
-  );
-}
-
-function DifficultyBadge({ difficulty }) {
-  const cfg = {
-    analyst: { label: 'Analyst', color: 'var(--blue-text)', bg: 'var(--blue-bg)', border: 'var(--blue-border)' },
-    senior:  { label: 'Senior',  color: 'var(--accent)',    bg: 'var(--accent-bg)', border: 'var(--accent-border)' },
-    staff:   { label: 'Staff',   color: 'var(--teal)',      bg: 'var(--teal-bg)',   border: 'var(--teal-border)' },
-  }[difficulty] || { label: difficulty, color: 'var(--text-dim)', bg: 'var(--surface-2)', border: 'var(--border)' };
-
-  return (
-    <span style={{
-      fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-      color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
-      borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.4rem',
-    }}>{cfg.label}</span>
-  );
-}
-
-function IndustryBadge({ industry }) {
-  return (
-    <span style={{
-      fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
-      color: 'var(--text-dim)', background: 'var(--surface-2)', border: '1px solid var(--border)',
-      borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.4rem',
-    }}>{industry}</span>
   );
 }

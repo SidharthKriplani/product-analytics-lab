@@ -4,6 +4,16 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.95.0] — 2026-06-25 [DESIGN-SYSTEM ROLLOUT · SIMULATOR GOLD · PAGE REFRESH]
+
+**Design system rolled to every room.** RoomHeader + FilterBar (dropdowns) + CaseCard applied across all room browsers: Metrics (+ Growth tab), RCA, Analytics Cases, Product Design, Prioritization, Spot the Flaw, A/B Judgment (Scenario), A/B Design, Instrumentation, Growth Analytics, Challenges, and the shared FoundationBrowser (all 4 Foundations). Chip-walls → dropdown filters everywhere; per-card colored rails removed; one consistent layout. SQL Lab browse left as-is (special surface). All room filtering/lock/progress logic preserved — presentation only.
+
+**Simulator → mock-onsite gold.** Per-round timer (prominent, soft ~12-min target) + monochrome round rail; interviewer framing per round ("Round 2 — your RCA interviewer asks:"); Control Room setup polish with loop-order preview; the debrief is now a real report card (round-by-round times + results, verdict, weakest-areas deep-links). Score-band red/amber/green kept only where it carries meaning. All prior logic intact.
+
+**Stale pages refreshed.** About (4 pillars + current room lineup + community/feed, contact kept), Profile (A/B Design added to stats, tidy monochrome), Progress (Review due-count card + current rooms + monochrome), Plans + Pricing (copy matches the current product; beta unlock logic untouched). All de-railed to the monochrome system.
+
+Build: 895 modules clean.
+
 ## [5.94.0] — 2026-06-25 [DESIGN-SYSTEM FOUNDATION · RAILS KILLED · COMMUNITY FEED v1]
 
 **Shared design system (the fix for the drift).** New `RoomHeader`, `FilterBar` (compact dropdown filters, replaces chip-walls), and `CaseCard` (one unified monochrome card — no colored rails). Applied to Estimation as the reference room: its three chip-walls are now Difficulty/Category/Topic/Status dropdowns + a Sort. (Rollout to the other ~13 rooms is the next task.)

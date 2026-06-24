@@ -40,27 +40,31 @@ const PRICING_PLANS = [
 const TIERS = [
   { id: 'guest',  label: 'Guest',        color: 'var(--text-muted)' },
   { id: 'free',   label: 'Free Account', color: 'var(--accent)'     },
-  { id: 'full',   label: 'Full Lab',     color: 'var(--teal)'       },
+  { id: 'full',   label: 'Full Lab',     color: 'var(--accent)'     },
 ];
 
 const FEATURES = [
-  { label: 'Practice cases',          guest: '1 per room',   free: '3 per room',    full: 'All 300+'         },
-  { label: 'Difficulty access',       guest: 'Analyst only', free: 'Analyst–Senior', full: 'Analyst → Staff' },
-  { label: 'Progress saved',          guest: false,          free: true,            full: true               },
-  { label: 'Daily streak',            guest: false,          free: true,            full: true               },
-  { label: 'Cross-device sync',       guest: false,          free: true,            full: true               },
-  { label: 'Foundations (4 rooms)',   guest: true,           free: true,            full: true               },
-  { label: 'Frameworks & articles',   guest: true,           free: true,            full: true               },
-  { label: 'Easy SQL (50 problems)',  guest: false,          free: true,            full: true               },
-  { label: 'Forensic SQL',            guest: false,          free: '10 problems',   full: '25 problems'      },
-  { label: 'Medium / Hard / Master SQL', guest: false,       free: false,           full: '90+ problems'     },
-  { label: 'Staff Layer debriefs',    guest: false,          free: false,           full: true               },
-  { label: 'Company Tracks',          guest: false,          free: false,           full: true               },
-  { label: 'Mock Interview',          guest: false,          free: false,           full: true               },
+  { label: 'Judgment cases (all rooms)', guest: '1 per room',   free: '3 per room',     full: 'All 300+'         },
+  { label: 'Options & Describe modes',   guest: true,           free: true,             full: true               },
+  { label: 'Difficulty access',          guest: 'Analyst only', free: 'Analyst–Senior', full: 'Analyst → Staff'  },
+  { label: 'Foundations (4 rooms)',      guest: true,           free: true,             full: true               },
+  { label: 'Library & frameworks',       guest: true,           free: true,             full: true               },
+  { label: 'SQL Lab — beginner walkthrough', guest: true,       free: true,             full: true               },
+  { label: 'Easy SQL (50 problems)',     guest: false,          free: true,             full: true               },
+  { label: 'Forensic SQL',               guest: false,          free: '10 problems',    full: '25 problems'      },
+  { label: 'Medium / Hard / Master SQL', guest: false,          free: false,            full: '90+ problems'     },
+  { label: 'Staff-layer debriefs',       guest: false,          free: false,            full: true               },
+  { label: 'Review (spaced repetition)', guest: false,          free: true,             full: true               },
+  { label: 'Readiness countdown',        guest: false,          free: true,             full: true               },
+  { label: 'Progress sync across devices', guest: false,        free: true,             full: true               },
+  { label: 'Community Feed & leaderboard', guest: false,        free: true,             full: true               },
+  { label: 'Mock Interview (timed onsite)', guest: false,       free: false,            full: true               },
+  { label: 'Defense Strategy plan',      guest: false,          free: false,            full: true               },
+  { label: 'Company Tracks',             guest: false,          free: false,            full: true               },
 ];
 
 function Cell({ value, accent }) {
-  if (value === true)  return <span style={{ color: accent || 'var(--green)', fontWeight: 700, fontSize: '1rem' }}><Icon name='check' size={16} color={accent || 'var(--green)'} /></span>;
+  if (value === true)  return <span style={{ color: accent || 'var(--accent)', fontWeight: 700, fontSize: '1rem' }}><Icon name='check' size={16} color={accent || 'var(--accent)'} /></span>;
   if (value === false) return <span style={{ color: 'var(--border)', fontSize: '1rem' }}>—</span>;
   return <span style={{ fontSize: '0.8rem', fontWeight: 600, color: accent || 'var(--text-muted)' }}>{value}</span>;
 }
@@ -302,10 +306,10 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
       {/* Header */}
       <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text)', margin: '0 0 0.5rem', letterSpacing: '-0.03em' }}>
-          How you want to practice
+          Practice the judgment interviews actually test
         </h1>
-        <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', margin: 0 }}>
-          Full access to every room, difficulty level, and debrief.
+        <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', margin: '0 auto', maxWidth: 540, lineHeight: 1.6 }}>
+          Every judgment room, the SQL Lab, spaced-repetition Review, a timed Mock Interview, your readiness countdown, and the community — one lab, no subscription lock-in.
         </p>
       </div>
 
@@ -325,24 +329,25 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
       }}>
         {PRICING_PLANS.map(plan => (
           <div key={plan.id} style={{
-            border: plan.highlight ? '2px solid var(--teal)' : '1px solid var(--border)',
+            border: plan.highlight ? '1px solid var(--accent)' : '1px solid var(--border)',
+            boxShadow: plan.highlight ? '0 0 0 1px var(--accent)' : 'none',
             borderRadius: '14px',
             padding: '1.5rem',
-            background: plan.highlight ? 'rgba(20,184,166,0.04)' : 'var(--surface)',
+            background: 'var(--surface)',
             display: 'flex', flexDirection: 'column', gap: '0.6rem',
             position: 'relative',
           }}>
             {plan.highlight && (
               <span style={{
                 position: 'absolute', top: '-11px', left: '50%', transform: 'translateX(-50%)',
-                background: 'var(--teal)', color: '#fff',
+                background: 'var(--accent)', color: '#fff',
                 fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
                 borderRadius: '4px', padding: '0.15rem 0.5rem', whiteSpace: 'nowrap',
               }}>
                 Best value
               </span>
             )}
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: plan.highlight ? 'var(--teal)' : 'var(--text-muted)' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: plan.highlight ? 'var(--accent)' : 'var(--text-muted)' }}>
               {plan.label}
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.2rem' }}>
@@ -363,8 +368,8 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
               style={{
                 display: 'block', textAlign: 'center',
                 marginTop: '0.25rem', padding: '0.6rem 1rem',
-                background: plan.highlight ? 'var(--teal)' : 'var(--surface-2, var(--surface))',
-                border: '1px solid ' + (plan.highlight ? 'var(--teal)' : 'var(--border)'),
+                background: plan.highlight ? 'var(--accent)' : 'var(--surface-2, var(--surface))',
+                border: '1px solid ' + (plan.highlight ? 'var(--accent)' : 'var(--border)'),
                 borderRadius: '8px',
                 fontSize: '0.825rem', fontWeight: 700,
                 color: plan.highlight ? '#fff' : 'var(--text)',
@@ -420,8 +425,8 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
           {success ? (
             <span style={{
               padding: '0.55rem 1.1rem', fontSize: '0.82rem', fontWeight: 700,
-              color: 'var(--teal)', background: 'rgba(20,184,166,0.08)',
-              border: '1px solid var(--teal-border, rgba(20,184,166,0.3))', borderRadius: '8px',
+              color: 'var(--accent)', background: 'var(--accent-bg)',
+              border: '1px solid var(--accent-border)', borderRadius: '8px',
             }}>
               <Icon name='check' size={13} color='currentColor' /> Full lab unlocked
             </span>
@@ -439,7 +444,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
                   color: 'var(--text)', background: 'var(--surface)',
                   outline: 'none', fontFamily: 'inherit', width: '160px',
                 }}
-                onFocus={e => { e.currentTarget.style.borderColor = 'var(--teal)'; }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent)'; }}
                 onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
               />
               <button
@@ -447,7 +452,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
                 disabled={!code.trim()}
                 style={{
                   padding: '0.5rem 0.9rem',
-                  background: code.trim() ? 'var(--teal)' : 'var(--surface-2, var(--surface))',
+                  background: code.trim() ? 'var(--accent)' : 'var(--surface-2, var(--surface))',
                   color: code.trim() ? '#fff' : 'var(--text-muted)',
                   border: '1px solid var(--border)',
                   borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700,
@@ -477,7 +482,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
 
       {/* ── Comparison table ── */}
       <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '1rem', opacity: 0.8 }}>
-        All paid plans above include <strong style={{ color: 'var(--teal)', fontWeight: 700 }}>Full Lab</strong> access — same content, different billing periods.
+        All paid plans above include <strong style={{ color: 'var(--accent)', fontWeight: 700 }}>Full Lab</strong> access — same content, different billing periods.
       </p>
       <div style={{
         border: '1px solid var(--border)', borderRadius: '14px',
@@ -521,7 +526,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
                 borderLeft: i === 1 ? '1px solid var(--accent-border)' : '1px solid var(--border)',
                 borderRight: i === 1 ? '1px solid var(--accent-border)' : 'none',
               }}>
-                <Cell value={val} accent={i === 1 ? 'var(--accent)' : i === 2 ? 'var(--teal)' : undefined} />
+                <Cell value={val} accent={(i === 1 || i === 2) ? 'var(--accent)' : undefined} />
               </div>
             ))}
           </div>
@@ -534,7 +539,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
         textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)',
         borderTop: '1px solid var(--border)', paddingTop: '1.5rem',
       }}>
-        Foundations are always free — no account required. · Stripe payments coming soon. One code covers everything during beta.
+        Foundations and the SQL Lab beginner walkthrough are always free — no account required. · Subscriptions activate at launch. One beta code covers the whole lab right now.
       </div>
 
     </div>

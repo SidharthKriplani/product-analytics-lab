@@ -6,80 +6,66 @@ export function About() {
 
 The gap PAL fills: most prep resources teach you what A/B testing, RCA, and metric design are. Very few give you practice making judgment calls under realistic business pressure with messy, ambiguous data. PAL puts you in the decision, not the definition.
 
-17 rooms. 150+ cases. SQL Lab with 192 problems. Foundation modules across Stats, Experimentation, RCA, and Metrics. Every case tests judgment, not recall.`,
+Foundations, a 300+ problem SQL Lab, a deck of judgment rooms, a spaced-repetition Review queue, a timed Mock Interview, and a community Feed — organised so you always know what to do next.`,
     },
     {
-      title: 'Part of BreakLabs',
+      title: 'The four things interviews test',
       body: `PAL is part of BreakLabs, built around the four competencies every technical interview — and the job itself — actually tests:
 
-Recall — do you know the concepts cold? Definitions, formulas, what SRM or CUPED is. (In PAL: the MCQ Trainer.)
-Depth — do you understand why they work, well enough to reason past the textbook? (In PAL: the Foundation rooms.)
-Fluency — can you execute without fighting the tools — write the SQL, the Python, the transform? (Programming Lab, the sibling SWE-for-data app.)
-Judgment — given messy, ambiguous data and real stakes, do you make the right call? (PAL's practice rooms — the whole point.)
+Recall — do you know the concepts cold? Definitions, formulas, what SRM or CUPED is. (In PAL: the Library and Foundations.)
+Depth — do you understand why they work, well enough to reason past the textbook? (The four Foundation rooms.)
+Fluency — can you execute without fighting the tools — write the SQL, the transform? (SQL Lab here; Programming Lab, the sibling SWE-for-data app, for code.)
+Judgment — given messy, ambiguous data and real stakes, do you make the right call? (The judgment rooms — the whole point.)
 
 Most prep tools drill recall and fluency. Judgment is the part that actually decides senior interviews — and it's the reason PAL exists.`,
     },
     {
-      title: "Who it's for",
-      body: `Product analysts, data analysts, business analysts, and PMs preparing for senior IC and leadership-track interviews.
+      title: 'How the lab is organised',
+      body: `PAL groups its rooms into four stages — the loop you move through as you prep:
 
-If you are transitioning into product analytics from technical operations, consulting, or engineering — start with the Foundation rooms. They build the mental models the practice rooms assume.
+KNOW — build and check the fundamentals. Four Foundation rooms (Stats, Experimentation, RCA, Metrics) plus the Library of reference articles.
 
-If you already know what a p-value, SRM, and metric tree are — jump directly into the practice rooms and use Defense Strategy to build a targeted prep plan from your actual job description.`,
+DO — get fluent with the tools. SQL Lab spans a guided beginner walkthrough through Easy, Medium, Hard, Master, and Forensic problems. Programming Lab (the sibling app) handles code fluency.
+
+JUDGE — the heart of PAL. A/B Design, A/B Judgment, Spot the Flaw, Metrics, RCA, Analytics Cases, Instrumentation, Product Design, Prioritization, Estimation, and Cross-Room Challenges. Every case puts you in a decision under realistic pressure.
+
+LIVE — practice under interview conditions. Review (spaced repetition that resurfaces what you got wrong), Mock Interview (timed onsite simulation), Defense Strategy (a plan built from your JD), Company Tracks (round-by-round packs), and the community Feed.`,
+    },
+    {
+      title: 'Answer the way interviewers ask',
+      body: `Every judgment room runs in two modes. Options mode gives you multiple-choice calls for fast, keyed practice when you are warming up or drilling. Describe mode hides the options and asks you to write your reasoning first — the way a real interviewer makes you commit before revealing the answer.
+
+The debrief is the point: every case explains not just the right call but the reasoning behind it and the failure modes that trap most candidates.`,
+    },
+    {
+      title: 'Community, leaderboard & profiles',
+      body: `PAL is more than a solo grind. The Feed is a community space where people share wins, questions, and what they're working through — and earn points for contributing.
+
+Your profile carries your current role and company (with logo), LinkedIn, an optional résumé link, your avatar, your leaderboard rank, a per-room breakdown, and your feed points. Add your LinkedIn and résumé so recruiters browsing the leaderboard can actually find and reach you.
+
+Progress and the readiness countdown live on the Progress page — completion by room, a practice heatmap, your role-readiness level, and recommended next steps.`,
+    },
+    {
+      title: 'How to use PAL',
+      body: `New to product analytics, or transitioning from another field:
+→ Start in KNOW. Work Stat Foundations and RCA Foundations in order, then try a few cases in the Stats and RCA rooms before moving on.
+
+Prepping for a specific interview:
+→ Open Defense Strategy. Paste the job description, self-rate your gaps, pick your time horizon, and get a personalized day-by-day plan pointing you at the right rooms.
+
+Keeping skills sharp:
+→ Check Review daily — it resurfaces the exact cases you got wrong, spaced over time. Use Global Search (/) to jump to any topic, and run a Mock Interview when you want the full timed onsite.
+
+Tracking where you stand:
+→ The Progress page shows your readiness countdown, completion by room, a practice heatmap, and what to do next.`,
     },
     {
       title: 'How it differs from DataLemur, StrataScratch, Exponent',
       body: `DataLemur and StrataScratch: excellent SQL and Python question banks. PAL is not a question bank — it is a judgment system. The cases are not "write a query that returns X." They are "here is a metric that dropped 18% — what do you check first and why?"
 
-Exponent: case interview coaching with community and mock interviews. PAL is asynchronous, self-directed, and structured around specific analytical failure modes rather than coaching rubrics.
+Exponent: case-interview coaching with community and mock interviews. PAL is self-directed and structured around specific analytical failure modes rather than coaching rubrics — with its own Mock Interview, Review queue, and Feed built in.
 
-The specific gap PAL targets: experiment analysis judgment (not just stats formulas), RCA diagnostic instinct (not just framework recitation), and metric design under business pressure (not just definitions). These are the skills that decide senior PA interviews that existing tools do not systematically practice.`,
-    },
-    {
-      title: 'How to use PAL',
-      body: `New to product analytics or transitioning from another field:
-→ Start with Stat Foundations + RCA Foundations. Read every module in order. Then try 3 cases in the Stats Room and RCA Room before moving on.
-
-Already familiar with the core concepts, prepping for a specific interview:
-→ Start with Defense Strategy (under Tools). Paste your job description, self-rate your gaps, pick your time horizon. Your personalized day plan tells you which rooms to hit in what order.
-
-Practicing specific skills:
-→ Use Global Search (/) to find cases by topic. SQL Lab is the structured SQL/Python problem bank — 192 problems ordered by difficulty with hints and a timer. MCQ Trainer for fast recall drilling.
-
-Tracking progress:
-→ Progress page shows completion by room, role readiness score, a practice heatmap, and recommended next steps.`,
-    },
-    {
-      title: 'The rooms',
-      body: `Foundation rooms (free, start here if new):
-— Stat Foundations: 25 interactive modules on statistical thinking for experimentation
-— RCA Foundations: 12 modules on structured root cause analysis
-— Metrics Foundations: 13 modules on metric design, hierarchy, and sensitivity
-— Exp Foundations: 15 modules on A/B test design, validity, and advanced methods
-
-Core analytics practice rooms:
-— Stats Room: evaluate stakeholder claims about experiment data — valid, directionally reasonable, not supported, or inconclusive
-— Metrics Room: define primary metrics, diagnostics, and guardrails for a given product context
-— Experiment Design Room: design an experiment before you see the data — metric, unit, guardrails, trust checks
-— Experiment Review Room: make the ship/rollback/investigate call on a messy readout with conflicting signals
-— RCA Room: step through a structured diagnosis of a metric movement
-— Cases Room: work a business question from executive ask through to recommendation
-— Growth Analytics Room: analyze growth metrics, cohort curves, and supply-demand dynamics
-— BI & Reporting Room: interpret dashboards, surface insights, recommend actions
-— Spot the Flaw Room: identify the methodological error in an analysis that looks correct
-— Analytics Instrumentation Room: design event schemas and debug tracking failures
-
-Practice tools:
-— SQL Lab: 192 graded problems across Easy, Medium, Hard, Master, and Forensic levels
-— Programming Lab: SWE-for-data fluency practice — now a standalone BreakLabs app (opens separately)
-— MCQ Trainer: 40 multiple-choice questions across core concepts
-— Interview Simulator: timed practice sessions with role-specific question banks
-— Cross-Room Challenges: multi-room scenarios that integrate skills
-
-Prep tools:
-— Defense Strategy: paste your JD → gap score → personalized day-by-day plan
-— Company Tracks: round-by-round prep packs for specific companies
-— Deep Dives: long-form Playbook articles on every major concept`,
+The specific gap PAL targets: experiment-analysis judgment (not just stats formulas), RCA diagnostic instinct (not just framework recitation), and metric design under business pressure (not just definitions). These are the skills that decide senior PA interviews that existing tools do not systematically practice.`,
     },
     {
       title: 'Difficulty levels',
@@ -95,11 +81,11 @@ Filter by difficulty in any room browser using the chips above the case list.`,
     },
     {
       title: 'Technical details',
-      body: `Fully static React + Vite SPA. No backend, no database, no API calls. All case content ships as JavaScript data files. Progress is stored in your browser's localStorage. Nothing leaves your device.
+      body: `React + Vite SPA. Case content ships as JavaScript data files and your progress is stored in your browser's localStorage. Sign in (optional) to sync across devices, post to the Feed, and appear on the leaderboard.
 
-SQL Lab runs SQLite in the browser via sql.js (WASM), fully in-browser with no server-side execution. Python practice now lives in Programming Lab, a separate BreakLabs app.
+SQL Lab runs SQLite in the browser via sql.js (WASM) — no server-side execution. Code fluency lives in Programming Lab, a separate BreakLabs app.
 
-Deployed on Vercel. Works offline once loaded. Free to use with access code; full access via one-time unlock.`,
+Deployed on Vercel. Works offline once loaded. Currently in beta — free with an access code.`,
     },
   ];
 
@@ -153,7 +139,7 @@ Deployed on Vercel. Works offline once loaded. Free to use with access code; ful
             href="mailto:sidharthkriplani@gmail.com"
             style={{
               display: 'inline-flex', alignItems: 'center', padding: '0.5rem 1rem',
-              background: 'var(--teal)', color: '#fff', borderRadius: '8px',
+              background: 'var(--accent)', color: '#fff', borderRadius: '8px',
               fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none',
             }}
           >Email Sidharth</a>

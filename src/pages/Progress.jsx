@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { UniverseView } from '../components/shared/UniverseView.jsx';
 import { ReadinessWidget } from '../components/shared/ReadinessWidget.jsx';
 import { Icon } from '../components/shared/Icon.jsx';
+import { getDueReviews } from '../utils/srQueue.js';
 
 // Set to false to soft-hide the Universe view toggle without removing code
 const SHOW_UNIVERSE_TOGGLE = true;
@@ -77,7 +78,7 @@ function LevelBadge({ level }) {
   );
 }
 
-function RoomReadinessBar({ label, color, bg, border, completed, total, bestLevel, onReset }) {
+function RoomReadinessBar({ label, completed, total, bestLevel, onReset }) {
   const [confirmingReset, setConfirmingReset] = useState(false);
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
   return (
@@ -107,8 +108,8 @@ function RoomReadinessBar({ label, color, bg, border, completed, total, bestLeve
           )}
         </div>
       </div>
-      <div style={{ height: '5px', background: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: '3px', transition: 'width 0.3s' }} />
+      <div style={{ height: '5px', background: 'var(--surface-2)', borderRadius: '3px', overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: 'var(--accent)', borderRadius: '3px', transition: 'width 0.3s' }} />
       </div>
     </div>
   );
@@ -152,8 +153,8 @@ function SectionCard({ icon, title, open, onToggle, badge, children }) {
           {badge != null && (
             <span style={{
               fontSize: '0.68rem', fontWeight: 700,
-              background: 'var(--yellow-bg)', color: 'var(--yellow)',
-              border: '1px solid var(--yellow-border)',
+              background: 'var(--accent-bg)', color: 'var(--accent)',
+              border: '1px solid var(--accent-border)',
               borderRadius: '10px', padding: '0.1rem 0.45rem',
             }}>{badge}</span>
           )}
@@ -204,6 +205,10 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
     const p = getDesignProgress(s.id);
     return p && p.submittedPhases && Object.keys(p.submittedPhases).length > 0;
   });
+  const productDesignCompleted = productDesignScenarios.filter(s => {
+    const p = getProductDesignProgress(s.id);
+    return p && p.submittedPhases && Object.keys(p.submittedPhases).length > 0;
+  });
 
   // Best levels per room
   const statsBest = getBestLevel(statsCompleted.map(m => statsProgress[m.id]?.level).filter(Boolean));
@@ -225,9 +230,9 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
       onReset: makeRoomResetter(['pal-stats-progress-v1']) },
     { label: 'Metrics', completed: metricsCompleted.length, total: metricCases.length, best: metricsBest,
       onReset: makeRoomResetter(['pal-metrics-progress-v2']) },
-    { label: 'Design', completed: designCompleted.length, total: designScenarios.length, best: designBest,
+    { label: 'A/B Design', completed: designCompleted.length, total: designScenarios.length, best: designBest,
       onReset: makeRoomResetter(['pal-design-progress-v1']) },
-    { label: 'Review', completed: completed.length, total: scenarios.length, best: reviewBest,
+    { label: 'A/B Judgment', completed: completed.length, total: scenarios.length, best: reviewBest,
       onReset: makeRoomResetter(['exp-lab-progress-v1']) },
     { label: 'RCA', completed: rcaCompleted.length, total: rcaCases.length, best: rcaBest,
       onReset: makeRoomResetter(['pal-rca-progress-v2']) },
@@ -259,9 +264,21 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
       onReset: makeRoomResetter(['pal-rca-foundation-progress-v1']) },
     { label: 'Exp Foundations', completed: expFoundationModules.filter(m => efProgress[m.id]?.completedAt).length, total: expFoundationModules.length, color: 'var(--accent)',
       onReset: makeRoomResetter(['pal-exp-foundation-progress-v1']) },
-    { label: 'Prioritization', completed: prioritizationScenarios.filter(s => priProgress[s.id]?.completedAt).length, total: prioritizationScenarios.length, color: 'var(--yellow)',
+    { label: 'Prioritization', completed: prioritizationScenarios.filter(s => priProgress[s.id]?.completedAt).length, total: prioritizationScenarios.length,
       onReset: makeRoomResetter(['pal-pri-progress-v1']) },
-    { label: 'SQL Lab', completed: sqlLabProblems.filter(p => sqlSolved.has(p.id)).length, total: sqlLabProblems.length, color: 'var(--teal)',
+    { label: 'Product Design', completed: productDesignCompleted.length, total: productDesignScenarios.length,
+      onReset: () => {
+        try {
+          const toRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('pd-progress-')) toRemove.push(k);
+          }
+          toRemove.forEach(k => localStorage.removeItem(k));
+        } catch {}
+        window.location.reload();
+      } },
+    { label: 'SQL Lab', completed: sqlLabProblems.filter(p => sqlSolved.has(p.id)).length, total: sqlLabProblems.length,
       onReset: makeRoomResetter(['pal-sql-lab-solved-v1', 'pal-sql-lab-times-v1', 'pal-sql-lab-dates-v1']) },
   ];
 
@@ -487,6 +504,10 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
   }
 
   // Empty state for brand-new users with zero completions
+  // Spaced-repetition Review queue — due count (guarded; 0 if queue empty/absent)
+  let srDueCount = 0;
+  try { srDueCount = getDueReviews().length; } catch { srDueCount = 0; }
+
   const allRoomTotal = allRoomProgress.reduce((sum, r) => sum + r.completed, 0);
   if (allRoomTotal === 0) {
     return (
@@ -505,7 +526,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
           onClick={() => onNavigate('metrics-foundations')}
           style={{
             background: 'var(--surface)',
-            border: '2px solid var(--green)',
+            border: '1px solid var(--border)',
             borderRadius: '14px',
             padding: '2rem 1.5rem',
             cursor: 'pointer',
@@ -514,7 +535,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
             margin: '0 auto',
           }}
         >
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
             Start Here
           </div>
           <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
@@ -527,7 +548,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
             className="pal-glow-pulse"
             style={{
               display: 'inline-block',
-              background: 'var(--green)',
+              background: 'var(--accent)',
               color: '#fff',
               fontWeight: 700,
               fontSize: '0.85rem',
@@ -591,6 +612,46 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
 
       {/* Readiness countdown — headline "are you ready for your interview" metric */}
       <ReadinessWidget allProgress={allRoomProgress} onNavigate={onNavigate} />
+
+      {/* Spaced-repetition Review — surfaced only when cases are due */}
+      {srDueCount > 0 && (
+        <div className="pal-card-enter" style={{
+          border: '1px solid var(--border)',
+          background: 'var(--surface)',
+          borderRadius: '12px',
+          padding: '1rem 1.25rem',
+          marginBottom: '1.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          flexWrap: 'wrap',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+            <Icon name='rotate-ccw' size={18} color='var(--accent)' />
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
+                Review due
+              </div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)' }}>
+                {srDueCount} case{srDueCount !== 1 ? 's' : ''} ready to review
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => onNavigate && onNavigate('review-queue')}
+            style={{
+              background: 'var(--accent)', color: '#fff',
+              border: 'none', borderRadius: '8px',
+              padding: '0.5rem 1.1rem', fontSize: '0.875rem',
+              fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Review now →
+          </button>
+        </div>
+      )}
 
       {/* Returning user next-suggestion card — shown when user has prior activity */}
       {totalCompleted > 0 && nextSuggested && (
@@ -747,13 +808,6 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
               <RoomReadinessBar
                 key={r.label}
                 label={r.label}
-                color={r.label === 'Stats' ? 'var(--blue-text)' :
-                       r.label === 'Metrics' ? 'var(--green)' :
-                       r.label === 'Design' ? 'var(--teal)' :
-                       r.label === 'Review' ? 'var(--accent)' :
-                       r.label === 'RCA' ? 'var(--yellow)' : 'var(--purple)'}
-                bg={r.label === 'Stats' ? 'var(--blue-bg)' : 'var(--surface-2)'}
-                border={r.label === 'Stats' ? 'var(--blue-border)' : 'var(--border)'}
                 completed={r.completed}
                 total={r.total}
                 bestLevel={r.best}
@@ -838,8 +892,8 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
             {streak > 0 && (
               <span style={{
                 fontSize: '0.68rem', fontWeight: 700,
-                background: 'var(--yellow-bg)', color: 'var(--yellow)',
-                border: '1px solid var(--yellow-border)',
+                background: 'var(--surface-2)', color: 'var(--text-secondary)',
+                border: '1px solid var(--border)',
                 borderRadius: '10px', padding: '0.1rem 0.5rem',
               }}>{streak} day{streak !== 1 ? 's' : ''}</span>
             )}
@@ -864,7 +918,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                   title={day}
                   style={{
                     width: '10px', height: '10px', borderRadius: '2px',
-                    background: practiceDates.has(day) ? 'var(--yellow)' : 'var(--surface)',
+                    background: practiceDates.has(day) ? 'var(--accent)' : 'var(--surface)',
                     border: practiceDates.has(day) ? 'none' : '1px solid var(--border)',
                   }}
                 />
