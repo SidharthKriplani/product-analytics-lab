@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """
 Tier-3 SEMANTIC triage for Foundation modules — runs on your LOCAL LM Studio model
-(zero cloud tokens). It does NOT grade; it OVER-FLAGS suspects so you only adjudicate
-a short pile instead of re-reading 79 modules.
+(zero cloud tokens). It does NOT grade authoritatively; it scores + flags suspects so
+you only adjudicate a short pile instead of re-reading 79 modules.
 
-Treat output as a recall-biased net: 'review' = look at this; 'ok' = NOT a clearance,
-just "the small model didn't catch anything." Final judgment is yours (see
-docs/EVAL_RUBRICS.md → Tier 3).
+Calibration (learned V5.72.0): a weak local model over-flags and mis-reads (claims an
+example is missing when it's in the text). Two guards: every flag must cite EVIDENCE
+(forces it to read) and it must SCORE 1-5 (forces discrimination). "review" = score <= 2
+or any factual-doubt. Still a net, not a judge — final call is yours (EVAL_RUBRICS.md Tier 3).
 
-Prereqs: LM Studio running with a model loaded (Settings mirror tag_companies.py).
-    pip install requests
+Prereqs: LM Studio running with a model loaded; pip install requests.
 Run from repo root:
-    python3 scripts/triage_foundations.py --room all          # all 79 modules
-    python3 scripts/triage_foundations.py --room exp --limit 5 # smoke test
-Output: scripts/foundations_triage.csv (sorted worst-first) + a printed shortlist.
+    python3 scripts/triage_foundations.py --room exp --limit 5   # smoke test
+    python3 scripts/triage_foundations.py --room all
+Output: scripts/foundations_triage.csv (worst-first) + a printed shortlist.
 """
 import json, re, subprocess, sys, os, tempfile, csv, requests
 
 BASE_URL = "http://127.0.0.1:1234"
-MODEL    = "qwen/qwen3-8b"
+MODEL    = "qwen2.5-7b-instruct"   # instruct model holds strict JSON + literal reading better than a reasoner; auto-detect overrides if not loaded
 TIMEOUT  = 120
 
 ROOMS = {
@@ -28,23 +28,39 @@ ROOMS = {
     'rca':     ('src/data/rcaFoundationModules.js',     'rcaFoundationModules'),
 }
 
-SYSTEM = """You are a ruthless content reviewer for a product-analytics interview-prep platform.
-You review TEACHING modules. You do NOT rewrite — you only flag suspects for a human expert.
-Bias toward flagging: when in doubt, mark "review". A clean pass means you found nothing, not that it is great.
-Output VALID JSON ONLY, no markdown, no prose outside the JSON."""
+SYSTEM = """You are a sharp content reviewer for a product-analytics interview-prep platform.
+You review TEACHING modules and only FLAG suspects for a human expert — you never rewrite.
+You read carefully and NEVER claim something is missing that is actually present in the text.
+Every flag must cite specific evidence. Output VALID JSON ONLY — no markdown, no prose outside the JSON."""
 
-RUBRIC = """Flag a module for human review if ANY of these apply:
-- recall-not-judgment: it just states facts/definitions instead of building intuition or a judgment reflex.
-- no-intuition: jumps to a formula/claim without the "why it works" intuition first.
-- no-example: a quantitative concept with no concrete worked/numeric example.
-- jargon: uses a term without defining it (assumes knowledge a learner here may not have).
-- weak-connection: the "why this matters / where it's used" link is generic or missing.
-- factual-doubt: any claim, threshold, or example that seems wrong or oversimplified (flag for the human to verify; you are not the authority).
-- boring: technically fine but unlikely to hold a strong candidate's attention or to come up in a real interview.
+RUBRIC = """How these modules work: each teaches ONE concept through a realistic NARRATIVE SCENARIO
+written in `keyInsight` (usually with concrete numbers), plus a `connection` line on where it is used.
+A concrete scenario or numbers in keyInsight COUNT as both intuition and a worked example —
+do NOT flag "no-intuition" or "no-example" if keyInsight contains a scenario or any numbers.
+
+Score the module 1-5:
+5 = sharp, builds real judgment, would hold a strong candidate
+4 = solid
+3 = fine but unremarkable
+2 = a real weakness (must be backed by a flag + evidence)
+1 = wrong, misleading, or near-useless
+
+Flag ONLY genuine problems, each with evidence:
+- recall-not-judgment: states facts with no scenario or decision to reason about
+- no-intuition: asserts a claim/formula with zero "why it works" (ONLY if truly absent)
+- no-example: no concrete instance or number anywhere (ONLY if truly absent)
+- jargon: a term used with no definition a learner here would need
+- weak-connection: the connection line is generic/boilerplate
+- factual-doubt: a claim/threshold/number that seems wrong (flag for the human to verify; you are NOT the authority)
+- boring: technically fine but flat and forgettable
+
+Most modules here are well-built. Reserve scores of 2 or below for genuine issues; if you are flagging
+the majority, re-read — you are being too harsh. For every flag, put the exact offending or missing
+thing in `evidence` as a short reason WITHOUT quotation marks.
 
 Return JSON exactly:
-{"verdict": "ok" | "review", "severity": 1|2|3, "flags": ["..."], "why": "one short sentence"}
-severity: 3 = likely wrong/misleading, 2 = weak pedagogy, 1 = minor. Use [] flags and verdict "ok" only if nothing applies."""
+{"score": 1-5, "flags": ["..."], "evidence": "specific reason, no quote marks", "why": "one short sentence"}
+Use [] for flags on a clean module."""
 
 
 def load_modules(file, export_name):
@@ -81,13 +97,11 @@ def call_lm(user_msg):
     text = re.sub(r'<think>[\s\S]*?</think>', '', text).strip()
     m = re.search(r'\{[\s\S]*\}', text)
     if not m:
-        return {"verdict": "review", "severity": 1, "flags": ["parse-error"],
-                "why": "model returned no JSON: " + text[:120]}
+        return {"score": 2, "flags": ["parse-error"], "evidence": "no JSON returned", "why": text[:120]}
     try:
         return json.loads(m.group())
     except Exception:
-        return {"verdict": "review", "severity": 1, "flags": ["parse-error"],
-                "why": "unparseable JSON: " + m.group()[:120]}
+        return {"score": 2, "flags": ["parse-error"], "evidence": "unparseable JSON", "why": m.group()[:120]}
 
 
 def module_msg(room, m):
@@ -100,26 +114,37 @@ def module_msg(room, m):
 
 
 def main():
+    global MODEL
     args = sys.argv[1:]
-    room = 'all'
-    limit = None
+    room, limit, forced = 'all', None, None
     for i, a in enumerate(args):
         if a == '--room' and i + 1 < len(args): room = args[i + 1]
         if a == '--limit' and i + 1 < len(args): limit = int(args[i + 1])
+        if a == '--model' and i + 1 < len(args): forced = args[i + 1]
+    if forced: MODEL = forced
 
-    global MODEL
     try:
         r = requests.get(f"{BASE_URL}/v1/models", timeout=5); r.raise_for_status()
         ids = [m.get('id') for m in r.json().get('data', []) if m.get('id')]
     except Exception as e:
         print(f"ERROR: LM Studio not reachable at {BASE_URL} ({e}).")
-        print("Open LM Studio → load a model → Developer (Local Server) → Start Server, then re-run.")
+        print("Open LM Studio -> load a model -> Developer (Local Server) -> Start Server, then re-run.")
         sys.exit(1)
     if ids and MODEL not in ids:
-        print(f"Note: '{MODEL}' not loaded; using served model '{ids[0]}'.")
-        MODEL = ids[0]
-    elif not ids:
-        print("Warning: server returned no model list; trying the configured MODEL anyway.")
+        short = MODEL.split('/')[-1].lower()
+        match = next((i for i in ids if short in i.lower() or i.lower() in MODEL.lower()), None)
+        if match:
+            print(f"Note: '{MODEL}' not an exact loaded id; using '{match}'.")
+            MODEL = match
+        elif forced:
+            print(f"ERROR: requested --model '{MODEL}' is not loaded.")
+            print(f"Loaded models: {', '.join(ids) if ids else '(none)'}")
+            print("Load it in LM Studio (Loaded Models must show it READY), or pass one of the above ids.")
+            sys.exit(1)
+        else:
+            print(f"Note: '{MODEL}' not loaded; using served model '{ids[0]}'.")
+            MODEL = ids[0]
+    print(f"Model: {MODEL}")
 
     targets = ROOMS.keys() if room == 'all' else [room]
     rows = []
@@ -134,28 +159,34 @@ def main():
             try:
                 res = call_lm(module_msg(rk, m))
             except Exception as e:
-                res = {"verdict": "review", "severity": 1, "flags": ["call-error"], "why": str(e)[:120]}
-            verdict = res.get('verdict', 'review')
-            sev = res.get('severity', 1)
-            flags = ','.join(res.get('flags', []) or [])
-            why = res.get('why', '')
-            mark = '  ok' if verdict == 'ok' else f"REVIEW s{sev}"
-            print(f"  {mark}  [{rk}] {m.get('id','?')} {m.get('title','')[:42]}"
-                  + (f"  — {flags}" if verdict != 'ok' else ''))
-            if verdict != 'ok':
+                res = {"score": 2, "flags": ["call-error"], "evidence": str(e)[:120], "why": ""}
+            try:
+                score = int(res.get('score', 3))
+            except Exception:
+                score = 2
+            flags = res.get('flags', []) or []
+            evidence = (res.get('evidence', '') or '').replace('\n', ' ')
+            why = (res.get('why', '') or '').replace('\n', ' ')
+            review = score <= 2 or 'factual-doubt' in flags
+            sev = 3 if 'factual-doubt' in flags else (3 if score <= 1 else 2 if score <= 2 else 1)
+            mark = f"REVIEW s{sev}" if review else "  ok  "
+            print(f"  {mark} score{score} [{rk}] {m.get('id','?')} {m.get('title','')[:40]}"
+                  + (f"  — {','.join(flags)}" if review else ''))
+            if review:
                 rows.append({'room': rk, 'id': m.get('id', ''), 'title': m.get('title', ''),
-                             'severity': sev, 'flags': flags, 'why': why})
+                             'score': score, 'severity': sev, 'flags': ','.join(flags),
+                             'evidence': evidence, 'why': why})
 
-    rows.sort(key=lambda r: (-int(r.get('severity', 1)), r['room']))
+    rows.sort(key=lambda r: (r['score'], -int(r['severity'])))
     out = 'scripts/foundations_triage.csv'
     with open(out, 'w', newline='') as f:
-        w = csv.DictWriter(f, fieldnames=['room', 'id', 'title', 'severity', 'flags', 'why'])
+        w = csv.DictWriter(f, fieldnames=['room', 'id', 'title', 'score', 'severity', 'flags', 'evidence', 'why'])
         w.writeheader(); w.writerows(rows)
 
-    print(f"\n── Shortlist: {len(rows)} modules flagged for human review (worst first) ──")
+    print(f"\n── Shortlist: {len(rows)} flagged for human review (worst first) ──")
     for r in rows:
-        print(f"  s{r['severity']} [{r['room']}] {r['id']} {r['title'][:40]} — {r['flags']}: {r['why']}")
-    print(f"\nFull ledger: {out}. Remember: 'review' = look; 'ok' = not a clearance. You adjudicate.")
+        print(f"  score{r['score']} [{r['room']}] {r['id']} {r['title'][:38]} — {r['flags']}: {r['evidence']}")
+    print(f"\nFull ledger: {out}. 'review' = look; 'ok' = not a clearance. You adjudicate.")
 
 
 if __name__ == '__main__':

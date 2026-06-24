@@ -4,6 +4,22 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.73.0] — 2026-06-24 [KEYED-ROOM AUDIT HARNESS + STF DUP-ID BUG FIX]
+
+Pivot from Foundations (where local LLMs proved unable to judge pedagogy — 7B and 14B both rubber-stamp, 8B carpet-flags) to the KEYED rooms, where the task is verifiable consistency, not taste — the local 14B's actual strength.
+- **`scripts/audit_keyed.mjs`** (deterministic): MCQ + Spot-the-Flaw gate — key validity, exactly-one-correct option, dup ids/options, explanation present, plus a length-bias detector. Pure code, no LLM.
+- **Bug caught + fixed (Tier 1):** Spot-the-Flaw had STF13–STF17 **pasted twice** (22 entries, 5 dup ids) — silently broke `spotTheFlawCasesById` and progress tracking. Removed the duplicate block; now 17 unique cases, byId map intact. `src/data/spotTheFlawCases.js`.
+- **Flagged (Tier 2):** 29 of 40 MCQ items have the correct answer as the longest option — gameable by "pick the longest." Logged for a content pass; not blocking.
+- **`scripts/triage_keyed.py`** (local LLM consistency check): verifies the keyed answer holds, distractors aren't secretly correct, the flaw is real/primary, the fix works. Reuses the LM Studio harness (`--model`, fuzzy id match). This is where the 14B is fit for purpose.
+- `docs/EVAL_RUBRICS.md` updated (Archetype B automation BUILT). Foundations conclusion recorded: deterministic gate + human, no LLM.
+
+## [5.72.0] — 2026-06-24 [FOUNDATIONS TRIAGE — CALIBRATION FIX]
+
+First live run of `triage_foundations.py` (qwen3-8b) over-flagged and mis-read — it flagged ef01/ef03/ef04 for "no-example/no-intuition" when those modules are built around concrete scenarios (85%-vs-60% confound; 14M users / 1% lift / 1-over-MDE²; "p=0.03 so 3% chance it fails? No"). A net that flags 4/5 with identical generic reasons has no discriminating power. Fixes:
+- **Evidence-required + scored prompt:** every flag must cite a specific reason (forces the model to actually read), and the model must score 1-5; "review" = score ≤ 2 or any factual-doubt. Explicitly tells it a narrative scenario / numbers in `keyInsight` COUNT as intuition + example, so it stops false-flagging present content.
+- **Default model → `qwen2.5-7b-instruct`** (instruct holds strict JSON + literal reading better than the reasoner; auto-detect still overrides if not loaded).
+- CSV gains `score` + `evidence` columns. File: `scripts/triage_foundations.py`.
+
 ## [5.71.0] — 2026-06-24 [FOUNDATIONS AUDIT HARNESS (DETERMINISTIC + LM STUDIO)]
 
 Built the first room audit harness, Foundations, on the three-layer model (deterministic → local-LLM triage → human adjudication) — designed to keep token burn off the cloud.

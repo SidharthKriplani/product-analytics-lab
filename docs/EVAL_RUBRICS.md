@@ -186,6 +186,8 @@ Rather than 15 near-duplicate rubrics, every room maps to one of four rubric *sh
 
 **Tier 3 (manual):** is *exactly one* option actually correct — red-team the best distractor; judgment vs lookup; explanation teaches the reasoning, not just asserts.
 
+**Automation (BUILT):** `scripts/audit_keyed.mjs` (deterministic, MCQ + Spot-the-Flaw: key validity, exactly-one-correct, dup ids/options, explanation present, length-bias tell) and `scripts/triage_keyed.py` (local LLM *consistency check* — verifies the keyed answer holds, distractors aren't secretly correct, the flaw is real & primary, the fix works). Unlike Foundations, this is a verification task, so the local 14B is fit for purpose here. First run (V5.73.0) caught a Tier-1 dup-id bug in Spot-the-Flaw (STF13–17 pasted twice → fixed, 22→17) and flagged 29/40 MCQ items with a length-bias tell (correct answer is the longest option — gameable).
+
 ### Archetype C — rubric-scored judgment
 *(Metrics, Experiment Design, RCA, Cases/Business, Product Design, Prioritization, Estimation, Instrumentation, Growth Analytics, BI, Take-Home, Full Loop, Behavioral, Challenges)*
 
