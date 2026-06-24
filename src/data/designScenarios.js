@@ -4072,6 +4072,3758 @@ export const designScenarios = [
       fromReview: 'You read the checklist completion illusion. Go back and design this experiment to avoid shipping on the wrong metric.',
     },
   },
+
+  // ─────────────────────────────────────────────
+  // D09 — Design the Group Video Calls Test (BETA · Staff)
+  // Core trap: interference / network effects — user-level randomization leaks across the social graph
+  // ─────────────────────────────────────────────
+  {
+    id: 'd09-social-network-rollout',
+    title: 'Design the Group Video Calls Test',
+    subtitle: 'Saanjh, a social app, wants to test a new group video call feature. Decide the randomization unit before the social graph contaminates your control.',
+    isFree: false,
+    difficulty: 'staff',
+    industry: 'social',
+    scenarioFamily: 'sutva',
+
+    context: {
+      company: 'Saanjh',
+      product: 'Consumer social messaging app, ~14M MAU, heavy in India and Southeast Asia, built around friend-to-friend and small-group communication',
+      team: 'Communications team',
+      background: 'Saanjh built a new group video call feature embedded directly in group chats. The hypothesis is that richer real-time communication increases group activity and overall retention. The catch: video calls are inherently multi-person. A treated user who starts a call pulls their friends into the experience — even friends who are in the control group. The team\'s default plan is a standard 50/50 user-level A/B test.',
+      featureProposal: 'Add a one-tap group video call button to group chats. Treatment users see the button and can start calls; control users do not see it. Hypothesis: group video calling increases group messaging activity and 28-day retention.',
+      businessPressure: 'A competitor just shipped group video. Leadership wants a fast read on whether this moves retention before committing engineering to a full polish-and-scale effort. The Comms PM has already configured a 50/50 user-level split in the experimentation platform.',
+      constraints: [
+        'The social graph is dense — the median user is in 4+ active group chats, each with 5-12 members',
+        'A video call started by a treated user is joinable by anyone in the group, including control users',
+        '~14M MAU; geographic clustering is strong (most groups are single-country)',
+        'The platform supports user-level, group-level (cluster), and geo/time-based switchback randomization',
+      ],
+    },
+
+    designPhases: [
+      {
+        id: 'framing',
+        label: 'Framing',
+        hint: 'What are you testing, and what makes measurement hard here?',
+        fields: [
+          {
+            id: 'businessDecision',
+            label: 'What business decision will this experiment inform?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'bd-a',
+                label: 'Whether to invest in polishing and scaling group video calling to the whole user base',
+                scoreValue: 2,
+                rationale: 'Correct. The decision is whether the feature moves the needle enough to justify the full build-out. Clear and scoped.',
+              },
+              {
+                id: 'bd-b',
+                label: 'Whether users like video calling',
+                scoreValue: 0,
+                rationale: 'Not a decision. "Like" is unmeasurable and the existence of a competitor feature already implies demand. The question is incremental impact on Saanjh\'s metrics.',
+              },
+              {
+                id: 'bd-c',
+                label: 'Whether Saanjh can match the competitor\'s feature set',
+                scoreValue: 0,
+                rationale: 'A parity/strategy question, not a treatment-effect question. The experiment measures impact, not competitive positioning.',
+              },
+              {
+                id: 'bd-d',
+                label: 'Whether group video drives more activity than one-to-one video',
+                scoreValue: 1,
+                rationale: 'A reasonable secondary question, but it is not what this experiment is set up to answer — there is no one-to-one video arm. Out of scope for this design.',
+              },
+            ],
+          },
+          {
+            id: 'hypothesis',
+            label: 'Select the strongest hypothesis',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'hyp-a',
+                label: 'Giving groups access to video calling increases group messaging activity and 28-day retention, because richer real-time communication deepens group engagement.',
+                scoreValue: 2,
+                rationale: 'Strong. Note the unit: it frames the effect at the group level, which is the correct way to think about a feature whose value is inherently shared across members. Mechanism specified, outcome specified.',
+              },
+              {
+                id: 'hyp-b',
+                label: 'Treated users will send more messages than control users.',
+                scoreValue: 0,
+                rationale: 'This framing assumes treated and control users are cleanly separable, which is exactly the assumption the social graph violates. A control user pulled into a treated user\'s call is contaminated. The hypothesis bakes in the design flaw.',
+              },
+              {
+                id: 'hyp-c',
+                label: 'Video calling will increase total time spent in the app.',
+                scoreValue: 1,
+                rationale: 'Directionally fine and measurable, but time-spent is a weaker outcome than retention for a social product, and the framing again ignores the cross-user spillover that makes a naive comparison invalid.',
+              },
+              {
+                id: 'hyp-d',
+                label: 'Users in groups where someone starts a video call will be more active.',
+                scoreValue: 1,
+                rationale: 'Closer — it correctly centers the group — but it is a descriptive correlation, not a causal hypothesis tied to the treatment assignment. It also conditions on a post-treatment behavior (someone starting a call), which is a collider.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'setup',
+        label: 'Setup',
+        hint: 'This is the crux: who gets treated, and how do you stop the effect from leaking?',
+        fields: [
+          {
+            id: 'eligiblePopulation',
+            label: 'Who should be included in the experiment?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'ep-a',
+                label: 'All active groups (and their members) during the test window',
+                scoreValue: 2,
+                rationale: 'Correct given a group-level design. The feature lives in group chats; the group is the natural eligible unit. Including all active groups maximizes power and generalizability.',
+              },
+              {
+                id: 'ep-b',
+                label: 'Only large groups (8+ members), since video calling is most useful there',
+                scoreValue: 1,
+                rationale: 'Plausible if you believe the effect concentrates in large groups, but it restricts external validity. Most of Saanjh\'s groups are smaller, and the average effect across all groups is what the ship decision needs.',
+              },
+              {
+                id: 'ep-c',
+                label: 'Only individual users who opt into beta features',
+                scoreValue: 0,
+                rationale: 'Opt-in beta users are a self-selected, unrepresentative population, and individual opt-in does nothing to contain the cross-member spillover. Two problems in one option.',
+              },
+              {
+                id: 'ep-d',
+                label: 'Only new users, to isolate the feature\'s effect on early retention',
+                scoreValue: 0,
+                rationale: 'New users have the thinnest social graphs and fewest active groups — the worst population for testing a feature whose value depends on group density. This would bias the effect toward zero.',
+              },
+            ],
+          },
+          {
+            id: 'randomizationUnit',
+            label: 'What should be the randomization unit? (This is the central decision.)',
+            type: 'single_select',
+            conceptLinks: ['randomization-unit', 'sutva'],
+            options: [
+              {
+                id: 'ru-a',
+                label: 'Group / cluster — assign whole groups (ideally clusters of connected groups) to treatment or control',
+                scoreValue: 2,
+                rationale: 'Correct. The feature\'s effect propagates through the group. Randomizing at the group level keeps the treatment self-contained: everyone exposed to a given call is in the same arm. To be rigorous, you cluster connected groups (users who share membership) so spillover stays within-arm. This is the only design that respects SUTVA here.',
+              },
+              {
+                id: 'ru-b',
+                label: 'User — assign each user independently to treatment or control',
+                scoreValue: 0,
+                rationale: 'This is the trap. A treated user starts a call; control users in the same group join it. The control arm is contaminated by the treatment, the measured difference shrinks toward zero, and you conclude the feature does nothing when it may work. Classic SUTVA violation via network interference.',
+              },
+              {
+                id: 'ru-c',
+                label: 'Geography — assign whole countries to treatment or control',
+                scoreValue: 1,
+                rationale: 'Geo-level randomization does contain spillover well (groups are mostly single-country), but it dramatically reduces the effective sample size — you have only a handful of large countries, so power and balance suffer. Cluster-by-group is more efficient while still containing leakage.',
+              },
+              {
+                id: 'ru-d',
+                label: 'Session — assign each session independently',
+                scoreValue: 0,
+                rationale: 'The worst option. It contaminates within users (same person, different arm across sessions) AND across users (spillover through calls). It compounds every interference problem.',
+              },
+            ],
+          },
+          {
+            id: 'unitOfAnalysis',
+            label: 'What is the unit of analysis?',
+            type: 'single_select',
+            conceptLinks: ['unit-of-analysis'],
+            options: [
+              {
+                id: 'ua-a',
+                label: 'Group / cluster — compute outcomes per cluster, matching the randomization unit (e.g. cluster-level retention, cluster-level activity)',
+                scoreValue: 2,
+                rationale: 'Correct. Analysis unit must match randomization unit. With cluster randomization, the valid approach analyzes cluster-level summaries (or uses a mixed model with cluster random effects) so standard errors reflect the true number of independent units.',
+              },
+              {
+                id: 'ua-b',
+                label: 'User — compute per-user metrics and run a standard t-test',
+                scoreValue: 0,
+                rationale: 'Mismatched. Users within a cluster are correlated; treating them as independent deflates standard errors and produces false significance. This is the cluster-randomization analogue of the session-vs-user mistake.',
+              },
+              {
+                id: 'ua-c',
+                label: 'Message — analyze at the level of individual messages or calls',
+                scoreValue: 0,
+                rationale: 'Even more correlated than users. Messages from the same group and user are deeply non-independent. Wildly overstates power.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'metrics',
+        label: 'Metrics',
+        hint: 'What will you measure?',
+        fields: [
+          {
+            id: 'primaryMetric',
+            label: 'What is the primary metric?',
+            type: 'single_select',
+            conceptLinks: ['primary-metric'],
+            options: [
+              {
+                id: 'pm-a',
+                label: '28-day retention at the cluster level (share of cluster members retained)',
+                scoreValue: 2,
+                rationale: 'Correct. Retention is the business outcome leadership cares about, measured at the unit of randomization. It captures the durable value of richer group communication.',
+              },
+              {
+                id: 'pm-b',
+                label: 'Number of video calls started',
+                scoreValue: 0,
+                rationale: 'A pure adoption metric, and one that only exists in treatment. It tells you the feature is used, not that it creates value. Cannot be a primary for a ship decision.',
+              },
+              {
+                id: 'pm-c',
+                label: 'Group messaging activity (messages per active group per week) at the cluster level',
+                scoreValue: 1,
+                rationale: 'A strong mechanism/engagement metric and a reasonable secondary, but activity can rise without retention rising. Retention is the harder, more decision-relevant outcome.',
+              },
+              {
+                id: 'pm-d',
+                label: 'Daily active users, app-wide',
+                scoreValue: 0,
+                rationale: 'Too diluted. A group feature\'s effect will be swamped by app-wide DAU noise, and app-wide DAU is contaminated across arms in a user-level design. Wrong granularity.',
+              },
+            ],
+          },
+          {
+            id: 'guardrailMetrics',
+            label: 'Which metrics should be guardrails?',
+            type: 'multi_select',
+            conceptLinks: ['guardrail-metric'],
+            options: [
+              {
+                id: 'gm-a',
+                label: 'App crash / call-failure rate',
+                scoreValue: 2,
+                rationale: 'Essential. Real-time video is technically fragile. A feature that boosts engagement but crashes calls or the app is not shippable. Blocking guardrail.',
+              },
+              {
+                id: 'gm-b',
+                label: 'Notification opt-out / mute rate',
+                scoreValue: 1,
+                rationale: 'Good guardrail. Call invitations generate notifications; if they annoy users into muting groups, the feature is causing latent harm even if short-term activity rises.',
+              },
+              {
+                id: 'gm-c',
+                label: 'Number of video calls started',
+                scoreValue: 0,
+                rationale: 'This is an adoption diagnostic, not a guardrail. It cannot breach in a harmful direction and exists only in treatment.',
+              },
+              {
+                id: 'gm-d',
+                label: 'User-reported abuse / safety reports in calls',
+                scoreValue: 1,
+                rationale: 'Worth tracking for a real-time social feature — new surfaces create new abuse vectors — though it may be too low-frequency to power within the window. Reasonable as a monitored guardrail.',
+              },
+            ],
+          },
+          {
+            id: 'diagnosticMetrics',
+            label: 'Which metrics should be tracked as diagnostics?',
+            type: 'multi_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'dm-a',
+                label: 'Call adoption rate (share of treated groups that start at least one call)',
+                scoreValue: 2,
+                rationale: 'Key diagnostic. If almost no treated groups adopt, a null retention result means "not adopted," not "doesn\'t work." Adoption gates interpretation.',
+              },
+              {
+                id: 'dm-b',
+                label: 'Average call duration and participants per call',
+                scoreValue: 1,
+                rationale: 'Useful for understanding how the feature is used and whether the mechanism (richer communication) is plausibly active.',
+              },
+              {
+                id: 'dm-c',
+                label: 'Share of group members who join a started call',
+                scoreValue: 1,
+                rationale: 'Good diagnostic for the spillover mechanism — it quantifies exactly how many members a single starter pulls in, which is the thing that breaks a user-level design.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'logistics',
+        label: 'Logistics',
+        hint: 'How long, how large, how attributed?',
+        fields: [
+          {
+            id: 'runtime',
+            label: 'How long should this experiment run?',
+            type: 'single_select',
+            conceptLinks: ['novelty-effect', 'mde'],
+            options: [
+              {
+                id: 'rt-a',
+                label: '4-6 weeks, long enough to observe 28-day retention for the enrolled cohort and to see novelty decay',
+                scoreValue: 2,
+                rationale: 'Correct. The primary metric is 28-day retention, so the window must exceed 28 days for the cohort to mature. A new, exciting feature also carries a novelty spike; 4-6 weeks lets you see whether activity sustains.',
+              },
+              {
+                id: 'rt-b',
+                label: '1 week — get a fast read for leadership',
+                scoreValue: 0,
+                rationale: 'Impossible to measure 28-day retention in a 1-week window, and a brand-new social feature\'s first week is pure novelty. The fast read would be a mirage.',
+              },
+              {
+                id: 'rt-c',
+                label: '2 weeks with a 28-day trailing observation window',
+                scoreValue: 1,
+                rationale: 'Defensible enrollment-plus-observation structure, but 2 weeks of enrollment at cluster level may not yield enough independent clusters for power. Longer enrollment is usually needed for cluster designs.',
+              },
+              {
+                id: 'rt-d',
+                label: 'Run until the retention difference is significant',
+                scoreValue: 0,
+                rationale: 'Peeking. Continuous testing without an alpha-spending plan inflates false positives, and it tempts stopping during the novelty peak.',
+              },
+            ],
+          },
+          {
+            id: 'attributionWindow',
+            label: 'What attribution window should apply to the primary metric?',
+            type: 'single_select',
+            conceptLinks: ['right-censoring'],
+            options: [
+              {
+                id: 'aw-a',
+                label: '28 days from each cluster\'s enrollment date',
+                scoreValue: 2,
+                rationale: 'Correct and matches the metric definition. Each cluster gets a full, equal observation window measured from its own enrollment, avoiding right-censoring bias.',
+              },
+              {
+                id: 'aw-b',
+                label: 'Calendar month, aligned to the analysis date',
+                scoreValue: 0,
+                rationale: 'Calendar alignment gives clusters enrolled late a truncated window — right-censoring that biases retention downward for later cohorts.',
+              },
+              {
+                id: 'aw-c',
+                label: '7 days, for a quicker read',
+                scoreValue: 0,
+                rationale: 'A 7-day window does not measure the 28-day retention the decision needs, and early retention is most contaminated by novelty.',
+              },
+            ],
+          },
+          {
+            id: 'sampleSizeConcern',
+            label: 'What is the main power concern for this experiment?',
+            type: 'single_select',
+            conceptLinks: ['power', 'mde'],
+            options: [
+              {
+                id: 'ss-a',
+                label: 'Cluster randomization reduces effective sample size — the number of independent clusters, not the number of users, drives power, so the MDE is larger than a naive user-count suggests',
+                scoreValue: 2,
+                rationale: 'Exactly the key insight. With intra-cluster correlation, effective N is governed by the number of clusters and the design effect (1 + (m-1)·ICC). You can have millions of users but only thousands of clusters — and the MDE follows the clusters. Must compute power on clusters.',
+              },
+              {
+                id: 'ss-b',
+                label: 'No concern — with 14M MAU there is more than enough data',
+                scoreValue: 0,
+                rationale: 'The classic trap of cluster designs. User count is irrelevant once you cluster; intra-cluster correlation collapses effective sample size. 14M users in a few thousand correlated clusters can be badly underpowered.',
+              },
+              {
+                id: 'ss-c',
+                label: 'The concern is that treated and control users will have different baseline activity',
+                scoreValue: 0,
+                rationale: 'Randomization handles baseline balance in expectation; that is not the distinctive power concern. The distinctive concern is the design effect from clustering.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'risks',
+        label: 'Risks & Decision Rule',
+        hint: 'What could invalidate this, and what will you do with the result?',
+        fields: [
+          {
+            id: 'trustChecks',
+            label: 'Which trust checks should you run?',
+            type: 'multi_select',
+            conceptLinks: ['srm'],
+            options: [
+              {
+                id: 'tc-a',
+                label: 'SRM check on cluster assignment counts (and on user counts within arms)',
+                scoreValue: 2,
+                rationale: 'Essential. Verify the cluster split matches intent. A clustering bug (e.g. a few mega-clusters landing in one arm) shows up as imbalance and would invalidate inference.',
+              },
+              {
+                id: 'tc-b',
+                label: 'Verify cluster sizes are balanced across arms (no giant cluster dominating one side)',
+                scoreValue: 2,
+                rationale: 'Critical for cluster designs. One enormous cluster in treatment can swing the whole estimate. Check the cluster-size distribution per arm, not just total counts.',
+              },
+              {
+                id: 'tc-c',
+                label: 'Confirm cross-arm leakage is contained — measure how often a control cluster\'s members were pulled into a treated cluster\'s call',
+                scoreValue: 2,
+                rationale: 'The defining check for this design. If clustering failed to contain spillover (users bridging clusters), the arms are contaminated. Quantifying residual leakage tells you whether the design held.',
+              },
+              {
+                id: 'tc-d',
+                label: 'Check that retention is above 50% in both arms before analyzing',
+                scoreValue: 0,
+                rationale: 'An arbitrary threshold confuses an outcome level with a trust check. Trust checks validate the mechanism, not the result\'s magnitude.',
+              },
+            ],
+          },
+          {
+            id: 'validityRisks',
+            label: 'What are the main validity risks?',
+            type: 'multi_select',
+            conceptLinks: ['sutva', 'novelty-effect'],
+            options: [
+              {
+                id: 'vr-a',
+                label: 'Network interference / SUTVA violation — treatment leaks to control through shared calls if clustering is imperfect',
+                scoreValue: 2,
+                rationale: 'The headline risk. Even with cluster randomization, users who bridge multiple groups can carry the treatment across the boundary. Imperfect clustering re-introduces the very contamination you cluster to avoid.',
+              },
+              {
+                id: 'vr-b',
+                label: 'Novelty effect — a flashy new feature inflates week-1 activity that decays',
+                scoreValue: 2,
+                rationale: 'High risk for a salient new social feature. Early adoption curiosity can masquerade as durable engagement. Weekly breakdowns over a 4-6 week window are needed to separate novelty from sustained lift.',
+              },
+              {
+                id: 'vr-c',
+                label: 'Low effective sample size from clustering, risking an underpowered null',
+                scoreValue: 2,
+                rationale: 'A genuine validity-of-conclusion risk: an underpowered cluster design can produce a non-significant result that gets misread as "no effect" when it is really "couldn\'t detect."',
+              },
+              {
+                id: 'vr-d',
+                label: 'Hawthorne effect — users behave differently because they know they are in a test',
+                scoreValue: 0,
+                rationale: 'Users are not told they are in an experiment; assignment is invisible. Not a meaningful threat here.',
+              },
+            ],
+          },
+          {
+            id: 'decisionRule',
+            label: 'What is the pre-committed decision rule?',
+            type: 'single_select',
+            conceptLinks: ['p-value', 'guardrail-metric'],
+            options: [
+              {
+                id: 'dr-a',
+                label: 'Ship if cluster-level 28-day retention is significantly positive (cluster-correct standard errors) AND crash/call-failure and mute rates are not significantly worse. If retention is null but adoption was healthy, treat as a true null; if adoption was near zero, the test is inconclusive, not negative.',
+                scoreValue: 2,
+                rationale: 'Correct and staff-level. It analyzes at the right unit, treats technical and annoyance guardrails as blocking, and crucially distinguishes a real null from an inconclusive test by gating interpretation on adoption. That last clause is what separates senior from staff thinking.',
+              },
+              {
+                id: 'dr-b',
+                label: 'Ship if treated users send more messages than control users (p < 0.05).',
+                scoreValue: 0,
+                rationale: 'Wrong unit (user-level), wrong primary (messages not retention), and ignores the contamination that makes a user-level comparison invalid in the first place.',
+              },
+              {
+                id: 'dr-c',
+                label: 'Ship if video call adoption exceeds 20% of treated groups.',
+                scoreValue: 0,
+                rationale: 'Adoption is necessary but not sufficient. A feature can be widely adopted and still not move retention — adoption is a diagnostic, not a decision criterion.',
+              },
+              {
+                id: 'dr-d',
+                label: 'Ship if cluster-level retention is positive and call-failure rate is acceptable, reviewing other metrics contextually.',
+                scoreValue: 1,
+                rationale: 'Right unit and a real guardrail, but "reviewing contextually" leaves a loophole for post-hoc rationalization, and it omits the adoption-gating that makes a null interpretable.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+
+    scoringRubric: {
+      dimensions: [
+        { id: 'metric_selection', label: 'Metric selection', weight: 0.25, fieldIds: ['primaryMetric', 'guardrailMetrics'] },
+        { id: 'design_validity', label: 'Design validity', weight: 0.45, fieldIds: ['randomizationUnit', 'unitOfAnalysis', 'trustChecks', 'validityRisks'] },
+        { id: 'decision_discipline', label: 'Decision discipline', weight: 0.15, fieldIds: ['decisionRule', 'sampleSizeConcern'] },
+        { id: 'hypothesis_framing', label: 'Hypothesis framing', weight: 0.15, fieldIds: ['hypothesis', 'businessDecision'] },
+      ],
+      levels: {
+        incomplete:    { minScore: 0,    label: 'Incomplete' },
+        analyst_ready: { minScore: 0.45, label: 'Analyst-Ready' },
+        senior_ready:  { minScore: 0.68, label: 'Senior-Ready' },
+        staff_level:   { minScore: 0.85, label: 'Staff-Level' },
+      },
+    },
+
+    seniorDesign: {
+      rationale: 'This is a network-interference test masquerading as a standard A/B test. The single most important decision is the randomization unit, and the default plan — 50/50 user-level — is wrong. The value of group video propagates through the group: a treated user who starts a call pulls control users into the treatment experience. That contamination biases the measured effect toward zero. You can run a beautiful experiment, get a clean null, and ship nothing — when the feature actually works.\n\nThe fix is to randomize at the unit through which the effect spreads: the group, ideally clustered so that connected groups (sharing members) land in the same arm. This keeps every person exposed to a given call inside one arm. Geo-level randomization also contains leakage but wastes power because there are so few countries. Cluster-by-group is the efficient, valid middle.\n\nOnce you cluster, two things change. First, analysis must happen at the cluster level (or via a mixed model with cluster random effects) — a user-level t-test would deflate standard errors and manufacture significance. Second, power is governed by the number of independent clusters and the intra-cluster correlation, not by the 14M user count. This is the trap of "we have plenty of data": you may have millions of users but only a few thousand correlated clusters, and the MDE follows the clusters.\n\nFinally, the decision rule must gate interpretation on adoption. A null retention result means something completely different if 40% of treated groups started calls versus if 2% did. The former is a real null; the latter is an inconclusive test. Staff-level discipline names that distinction before the data arrives.',
+      commonMistakes: [
+        {
+          mistake: 'Defaulting to user-level randomization for a feature whose value spreads through the social graph',
+          consequence: 'Control users get pulled into treated users\' calls. The control arm is contaminated, the treatment-control gap shrinks, and a working feature reads as a null. The team kills a good feature on bad measurement.',
+          conceptLink: 'sutva',
+        },
+        {
+          mistake: 'Clustering for randomization but analyzing at the user level',
+          consequence: 'Users within a cluster are correlated. A user-level t-test treats them as independent, deflating standard errors and producing false significance — the opposite failure, an over-confident ship.',
+          conceptLink: 'unit-of-analysis',
+        },
+        {
+          mistake: 'Assuming 14M MAU guarantees enough power',
+          consequence: 'Effective sample size is the number of independent clusters times a shrinkage factor for intra-cluster correlation. The experiment can be badly underpowered despite enormous raw user counts, yielding an uninterpretable null.',
+          conceptLink: 'power',
+        },
+      ],
+      failureMode: {
+        weakAnswer: 'The candidate keeps the default 50/50 user-level split because the platform already configured it, runs a standard user-level t-test, reads a small non-significant retention difference, and recommends not shipping. They never recognize that control users were pulled into treated users\' calls, never cluster, and never gate the null on adoption.',
+        interviewerFollowUp: '"Your control arm shows almost as much video-call exposure as treatment. A control user got pulled into a friend\'s call. Walk me through what that does to your treatment-control comparison — and tell me what randomization unit would have prevented it and why."',
+      },
+    },
+
+    pairedScenarioPrompt: {
+      toReview: 'You designed this experiment around the social graph. Now read what happens when a team runs the naive user-level version.',
+      fromReview: 'You saw how network interference corrupts a user-level test. Go back and design it to contain the spillover.',
+    },
+  },
+
+  // ─────────────────────────────────────────────
+  // D10 — Design the Free-Trial Length Test (BETA · Senior)
+  // Core trap: primary-metric selection when conversion, revenue, and retention conflict
+  // ─────────────────────────────────────────────
+  {
+    id: 'd10-trial-length-metric-conflict',
+    title: 'Design the Free-Trial Length Test',
+    subtitle: 'Kalmwave, a meditation app, wants to shorten its free trial from 14 to 7 days. Three stakeholders want three different primary metrics. Pick the right one.',
+    isFree: false,
+    difficulty: 'senior',
+    industry: 'subscription',
+    scenarioFamily: 'metric_conflict',
+
+    context: {
+      company: 'Kalmwave',
+      product: 'Subscription mindfulness and meditation app, ~2.1M installs/month, freemium with a paid annual plan, strong in India and the US',
+      team: 'Monetization team',
+      background: 'Kalmwave currently offers a 14-day free trial before the paid plan kicks in. Growth wants to shorten it to 7 days to create urgency and convert faster. Three stakeholders disagree on how to judge success: the Growth lead wants trial-to-paid conversion rate; the Finance partner wants revenue per trial-starter; the CEO wants 90-day subscriber retention because refunds and early cancels have been climbing. Shortening the trial could plausibly push all three in different directions.',
+      featureProposal: 'Reduce the free trial from 14 days to 7 days for new trial-starters. Control: 14-day trial. Treatment: 7-day trial. Hypothesis: a shorter trial increases urgency and lifts paid conversion.',
+      businessPressure: 'The board reviews subscriber growth next quarter. Growth has informally promised "a conversion win." Finance is worried that faster conversions might be lower-quality subscribers who churn or refund. The CEO has made retention a company-wide priority after a spike in 60-day cancellations.',
+      constraints: [
+        '~2.1M installs/month; roughly 18% start a free trial',
+        'Paid plan is annual, billed upfront; refunds are allowed within 30 days',
+        'A meaningful share of conversions happen in the final 48 hours of the current 14-day trial',
+        'The team can run the test for up to 10-12 weeks before the board review',
+      ],
+    },
+
+    designPhases: [
+      {
+        id: 'framing',
+        label: 'Framing',
+        hint: 'What are you testing, and what is the real success definition?',
+        fields: [
+          {
+            id: 'businessDecision',
+            label: 'What business decision will this experiment inform?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'bd-a',
+                label: 'Whether to permanently shorten the free trial from 14 to 7 days',
+                scoreValue: 2,
+                rationale: 'Correct. Binary, specific, and clearly tied to a ship/no-ship outcome.',
+              },
+              {
+                id: 'bd-b',
+                label: 'Whether the free trial is the right acquisition model',
+                scoreValue: 0,
+                rationale: 'Far too broad. The experiment tests one parameter (trial length), not the entire model. Reframing it this way invites scope creep and an unanswerable question.',
+              },
+              {
+                id: 'bd-c',
+                label: 'Which stakeholder\'s preferred metric is correct',
+                scoreValue: 0,
+                rationale: 'The experiment does not adjudicate office politics. It informs a product decision. The metric conflict is something you resolve in design, not something the experiment is "about."',
+              },
+              {
+                id: 'bd-d',
+                label: 'Whether shortening the trial improves conversion without harming subscriber quality',
+                scoreValue: 1,
+                rationale: 'A good restatement of the tension, but it is the hypothesis, not the decision. The decision is the binary ship choice. Close, but conflates the two.',
+              },
+            ],
+          },
+          {
+            id: 'hypothesis',
+            label: 'Select the strongest hypothesis',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'hyp-a',
+                label: 'Shortening the trial to 7 days increases revenue per trial-starter over a 90-day horizon, because the urgency lift in conversions outweighs any drop in subscriber quality.',
+                scoreValue: 2,
+                rationale: 'Strong. It names a single net outcome (revenue per trial-starter over a long horizon) that internalizes the whole tradeoff: more conversions, but only if they do not refund or churn quickly. It forces the conversion-vs-quality tension into one number.',
+              },
+              {
+                id: 'hyp-b',
+                label: 'Shortening the trial increases trial-to-paid conversion rate.',
+                scoreValue: 1,
+                rationale: 'Testable and likely true, but dangerously incomplete. Conversion can rise while revenue and retention fall if the new converts refund or cancel. Optimizing this alone is exactly the trap.',
+              },
+              {
+                id: 'hyp-c',
+                label: 'A shorter trial creates urgency.',
+                scoreValue: 0,
+                rationale: 'Vague and unmeasurable as stated. "Urgency" is a mechanism, not an outcome. No metric, no direction on the business result.',
+              },
+              {
+                id: 'hyp-d',
+                label: 'Shortening the trial increases conversion and improves 90-day retention.',
+                scoreValue: 1,
+                rationale: 'Specifies two outcomes that may well move in opposite directions — which one defines success if conversion rises but retention falls? A hypothesis with two outcomes that can conflict needs a single arbiter metric.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'setup',
+        label: 'Setup',
+        hint: 'Who gets treated, and how?',
+        fields: [
+          {
+            id: 'eligiblePopulation',
+            label: 'Who should be included in the experiment?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'ep-a',
+                label: 'All new trial-starters during the enrollment window',
+                scoreValue: 2,
+                rationale: 'Correct. The treatment is the trial length, so the eligible unit is whoever starts a trial. Including all of them maximizes power and represents the real population.',
+              },
+              {
+                id: 'ep-b',
+                label: 'All new installs, assigned at install time',
+                scoreValue: 1,
+                rationale: 'Defensible, but most installs never start a trial, so assigning at install dilutes the sample with users who never experience the treatment. Triggered assignment at trial start is cleaner (and relates to exposure-based analysis).',
+              },
+              {
+                id: 'ep-c',
+                label: 'Only users acquired through paid channels, who have higher intent',
+                scoreValue: 0,
+                rationale: 'Restricting to paid-acquired users biases toward a high-intent segment and breaks generalizability to the full trial-starting population.',
+              },
+              {
+                id: 'ep-d',
+                label: 'Only users in the US, the highest-revenue market',
+                scoreValue: 0,
+                rationale: 'Geographic restriction without justification harms external validity, especially given Kalmwave\'s large India base which likely responds differently to trial length and price.',
+              },
+            ],
+          },
+          {
+            id: 'randomizationUnit',
+            label: 'What should be the randomization unit?',
+            type: 'single_select',
+            conceptLinks: ['randomization-unit'],
+            options: [
+              {
+                id: 'ru-a',
+                label: 'User, assigned persistently at trial start',
+                scoreValue: 2,
+                rationale: 'Correct. A user goes through the trial once; the experience must be consistent. Persistent user-level assignment at trial start is the natural unit and supports clean exposure-based analysis.',
+              },
+              {
+                id: 'ru-b',
+                label: 'Session',
+                scoreValue: 0,
+                rationale: 'A trial spans many sessions; session-level assignment could flip a user\'s trial length mid-trial, which is incoherent and invalid.',
+              },
+              {
+                id: 'ru-c',
+                label: 'Device',
+                scoreValue: 0,
+                rationale: 'Users on multiple devices would get different trial lengths, contaminating both arms. Account/user-level is required.',
+              },
+              {
+                id: 'ru-d',
+                label: 'Cohort by signup week',
+                scoreValue: 0,
+                rationale: 'Assigning whole weekly cohorts to one arm confounds the treatment with calendar-time effects (seasonality, campaigns) and gives you almost no independent units. Not a valid A/B design here.',
+              },
+            ],
+          },
+          {
+            id: 'unitOfAnalysis',
+            label: 'What is the unit of analysis?',
+            type: 'single_select',
+            conceptLinks: ['unit-of-analysis'],
+            options: [
+              {
+                id: 'ua-a',
+                label: 'User — all metrics (conversion, revenue, retention) computed per trial-starter',
+                scoreValue: 2,
+                rationale: 'Correct. Matches user-level randomization and lets every candidate primary metric be computed on a common denominator (trial-starters), which is what makes them comparable.',
+              },
+              {
+                id: 'ua-b',
+                label: 'Subscriber — compute metrics only among users who converted',
+                scoreValue: 0,
+                rationale: 'Conditioning on conversion is post-treatment selection. If treatment changes who converts, comparing only converters compares non-comparable groups. Always analyze on the randomized denominator.',
+              },
+              {
+                id: 'ua-c',
+                label: 'Payment — analyze each billing event',
+                scoreValue: 0,
+                rationale: 'Payment-level analysis mixes correlated events and conditions on having paid. Wrong denominator and correlated observations.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'metrics',
+        label: 'Metrics',
+        hint: 'This is the crux: three stakeholders, three metrics. Which is primary?',
+        fields: [
+          {
+            id: 'primaryMetric',
+            label: 'What is the ONE primary metric?',
+            type: 'single_select',
+            conceptLinks: ['primary-metric'],
+            options: [
+              {
+                id: 'pm-a',
+                label: 'Revenue per trial-starter over a 90-day horizon (net of refunds)',
+                scoreValue: 2,
+                rationale: 'Best primary. It is computed on the randomized denominator (all trial-starters), and it internalizes the whole tradeoff: it rises only if extra conversions are real, paying, and not refunded. It mechanically reconciles the Growth, Finance, and CEO concerns into one decision number.',
+              },
+              {
+                id: 'pm-b',
+                label: 'Trial-to-paid conversion rate',
+                scoreValue: 1,
+                rationale: 'The Growth lead\'s metric, and a legitimate diagnostic, but as a standalone primary it is the trap. A shorter trial can manufacture conversions that refund or churn — conversion up, business down. Reasonable as a secondary, not the arbiter.',
+              },
+              {
+                id: 'pm-c',
+                label: '90-day subscriber retention rate (among converters)',
+                scoreValue: 1,
+                rationale: 'The CEO\'s concern, and important, but measured among converters it conditions on a post-treatment outcome — and on its own it ignores how many people converted. Retention is best as a guardrail or a component of the net revenue metric, not the sole primary.',
+              },
+              {
+                id: 'pm-d',
+                label: 'Day-1 paid conversion (converts within 24h of trial start)',
+                scoreValue: 0,
+                rationale: 'Far too narrow and most contaminated by urgency novelty. It captures none of the quality side of the tradeoff. A bad primary for a decision about subscriber value.',
+              },
+            ],
+          },
+          {
+            id: 'guardrailMetrics',
+            label: 'Which metrics should be guardrails?',
+            type: 'multi_select',
+            conceptLinks: ['guardrail-metric'],
+            options: [
+              {
+                id: 'gm-a',
+                label: '30-day refund rate among converters',
+                scoreValue: 2,
+                rationale: 'Critical guardrail and the most direct quality signal. If a 7-day trial converts people who have not yet seen enough value, refunds spike. Blocking if it breaches.',
+              },
+              {
+                id: 'gm-b',
+                label: '90-day retention / early-cancel rate',
+                scoreValue: 2,
+                rationale: 'Essential given the CEO\'s explicit concern about rising 60-day cancellations. If shortening the trial worsens early cancels, that blocks shipping even if conversion rises.',
+              },
+              {
+                id: 'gm-c',
+                label: 'Trial-start rate',
+                scoreValue: 0,
+                rationale: 'Trial length is applied at trial start, so it should not affect whether someone starts a trial in the first place. Not a meaningful guardrail; better as an SRM/sanity check.',
+              },
+              {
+                id: 'gm-d',
+                label: 'App-store rating',
+                scoreValue: 0,
+                rationale: 'Too lagging, too noisy, and too diffuse to attribute to a trial-length change within the window. Not actionable as a guardrail here.',
+              },
+            ],
+          },
+          {
+            id: 'diagnosticMetrics',
+            label: 'Which metrics should be tracked as diagnostics?',
+            type: 'multi_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'dm-a',
+                label: 'Trial-to-paid conversion rate (so Growth still sees its number)',
+                scoreValue: 2,
+                rationale: 'Good diagnostic. Conversion explains the mechanism behind any revenue movement and keeps the Growth stakeholder informed without letting it drive the decision.',
+              },
+              {
+                id: 'dm-b',
+                label: 'Distribution of conversion timing within the trial (when do people convert?)',
+                scoreValue: 1,
+                rationale: 'Useful for understanding whether the 14-day arm\'s late conversions simply move earlier in the 7-day arm or disappear — directly relevant to interpreting the result.',
+              },
+              {
+                id: 'dm-c',
+                label: 'Average content sessions completed before converting',
+                scoreValue: 1,
+                rationale: 'Good mechanism diagnostic: if 7-day converts have engaged with far less content, that foreshadows higher refunds and lower retention.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'logistics',
+        label: 'Logistics',
+        hint: 'How long, how large, how attributed?',
+        fields: [
+          {
+            id: 'runtime',
+            label: 'How long should this experiment run?',
+            type: 'single_select',
+            conceptLinks: ['mde', 'right-censoring'],
+            options: [
+              {
+                id: 'rt-a',
+                label: '10-12 weeks, so the earliest cohorts complete the 90-day revenue/retention window',
+                scoreValue: 2,
+                rationale: 'Correct. The primary metric is a 90-day net revenue figure, so the test must run long enough for at least the early cohort to mature past 90 days (and past the 30-day refund window). 10-12 weeks of enrollment plus observation fits the board timeline.',
+              },
+              {
+                id: 'rt-b',
+                label: '2 weeks — long enough to see the conversion lift',
+                scoreValue: 0,
+                rationale: 'Two weeks measures only immediate conversion, the most novelty-contaminated and least quality-aware signal. It cannot observe refunds or retention. This is how you ship a conversion mirage.',
+              },
+              {
+                id: 'rt-c',
+                label: '4 weeks — captures conversion plus the refund window',
+                scoreValue: 1,
+                rationale: 'Better — it sees the 30-day refund signal — but still cannot measure 90-day retention, which is the CEO\'s explicit concern. Acceptable only if the primary is redefined to a shorter horizon, which weakens the test.',
+              },
+              {
+                id: 'rt-d',
+                label: 'Run until conversion is significant',
+                scoreValue: 0,
+                rationale: 'Peeking, and it stops on the fastest-moving, most misleading metric. Pre-commit the runtime to a power calculation on the net-revenue primary.',
+              },
+            ],
+          },
+          {
+            id: 'attributionWindow',
+            label: 'What attribution window should apply to the primary metric?',
+            type: 'single_select',
+            conceptLinks: ['right-censoring'],
+            options: [
+              {
+                id: 'aw-a',
+                label: '90 days from each user\'s trial-start date, net of refunds',
+                scoreValue: 2,
+                rationale: 'Correct and matches the metric. Per-user windows anchored at trial start give equal observation and capture refunds and early cancels in the revenue figure.',
+              },
+              {
+                id: 'aw-b',
+                label: 'Lifetime value (LTV) projected from the first payment',
+                scoreValue: 1,
+                rationale: 'LTV is the ideal economic quantity but cannot be observed in the window — projecting it adds modeling assumptions that can hide the very quality differences you are testing for. A measured 90-day figure is more trustworthy for the decision.',
+              },
+              {
+                id: 'aw-c',
+                label: 'Revenue booked on conversion day (full annual plan value)',
+                scoreValue: 0,
+                rationale: 'Counting the full upfront annual value on conversion day ignores refunds entirely — it would reward exactly the low-quality conversions the test is meant to catch. Net-of-refunds is required.',
+              },
+            ],
+          },
+          {
+            id: 'sampleSizeConcern',
+            label: 'What is the main power concern?',
+            type: 'single_select',
+            conceptLinks: ['power', 'mde'],
+            options: [
+              {
+                id: 'ss-a',
+                label: 'Revenue per trial-starter is high-variance (most users pay 0, a few pay the full plan), so it needs a larger sample than the binary conversion metric to detect the same relative effect',
+                scoreValue: 2,
+                rationale: 'Exactly right. Revenue is a heavy-tailed, zero-inflated metric — its variance is far higher than a binary conversion rate, so the MDE for revenue is larger at the same N. You must power on the revenue primary, not the conversion proxy, and consider variance-reduction (e.g. CUPED) or capping outliers.',
+              },
+              {
+                id: 'ss-b',
+                label: 'No concern — trial volume is high, so any metric is well-powered',
+                scoreValue: 0,
+                rationale: 'High volume helps, but the revenue metric\'s variance is the binding constraint. Assuming conversion-level power transfers to revenue is the common error.',
+              },
+              {
+                id: 'ss-c',
+                label: 'The concern is multiple testing across the three stakeholder metrics',
+                scoreValue: 1,
+                rationale: 'Multiple testing is a real secondary concern if you treat all three as co-primaries — but you should not. Once you commit to one primary and use the others as guardrails/diagnostics, the binding power concern is the revenue metric\'s variance, not multiplicity.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'risks',
+        label: 'Risks & Decision Rule',
+        hint: 'What could invalidate this, and what will you do with the result?',
+        fields: [
+          {
+            id: 'trustChecks',
+            label: 'Which trust checks should you run?',
+            type: 'multi_select',
+            conceptLinks: ['srm'],
+            options: [
+              {
+                id: 'tc-a',
+                label: 'SRM check on trial-starter assignment counts',
+                scoreValue: 2,
+                rationale: 'Always first. A trigger-at-trial-start assignment can mis-fire (e.g. timing/eligibility bugs), showing up as a split imbalance that would invalidate everything downstream.',
+              },
+              {
+                id: 'tc-b',
+                label: 'Verify the trial length is actually applied correctly (7 days in treatment, 14 in control), with no leakage from billing-system defaults',
+                scoreValue: 2,
+                rationale: 'Critical implementation check specific to this test. Billing systems often hard-code trial length; if treatment users silently keep 14-day billing, the treatment never happened and results bias to null.',
+              },
+              {
+                id: 'tc-c',
+                label: 'Confirm pre-experiment conversion and revenue baselines are comparable across arms',
+                scoreValue: 1,
+                rationale: 'Good sanity check. Comparable baselines on the (pre-assignment) install cohort increase confidence the randomization balanced the arms.',
+              },
+              {
+                id: 'tc-d',
+                label: 'Check that revenue per user exceeds the prior quarter in both arms',
+                scoreValue: 0,
+                rationale: 'Comparing to last quarter is not a trust check — it confounds the experiment with seasonality. Trust checks validate the mechanism, not the level relative to history.',
+              },
+            ],
+          },
+          {
+            id: 'validityRisks',
+            label: 'What are the main validity risks?',
+            type: 'multi_select',
+            conceptLinks: ['right-censoring', 'novelty-effect'],
+            options: [
+              {
+                id: 'vr-a',
+                label: 'Shipping on the conversion proxy before refunds and retention have time to manifest',
+                scoreValue: 2,
+                rationale: 'The central risk and the whole point of this scenario. Conversion moves first and is the most flattering; refunds and cancels arrive weeks later. Reading the result early on conversion alone is how the team makes the wrong call.',
+              },
+              {
+                id: 'vr-b',
+                label: 'Right-censoring — late cohorts have not completed the 90-day window at analysis time',
+                scoreValue: 2,
+                rationale: 'A real measurement risk. If you pool all cohorts naively, late enrollees have truncated revenue windows, biasing the comparison. Restrict the primary analysis to cohorts with a complete 90-day window or use survival methods.',
+              },
+              {
+                id: 'vr-c',
+                label: 'Seasonality / campaign confounds if the test spans a major holiday or price promo',
+                scoreValue: 1,
+                rationale: 'Worth noting — a Diwali or New Year promo during the window can shift intent and conversion — but randomization balances this across arms as long as both arms run concurrently. A moderate interpretation caveat, not a fatal flaw.',
+              },
+              {
+                id: 'vr-d',
+                label: 'SUTVA violation — trial-starters influence each other\'s conversion decisions',
+                scoreValue: 0,
+                rationale: 'Trial conversion is an individual decision with no meaningful cross-user spillover here. SUTVA is not a serious threat for this design.',
+              },
+            ],
+          },
+          {
+            id: 'decisionRule',
+            label: 'What is the pre-committed decision rule?',
+            type: 'single_select',
+            conceptLinks: ['p-value', 'guardrail-metric'],
+            options: [
+              {
+                id: 'dr-a',
+                label: 'Ship if 90-day net revenue per trial-starter is significantly positive AND neither the 30-day refund rate nor the 90-day early-cancel rate is significantly worse. If revenue is flat but conversion rose, do not ship — that signals the extra conversions are low quality.',
+                scoreValue: 2,
+                rationale: 'Correct. It makes the net-revenue metric the arbiter, treats the quality guardrails as blocking, and explicitly pre-commits to the counter-intuitive call (conversion up but revenue flat = no ship). That last clause is what defeats the conversion-win narrative.',
+              },
+              {
+                id: 'dr-b',
+                label: 'Ship if trial-to-paid conversion is significantly higher.',
+                scoreValue: 0,
+                rationale: 'This is the failure mode. It optimizes the proxy and ignores refunds and retention — the exact metric conflict the design is meant to resolve.',
+              },
+              {
+                id: 'dr-c',
+                label: 'Ship if any two of the three stakeholder metrics improve.',
+                scoreValue: 0,
+                rationale: '"Two of three" is an ad hoc voting rule with no statistical basis and re-creates a multiple-testing problem. It also has no answer for the case where conversion is up but revenue and retention are down.',
+              },
+              {
+                id: 'dr-d',
+                label: 'Ship if net revenue is positive and refund rate is acceptable, reviewing retention contextually.',
+                scoreValue: 1,
+                rationale: 'Right primary and one real guardrail, but "reviewing retention contextually" weakens the CEO\'s explicit retention concern into a negotiable afterthought. Retention should be a pre-specified blocking guardrail.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+
+    scoringRubric: {
+      dimensions: [
+        { id: 'metric_selection', label: 'Metric selection', weight: 0.40, fieldIds: ['primaryMetric', 'guardrailMetrics'] },
+        { id: 'design_validity', label: 'Design validity', weight: 0.25, fieldIds: ['randomizationUnit', 'unitOfAnalysis', 'trustChecks', 'validityRisks'] },
+        { id: 'decision_discipline', label: 'Decision discipline', weight: 0.20, fieldIds: ['decisionRule', 'sampleSizeConcern'] },
+        { id: 'hypothesis_framing', label: 'Hypothesis framing', weight: 0.15, fieldIds: ['hypothesis', 'businessDecision'] },
+      ],
+      levels: {
+        incomplete:    { minScore: 0,    label: 'Incomplete' },
+        analyst_ready: { minScore: 0.45, label: 'Analyst-Ready' },
+        senior_ready:  { minScore: 0.68, label: 'Senior-Ready' },
+        staff_level:   { minScore: 0.85, label: 'Staff-Level' },
+      },
+    },
+
+    seniorDesign: {
+      rationale: 'This is a metric-selection problem wearing a trial-length costume. Three stakeholders want three different primary metrics, and shortening the trial can push them in opposite directions: conversion up (urgency), revenue ambiguous (more converts but possibly lower-quality), retention down (people who converted before seeing enough value cancel or refund). If you let conversion be the primary, you will almost certainly get a "win" and ship a change that erodes the business.\n\nThe resolution is to choose a single primary metric that internalizes the entire tradeoff. Revenue per trial-starter over a 90-day horizon, net of refunds, does exactly that. It is computed on the randomized denominator (everyone who started a trial), so it is comparable across arms; and it only goes up if the extra conversions are real, paying, and durable. A conversion that refunds in week three subtracts from it. This single number reconciles Growth, Finance, and the CEO.\n\nTwo subtleties make this a senior-level test. First, the analysis denominator: never compute retention or revenue only among converters, because conversion is itself a treatment outcome — conditioning on it compares non-comparable groups. Always analyze on trial-starters. Second, the variance and the clock: revenue is zero-inflated and heavy-tailed, so it needs more sample than the binary conversion metric to reach the same MDE, and it needs 90+ days to observe — which means right-censoring of late cohorts is a live threat. Restrict the primary readout to cohorts with a complete window.\n\nThe decision rule has to pre-commit to the uncomfortable case: conversion up, revenue flat, do not ship. Writing that down before the data arrives is the only thing that stops the "we got a conversion win" narrative from carrying the room.',
+      commonMistakes: [
+        {
+          mistake: 'Letting the loudest stakeholder\'s metric (conversion rate) become the primary',
+          consequence: 'A shorter trial reliably lifts conversion. You ship, then watch refunds and 60-day cancels climb. The "win" reverses, and the CEO\'s retention concern — the reason this mattered — gets worse, not better.',
+          conceptLink: 'primary-metric',
+        },
+        {
+          mistake: 'Measuring retention and revenue only among converters',
+          consequence: 'Conversion is a post-treatment outcome. Comparing only converters across arms compares different populations; a "retention is fine among converters" reading can completely mask that the new converters are systematically worse.',
+          conceptLink: 'unit-of-analysis',
+        },
+        {
+          mistake: 'Reading the test at two weeks on the conversion signal',
+          consequence: 'Conversion moves first and looks great; refunds and cancellations arrive weeks later. An early read guarantees you ship before the quality cost is visible.',
+          conceptLink: 'right-censoring',
+        },
+      ],
+      failureMode: {
+        weakAnswer: 'The candidate adopts trial-to-paid conversion as the primary because Growth promised a conversion win, runs the test for two weeks, sees a clear conversion lift, and recommends shipping. They never define a net-revenue metric, never set refund or retention guardrails, and never wait for the 90-day window — so the quality erosion is invisible at decision time.',
+        interviewerFollowUp: '"Conversion is up 3 points and you want to ship. Finance asks: of those extra conversions, how many are still subscribed and un-refunded at 90 days? You don\'t have that number yet because you read the test at week two. What primary metric would have forced you to answer that question before deciding?"',
+      },
+    },
+
+    pairedScenarioPrompt: {
+      toReview: 'You designed this experiment around a net-revenue primary. Now read what happens when a team ships on the conversion win.',
+      fromReview: 'You saw the conversion mirage play out. Go back and design the test so the primary metric internalizes the whole tradeoff.',
+    },
+  },
+
+  // ─────────────────────────────────────────────
+  // D11 — Design the Approval-Flow Test (BETA · Senior)
+  // Core trap: power / MDE / duration tradeoff on a low-traffic, high-stakes B2B feature
+  // ─────────────────────────────────────────────
+  {
+    id: 'd11-power-mde-duration',
+    title: 'Design the Approval-Flow Test',
+    subtitle: 'Ledgerline, a B2B spend-management tool, wants a fast read on a redesigned approval flow. The traffic is low. Get the power math right before you promise a timeline.',
+    isFree: false,
+    difficulty: 'senior',
+    industry: 'fintech',
+    scenarioFamily: 'power_mde',
+
+    context: {
+      company: 'Ledgerline',
+      product: 'B2B corporate spend-management and expense-approval platform, ~3,200 paying companies, mid-market finance teams',
+      team: 'Workflow Product team',
+      background: 'Ledgerline redesigned its expense-approval flow to reduce the time approvers spend reviewing requests. The hypothesis is that a cleaner, batch-approval flow speeds approvals and increases the share of expenses approved within 48 hours. The feature is used only by approvers — a small subset of users at each company. The PM wants to "run it for a week and decide."',
+      featureProposal: 'Replace the one-at-a-time approval screen with a batch-approval flow. Control: current flow. Treatment: new batch flow. Hypothesis: the new flow increases the 48-hour approval rate.',
+      businessPressure: 'A major prospect cited slow approvals as a blocker in a competitive deal. Sales wants to announce the improvement within the month. The PM has told leadership the test will take "about a week."',
+      constraints: [
+        'Approvers are a small population — roughly 6,000 active approvers across all companies',
+        'Approval events are bursty: most expenses are submitted near month-end',
+        'Current 48-hour approval rate is about 62%',
+        'The team can technically run the test as long as needed, but Sales is pushing for a one-month total timeline',
+      ],
+    },
+
+    designPhases: [
+      {
+        id: 'framing',
+        label: 'Framing',
+        hint: 'What are you testing, and what is realistic to learn?',
+        fields: [
+          {
+            id: 'businessDecision',
+            label: 'What business decision will this experiment inform?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'bd-a',
+                label: 'Whether to roll out the redesigned batch-approval flow to all approvers',
+                scoreValue: 2,
+                rationale: 'Correct. Binary, specific, ties to a ship decision.',
+              },
+              {
+                id: 'bd-b',
+                label: 'Whether approvers are unhappy with the current flow',
+                scoreValue: 0,
+                rationale: 'A satisfaction/discovery question, not a treatment-effect decision. The redesign already presumes the current flow is slow; the test measures whether the new one is better.',
+              },
+              {
+                id: 'bd-c',
+                label: 'Whether Ledgerline can win the competitive deal',
+                scoreValue: 0,
+                rationale: 'A sales-outcome question outside the experiment\'s reach. The test informs the product decision, not the deal.',
+              },
+              {
+                id: 'bd-d',
+                label: 'How much faster the new flow is in absolute terms',
+                scoreValue: 1,
+                rationale: 'The experiment will estimate effect size, but the decision is ship/no-ship. Framing it purely as estimation understates the binary call and risks an open-ended test.',
+              },
+            ],
+          },
+          {
+            id: 'hypothesis',
+            label: 'Select the strongest hypothesis',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'hyp-a',
+                label: 'The batch-approval flow increases the share of expenses approved within 48 hours by letting approvers clear queues faster, with no increase in erroneous approvals.',
+                scoreValue: 2,
+                rationale: 'Strong. Single outcome, mechanism specified, and a quality guardrail condition (no rise in erroneous approvals) — important for a finance tool where speed must not trade off against control.',
+              },
+              {
+                id: 'hyp-b',
+                label: 'Approvers will approve expenses faster.',
+                scoreValue: 1,
+                rationale: 'Directional and measurable but omits the guardrail. Faster approvals that wave through bad expenses are not a win in a spend-control product.',
+              },
+              {
+                id: 'hyp-c',
+                label: 'The new flow will be more efficient.',
+                scoreValue: 0,
+                rationale: '"Efficient" is undefined — efficient on what metric, for whom? No testable outcome.',
+              },
+              {
+                id: 'hyp-d',
+                label: 'The batch flow will reduce the number of clicks per approval.',
+                scoreValue: 1,
+                rationale: 'Testable but a mechanism micro-metric, not the business outcome. Fewer clicks need not translate to the 48-hour approval rate that matters to customers.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'setup',
+        label: 'Setup',
+        hint: 'Who gets treated, and how?',
+        fields: [
+          {
+            id: 'eligiblePopulation',
+            label: 'Who should be included in the experiment?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'ep-a',
+                label: 'All active approvers across companies',
+                scoreValue: 2,
+                rationale: 'Correct. The feature is the approval flow; approvers are the eligible unit. Including all of them is essential given how scarce this population already is — you cannot afford to shrink it.',
+              },
+              {
+                id: 'ep-b',
+                label: 'Only approvers at large companies, who handle more volume',
+                scoreValue: 1,
+                rationale: 'Tempting for power (more events per approver), but it sacrifices generalizability to the many mid-market customers and shrinks an already small population. Usually the wrong trade unless you specifically intend a large-company rollout.',
+              },
+              {
+                id: 'ep-c',
+                label: 'Only approvers who logged in during the past 7 days',
+                scoreValue: 0,
+                rationale: 'Given bursty, month-end-concentrated activity, a 7-day login filter would exclude many genuine approvers who simply have not had expenses to review yet, biasing and shrinking the sample.',
+              },
+              {
+                id: 'ep-d',
+                label: 'New approvers only, to avoid habituation to the old flow',
+                scoreValue: 0,
+                rationale: 'New approvers are rare and unrepresentative. This would gut the sample and bias toward users with no baseline behavior.',
+              },
+            ],
+          },
+          {
+            id: 'randomizationUnit',
+            label: 'What should be the randomization unit?',
+            type: 'single_select',
+            conceptLinks: ['randomization-unit', 'sutva'],
+            options: [
+              {
+                id: 'ru-a',
+                label: 'Company / account — all approvers at a company get the same flow',
+                scoreValue: 2,
+                rationale: 'Correct for a B2B workflow tool. Approvers at the same company collaborate and discuss process; account-level assignment prevents within-company contamination and matches how the rollout decision is made. Be aware it reduces the number of independent units, which feeds the power concern.',
+              },
+              {
+                id: 'ru-b',
+                label: 'Approver (user) level',
+                scoreValue: 1,
+                rationale: 'Defensible and higher-powered (more independent units), but risks within-company contamination — two approvers on the same team seeing different flows may coordinate or complain, blurring the comparison. A reasonable second choice if contamination is judged low.',
+              },
+              {
+                id: 'ru-c',
+                label: 'Approval event / session level',
+                scoreValue: 0,
+                rationale: 'Flipping the flow per approval is incoherent for a workflow users must learn, and it destroys independence. Wrong unit.',
+              },
+              {
+                id: 'ru-d',
+                label: 'Expense item level',
+                scoreValue: 0,
+                rationale: 'Expenses from the same approver and company are deeply correlated; item-level randomization both confuses the user and massively overstates power.',
+              },
+            ],
+          },
+          {
+            id: 'unitOfAnalysis',
+            label: 'What is the unit of analysis?',
+            type: 'single_select',
+            conceptLinks: ['unit-of-analysis'],
+            options: [
+              {
+                id: 'ua-a',
+                label: 'Company — compute the 48-hour approval rate per company, matching account-level randomization',
+                scoreValue: 2,
+                rationale: 'Correct when randomizing by company. Analyze company-level summaries (or a mixed model with company random effects) so standard errors reflect the true count of independent units.',
+              },
+              {
+                id: 'ua-b',
+                label: 'Expense — pool all expenses and compute one approval rate per arm',
+                scoreValue: 0,
+                rationale: 'Expenses are nested within approvers within companies. Pooling them as independent observations deflates standard errors and manufactures significance — the cluster-analysis trap.',
+              },
+              {
+                id: 'ua-c',
+                label: 'Approver — compute per-approver rates and run a t-test ignoring company',
+                scoreValue: 1,
+                rationale: 'Acceptable only if you randomized at the approver level. If randomization is at the company level, this ignores clustering and is invalid. Match the unit to the randomization.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'metrics',
+        label: 'Metrics',
+        hint: 'What will you measure?',
+        fields: [
+          {
+            id: 'primaryMetric',
+            label: 'What is the primary metric?',
+            type: 'single_select',
+            conceptLinks: ['primary-metric'],
+            options: [
+              {
+                id: 'pm-a',
+                label: 'Share of expenses approved within 48 hours (computed at the unit of analysis)',
+                scoreValue: 2,
+                rationale: 'Correct. It is the customer-facing outcome cited by the prospect, directly tied to the hypothesis, and a clean rate. The right primary.',
+              },
+              {
+                id: 'pm-b',
+                label: 'Median time-to-approval',
+                scoreValue: 1,
+                rationale: 'A reasonable alternative outcome, but a continuous, skewed metric that is harder to power and less directly tied to the customer\'s "48-hour" framing. Good as a secondary.',
+              },
+              {
+                id: 'pm-c',
+                label: 'Clicks per approval',
+                scoreValue: 0,
+                rationale: 'A UI mechanism metric, not the business outcome. Optimizing clicks does not guarantee the 48-hour rate moves.',
+              },
+              {
+                id: 'pm-d',
+                label: 'Approver satisfaction (in-app survey)',
+                scoreValue: 0,
+                rationale: 'Low response rates among a small approver population make this badly underpowered and noisy as a primary. Diagnostic at best.',
+              },
+            ],
+          },
+          {
+            id: 'guardrailMetrics',
+            label: 'Which metrics should be guardrails?',
+            type: 'multi_select',
+            conceptLinks: ['guardrail-metric'],
+            options: [
+              {
+                id: 'gm-a',
+                label: 'Erroneous-approval / later-reversal rate (expenses approved then flagged or reversed)',
+                scoreValue: 2,
+                rationale: 'Essential. In a spend-control tool, speed must not come at the cost of waving through bad expenses. If batch approval increases reversals, that blocks shipping regardless of speed gains.',
+              },
+              {
+                id: 'gm-b',
+                label: 'Policy-violation approvals (expenses approved that breach company policy)',
+                scoreValue: 2,
+                rationale: 'Critical quality guardrail specific to this product. Batch approval that lets violations slip through is a compliance risk that outweighs speed.',
+              },
+              {
+                id: 'gm-c',
+                label: 'Number of expenses submitted',
+                scoreValue: 0,
+                rationale: 'The approval-flow change should not affect submission volume (a different user group). Not a meaningful guardrail.',
+              },
+              {
+                id: 'gm-d',
+                label: 'Approver session count',
+                scoreValue: 0,
+                rationale: 'Ambiguous and not decision-relevant. More or fewer sessions could mean anything. Not actionable as a guardrail.',
+              },
+            ],
+          },
+          {
+            id: 'diagnosticMetrics',
+            label: 'Which metrics should be tracked as diagnostics?',
+            type: 'multi_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'dm-a',
+                label: 'Median and p90 time-to-approval',
+                scoreValue: 2,
+                rationale: 'Good diagnostics. They explain the mechanism behind any movement in the 48-hour rate and reveal whether the gain is broad or concentrated in the tail.',
+              },
+              {
+                id: 'dm-b',
+                label: 'Batch-flow adoption (share of approvals done via the new batch action)',
+                scoreValue: 2,
+                rationale: 'Key diagnostic. If approvers ignore the batch action, a null is about adoption, not the feature. Gates interpretation.',
+              },
+              {
+                id: 'dm-c',
+                label: 'Approvals per approver per session',
+                scoreValue: 1,
+                rationale: 'Useful for understanding throughput change, supporting the mechanism story.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'logistics',
+        label: 'Logistics',
+        hint: 'This is the crux: how long, given low and bursty traffic?',
+        fields: [
+          {
+            id: 'runtime',
+            label: 'How long should this experiment run?',
+            type: 'single_select',
+            conceptLinks: ['power', 'mde', 'novelty-effect'],
+            options: [
+              {
+                id: 'rt-a',
+                label: 'At least one full month-end cycle, sized by a power calculation on the company-level approval rate — likely 4-6 weeks, not one week',
+                scoreValue: 2,
+                rationale: 'Correct. Two forces collide: low traffic (few independent companies/approvers) means a large MDE, and bursty month-end activity means a one-week window could entirely miss or entirely consist of the peak. You must span at least one full month-end cycle and size the runtime by a power calculation, not by Sales\' timeline.',
+              },
+              {
+                id: 'rt-b',
+                label: 'One week, as the PM proposed',
+                scoreValue: 0,
+                rationale: 'The trap. One week of a low-traffic, month-end-bursty feature is almost certainly underpowered and may sit entirely off-peak or on-peak, badly biasing the estimate. A "fast read" here is a misread.',
+              },
+              {
+                id: 'rt-c',
+                label: 'Two weeks, to roughly double the sample',
+                scoreValue: 1,
+                rationale: 'Better than one week, but with such a small approver population two weeks likely still falls short of the MDE the team cares about, and may not contain a full month-end cycle. Defensible only if a power calc shows it suffices.',
+              },
+              {
+                id: 'rt-d',
+                label: 'Run until the 48-hour rate is significant',
+                scoreValue: 0,
+                rationale: 'Peeking — especially dangerous on a small, bursty sample where early noise easily crosses 0.05. Pre-commit the sample size and runtime from a power calculation.',
+              },
+            ],
+          },
+          {
+            id: 'attributionWindow',
+            label: 'What attribution window applies to the primary metric?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'aw-a',
+                label: '48 hours from each expense\'s submission time',
+                scoreValue: 2,
+                rationale: 'Correct and matches the metric definition. Anchoring to submission time gives each expense an equal observation window for the 48-hour outcome.',
+              },
+              {
+                id: 'aw-b',
+                label: 'Same calendar day as submission',
+                scoreValue: 0,
+                rationale: 'An expense submitted at 5pm has only hours left in the calendar day. Calendar-day windows create systematically unequal observation and bias the rate by submission time.',
+              },
+              {
+                id: 'aw-c',
+                label: '7 days from submission',
+                scoreValue: 1,
+                rationale: 'A wider window is fine for a secondary "eventually approved" metric, but it dilutes the 48-hour outcome the customer actually cares about. Keep the primary at 48 hours.',
+              },
+            ],
+          },
+          {
+            id: 'sampleSizeConcern',
+            label: 'What is the main power concern, and how do you address it?',
+            type: 'single_select',
+            conceptLinks: ['power', 'mde'],
+            options: [
+              {
+                id: 'ss-a',
+                label: 'The population of independent units is small, so the detectable effect (MDE) is large; address it by extending runtime across month-end cycles, using approver-level randomization if contamination is low, and applying variance reduction (e.g. CUPED on pre-period approval rate)',
+                scoreValue: 2,
+                rationale: 'Exactly right, and the levers are the substance. With few companies/approvers, the MDE is large. The honest moves are: run longer (more cycles), increase independent units (approver-level if contamination is acceptable), and reduce variance with pre-period covariates (CUPED) — all of which shrink the MDE without faking power.',
+              },
+              {
+                id: 'ss-b',
+                label: 'No concern — approval events are frequent, so there is plenty of data',
+                scoreValue: 0,
+                rationale: 'Counting events overstates power. Events are nested within a small number of approvers and companies; the binding constraint is independent units, not raw event count.',
+              },
+              {
+                id: 'ss-c',
+                label: 'The concern is that the effect might be too small to matter, so we should lower alpha to 0.10',
+                scoreValue: 0,
+                rationale: 'Loosening alpha to manufacture significance trades a Type I error increase for the appearance of power. It does not address the real issue (small independent N) and weakens the evidence standard for a high-stakes finance feature.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'risks',
+        label: 'Risks & Decision Rule',
+        hint: 'What could invalidate this, and what will you do with the result?',
+        fields: [
+          {
+            id: 'trustChecks',
+            label: 'Which trust checks should you run?',
+            type: 'multi_select',
+            conceptLinks: ['srm'],
+            options: [
+              {
+                id: 'tc-a',
+                label: 'SRM check on assignment counts at the unit of randomization (companies or approvers)',
+                scoreValue: 2,
+                rationale: 'Essential — and especially important on small samples, where a modest imbalance has an outsized effect on the estimate.',
+              },
+              {
+                id: 'tc-b',
+                label: 'Verify cluster (company) sizes are balanced across arms so no single large company dominates one arm',
+                scoreValue: 2,
+                rationale: 'Critical for low-N cluster designs. One big company landing in treatment can swing the whole result. Check the size distribution, not just totals.',
+              },
+              {
+                id: 'tc-c',
+                label: 'Exclude internal / test companies and sandbox approvers',
+                scoreValue: 1,
+                rationale: 'Good hygiene. Internal accounts behave differently and, on a small sample, can distort the estimate noticeably. Exclude before analysis.',
+              },
+              {
+                id: 'tc-d',
+                label: 'Confirm the 48-hour rate is above 50% in both arms before analyzing',
+                scoreValue: 0,
+                rationale: 'A level threshold is not a trust check. Trust checks validate the mechanism, not whether the outcome cleared an arbitrary bar.',
+              },
+            ],
+          },
+          {
+            id: 'validityRisks',
+            label: 'What are the main validity risks?',
+            type: 'multi_select',
+            conceptLinks: ['power', 'novelty-effect'],
+            options: [
+              {
+                id: 'vr-a',
+                label: 'Underpowered null read as "no effect" — a non-significant result on a small sample may simply mean the test could not detect the effect',
+                scoreValue: 2,
+                rationale: 'The headline risk for this design. With a large MDE, a true 4-point improvement could easily come back non-significant. Reporting that as "the feature does nothing" is a Type II error dressed up as a conclusion.',
+              },
+              {
+                id: 'vr-b',
+                label: 'Month-end seasonality — if the window does not span a full cycle, the estimate reflects a non-representative period',
+                scoreValue: 2,
+                rationale: 'Real and specific here. Approval behavior at month-end peak differs from mid-month. A short window that lands off-cycle (or only on peak) biases the result. Span a full cycle.',
+              },
+              {
+                id: 'vr-c',
+                label: 'Novelty / learning effect — approvers may be slower at first while learning the batch flow, understating early gains',
+                scoreValue: 1,
+                rationale: 'A plausible primacy effect (the inverse of novelty): a new workflow can slow users down before it speeds them up. Worth a week-over-week look, though secondary to the power and seasonality risks.',
+              },
+              {
+                id: 'vr-d',
+                label: 'SUTVA violation via cross-company spillover',
+                scoreValue: 0,
+                rationale: 'Companies do not share approval queues; there is no cross-company interference. Not a meaningful threat (within-company contamination is handled by account-level randomization).',
+              },
+            ],
+          },
+          {
+            id: 'decisionRule',
+            label: 'What is the pre-committed decision rule?',
+            type: 'single_select',
+            conceptLinks: ['p-value', 'guardrail-metric', 'power'],
+            options: [
+              {
+                id: 'dr-a',
+                label: 'Pre-commit the sample size from a power calculation. Ship if the 48-hour approval rate is significantly positive AND erroneous-approval and policy-violation rates are not significantly worse. If the result is non-significant, report it as inconclusive given the MDE — not as "no effect" — and decide whether to extend or accept the uncertainty.',
+                scoreValue: 2,
+                rationale: 'Correct and senior-level. It fixes the sample size in advance, treats the finance-quality guardrails as blocking, and — crucially — pre-commits to distinguishing an inconclusive underpowered null from a true null. That honesty about power is the heart of this scenario.',
+              },
+              {
+                id: 'dr-b',
+                label: 'Ship if the 48-hour rate is higher in treatment after one week.',
+                scoreValue: 0,
+                rationale: 'Reads a directional difference on an underpowered, possibly off-cycle week with no significance or guardrail check. This is the failure mode.',
+              },
+              {
+                id: 'dr-c',
+                label: 'Do not ship if the result is non-significant.',
+                scoreValue: 0,
+                rationale: 'Treating an underpowered null as evidence of no effect is the Type II error trap. A non-significant result on a small sample is often uninformative, not a verdict.',
+              },
+              {
+                id: 'dr-d',
+                label: 'Ship if the 48-hour rate improves significantly, reviewing approval-quality metrics contextually.',
+                scoreValue: 1,
+                rationale: 'Right primary, but "contextually" weakens the quality guardrails that genuinely matter in a finance product, and it omits the pre-committed handling of an underpowered null.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+
+    scoringRubric: {
+      dimensions: [
+        { id: 'metric_selection', label: 'Metric selection', weight: 0.20, fieldIds: ['primaryMetric', 'guardrailMetrics'] },
+        { id: 'design_validity', label: 'Design validity', weight: 0.30, fieldIds: ['randomizationUnit', 'unitOfAnalysis', 'trustChecks', 'validityRisks'] },
+        { id: 'decision_discipline', label: 'Decision discipline', weight: 0.35, fieldIds: ['decisionRule', 'sampleSizeConcern'] },
+        { id: 'hypothesis_framing', label: 'Hypothesis framing', weight: 0.15, fieldIds: ['hypothesis', 'businessDecision'] },
+      ],
+      levels: {
+        incomplete:    { minScore: 0,    label: 'Incomplete' },
+        analyst_ready: { minScore: 0.45, label: 'Analyst-Ready' },
+        senior_ready:  { minScore: 0.68, label: 'Senior-Ready' },
+        staff_level:   { minScore: 0.85, label: 'Staff-Level' },
+      },
+    },
+
+    seniorDesign: {
+      rationale: 'This scenario is about power discipline under business pressure. The PM has promised a one-week read; the population is tiny (a few thousand approvers across a few thousand companies) and the activity is bursty around month-end. Those two facts together mean the minimum detectable effect is large and a one-week window may not even contain a representative slice of activity. Promising a fast read here is promising a misread.\n\nThe right move is to derive the runtime from a power calculation on the actual unit of analysis, not from the sales calendar. If you randomize by company (sensible for a B2B workflow tool, to avoid within-company contamination), your independent N is the number of companies, and event counts are irrelevant to power. You then have three honest levers to shrink the MDE: run longer across at least one full month-end cycle; consider approver-level randomization if within-company contamination is genuinely low, which buys you more independent units; and apply variance reduction such as CUPED using each unit\'s pre-period approval rate. None of these fake power — they earn it.\n\nThe guardrails matter more than usual because this is a finance product. Speed that comes from waving through erroneous or policy-violating expenses is not a win; it is a liability. Both quality metrics must be pre-specified as blocking.\n\nThe decision rule is where seniority shows. You pre-commit the sample size, and you pre-commit to interpreting a non-significant result honestly: on a small sample with a large MDE, a null is usually "we could not detect it," not "there is nothing there." Stating that distinction before the data arrives is what stops an underpowered test from being misreported in either direction — Sales hearing "no effect, don\'t bother" or hearing "it works" off a noisy directional blip.',
+      commonMistakes: [
+        {
+          mistake: 'Setting runtime by the sales timeline instead of a power calculation',
+          consequence: 'A one-week test on a low-traffic, bursty feature is underpowered and may sit entirely off-peak. You get a noisy estimate and either miss a real improvement or ship on a fluke.',
+          conceptLink: 'power',
+        },
+        {
+          mistake: 'Counting approval events as the sample size',
+          consequence: 'Events are nested within approvers within companies. Treating them as independent inflates apparent power and, in analysis, deflates standard errors into false significance.',
+          conceptLink: 'unit-of-analysis',
+        },
+        {
+          mistake: 'Reading a non-significant result as proof the feature does nothing',
+          consequence: 'On a small sample with a large MDE, a true 4-point gain can come back non-significant. Reporting that as "no effect" is a Type II error that kills a good feature.',
+          conceptLink: 'mde',
+        },
+      ],
+      failureMode: {
+        weakAnswer: 'The candidate accepts the PM\'s one-week timeline, randomizes at the approval-event level for "more data," runs a pooled t-test that ignores company clustering, and reports a non-significant directional improvement as "the feature doesn\'t move the needle." They never compute the MDE, never span a month-end cycle, and never distinguish an underpowered null from a true one.',
+        interviewerFollowUp: '"Your result is +3 points on the 48-hour rate, p = 0.21, after one week. Before you tell Sales the feature doesn\'t work — what was the minimum effect this test could have detected, and is +3 points even inside that detectable range? If you don\'t know the MDE, what does p = 0.21 actually tell you?"',
+      },
+    },
+
+    pairedScenarioPrompt: {
+      toReview: 'You sized the test by the power math, not the sales calendar. Now read what happens when a team ships the one-week read.',
+      fromReview: 'You saw the underpowered read go wrong. Go back and design the test with an honest power calculation.',
+    },
+  },
+
+  // ─────────────────────────────────────────────
+  // D12 — Design the Rich-Media Feed Test (BETA · Senior)
+  // Core trap: guardrail design + ship/no-ship rule when engagement wins but latency degrades
+  // ─────────────────────────────────────────────
+  {
+    id: 'd12-guardrail-latency-tradeoff',
+    title: 'Design the Rich-Media Feed Test',
+    subtitle: 'Rivulet, a news app, wants to add auto-playing video previews to the feed. It will lift engagement and slow the page. Design the guardrails and the ship rule before you see the data.',
+    isFree: false,
+    difficulty: 'senior',
+    industry: 'media',
+    scenarioFamily: 'guardrail_tradeoff',
+
+    context: {
+      company: 'Rivulet',
+      product: 'Consumer news and content app, ~9M MAU, ad-supported, large mobile audience across India tier-2 and tier-3 cities',
+      team: 'Feed & Engagement team',
+      background: 'Rivulet wants to add auto-playing video previews to feed cards. The team is confident this will lift engagement — video previews are sticky. The concern is performance: richer cards mean heavier pages, and a large share of Rivulet\'s users are on mid-range Android devices and slower networks. Leadership has previously seen engagement features quietly degrade load time and increase crashes, eroding long-term retention. They want guardrails designed deliberately, with a ship rule committed up front.',
+      featureProposal: 'Add auto-playing (muted) video previews to feed cards. Control: static image cards. Treatment: video-preview cards. Hypothesis: video previews increase feed engagement (taps, dwell time, sessions).',
+      businessPressure: 'The engagement OKR is behind for the half. The PM is confident this is a clear engagement win and wants to ship fast. The Platform team is wary — they have been fighting a slow creep in page-load time and app-size for two quarters.',
+      constraints: [
+        'Roughly 70% of users are on mid-range or low-end Android devices; median network is 4G but variable',
+        'Engagement (feed taps, dwell time) is the team\'s headline metric this half',
+        'Page-load time and crash rate are tracked at the session and device level',
+        'The feature can be feature-flagged per user; rollout supports a standard 50/50 split',
+      ],
+    },
+
+    designPhases: [
+      {
+        id: 'framing',
+        label: 'Framing',
+        hint: 'What are you testing, and what is the real tension?',
+        fields: [
+          {
+            id: 'businessDecision',
+            label: 'What business decision will this experiment inform?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'bd-a',
+                label: 'Whether to ship auto-playing video previews to the whole feed',
+                scoreValue: 2,
+                rationale: 'Correct. Binary, specific, ship/no-ship.',
+              },
+              {
+                id: 'bd-b',
+                label: 'Whether users prefer video to static images',
+                scoreValue: 0,
+                rationale: 'A preference question, not a decision. The real decision weighs the engagement gain against the performance cost — preference alone ignores half the tradeoff.',
+              },
+              {
+                id: 'bd-c',
+                label: 'Whether the engagement OKR can be hit this half',
+                scoreValue: 0,
+                rationale: 'An OKR-attainment question. The experiment informs a product decision; tying the decision to an OKR deadline is exactly the pressure that leads to ignoring guardrails.',
+              },
+              {
+                id: 'bd-d',
+                label: 'Whether the engagement lift from video previews is worth the performance cost',
+                scoreValue: 1,
+                rationale: 'This is the right tension, but it is the hypothesis/tradeoff statement, not the decision. The decision is the binary ship call; this is how you will reason about it.',
+              },
+            ],
+          },
+          {
+            id: 'hypothesis',
+            label: 'Select the strongest hypothesis',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'hyp-a',
+                label: 'Auto-playing video previews increase feed engagement without degrading page-load time or crash rate beyond acceptable thresholds.',
+                scoreValue: 2,
+                rationale: 'Strong. It states the intended gain and explicitly conditions success on the performance guardrails holding — which is the entire point of this design. It forces the tradeoff into the hypothesis.',
+              },
+              {
+                id: 'hyp-b',
+                label: 'Video previews increase feed taps and dwell time.',
+                scoreValue: 1,
+                rationale: 'Testable and likely true, but it omits the performance side. A hypothesis that ignores the known risk will produce a test that ships an engagement win while quietly degrading the experience.',
+              },
+              {
+                id: 'hyp-c',
+                label: 'Richer media makes the feed more engaging.',
+                scoreValue: 0,
+                rationale: 'Vague and one-sided. No specific outcome and no acknowledgment of the cost.',
+              },
+              {
+                id: 'hyp-d',
+                label: 'Video previews increase engagement, and any load-time increase will be small enough not to matter.',
+                scoreValue: 1,
+                rationale: 'At least names the cost, but "small enough not to matter" pre-judges the guardrail result instead of setting a threshold to test against. Define the threshold; do not assume it.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'setup',
+        label: 'Setup',
+        hint: 'Who gets treated, and how?',
+        fields: [
+          {
+            id: 'eligiblePopulation',
+            label: 'Who should be included in the experiment?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'ep-a',
+                label: 'All users who open the feed during the test window',
+                scoreValue: 2,
+                rationale: 'Correct. The feed is universal; everyone who opens it experiences the change. Full inclusion maximizes power and generalizability — and crucially keeps low-end-device users in, since they bear the performance cost.',
+              },
+              {
+                id: 'ep-b',
+                label: 'Only users on high-end devices and fast networks, to isolate the engagement effect',
+                scoreValue: 0,
+                rationale: 'This deliberately excludes the population most exposed to the performance downside. It would inflate the apparent net benefit and hide the very harm the guardrails exist to catch.',
+              },
+              {
+                id: 'ep-c',
+                label: 'Only highly active users, who engage with the feed most',
+                scoreValue: 0,
+                rationale: 'Biases toward users with the highest engagement ceiling and likely better devices; not representative of the average user or the at-risk segment.',
+              },
+              {
+                id: 'ep-d',
+                label: 'All feed users, with device tier captured for pre-registered subgroup analysis',
+                scoreValue: 2,
+                rationale: 'Also correct, and slightly better than (a): include everyone, and pre-register a device-tier subgroup so you can see whether the performance harm concentrates on low-end devices. That is senior-level foresight given the user base.',
+              },
+            ],
+          },
+          {
+            id: 'randomizationUnit',
+            label: 'What should be the randomization unit?',
+            type: 'single_select',
+            conceptLinks: ['randomization-unit'],
+            options: [
+              {
+                id: 'ru-a',
+                label: 'User (persistent assignment)',
+                scoreValue: 2,
+                rationale: 'Correct. A consistent feed experience per user is required, and engagement/retention are individual-level. Persistent user assignment is the natural unit.',
+              },
+              {
+                id: 'ru-b',
+                label: 'Session',
+                scoreValue: 0,
+                rationale: 'The same user flipping between video and static feeds across sessions is incoherent and contaminates both arms; it also makes retention impossible to attribute.',
+              },
+              {
+                id: 'ru-c',
+                label: 'Device',
+                scoreValue: 1,
+                rationale: 'Workable since the feature is device-rendered, but users on multiple devices would split across arms, and device-level assignment complicates user-level retention analysis. User-level is cleaner.',
+              },
+              {
+                id: 'ru-d',
+                label: 'Feed-card impression',
+                scoreValue: 0,
+                rationale: 'Impressions are deeply correlated within a user and session; randomizing them destroys independence and overstates power massively.',
+              },
+            ],
+          },
+          {
+            id: 'unitOfAnalysis',
+            label: 'What is the unit of analysis?',
+            type: 'single_select',
+            conceptLinks: ['unit-of-analysis'],
+            options: [
+              {
+                id: 'ua-a',
+                label: 'User — engagement and guardrail metrics computed per user',
+                scoreValue: 2,
+                rationale: 'Correct. Matches user-level randomization. Per-user aggregation keeps the analysis valid for engagement, load time, and crashes alike.',
+              },
+              {
+                id: 'ua-b',
+                label: 'Session — compute load time and engagement per session',
+                scoreValue: 1,
+                rationale: 'Acceptable for reporting load-time distributions as a diagnostic, but sessions from the same user are correlated; the primary analysis should aggregate to the user to match randomization.',
+              },
+              {
+                id: 'ua-c',
+                label: 'Impression — analyze each card view',
+                scoreValue: 0,
+                rationale: 'Impressions are not independent. Wrong unit; inflates power and biases inference.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'metrics',
+        label: 'Metrics',
+        hint: 'The guardrail design is the heart of this scenario.',
+        fields: [
+          {
+            id: 'primaryMetric',
+            label: 'What is the primary metric?',
+            type: 'single_select',
+            conceptLinks: ['primary-metric'],
+            options: [
+              {
+                id: 'pm-a',
+                label: 'Feed engagement — per-user feed taps (or dwell time) per active day',
+                scoreValue: 2,
+                rationale: 'Correct given the team\'s engagement mandate and the hypothesis. It is the intended benefit; the performance metrics are guardrails against it. Clean primary.',
+              },
+              {
+                id: 'pm-b',
+                label: 'Page-load time',
+                scoreValue: 0,
+                rationale: 'Load time is the guardrail, not the primary. The feature is not designed to improve load time; making it the primary inverts the test.',
+              },
+              {
+                id: 'pm-c',
+                label: '7-day retention',
+                scoreValue: 1,
+                rationale: 'A legitimate north-star, but for a feed-card change retention is a downstream, lower-sensitivity signal that is also where the latency harm would eventually show up. Better as a guardrail/secondary; engagement is the direct primary here.',
+              },
+              {
+                id: 'pm-d',
+                label: 'Video preview play rate',
+                scoreValue: 0,
+                rationale: 'An adoption metric that exists only in treatment. It measures usage of the feature, not the engagement benefit. Diagnostic at best.',
+              },
+            ],
+          },
+          {
+            id: 'guardrailMetrics',
+            label: 'Which metrics should be guardrails? (This is the key decision.)',
+            type: 'multi_select',
+            conceptLinks: ['guardrail-metric'],
+            options: [
+              {
+                id: 'gm-a',
+                label: 'Page-load time (feed render time), monitored at the p75/p90 of the distribution, not just the mean',
+                scoreValue: 2,
+                rationale: 'The central guardrail, and the tail-focus is what makes it senior-level. Mean load time can look fine while p90 — the experience of low-end-device users — degrades badly. Guarding the tail is essential given Rivulet\'s device mix.',
+              },
+              {
+                id: 'gm-b',
+                label: 'App crash / ANR (app-not-responding) rate',
+                scoreValue: 2,
+                rationale: 'Essential. Heavier video cards on mid-range Android are a known crash/ANR risk. A crashing app cannot be engaging; this is a blocking guardrail.',
+              },
+              {
+                id: 'gm-c',
+                label: '7-day retention as a guardrail (engagement gain must not come with a retention drop)',
+                scoreValue: 2,
+                rationale: 'Strong guardrail. The long-term failure mode is exactly "engagement up now, retention down later as slow/crashy experience frustrates users." Pre-specifying retention as a guardrail catches that.',
+              },
+              {
+                id: 'gm-d',
+                label: 'Total ad impressions served',
+                scoreValue: 1,
+                rationale: 'Reasonable to monitor as a business guardrail (video previews could push ads down the feed or change viewability), but it is secondary to the user-experience guardrails and somewhat indirect. Acceptable, lower priority.',
+              },
+            ],
+          },
+          {
+            id: 'diagnosticMetrics',
+            label: 'Which metrics should be tracked as diagnostics?',
+            type: 'multi_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'dm-a',
+                label: 'Load-time and crash breakdown by device tier (low / mid / high end)',
+                scoreValue: 2,
+                rationale: 'Critical diagnostic given the user base. The harm is expected to concentrate on low-end devices; a tier breakdown tells you whether a borderline guardrail breach is broad or concentrated — and whether a tier-gated rollout is an option.',
+              },
+              {
+                id: 'dm-b',
+                label: 'Video preview play / completion rate',
+                scoreValue: 1,
+                rationale: 'Good diagnostic for whether the engagement gain is actually driven by the videos (mechanism) versus some other change.',
+              },
+              {
+                id: 'dm-c',
+                label: 'Data usage per session',
+                scoreValue: 1,
+                rationale: 'Relevant for a data-cost-sensitive audience — auto-play video can balloon data use, which is a real user concern in tier-2/3 markets even if it is not a hard guardrail.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'logistics',
+        label: 'Logistics',
+        hint: 'How long, how large, how attributed?',
+        fields: [
+          {
+            id: 'runtime',
+            label: 'How long should this experiment run?',
+            type: 'single_select',
+            conceptLinks: ['novelty-effect', 'mde'],
+            options: [
+              {
+                id: 'rt-a',
+                label: '3-4 weeks — enough to see novelty decay on engagement and to observe a 7-day retention guardrail for the cohort',
+                scoreValue: 2,
+                rationale: 'Correct. Video previews are novel and will draw an early engagement spike; you need multiple weeks to see whether it sustains. And the retention guardrail needs a 7-day window per user, so the test must run well beyond a week.',
+              },
+              {
+                id: 'rt-b',
+                label: '1 week — engagement effects show up fast',
+                scoreValue: 0,
+                rationale: 'One week captures the novelty peak and cannot observe the retention guardrail. It would flatter the engagement win and hide the long-term cost — the exact failure this design guards against.',
+              },
+              {
+                id: 'rt-c',
+                label: '2 weeks',
+                scoreValue: 1,
+                rationale: 'Better, and may be enough for engagement power, but two weeks barely lets novelty decay and gives only a thin retention read. Defensible if a power calc supports it and retention is observed for the early cohort.',
+              },
+              {
+                id: 'rt-d',
+                label: 'Run until engagement is significant',
+                scoreValue: 0,
+                rationale: 'Peeking, and it stops on the fastest, most novelty-inflated metric while the guardrails are still maturing. Pre-commit the runtime.',
+              },
+            ],
+          },
+          {
+            id: 'attributionWindow',
+            label: 'What attribution window applies?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'aw-a',
+                label: 'Engagement measured per active day throughout the test; retention guardrail measured 7 days from first exposure',
+                scoreValue: 2,
+                rationale: 'Correct — different metrics, different windows. Engagement is an ongoing daily measure; the retention guardrail requires a fixed 7-day per-user window. Applying one window to both would be wrong.',
+              },
+              {
+                id: 'aw-b',
+                label: 'Single 7-day window for all metrics from first exposure',
+                scoreValue: 1,
+                rationale: 'Workable but blunt. It under-uses the continuous engagement signal and can right-censor late-enrolled users\' retention. Per-metric windows are cleaner.',
+              },
+              {
+                id: 'aw-c',
+                label: 'Same-session window for all metrics',
+                scoreValue: 0,
+                rationale: 'Same-session cannot measure retention at all and ignores the sustained engagement question. Wrong for the guardrails that matter most.',
+              },
+            ],
+          },
+          {
+            id: 'sampleSizeConcern',
+            label: 'What is the main power concern?',
+            type: 'single_select',
+            conceptLinks: ['power', 'mde'],
+            options: [
+              {
+                id: 'ss-a',
+                label: 'Guardrails need their own power: load-time tail metrics and especially the low-base-rate crash metric require enough sample to detect a meaningful degradation, and the low-end-device subgroup has less power than the whole',
+                scoreValue: 2,
+                rationale: 'Exactly the right concern for a guardrail-centric design. It is not enough to power the engagement primary; the guardrails must be powered to detect harm. Crash rate is rare (low base rate), and the device-tier subgroup where harm concentrates is smaller — both raise the MDE for the very signals you most need to trust.',
+              },
+              {
+                id: 'ss-b',
+                label: 'No concern — 9M MAU powers everything',
+                scoreValue: 0,
+                rationale: 'High overall N does not guarantee power for rare events (crashes) or for the smaller low-end-device subgroup. Assuming the guardrails are automatically powered is the trap.',
+              },
+              {
+                id: 'ss-c',
+                label: 'The concern is multiple testing across the guardrails',
+                scoreValue: 1,
+                rationale: 'A fair secondary point — several guardrails do raise multiplicity — but for guardrails you typically want to be conservative about missing harm, so the dominant concern is having enough power to detect a breach, not controlling false alarms.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'risks',
+        label: 'Risks & Decision Rule',
+        hint: 'The ship rule must resolve the engagement-vs-performance tradeoff in advance.',
+        fields: [
+          {
+            id: 'trustChecks',
+            label: 'Which trust checks should you run?',
+            type: 'multi_select',
+            conceptLinks: ['srm'],
+            options: [
+              {
+                id: 'tc-a',
+                label: 'SRM check on user assignment counts',
+                scoreValue: 2,
+                rationale: 'Always first. A rendering feature flag that fails on certain devices can silently drop users from one arm, producing an SRM that also correlates with device tier — doubly damaging here.',
+              },
+              {
+                id: 'tc-b',
+                label: 'Verify device-tier and network composition are balanced across arms',
+                scoreValue: 2,
+                rationale: 'Critical for this test. If one arm has more low-end devices, the load-time and crash comparison is confounded by composition rather than the feature. Check balance on the dimensions that drive the guardrails.',
+              },
+              {
+                id: 'tc-c',
+                label: 'Confirm load-time and crash instrumentation fires equally in both arms (e.g. video cards are not failing to log load events)',
+                scoreValue: 2,
+                rationale: 'Essential. If video cards measure load differently (or fail to log when they crash), the guardrail data is biased toward looking safe. Verify the measurement before trusting it.',
+              },
+              {
+                id: 'tc-d',
+                label: 'Check that engagement is higher in treatment before running guardrails',
+                scoreValue: 0,
+                rationale: 'Conditioning the analysis order on the result is not a trust check. Run all checks and read all metrics per the pre-committed plan.',
+              },
+            ],
+          },
+          {
+            id: 'validityRisks',
+            label: 'What are the main validity risks?',
+            type: 'multi_select',
+            conceptLinks: ['novelty-effect', 'guardrail-metric'],
+            options: [
+              {
+                id: 'vr-a',
+                label: 'Novelty effect inflating the early engagement win',
+                scoreValue: 2,
+                rationale: 'High risk. Auto-play video is eye-catching; week-1 engagement will likely overstate the durable effect. Multi-week runtime with weekly breakdowns is the mitigation.',
+              },
+              {
+                id: 'vr-b',
+                label: 'Guardrail measured on the mean, masking tail degradation on low-end devices',
+                scoreValue: 2,
+                rationale: 'The most design-specific risk. A mean load time that barely moves can hide a severe p90 regression concentrated on the users least able to tolerate it. Guarding and analyzing the tail (and the device subgroup) is the fix.',
+              },
+              {
+                id: 'vr-c',
+                label: 'Shipping on the engagement win before the retention guardrail has matured',
+                scoreValue: 2,
+                rationale: 'Real and central. Engagement moves first; the retention cost of a slower app shows up later. Reading early on engagement alone is how the long-term harm gets shipped.',
+              },
+              {
+                id: 'vr-d',
+                label: 'SUTVA violation via users sharing the feature',
+                scoreValue: 0,
+                rationale: 'Feed rendering is individual; there is no meaningful cross-user interference. Not a real threat here.',
+              },
+            ],
+          },
+          {
+            id: 'decisionRule',
+            label: 'What is the pre-committed decision rule?',
+            type: 'single_select',
+            conceptLinks: ['p-value', 'guardrail-metric'],
+            options: [
+              {
+                id: 'dr-a',
+                label: 'Ship only if engagement is significantly positive AND p90 load time does not worsen beyond a pre-set threshold AND crash/ANR rate and 7-day retention are not significantly worse. If engagement wins but a guardrail breaches, do not ship the full feature — consider a tier-gated rollout (e.g. high-end devices only) pending optimization.',
+                scoreValue: 2,
+                rationale: 'Correct and senior-level. It pre-sets a concrete load-time threshold, treats crashes and retention as blocking, and — uniquely — pre-commits a fallback (tier-gated rollout) for the most likely real outcome: a win that breaches the guardrail on low-end devices. That contingency is what makes the rule actionable rather than just restrictive.',
+              },
+              {
+                id: 'dr-b',
+                label: 'Ship if engagement improves significantly.',
+                scoreValue: 0,
+                rationale: 'Ignores the entire performance tradeoff the experiment exists to evaluate. This is the failure mode.',
+              },
+              {
+                id: 'dr-c',
+                label: 'Ship if engagement is up and average load time is not significantly worse.',
+                scoreValue: 1,
+                rationale: 'Better — it has a guardrail — but using the mean lets tail degradation on low-end devices slip through, and it omits crash and retention guardrails. Partial credit for the structure, but the wrong statistic on the key guardrail.',
+              },
+              {
+                id: 'dr-d',
+                label: 'Ship if engagement is up and no guardrail is more than 10% worse.',
+                scoreValue: 1,
+                rationale: 'Has the right shape (engagement plus guardrail thresholds), but a flat "10% worse" with no significance framing and no tail/subgroup specificity is crude. It is a step toward (a), not a substitute for it.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+
+    scoringRubric: {
+      dimensions: [
+        { id: 'metric_selection', label: 'Metric selection', weight: 0.35, fieldIds: ['primaryMetric', 'guardrailMetrics'] },
+        { id: 'design_validity', label: 'Design validity', weight: 0.25, fieldIds: ['randomizationUnit', 'unitOfAnalysis', 'trustChecks', 'validityRisks'] },
+        { id: 'decision_discipline', label: 'Decision discipline', weight: 0.25, fieldIds: ['decisionRule', 'sampleSizeConcern'] },
+        { id: 'hypothesis_framing', label: 'Hypothesis framing', weight: 0.15, fieldIds: ['hypothesis', 'businessDecision'] },
+      ],
+      levels: {
+        incomplete:    { minScore: 0,    label: 'Incomplete' },
+        analyst_ready: { minScore: 0.45, label: 'Analyst-Ready' },
+        senior_ready:  { minScore: 0.68, label: 'Senior-Ready' },
+        staff_level:   { minScore: 0.85, label: 'Staff-Level' },
+      },
+    },
+
+    seniorDesign: {
+      rationale: 'This scenario is a guardrail-design exercise. The engagement win is almost a foregone conclusion — auto-play video is sticky — so the experiment\'s real job is to measure the cost and pre-commit how much cost is acceptable. The team that designs only for the win will ship a feature that lifts the OKR this half and quietly erodes the experience for the 70% of users on mid-range Android.\n\nThree design choices matter most. First, guard the right statistic: page-load time must be watched at the tail (p75/p90), not the mean, because the harm concentrates on slow devices and a healthy mean can hide a broken p90. Add crash/ANR rate (a rich-media risk on low-end Android) and 7-day retention (where a slow, crashy experience eventually shows up) as blocking guardrails. Second, keep the at-risk population in and pre-register a device-tier subgroup, so a borderline result can be diagnosed as broad or concentrated. Third, power the guardrails, not just the primary — crash rate is a low-base-rate event and the low-end subgroup is smaller, so both have a larger MDE precisely where you most need sensitivity.\n\nThe decision rule is where this scenario is won or lost. A good rule pre-sets a concrete load-time threshold, treats crashes and retention as blocking, and — most importantly — pre-commits a contingency for the likeliest real outcome: engagement wins but the guardrail breaches on low-end devices. The mature answer is not a binary ship/kill but a planned fallback, such as a tier-gated rollout to capable devices while the team optimizes the heavier path. Writing that contingency down before the data arrives is what stops the OKR pressure from steamrolling the guardrail when the engagement number comes in green.',
+      commonMistakes: [
+        {
+          mistake: 'Designing the test only around the engagement win, with performance as an afterthought',
+          consequence: 'Engagement is up, the team ships, and load time and crashes degrade for low-end-device users. Retention erodes over the following weeks — the exact pattern leadership warned about.',
+          conceptLink: 'guardrail-metric',
+        },
+        {
+          mistake: 'Guarding load time on the mean instead of the tail',
+          consequence: 'Mean load time barely moves, so the guardrail passes — while p90 (the experience of slow-device users) regresses sharply. The harm is real but invisible to a mean-based guardrail.',
+          conceptLink: 'guardrail-metric',
+        },
+        {
+          mistake: 'No pre-committed contingency for "win but guardrail breach"',
+          consequence: 'When engagement comes in positive but load time breaches on low-end devices, the team has no plan and, under OKR pressure, rationalizes shipping anyway. A pre-set tier-gated fallback would have given a defensible middle path.',
+          conceptLink: 'p-value',
+        },
+      ],
+      failureMode: {
+        weakAnswer: 'The candidate sets engagement as the primary, tracks average load time as a soft secondary, runs the test for one week, sees a strong engagement lift and a small mean load-time change, and recommends shipping to everyone. They never guard the p90, never set a crash or retention guardrail, never break out low-end devices, and have no plan for the case where the guardrail breaches.',
+        interviewerFollowUp: '"Engagement is up 8% and mean load time rose only 40ms, so you want to ship. The Platform lead pulls the p90 by device tier: low-end Android load time is up 900ms and crash rate is up 15%. Your guardrail looked at the mean. What decision do you actually make now, and what should your pre-committed rule have said to handle this?"',
+      },
+    },
+
+    pairedScenarioPrompt: {
+      toReview: 'You designed the guardrails and the ship rule up front. Now read what happens when a team ships on the engagement win alone.',
+      fromReview: 'You saw the performance cost surface after launch. Go back and design the guardrails and contingency before the data arrives.',
+    },
+  },
+
+  // ─────────────────────────────────────────────
+  // D13 — Design the Surge-Pricing Test (BETA · Staff)
+  // Core trap: two-sided marketplace interference — shared supply makes user-level A/B invalid; switchback design
+  // ─────────────────────────────────────────────
+  {
+    id: 'd13-marketplace-switchback',
+    title: 'Design the Surge-Pricing Test',
+    subtitle: 'Zipline, a ride-hailing marketplace, wants to test a new surge-pricing algorithm. The two sides share one pool of drivers. A standard rider A/B test will lie to you.',
+    isFree: false,
+    difficulty: 'staff',
+    industry: 'marketplace',
+    scenarioFamily: 'sutva',
+
+    context: {
+      company: 'Zipline',
+      product: 'Ride-hailing marketplace operating in 40+ Indian cities, two-sided: riders request, drivers fulfill, a shared pool of drivers serves all riders in a city',
+      team: 'Marketplace & Pricing team',
+      background: 'Zipline built a new surge-pricing algorithm that it believes prices trips more responsively, reducing rider wait times and increasing completed trips. The instinct is to run a standard rider-level A/B test: half of riders see the new surge, half see the old. The problem is structural — all riders in a city draw from the same finite pool of drivers. If the new algorithm reroutes drivers toward treatment riders, control riders wait longer, and vice versa. The treatment effect leaks across arms through shared supply.',
+      featureProposal: 'Replace the current surge-pricing algorithm with a more responsive one. Hypothesis: it reduces average rider wait time and increases completed trips per hour without harming driver earnings or rider cancellations.',
+      businessPressure: 'A competitor is gaining share on reliability (shorter waits). Leadership wants a defensible read on whether the new algorithm actually improves marketplace throughput within a quarter, across a few launch cities.',
+      constraints: [
+        'A single shared driver pool serves all riders in a city at any moment',
+        'Pricing and dispatch decisions update continuously; the platform supports city-level and time-window (switchback) toggling of the algorithm',
+        'Demand is highly time-of-day and day-of-week dependent (rush hours, weekends)',
+        'About 40 cities of varying size are available; metrics are logged at trip, rider, driver, and city-time-window levels',
+      ],
+    },
+
+    designPhases: [
+      {
+        id: 'framing',
+        label: 'Framing',
+        hint: 'What are you testing, and why is measurement structurally hard?',
+        fields: [
+          {
+            id: 'businessDecision',
+            label: 'What business decision will this experiment inform?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'bd-a',
+                label: 'Whether to roll out the new surge-pricing algorithm across all cities',
+                scoreValue: 2,
+                rationale: 'Correct. Binary, specific, ship/no-ship at the platform level.',
+              },
+              {
+                id: 'bd-b',
+                label: 'Whether surge pricing is good for the marketplace',
+                scoreValue: 0,
+                rationale: 'Too broad and already presumed — Zipline runs surge today. The decision is about this specific new algorithm versus the current one.',
+              },
+              {
+                id: 'bd-c',
+                label: 'Whether riders dislike surge pricing',
+                scoreValue: 0,
+                rationale: 'A sentiment question, not a marketplace-throughput decision. Off-target.',
+              },
+              {
+                id: 'bd-d',
+                label: 'How the new algorithm changes driver earnings',
+                scoreValue: 1,
+                rationale: 'Driver earnings is a vital guardrail, but the decision is the binary algorithm rollout, not earnings estimation alone. One important dimension, not the whole decision.',
+              },
+            ],
+          },
+          {
+            id: 'hypothesis',
+            label: 'Select the strongest hypothesis',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'hyp-a',
+                label: 'The new surge algorithm increases completed trips per available driver-hour and reduces rider wait time at the city-time level, without reducing driver earnings per hour.',
+                scoreValue: 2,
+                rationale: 'Strong. It frames the outcome at the marketplace (city-time) level — the only level at which a shared-supply effect is well-defined — and pairs the throughput gain with a driver-side guardrail. This is the correct mental model for a two-sided test.',
+              },
+              {
+                id: 'hyp-b',
+                label: 'Riders in the treatment group will have shorter wait times than riders in the control group.',
+                scoreValue: 0,
+                rationale: 'This bakes in the fatal design flaw: it assumes treatment and control riders are independent when they compete for the same drivers. The comparison is contaminated by shared supply. Wrong framing.',
+              },
+              {
+                id: 'hyp-c',
+                label: 'The new algorithm will make pricing more efficient.',
+                scoreValue: 0,
+                rationale: 'Undefined outcome. "Efficient" needs a metric and a level. No testable claim.',
+              },
+              {
+                id: 'hyp-d',
+                label: 'Treatment riders will complete more trips than control riders.',
+                scoreValue: 1,
+                rationale: 'Directional and measurable, but at the rider level it again ignores supply contention — extra trips for treatment riders may be trips taken away from control riders, a zero-sum artifact rather than a real throughput gain.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'setup',
+        label: 'Setup',
+        hint: 'This is the crux: shared supply breaks rider-level randomization.',
+        fields: [
+          {
+            id: 'eligiblePopulation',
+            label: 'Who/what should be included in the experiment?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'ep-a',
+                label: 'All trips in the selected cities during the experiment\'s active time windows',
+                scoreValue: 2,
+                rationale: 'Correct for a marketplace test. The unit experiencing the algorithm is the city during a time window; all trips in those city-windows are eligible. This captures the whole local market, which is what shared-supply effects require.',
+              },
+              {
+                id: 'ep-b',
+                label: 'Only riders who request during surge periods',
+                scoreValue: 1,
+                rationale: 'The algorithm matters most during surge, so focusing windows there is reasonable, but restricting entirely to surge periods misses how the algorithm reallocates supply into and out of surge. Better to include full city-time windows and analyze surge as a subgroup.',
+              },
+              {
+                id: 'ep-c',
+                label: 'Only new riders, to avoid habituated pricing expectations',
+                scoreValue: 0,
+                rationale: 'New riders are a small, unrepresentative slice and do nothing to address the shared-supply problem. Wrong on both counts.',
+              },
+              {
+                id: 'ep-d',
+                label: 'A random 50% of riders in each city',
+                scoreValue: 0,
+                rationale: 'This is the trap restated as eligibility: splitting riders within a city leaves both arms competing for one driver pool, contaminating the comparison.',
+              },
+            ],
+          },
+          {
+            id: 'randomizationUnit',
+            label: 'What should be the randomization unit? (Central decision.)',
+            type: 'single_select',
+            conceptLinks: ['randomization-unit', 'sutva'],
+            options: [
+              {
+                id: 'ru-a',
+                label: 'City-by-time-window switchback — toggle the whole city between old and new algorithm in alternating time windows, randomizing the order',
+                scoreValue: 2,
+                rationale: 'Correct. When all units share one supply pool, you cannot split the pool; you must apply one algorithm to the whole market at a time and compare across time windows. Switchback randomization (alternating windows within a city, randomized order) contains the supply effect entirely within the active treatment and is the standard marketplace design.',
+              },
+              {
+                id: 'ru-b',
+                label: 'Rider level — assign each rider to old or new surge',
+                scoreValue: 0,
+                rationale: 'The core trap. Treatment and control riders compete for the same drivers; the algorithm reallocates supply between them, so each arm\'s outcome depends on the other arm\'s assignment. SUTVA is violated and the measured effect is meaningless (often a zero-sum artifact).',
+              },
+              {
+                id: 'ru-c',
+                label: 'City level — assign whole cities to old or new for the entire period',
+                scoreValue: 1,
+                rationale: 'City-level cleanly contains the supply effect, but with only ~40 heterogeneous cities you get very few independent units, poor balance, and confounding by city characteristics. Switchback uses each city as its own control across time, which is far more powerful. A defensible fallback, not the best design.',
+              },
+              {
+                id: 'ru-d',
+                label: 'Driver level — assign each driver to serve old or new surge',
+                scoreValue: 0,
+                rationale: 'Drivers serve all riders regardless; you cannot partition a shared pool by driver without breaking dispatch. This neither contains the effect nor reflects how the marketplace works.',
+              },
+            ],
+          },
+          {
+            id: 'unitOfAnalysis',
+            label: 'What is the unit of analysis?',
+            type: 'single_select',
+            conceptLinks: ['unit-of-analysis'],
+            options: [
+              {
+                id: 'ua-a',
+                label: 'City-time-window — aggregate metrics per switchback window and compare treatment windows to control windows',
+                scoreValue: 2,
+                rationale: 'Correct. The randomized unit is the city-time window, so analysis must aggregate to that level (with care for autocorrelation across adjacent windows). This yields a valid marketplace-level treatment effect.',
+              },
+              {
+                id: 'ua-b',
+                label: 'Trip — analyze each trip independently by which algorithm was active',
+                scoreValue: 1,
+                rationale: 'Trips can be labeled by active algorithm, but trips within a window are correlated and not independent. Without aggregating to the window (or modeling the correlation), trip-level standard errors are too small. Acceptable only with proper clustering.',
+              },
+              {
+                id: 'ua-c',
+                label: 'Rider — compute per-rider wait time and compare arms',
+                scoreValue: 0,
+                rationale: 'There are no clean rider arms in a switchback; riders experience whichever algorithm is active when they request. Rider-arm analysis re-imports the invalid rider-level framing.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'metrics',
+        label: 'Metrics',
+        hint: 'What will you measure?',
+        fields: [
+          {
+            id: 'primaryMetric',
+            label: 'What is the primary metric?',
+            type: 'single_select',
+            conceptLinks: ['primary-metric'],
+            options: [
+              {
+                id: 'pm-a',
+                label: 'Completed trips per available driver-hour at the city-time-window level (marketplace throughput)',
+                scoreValue: 2,
+                rationale: 'Correct. Normalizing completed trips by available supply captures genuine throughput improvement rather than a reshuffling of a fixed number of trips. It is the marketplace-level outcome that distinguishes a real gain from a zero-sum artifact.',
+              },
+              {
+                id: 'pm-b',
+                label: 'Average rider wait time per window',
+                scoreValue: 1,
+                rationale: 'A strong secondary and intuitive, but wait time alone can improve while throughput is flat (e.g. by suppressing demand through higher prices). Throughput-per-supply is the more complete primary; wait time supports it.',
+              },
+              {
+                id: 'pm-c',
+                label: 'Surge multiplier applied',
+                scoreValue: 0,
+                rationale: 'An input/mechanism metric, not an outcome. The algorithm sets the multiplier; that is not evidence the marketplace got better.',
+              },
+              {
+                id: 'pm-d',
+                label: 'Rider-facing price per trip',
+                scoreValue: 0,
+                rationale: 'Price is a lever, not the goal. Lower or higher price is only good or bad via its effect on throughput, waits, and earnings. Wrong primary.',
+              },
+            ],
+          },
+          {
+            id: 'guardrailMetrics',
+            label: 'Which metrics should be guardrails?',
+            type: 'multi_select',
+            conceptLinks: ['guardrail-metric'],
+            options: [
+              {
+                id: 'gm-a',
+                label: 'Driver earnings per online hour',
+                scoreValue: 2,
+                rationale: 'Essential two-sided guardrail. A throughput gain that comes by squeezing driver pay is unsustainable — drivers leave, supply shrinks, the marketplace worsens. Blocking guardrail.',
+              },
+              {
+                id: 'gm-b',
+                label: 'Rider cancellation rate (and rider-facing price)',
+                scoreValue: 2,
+                rationale: 'Important guardrail. If the new algorithm posts higher prices that drive cancellations, apparent wait-time gains are just suppressed demand. Watch cancellations and price together.',
+              },
+              {
+                id: 'gm-c',
+                label: 'Driver idle / utilization rate',
+                scoreValue: 1,
+                rationale: 'Useful supply-health guardrail — if drivers sit idle more, the marketplace is mismatching supply and demand even if completed trips look okay. Reasonable to monitor.',
+              },
+              {
+                id: 'gm-d',
+                label: 'Surge multiplier magnitude',
+                scoreValue: 0,
+                rationale: 'The multiplier is the lever, not a guardrail outcome. Its level is only meaningful through downstream effects already captured by other guardrails.',
+              },
+            ],
+          },
+          {
+            id: 'diagnosticMetrics',
+            label: 'Which metrics should be tracked as diagnostics?',
+            type: 'multi_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'dm-a',
+                label: 'Effect by demand regime (rush-hour vs off-peak windows)',
+                scoreValue: 2,
+                rationale: 'Critical diagnostic. A surge algorithm should matter most under supply strain. Breaking the effect out by demand regime tells you whether the gain is real and concentrated where it should be — and informs a partial rollout.',
+              },
+              {
+                id: 'dm-b',
+                label: 'Driver repositioning / acceptance behavior under the new algorithm',
+                scoreValue: 1,
+                rationale: 'Good mechanism diagnostic — does the new pricing actually move drivers to where demand is? Explains why throughput moves or not.',
+              },
+              {
+                id: 'dm-c',
+                label: 'Price elasticity (how demand responds to the new surge levels)',
+                scoreValue: 1,
+                rationale: 'Useful for interpreting whether wait-time changes come from better matching versus demand suppression.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'logistics',
+        label: 'Logistics',
+        hint: 'How long, how large, how attributed in a switchback?',
+        fields: [
+          {
+            id: 'runtime',
+            label: 'How long should this experiment run, and how should windows be structured?',
+            type: 'single_select',
+            conceptLinks: ['power', 'mde', 'novelty-effect'],
+            options: [
+              {
+                id: 'rt-a',
+                label: 'Multiple weeks, with switchback windows short enough to balance time-of-day/day-of-week across arms but long enough for the marketplace to reach equilibrium after each toggle',
+                scoreValue: 2,
+                rationale: 'Correct, and the tension is the substance. Windows must be short enough that both algorithms get equal exposure to rush hours, weekends, and weather, so those confounders balance — but long enough that the marketplace settles after each switch (supply does not reposition instantly). Several weeks gives enough windows for power.',
+              },
+              {
+                id: 'rt-b',
+                label: 'One week with daily alternation',
+                scoreValue: 1,
+                rationale: 'Daily alternation risks confounding the algorithm with day-of-week (e.g. new algorithm always on weekends), and one week yields few windows for power. Better than a rider A/B, but the window scheme and duration need more care.',
+              },
+              {
+                id: 'rt-c',
+                label: 'A few days, toggling each hour',
+                scoreValue: 0,
+                rationale: 'Hourly toggling does not let the marketplace re-equilibrate after each switch (carryover contaminates the next window), and a few days cannot span the weekly demand cycle. Underpowered and biased by carryover.',
+              },
+              {
+                id: 'rt-d',
+                label: 'Run until throughput is significant',
+                scoreValue: 0,
+                rationale: 'Peeking, and especially fraught in a switchback where autocorrelated windows make naive significance unreliable. Pre-commit the window scheme and duration.',
+              },
+            ],
+          },
+          {
+            id: 'attributionWindow',
+            label: 'How should trips be attributed to a treatment condition?',
+            type: 'single_select',
+            conceptLinks: ['right-censoring'],
+            options: [
+              {
+                id: 'aw-a',
+                label: 'Attribute each trip to the algorithm active at request time, and discard or down-weight a short buffer right after each switch to avoid carryover contamination',
+                scoreValue: 2,
+                rationale: 'Correct and sophisticated. Request-time attribution is clean, and excluding a transition buffer after each toggle removes the carryover period where the marketplace is still adjusting from the previous algorithm. This is standard switchback hygiene.',
+              },
+              {
+                id: 'aw-b',
+                label: 'Attribute every trip in a window to that window\'s algorithm with no buffer',
+                scoreValue: 1,
+                rationale: 'Workable but ignores carryover: trips just after a switch are still influenced by the prior algorithm\'s supply state, biasing the early part of each window. A buffer is better.',
+              },
+              {
+                id: 'aw-c',
+                label: 'Attribute trips to the algorithm active when the trip completes',
+                scoreValue: 0,
+                rationale: 'Completion time can fall in a different window than the request/dispatch decision that the algorithm actually drove. Misattributes the causal moment.',
+              },
+            ],
+          },
+          {
+            id: 'sampleSizeConcern',
+            label: 'What is the main power concern?',
+            type: 'single_select',
+            conceptLinks: ['power', 'mde'],
+            options: [
+              {
+                id: 'ss-a',
+                label: 'The effective sample size is the number of independent switchback windows, not the number of trips — and adjacent windows are autocorrelated, so naive trip counts massively overstate power',
+                scoreValue: 2,
+                rationale: 'Exactly right. Like cluster designs, switchbacks have far fewer independent units (windows) than raw events (trips), and temporal autocorrelation further reduces effective N. Power must be computed on windows, accounting for autocorrelation — possibly across multiple cities to gain units.',
+              },
+              {
+                id: 'ss-b',
+                label: 'No concern — a busy marketplace logs millions of trips',
+                scoreValue: 0,
+                rationale: 'Trip counts are not the unit of inference. Millions of trips can sit inside a few dozen correlated windows. This is the marketplace version of the "we have plenty of data" trap.',
+              },
+              {
+                id: 'ss-c',
+                label: 'The concern is that treatment and control riders have different baselines',
+                scoreValue: 0,
+                rationale: 'There are no rider arms in a switchback; each window\'s market sees one algorithm. Baseline rider differences are not the issue — window count and autocorrelation are.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'risks',
+        label: 'Risks & Decision Rule',
+        hint: 'What could invalidate this, and what will you do with the result?',
+        fields: [
+          {
+            id: 'trustChecks',
+            label: 'Which trust checks should you run?',
+            type: 'multi_select',
+            conceptLinks: ['srm'],
+            options: [
+              {
+                id: 'tc-a',
+                label: 'Verify time-of-day, day-of-week, and weather/event exposure are balanced across treatment and control windows',
+                scoreValue: 2,
+                rationale: 'The switchback analogue of an SRM/balance check. The whole validity of a switchback rests on confounding time-varying factors being balanced across the two conditions. If the new algorithm disproportionately ran during rush hours or a festival, the comparison is confounded.',
+              },
+              {
+                id: 'tc-b',
+                label: 'Confirm the algorithm actually toggled when intended (the active algorithm matches the assigned schedule each window)',
+                scoreValue: 2,
+                rationale: 'Essential implementation check. If toggles failed or lagged, windows are mislabeled and the effect is biased toward null. Verify the realized schedule against the planned one.',
+              },
+              {
+                id: 'tc-c',
+                label: 'Check for carryover by comparing early-window vs late-window outcomes after each switch',
+                scoreValue: 2,
+                rationale: 'Specific and important. If outcomes right after a switch differ systematically from later in the window, carryover is present and the buffer needs widening. This validates the attribution scheme.',
+              },
+              {
+                id: 'tc-d',
+                label: 'Confirm completed trips exceed last month\'s level in both conditions',
+                scoreValue: 0,
+                rationale: 'A comparison to history confounds the test with seasonality and is not a trust check. Validate the design mechanism, not the outcome level.',
+              },
+            ],
+          },
+          {
+            id: 'validityRisks',
+            label: 'What are the main validity risks?',
+            type: 'multi_select',
+            conceptLinks: ['sutva', 'novelty-effect'],
+            options: [
+              {
+                id: 'vr-a',
+                label: 'Interference / SUTVA via shared supply if any rider-level split remains',
+                scoreValue: 2,
+                rationale: 'The defining risk and the reason for the whole design. Any residual rider-level splitting re-introduces cross-arm contention. The switchback exists to eliminate it; verify none crept back in.',
+              },
+              {
+                id: 'vr-b',
+                label: 'Carryover between adjacent windows (supply state from the previous algorithm bleeds into the next window)',
+                scoreValue: 2,
+                rationale: 'Real and specific to switchbacks. Drivers repositioned under the old algorithm are still where they are when the new window starts. Without a buffer and adequate window length, carryover biases the estimate.',
+              },
+              {
+                id: 'vr-c',
+                label: 'Time-varying confounding if windows do not balance the demand cycle',
+                scoreValue: 2,
+                rationale: 'A switchback is only valid if confounding time factors balance across conditions. Poor window scheduling (algorithm correlated with rush hour or weekend) is a direct validity threat.',
+              },
+              {
+                id: 'vr-d',
+                label: 'Hawthorne effect — drivers behave differently knowing they are tested',
+                scoreValue: 0,
+                rationale: 'Drivers are not told which algorithm is active; the toggle is invisible to them. Not a meaningful threat.',
+              },
+            ],
+          },
+          {
+            id: 'decisionRule',
+            label: 'What is the pre-committed decision rule?',
+            type: 'single_select',
+            conceptLinks: ['p-value', 'guardrail-metric'],
+            options: [
+              {
+                id: 'dr-a',
+                label: 'Ship if city-time-level throughput (completed trips per driver-hour) is significantly positive under window-level analysis AND driver earnings per hour and rider cancellation rate are not significantly worse. If gains concentrate only in high-demand windows, consider rolling out the algorithm only during those regimes.',
+                scoreValue: 2,
+                rationale: 'Correct and staff-level. It analyzes at the right unit, treats both the driver-side and rider-side guardrails as blocking, and pre-commits a partial-rollout contingency (surge-only/high-demand windows) that matches where a surge algorithm should help. That regime-targeting clause is the mark of marketplace fluency.',
+              },
+              {
+                id: 'dr-b',
+                label: 'Ship if treatment riders waited less than control riders.',
+                scoreValue: 0,
+                rationale: 'Re-imports the invalid rider-arm comparison the switchback was built to avoid, and ignores throughput and driver guardrails. The failure mode.',
+              },
+              {
+                id: 'dr-c',
+                label: 'Ship if the new algorithm sets lower average prices.',
+                scoreValue: 0,
+                rationale: 'Lower price is a lever, not a success criterion — it could come with longer waits, fewer trips, and lower driver earnings. Wrong basis for the decision.',
+              },
+              {
+                id: 'dr-d',
+                label: 'Ship if throughput improves at the window level and driver earnings are acceptable, reviewing cancellations contextually.',
+                scoreValue: 1,
+                rationale: 'Right unit and one real guardrail, but "reviewing cancellations contextually" weakens a key rider-side guardrail, and it omits the regime-targeting contingency. Partial credit.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+
+    scoringRubric: {
+      dimensions: [
+        { id: 'metric_selection', label: 'Metric selection', weight: 0.20, fieldIds: ['primaryMetric', 'guardrailMetrics'] },
+        { id: 'design_validity', label: 'Design validity', weight: 0.50, fieldIds: ['randomizationUnit', 'unitOfAnalysis', 'trustChecks', 'validityRisks'] },
+        { id: 'decision_discipline', label: 'Decision discipline', weight: 0.15, fieldIds: ['decisionRule', 'sampleSizeConcern'] },
+        { id: 'hypothesis_framing', label: 'Hypothesis framing', weight: 0.15, fieldIds: ['hypothesis', 'businessDecision'] },
+      ],
+      levels: {
+        incomplete:    { minScore: 0,    label: 'Incomplete' },
+        analyst_ready: { minScore: 0.45, label: 'Analyst-Ready' },
+        senior_ready:  { minScore: 0.68, label: 'Senior-Ready' },
+        staff_level:   { minScore: 0.85, label: 'Staff-Level' },
+      },
+    },
+
+    seniorDesign: {
+      rationale: 'This is the canonical two-sided-marketplace interference problem. The instinct — split riders 50/50 and compare wait times — is structurally invalid, because all riders in a city draw from one shared pool of drivers. A more responsive algorithm applied to treatment riders pulls drivers toward them, which makes control riders wait longer. The two arms are not independent; each arm\'s outcome depends on the other\'s assignment. That is a textbook SUTVA violation, and it often produces a flattering but meaningless zero-sum result: treatment "wins" only because it took supply from control.\n\nBecause you cannot partition shared supply, you must apply one algorithm to the whole market at a time and compare across time. The switchback design — toggling a city between old and new algorithm in alternating, randomly ordered time windows — does exactly this. Each city becomes its own control across time, which is far more powerful than the alternative of assigning whole cities (only ~40 heterogeneous units, poorly balanced). The trade is that switchbacks bring their own subtleties: windows must balance the demand cycle (so the algorithm is not confounded with rush hour or weekends), the marketplace needs time to re-equilibrate after each toggle (carryover), and you should discard a buffer right after each switch.\n\nAnalysis and power follow the design. The unit of inference is the city-time window, not the trip; adjacent windows are autocorrelated, so effective sample size is the number of (roughly independent) windows, not the millions of trips. Power must be computed accordingly, often pooling several cities to gain windows.\n\nThe metric and guardrail set must be two-sided. Throughput per driver-hour is the primary because it distinguishes a real gain from reshuffled supply; driver earnings per hour and rider cancellations are blocking guardrails because a marketplace win that bleeds either side is illusory. The decision rule should also pre-commit a regime-targeted contingency: if the algorithm only helps in high-demand windows, roll it out there. Naming that before the data is what separates marketplace-literate design from a generic A/B mindset.',
+      commonMistakes: [
+        {
+          mistake: 'Running a standard rider-level 50/50 A/B test on a shared-supply marketplace',
+          consequence: 'Treatment and control riders compete for the same drivers. The algorithm shifts supply between arms, so the measured "win" is partly or wholly a zero-sum transfer, not a real throughput gain. You ship on a contaminated, possibly fictional effect.',
+          conceptLink: 'sutva',
+        },
+        {
+          mistake: 'Counting trips as the sample size in a switchback',
+          consequence: 'The independent unit is the time window, and adjacent windows are autocorrelated. Trip-level analysis deflates standard errors and manufactures significance from temporal structure.',
+          conceptLink: 'unit-of-analysis',
+        },
+        {
+          mistake: 'Ignoring carryover and demand-cycle balance when scheduling windows',
+          consequence: 'Supply repositioned under the prior algorithm bleeds into the next window, and an unbalanced schedule confounds the algorithm with rush hour or weekends. Both bias the estimate even though the design "looks" like a clean switchback.',
+          conceptLink: 'novelty-effect',
+        },
+      ],
+      failureMode: {
+        weakAnswer: 'The candidate runs a rider-level 50/50 test in three cities, compares average wait time between treatment and control riders, sees treatment waits drop, and recommends rollout. They never recognize that the new algorithm reduced treatment waits by diverting drivers away from control riders, never move to a switchback, and report a zero-sum artifact as a marketplace win.',
+        interviewerFollowUp: '"Treatment riders\' wait times dropped and control riders\' wait times rose by almost the same amount. Total completed trips in the city barely changed. Walk me through what your algorithm actually did to the shared driver pool — and tell me why a rider-level A/B can never answer whether marketplace throughput improved."',
+      },
+    },
+
+    pairedScenarioPrompt: {
+      toReview: 'You designed a switchback to contain the shared-supply effect. Now read what happens when a team runs the naive rider A/B.',
+      fromReview: 'You saw the zero-sum artifact a rider A/B produces. Go back and design a test that respects shared supply.',
+    },
+  },
+
+  // ─────────────────────────────────────────────
+  // D14 — Design the UPI Autopay Test (BETA · Staff)
+  // Core trap: triggered (exposure-based) analysis + ratio-metric dilution and variance
+  // ─────────────────────────────────────────────
+  {
+    id: 'd14-triggered-ratio-metric',
+    title: 'Design the UPI Autopay Test',
+    subtitle: 'Paywave wants to test a UPI Autopay nudge that only a fraction of users ever see. Decide who counts as exposed before the dilution buries the effect.',
+    isFree: false,
+    difficulty: 'staff',
+    industry: 'fintech',
+    scenarioFamily: 'triggered_analysis',
+
+    context: {
+      company: 'Paywave',
+      product: 'Consumer payments and bill-pay app in India, ~22M MAU, users pay recurring bills (electricity, mobile, DTH, rent) manually each month',
+      team: 'Recurring Payments team',
+      background: 'Paywave built a nudge that offers to set up UPI Autopay (a standing mandate) at the moment a user is about to complete a recurring bill payment. The hypothesis: removing the monthly manual step increases on-time payments and retention. The catch is exposure: the nudge only appears to users who actually reach the bill-payment confirmation screen for an eligible biller during the test. Most of the 22M MAU never trigger it in a given window. The default analysis plan compares all assigned treatment users to all assigned control users.',
+      featureProposal: 'Show an Autopay setup nudge at the bill-payment confirmation step for eligible billers. Control: no nudge. Treatment: nudge shown. Hypothesis: Autopay adoption increases on-time recurring payments and user retention.',
+      businessPressure: 'Recurring payments is the strategic wedge for the year — Autopay users are far stickier. Leadership wants a clean causal read on the nudge\'s impact, and the PM has set up a standard all-users 50/50 assignment with "Autopay setup rate" as the headline number.',
+      constraints: [
+        '~22M MAU, but only ~12% reach an eligible bill-payment confirmation screen in a typical 4-week window',
+        'Whether a user triggers the nudge depends on their own billing cycle, which is unaffected by assignment',
+        'Metrics are logged at user level; trigger events (reaching the confirmation screen) are individually timestamped for both arms',
+        'On-time payment and retention are tracked at the user level over 30-90 days',
+      ],
+    },
+
+    designPhases: [
+      {
+        id: 'framing',
+        label: 'Framing',
+        hint: 'What are you testing, and why does exposure make measurement tricky?',
+        fields: [
+          {
+            id: 'businessDecision',
+            label: 'What business decision will this experiment inform?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'bd-a',
+                label: 'Whether to roll out the Autopay nudge to all eligible bill-payment flows',
+                scoreValue: 2,
+                rationale: 'Correct. Binary, specific, ship/no-ship on the nudge.',
+              },
+              {
+                id: 'bd-b',
+                label: 'Whether Autopay is a good product',
+                scoreValue: 0,
+                rationale: 'Autopay already exists; the test is about the nudge that drives adoption, not whether Autopay itself is worthwhile.',
+              },
+              {
+                id: 'bd-c',
+                label: 'How many users will adopt Autopay overall',
+                scoreValue: 1,
+                rationale: 'Adoption is an output the test estimates, but the decision is the binary rollout. Framing it as a forecast understates the ship/no-ship call.',
+              },
+              {
+                id: 'bd-d',
+                label: 'Whether recurring payments should be the strategic focus this year',
+                scoreValue: 0,
+                rationale: 'A strategy question already settled by leadership. The experiment evaluates one nudge, not the strategy.',
+              },
+            ],
+          },
+          {
+            id: 'hypothesis',
+            label: 'Select the strongest hypothesis',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'hyp-a',
+                label: 'Among users who reach an eligible bill-payment confirmation screen, the Autopay nudge increases Autopay adoption and, downstream, on-time payments and 90-day retention.',
+                scoreValue: 2,
+                rationale: 'Strong. It scopes the effect to the exposed population (users who reach the confirmation screen), which is the only population the nudge can affect, and chains adoption to the business outcomes. This framing is what makes a triggered analysis valid.',
+              },
+              {
+                id: 'hyp-b',
+                label: 'The Autopay nudge increases retention across all users.',
+                scoreValue: 0,
+                rationale: 'Across all users, the effect is diluted by the ~88% who never see the nudge and cannot be affected by it. The hypothesis sets up a comparison guaranteed to look near-zero regardless of how well the nudge works.',
+              },
+              {
+                id: 'hyp-c',
+                label: 'Showing an Autopay nudge will make users pay bills more reliably.',
+                scoreValue: 1,
+                rationale: 'Directionally fine and measurable, but it does not specify the exposed population, so it invites the dilution trap when operationalized.',
+              },
+              {
+                id: 'hyp-d',
+                label: 'Autopay setup rate will be higher in treatment than control.',
+                scoreValue: 1,
+                rationale: 'True and easy to measure, but setup rate is an adoption proxy. The business case rests on on-time payments and retention; a hypothesis that stops at setup is incomplete.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'setup',
+        label: 'Setup',
+        hint: 'Who gets treated, and who counts as exposed?',
+        fields: [
+          {
+            id: 'eligiblePopulation',
+            label: 'Who should be in the analysis population? (Central decision.)',
+            type: 'single_select',
+            conceptLinks: ['triggered-analysis'],
+            options: [
+              {
+                id: 'ep-a',
+                label: 'Triggered users only — those who reached an eligible bill-payment confirmation screen during the test (the point at which the nudge would fire), in both arms',
+                scoreValue: 2,
+                rationale: 'Correct. This is the essence of triggered (exposure-based) analysis. The nudge can only affect users who reach the confirmation screen, so the valid comparison is treatment-triggered vs control-would-have-triggered. Including the ~88% who never trigger only dilutes the effect with users who could not be touched. Crucially, the trigger is defined identically in both arms to preserve randomization.',
+              },
+              {
+                id: 'ep-b',
+                label: 'All assigned users, treatment vs control (intent-to-treat over the whole base)',
+                scoreValue: 1,
+                rationale: 'A pure ITT over all 22M is unbiased but badly diluted — the headline effect will be ~12% the size of the true effect on the exposed, likely drowning it in noise. ITT has its place, but here it answers a question (whole-base impact of assignment) that obscures whether the nudge works. Triggered analysis is the right lens for the ship decision.',
+              },
+              {
+                id: 'ep-c',
+                label: 'Treatment users who adopted Autopay, compared to all control users',
+                scoreValue: 0,
+                rationale: 'Conditioning the treatment arm on adoption is post-treatment selection — adopters are self-selected to be reliable payers. Comparing them to all controls compares non-comparable groups and grossly overstates the effect. The classic triggered-analysis mistake.',
+              },
+              {
+                id: 'ep-d',
+                label: 'Treatment users who saw the nudge, compared to control users matched on similar billing behavior',
+                scoreValue: 1,
+                rationale: 'The instinct to find the comparable control group is right, but ad hoc matching is fragile. The clean approach is to log the trigger condition in control too (users who reached the same screen) and compare the randomized triggered subsets — no matching needed because randomization already balances them.',
+              },
+            ],
+          },
+          {
+            id: 'randomizationUnit',
+            label: 'What should be the randomization unit?',
+            type: 'single_select',
+            conceptLinks: ['randomization-unit'],
+            options: [
+              {
+                id: 'ru-a',
+                label: 'User, assigned at enrollment, with the nudge firing only when an assigned treatment user later triggers',
+                scoreValue: 2,
+                rationale: 'Correct. Assign at the user level up front so the trigger event itself is post-randomization and balanced across arms; the nudge then fires for treatment users who reach the screen. This separates assignment (randomized) from exposure (triggered) cleanly.',
+              },
+              {
+                id: 'ru-b',
+                label: 'Bill-payment session',
+                scoreValue: 0,
+                rationale: 'A user pays many bills; session-level assignment would flip their nudge experience and Autopay state across sessions, which is incoherent for a standing-mandate feature.',
+              },
+              {
+                id: 'ru-c',
+                label: 'Biller (assign each biller category to a treatment)',
+                scoreValue: 0,
+                rationale: 'Billers are not the decision unit and there are few of them; this confounds the nudge with biller-category differences and gives almost no independent units.',
+              },
+              {
+                id: 'ru-d',
+                label: 'Assign only at the moment of trigger (randomize users when they reach the screen)',
+                scoreValue: 1,
+                rationale: 'Trigger-time randomization is a legitimate alternative that automatically restricts to the exposed population, but it forfeits the ability to measure pre-trigger balance and makes ITT impossible. Up-front assignment with logged triggers is more flexible. Defensible, not optimal.',
+              },
+            ],
+          },
+          {
+            id: 'unitOfAnalysis',
+            label: 'What is the unit of analysis?',
+            type: 'single_select',
+            conceptLinks: ['unit-of-analysis'],
+            options: [
+              {
+                id: 'ua-a',
+                label: 'User (within the triggered population) — per-user adoption, on-time-payment, and retention metrics',
+                scoreValue: 2,
+                rationale: 'Correct. Matches user-level randomization and the triggered scoping. Per-user metrics over the exposed population give a valid, interpretable effect.',
+              },
+              {
+                id: 'ua-b',
+                label: 'Payment — on-time rate computed as on-time payments / total payments across the arm',
+                scoreValue: 1,
+                rationale: 'This is a ratio metric where the denominator (number of payments) can itself be affected by treatment — Autopay changes how many manual payments occur. A pooled payment-level ratio mixes correlated payments and a shifting denominator; per-user aggregation with delta-method (or bootstrap) variance is safer.',
+              },
+              {
+                id: 'ua-c',
+                label: 'Biller-payment — analyze each biller-payment combination',
+                scoreValue: 0,
+                rationale: 'Deeply correlated within users and billers, and conditions on payment occurrence. Wrong unit.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'metrics',
+        label: 'Metrics',
+        hint: 'Ratio metrics and denominators need care here.',
+        fields: [
+          {
+            id: 'primaryMetric',
+            label: 'What is the primary metric?',
+            type: 'single_select',
+            conceptLinks: ['primary-metric'],
+            options: [
+              {
+                id: 'pm-a',
+                label: 'On-time recurring-payment rate per triggered user over 90 days (the downstream business outcome among the exposed)',
+                scoreValue: 2,
+                rationale: 'Best primary. It is the business outcome the strategy cares about, scoped to the exposed population, and computed per user so the ratio is well-defined. It captures whether the nudge actually improves payment reliability, not just adoption.',
+              },
+              {
+                id: 'pm-b',
+                label: 'Autopay setup rate among triggered users',
+                scoreValue: 1,
+                rationale: 'A strong, clean adoption metric and a good secondary — but adoption is a means to the end. A nudge could lift setup while net payment reliability or retention is flat if the wrong users adopt. Reasonable as a co-primary or leading indicator, not the sole arbiter.',
+              },
+              {
+                id: 'pm-c',
+                label: 'Autopay setup rate across all assigned users',
+                scoreValue: 0,
+                rationale: 'Computing the rate over all 22M assigned users dilutes the effect by the ~88% who never triggered. The denominator is wrong; the metric will look tiny regardless of the nudge\'s true effect.',
+              },
+              {
+                id: 'pm-d',
+                label: 'Total payment volume processed',
+                scoreValue: 0,
+                rationale: 'Too diffuse and dominated by factors unrelated to the nudge. Not sensitive to a confirmation-screen nudge.',
+              },
+            ],
+          },
+          {
+            id: 'guardrailMetrics',
+            label: 'Which metrics should be guardrails?',
+            type: 'multi_select',
+            conceptLinks: ['guardrail-metric'],
+            options: [
+              {
+                id: 'gm-a',
+                label: 'Autopay cancellation / mandate-revocation rate after setup',
+                scoreValue: 2,
+                rationale: 'Critical guardrail. A pushy nudge can drive setups that users immediately regret and revoke — or worse, that cause failed debits and distrust. High post-setup cancellation means the adoption was hollow. Blocking.',
+              },
+              {
+                id: 'gm-b',
+                label: 'Bill-payment completion rate at the confirmation step (did the nudge add friction that caused users to abandon the payment they came to make?)',
+                scoreValue: 2,
+                rationale: 'Essential. The nudge interrupts a payment the user already intended to complete. If it causes drop-off at confirmation, it harms the core flow regardless of Autopay gains. Direct guardrail on the surface where the nudge lives.',
+              },
+              {
+                id: 'gm-c',
+                label: 'Failed-debit / NACH-bounce rate among new Autopay mandates',
+                scoreValue: 1,
+                rationale: 'Worth monitoring — Autopay mandates that bounce due to insufficient balance create fees and frustration. A real downside of over-aggressive adoption, though somewhat lagging.',
+              },
+              {
+                id: 'gm-d',
+                label: 'Number of nudges shown',
+                scoreValue: 0,
+                rationale: 'An exposure/diagnostic count, not a guardrail outcome. It cannot breach harmfully on its own.',
+              },
+            ],
+          },
+          {
+            id: 'diagnosticMetrics',
+            label: 'Which metrics should be tracked as diagnostics?',
+            type: 'multi_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'dm-a',
+                label: 'Trigger rate by arm (share of assigned users who reached the confirmation screen)',
+                scoreValue: 2,
+                rationale: 'Essential diagnostic and a trust check in disguise. Trigger rate must be equal across arms — if treatment users trigger at a different rate, exposure is not independent of assignment and the triggered comparison is biased. Always verify.',
+              },
+              {
+                id: 'dm-b',
+                label: 'Nudge acceptance rate (share of shown nudges that led to a setup attempt)',
+                scoreValue: 1,
+                rationale: 'Good mechanism diagnostic for nudge quality and where users drop in the setup funnel.',
+              },
+              {
+                id: 'dm-c',
+                label: 'Effect on ITT (all-users) basis, reported alongside the triggered estimate',
+                scoreValue: 1,
+                rationale: 'Useful to report both: the triggered effect answers "does the nudge work?" and the ITT effect answers "what is the whole-base impact of rolling it out?" Showing both is honest and informative.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'logistics',
+        label: 'Logistics',
+        hint: 'How long, how large, how attributed?',
+        fields: [
+          {
+            id: 'runtime',
+            label: 'How long should this experiment run?',
+            type: 'single_select',
+            conceptLinks: ['power', 'right-censoring'],
+            options: [
+              {
+                id: 'rt-a',
+                label: 'Long enough for a representative share of users to hit their billing cycle and trigger, plus the 90-day outcome window for the early cohort — likely 8-12 weeks',
+                scoreValue: 2,
+                rationale: 'Correct. Triggering depends on each user\'s monthly billing cycle, so a short window captures few triggers and a non-representative slice of billers. And the primary is a 90-day on-time-payment rate, so the test must run long enough for the early triggered cohort to mature. Both forces push to ~8-12 weeks.',
+              },
+              {
+                id: 'rt-b',
+                label: '1 week',
+                scoreValue: 0,
+                rationale: 'One week captures only the small fraction of users whose bill happens to fall that week, and cannot observe 90-day outcomes. Severely underpowered on the exposed population and unable to measure the primary.',
+              },
+              {
+                id: 'rt-c',
+                label: '4 weeks',
+                scoreValue: 1,
+                rationale: 'A 4-week window captures roughly one billing cycle for most users (good for trigger coverage) but cannot observe the 90-day primary for anyone. Acceptable only if the primary is redefined to a shorter horizon, which weakens it.',
+              },
+              {
+                id: 'rt-d',
+                label: 'Run until Autopay setup rate is significant',
+                scoreValue: 0,
+                rationale: 'Peeking, and it stops on the leading adoption metric before downstream payment/retention outcomes mature.',
+              },
+            ],
+          },
+          {
+            id: 'attributionWindow',
+            label: 'What attribution window applies to the primary metric?',
+            type: 'single_select',
+            conceptLinks: ['right-censoring'],
+            options: [
+              {
+                id: 'aw-a',
+                label: '90 days from each user\'s first trigger (exposure) date',
+                scoreValue: 2,
+                rationale: 'Correct. Anchoring the outcome window to first exposure gives every triggered user an equal observation period and aligns measurement with when the nudge could first act. Avoids right-censoring bias from anchoring to enrollment.',
+              },
+              {
+                id: 'aw-b',
+                label: '90 days from enrollment, regardless of when the user triggered',
+                scoreValue: 0,
+                rationale: 'A user who triggers in week 8 has only weeks of post-exposure observation if you anchor to enrollment — right-censoring that biases their outcome. Anchor to exposure.',
+              },
+              {
+                id: 'aw-c',
+                label: '30 days from trigger',
+                scoreValue: 1,
+                rationale: 'A shorter post-exposure window is cleaner to observe but captures only the first recurring cycle or two; on-time-payment habit and retention need a longer horizon. Acceptable as a faster secondary read.',
+              },
+            ],
+          },
+          {
+            id: 'sampleSizeConcern',
+            label: 'What is the main power concern?',
+            type: 'single_select',
+            conceptLinks: ['power', 'mde'],
+            options: [
+              {
+                id: 'ss-a',
+                label: 'Power should be computed on the triggered (exposed) population, not all 22M — and the ratio primary is high-variance, so the effective sample and MDE are governed by the number of triggered users and the ratio metric\'s variance',
+                scoreValue: 2,
+                rationale: 'Exactly right, and it ties the two themes together. Only ~12% trigger, so the inferential N is the triggered count, not the MAU. And an on-time-payment ratio per user is noisier than a simple binary, so its MDE is larger. Power the triggered analysis on the right denominator and the right variance — and consider variance reduction (CUPED on pre-period payment reliability).',
+              },
+              {
+                id: 'ss-b',
+                label: 'No concern — 22M MAU guarantees power',
+                scoreValue: 0,
+                rationale: 'The headline trap. Only the triggered ~12% carry information about the nudge; the other 88% add only dilution. Counting all 22M overstates power enormously.',
+              },
+              {
+                id: 'ss-c',
+                label: 'The concern is that treatment users trigger more often, giving them more exposure',
+                scoreValue: 1,
+                rationale: 'A real and important point — differential triggering would bias the analysis — but it is a validity/trust issue (verified via equal trigger rates), not the primary power concern, which is the size and variance of the triggered population.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'risks',
+        label: 'Risks & Decision Rule',
+        hint: 'What could invalidate this, and what will you do with the result?',
+        fields: [
+          {
+            id: 'trustChecks',
+            label: 'Which trust checks should you run?',
+            type: 'multi_select',
+            conceptLinks: ['srm', 'triggered-analysis'],
+            options: [
+              {
+                id: 'tc-a',
+                label: 'SRM check on overall assignment, and a trigger-rate equality check (treatment and control trigger at the same rate)',
+                scoreValue: 2,
+                rationale: 'Both are essential, and the trigger-rate check is the one unique to triggered analysis. If treatment users reach the confirmation screen at a different rate than control (e.g. the nudge code subtly changes navigation), the triggered subsets are no longer comparable and the analysis is biased. This is the SRM of exposure.',
+              },
+              {
+                id: 'tc-b',
+                label: 'Verify the trigger condition is logged identically in control — control users who reached the screen are flagged even though no nudge was shown',
+                scoreValue: 2,
+                rationale: 'The foundational requirement for valid triggered analysis. You can only compare exposed-treatment to would-be-exposed-control if you log the would-be-exposure in control. Without it, you have no comparable control group and are tempted into post-treatment conditioning.',
+              },
+              {
+                id: 'tc-c',
+                label: 'Confirm pre-trigger billing behavior is balanced between the triggered subsets',
+                scoreValue: 1,
+                rationale: 'Good check. Since the trigger is post-randomization, verify it did not induce imbalance — the triggered treatment and triggered control users should look similar on pre-period payment behavior.',
+              },
+              {
+                id: 'tc-d',
+                label: 'Confirm Autopay setup rate exceeds last quarter in treatment',
+                scoreValue: 0,
+                rationale: 'A historical comparison is not a trust check and confounds with seasonality. Validate the exposure mechanism, not the level versus history.',
+              },
+            ],
+          },
+          {
+            id: 'validityRisks',
+            label: 'What are the main validity risks?',
+            type: 'multi_select',
+            conceptLinks: ['triggered-analysis'],
+            options: [
+              {
+                id: 'vr-a',
+                label: 'Dilution — analyzing all assigned users buries a real effect under the 88% who never trigger',
+                scoreValue: 2,
+                rationale: 'The headline risk. A genuinely effective nudge can look like a null on an all-users basis simply because most of the base could never be affected. Triggered scoping is the fix.',
+              },
+              {
+                id: 'vr-b',
+                label: 'Differential triggering — if assignment changes who reaches the confirmation screen, the triggered subsets are no longer comparable',
+                scoreValue: 2,
+                rationale: 'A subtle but serious threat unique to triggered designs. If the treatment code path alters navigation or load and changes who triggers, exposure becomes correlated with assignment and the comparison is biased. Verify equal trigger rates.',
+              },
+              {
+                id: 'vr-c',
+                label: 'Post-treatment conditioning — comparing adopters to non-adopters or to all controls',
+                scoreValue: 2,
+                rationale: 'The most common analytical error here. Adopters self-select to be reliable payers; conditioning on adoption (a treatment outcome) destroys the randomized comparison and wildly inflates the apparent effect.',
+              },
+              {
+                id: 'vr-d',
+                label: 'SUTVA violation via users influencing each other\'s Autopay decisions',
+                scoreValue: 0,
+                rationale: 'Autopay setup is an individual decision at a private confirmation screen; no meaningful cross-user interference. Not a real threat.',
+              },
+            ],
+          },
+          {
+            id: 'decisionRule',
+            label: 'What is the pre-committed decision rule?',
+            type: 'single_select',
+            conceptLinks: ['p-value', 'guardrail-metric', 'triggered-analysis'],
+            options: [
+              {
+                id: 'dr-a',
+                label: 'Ship if, among triggered users, the 90-day on-time-payment rate is significantly positive (with equal trigger rates verified) AND bill-payment completion does not drop and Autopay cancellation/failed-debit rates are not significantly worse. Report the ITT (all-users) effect alongside to size the whole-base impact.',
+                scoreValue: 2,
+                rationale: 'Correct and staff-level. It uses the triggered population for the causal read, gates on the exposure trust check (equal trigger rates), treats the in-flow friction and Autopay-quality metrics as blocking guardrails, and reports ITT for honest rollout sizing. It separates "does it work" from "how much does it move the whole base."',
+              },
+              {
+                id: 'dr-b',
+                label: 'Ship if Autopay setup rate among all assigned users is significantly higher.',
+                scoreValue: 0,
+                rationale: 'Wrong denominator (diluted by non-triggered users) and stops at adoption, ignoring downstream outcomes and guardrails. The failure mode.',
+              },
+              {
+                id: 'dr-c',
+                label: 'Ship if users who set up Autopay have higher retention than users who did not.',
+                scoreValue: 0,
+                rationale: 'Pure post-treatment conditioning — adopters are self-selected. This comparison is not causal and overstates the effect.',
+              },
+              {
+                id: 'dr-d',
+                label: 'Ship if the triggered on-time-payment rate improves significantly and setup looks healthy, reviewing completion and cancellations contextually.',
+                scoreValue: 1,
+                rationale: 'Right population and primary, but "reviewing contextually" softens the in-flow friction and cancellation guardrails that genuinely matter, and it omits the trigger-rate trust check and ITT reporting. Partial credit.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+
+    scoringRubric: {
+      dimensions: [
+        { id: 'metric_selection', label: 'Metric selection', weight: 0.25, fieldIds: ['primaryMetric', 'guardrailMetrics'] },
+        { id: 'design_validity', label: 'Design validity', weight: 0.45, fieldIds: ['eligiblePopulation', 'unitOfAnalysis', 'trustChecks', 'validityRisks'] },
+        { id: 'decision_discipline', label: 'Decision discipline', weight: 0.15, fieldIds: ['decisionRule', 'sampleSizeConcern'] },
+        { id: 'hypothesis_framing', label: 'Hypothesis framing', weight: 0.15, fieldIds: ['hypothesis', 'businessDecision'] },
+      ],
+      levels: {
+        incomplete:    { minScore: 0,    label: 'Incomplete' },
+        analyst_ready: { minScore: 0.45, label: 'Analyst-Ready' },
+        senior_ready:  { minScore: 0.68, label: 'Senior-Ready' },
+        staff_level:   { minScore: 0.85, label: 'Staff-Level' },
+      },
+    },
+
+    seniorDesign: {
+      rationale: 'This scenario is about triggered (exposure-based) analysis and the ratio-metric care that comes with it. The nudge can only affect users who reach the bill-payment confirmation screen — about 12% of the base in a given window. The default plan, comparing all assigned treatment to all assigned control, dilutes the true effect by the ~88% who can never be touched, so a genuinely effective nudge can read as a flat line. The fix is to scope the analysis to the triggered population: compare treatment users who were exposed to control users who would have been exposed. That requires logging the trigger condition in control too — flagging control users who reached the same screen even though no nudge appeared. Without that log, you have no comparable control group and you get pushed toward the cardinal sin of triggered analysis: conditioning on a post-treatment outcome (comparing adopters to non-adopters, or adopters to all controls), which compares self-selected reliable payers to everyone and fabricates a huge effect.\n\nThe subtle validity check is trigger-rate equality. Because the trigger is post-randomization, the analysis is only valid if assignment does not change who triggers. If the treatment code path alters navigation or load and shifts the trigger rate, exposure becomes correlated with assignment and the triggered comparison is biased. Treat equal trigger rates as the SRM of exposure.\n\nTwo more things make this staff-level. First, power: the inferential sample is the triggered count, not the 22M MAU, and the primary is a per-user on-time-payment ratio whose variance is higher than a simple binary — so the MDE is governed by triggered N and ratio variance, and variance reduction (CUPED on pre-period reliability) is worth using. Second, the metric stack must reach past adoption: setup rate is a leading indicator, but the business case is on-time payments and retention, and the guardrails must protect the flow the nudge interrupts (completion at confirmation) and the quality of adoption (cancellations, failed debits). The decision rule should report both the triggered effect (does it work?) and the ITT effect (how much does it move the whole base?), because they answer different questions and leadership needs both.',
+      commonMistakes: [
+        {
+          mistake: 'Analyzing all assigned users instead of the triggered population',
+          consequence: 'The ~88% who never reach the confirmation screen dilute the effect toward zero. A nudge that strongly helps the exposed reads as a null, and a good feature gets killed on a denominator mistake.',
+          conceptLink: 'triggered-analysis',
+        },
+        {
+          mistake: 'Conditioning on adoption — comparing Autopay adopters to non-adopters or to all controls',
+          consequence: 'Adopters self-select to be reliable payers. Conditioning on a treatment outcome breaks randomization and inflates the apparent retention lift far beyond the real causal effect.',
+          conceptLink: 'triggered-analysis',
+        },
+        {
+          mistake: 'Not verifying equal trigger rates across arms',
+          consequence: 'If the treatment code path changes who reaches the confirmation screen, exposure is correlated with assignment. The triggered subsets are no longer comparable and the effect is biased in an undetectable direction.',
+          conceptLink: 'srm',
+        },
+      ],
+      failureMode: {
+        weakAnswer: 'The candidate keeps the all-users 50/50 plan, makes Autopay setup rate over the whole base the headline, sees a tiny diluted effect, and then pivots to comparing users who set up Autopay against those who did not — reporting a huge retention gap as the win. They never scope to triggered users, never log the control-side trigger, and never check trigger-rate equality, ending with either a false null or a self-selection artifact.',
+        interviewerFollowUp: '"Your all-users setup-rate effect was +0.4 points and looked like nothing, so you switched to comparing Autopay adopters versus non-adopters and now show a 12-point retention gap. Which of those two numbers is causal, and which is an artifact — and what population should you actually have analyzed to get a real answer?"',
+      },
+    },
+
+    pairedScenarioPrompt: {
+      toReview: 'You scoped the analysis to the triggered population. Now read what happens when a team analyzes the whole base and then conditions on adoption.',
+      fromReview: 'You saw dilution and self-selection wreck the read. Go back and design the test around exposure-based analysis.',
+    },
+  },
+
+  // ─────────────────────────────────────────────
+  // D15 — Design the Streaks Redesign Test (BETA · Senior)
+  // Core trap: novelty (new users spike) vs primacy (existing users disrupted) + test duration
+  // ─────────────────────────────────────────────
+  {
+    id: 'd15-novelty-primacy-duration',
+    title: 'Design the Streaks Redesign Test',
+    subtitle: 'Lumora, a language-learning app, redesigned its daily-streak system. New users will love it on day one; veterans may resent the change. Design a test long enough to tell the difference.',
+    isFree: false,
+    difficulty: 'senior',
+    industry: 'edtech',
+    scenarioFamily: 'novelty_primacy',
+
+    context: {
+      company: 'Lumora',
+      product: 'Consumer language-learning app, ~6M MAU, habit-driven daily practice, monetized via subscriptions, large base of long-tenured daily users',
+      team: 'Engagement & Habits team',
+      background: 'Lumora redesigned its daily-streak system — new visuals, streak freezes, and a revamped reward schedule meant to make the habit loop more compelling. The team expects a big engagement lift. Two opposing forces are in play. New and casual users may show a novelty spike: the redesign is shiny and they engage more at first. Long-tenured daily users, whose habit is built around the old streak mechanics, may be disrupted by the change (a primacy effect) and engage less until they re-learn it — or churn. A short test could read either force as the headline and ship the wrong call.',
+      featureProposal: 'Replace the current daily-streak system with the redesigned one. Control: existing streaks. Treatment: redesigned streaks. Hypothesis: the redesign increases daily active practice and long-term retention.',
+      businessPressure: 'The redesign was a flagship Q3 effort. Leadership wants to announce it at a product event in 5 weeks and is hoping for a clear engagement win to headline. The PM is inclined to read the test early if the week-1 numbers look strong.',
+      constraints: [
+        '~6M MAU with a wide tenure spread: roughly 35% are users of 6+ months who practice almost daily',
+        'Daily practice (lessons completed per day) and subscription retention are the headline metrics',
+        'The app can assign and hold users persistently in an arm; both new and existing users can be enrolled',
+        'There is room to run the test up to ~6 weeks, but leadership pressure favors an early read',
+      ],
+    },
+
+    designPhases: [
+      {
+        id: 'framing',
+        label: 'Framing',
+        hint: 'What are you testing, and what makes the timing tricky?',
+        fields: [
+          {
+            id: 'businessDecision',
+            label: 'What business decision will this experiment inform?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'bd-a',
+                label: 'Whether to roll out the redesigned streak system to all users',
+                scoreValue: 2,
+                rationale: 'Correct. Binary, specific, ship/no-ship.',
+              },
+              {
+                id: 'bd-b',
+                label: 'Whether streaks motivate users',
+                scoreValue: 0,
+                rationale: 'A settled premise — Lumora already uses streaks. The decision is about the redesign versus the current system.',
+              },
+              {
+                id: 'bd-c',
+                label: 'Whether the redesign looks better than the old one',
+                scoreValue: 0,
+                rationale: 'Aesthetic preference is not the decision. The decision is whether it improves the habit loop\'s behavioral outcomes.',
+              },
+              {
+                id: 'bd-d',
+                label: 'Whether the redesign should ship to new users, existing users, or both',
+                scoreValue: 1,
+                rationale: 'Insightful — this scenario may well resolve into a tenure-segmented rollout — but as stated it is a refinement of the rollout decision, not the framing. The core decision is still ship/no-ship; segmentation is a possible outcome of the analysis.',
+              },
+            ],
+          },
+          {
+            id: 'hypothesis',
+            label: 'Select the strongest hypothesis',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'hyp-a',
+                label: 'The redesigned streak system increases sustained daily practice and retention once users have adjusted, with effects that may differ for new (novelty-prone) versus long-tenured (primacy-prone) users.',
+                scoreValue: 2,
+                rationale: 'Strong. It centers the durable effect ("once users have adjusted"), explicitly anticipates the opposing novelty and primacy dynamics by tenure, and ties to the real outcomes. This framing forces a long-enough test and a tenure breakdown.',
+              },
+              {
+                id: 'hyp-b',
+                label: 'The redesign increases daily practice.',
+                scoreValue: 1,
+                rationale: 'Testable but timing-blind. Without specifying "sustained" it invites reading the novelty spike as the result, which is the trap.',
+              },
+              {
+                id: 'hyp-c',
+                label: 'Users will be more engaged with the new streaks.',
+                scoreValue: 0,
+                rationale: 'Vague — which users, on what metric, over what horizon? No testable claim and no acknowledgment of the tenure split.',
+              },
+              {
+                id: 'hyp-d',
+                label: 'The redesign increases week-1 daily active practice.',
+                scoreValue: 0,
+                rationale: 'Explicitly targets the week-1 window, which is exactly where novelty inflates the signal and primacy has not yet resolved. This hypothesis optimizes for the misleading period.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'setup',
+        label: 'Setup',
+        hint: 'Who gets treated, and how?',
+        fields: [
+          {
+            id: 'eligiblePopulation',
+            label: 'Who should be included in the experiment?',
+            type: 'single_select',
+            conceptLinks: [],
+            options: [
+              {
+                id: 'ep-a',
+                label: 'All users, with tenure captured for a pre-registered new-vs-tenured subgroup analysis',
+                scoreValue: 2,
+                rationale: 'Correct. Both populations experience the streak system and the opposing dynamics live in different tenure bands, so you must include both and pre-register the tenure split. Pre-registration is what lets a tenure-differential result be a finding rather than a fishing expedition.',
+              },
+              {
+                id: 'ep-b',
+                label: 'Only new users, since they have no old habit to disrupt',
+                scoreValue: 0,
+                rationale: 'This conveniently excludes the population at risk (tenured users) and would show only the rosy novelty side. It cannot inform a full rollout that affects 35% long-tenured daily users.',
+              },
+              {
+                id: 'ep-c',
+                label: 'Only long-tenured daily users, the most valuable segment',
+                scoreValue: 1,
+                rationale: 'Tenured users are the highest-risk segment and worth protecting, but testing only them misses the new-user upside and the average effect needed for the rollout decision. Better to include all and pre-register subgroups.',
+              },
+              {
+                id: 'ep-d',
+                label: 'A random 50% of users regardless of tenure, without recording tenure',
+                scoreValue: 0,
+                rationale: 'Random inclusion is fine, but not recording tenure throws away the one dimension that determines the right call here. You would be unable to separate novelty from primacy.',
+              },
+            ],
+          },
+          {
+            id: 'randomizationUnit',
+            label: 'What should be the randomization unit?',
+            type: 'single_select',
+            conceptLinks: ['randomization-unit'],
+            options: [
+              {
+                id: 'ru-a',
+                label: 'User (persistent assignment)',
+                scoreValue: 2,
+                rationale: 'Correct. The streak is a per-user habit; assignment must be persistent so each user experiences one consistent system, which is also required to observe novelty decay and primacy recovery over time.',
+              },
+              {
+                id: 'ru-b',
+                label: 'Session',
+                scoreValue: 0,
+                rationale: 'Flipping a user\'s streak system across sessions is incoherent for a habit feature and makes it impossible to track the within-user time dynamics that define novelty and primacy.',
+              },
+              {
+                id: 'ru-c',
+                label: 'Device',
+                scoreValue: 1,
+                rationale: 'Workable but users on multiple devices would split across arms, and habit/retention are user-level. User-level is cleaner.',
+              },
+              {
+                id: 'ru-d',
+                label: 'Daily cohort (assign by signup or activity day)',
+                scoreValue: 0,
+                rationale: 'Assigning whole day-cohorts to an arm confounds the treatment with calendar effects and yields almost no independent units. Not a valid A/B here.',
+              },
+            ],
+          },
+          {
+            id: 'unitOfAnalysis',
+            label: 'What is the unit of analysis?',
+            type: 'single_select',
+            conceptLinks: ['unit-of-analysis'],
+            options: [
+              {
+                id: 'ua-a',
+                label: 'User — daily-practice and retention metrics per user, analyzed overall and by tenure band, with week-over-week breakdowns',
+                scoreValue: 2,
+                rationale: 'Correct. Matches user-level randomization, supports the pre-registered tenure subgroups, and — crucially — the week-over-week breakdown is what reveals the novelty decay and primacy recovery curves.',
+              },
+              {
+                id: 'ua-b',
+                label: 'User-day — pool all user-days and compare arms',
+                scoreValue: 1,
+                rationale: 'User-days are correlated within users; pooling them as independent overstates power. Acceptable only with proper clustering, and it obscures the per-user time trajectory you need to see.',
+              },
+              {
+                id: 'ua-c',
+                label: 'Lesson — analyze each completed lesson',
+                scoreValue: 0,
+                rationale: 'Lessons are deeply nested within users and days. Wrong unit; massively overstates power.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'metrics',
+        label: 'Metrics',
+        hint: 'What will you measure?',
+        fields: [
+          {
+            id: 'primaryMetric',
+            label: 'What is the primary metric?',
+            type: 'single_select',
+            conceptLinks: ['primary-metric', 'novelty-effect'],
+            options: [
+              {
+                id: 'pm-a',
+                label: 'Sustained daily practice in the final week(s) of the test (e.g. lessons/day in weeks 4-6), per user',
+                scoreValue: 2,
+                rationale: 'Best primary. Measuring the metric in the later weeks — after novelty has decayed and primacy disruption has resolved — captures the durable effect that predicts the post-launch reality. Anchoring the primary to the stabilized period is the core insight of this scenario.',
+              },
+              {
+                id: 'pm-b',
+                label: 'Average daily practice across the whole test window',
+                scoreValue: 1,
+                rationale: 'Reasonable, but averaging over the whole window blends the inflated novelty period with the stabilized period, biasing the estimate upward. The later-week measure is cleaner. Acceptable as a secondary.',
+              },
+              {
+                id: 'pm-c',
+                label: 'Week-1 daily active practice',
+                scoreValue: 0,
+                rationale: 'The trap metric. Week-1 is dominated by novelty (up) and unresolved primacy (down) — the least representative window of long-run behavior. Optimizing it ships the wrong call.',
+              },
+              {
+                id: 'pm-d',
+                label: 'Streak length achieved',
+                scoreValue: 0,
+                rationale: 'Mechanically inflated by the new streak-freeze feature (users keep streaks they would have lost), so it measures the feature\'s definition change more than real engagement. Misleading as a primary.',
+              },
+            ],
+          },
+          {
+            id: 'guardrailMetrics',
+            label: 'Which metrics should be guardrails?',
+            type: 'multi_select',
+            conceptLinks: ['guardrail-metric'],
+            options: [
+              {
+                id: 'gm-a',
+                label: 'Retention / churn among long-tenured daily users',
+                scoreValue: 2,
+                rationale: 'The critical guardrail for this scenario. The primary risk is that disrupting a deeply ingrained habit causes valuable veterans to disengage or churn. Even a strong average win must not come with tenured-user churn. Blocking, and tracked specifically by tenure.',
+              },
+              {
+                id: 'gm-b',
+                label: 'Subscription cancellation rate',
+                scoreValue: 2,
+                rationale: 'Essential business guardrail. Lumora monetizes via subscriptions; if the redesign frustrates paying users into cancelling, that outweighs engagement gains. Watch closely, especially among tenured subscribers.',
+              },
+              {
+                id: 'gm-c',
+                label: 'Streak-freeze overuse (users coasting on freezes without practicing)',
+                scoreValue: 1,
+                rationale: 'Worth monitoring as a gaming/quality signal — if freezes let users maintain streaks without learning, engagement metrics can look healthy while real practice falls. A meaningful secondary guardrail.',
+              },
+              {
+                id: 'gm-d',
+                label: 'Number of streak notifications sent',
+                scoreValue: 0,
+                rationale: 'An input count, not a guardrail outcome. Relevant only via downstream effects already captured elsewhere.',
+              },
+            ],
+          },
+          {
+            id: 'diagnosticMetrics',
+            label: 'Which metrics should be tracked as diagnostics?',
+            type: 'multi_select',
+            conceptLinks: ['novelty-effect'],
+            options: [
+              {
+                id: 'dm-a',
+                label: 'Week-over-week effect trajectory by tenure band (the novelty-decay and primacy-recovery curves)',
+                scoreValue: 2,
+                rationale: 'The single most important diagnostic for this design. Plotting the treatment effect week by week, split by tenure, directly visualizes whether new users\' early spike is decaying and whether tenured users\' early dip is recovering. It is how you read the two forces apart.',
+              },
+              {
+                id: 'dm-b',
+                label: 'Time to first practice each day (does the new design prompt the habit faster?)',
+                scoreValue: 1,
+                rationale: 'Useful mechanism diagnostic for whether the redesign strengthens the habit trigger.',
+              },
+              {
+                id: 'dm-c',
+                label: 'Adoption of new features (streak freeze, new rewards)',
+                scoreValue: 1,
+                rationale: 'Good for understanding which elements drive any effect and whether they are used as intended.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'logistics',
+        label: 'Logistics',
+        hint: 'This is the crux: how long, given novelty and primacy?',
+        fields: [
+          {
+            id: 'runtime',
+            label: 'How long should this experiment run?',
+            type: 'single_select',
+            conceptLinks: ['novelty-effect', 'mde'],
+            options: [
+              {
+                id: 'rt-a',
+                label: 'At least 4-6 weeks, long enough for the novelty spike to decay and for tenured users to re-stabilize their habit, reading the primary on the later, stabilized weeks',
+                scoreValue: 2,
+                rationale: 'Correct, and the reasoning is the substance. Novelty effects typically decay over 2-4 weeks; primacy disruption to a long-held habit also takes weeks to resolve. Running 4-6 weeks and anchoring the primary to the final weeks is the only way to estimate the durable effect both forces eventually settle into.',
+              },
+              {
+                id: 'rt-b',
+                label: '1 week — read it early since leadership wants a headline',
+                scoreValue: 0,
+                rationale: 'The trap. Week-1 is peak novelty and peak unresolved primacy — the least representative possible window. An early read here is almost guaranteed to mislead in one direction or the other.',
+              },
+              {
+                id: 'rt-c',
+                label: '2 weeks — a compromise between speed and stability',
+                scoreValue: 1,
+                rationale: 'Better than one week, but two weeks often is not enough for novelty to fully decay or for veterans\' habits to re-form. The estimate is still contaminated by transients. Defensible only if the trajectory has visibly flattened by then.',
+              },
+              {
+                id: 'rt-d',
+                label: 'Run until daily practice is significant',
+                scoreValue: 0,
+                rationale: 'Peeking, and it will almost certainly cross significance during the novelty spike — stopping you at the most inflated moment. Pre-commit the duration.',
+              },
+            ],
+          },
+          {
+            id: 'attributionWindow',
+            label: 'How should the primary effect be measured over time?',
+            type: 'single_select',
+            conceptLinks: ['novelty-effect'],
+            options: [
+              {
+                id: 'aw-a',
+                label: 'Compare arms on the stabilized final-weeks window, and report the full week-over-week trajectory for transparency',
+                scoreValue: 2,
+                rationale: 'Correct. The decision rests on the stabilized effect, but showing the trajectory lets stakeholders see the novelty and primacy dynamics and trust that the final-week number is the durable one.',
+              },
+              {
+                id: 'aw-b',
+                label: 'Average the effect across all weeks equally',
+                scoreValue: 1,
+                rationale: 'Blends transient and durable effects, biasing toward the inflated early weeks. Acceptable as a secondary view but not the basis for the call.',
+              },
+              {
+                id: 'aw-c',
+                label: 'Use only the first 3 days for a fast, clean read',
+                scoreValue: 0,
+                rationale: 'The first days are the most contaminated by both novelty and primacy. The opposite of clean.',
+              },
+            ],
+          },
+          {
+            id: 'sampleSizeConcern',
+            label: 'What is the main power concern?',
+            type: 'single_select',
+            conceptLinks: ['power', 'mde'],
+            options: [
+              {
+                id: 'ss-a',
+                label: 'The pre-registered tenure subgroups (especially long-tenured users) have less power than the whole, and the late-week primary uses fewer observations than the full window — both raise the MDE where it matters most',
+                scoreValue: 2,
+                rationale: 'Exactly right. The tenured subgroup is ~35% of users, so its MDE is larger, and restricting the primary to the final weeks reduces the observation count for the key estimate. You must verify the test is powered for the tenured-user guardrail and the stabilized-window primary, not just the overall full-window effect.',
+              },
+              {
+                id: 'ss-b',
+                label: 'No concern — 6M MAU is plenty for any analysis',
+                scoreValue: 0,
+                rationale: 'Overall N is large, but the decision-relevant estimates (tenured subgroup, late-week window) use subsets and are less powered. Assuming the headline N covers them is the trap.',
+              },
+              {
+                id: 'ss-c',
+                label: 'The concern is that the novelty effect will make the test underpowered',
+                scoreValue: 0,
+                rationale: 'Novelty inflates the early effect, if anything making early significance easier, not harder. The real power concern is the subgroup and late-window sample sizes, not the novelty effect.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'risks',
+        label: 'Risks & Decision Rule',
+        hint: 'What could invalidate this, and what will you do with the result?',
+        fields: [
+          {
+            id: 'trustChecks',
+            label: 'Which trust checks should you run?',
+            type: 'multi_select',
+            conceptLinks: ['srm'],
+            options: [
+              {
+                id: 'tc-a',
+                label: 'SRM check on assignment, overall and within the pre-registered tenure bands',
+                scoreValue: 2,
+                rationale: 'Essential. Check the split overall and within tenure bands — an imbalance within the tenured band would undermine exactly the subgroup the decision hinges on.',
+              },
+              {
+                id: 'tc-b',
+                label: 'Verify tenure composition is balanced across arms',
+                scoreValue: 2,
+                rationale: 'Critical here. If one arm has more long-tenured users, the overall comparison is confounded by tenure mix rather than the redesign. Balance on the dimension that drives the opposing effects.',
+              },
+              {
+                id: 'tc-c',
+                label: 'Confirm pre-experiment daily-practice baselines are comparable across arms',
+                scoreValue: 1,
+                rationale: 'Good sanity check that randomization balanced the habit-strength distribution, which is the key covariate for this outcome.',
+              },
+              {
+                id: 'tc-d',
+                label: 'Confirm daily practice is higher in treatment in week 1 before continuing',
+                scoreValue: 0,
+                rationale: 'Gating on an early result is not a trust check — and week 1 is precisely the contaminated window you should not be reacting to. Run the full pre-committed duration.',
+              },
+            ],
+          },
+          {
+            id: 'validityRisks',
+            label: 'What are the main validity risks?',
+            type: 'multi_select',
+            conceptLinks: ['novelty-effect'],
+            options: [
+              {
+                id: 'vr-a',
+                label: 'Novelty effect — new/casual users\' early spike overstates the durable engagement gain',
+                scoreValue: 2,
+                rationale: 'A headline risk. A shiny redesign draws early engagement that fades. Reading the result before novelty decays inflates the estimate.',
+              },
+              {
+                id: 'vr-b',
+                label: 'Primacy effect — long-tenured users are disrupted and engage less until they re-learn the habit (or churn)',
+                scoreValue: 2,
+                rationale: 'The other headline risk, and the more dangerous one because it can be permanent (churn). The early dip among veterans may recover — or may not. A short test cannot tell which, and the at-risk segment is highly valuable.',
+              },
+              {
+                id: 'vr-c',
+                label: 'Reading the test early and shipping on a transient signal',
+                scoreValue: 2,
+                rationale: 'The central decision risk that ties the scenario together. Under event-deadline pressure, an early read on either the novelty spike or the primacy dip leads to the wrong ship/kill call. Pre-committing the duration and the stabilized-window primary is the defense.',
+              },
+              {
+                id: 'vr-d',
+                label: 'SUTVA violation via users comparing streaks with friends',
+                scoreValue: 0,
+                rationale: 'Minor at most — streaks are largely individual, and casual social comparison is unlikely to materially contaminate arms. Not a real validity threat here.',
+              },
+            ],
+          },
+          {
+            id: 'decisionRule',
+            label: 'What is the pre-committed decision rule?',
+            type: 'single_select',
+            conceptLinks: ['p-value', 'guardrail-metric', 'novelty-effect'],
+            options: [
+              {
+                id: 'dr-a',
+                label: 'Ship if stabilized (final-weeks) daily practice is significantly positive overall AND retention/churn among long-tenured users is not significantly worse. If new users gain but tenured users are harmed even after stabilization, do not ship a blanket rollout — consider shipping to new users while preserving the old system for tenured users.',
+                scoreValue: 2,
+                rationale: 'Correct and senior-level. It reads the primary on the stabilized window (defeating novelty), treats tenured-user retention as a blocking guardrail (respecting primacy), and pre-commits a tenure-segmented contingency for the most likely real outcome (new-user win, veteran harm). That contingency is the mature answer to opposing effects across segments.',
+              },
+              {
+                id: 'dr-b',
+                label: 'Ship if week-1 daily practice is significantly higher.',
+                scoreValue: 0,
+                rationale: 'Reads the most contaminated window and ignores the tenured-user risk entirely. The failure mode.',
+              },
+              {
+                id: 'dr-c',
+                label: 'Ship if average daily practice across the whole window is positive.',
+                scoreValue: 1,
+                rationale: 'Better — it does not stop at week 1 — but the whole-window average is biased upward by novelty and can mask a sustained decline among veterans. The stabilized-window primary plus a tenured guardrail is stronger.',
+              },
+              {
+                id: 'dr-d',
+                label: 'Ship if stabilized daily practice is positive, reviewing tenured-user retention contextually.',
+                scoreValue: 1,
+                rationale: 'Right primary window, but "reviewing contextually" softens the one guardrail that matters most here and omits the tenure-segmented contingency. Partial credit.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+
+    scoringRubric: {
+      dimensions: [
+        { id: 'metric_selection', label: 'Metric selection', weight: 0.25, fieldIds: ['primaryMetric', 'guardrailMetrics'] },
+        { id: 'design_validity', label: 'Design validity', weight: 0.30, fieldIds: ['randomizationUnit', 'unitOfAnalysis', 'trustChecks', 'validityRisks'] },
+        { id: 'decision_discipline', label: 'Decision discipline', weight: 0.30, fieldIds: ['decisionRule', 'sampleSizeConcern'] },
+        { id: 'hypothesis_framing', label: 'Hypothesis framing', weight: 0.15, fieldIds: ['hypothesis', 'businessDecision'] },
+      ],
+      levels: {
+        incomplete:    { minScore: 0,    label: 'Incomplete' },
+        analyst_ready: { minScore: 0.45, label: 'Analyst-Ready' },
+        senior_ready:  { minScore: 0.68, label: 'Senior-Ready' },
+        staff_level:   { minScore: 0.85, label: 'Staff-Level' },
+      },
+    },
+
+    seniorDesign: {
+      rationale: 'This scenario pits two time-dependent biases against each other, and the test must be designed to separate them. New and casual users will likely show a novelty spike — the redesign is shiny, so early engagement overstates the durable effect. Long-tenured daily users, whose habit is wired to the old streak mechanics, may show a primacy effect — disruption that depresses engagement until they re-learn the system, or that tips some into churn. A one-week read, which the deadline tempts, lands squarely in the worst window: novelty is at its peak and primacy is unresolved. Reading either force as the headline ships the wrong decision.\n\nThe design answer has three parts. First, run long enough — 4-6 weeks — for novelty to decay and for veterans\' habits to re-stabilize, and anchor the primary metric to the stabilized final weeks rather than the full-window average (which is biased upward by the early spike). Second, make the effect-over-time trajectory, broken out by tenure, a first-class diagnostic: the novelty-decay curve for new users and the recovery-or-not curve for veterans are how you actually read the two forces apart. Third, pre-register the tenure subgroups and protect the at-risk one — long-tenured-user retention and subscription churn are blocking guardrails, because that segment is both the most valuable and the most exposed to primacy harm.\n\nThe decision rule should pre-commit the stabilized-window primary, the tenured-user guardrail, and a contingency for the most plausible real outcome: new users gain while veterans are harmed. The mature response to that is not a binary ship/kill but a tenure-segmented rollout — ship the redesign to new users, preserve the familiar system for entrenched veterans (or migrate them gradually). Writing that down before the data arrives is what stops a green week-1 number, under event-deadline pressure, from steamrolling the veterans whose habit the company depends on.',
+      commonMistakes: [
+        {
+          mistake: 'Reading the test in week 1 and shipping on the novelty spike',
+          consequence: 'Early engagement is inflated by curiosity that fades. You ship, the effect decays over the next month, and the headline "engagement win" quietly evaporates while veteran behavior was never given time to reveal itself.',
+          conceptLink: 'novelty-effect',
+        },
+        {
+          mistake: 'Ignoring the primacy effect on long-tenured users by not breaking out tenure',
+          consequence: 'A positive average effect (driven by new users) masks a sustained decline or churn among the 35% of veterans. You ship a blanket rollout that damages your most valuable, most loyal segment.',
+          conceptLink: 'novelty-effect',
+        },
+        {
+          mistake: 'Using the whole-window average as the primary instead of the stabilized period',
+          consequence: 'Averaging blends the inflated novelty weeks with the stabilized weeks, biasing the estimate upward and obscuring whether the durable effect is actually positive.',
+          conceptLink: 'primary-metric',
+        },
+      ],
+      failureMode: {
+        weakAnswer: 'The candidate sets week-1 daily practice as the primary, runs the test for one week to hit the event deadline, sees a strong overall lift, and recommends a full rollout. They never break out tenure, never wait for novelty to decay or primacy to resolve, and never set a tenured-user retention guardrail — shipping on a transient spike that hides harm to loyal veterans.',
+        interviewerFollowUp: '"Your week-1 lift was +9% daily practice and you shipped. Six weeks post-launch, overall practice is flat and your cohort of 6-month-plus daily users has churned 4% faster than before. Walk me through which of those users were in a novelty spike, which were in a primacy dip, and what your test should have measured to tell them apart before you decided."',
+      },
+    },
+
+    pairedScenarioPrompt: {
+      toReview: 'You designed a test long enough to separate novelty from primacy. Now read what happens when a team reads the week-1 spike.',
+      fromReview: 'You saw the transient signal mislead the call. Go back and design the test to read the durable, tenure-split effect.',
+    },
+  },
 ];
 
 export const designScenariosById = Object.fromEntries(designScenarios.map(s => [s.id, s]));

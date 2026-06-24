@@ -4,6 +4,31 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.87.0] — 2026-06-24 [SQL LAB — SQLBOLT-STYLE BEGINNER MODE]
+
+A guided, sequential beginner level inside SQL Lab for people who don't know SQL at all — fixing the ramp-up problem where newcomers hit 182 problems cold.
+
+**Lesson data — `src/data/sqlBeginnerLessons.js` (new).** `BEGINNER_DATAMART` = a fun, neutral **movies** dataset (12 invented movies + 4 studios; studios used only by the JOIN lessons), in the same shape as sqlLabDatamarts. `BEGINNER_LESSONS` = 18 ordered lessons, one concept each: SELECT* → columns → WHERE(num) → WHERE(text) → AND/OR → ranges → LIKE → IN → ORDER BY → LIMIT → DISTINCT → expr+alias → COUNT → SUM/AVG/MIN/MAX → GROUP BY → HAVING → first JOIN → JOIN+GROUP BY. **Every one of the 18 solutions was executed against the seed data**, so expectedColumns/expectedRowCount are guaranteed correct. Lessons 1-7 carry an explicit "Your result should:" bullet checklist; only the needed table(s) are shown (single table until the JOIN lessons).
+
+**Beginner view — `src/pages/SqlLabBeginnerPage.jsx` (new).** Isolated sequential track (does NOT import the 182-problem list): a lesson rail with done/current/locked states + progress, concept + table preview + prompt + bullet requirements, the existing `SqlEditor` reused, Run/Check, results, revealable hints, and a "Show solution" affordance after 2 misses. Validation is the lab's `validateResults` copied 1:1 (row count → columns → order-tolerant value match, 0.01 numeric tolerance), run against `lesson.solution` on the same sql.js db. Progress in `pal-sql-beginner-v1`. Finishing the last lesson → "Enter the full SQL Lab."
+
+**Gentle entry + optional placement.** A "New to SQL? Start the guided walkthrough" card sits atop the SQL Lab browse view. A total newbie who picks "Start from lesson 1" never sees a test. Those who say they already know some SQL can take a 3-question check (lessons b03/b09/b15); pass ≥2/3 → all lessons marked complete and dropped into the full lab; otherwise a friendly start at lesson 1. An "I know SQL, skip" exit is always available. When beginner mode is on, the other levels/filters are hidden (isolated), per spec.
+
+**Integration.** SqlLabPage gains a `mode === 'beginner'` branch; the existing lab (browse/solve, the 182 problems, engine) is untouched. Build: 881 modules transformed.
+
+## [5.86.0] — 2026-06-24 [DEPTH CONTENT FILLS — THIN ROOMS + BLOG CORRECTION]
+
+Filled the THIN rooms from `docs/DEPTH-AUDIT.md` with new cases written to the quality bar (each batch sample-reviewed, schema-matched, strict data-file syntax, build-verified):
+- **A/B Design** 8 → 15 (+7 multi-phase cases: metric conflicts, randomization unit, power/MDE/duration, guardrail tradeoffs, SUTVA/switchback, triggered/ratio metrics, novelty/primacy).
+- **Instrumentation** 12 → 21 (+9: event taxonomy, dedup/idempotency, funnel fire-order bugs, identity stitching, client-vs-server, pipeline breakage, validation, cross-platform).
+- **Growth Analytics** 12 → 20 (+8: retention-curve shape, funnel decomposition, growth accounting/quick ratio, L28 engagement, channel quality, activation, referral loop math, resurrection).
+- **Spot the Flaw** 17 → 25 (+8: Simpson's, survivorship, ratio-of-averages, multiple comparisons, peeking, novelty, SUTVA, confounding).
+- Fixed 6 invalid `playbookLinks` ids the Growth batch introduced → mapped to real PlaybookBrowser registry ids.
+
+**Deep Dives correction.** The "29 of 41 stubs" was a STALE file comment — the blog actually has **81 fully-written posts, 0 stubs**. Fixed the misleading "coming soon" copy in BlogBrowser (content-gated the listing), corrected the Library landing count (12 → 81), and corrected `docs/DEPTH-AUDIT.md`.
+
+Note: the SQLBolt-style beginner SQL level is in design/brainstorm this round (not built yet) — see chat.
+
 ## [5.85.0] — 2026-06-24 [PROFILE EMPLOYMENT + MONTHLY COMPANY REMINDER]
 
 Referrals in the community run off current company + role, so people need to keep them accurate. Adds the fields, the referral payload, and a monthly reminder. All guarded to work before the DB migration runs.

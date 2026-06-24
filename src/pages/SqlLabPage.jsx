@@ -5,6 +5,7 @@ import { COMPANY_DOMAINS } from '../data/companyDirectory.js';
 import { track } from '../utils/analytics.js';
 import { ShareLinkButton } from '../components/shared/ShareLinkButton.jsx';
 import { SqlEditor } from '../components/shared/SqlEditor.jsx';
+import { SqlLabBeginnerPage } from './SqlLabBeginnerPage.jsx';
 
 const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3, Forensic: 5 };
 // V5.53: CodeMirror editor (highlighting + schema autocomplete + indent keeper).
@@ -370,7 +371,7 @@ function ProblemListRow({ p, isSolved, onSelect, i = 0 }) {
 
 function askedAtCount(p) { return 1 + ((p.alsoAskedAt || []).length); }
 
-function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
+function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginner }) {
   const [filterDiff, setFilterDiff] = useState('');      // single-select
   const [filterCompany, setFilterCompany] = useState('');
   const [filterTopic, setFilterTopic] = useState('');
@@ -429,6 +430,32 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan }) {
           style={{ marginLeft: 'auto', background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.75rem', fontSize: '0.78rem', fontWeight: 600, color: 'var(--teal)', cursor: 'pointer' }}
         >Study Plan</button>
       </div>
+
+      {/* Beginner tutorial entry — guided, isolated, step-by-step walkthrough */}
+      {onStartBeginner && (
+        <div
+          className="pal-card-hover"
+          onClick={onStartBeginner}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onStartBeginner(); } }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap',
+            marginBottom: '1rem', padding: '0.85rem 1.1rem',
+            background: 'var(--teal-bg)', border: '1px solid var(--teal-border)',
+            borderRadius: '10px', cursor: 'pointer',
+          }}
+        >
+          <div style={{ fontSize: '1.5rem', lineHeight: 1, flexShrink: 0 }}>🎓</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--teal)' }}>New to SQL? Start with a guided, step-by-step walkthrough.</div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem', lineHeight: 1.5 }}>
+              18 short lessons that build from SELECT to JOIN — one idea at a time. Skip ahead anytime.
+            </div>
+          </div>
+          <span style={{ flexShrink: 0, padding: '0.45rem 1rem', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700, background: 'var(--teal)', color: '#fff' }}>Start tutorial →</span>
+        </div>
+      )}
 
       {/* Filter bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
@@ -1241,6 +1268,11 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
 
   if (!problem) return null;
 
+  // ── Beginner tutorial mode (isolated SQLBolt-style sequential track) ──────────
+  if (mode === 'beginner') {
+    return <SqlLabBeginnerPage onExit={() => setMode('browse')} />;
+  }
+
   // ── Browse mode ──────────────────────────────────────────────────────────────
   if (mode === 'browse') {
     return (
@@ -1254,6 +1286,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           }}
           solved={solved}
           onShowPlan={() => setShowPlanModal(true)}
+          onStartBeginner={() => setMode('beginner')}
         />
         {showPlanModal && <StudyPlanModal solved={solved} onClose={() => setShowPlanModal(false)} onApply={() => setShowPlanModal(false)} />}
       </>

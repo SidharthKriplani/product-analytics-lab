@@ -11,7 +11,7 @@
 import { Icon } from '../components/shared/Icon.jsx';
 import { interviewQA } from '../data/interviewQA.js';
 
-const DEEP_DIVE_COUNT = 12;   // written long-form essays (stubs excluded)
+const DEEP_DIVE_COUNT = 81;   // written long-form essays (all posts are written; no stubs)
 const FAILURE_COUNT = 25;     // dissected real-world failures
 
 const LIBRARY_CARDS = [

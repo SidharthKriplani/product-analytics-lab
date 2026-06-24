@@ -28,13 +28,13 @@ Post-consolidation depth check of every practice/content component, against EVAL
 | **Prioritization** | prioritizationScenarios.js | **12** | **THIN-ish** |
 | **Interview Q&A** | interviewQA.js | **26** | **THIN** |
 | **Analytics Failures** | (FailuresCatalog) | **25** | **THIN** |
-| **Deep Dives (blog)** | (BlogBrowser) | **12 written / ~41 listed** | **THIN — 29 stubs** |
+| Deep Dives (blog) | (BlogBrowser) | 81 written, 0 stubs | RICH — *(the earlier "12 of 41 stubs" was a stale file comment; corrected V5.86)* |
 | MCQ Trainer | trainerMCQ.js | 36 | recall-only by design |
 
 ## The acute gaps (deferred content work — "hold depth, do UI first" decision 2026-06-24)
 
 1. **A/B Design — 8 cases** for the most complex room in PAL. Needs ~12-15 more (metric conflicts, randomization-unit choice, guardrail tradeoffs, sample-size/power calls).
-2. **Deep Dives — 29 of 41 are stubs.** This is why the Library felt empty. Fix: write the 29, OR hide/mark them "coming soon" in BlogBrowser so the page isn't 71% placeholder. (Landing now shows the honest written count, 12.)
+2. **Deep Dives — RESOLVED / was a false alarm.** The "29 of 41 stubs" came from a stale file comment; the blog actually has **81 fully-written posts, 0 stubs**. Fixed the misleading "coming soon" copy in BlogBrowser and corrected the Library landing count (now 81).
 3. **Instrumentation — 12 cases.** Needs ~10-15 (schema-design errors, ETL breakage, event validation, cross-platform tracking).
 4. **Spot the Flaw — 17 brief keyed items.** Needs theory intros + 2-3 progressively harder cases per flaw family (SRM, peeking, novelty, SUTVA).
 5. **Growth Analytics — 12 cases.** Needs ~8-12 more cohort/funnel/retention-decomposition scenarios.

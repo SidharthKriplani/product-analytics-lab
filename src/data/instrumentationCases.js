@@ -448,6 +448,349 @@ export const instrumentationCases = [
       'Technical controls (PII classifier at ingestion) prevent recurrence; policy alone does not'
     ],
     playbookLinks: []
+  },
+  {
+    id: 'inst13',
+    title: 'Naming a Family of Related Events',
+    subtitle: 'One event with a property, or many events? The choice you can\'t undo cheaply',
+    difficulty: 'senior',
+    isFree: false,
+    domain: 'event-taxonomy',
+    company: 'Figma',
+    estimatedMin: 22,
+    tags: ['event-taxonomy', 'naming-convention', 'schema-design', 'event-granularity'],
+    situation: 'Figma is instrumenting the toolbar. A designer can pick the rectangle tool, the pen tool, the text tool, the frame tool, and 11 others. The engineer proposes 15 events: rectangle_tool_selected, pen_tool_selected, text_tool_selected, and so on. Another engineer proposes a single tool_selected event with a tool_name property. The team is split and wants your ruling before they ship — and the toolbar will grow to ~40 tools within a year.',
+    question: 'One generic event with a property, or one event per tool? Give your ruling and the rule you\'d apply to the next team that asks this question.',
+    hints: [
+      'Ask what changes when a new tool is added. With 15 named events, each new tool needs a code change AND a taxonomy review. With one event + property, a new tool is just a new property value.',
+      'Think about how each design queries: do analysts want "how often is the pen tool used" (one tool) or "tool usage distribution" (across tools)? Properties make cross-tool analysis a GROUP BY; named events make it a UNION.',
+      'When does the property approach break down? If different tools need wildly different properties, or if some tools are conversion events with their own funnels, separate events may earn their keep.'
+    ],
+    modelAnswer: {
+      approach: 'State the default rule → apply it here → name the exception → set the governance principle',
+      answer: 'Ruling: one event, tool_selected { tool_name, tool_category, canvas_id, platform }. The decisive test: a generic event with a property is correct when the actions are the same verb applied to interchangeable objects, and the analysis you want is the distribution across those objects. Selecting the pen vs the rectangle is the same action (tool_selected) on an interchangeable object (tool_name). Every analyst question — usage distribution, most/least used tools, tool adoption over time — becomes a GROUP BY tool_name, which is trivial. With 15 (soon 40) named events, the same question is a 40-way UNION that breaks every time a tool is added, and adding a tool requires a taxonomy PR instead of passing a new enum value. The property approach also keeps the event count flat as the toolbar grows. The exception, and the rule for the next team: split into separate events when (1) the events carry materially different properties (e.g., text_tool_selected needs font/size that no other tool has — though even then, additive nullable properties on one event usually win), or (2) one variant is a distinct conversion/funnel step that will be referenced independently in dashboards and alerts (e.g., if the pen tool gated a paywall, pen_tool_selected might warrant its own event). Governance principle: default to generic-event-plus-property; require a written justification to split. The cost of a wrong split (event sprawl, broken cross-cuts) is paid forever; the cost of a wrong merge (one over-broad event) is recoverable by adding a property.',
+      keyInsights: [
+        'Generic-event-plus-property is the default when the action is one verb over interchangeable objects and you want the cross-object distribution',
+        'A new variant should cost a new property value, not a new event plus a taxonomy review — that test alone usually settles the debate',
+        'Splitting is justified only when variants carry materially different properties or one is an independently-referenced funnel step'
+      ]
+    },
+    leadershipNote: 'At staff level you publish this as a taxonomy rule so it is decided once, not re-litigated per feature: "Use one event with a discriminator property unless a variant has distinct properties or its own funnel." The failure mode you are preventing is event-count explosion — a product with 4,000 events nobody can navigate, born from a thousand small per-variant decisions that each seemed reasonable.',
+    failureMode: {
+      weakAnswer: 'The candidate picks one event per tool because "it is more explicit and easier to find in the dashboard," without reasoning about how the toolbar grows, how analysts query across tools, or the maintenance cost of a taxonomy PR per new tool. They optimize for the demo-day dashboard, not the system in a year.',
+      interviewerFollowUp: '"Next quarter the team ships 12 new tools and a PM asks for tool-usage share across all 27 tools, broken out by platform. Walk me through the exact query under your design — and what a teammate has to do to add the 28th tool."',
+    },
+    keyTakeaways: [
+      'Default to one event + discriminator property when the action is one verb over interchangeable objects',
+      'The test: a new variant should cost a property value, not a new event and a taxonomy review',
+      'Split only for materially different properties or an independently-referenced funnel step'
+    ],
+    playbookLinks: []
+  },
+  {
+    id: 'inst14',
+    title: 'The Double-Counted Conversion',
+    subtitle: 'Retries and a missing idempotency key are inflating your purchase numbers',
+    difficulty: 'senior',
+    isFree: false,
+    domain: 'data-quality',
+    company: 'DoorDash',
+    estimatedMin: 24,
+    tags: ['idempotency', 'event-dedup', 'retries', 'data-quality', 'client-side'],
+    situation: 'DoorDash\'s order_placed event fires from the client when the user taps "Place Order." Finance reconciles revenue against the payments ledger and finds analytics reports 4.2% more orders than the ledger. The gap is largest on Android and on flaky-network days. The analytics team initially blames the ledger. You suspect the event.',
+    question: 'What is causing the 4.2% overcount, and how do you make order_placed countable exactly once — without losing the events you legitimately need?',
+    hints: [
+      'Why would the gap be worse on Android and on flaky-network days? What does a client SDK do when it isn\'t sure the event was delivered?',
+      'An event can be emitted once by intent but ingested multiple times by the pipeline. Which layer should own "count this once"?',
+      'Idempotency needs a stable key generated at the moment of the user action — not at ingestion time. Where does that key come from?'
+    ],
+    modelAnswer: {
+      approach: 'Locate the duplication mechanism → assign an idempotency key at the source → dedup at ingestion → backfill historical counts',
+      answer: 'Mechanism: client SDKs retry event delivery when they do not receive an ack. On flaky networks (worse on Android with aggressive battery/network management), the event reaches the server, the ack is lost, and the SDK resends the same order_placed — so the pipeline ingests it 2+ times. There may also be UI double-taps if the button is not disabled on first tap. Both produce duplicate rows for a single real order. Fix, in layers: (1) Source-side idempotency key. Generate a client_event_id (UUID) at the moment the user taps Place Order, and attach the order_id (the real business key) to the event. The client_event_id is identical across retries of the same emission; order_id is identical across both retries and accidental double-taps. (2) Dedup at ingestion. The pipeline deduplicates on (order_id) for counting orders, keeping the earliest event. Keep all raw rows in a staging table but expose a deduplicated view to analysts and finance. Dedup at ingestion, not in every downstream query — otherwise every analyst re-implements it inconsistently. (3) Disable the button on first tap and emit on the server\'s order-confirmation response where possible (see the client-vs-server tradeoff: a purchase is a money event that should ultimately be trusted from the server). (4) Backfill: re-aggregate historical order counts using the dedup-on-order_id view so past dashboards reconcile with the ledger; annotate the correction. Validation: after the fix, the analytics-vs-ledger gap should fall to near zero; monitor it as an ongoing data-quality check.',
+      keyInsights: [
+        'At-least-once delivery (SDK retries on lost acks) means events arrive 1+ times — counting exactly once is the consumer\'s job, via an idempotency key',
+        'The dedup key must be the stable business key (order_id) generated at the action, not a row id assigned at ingestion',
+        'Deduplicate once at ingestion and expose a clean view — never leave each analyst to dedup in their own query'
+      ]
+    },
+    leadershipNote: 'A staff data engineer treats every money or conversion event as at-least-once by default and bakes idempotency into the contract: each carries a business key, ingestion dedups, and a daily analytics-vs-ledger reconciliation alerts when the gap exceeds a threshold. The lesson for the org: "the ledger is wrong" is almost never the answer when your counts are higher than the system of record.',
+    failureMode: {
+      weakAnswer: 'The candidate adds a SELECT DISTINCT in the one dashboard finance complained about and calls it fixed. They do not add a stable idempotency key, do not dedup at ingestion, leave every other consumer double-counting, and never address the retry behavior or the double-tap — so the overcount returns in the next report that doesn\'t happen to use DISTINCT.',
+      interviewerFollowUp: '"You said you\'ll deduplicate. On what key, generated where and when? Walk me through what happens to that key when (a) the SDK retries after a lost ack and (b) the user double-taps Place Order on a frozen screen."',
+    },
+    keyTakeaways: [
+      'Assume at-least-once delivery: events can arrive multiple times, so counting once requires an idempotency key',
+      'Dedup on the stable business key (order_id) generated at the user action, once at ingestion',
+      'Reconcile conversion events against the system-of-record ledger as a standing data-quality check'
+    ],
+    playbookLinks: []
+  },
+  {
+    id: 'inst15',
+    title: 'The Funnel With a Phantom Step',
+    subtitle: 'Step 2 has higher conversion than step 1 — a fire order bug, not a miracle',
+    difficulty: 'junior',
+    isFree: false,
+    domain: 'data-quality',
+    company: 'Coursera',
+    estimatedMin: 18,
+    tags: ['funnel-instrumentation', 'double-fire', 'event-ordering', 'data-quality', 'qa'],
+    situation: 'Coursera\'s enrollment funnel dashboard shows: course_page_viewed 100,000 → enroll_clicked 38,000 → payment_step_viewed 41,000 → payment_completed 22,000. A PM is excited that payment_step_viewed (41,000) is higher than enroll_clicked (38,000) and concludes the payment page is "magnetically converting." You are asked to confirm before this goes in the board deck.',
+    question: 'A step in a linear funnel has more events than the step before it. What are the possible causes, and how do you determine which one is happening here?',
+    hints: [
+      'In a strictly linear funnel, a later step can never legitimately exceed an earlier step for the same population. So either the funnel is not linear, or one event is firing wrong.',
+      'Two common bugs: the later event double-fires (e.g., on every render or re-render), or the earlier event under-fires (it misses some users who still proceed).',
+      'You can\'t diagnose this from step totals alone. What do you need to count per user to tell double-fire from under-fire?'
+    ],
+    modelAnswer: {
+      approach: 'Reject the surface read → enumerate the two failure classes → diagnose per-user, not per-total → fix and re-validate',
+      answer: 'First, reject the conclusion: in a linear funnel where payment_step_viewed requires passing enroll_clicked, a later step exceeding an earlier one is structurally impossible for the same users — it is a tracking bug, not a magnetic page. Two failure classes: (A) payment_step_viewed double-fires — e.g., it is bound to a component render/re-render or a route that mounts twice (React StrictMode, a redirect bounce, a back-then-forward navigation), so one user generates 1.5 events on average. (B) enroll_clicked under-fires — e.g., it is on a click handler that misses users who reach payment via a deep link, a "resume enrollment" path, or a different entry point that skips the enroll button, so real users reach payment without ever logging enroll_clicked. Diagnosis (the key move): stop looking at step totals and count events per user. Run COUNT(*) per user_id for payment_step_viewed: if many users have 2+, it is double-fire (A). Then check users who have payment_step_viewed but no enroll_clicked: if there is a large set, there is an alternate entry path causing under-fire (B). Often both exist. Inspect the firing trigger in code — is payment_step_viewed on mount of a component that remounts? Is enroll_clicked the only path into payment? Fix: bind payment_step_viewed to a single, idempotent page-view (fire once per session-step, dedup on session_id + step), and ensure enroll_clicked (or a unified enrollment_started event) covers every entry into the payment flow. Re-validate by walking all known entry paths and confirming monotonic, non-increasing step counts. Do not put the 41,000 number in the board deck.',
+      keyInsights: [
+        'A later funnel step exceeding an earlier one in a linear flow is structurally impossible for the same users — it is always a fire-order or fire-count bug',
+        'Step totals can\'t distinguish double-fire from under-fire; counting events per user (and finding step-2-without-step-1 users) can',
+        'Fixes are symmetric: make the inflated event fire exactly once, and make the deflated event cover every real entry path'
+      ]
+    },
+    leadershipNote: 'A senior analyst builds a standing funnel-integrity check: every funnel dashboard runs an assertion that each step count is less than or equal to the prior step, and flags violations before a human reads the chart. The PM\'s excitement here is the tell — when a number looks too good and violates a structural invariant, the instrumentation is the first suspect, not the product.',
+    failureMode: {
+      weakAnswer: 'The candidate accepts the framing and tries to explain why the payment page converts so well, or quietly "normalizes" by capping payment_step_viewed at enroll_clicked. They never count events per user, never look for step-2-without-step-1 users, and never inspect the firing trigger — so the underlying double-fire keeps poisoning every other metric built on that event.',
+      interviewerFollowUp: '"You suspect payment_step_viewed double-fires. Write the check that proves it, and the separate check that would instead point to enroll_clicked under-firing. What does each result look like, and what do you do in each case?"',
+    },
+    keyTakeaways: [
+      'In a linear funnel, a later step can never legitimately exceed an earlier step — it signals a double-fire or under-fire bug',
+      'Diagnose by counting events per user and finding step-2-without-step-1 users, not by reading step totals',
+      'Validate funnels with a monotonic non-increasing assertion before trusting any conversion read'
+    ],
+    playbookLinks: []
+  },
+  {
+    id: 'inst16',
+    title: 'Stitching the Anonymous-to-Signed-In Identity',
+    subtitle: 'Half your signups look like they have no marketing source. They do',
+    difficulty: 'senior',
+    isFree: false,
+    domain: 'identity-resolution',
+    company: 'Canva',
+    estimatedMin: 26,
+    tags: ['identity-stitching', 'anonymous-id', 'attribution', 'cross-device', 'aliasing'],
+    situation: 'Canva\'s growth team reports that 48% of new signups show acquisition_source = direct/none. Marketing insists their paid campaigns drive far more than the dashboard credits. You discover that pre-signup activity is tracked under an anonymous_id and post-signup activity under user_id, and the two are never linked. The campaign click and the landing-page session live under the anonymous identity; the signup and everything after lives under the user identity.',
+    question: 'Design the identity stitching so pre-signup (anonymous) activity is correctly attributed to the user after they sign up — across the same device and across devices. What are the hard cases?',
+    hints: [
+      'The core operation is an alias/merge: when a user signs up, you must tie their new user_id to the anonymous_id that was active just before. Where and when do you capture that link?',
+      'Same-device stitching is the easy 80%. The hard cases are cross-device (clicked the ad on mobile, signed up on desktop) and shared devices (a family laptop where two people sign up under one anonymous_id).',
+      'Retroactive vs forward stitching: do you rewrite historical anonymous events to the user_id, or keep a mapping table and join at query time? Each has tradeoffs.'
+    ],
+    modelAnswer: {
+      approach: 'Capture the alias at the identify moment → choose a stitching model → handle cross-device and shared-device → fix attribution and backfill',
+      answer: 'The fix is an identify/alias step. (1) Capture the link at signup: at the moment of signup (and login), emit an identify call that carries both the current anonymous_id and the new user_id, persisting the mapping in an identity graph (anonymous_id -> user_id, with first-seen timestamp). This is the canonical operation analytics SDKs call alias/identify. The campaign click and landing session, tagged with that anonymous_id, now resolve to the user. (2) Stitching model: prefer a mapping-table + query-time resolution over destructively rewriting historical rows. Keep raw events immutable; resolve identity in the modeling layer by joining events to the identity graph and coalescing to a canonical_user_id. This lets you re-run stitching when the graph improves and avoids irreversible rewrites. (3) Attribution: with stitching, first-touch (the campaign click under the anonymous_id) flows to the user, so direct/none collapses toward the true paid share. Decide and document the attribution window (e.g., last anonymous_id active within 30 days pre-signup). (4) Hard cases. Cross-device: mobile-click + desktop-signup leaves two anonymous_ids with no shared device link; stitch them via a deterministic key when available (logged-in on both, or a shared email from a magic link) and accept that probabilistic device matching is lossy and privacy-sensitive — be conservative. Shared device: two people sign up under one anonymous_id; do not blindly merge all anonymous history into both users — cap the alias to the session(s) leading to each signup, and break the anonymous_id association after an identify so the next person starts clean. (5) Backfill: re-resolve historical signups through the identity graph to correct the 48% direct/none, and report the corrected paid share with a note on method. Validation: after stitching, the share of signups with a known first-touch source should jump materially; sanity-check against campaign platform click counts.',
+      keyInsights: [
+        'Identity stitching hinges on capturing the anonymous_id -> user_id alias at the identify moment (signup/login) — without it, pre-signup attribution is permanently lost',
+        'Resolve identity at the modeling layer via an identity graph + query-time join, not by destructively rewriting raw events — so you can re-stitch as the graph improves',
+        'Cross-device and shared-device are the lossy, judgment-heavy cases: prefer deterministic links, be conservative with probabilistic merges, and don\'t bleed one person\'s history into another'
+      ]
+    },
+    leadershipNote: 'At staff level you own the identity graph as shared infrastructure, not a per-team hack, because attribution, retention cohorts, and experiment assignment all depend on a single canonical_user_id. The shared-device merge is also a privacy boundary: over-merging can attach one person\'s behavior to another\'s account, which is both an analytics bug and a trust violation. Set the policy deliberately.',
+    failureMode: {
+      weakAnswer: 'The candidate says "just use user_id everywhere" or rewrites all anonymous events to the first user who signs up on that device, ignoring that pre-signup users have no user_id yet, that cross-device clicks never share a device, and that shared devices will cross-contaminate identities. They produce a stitch that looks complete but silently mis-attributes shared-device and cross-device users.',
+      interviewerFollowUp: '"A user clicks your Instagram ad on their phone, does nothing, then signs up on their work laptop two days later. There is no shared device id and no login on the phone. Does your design attribute that signup to the Instagram campaign? Walk me through exactly what links the two sessions — or honestly tell me it can\'t."',
+    },
+    keyTakeaways: [
+      'Stitch identity by aliasing anonymous_id to user_id at the signup/login moment and storing it in an identity graph',
+      'Resolve to a canonical_user_id at query time over an immutable event log — re-stitchable, non-destructive',
+      'Cross-device and shared-device are lossy: prefer deterministic keys, stay conservative, and protect the privacy boundary'
+    ],
+    playbookLinks: []
+  },
+  {
+    id: 'inst17',
+    title: 'Client-Side or Server-Side for the Purchase Event',
+    subtitle: 'The same conversion, two places to fire it, very different failure modes',
+    difficulty: 'senior',
+    isFree: false,
+    domain: 'instrumentation-architecture',
+    company: 'Booking.com',
+    estimatedMin: 24,
+    tags: ['client-side', 'server-side', 'event-tradeoffs', 'reliability', 'attribution'],
+    situation: 'Booking.com is re-instrumenting its booking_confirmed event. Today it fires client-side from the confirmation page. The data team notices booking_confirmed undercounts vs the reservations database by ~6%, concentrated on mobile web and ad-blocked sessions. A proposal is on the table to move it fully server-side. The marketing team objects: they need this event client-side for ad-platform conversion pixels and on-page UX.',
+    question: 'For booking_confirmed, when should the event be fired client-side, server-side, or both? Make the call and justify the architecture, naming the failure modes of each.',
+    hints: [
+      'Why does the client-side event undercount by 6% on mobile and ad-blocked sessions? What kills a client event before it reaches your pipeline?',
+      'Server-side events are reliable and hard to block, but they lose client context (device, UI state, campaign params on the page) and can\'t fire ad pixels in the browser.',
+      'This is not strictly either/or. What is the source of truth for "did a booking happen," and what is the client event uniquely good for?'
+    ],
+    modelAnswer: {
+      approach: 'Diagnose the undercount → separate "source of truth" from "client context" → choose a hybrid with a single business key → reconcile',
+      answer: 'Diagnose: client-side events are lost to ad blockers, browser tracking-prevention (ITP), network drops, and users closing the tab before the beacon sends — all heavier on mobile web, which explains the 6% mobile/ad-blocked skew. So the client event systematically undercounts a money event. Decision: fire server-side as the source of truth, and keep a client-side event for what only the client can do — but tie them with one business key. Reasoning: "did a booking happen and for how much" is a financial fact the server knows authoritatively when it writes the reservation; that event cannot be blocked, dropped, or spoofed by the client, so server-side booking_confirmed becomes the count of record and will reconcile with the reservations DB. However, server-side loses on-page context (which UI variant, scroll depth, campaign params present in the browser) and cannot fire in-browser ad-conversion pixels. So keep a client-side booking_confirmed_view (or use the ad platforms\' server-side conversion APIs where available) for marketing pixels and UX, explicitly understood to be lossy and not the count of record. Critically, both events carry the same reservation_id so they can be joined and deduplicated; analytics counts off the server event, marketing fires pixels off the client event, and nobody counts the same booking twice. Reconcile continuously: server booking_confirmed vs reservations DB should be ~100%; client vs server gap is your measure of client loss and a health signal. General rule for the org: money/state-change events (purchase, subscription, refund) are server-side source of truth; UI-intent and context events (clicks, views, scroll, page variant) are client-side; high-stakes events that need both get fired on both layers and stitched by a shared business key.',
+      keyInsights: [
+        'Money and state-change events belong server-side as the source of truth — client events are lossy to ad blockers, ITP, and tab-close on exactly the conversions that matter most',
+        'Client-side is uniquely good at on-page context and firing ad pixels — keep it for those, explicitly as lossy and not the count of record',
+        'When you fire both, give them the same business key so you can reconcile and dedup instead of double-counting'
+      ]
+    },
+    leadershipNote: 'A staff engineer makes this a standing principle rather than a per-event debate: state changes are trusted from the server, intent and context from the client, and the two are joined on a shared key. The trap to avoid is letting marketing\'s legitimate need for a browser pixel dictate that the company counts revenue off a client event that an ad blocker can silently delete.',
+    failureMode: {
+      weakAnswer: 'The candidate moves everything server-side and tells marketing to "find another way to fire pixels," breaking ad-platform conversion tracking and losing on-page context — or keeps everything client-side and accepts the 6% undercount on a revenue event. Either way they treat it as binary and miss the hybrid with a shared reservation_id.',
+      interviewerFollowUp: '"You fire booking_confirmed both client-side and server-side. A booking happens, the server event lands, but the client event is eaten by an ad blocker. Later both land for a different booking. How does your design make sure analytics counts each booking exactly once and marketing still fires its pixel where it can?"',
+    },
+    keyTakeaways: [
+      'Fire money/state-change events server-side as the source of truth; they reconcile with the system of record and resist client loss',
+      'Keep client-side events for on-page context and ad pixels — lossy by nature, not the count of record',
+      'When firing both, share a business key so events reconcile and dedup rather than double-count'
+    ],
+    playbookLinks: []
+  },
+  {
+    id: 'inst18',
+    title: 'The Silent Pipeline Gap',
+    subtitle: 'A schema change broke ingestion for two days. Do you backfill, and how?',
+    difficulty: 'staff',
+    isFree: false,
+    domain: 'data-pipeline',
+    company: 'Reddit',
+    estimatedMin: 28,
+    tags: ['etl', 'pipeline-breakage', 'backfill', 'data-quality', 'incident-response'],
+    situation: 'Reddit ships a client update that adds a new required field to the comment_posted event. The ingestion pipeline\'s strict schema validation rejects every event missing the field — but the rejection is silent: bad events go to a dead-letter queue nobody monitors. Two days later, an analyst notices comment_posted volume looks low. 41 million events sit in the dead-letter queue. Dashboards, a weekly exec report, and a live experiment readout all consumed the gap.',
+    question: 'Walk through detection, recovery, and the backfill decision. When is backfilling the right call, when is it not, and how do you avoid corrupting the experiment that ran during the gap?',
+    hints: [
+      'First, scope the blast radius: which downstream artifacts read the affected window, and which of them are already "decided"?',
+      'A dead-letter queue means the data is recoverable — but reprocessing it changes history. What breaks when a number that was already reported suddenly changes?',
+      'The live experiment is the sharp case: a 2-day gap that hit treatment and control unequally is different from one that hit them equally.'
+    ],
+    modelAnswer: {
+      approach: 'Scope the gap → stop the bleeding → decide backfill per consumer → handle the experiment carefully → fix the silent-failure root cause',
+      answer: 'Scope (first hour): quantify the gap — 41M events, exact start/end timestamps, and which fields/platforms are affected (only events missing the new field? all comment_posted? other events sharing the pipeline?). Map downstream consumers of the affected window: dashboards, the weekly exec report, the experiment readout, any ML features, any data already exported externally. Stop the bleeding: relax the validation so the new required field is treated as nullable/optional (a new field should almost never have been hard-required at ingestion), redeploy so live events flow again, and confirm the dead-letter queue stops growing. Backfill decision, per consumer: backfilling is right when the data is recoverable (it is — it\'s in the DLQ) and the corrected numbers are still actionable. Reprocess the 41M DLQ events through the fixed pipeline, deduping on event id so a replay can\'t double-count. For internal dashboards and not-yet-published reports: backfill and annotate the corrected window. For the weekly exec report that already shipped with the gap: do not silently rewrite history — issue a correction with the restated number and a one-line cause, so trust is preserved. For anything immutable or externally reported, restate explicitly rather than quietly mutate. The experiment (the sharp case): determine whether the gap hit treatment and control symmetrically. If comment_posted was suppressed equally in both arms, the relative effect may still be estimable after backfill, but power and any time-based analysis are compromised — backfill, then re-run the readout on complete data. If the missing field correlated with an arm (e.g., the client update rolled out unevenly), the gap is non-random across arms and the readout is contaminated; do not ship on it — backfill, validate balance, and extend or restart. Either way, never report the experiment off the gapped window. Root cause / prevention: the real bug is the silent dead-letter queue. Add DLQ depth monitoring with alerting (page if DLQ grows beyond a threshold), make new event fields additive-and-optional by contract, and add a volume-anomaly monitor on comment_posted so a 2-day drop pages in hours, not days.',
+      keyInsights: [
+        'A recoverable gap (events in a dead-letter queue) makes backfill the default — but reprocessing changes already-reported history, so restate openly rather than silently mutate published numbers',
+        'Dedup on event id when replaying a DLQ, or the backfill double-counts on top of any events that did get through',
+        'The experiment is the trap: a gap that hit arms equally may be salvageable after backfill; a gap correlated with an arm contaminates the readout — validate balance before trusting it'
+      ]
+    },
+    leadershipNote: 'The headline lesson is not the schema change — it is that a pipeline failed silently for two days because the dead-letter queue had no monitoring. A staff engineer fixes the class of bug: new fields are additive/optional by contract so they can never hard-reject ingestion, DLQ depth is alerted, and every high-volume event has a volume-anomaly monitor. Silent failures are the most expensive kind because they corrupt decisions before anyone knows.',
+    failureMode: {
+      weakAnswer: 'The candidate reprocesses the dead-letter queue and overwrites the affected window everywhere, including silently rewriting the already-shipped exec report, and re-runs the experiment readout on the backfilled data without checking whether the gap hit treatment and control unequally. They fix the symptom, corrupt the experiment, and erode trust by changing a reported number with no correction note — and they never address the unmonitored DLQ that caused it.',
+      interviewerFollowUp: '"The client update that added the required field rolled out to iOS first and Android a day later, and comment_posted is more common on Android. The experiment\'s arms had different iOS/Android mixes. After you backfill, is that experiment readout trustworthy? Walk me through how you\'d check, and what you do if it isn\'t."',
+    },
+    keyTakeaways: [
+      'Backfill when data is recoverable and still actionable; dedup on event id when replaying a dead-letter queue',
+      'Don\'t silently rewrite already-published numbers — restate with a correction note to preserve trust',
+      'A pipeline gap can contaminate a live experiment if it hit arms unequally — validate arm balance before trusting the readout',
+      'The root fix is monitoring the silent failure: alert on DLQ depth and event-volume anomalies, make new fields optional by contract'
+    ],
+    playbookLinks: []
+  },
+  {
+    id: 'inst19',
+    title: 'Validating a New Event Before You Trust It',
+    subtitle: 'A new event went live yesterday. A VP wants the number today. Is it real?',
+    difficulty: 'junior',
+    isFree: false,
+    domain: 'data-quality',
+    company: 'Slack',
+    estimatedMin: 18,
+    tags: ['validation', 'qa', 'new-event', 'data-quality', 'sanity-checks'],
+    situation: 'Slack shipped a new huddle_started event yesterday to measure adoption of audio huddles. This morning a VP saw a teammate mention it and asks for "huddle adoption numbers by lunch" for an all-hands. The event has been live for ~18 hours. You have never validated it. The PM is already drafting a slide that says "huddles adopted by 12% of workspaces."',
+    question: 'Before this number goes in front of the company, what validation do you run on a brand-new event? Give the concrete checks and what each one would catch.',
+    hints: [
+      'A new event can be wrong in many ways: not firing at all, firing too much, firing on the wrong action, missing properties, or not arriving for all platforms yet.',
+      'Some checks are about the event in isolation (is it well-formed?); others compare it against something you already trust (does its volume make sense?).',
+      'What is the risk of putting an 18-hour-old, never-validated number in front of the whole company — and what is the honest thing to tell the VP?'
+    ],
+    modelAnswer: {
+      approach: 'Run isolation checks → run cross-validation checks → check coverage/recency → decide what you can honestly say',
+      answer: 'Validation battery before trusting huddle_started: (1) Is it firing at all and at a sane volume? Count events per hour since launch. Zero or near-zero means it is not wired up; implausibly high means it is double-firing or bound to a render. (2) Does it fire on the right action? Manually start a huddle in a test workspace and confirm exactly one event lands, with correct properties (workspace_id, user_id, platform, huddle_id), and confirm it does NOT fire on merely viewing the huddle button. One event per real action — no more, no less. (3) Property completeness: what fraction of events have each required property populated and non-null? A property that is 40% null breaks any segmentation. (4) Cross-validate volume against something trusted: compare huddle_started counts to an independent signal — server-side huddle session logs, or the count of distinct huddle_id values, or audio-infra connection counts. If analytics says 50k huddles but the media server saw 200k sessions, the event is undercounting. (5) Coverage by platform: is it live on web, iOS, AND Android, or only the platform that shipped first? An 18-hour-old event is often live on a subset — computing "adoption" off partial platform coverage understates it badly. (6) Recency/lag: confirm events are arriving with normal pipeline latency, not piling up delayed. (7) Denominator sanity: "12% of workspaces" — is the denominator all workspaces, or only eligible ones on a version that has the feature? Honest call: an 18-hour-old, never-validated event with likely-partial platform coverage is not safe for an all-hands number. Tell the VP exactly that: give a directional, clearly-caveated read ("early signal, web-only, first day"), not a precise 12% that will be quoted forever. The cost of a wrong number in an all-hands is that it gets repeated and you spend weeks walking it back.',
+      keyInsights: [
+        'Validate a new event in isolation (fires once, on the right action, with complete properties) AND against an independent trusted source before quoting it',
+        'New events are usually live on a subset of platforms first — computing adoption off partial coverage silently understates the metric',
+        'The honest move under time pressure is a clearly-caveated directional read, never a precise number that will be quoted forever from an unvalidated event'
+      ]
+    },
+    leadershipNote: 'A senior analyst treats "can I trust this number" as a yes/no gate with a checklist, and is willing to tell a VP "not yet, here is a directional read instead." The reputational asymmetry is the point: a caveated estimate that holds up beats a precise number that gets retracted. Bake a new-event validation checklist into the launch process so this isn\'t improvised under pressure each time.',
+    failureMode: {
+      weakAnswer: 'The candidate queries huddle_started, sees a number, and hands over "12% of workspaces" because the query ran without errors. They don\'t check whether it fires once per real action, whether properties are populated, whether it\'s live on all platforms, or whether the volume reconciles with any independent source — so a web-only, partially-instrumented first-day number goes into the all-hands as fact.',
+      interviewerFollowUp: '"You run the query and get 12%. Name three distinct ways that number could be wrong even though the query returned clean results — and the single fastest check for each before it goes on the slide."',
+    },
+    keyTakeaways: [
+      'Validate a new event before trusting it: fires once, on the right action, properties complete, volume reconciles with an independent source',
+      'Check platform coverage and recency — new events are often live on one platform first, which biases adoption down',
+      'Under pressure, give a caveated directional read, not a precise unvalidated number that will be quoted forever'
+    ],
+    playbookLinks: []
+  },
+  {
+    id: 'inst20',
+    title: 'One Event, Three Platforms, Three Definitions',
+    subtitle: 'video_started means something different on web, iOS, and Android',
+    difficulty: 'senior',
+    isFree: false,
+    domain: 'cross-platform',
+    company: 'YouTube',
+    estimatedMin: 26,
+    tags: ['cross-platform', 'web', 'ios', 'android', 'event-consistency', 'autoplay'],
+    situation: 'YouTube\'s video_started event powers the cross-platform "views" metric. An analyst notices web video starts per user are 2x iOS. Investigation reveals the event fires differently per platform: web fires video_started on autoplay-on-hover preview; iOS fires it only when playback actually begins after a user tap; Android fires it on player initialization, before any frame renders. Each platform team instrumented in isolation, all believing they were doing it right.',
+    question: 'The same event name carries three different definitions across platforms. Why is this so dangerous, how do you reconcile it, and how do you prevent it for the next cross-platform event?',
+    hints: [
+      'The danger is not just inaccuracy — it is that the metric is invalid in a way that looks valid. A cross-platform "views" number that sums three different definitions is meaningless but will be charted and compared.',
+      'Reconciliation is not "pick one platform\'s code." It starts with agreeing on the single semantic definition of what video_started should mean, then conforming all three to it.',
+      'Prevention is the real lesson: how do you stop three teams from independently inventing three definitions of the same event?'
+    ],
+    modelAnswer: {
+      approach: 'Name why it\'s invalid not just inaccurate → agree the canonical definition → conform each platform → backfill comparability → prevent via shared spec',
+      answer: 'Why it\'s dangerous: the cross-platform views metric sums three different events under one name, so it is not noisy — it is invalid, and invalid in a way that passes every smoke test (the number exists, trends, and gets compared platform-to-platform in exec reviews and ads reporting). Web\'s hover-autoplay and Android\'s pre-render init both inflate vs iOS\'s real-playback definition, manufacturing a fake "web/Android engage more" story and breaking any platform comparison, any cross-platform funnel, and ad view counts. Reconcile: (1) Agree the canonical semantic first, before touching code: define video_started precisely — e.g., "a human-intended playback that renders at least the first frame," explicitly excluding hover-preview autoplay and excluding player init that never renders. Document it in the event registry with positive and negative examples. (2) Conform each platform to that definition: web stops firing on hover-preview (or fires a separate video_preview_autoplayed event for that distinct action); Android moves the fire from player-init to first-frame-rendered; iOS likely already matches and becomes the reference. Keep the genuinely different actions as their own named events rather than cramming them into video_started. (3) Restore comparability: from the conformance date forward, the metric is apples-to-apples; for history, either backfill a corrected definition where the raw signals exist (e.g., web can subtract hover-autoplays if they were distinguishable) or annotate a clear break in series and don\'t compare across it. (4) Validate: after conformance, web/iOS/Android starts-per-user should converge toward each other (allowing for real platform differences), and the gap that\'s left is real, not definitional. Prevent (the actual lesson): cross-platform events must be specified once in a shared, platform-agnostic spec — the semantic definition, the firing trigger described behaviorally (not per-SDK), required properties, and worked examples — and each platform implements against that single spec, not its own interpretation. Add a cross-platform consistency check: alert when per-platform rates of a shared event diverge beyond a threshold, which would have caught the 2x immediately. Ideally provide a shared tracking library or a conformance test suite so "fire video_started" means the same behavior everywhere.',
+      keyInsights: [
+        'A shared event name with per-platform definitions produces an invalid-but-plausible metric — it sums different things and silently fakes platform differences',
+        'Reconcile by agreeing the canonical semantic first, then conforming each platform\'s firing trigger to it; split genuinely-different actions into their own events',
+        'Prevent recurrence with a single platform-agnostic event spec (behavioral trigger + examples) plus a divergence monitor across platforms'
+      ]
+    },
+    leadershipNote: 'At staff level the fix is organizational: cross-platform events are owned by one spec and one definition, not by whichever team shipped first. The deep failure here is that three competent teams each "did it right" against no shared definition — so the safeguard is a single source-of-truth spec and a conformance/divergence check, not better individual intentions. A 2x per-platform divergence on a shared event should page, because it is almost always a definitional bug.',
+    failureMode: {
+      weakAnswer: 'The candidate \"fixes\" it by normalizing in SQL — multiplying iOS by 2 or capping web — without agreeing on what video_started should actually mean. They leave three definitions in place and paper over the gap with a fudge factor that breaks the moment any platform\'s behavior changes, and they never create a shared spec, so the next cross-platform event repeats the whole mess.',
+      interviewerFollowUp: '"You\'ve aligned all three platforms to fire on first-frame-rendered. The web team says hover-autoplay previews are a real, valuable behavior they still want to measure. Where does that behavior go now, and how do you make sure it never gets counted as a video_started again?"',
+    },
+    keyTakeaways: [
+      'A shared event name with different per-platform definitions yields an invalid metric that still looks valid — the most dangerous kind',
+      'Reconcile by defining the canonical semantic first, then conforming every platform\'s trigger; split distinct actions into distinct events',
+      'Prevent with one platform-agnostic event spec (behavioral trigger + examples) and a cross-platform divergence alert'
+    ],
+    playbookLinks: []
+  },
+  {
+    id: 'inst21',
+    title: 'The Retroactive Property Request',
+    subtitle: 'A PM needs a breakdown the event never captured. What can you actually recover?',
+    difficulty: 'staff',
+    isFree: false,
+    domain: 'data-quality',
+    company: 'Airtable',
+    estimatedMin: 24,
+    tags: ['schema-evolution', 'backfill', 'enrichment', 'event-design', 'data-quality'],
+    situation: 'Airtable\'s record_created event has fired for two years with properties { user_id, base_id, timestamp }. A PM now needs to know what creation_surface each record came from (grid view, form, API, automation) for a roadmap decision. The event never captured creation_surface. The PM asks you to "just add it and backfill the last two years." You need to tell them what is and isn\'t recoverable, and design the path forward.',
+    question: 'A property was never instrumented and is now needed historically. What can you legitimately reconstruct, what is genuinely lost, and how do you instrument going forward so this doesn\'t recur?',
+    hints: [
+      'A missing property is sometimes recoverable from other data you DID capture, and sometimes gone forever. The skill is distinguishing the two honestly.',
+      'Can creation_surface be inferred from any signal that was logged — adjacent events, server logs, the API gateway, the automation engine? Inference is not the same as the ground-truth property, and you must label it as such.',
+      'Going forward is the easy part (add the property). The judgment is being honest about the historical gap rather than fabricating a clean backfill.'
+    ],
+    modelAnswer: {
+      approach: 'Separate recoverable-by-inference from truly-lost → reconstruct what you can and label it → add the property forward → be honest about the gap',
+      answer: 'First, the honest framing: a property that was never captured is not "in the data waiting to be added" — going forward you instrument it; historically you can only reconstruct it from signals that WERE captured, with stated confidence, and accept that some of it is genuinely lost. Audit recoverability per surface: (1) API-created records — likely recoverable: the API gateway logs almost certainly recorded which requests hit the record-creation endpoint with auth context; join record_created to gateway logs on user_id + timestamp + base_id to tag creation_surface = api with high confidence. (2) Automation-created records — likely recoverable: the automation engine has its own run logs; records created in the same transaction as an automation run can be tagged automation. (3) Form vs grid (both in-app UI) — likely the hard, partly-lost case: if there was no adjacent event distinguishing them (e.g., a form_submitted event that shares a key with record_created), they may be indistinguishable in history; you might infer probabilistically (records created in bursts matching form-submission patterns, or sessions where only form routes were active) but this is an estimate, not ground truth. State that explicitly. Build the backfill as a derived, clearly-labeled field: creation_surface_inferred with a confidence and a method note, kept separate from a true creation_surface so nobody mistakes reconstruction for ground truth. Where a surface is unrecoverable, label it unknown rather than guessing — an honest "32% unknown for the historical window" is far better than a fabricated clean split that drives a roadmap decision wrongly. Forward: add creation_surface as a first-class property on record_created now, populated at emission on every surface, validate it (the new-event battery: fires with the property non-null across all surfaces), and from that date forward you have ground truth. Give the PM: ground-truth going forward, high-confidence inference for API/automation history, and an honest unknown bucket for the form-vs-grid history — with the caveat that the roadmap call should lean on the forward data and the recoverable segments, not the inferred soft split. Prevention: this recurs because events are under-propertied at design time; the fix is a measurement-plan habit of capturing the source/surface/context dimension on creation and action events by default, since "where did this come from" is asked retroactively about almost everything.',
+      keyInsights: [
+        'A never-captured property is reconstructable only from signals that WERE logged (API gateway, automation engine, adjacent events) — and that reconstruction is inferred, not ground truth',
+        'Label reconstructed values as inferred with confidence and an explicit unknown bucket; never present a backfilled estimate as if it were captured data',
+        'The honest deliverable is ground-truth-forward + high-confidence-recoverable-history + an unknown bucket — and steering the decision toward the trustworthy parts'
+      ]
+    },
+    leadershipNote: 'The staff move is resisting the implied ask — "just backfill it cleanly" — because a fabricated clean history feels helpful and quietly corrupts the roadmap decision it feeds. Reconstruct what is genuinely recoverable, label confidence, and name what is lost. The durable fix is upstream: design events with the context/source dimension from the start, because "where did this come from" is the single most common retroactive question, and it is cheap to capture at emission and impossible to recover later.',
+    failureMode: {
+      weakAnswer: 'The candidate promises to "backfill the last two years" and ships a creation_surface that looks complete but is actually a guess for the in-app records, presenting inferred values with no confidence labeling or unknown bucket. The PM makes a roadmap call on a fabricated split. Alternatively they say "it\'s impossible, nothing can be done" and miss the API/automation history that genuinely was recoverable from gateway and engine logs.',
+      interviewerFollowUp: '"You tell the PM you can recover API and automation history but not reliably distinguish form from grid before today. The PM says \'just split the in-app ones 50/50 so the chart is complete.\' What do you say, and what do you actually put in the field for those records?"',
+    },
+    keyTakeaways: [
+      'A never-captured property is only reconstructable from signals that were logged — and that is inference, not ground truth',
+      'Label backfilled values as inferred with confidence and keep an explicit unknown bucket; never fake a clean history',
+      'Add the property as first-class going forward, and capture source/surface/context by default since it is the most common retroactive ask'
+    ],
+    playbookLinks: []
   }
 ];
 

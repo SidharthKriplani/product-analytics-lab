@@ -478,7 +478,8 @@ table { border-collapse: collapse; }
   overflow: hidden;
 }
 /* SQL Lab — browse mode (full screen, no sidebar offset) */
-.sql-lab-browse-panel {
+.sql-lab-browse-panel,
+.sql-lab-beginner-panel {
   position: fixed;
   top: 0; bottom: 0;
   left: 0; right: 0;
@@ -511,7 +512,8 @@ table { border-collapse: collapse; }
   box-sizing: border-box;
 }
 @media (max-width: 900px) {
-  .sql-lab-browse-panel {
+  .sql-lab-browse-panel,
+  .sql-lab-beginner-panel {
     left: 0;
     top: calc(46px + env(safe-area-inset-top, 0px));
     padding: 1rem;
@@ -529,6 +531,13 @@ table { border-collapse: collapse; }
     left: 0; right: 0;
     top: calc(46px + env(safe-area-inset-top, 0px) + 44vh);
     padding: 0.875rem 1rem;
+  }
+  /* Beginner tutorial — stack the lesson rail above the lesson content */
+  .sql-beginner-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .sql-beginner-grid > div:first-child {
+    position: static !important;
   }
 }
 
@@ -1242,6 +1251,7 @@ button:not(:disabled):active {
 /* ── Terminal Lab — scoped variable overrides ────────────────────────────── */
 /* All var(--x) references inside SQL Lab panels automatically use dark vals */
 .sql-lab-browse-panel,
+.sql-lab-beginner-panel,
 .sql-lab-solve-left,
 .sql-lab-solve-right {
   --bg: #070A12;

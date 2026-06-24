@@ -1,5 +1,7 @@
 // Blog / Learn layer
-// Full topic population — 12 posts have full content, rest are stubs
+// Full topic population — every post below ships with a complete content array.
+// The listing only surfaces posts whose content is written (content.length > 0);
+// any future post added without content renders as a dimmed, non-clickable "Coming Soon" card.
 // Each post maps to a room with a "Practice this now →" CTA
 
 import { useState } from 'react';
@@ -1918,6 +1920,7 @@ export function BlogBrowser({ onNavigate }) {
   const [selectedPost, setSelectedPost] = useState(null);
   const total = POSTS.length;
   const writtenCount = POSTS.filter(p => p.content && p.content.length > 0).length;
+  const pendingCount = total - writtenCount;
 
   // If a post is selected, render the reader view
   if (selectedPost) {
@@ -1948,39 +1951,33 @@ export function BlogBrowser({ onNavigate }) {
           Interviewers test concepts indirectly — they give you a scenario and watch whether the right mental model surfaces on its own. These deep dives are written to build that instinct: each one targets a specific pattern, shows where candidates get it wrong, and links directly to the practice cases where it shows up live. Read, then practice — the sequence matters.
         </p>
 
-        {/* Stats row */}
+        {/* Stats row — count reflects written articles only, never the planned total */}
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{
             background: 'var(--surface-2)', border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.7rem',
             display: 'flex', alignItems: 'baseline', gap: '0.3rem',
           }}>
-            <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--accent)', lineHeight: 1 }}>{total}</span>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>topics planned</span>
-          </div>
-          <div style={{
-            background: 'var(--surface-2)', border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.7rem',
-            display: 'flex', alignItems: 'baseline', gap: '0.3rem',
-          }}>
             <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--green)', lineHeight: 1 }}>{writtenCount}</span>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>articles live</span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>{writtenCount === 1 ? 'article' : 'articles'} to read</span>
           </div>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-            background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)',
-            borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.65rem',
-            fontSize: '0.75rem', color: 'var(--yellow)', fontWeight: 600,
-          }}>
-            ⏳ More coming soon
-          </div>
+          {pendingCount > 0 && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+              background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)',
+              borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.65rem',
+              fontSize: '0.75rem', color: 'var(--yellow)', fontWeight: 600,
+            }}>
+              ⏳ {pendingCount} more coming soon
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Category sections */}
+      {/* Category sections — only surface posts that are actually written */}
       {CATEGORIES.map(cat => {
         const cfg = CATEGORY_CONFIG[cat];
-        const posts = POSTS.filter(p => p.category === cat);
+        const posts = POSTS.filter(p => p.category === cat && p.content && p.content.length > 0);
         if (!posts.length) return null;
         return (
           <div key={cat} style={{ marginBottom: '2.5rem' }}>
