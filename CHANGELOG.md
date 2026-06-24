@@ -4,6 +4,18 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.74.0] — 2026-06-24 [FOUNDATIONS TIER-3 AUDIT — THE END GOAL, DELIVERED]
+
+The original goal: audit Foundations content against the eval rubric to find real problems. The local LLMs couldn't do the judgment half (proven over V5.71–5.73), so this pass was done by frontier-model review (me + 3 parallel reviewers), one per room. New doc: `docs/FOUNDATIONS-AUDIT.md` — per-module score (1–5) + evidence for all 79 modules, prioritized fix lists per room.
+
+Result discriminated (not all-5, not carpet-flag): ~64/79 clean, **4 must-fixes**, ~11 polish.
+- **ef08 (Exp):** a single significant A/A test is framed as proof of a broken platform — but ~5% of valid A/A tests are significant by chance. Teach the p-value distribution / repeated A/A.
+- **rf07 (RCA):** `revenue = users × sessions × conversion × AOV` is dimensionally wrong as written (needs per-unit terms) + "every drop lives in exactly one node" contradicts rf12/rf14.
+- **mf13 (Metrics):** near-duplicate of mf08 with contradicting sample-size numbers — differentiate or merge.
+- **sf26 (Stats):** Bayesian credible-interval "exactly the probability" claim omits prior-dependence.
+
+Plus high-value 4s (mostly Stats factual soft-spots): sf16, sf29, sf32, mf06, rf05. No content edited yet — this is the punch list; fixes are the next pass. Content unchanged this version (doc only).
+
 ## [5.73.0] — 2026-06-24 [KEYED-ROOM AUDIT HARNESS + STF DUP-ID BUG FIX]
 
 Pivot from Foundations (where local LLMs proved unable to judge pedagogy — 7B and 14B both rubber-stamp, 8B carpet-flags) to the KEYED rooms, where the task is verifiable consistency, not taste — the local 14B's actual strength.
