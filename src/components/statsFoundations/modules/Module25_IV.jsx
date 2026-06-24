@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { loadSFState, saveSFState } from '../../../utils/statsFoundationsState.js';
+import { Icon } from '../../shared/Icon.jsx';
 
 const CONDITIONS = [
   {
@@ -181,7 +182,7 @@ export function Module25_IV({ module, onNext }) {
               ) : (
                 <div style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>
                   <span style={{ fontWeight: 700, color: isCorrect ? 'var(--green)' : 'var(--red)', marginRight: 6 }}>
-                    {isCorrect ? '✓ Correct —' : '✗ Not quite —'}
+                    {isCorrect ? <><Icon name='check' size={15} color='currentColor' /> Correct —</> : <><Icon name='x' size={15} color='currentColor' /> Not quite —</>}
                   </span>
                   <span style={{ color: 'var(--text-secondary)' }}>
                     {isCorrect
@@ -224,7 +225,7 @@ export function Module25_IV({ module, onNext }) {
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button className="pal-glow-pulse" onClick={onNext} style={{ padding: '0.7rem 1.75rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--green)', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', boxShadow: 'var(--shadow)', letterSpacing: '0.02em' }}>
-          Complete ✓
+          Complete <Icon name='check' size={15} color='currentColor' />
         </button>
       </div>
     </div>

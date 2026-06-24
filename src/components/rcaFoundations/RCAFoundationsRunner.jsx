@@ -5,6 +5,7 @@ import { track } from '../../utils/analytics.js';
 import { loadRFState, saveRFState } from '../../utils/rcaFoundationsState.js';
 import { InsightBox, NextBtn, MCQOption } from '../shared/FoundationPrimitives.jsx';
 import { FoundationRunnerShell } from '../shared/FoundationRunnerShell.jsx';
+import { Icon } from '../shared/Icon.jsx';
 function shuffleArr(arr) {
   var a = arr.slice();
   for (var i = a.length - 1; i > 0; i--) {
@@ -197,7 +198,7 @@ function Module_RF01({ onComplete }) {
               {revealed && (
                 <div style={{ fontSize: '0.75rem', fontWeight: 700, color: isCorrect ? 'var(--teal)' : 'var(--red)' }}>
                   {isCorrect
-                    ? aLayer.label + ' ✓'
+                    ? <>{aLayer.label} <Icon name='check' size={12} color='currentColor' /></>
                     : 'Correct: ' + correctLayer.label}
                 </div>
               )}
@@ -351,7 +352,7 @@ function Module_RF02({ onComplete }) {
                 fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5,
                 padding: '0.3rem 1rem 0.6rem', marginBottom: '0.1rem',
               }}>
-                {d.correct ? '✓' : '✗'} {d.explanation}
+                {d.correct ? <Icon name='check' size={13} color='var(--green)' /> : <Icon name='x' size={13} color='var(--red)' />} {d.explanation}
               </div>
             )}
           </div>
@@ -542,7 +543,7 @@ function Module_RF03({ onComplete }) {
               </div>
               {triageRevealed && (
                 <div style={{ marginTop: '0.4rem', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  {isCorrect ? '✓' : '✗'} <strong style={{ color: signal.answer === 'data' ? 'var(--teal)' : 'var(--purple)' }}>{signal.answer === 'data' ? 'Data Issue' : 'Product Signal'}.</strong> {signal.explanation}
+                  {isCorrect ? <Icon name='check' size={13} color='var(--green)' /> : <Icon name='x' size={13} color='var(--red)' />} <strong style={{ color: signal.answer === 'data' ? 'var(--teal)' : 'var(--purple)' }}>{signal.answer === 'data' ? 'Data Issue' : 'Product Signal'}.</strong> {signal.explanation}
                 </div>
               )}
             </div>
@@ -596,7 +597,7 @@ function Module_RF03({ onComplete }) {
         )}
         {mcqAnswered && (
           <div className='pal-reveal-in' style={{ marginTop: '0.75rem', background: mcqSelected === MCQ.correct ? 'var(--teal-bg)' : 'var(--red-bg)', border: '1px solid ' + (mcqSelected === MCQ.correct ? 'var(--teal-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-            <strong>{mcqSelected === MCQ.correct ? '✓ Correct. ' : '✗ Not quite. '}</strong>{MCQ.explanation}
+            <strong>{mcqSelected === MCQ.correct ? <><Icon name='check' size={13} color='var(--green)' /> Correct. </> : <><Icon name='x' size={13} color='var(--red)' /> Not quite. </>}</strong>{MCQ.explanation}
           </div>
         )}
       </div>
@@ -1059,7 +1060,7 @@ function Module_RF06({ onComplete }) {
                   fontSize: '0.7rem', fontWeight: 800,
                   color: isDone ? '#fff' : isActive ? 'var(--teal)' : 'var(--text-muted)',
                 }}>
-                  {isDone ? '✓' : i + 1}
+                  {isDone ? <Icon name='check' size={13} color='currentColor' /> : i + 1}
                 </div>
                 <span style={{
                   fontWeight: isActive ? 700 : 600, fontSize: '0.88rem',
@@ -3262,7 +3263,7 @@ function Module_RF15({ onComplete }) {
                         </span>
                         {userRanks[h.id] === h.rank ? (
                           <span style={{ fontSize: '0.71rem', padding: '0.1rem 0.45rem', borderRadius: '20px', background: 'var(--teal-bg)', color: 'var(--teal)', fontWeight: 700, border: '1px solid var(--teal-border)' }}>
-                            ✓ Your rank matched
+                            <Icon name='check' size={11} color='currentColor' /> Your rank matched
                           </span>
                         ) : (
                           <span style={{ fontSize: '0.71rem', padding: '0.1rem 0.45rem', borderRadius: '20px', background: 'var(--yellow-bg)', color: 'var(--yellow)', fontWeight: 700, border: '1px solid var(--yellow-border)' }}>

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Icon } from '../../shared/Icon.jsx';
 
 // ── Math helpers ──────────────────────────────────────────────────────────────
 function erf(x) {
@@ -168,7 +169,7 @@ export function Module20_PracticalSignificance({ module, onNext }) {
         <div style={{ flex: 1, minWidth: 130, background: pSig ? 'var(--green-bg)' : 'var(--red-bg)', border: `1.5px solid ${pSig ? 'var(--green-border)' : 'var(--red-border)'}`, borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, color: pSig ? 'var(--green)' : 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>p-value</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 900, color: pSig ? 'var(--green)' : 'var(--red)', fontVariantNumeric: 'tabular-nums' }}>p = {pLabel}</div>
-          <div style={{ fontSize: '0.75rem', color: pSig ? 'var(--green)' : 'var(--red)', marginTop: '0.3rem' }}>{pSig ? '✓ Significant (p < 0.05)' : '✗ Not significant'}</div>
+          <div style={{ fontSize: '0.75rem', color: pSig ? 'var(--green)' : 'var(--red)', marginTop: '0.3rem' }}>{pSig ? <><Icon name='check' size={12} color='var(--green)' /> {'Significant (p < 0.05)'}</> : <><Icon name='x' size={12} color='var(--red)' /> Not significant</>}</div>
         </div>
 
         {/* Cohen's h */}

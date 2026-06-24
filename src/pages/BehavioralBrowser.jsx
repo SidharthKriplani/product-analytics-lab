@@ -327,7 +327,7 @@ export function BehavioralBrowser({ onStart, unlocked }) {
                         borderRadius: '4px', padding: '0.1rem 0.4rem',
                       }}>Free</span>
                     )}
-                    {isLocked && <span style={{ fontSize: '0.75rem' }}>🔒</span>}
+                    {isLocked && <span style={{ fontSize: '0.75rem' }}><Icon name='lock' size={12} color='currentColor' /></span>}
                   </div>
 
                   {/* Title */}
@@ -363,7 +363,7 @@ export function BehavioralBrowser({ onStart, unlocked }) {
                     borderRadius: '6px', padding: '0.3rem 0.6rem',
                     whiteSpace: 'nowrap', flexShrink: 0,
                   }}>
-                    {prog.rating === 'strong' ? '✓ Nailed it' : prog.rating === 'partial' ? '~ Partial' : '✗ Revisit'}
+                    {prog.rating === 'strong' ? (<><Icon name='check' size={12} color='currentColor' /> Nailed it</>) : prog.rating === 'partial' ? '~ Partial' : (<><Icon name='x' size={12} color='currentColor' /> Revisit</>)}
                   </div>
                 )}
               </div>

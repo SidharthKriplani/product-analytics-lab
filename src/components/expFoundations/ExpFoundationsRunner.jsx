@@ -4,6 +4,7 @@ import { saveExpFoundationProgress, getAllExpFoundationProgress } from '../../ut
 import { track } from '../../utils/analytics.js';
 import { InsightBox as SharedInsightBox, NextBtn as SharedNextBtn, MCQOption, CheckBtn as SharedCheckBtn, InstructionBox as SharedInstructionBox } from '../shared/FoundationPrimitives.jsx';
 import { FoundationRunnerShell } from '../shared/FoundationRunnerShell.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 // ── Thin wrappers: shared primitives default to teal; ExpFoundations uses accent (blue) ──
 function InsightBox(props) {
@@ -324,7 +325,7 @@ function Module_EF02({ onComplete }) {
                   marginTop: '0.6rem', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5,
                   borderTop: '1px solid var(--border)', paddingTop: '0.5rem',
                 }}>
-                  {isCorrect ? '✓' : '✗'} {s.explanation}
+                  {isCorrect ? <Icon name="check" size={13} color="var(--green)" /> : <Icon name="x" size={13} color="var(--red)" />} {s.explanation}
                 </div>
               )}
             </div>

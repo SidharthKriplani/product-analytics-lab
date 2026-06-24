@@ -274,7 +274,7 @@ export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
             <span style={{ fontSize: '0.8rem', color: response.trim().length < 40 ? 'var(--text-dim)' : 'var(--teal)' }}>
               {response.trim().length < 40
                 ? `${response.trim().length}/40 characters to unlock`
-                : '✓ Ready to reveal'}
+                : <><Icon name="check" size={13} color="var(--teal)" /> Ready to reveal</>}
             </span>
           </div>
           <div className="pal-textarea-wrap" style={{ marginBottom: 16 }}>
@@ -301,7 +301,7 @@ export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
                 color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
               }}
             >
-              {noteSaved ? '✓ Saved' : 'Save note'}
+              {noteSaved ? <><Icon name="check" size={12} color="var(--green)" /> Saved</> : 'Save note'}
             </button>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -480,7 +480,7 @@ export function EstimationRunner({ caseId, onBack, onNext, onNavigate }) {
                 color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer',
               }}
             >
-              ↺ Try again
+              <Icon name="rotate-ccw" size={14} color="currentColor" /> Try again
             </button>
             <button
               onClick={onBack}

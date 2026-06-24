@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { loadSFState, saveSFState } from '../../../utils/statsFoundationsState.js';
+import { Icon } from '../../shared/Icon.jsx';
 
 const MCQ = {
   id: 'ad_counterfactual',
@@ -127,19 +128,19 @@ export function Module21_Counterfactuals({ module, onNext }) {
                     onClick={() => handleAnswer(s.id, 'causal')}
                     style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--green-border)', background: 'var(--green-bg)', color: 'var(--green)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}
                   >
-                    Causal ✓
+                    Causal <Icon name='check' size={13} color='currentColor' />
                   </button>
                   <button
                     onClick={() => handleAnswer(s.id, 'confounded')}
                     style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--red-border)', background: 'var(--red-bg)', color: 'var(--red)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}
                   >
-                    Confounded ✗
+                    Confounded <Icon name='x' size={13} color='currentColor' />
                   </button>
                 </div>
               ) : (
                 <div style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>
                   <span style={{ fontWeight: 700, color: isCorrect ? 'var(--green)' : 'var(--red)', marginRight: 6 }}>
-                    {isCorrect ? '✓ Correct —' : '✗ Not quite —'}
+                    {isCorrect ? <><Icon name='check' size={15} color='currentColor' /> Correct —</> : <><Icon name='x' size={15} color='currentColor' /> Not quite —</>}
                   </span>
                   <span style={{ color: 'var(--text-secondary)' }}>{s.explanation}</span>
                 </div>
@@ -196,12 +197,12 @@ export function Module21_Counterfactuals({ module, onNext }) {
                 </button>
                 {mcqRevealed && isChosen && (
                   <div style={{ fontSize: '0.8rem', color: opt.correct ? 'var(--green)' : 'var(--red)', lineHeight: 1.55, marginTop: '0.3rem', paddingLeft: '0.25rem' }}>
-                    {opt.correct ? '✓ ' : '✗ '}{opt.feedback}
+                    {opt.correct ? <Icon name='check' size={13} color='currentColor' /> : <Icon name='x' size={13} color='currentColor' />} {opt.feedback}
                   </div>
                 )}
                 {mcqRevealed && !isChosen && opt.correct && (
                   <div style={{ fontSize: '0.8rem', color: 'var(--green)', lineHeight: 1.55, marginTop: '0.3rem', paddingLeft: '0.25rem' }}>
-                    ✓ {opt.feedback}
+                    <Icon name='check' size={13} color='currentColor' /> {opt.feedback}
                   </div>
                 )}
               </div>

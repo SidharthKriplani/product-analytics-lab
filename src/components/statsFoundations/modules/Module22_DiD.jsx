@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Icon } from '../../shared/Icon.jsx';
 
 const MCQ = {
   id: 'did_interpretation',
@@ -206,12 +207,12 @@ export function Module22_DiD({ module, onNext }) {
                 </button>
                 {mcqRevealed && isChosen && (
                   <div style={{ fontSize: '0.8rem', color: opt.correct ? 'var(--green)' : 'var(--red)', lineHeight: 1.55, marginTop: '0.3rem', paddingLeft: '0.25rem' }}>
-                    {opt.correct ? '✓ ' : '✗ '}{opt.feedback}
+                    {opt.correct ? <Icon name='check' size={13} color='currentColor' /> : <Icon name='x' size={13} color='currentColor' />} {opt.feedback}
                   </div>
                 )}
                 {mcqRevealed && !isChosen && opt.correct && (
                   <div style={{ fontSize: '0.8rem', color: 'var(--green)', lineHeight: 1.55, marginTop: '0.3rem', paddingLeft: '0.25rem' }}>
-                    ✓ {opt.feedback}
+                    <Icon name='check' size={13} color='currentColor' /> {opt.feedback}
                   </div>
                 )}
               </div>

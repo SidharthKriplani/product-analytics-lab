@@ -4,6 +4,7 @@ import { saveCodeAttempt } from '../../utils/codeProgress.js';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -179,7 +180,7 @@ export function CodeRunner({ caseId, savedProgress, onBack, onNext, onNavigate }
           </div>
           {!revealed && (
             <div style={{ fontSize: '0.7rem', color: response.trim().length >= 30 ? 'var(--teal)' : 'var(--text-muted)' }}>
-              {response.trim().length < 30 ? `${30 - response.trim().length} chars to unlock reveal` : '✓ Ready'}
+              {response.trim().length < 30 ? `${30 - response.trim().length} chars to unlock reveal` : <><Icon name='check' size={12} color='currentColor' /> Ready</>}
             </div>
           )}
         </div>
@@ -402,8 +403,8 @@ function ModelAnswerPanel({ module, trackColor, rating, onRate, onRetry, onNext,
                 opacity: pyLoading === 'loading-pyodide' || pyLoading === 'running' ? 0.7 : 1,
               }}
             >
-              {pyLoading === 'loading-pyodide' ? '⏳ Loading Python…'
-               : pyLoading === 'running' ? '⏳ Running…'
+              {pyLoading === 'loading-pyodide' ? <><Icon name='hourglass' size={14} color='currentColor' /> Loading Python…</>
+               : pyLoading === 'running' ? <><Icon name='hourglass' size={14} color='currentColor' /> Running…</>
                : '▶ Run Code'}
             </button>
             {pyLoading === 'loading-pyodide' && (

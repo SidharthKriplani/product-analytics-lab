@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { UniverseView } from '../components/shared/UniverseView.jsx';
+import { Icon } from '../components/shared/Icon.jsx';
 
 // Set to false to soft-hide the Universe view toggle without removing code
 const SHOW_UNIVERSE_TOGGLE = true;
@@ -569,7 +570,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
               cursor: 'pointer', transition: 'all 0.12s', whiteSpace: 'nowrap',
             }}
           >
-            {universeView ? '← Progress' : '✦ Universe'}
+            {universeView ? '← Progress' : <><Icon name='sparkle' size={13} color='currentColor' /> Universe</>}
           </button>
         )}
       </div>
@@ -1335,9 +1336,13 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                       }}>{item.room}</span>
                       {/* Rating or retried badge */}
                       {item.rating !== null ? (
-                        <span style={{ fontSize: '0.85rem', letterSpacing: '0.05em' }}>
-                          <span style={{ color: 'var(--yellow)' }}>{'★'.repeat(item.rating)}</span>
-                          <span style={{ color: 'var(--border)' }}>{'☆'.repeat(5 - item.rating)}</span>
+                        <span style={{ fontSize: '0.85rem', letterSpacing: '0.05em', display: 'inline-flex', alignItems: 'center', gap: '1px' }}>
+                          {Array.from({ length: item.rating }).map((_, i) => (
+                            <Icon key={'f' + i} name='star-filled' size={13} color='var(--yellow)' />
+                          ))}
+                          {Array.from({ length: 5 - item.rating }).map((_, i) => (
+                            <Icon key={'e' + i} name='star' size={13} color='var(--border)' />
+                          ))}
                         </span>
                       ) : (
                         <span style={{
@@ -1393,7 +1398,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                    <span style={{ color: 'var(--green)', fontSize: '0.8rem' }}>✓</span>
+                    <span style={{ color: 'var(--green)', fontSize: '0.8rem' }}><Icon name='check' size={13} color='var(--green)' /></span>
                     <div>
                       <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.87rem' }}>{scenario.title}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.1rem' }}>
@@ -1442,8 +1447,8 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                   <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginLeft: '0.35rem' }}>/ {sqlLabProblems.length} solved</span>
                 </div>
                 {totalTimeMin > 0 && (
-                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                    ⏱ {totalTimeMin} min total practice time
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Icon name='timer' size={13} color='currentColor' /> {totalTimeMin} min total practice time
                   </div>
                 )}
                 {onNavigate && (
@@ -1488,7 +1493,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
 
       {/* Learning Paths */}
       <SectionCard
-        icon="🗺"
+        icon={<Icon name='map' size={16} color='currentColor' />}
         title="Learning Paths"
         open={learningPathsOpen}
         onToggle={() => setLearningPathsOpen(o => !o)}
@@ -1518,7 +1523,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                           onClick={() => { isDone ? unmarkLPStep(path.id, step.id) : markLPStep(path.id, step.id); window.location.reload(); }}
                           style={{ width: 16, height: 16, borderRadius: 4, border: '2px solid ' + (isDone ? path.color : 'var(--border)'), background: isDone ? path.color : 'transparent', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
-                          {isDone && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}
+                          {isDone && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}><Icon name='check' size={11} color='#fff' /></span>}
                         </button>
                         <button
                           onClick={() => onNavigate && onNavigate(step.nav)}
@@ -1540,7 +1545,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
       {/* Challenge Log */}
       {recentCompletions.length > 0 && (
         <SectionCard
-          icon="📋"
+          icon={<Icon name='clipboard' size={16} color='currentColor' />}
           title="Challenge Log"
           open={challengeLogOpen}
           onToggle={() => setChallengeLogOpen(o => !o)}

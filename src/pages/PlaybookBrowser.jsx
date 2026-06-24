@@ -4708,26 +4708,26 @@ FROM stats` },
 ];
 
 const CATEGORY_CONFIG = {
-  'Metrics':             { color: 'var(--green)',     bg: 'var(--green-bg)',    border: 'var(--green-border)',   icon: '📐' },
-  'RCA':                 { color: 'var(--yellow)',    bg: 'var(--yellow-bg)',   border: 'var(--yellow-border)',  icon: '🔍' },
-  'Experimentation':     { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)',  icon: '⚗' },
-  'Statistics':          { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',    icon: '📊' },
-  'Ambiguous Problems':  { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: '🧩' },
-  'GenAI Analytics':     { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',    icon: '🤖' },
-  'Product Sense':       { color: 'var(--blue-text)', bg: 'var(--blue-bg)',     border: 'var(--blue-border)',    icon: '💡' },
-  'SQL & Data':          { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)',  icon: '🗄' },
-  'Company Questions':   { color: 'var(--red)',       bg: 'var(--red-bg)',      border: 'var(--red-border)',     icon: '🏢' },
-  'Mental Models':       { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: '🧠' },
-  'Career & Interview':  { color: 'var(--text-muted)',bg: 'var(--surface-2)',   border: 'var(--border)',         icon: '🎯' },
-  'The Big Picture':     { color: 'var(--blue-text)', bg: 'var(--blue-bg)',     border: 'var(--blue-border)',    icon: '🌐' },
-  'Product Design':      { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: '🎨' },
-  'Prioritization':      { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)',  icon: '⚖' },
-  'PM Strategy':         { color: 'var(--blue-text)', bg: 'var(--blue-bg)',     border: 'var(--blue-border)',    icon: '🧭' },
-  'PM Career':           { color: 'var(--text-muted)',bg: 'var(--surface-2)',   border: 'var(--border)',         icon: '🚀' },
-  'Growth Analytics':    { color: 'var(--green)',     bg: 'var(--green-bg)',    border: 'var(--green-border)',   icon: '📈' },
-  'BI':                  { color: 'var(--yellow)',    bg: 'var(--yellow-bg)',   border: 'var(--yellow-border)',  icon: '📊' },
-  'Instrumentation':     { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',    icon: '🔧' },
-  'Take-Home':           { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: '📝' },
+  'Metrics':             { color: 'var(--green)',     bg: 'var(--green-bg)',    border: 'var(--green-border)',   icon: 'ruler' },
+  'RCA':                 { color: 'var(--yellow)',    bg: 'var(--yellow-bg)',   border: 'var(--yellow-border)',  icon: 'search' },
+  'Experimentation':     { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)',  icon: 'flask' },
+  'Statistics':          { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',    icon: 'bar-chart' },
+  'Ambiguous Problems':  { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: 'puzzle' },
+  'GenAI Analytics':     { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',    icon: 'bot' },
+  'Product Sense':       { color: 'var(--blue-text)', bg: 'var(--blue-bg)',     border: 'var(--blue-border)',    icon: 'lightbulb' },
+  'SQL & Data':          { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)',  icon: 'archive' },
+  'Company Questions':   { color: 'var(--red)',       bg: 'var(--red-bg)',      border: 'var(--red-border)',     icon: 'building-2' },
+  'Mental Models':       { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: 'brain' },
+  'Career & Interview':  { color: 'var(--text-muted)',bg: 'var(--surface-2)',   border: 'var(--border)',         icon: 'target' },
+  'The Big Picture':     { color: 'var(--blue-text)', bg: 'var(--blue-bg)',     border: 'var(--blue-border)',    icon: 'globe' },
+  'Product Design':      { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: 'palette' },
+  'Prioritization':      { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)',  icon: 'scale' },
+  'PM Strategy':         { color: 'var(--blue-text)', bg: 'var(--blue-bg)',     border: 'var(--blue-border)',    icon: 'compass' },
+  'PM Career':           { color: 'var(--text-muted)',bg: 'var(--surface-2)',   border: 'var(--border)',         icon: 'rocket' },
+  'Growth Analytics':    { color: 'var(--green)',     bg: 'var(--green-bg)',    border: 'var(--green-border)',   icon: 'trending-up' },
+  'BI':                  { color: 'var(--yellow)',    bg: 'var(--yellow-bg)',   border: 'var(--yellow-border)',  icon: 'bar-chart' },
+  'Instrumentation':     { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',    icon: 'wrench' },
+  'Take-Home':           { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: 'pen-line' },
 };
 
 const ROOM_CONFIG = {
@@ -4842,7 +4842,7 @@ export function PlaybookBrowser({ onOpenItem, initialArticleId }) {
                   display: 'flex', alignItems: 'center', gap: '0.3rem',
                 }}
               >
-                <span style={{ fontSize: '0.8rem' }}>{cfg.icon}</span>
+                <span><Icon name={cfg.icon} size={13} color='currentColor' /></span>
                 {cat}
               </button>
             );
@@ -4876,7 +4876,7 @@ export function PlaybookBrowser({ onOpenItem, initialArticleId }) {
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
                 marginBottom: '0.65rem',
               }}>
-                <span style={{ fontSize: '0.95rem' }}>{cfg.icon}</span>
+                <span><Icon name={cfg.icon} size={15} color='currentColor' /></span>
                 <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.01em' }}>{cat}</span>
                 <span style={{
                   fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em',
@@ -4961,7 +4961,7 @@ function RefCard({ post, cfg, onOpenItem, onRead, index }) {
             fontSize: '0.68rem', color: 'var(--red)', background: 'var(--red-bg)',
             border: '1px solid var(--red-border)',
             borderRadius: 'var(--radius-sm)', padding: '0.05rem 0.3rem',
-          }}>🏢 {post.source}</span>
+          }}><Icon name='building-2' size={11} color='currentColor' /> {post.source}</span>
         )}
         {!hasContent && (
           <span style={{

@@ -1,4 +1,5 @@
 import { DifficultyBadge, IndustryBadge, ThemeBadge } from '../ui/Badge.jsx';
+import { Icon } from '../shared/Icon.jsx';
 import { getScoreLevel } from '../../utils/scoring.js';
 
 export function ScenarioCard({ scenario, progress, onClick, isNextUnstarted, unlocked, cardClassName, cardStyle }) {
@@ -43,14 +44,14 @@ export function ScenarioCard({ scenario, progress, onClick, isNextUnstarted, unl
           position: 'absolute', top: '0.6rem', right: '0.7rem',
           fontSize: '0.68rem', color: 'var(--text-muted)',
         }}>
-          🔒
+          <Icon name='lock' size={11} color='currentColor' />
         </span>
       )}
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '0.6rem', gap: '0.5rem' }}>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
-            {isCompleted && <span style={{ fontSize: '0.75rem', color: 'var(--green)' }}>✓</span>}
+            {isCompleted && <span style={{ fontSize: '0.75rem', color: 'var(--green)' }}><Icon name='check' size={12} color='var(--green)' /></span>}
             <span style={{ fontWeight: 700, fontSize: '0.925rem', color: 'var(--text)' }}>{scenario.title}</span>
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>

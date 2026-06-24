@@ -41,6 +41,7 @@ import { getAllSTFProgress } from './utils/spotTheFlawProgress.js';
 import { getAllTakehomeProgress } from './utils/takehomeProgress.js';
 import { isUnlocked } from './utils/unlock.js';
 import { getCodeProgress } from './utils/codeProgress.js';
+import { Icon } from './components/shared/Icon.jsx';
 
 // Pages — lazy-loaded for code splitting
 const Home                  = lazy(() => import('./pages/Home.jsx').then(m => ({ default: m.Home })));
@@ -1086,7 +1087,7 @@ export default function App() {
             onClick={() => setSidebarOpen(s => !s)}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', fontSize: '1.1rem', padding: '0.3rem', lineHeight: 1, display: 'flex', alignItems: 'center' }}
             aria-label="Open menu"
-          >☰</button>
+          ><Icon name='menu' size={19} color='currentColor' /></button>
           <button
             onClick={() => navigate(user ? 'progress' : 'home')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.2rem 0' }}

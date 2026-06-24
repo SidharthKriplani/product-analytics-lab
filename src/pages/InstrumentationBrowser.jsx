@@ -103,7 +103,7 @@ export function InstrumentationBrowser({ onSelectCase, unlocked, onOpenArticle }
           </span>
           {completedCount > 0 && (
             <span style={{ fontSize: '0.82rem', color: 'var(--teal)' }}>
-              ✓ {completedCount} completed
+              <Icon name='check' size={13} color='currentColor' /> {completedCount} completed
             </span>
           )}
           <span style={{ fontSize: '0.82rem', color: 'var(--text-dim)' }}>
@@ -270,7 +270,7 @@ export function InstrumentationBrowser({ onSelectCase, unlocked, onOpenArticle }
                   </span>
                 )}
 
-                {isLocked && <span style={{ fontSize: '0.75rem' }}>🔒</span>}
+                {isLocked && <span style={{ fontSize: '0.75rem' }}><Icon name='lock' size={12} color='currentColor' /></span>}
 
                 {prog && (
                   <span style={{
@@ -278,7 +278,7 @@ export function InstrumentationBrowser({ onSelectCase, unlocked, onOpenArticle }
                     color: 'var(--teal)',
                     marginLeft: 'auto',
                   }}>
-                    ✓ Done
+                    <Icon name='check' size={11} color='currentColor' /> Done
                   </span>
                 )}
               </div>

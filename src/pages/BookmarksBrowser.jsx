@@ -145,12 +145,12 @@ export function BookmarksBrowser({ onNavigate, onBack }) {
           background: 'var(--surface)', border: '1px solid var(--border)',
           borderRadius: '12px', padding: '3rem 2rem', textAlign: 'center',
         }}>
-          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🔖</div>
+          <div style={{ marginBottom: '0.75rem' }}><Icon name='bookmark' size={32} color='currentColor' /></div>
           <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '0.4rem' }}>
             No bookmarks yet
           </div>
           <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '380px', margin: '0 auto' }}>
-            Use the 🔖 button in any case runner to save for later.
+            Use the <Icon name='bookmark' size={14} color='currentColor' /> button in any case runner to save for later.
           </div>
         </div>
       )}
@@ -269,7 +269,7 @@ export function BookmarksBrowser({ onNavigate, onBack }) {
                           onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--red)'; e.currentTarget.style.color = 'var(--red)'; }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
                         >
-                          🗑
+                          <Icon name='trash' size={14} color='currentColor' />
                         </button>
                       </div>
                     </div>

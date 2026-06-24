@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 import { scenarios } from '../data/scenarios.js';
 import { designScenarios } from '../data/designScenarios.js';
 import { statsModules } from '../data/statsModules.js';
@@ -320,7 +321,7 @@ export function SearchPage({ onNavigate }) {
             }}
             aria-label="Clear search"
           >
-            ✕
+            <Icon name='x' size={16} color='currentColor' />
           </button>
         )}
       </div>
@@ -370,7 +371,7 @@ export function SearchPage({ onNavigate }) {
           color: 'var(--text-muted)',
           fontSize: '0.9rem',
         }}>
-          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🤔</div>
+          <div style={{ marginBottom: '0.75rem' }}><Icon name='help-circle' size={32} color='currentColor' /></div>
           No matches for &ldquo;{debouncedQuery}&rdquo; — try a different keyword
         </div>
       )}

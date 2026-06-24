@@ -1,4 +1,5 @@
 import { conceptsById } from '../../data/concepts.js';
+import { Icon } from '../shared/Icon.jsx';
 
 export function ConceptCard({ conceptId, onClose }) {
   const concept = conceptsById[conceptId];
@@ -41,7 +42,8 @@ export function ConceptCard({ conceptId, onClose }) {
           <button onClick={onClose} style={{
             background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '1rem',
             cursor: 'pointer', padding: '0.1rem 0.3rem', flexShrink: 0, lineHeight: 1,
-          }}>✕</button>
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}><Icon name='x' size={16} color='currentColor' /></button>
         )}
       </div>
 

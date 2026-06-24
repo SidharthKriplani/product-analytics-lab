@@ -283,14 +283,14 @@ export function TakehomeBrowser({ onSelectCase, unlocked, onOpenArticle }) {
                       </span>
                     )}
 
-                    {isLocked && <span style={{ fontSize: '0.75rem' }}>🔒</span>}
+                    {isLocked && <span style={{ fontSize: '0.75rem' }}><Icon name='lock' size={12} color='currentColor' /></span>}
 
                     {status === 'completed' && (
                       <span style={{
                         fontSize: '0.7rem', fontWeight: 600,
                         color: RATING_COLOR[prog.rating] || 'var(--green)',
                       }}>
-                        ✓
+                        <Icon name='check' size={12} color='currentColor' />
                       </span>
                     )}
 
@@ -335,10 +335,10 @@ export function TakehomeBrowser({ onSelectCase, unlocked, onOpenArticle }) {
                     whiteSpace: 'nowrap', flexShrink: 0,
                   }}>
                     {prog.rating === 'strong'
-                      ? '✓ Strong'
+                      ? <><Icon name='check' size={12} color='currentColor' /> Strong</>
                       : prog.rating === 'partial'
                       ? '~ Partial'
-                      : '✗ Needs Work'}
+                      : <><Icon name='x' size={12} color='currentColor' /> Needs Work</>}
                   </div>
                 )}
 

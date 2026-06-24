@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 const DIFF_CFG = {
   analyst: { label: 'Analyst', color: 'var(--blue-text)', bg: 'var(--blue-bg)', border: 'var(--blue-border)' },
@@ -244,9 +245,9 @@ export function ChartScenario({ caseData, onBack, onNext, onRate }) {
                     transition: 'all 150ms ease',
                   }}
                 >
-                  {confidence === 'clear' && '✓ Clear'}
+                  {confidence === 'clear' && <><Icon name='check' size={13} color='currentColor' /> Clear</>}
                   {confidence === 'partial' && '~ Partial'}
-                  {confidence === 'unclear' && '✗ Unclear'}
+                  {confidence === 'unclear' && <><Icon name='x' size={13} color='currentColor' /> Unclear</>}
                 </button>
               ))}
             </div>

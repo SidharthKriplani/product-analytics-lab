@@ -15,6 +15,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { BEGINNER_DATAMART, BEGINNER_LESSONS } from '../data/sqlBeginnerLessons.js';
 import { SqlEditor } from '../components/shared/SqlEditor.jsx';
+import { Icon } from '../components/shared/Icon.jsx';
 import { track } from '../utils/analytics.js';
 
 const PROGRESS_KEY = 'pal-sql-beginner-v1';
@@ -207,7 +208,9 @@ function LessonRail({ currentId, completedSet, onPick }) {
           // A lesson is reachable if it's done, current, or already unlocked (every
           // earlier lesson is complete). Locked = a future lesson behind incomplete work.
           const clickable = isDone || isCurrent;
-          const icon = isDone ? '✓' : isCurrent ? '▸' : '🔒';
+          const icon = isDone
+            ? <Icon name='check' size={11} color='currentColor' />
+            : isCurrent ? '▸' : <Icon name='lock' size={11} color='currentColor' />;
           let color = 'var(--text-muted)';
           let bg = 'transparent';
           let bd = '1px solid transparent';
@@ -361,11 +364,11 @@ function QuickCheck({ db, onResult, onCancel }) {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
         {!feedback && (
-          <button onClick={check} disabled={!query.trim()} style={{ padding: '0.45rem 1.1rem', borderRadius: '6px', fontWeight: 700, fontSize: '0.82rem', background: 'var(--teal)', color: '#fff', border: 'none', cursor: 'pointer', opacity: query.trim() ? 1 : 0.4 }}>✓ Check</button>
+          <button onClick={check} disabled={!query.trim()} style={{ padding: '0.45rem 1.1rem', borderRadius: '6px', fontWeight: 700, fontSize: '0.82rem', background: 'var(--teal)', color: '#fff', border: 'none', cursor: 'pointer', opacity: query.trim() ? 1 : 0.4 }}><Icon name='check' size={13} color='currentColor' /> Check</button>
         )}
         {feedback && (
           <span style={{ fontSize: '0.82rem', fontWeight: 600, color: feedback.ok ? 'var(--green)' : 'var(--text-muted)' }}>
-            {feedback.ok ? '✓ ' : '○ '}{feedback.msg}
+            {feedback.ok ? <><Icon name='check' size={13} color='currentColor' /> </> : '○ '}{feedback.msg}
           </span>
         )}
         {feedback && !isLast && (
@@ -496,9 +499,9 @@ function LessonView({ db, lesson, isLast, onComplete, onNext, onFinish }) {
           disabled={!query.trim()}
           title="Check your answer against the expected result (Cmd/Ctrl+Enter)"
           style={{ padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 700, fontSize: '0.82rem', background: 'var(--teal)', color: '#fff', border: 'none', cursor: 'pointer', opacity: query.trim() ? 1 : 0.4 }}
-        >✓ Check</button>
+        ><Icon name='check' size={13} color='currentColor' /> Check</button>
         {verdict && verdict.ok && (
-          <span className="pal-success-ring" style={{ fontSize: '0.8rem', color: 'var(--green)', fontWeight: 700 }}>✓ {verdict.msg}</span>
+          <span className="pal-success-ring" style={{ fontSize: '0.8rem', color: 'var(--green)', fontWeight: 700 }}><Icon name='check' size={13} color='var(--green)' /> {verdict.msg}</span>
         )}
         {verdict && !verdict.ok && !runError && (
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{verdict.msg}</span>
@@ -754,7 +757,7 @@ export function SqlLabBeginnerPage({ onExit }) {
             )}
             {allDone && (
               <div style={{ marginBottom: '0.85rem', padding: '0.75rem 1rem', background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--green)' }}>🎉 You finished all {TOTAL} lessons.</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--green)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><Icon name='party' size={15} color='var(--green)' /> You finished all {TOTAL} lessons.</span>
                 <button onClick={onExit} className="pal-glow-pulse" style={{ padding: '0.45rem 1rem', borderRadius: '6px', fontWeight: 700, fontSize: '0.8rem', background: 'var(--teal)', color: '#fff', border: 'none', cursor: 'pointer' }}>Enter the full SQL Lab →</button>
               </div>
             )}

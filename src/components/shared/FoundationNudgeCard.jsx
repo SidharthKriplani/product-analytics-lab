@@ -71,7 +71,7 @@ export function FoundationNudgeCard({ foundationRoom, foundationLabel, onNavigat
           }}
           title="Dismiss"
         >
-          ✕
+          <Icon name='x' size={16} color='currentColor' />
         </button>
       </div>
     </div>

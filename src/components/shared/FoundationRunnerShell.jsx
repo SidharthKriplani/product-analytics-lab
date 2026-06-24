@@ -4,6 +4,7 @@
 // and a right-side module index for quick navigation.
 
 import { useState } from 'react';
+import { Icon } from './Icon.jsx';
 
 export function FoundationRunnerShell({
   module,           // current module object
@@ -59,7 +60,7 @@ export function FoundationRunnerShell({
               background: 'var(--green-bg)', color: 'var(--green)',
               border: '1px solid var(--green-border)',
             }}>
-              ✓ Complete
+              <Icon name='check' size={12} color='var(--green)' /> Complete
             </span>
           )}
 
@@ -71,7 +72,9 @@ export function FoundationRunnerShell({
               fontSize: '0.72rem', color: 'var(--text-muted)', cursor: 'pointer',
               display: 'none',
             }} className='pal-module-index-toggle'>
-              {indexOpen ? '✕ Close' : '☰ Modules'}
+              {indexOpen
+                ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><Icon name='x' size={12} color='currentColor' /> Close</span>
+                : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><Icon name='menu' size={12} color='currentColor' /> Modules</span>}
             </button>
           )}
         </div>

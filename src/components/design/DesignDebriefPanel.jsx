@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ConceptChip, ConceptsSection } from '../concepts/ConceptChip.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 // Debrief panel: shown after score reveal
 // Sections: senior design rationale, per-field answer review, common mistakes, paired CTA
@@ -119,8 +120,8 @@ export function DesignDebriefPanel({
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
                 marginBottom: '0.35rem', flexWrap: 'wrap',
               }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--yellow)' }}>
-                  ⚠ {m.mistake}
+                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--yellow)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Icon name='alert-triangle' size={14} color='currentColor' /> {m.mistake}
                 </span>
                 {m.conceptLink && (
                   <ConceptChip id={m.conceptLink} onOpen={onOpenConcept} variant="inline" />
@@ -212,7 +213,7 @@ export function DesignDebriefPanel({
           onMouseEnter={() => setRetryHovered(true)}
           onMouseLeave={() => setRetryHovered(false)}
         >
-          ↺ Try again from scratch
+          <Icon name='rotate-ccw' size={13} color='currentColor' /> Try again from scratch
         </button>
         {onNext && (
           <button
@@ -320,7 +321,7 @@ function MultiAnswerRow({ field, opts, totalEarned, maxValue, onOpenConcept }) {
               fontSize: '0.68rem', fontWeight: 700, color: opt.scoreValue >= 2 ? 'var(--teal)' : opt.scoreValue === 1 ? 'var(--accent)' : 'var(--yellow)',
               marginTop: '0.1rem', flexShrink: 0,
             }}>
-              {opt.scoreValue >= 2 ? '✓' : opt.scoreValue === 1 ? '~' : '✕'}
+              {opt.scoreValue >= 2 ? <Icon name='check' size={11} color='currentColor' /> : opt.scoreValue === 1 ? '~' : <Icon name='x' size={11} color='currentColor' />}
             </span>
             <div>
               <p style={{ fontSize: '0.83rem', color: 'var(--text)', margin: '0 0 0.2rem', fontWeight: 500 }}>"{opt.label}"</p>

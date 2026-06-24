@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Icon } from '../../shared/Icon.jsx';
 
 function generateCorrelatedPoints(r, n = 30) {
   const points = [];
@@ -182,14 +183,14 @@ export function Module14_Correlation({ module, onNext }) {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>🍦</span>
+            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}><Icon name='ice-cream' size={19} color='currentColor' /></span>
             <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
               <strong>Ice cream sales and drowning rates</strong> are both high in summer — but ice cream doesn't cause drowning.
               Both are <em>confounded</em> by temperature: a hidden third variable drives both.
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>📱</span>
+            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}><Icon name='smartphone' size={19} color='currentColor' /></span>
             <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
               <strong>Users who see a feature more often also retain better</strong> — but heavy users self-select into using features more.
               Showing the feature more isn't causing retention; engagement is causing both.

@@ -1,3 +1,5 @@
+import { Icon } from '../components/shared/Icon.jsx';
+
 export function Pricing({ onShowUnlock, onBack, onNavigate }) {
   const stripeLink = import.meta.env.VITE_STRIPE_PAYMENT_LINK || '#';
 
@@ -14,7 +16,7 @@ export function Pricing({ onShowUnlock, onBack, onNavigate }) {
 
   const featureItem = (text) => (
     <div key={text} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-      <span style={{ color: 'var(--green)', fontWeight: 700, marginTop: 1 }}>✓</span>
+      <span style={{ color: 'var(--green)', fontWeight: 700, marginTop: 1 }}><Icon name='check' size={15} color='var(--green)' /></span>
       <span>{text}</span>
     </div>
   );
@@ -66,7 +68,7 @@ export function Pricing({ onShowUnlock, onBack, onNavigate }) {
           significant but isn't — and watch how you reason through it. PAL trains exactly that.
         </p>
         <div style={{ fontSize: '0.83rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-          <span style={{ color: 'var(--green)', fontWeight: 700 }}>✓</span>
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}><Icon name='check' size={13} color='var(--green)' /></span>
           <span>17 practice rooms · 150+ cases · 25 interactive foundation modules · No subscription</span>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { track } from '../../utils/analytics.js';
 import { prioritizationScenarios } from '../../data/prioritizationScenarios.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -274,7 +275,7 @@ export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
           />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem' }}>
             <span style={{ fontSize: '0.8rem', color: response.trim().length < 40 ? 'var(--text-dim)' : 'var(--green)' }}>
-              {response.trim().length < 40 ? `${response.trim().length}/40 characters to unlock` : '✓ Ready to reveal'}
+              {response.trim().length < 40 ? `${response.trim().length}/40 characters to unlock` : <><Icon name="check" size={13} color="var(--green)" /> Ready to reveal</>}
             </span>
             <button
               onClick={handleReveal}
@@ -376,7 +377,7 @@ export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
               background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '7px',
               padding: '0.5rem 1rem', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer',
             }}>
-              ↺ Try again
+              <Icon name="rotate-ccw" size={14} color="currentColor" /> Try again
             </button>
             <button onClick={onBack} style={{
               background: 'none', border: '1px solid var(--border)', borderRadius: '7px',
@@ -458,10 +459,10 @@ function ModelAnswerDisplay({ scenario }) {
           <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '0.5rem' }}>Effort–Impact Matrix</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: '0.5rem' }}>
             {[
-              { label: '✅ Quick Wins', key: 'quickWins', color: 'var(--green)' },
-              { label: '🎯 Strategic Bets', key: 'strategicBets', color: 'var(--accent)' },
-              { label: '📌 Fill-ins', key: 'fillIns', color: 'var(--text-muted)' },
-              { label: '🚫 Time-sinks', key: 'timeSinks', color: 'var(--red)' },
+              { label: <><Icon name="check-circle" size={13} color="currentColor" /> Quick Wins</>, key: 'quickWins', color: 'var(--green)' },
+              { label: <><Icon name="target" size={13} color="currentColor" /> Strategic Bets</>, key: 'strategicBets', color: 'var(--accent)' },
+              { label: <><Icon name="pin" size={13} color="currentColor" /> Fill-ins</>, key: 'fillIns', color: 'var(--text-muted)' },
+              { label: <><Icon name="ban" size={13} color="currentColor" /> Time-sinks</>, key: 'timeSinks', color: 'var(--red)' },
             ].map(({ label, key, color }) => (
               <div key={key} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '7px', padding: '0.75rem' }}>
                 <div style={{ fontWeight: 600, color, fontSize: '0.82rem', marginBottom: '0.3rem' }}>{label}</div>

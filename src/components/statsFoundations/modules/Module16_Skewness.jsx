@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Icon } from '../../shared/Icon.jsx';
 
 const W = 600;
 const H = 260;
@@ -265,21 +266,21 @@ export function Module16_Skewness({ module, onNext }) {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>🎵</span>
+            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}><Icon name='music' size={19} color='currentColor' /></span>
             <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
               <strong>Spotify revenue per user:</strong> top 1% of users contribute ~35% of streams.
               Mean listening time: 28 min. Median: 12 min. The mean flatters the average user.
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>🛒</span>
+            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}><Icon name='shopping-cart' size={19} color='currentColor' /></span>
             <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
               <strong>E-commerce order value:</strong> most orders are $20–60. A handful of B2B orders are $2,000+.
               Mean = $85. Median = $38. An A/B test comparing means could be swung by 3 whale orders.
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>📱</span>
+            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}><Icon name='smartphone' size={19} color='currentColor' /></span>
             <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
               <strong>Mobile session length:</strong> most sessions are 30–90 seconds. Power users browse for 20+ minutes.
               Log-transform before A/B testing to normalize the distribution.
@@ -299,7 +300,7 @@ export function Module16_Skewness({ module, onNext }) {
             ['Cap/winsorize outliers', 'Replace values above the 99th percentile with the 99th percentile value. Reduces variance without removing data.'],
           ].map(([title, desc]) => (
             <div key={title} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
-              <span style={{ color: 'var(--green)', fontWeight: 800, fontSize: '0.9rem', flexShrink: 0, marginTop: '0.05rem' }}>✓</span>
+              <span style={{ color: 'var(--green)', fontWeight: 800, fontSize: '0.9rem', flexShrink: 0, marginTop: '0.05rem' }}><Icon name='check' size={15} color='var(--green)' /></span>
               <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
                 <strong style={{ color: 'var(--text)' }}>{title}:</strong> {desc}
               </div>

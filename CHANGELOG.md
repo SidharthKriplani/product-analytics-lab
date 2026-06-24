@@ -4,6 +4,18 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.88.0] — 2026-06-24 [EMOJI → SVG SWEEP (MONOCHROME INSTRUMENT)]
+
+Removed colorful/text-glyph emojis app-wide in favor of monochrome SVG icons, per the "Monochrome Instrument" aesthetic.
+
+**Icon library.** Extended `src/components/shared/Icon.jsx` from 31 → ~84 Lucide-style icons (added lock, graduation-cap, briefcase, target, check-circle, x-circle, siren, bug, rocket, brain, bot, trash, message-circle, command, menu, lightbulb, palette, archive, puzzle, globe, compass, pin, ban, help-circle, ice-cream, smartphone, music, shopping-cart, heart, sun, moon, map, link, wave, star-filled, rotate-ccw, timer, hourglass, wrench, mail, diamond, circle, circle-dot, minus, etc.) + an exported `GLYPH_TO_ICON` contract map. Icons inherit `currentColor` and size like text glyphs, so they drop into existing markup without restyling.
+
+**Sweep.** Replaced the rendered emoji/text-glyphs across ~95 component/page files with `<Icon>` (≈350 sites): ✓→check, ✗/✕→x, ★→star-filled, 🔒→lock, ⚠→alert-triangle, ⏱→timer, 💼→briefcase, 🎯→target, and the full pictographic set. Config-driven icon arrays (foundationMeta, Blog & Playbook category icons, the three *ScoreReveal* level configs, Module19 examples) were converted to **icon-name strings + a render-site `<Icon>`**. Decorative emojis inside data-file prose (sqlLabProblems ✅, scenarios ⚠️/✓, metricCases ★, codeModules) were stripped/neutralized.
+
+**Deliberately left (not UI chrome):** glyphs inside literal code/SQL example strings shown as `<pre>` text (PlaybookBrowser walkthroughs, CheatSheet, a BlogBrowser SQL sample), SVG `<text>` chart annotations (Module23/Module25), a `title=""` tooltip attribute (SqlLabPage ⌘), JS comments (the `break⌇labs` brandmark note, contentAudit), and the dormant/archived JudgmentBank page. These are content/markup contexts where an inline SVG is inappropriate or impossible.
+
+Verified: full Vite build transforms 881 modules cleanly (only the environmental public/ asset-copy step fails).
+
 ## [5.87.0] — 2026-06-24 [SQL LAB — SQLBOLT-STYLE BEGINNER MODE]
 
 A guided, sequential beginner level inside SQL Lab for people who don't know SQL at all — fixing the ramp-up problem where newcomers hit 182 problems cold.

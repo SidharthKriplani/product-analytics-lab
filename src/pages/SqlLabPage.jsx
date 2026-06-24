@@ -5,6 +5,7 @@ import { COMPANY_DOMAINS } from '../data/companyDirectory.js';
 import { track } from '../utils/analytics.js';
 import { ShareLinkButton } from '../components/shared/ShareLinkButton.jsx';
 import { SqlEditor } from '../components/shared/SqlEditor.jsx';
+import { Icon } from '../components/shared/Icon.jsx';
 import { SqlLabBeginnerPage } from './SqlLabBeginnerPage.jsx';
 
 const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3, Forensic: 5 };
@@ -446,7 +447,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
             borderRadius: '10px', cursor: 'pointer',
           }}
         >
-          <div style={{ fontSize: '1.5rem', lineHeight: 1, flexShrink: 0 }}>🎓</div>
+          <div style={{ lineHeight: 1, flexShrink: 0 }}><Icon name='graduation-cap' size={24} color='var(--teal)' /></div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--teal)' }}>New to SQL? Start with a guided, step-by-step walkthrough.</div>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem', lineHeight: 1.5 }}>
@@ -492,7 +493,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
               onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.94)'; }}
               onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-            >{active ? '✓ ' : ''}{d}</button>
+            >{active ? <><Icon name='check' size={12} color='currentColor' /> </> : ''}{d}</button>
           );
         })}
 
@@ -563,7 +564,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
               borderColor: filterStatus === s ? 'rgba(20,184,166,0.35)' : 'var(--border)',
               transition: 'background 0.15s, color 0.15s, border-color 0.15s',
             }}
-          >{s === 'all' ? 'All' : s === 'solved' ? '✓ Solved' : '○ Unsolved'}</button>
+          >{s === 'all' ? 'All' : s === 'solved' ? <><Icon name='check' size={12} color='currentColor' /> Solved</> : '○ Unsolved'}</button>
         ))}
 
         {/* Clear + count */}
@@ -572,7 +573,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
             <button
               onClick={clearAll}
               style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '99px', padding: '2px 10px', fontSize: '0.66rem', fontWeight: 600, color: 'var(--text-muted)', cursor: 'pointer' }}
-            >Clear ✕</button>
+            >Clear <Icon name='x' size={11} color='currentColor' /></button>
           )}
           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
             {displayed.length}{displayed.length !== SORTED_PROBLEMS.length ? ' / ' + SORTED_PROBLEMS.length : ''} problems
@@ -653,7 +654,7 @@ function SubmissionsHistory({ problemId, onRestore }) {
               border: '1px solid var(--border)',
             }}>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: s.passed ? 'var(--green)' : 'var(--red)', flexShrink: 0, marginTop: '1px' }}>
-                {s.passed ? '✓' : '✗'}
+                {s.passed ? <Icon name='check' size={12} color='currentColor' /> : <Icon name='x' size={12} color='currentColor' />}
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', marginBottom: '2px' }}>{fmtTime(s.ts)}</div>
@@ -728,7 +729,7 @@ function StudyPlanModal({ solved, onClose, onApply }) {
                 <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text)' }}>Build your SQL study plan</div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>Step {step + 1} of 4</div>
               </div>
-              <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.25rem' }}>✕</button>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.25rem' }}><Icon name='x' size={19} color='currentColor' /></button>
             </div>
             <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, marginBottom: '1.5rem', overflow: 'hidden' }}>
               <div style={{ width: `${((step + 1) / 4) * 100}%`, height: '100%', background: 'var(--teal)', borderRadius: 2, transition: 'width 0.3s' }} />
@@ -787,7 +788,7 @@ function StudyPlanModal({ solved, onClose, onApply }) {
           <>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--teal)' }}>Your plan is ready</div>
-              <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}><Icon name='x' size={19} color='currentColor' /></button>
             </div>
             <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
               {(plan?.dailyPlan || []).map(d => (
@@ -1385,7 +1386,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           {problem.format === 'forensic' && (
             <div style={{ marginTop: '0.75rem', border: '1.5px solid rgba(234,88,12,0.45)', borderRadius: '8px', overflow: 'hidden' }}>
               <div style={{ padding: '0.35rem 0.75rem', background: 'rgba(234,88,12,0.12)', fontSize: '0.68rem', fontWeight: 700, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid rgba(234,88,12,0.2)' }}>
-                ⚠ Broken query — in production
+<Icon name='alert-triangle' size={11} color='currentColor' /> Broken query — in production
               </div>
               <pre style={{ margin: 0, padding: '0.75rem', background: 'var(--surface-2)', fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: 1.6, color: 'var(--text)', overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{problem.brokenQuery}</pre>
               {problem.brokenOutputNote && (
@@ -1567,10 +1568,11 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
 
         {/* Timer row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexShrink: 0 }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+            <Icon name='timer' size={12} color='currentColor' />
             {elapsedSec > 0
-              ? `⏱ ${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} elapsed`
-              : `⏱ ~${problem.estimatedMin} min`
+              ? `${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} elapsed`
+              : `~${problem.estimatedMin} min`
             }{' · Ctrl+Enter to run'}
           </div>
           <button
@@ -1643,9 +1645,9 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                   opacity: (query.trim() && dbRef.current) ? 1 : 0.4,
                 }}
                 title="Check your answer — validates against the expected output (⌘Enter)"
-              >✓ Check</button>
+              ><Icon name='check' size={13} color='currentColor' /> Check</button>
               {hasRun && correct === true && (
-                <span className="pal-success-ring" style={{ fontSize: '0.78rem', color: 'var(--green)', fontWeight: 600 }}>✓ Correct — well done</span>
+                <span className="pal-success-ring" style={{ fontSize: '0.78rem', color: 'var(--green)', fontWeight: 600 }}><Icon name='check' size={13} color='var(--green)' /> Correct — well done</span>
               )}
               {hasRun && correct === false && !runError && (
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>

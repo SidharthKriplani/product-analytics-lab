@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { statsFoundationsModules } from '../data/statsFoundationsModules.js';
 import { growthAnalyticsCases } from '../data/growthAnalyticsCases.js';
 import { trainerMCQ } from '../data/trainerMCQ.js';
+import { Icon } from '../components/shared/Icon.jsx';
 
 // ─── Static article index ──────────────────────────────────────────────────
 const ARTICLE_INDEX = [
@@ -226,7 +227,7 @@ export function ConsultationSpace({ onBack, onNavigate }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '1.15rem', flexShrink: 0,
           }}>
-            💬
+            <Icon name='message-circle' size={18} color='currentColor' />
           </span>
           <div>
             <div style={{
@@ -336,7 +337,7 @@ export function ConsultationSpace({ onBack, onNavigate }) {
           </button>
         </div>
         <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.25rem', textAlign: 'right' }}>
-          Tip: ⌘+Enter to search
+          Tip: <Icon name='command' size={12} color='currentColor' />+Enter to search
         </div>
       </div>
 

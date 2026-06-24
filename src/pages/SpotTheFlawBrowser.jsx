@@ -63,7 +63,7 @@ export function SpotTheFlawBrowser({ onSelectCase, unlocked, onNavigate }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '1.1rem', flexShrink: 0,
           }}>
-            🐛
+            <Icon name='bug' size={18} color='var(--red)' />
           </span>
           <div>
             <div style={{
@@ -251,14 +251,14 @@ export function SpotTheFlawBrowser({ onSelectCase, unlocked, onNavigate }) {
                       </span>
                     )}
 
-                    {isLocked && <span style={{ fontSize: '0.75rem' }}>🔒</span>}
+                    {isLocked && <span style={{ fontSize: '0.75rem' }}><Icon name='lock' size={12} color='currentColor' /></span>}
 
                     {prog && (
                       <span style={{
                         fontSize: '0.7rem', fontWeight: 600,
                         color: RATING_COLOR[prog.rating] || 'var(--red)',
                       }}>
-                        ✓
+                        <Icon name='check' size={12} color='currentColor' />
                       </span>
                     )}
                   </div>
@@ -294,7 +294,11 @@ export function SpotTheFlawBrowser({ onSelectCase, unlocked, onNavigate }) {
                       borderRadius: '6px', padding: '0.3rem 0.6rem',
                       whiteSpace: 'nowrap',
                     }}>
-                      {prog.rating === 'caught it' ? '✓ Caught it' : prog.rating === 'partial' ? '~ Partial' : '✗ Missed it'}
+                      {prog.rating === 'caught it'
+                        ? <><Icon name='check' size={12} color='currentColor' /> Caught it</>
+                        : prog.rating === 'partial'
+                          ? '~ Partial'
+                          : <><Icon name='x' size={12} color='currentColor' /> Missed it</>}
                     </div>
                   ) : (
                     <span style={{

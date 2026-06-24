@@ -4,6 +4,7 @@ import { saveMetricsFoundationProgress, getMetricsFoundationProgress, getAllMetr
 import { track } from '../../utils/analytics.js';
 import { InsightBox, NextBtn as SharedNextBtn, MCQOption } from '../shared/FoundationPrimitives.jsx';
 import { FoundationRunnerShell } from '../shared/FoundationRunnerShell.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 // Green-default wrapper so MF01-MF13 modules get the right color without passing it
 function NextBtn(props) { return <SharedNextBtn {...props} color={props.color || 'var(--green)'} />; }
@@ -118,7 +119,7 @@ function Module_MF01({ module, onNext }) {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
         {items.map(item => (
           <span key={item.id} style={itemStyle(item)} onClick={() => cycle(item.id)}>
-            {checked && (placements[item.id] === item.correct ? '✓ ' : '✗ ')}
+            {checked && (placements[item.id] === item.correct ? <Icon name='check' size={12} color='currentColor' /> : <Icon name='x' size={12} color='currentColor' />)}{checked ? ' ' : ''}
             {item.label}
             {placements[item.id] && !checked && (
               <span style={{ fontSize: '0.7rem', opacity: 0.7, marginLeft: '0.3rem' }}>
@@ -314,7 +315,7 @@ function Module_MF02({ module, onNext }) {
                 var val = ratings[metric.id][prop.id];
                 var bg = val === null ? 'var(--surface-2)' : val ? 'var(--green-bg)' : 'var(--red-bg)';
                 var borderColor = val === null ? 'var(--border)' : val ? 'var(--green-border)' : 'var(--red-border)';
-                var icon = val === null ? '–' : val ? '✓' : '✗';
+                var icon = val === null ? '–' : val ? <Icon name='check' size={14} color='currentColor' /> : <Icon name='x' size={14} color='currentColor' />;
                 var iconColor = val === null ? 'var(--text-muted)' : val ? 'var(--green)' : 'var(--red)';
 
                 if (checked) {
@@ -324,7 +325,7 @@ function Module_MF02({ module, onNext }) {
                 }
 
                 return (
-                  <button key={prop.id} onClick={function() { handleToggle(metric.id, prop.id); }} style={{ background: bg, border: '1.5px solid ' + borderColor, borderRadius: 'var(--radius-sm)', padding: '0.3rem', cursor: checked ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 700, color: iconColor, textAlign: 'center', lineHeight: 1 }}>
+                  <button key={prop.id} onClick={function() { handleToggle(metric.id, prop.id); }} style={{ background: bg, border: '1.5px solid ' + borderColor, borderRadius: 'var(--radius-sm)', padding: '0.3rem', cursor: checked ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 700, color: iconColor, textAlign: 'center', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {icon}
                   </button>
                 );
@@ -389,7 +390,7 @@ function Module_MF02({ module, onNext }) {
         )}
         {answered && (
           <div className='pal-reveal-in' style={{ marginTop: '0.75rem', background: selected === Q.correct ? 'var(--green-bg)' : 'var(--red-bg)', border: '1px solid ' + (selected === Q.correct ? 'var(--green-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-            <strong>{selected === Q.correct ? '✓ Correct. ' : '✗ Not quite. '}</strong>{Q.explanation}
+            <strong>{selected === Q.correct ? <><Icon name='check' size={13} color='var(--green)' /> Correct. </> : <><Icon name='x' size={13} color='var(--red)' /> Not quite. </>}</strong>{Q.explanation}
           </div>
         )}
       </div>
@@ -567,7 +568,7 @@ function Module_MF03({ module, onNext }) {
         )}
         {answered && (
           <div className='pal-reveal-in' style={{ marginTop: '0.75rem', background: selected === Q.correct ? 'var(--green-bg)' : 'var(--red-bg)', border: '1px solid ' + (selected === Q.correct ? 'var(--green-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-            <strong>{selected === Q.correct ? '✓ Correct. ' : '✗ Not quite. '}</strong>{Q.explanation}
+            <strong>{selected === Q.correct ? <><Icon name='check' size={13} color='var(--green)' /> Correct. </> : <><Icon name='x' size={13} color='var(--red)' /> Not quite. </>}</strong>{Q.explanation}
           </div>
         )}
       </div>
@@ -639,7 +640,7 @@ function Module_MF04({ module, onNext }) {
             }
             return (
               <button key={opt} onClick={() => toggle(opt)} style={{ padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-sm)', border: '1.5px solid ' + border, background: bg, color, fontSize: '0.83rem', fontWeight: sel ? 600 : 400, cursor: checked ? 'default' : 'pointer', transition: 'all 0.15s' }}>
-                {checked && isCorrect ? '✓ ' : checked && sel ? '✗ ' : ''}{opt}
+                {checked && isCorrect ? <Icon name='check' size={12} color='currentColor' /> : checked && sel ? <Icon name='x' size={12} color='currentColor' /> : null}{checked && (isCorrect || sel) ? ' ' : ''}{opt}
               </button>
             );
           })}
@@ -650,8 +651,8 @@ function Module_MF04({ module, onNext }) {
         {checked && (
           <div className="pal-reveal-in" style={{ marginTop: '0.75rem', background: correct ? 'var(--green-bg)' : 'var(--red-bg)', border: '1px solid ' + (correct ? 'var(--green-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
             {correct
-              ? '✓ Correct. DAU = New + Retained + Resurrected. A DAU drop is a very different problem depending on which component fell: acquisition issue vs retention problem vs re-engagement gap.'
-              : '✗ The three components are New, Retained, and Resurrected users. "Churned" is the subtraction that gets you from yesterday\'s DAU to tomorrow\'s — it\'s a driver of change, not a component of today\'s DAU.'}
+              ? <><Icon name='check' size={13} color='var(--green)' /> Correct. DAU = New + Retained + Resurrected. A DAU drop is a very different problem depending on which component fell: acquisition issue vs retention problem vs re-engagement gap.</>
+              : <><Icon name='x' size={13} color='var(--red)' /> The three components are New, Retained, and Resurrected users. "Churned" is the subtraction that gets you from yesterday's DAU to tomorrow's — it's a driver of change, not a component of today's DAU.</>}
           </div>
         )}
       </div>
@@ -727,7 +728,7 @@ function Module_MF05({ module, onNext }) {
               }
               return (
                 <button key={opt} onClick={() => !checked && setAnswers(prev => ({ ...prev, [i]: opt }))} style={{ padding: '0.45rem 0.85rem', borderRadius: 'var(--radius-sm)', border: '1.5px solid ' + border, background: bg, color, fontSize: '0.83rem', fontWeight: sel ? 600 : 400, cursor: checked ? 'default' : 'pointer', textAlign: 'left', transition: 'all 0.15s' }}>
-                  {checked && isCorrect ? '✓ ' : checked && sel ? '✗ ' : ''}{pair.labels[opt]}
+                  {checked && isCorrect ? <Icon name='check' size={12} color='currentColor' /> : checked && sel ? <Icon name='x' size={12} color='currentColor' /> : null}{checked && (isCorrect || sel) ? ' ' : ''}{pair.labels[opt]}
                 </button>
               );
             })}
@@ -744,7 +745,7 @@ function Module_MF05({ module, onNext }) {
       )}
       {checked && (
         <div className="pal-reveal-in" style={{ background: score === 3 ? 'var(--green-bg)' : 'var(--yellow-bg)', border: '1px solid ' + (score === 3 ? 'var(--green-border)' : 'var(--yellow-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-          {score === pairs.length ? '✓ All correct. Opt-out rate catches notification fatigue. Ad hide rate catches ad quality degradation. Zero-click rate catches search quality degradation.' : score + '/' + pairs.length + '. Counter metrics protect the quality of the user experience that isn\'t captured in the primary optimisation signal.'}
+          {score === pairs.length ? <><Icon name='check' size={13} color='var(--green)' /> All correct. Opt-out rate catches notification fatigue. Ad hide rate catches ad quality degradation. Zero-click rate catches search quality degradation.</> : score + '/' + pairs.length + '. Counter metrics protect the quality of the user experience that isn\'t captured in the primary optimisation signal.'}
         </div>
       )}
       <InsightBox label="Key Insight" color="var(--green)" bg="var(--green-bg)" border="var(--green-border)">{module.keyInsight}</InsightBox>
@@ -828,7 +829,7 @@ function Module_MF06({ module, onNext }) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
           {items06.map(item => (
             <span key={item.id} style={chipStyle(item)} onClick={() => cycle(item.id)}>
-              {checked && (placements[item.id] === item.correct ? '✓ ' : '✗ ')}
+              {checked && (placements[item.id] === item.correct ? <Icon name='check' size={12} color='currentColor' /> : <Icon name='x' size={12} color='currentColor' />)}{checked ? ' ' : ''}
               {item.label}
               {placements[item.id] && !checked && <span style={{ fontSize: '0.7rem', opacity: 0.75, marginLeft: '0.3rem' }}>[{placements[item.id]}]</span>}
             </span>
@@ -1013,7 +1014,7 @@ function Module_MF07({ module, onNext }) {
                 var val = evals[cand.id][cr.id];
                 var bg = val === null ? 'var(--surface-2)' : val ? 'var(--green-bg)' : 'var(--red-bg)';
                 var borderColor = val === null ? 'var(--border)' : val ? 'var(--green-border)' : 'var(--red-border)';
-                var icon = val === null ? '–' : val ? '✓' : '✗';
+                var icon = val === null ? '–' : val ? <Icon name='check' size={14} color='currentColor' /> : <Icon name='x' size={14} color='currentColor' />;
                 var iconColor = val === null ? 'var(--text-muted)' : val ? 'var(--green)' : 'var(--red)';
 
                 if (checked) {
@@ -1023,7 +1024,7 @@ function Module_MF07({ module, onNext }) {
                 }
 
                 return (
-                  <button key={cr.id} onClick={function() { handleToggle(cand.id, cr.id); }} style={{ background: bg, border: '1.5px solid ' + borderColor, borderRadius: 'var(--radius-sm)', padding: '0.3rem', cursor: checked ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 700, color: iconColor, textAlign: 'center', lineHeight: 1 }}>
+                  <button key={cr.id} onClick={function() { handleToggle(cand.id, cr.id); }} style={{ background: bg, border: '1.5px solid ' + borderColor, borderRadius: 'var(--radius-sm)', padding: '0.3rem', cursor: checked ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 700, color: iconColor, textAlign: 'center', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {icon}
                   </button>
                 );
@@ -1088,7 +1089,7 @@ function Module_MF07({ module, onNext }) {
         )}
         {answered && (
           <div className='pal-reveal-in' style={{ marginTop: '0.75rem', background: selected === Q.correct ? 'var(--green-bg)' : 'var(--red-bg)', border: '1px solid ' + (selected === Q.correct ? 'var(--green-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-            <strong>{selected === Q.correct ? '✓ Correct. ' : '✗ Not quite. '}</strong>{Q.explanation}
+            <strong>{selected === Q.correct ? <><Icon name='check' size={13} color='var(--green)' /> Correct. </> : <><Icon name='x' size={13} color='var(--red)' /> Not quite. </>}</strong>{Q.explanation}
           </div>
         )}
       </div>
@@ -1263,7 +1264,7 @@ function Module_MF08({ module, onNext }) {
         )}
         {answered && (
           <div className='pal-reveal-in' style={{ marginTop: '0.75rem', background: selected === Q.correct ? 'var(--green-bg)' : 'var(--red-bg)', border: '1px solid ' + (selected === Q.correct ? 'var(--green-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-            <strong>{selected === Q.correct ? '✓ Correct. ' : '✗ Not quite. '}</strong>{Q.explanation}
+            <strong>{selected === Q.correct ? <><Icon name='check' size={13} color='var(--green)' /> Correct. </> : <><Icon name='x' size={13} color='var(--red)' /> Not quite. </>}</strong>{Q.explanation}
           </div>
         )}
       </div>

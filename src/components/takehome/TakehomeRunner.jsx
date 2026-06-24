@@ -5,6 +5,7 @@ import { takehomeCases } from '../../data/takehomeCases.js';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -182,7 +183,7 @@ export function TakehomeRunner({ caseId, onBack, onNext, onNavigate, unlocked })
             borderRadius: '8px', padding: '0.9rem 1.1rem', marginBottom: '1.5rem',
             display: 'flex', alignItems: 'center', gap: '0.75rem',
           }}>
-            <span style={{ fontSize: '1.4rem' }}>⏱</span>
+            <span style={{ fontSize: '1.4rem' }}><Icon name='timer' size={22} color='currentColor' /></span>
             <div>
               <div style={{ fontWeight: 700, color: 'var(--green)', fontSize: '1rem' }}>
                 {caseData.durationMin}-Minute Take-Home
@@ -199,7 +200,7 @@ export function TakehomeRunner({ caseId, onBack, onNext, onNavigate, unlocked })
             borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1.5rem',
             fontSize: '0.85rem', color: 'var(--text-muted)',
           }}>
-            ⚠️ Once started, the timer runs until you reveal the rubric. You can submit your write-up at any time.
+            <Icon name='alert-triangle' size={15} color='currentColor' /> Once started, the timer runs until you reveal the rubric. You can submit your write-up at any time.
           </div>
 
           {/* Prompt */}
@@ -251,7 +252,7 @@ export function TakehomeRunner({ caseId, onBack, onNext, onNavigate, unlocked })
               background: 'var(--surface-2)', border: '1px solid var(--border)',
               borderRadius: '10px', color: 'var(--text-muted)', fontSize: '0.9rem',
             }}>
-              🔒 Unlock PAL to attempt this take-home challenge
+              <Icon name='lock' size={15} color='currentColor' /> Unlock PAL to attempt this take-home challenge
             </div>
           ) : (
             <button
@@ -344,7 +345,7 @@ export function TakehomeRunner({ caseId, onBack, onNext, onNavigate, unlocked })
             borderRadius: '8px', padding: '0.7rem 1rem',
             marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
           }}>
-            <span style={{ fontSize: '1rem' }}>⏱</span>
+            <span style={{ fontSize: '1rem' }}><Icon name='timer' size={16} color='currentColor' /></span>
             <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
               You completed this in{' '}
               <strong style={{ color: 'var(--text)' }}>{elapsedLabel}</strong>
@@ -566,7 +567,7 @@ export function TakehomeRunner({ caseId, onBack, onNext, onNavigate, unlocked })
               borderRadius: '8px', padding: '1rem 1.25rem',
               fontSize: '0.9rem', color: 'var(--green)', fontWeight: 600,
             }}>
-              ✓ Progress saved
+              <Icon name='check' size={15} color='currentColor' /> Progress saved
             </div>
           )}
 

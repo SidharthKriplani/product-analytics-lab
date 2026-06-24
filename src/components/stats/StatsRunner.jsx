@@ -203,7 +203,9 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
                   color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
                 }}
               >
-                {noteSaved ? '✓ Saved' : 'Save note'}
+                {noteSaved
+                  ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><Icon name='check' size={12} color='currentColor' /> Saved</span>
+                  : 'Save note'}
               </button>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

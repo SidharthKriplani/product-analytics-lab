@@ -1,5 +1,6 @@
 // Phase progress nav for the Design Runner
 // Shows all 5 phases as tabs; completed phases get a checkmark; current is highlighted
+import { Icon } from '../shared/Icon.jsx';
 
 export function DesignPhaseNav({ phases, currentPhaseIndex, completedPhaseIds, onGoToPhase }) {
   return (
@@ -39,7 +40,7 @@ export function DesignPhaseNav({ phases, currentPhaseIndex, completedPhaseIds, o
             }}
           >
             {isCompleted && !isCurrent && (
-              <span style={{ fontSize: '0.68rem', color: 'var(--teal)' }}>✓</span>
+              <span style={{ fontSize: '0.68rem', color: 'var(--teal)', display: 'inline-flex', alignItems: 'center' }}><Icon name='check' size={11} color='var(--teal)' /></span>
             )}
             <span>{i + 1}. {phase.label}</span>
           </button>

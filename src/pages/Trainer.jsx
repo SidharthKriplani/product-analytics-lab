@@ -553,7 +553,7 @@ function QuestionScreen({ questions, currentIndex, onAnswer, onNext, answers, sc
           color: 'var(--green)',
           whiteSpace: 'nowrap',
         }}>
-          ✓ {score} correct / {Object.keys(answers).length} answered
+<Icon name='check' size={13} color='var(--green)' /> {score} correct / {Object.keys(answers).length} answered
         </div>
       </div>
 
@@ -840,7 +840,7 @@ function DebriefScreen({ questions, answers, onRetry, onNewSession, onBack }) {
                       padding: '0.5rem 0.75rem',
                       marginBottom: '0.5rem',
                     }}>
-                      <span style={{ color: 'var(--green)', fontWeight: 700, fontSize: '0.75rem', marginTop: 1 }}>✓</span>
+                      <span style={{ color: 'var(--green)', fontWeight: 700, fontSize: '0.75rem', marginTop: 1 }}><Icon name='check' size={12} color='var(--green)' /></span>
                       <span style={{ fontSize: '0.85rem', color: 'var(--green)' }}>{correctOpt?.text}</span>
                     </div>
                     <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>{q.explanation}</p>

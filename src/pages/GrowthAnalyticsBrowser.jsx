@@ -241,7 +241,7 @@ export function GrowthAnalyticsBrowser({ onSelectCase, unlocked, onOpenArticle, 
                     lineHeight: 1,
                   }}
                 >
-                  🔖
+                  <Icon name='bookmark' size={13} color='currentColor' />
                 </span>
               )}
 
@@ -290,14 +290,14 @@ export function GrowthAnalyticsBrowser({ onSelectCase, unlocked, onOpenArticle, 
                       </span>
                     )}
 
-                    {isLocked && <span style={{ fontSize: '0.75rem' }}>🔒</span>}
+                    {isLocked && <span style={{ fontSize: '0.75rem' }}><Icon name='lock' size={12} color='currentColor' /></span>}
 
                     {prog && (
                       <span style={{
                         fontSize: '0.7rem', fontWeight: 600,
                         color: RATING_COLOR[prog.rating] || 'var(--teal)',
                       }}>
-                        ✓
+                        <Icon name='check' size={11} color='currentColor' />
                       </span>
                     )}
                   </div>
@@ -339,10 +339,10 @@ export function GrowthAnalyticsBrowser({ onSelectCase, unlocked, onOpenArticle, 
                     whiteSpace: 'nowrap', flexShrink: 0,
                   }}>
                     {prog.rating === 'strong'
-                      ? '✓ Nailed it'
+                      ? (<><Icon name='check' size={12} color='currentColor' /> Nailed it</>)
                       : prog.rating === 'partial'
                       ? '~ Close'
-                      : '✗ Revisit'}
+                      : (<><Icon name='x' size={12} color='currentColor' /> Revisit</>)}
                   </div>
                 )}
               </div>

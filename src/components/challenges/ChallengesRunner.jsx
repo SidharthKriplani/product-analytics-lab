@@ -4,6 +4,7 @@ import { track } from '../../utils/analytics.js';
 import { challengesCases } from '../../data/challengesCases.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -377,7 +378,7 @@ export function ChallengesRunner({ caseId, onBack, onNext, unlocked, onNavigate 
               marginBottom: '1rem',
             }}>
               <span style={{ fontSize: '0.78rem', color: canReveal ? 'var(--green)' : 'var(--text-dim)' }}>
-                {canReveal ? '✓ Ready to reveal' : `${qAnswer.trim().length}/30 characters to unlock`}
+                {canReveal ? <><Icon name='check' size={13} color='currentColor' /> Ready to reveal</> : `${qAnswer.trim().length}/30 characters to unlock`}
               </span>
               <button
                 onClick={handleReveal}

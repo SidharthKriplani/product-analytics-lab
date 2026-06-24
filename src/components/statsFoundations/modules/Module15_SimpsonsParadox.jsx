@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell,
 } from 'recharts';
+import { Icon } from '../../shared/Icon.jsx';
 
 // Aggregate rates are the segment-weighted averages of SEGMENT_DATA below, so the
 // arithmetic reconciles:
@@ -189,7 +190,7 @@ export function Module15_SimpsonsParadox({ module, onNext }) {
                     <td style={{ padding: '0.5rem 0.65rem', color: 'var(--teal)', fontWeight: 700 }}>{s.control}%</td>
                     <td style={{ padding: '0.5rem 0.65rem', color: 'var(--text-muted)' }}>{s.controlN.toLocaleString()}</td>
                     <td style={{ padding: '0.5rem 0.65rem' }}>
-                      <span style={{ color: 'var(--accent)', fontWeight: 800, fontSize: '0.78rem' }}>Treatment ✓</span>
+                      <span style={{ color: 'var(--accent)', fontWeight: 800, fontSize: '0.78rem' }}>Treatment <Icon name='check' size={12} color='var(--accent)' /></span>
                     </td>
                   </tr>
                 ))}

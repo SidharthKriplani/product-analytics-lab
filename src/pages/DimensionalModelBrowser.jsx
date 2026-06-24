@@ -1,3 +1,5 @@
+import { Icon } from '../components/shared/Icon.jsx';
+
 export function DimensionalModelBrowser({ onNavigate }) {
   const clusters = [
     {
@@ -58,7 +60,7 @@ export function DimensionalModelBrowser({ onNavigate }) {
         borderRadius: 'var(--radius)', padding: '1rem 1.25rem',
         marginBottom: '2rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
       }}>
-        <div style={{ fontSize: '1.1rem', marginTop: '0.05rem' }}>🔧</div>
+        <div style={{ marginTop: '0.05rem' }}><Icon name='wrench' size={18} color='var(--yellow)' /></div>
         <div>
           <div style={{ fontWeight: 700, color: 'var(--yellow)', fontSize: '0.88rem', marginBottom: '0.25rem' }}>
             In development

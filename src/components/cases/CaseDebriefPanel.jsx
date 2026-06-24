@@ -2,6 +2,7 @@
 // Props: { businessCase, onRetry, onBack }
 
 import { useState } from 'react';
+import { Icon } from '../shared/Icon.jsx';
 
 export function CaseDebriefPanel({ businessCase, onRetry, onBack, onNext }) {
   const sa = businessCase.seniorAnswer;
@@ -134,7 +135,7 @@ export function CaseDebriefPanel({ businessCase, onRetry, onBack, onNext }) {
           onMouseEnter={() => setRetryHovered(true)}
           onMouseLeave={() => setRetryHovered(false)}
         >
-          ↺ Try again
+          <Icon name='rotate-ccw' size={14} color='currentColor' /> Try again
         </button>
         <button
           onClick={onBack}

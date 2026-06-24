@@ -12,6 +12,7 @@ import { behavioralQuestions } from '../data/behavioralQuestions.js';
 import { estimationProblems } from '../data/estimationProblems.js';
 import { statsFoundationsModules } from '../data/statsFoundationsModules.js';
 import { growthAnalyticsCases } from '../data/growthAnalyticsCases.js';
+import { Icon } from '../components/shared/Icon.jsx';
 
 // ─── Keyword → Room mapping ───────────────────────────────────────────────────
 const KEYWORD_MAP = [
@@ -460,7 +461,7 @@ export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocke
       {/* Header */}
       <div style={{ marginBottom: '1.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '0.5rem' }}>
-          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}>🛡</span>
+          <span style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}><Icon name='shield' size={18} color='currentColor' /></span>
           <div>
             <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--purple)', marginBottom: 2 }}>Prep Tools</div>
             <h1 style={{ fontSize: '1.55rem', fontWeight: 700, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>Defense Strategy</h1>
@@ -480,7 +481,7 @@ export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocke
             <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <div style={{ width: 22, height: 22, borderRadius: '50%', background: isDone ? 'var(--purple)' : isActive ? 'var(--purple-bg)' : 'var(--surface-2)', border: '2px solid ' + (isDone || isActive ? 'var(--purple)' : 'var(--border)'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700, color: isDone ? 'white' : isActive ? 'var(--purple)' : 'var(--text-dim)', flexShrink: 0 }}>
-                  {isDone ? '✓' : i + 1}
+                  {isDone ? <Icon name='check' size={11} color='currentColor' /> : i + 1}
                 </div>
                 <span style={{ fontSize: '0.78rem', fontWeight: isActive ? 700 : 400, color: isActive ? 'var(--text)' : isDone ? 'var(--text-muted)' : 'var(--text-dim)' }}>
                   {s.label}

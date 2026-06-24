@@ -1703,16 +1703,16 @@ const POSTS = [
 ];
 
 const CATEGORY_CONFIG = {
-  'Metrics':            { color: 'var(--green)',     bg: 'var(--green-bg)',    border: 'var(--green-border)',   icon: '📐' },
-  'RCA':                { color: 'var(--yellow)',    bg: 'var(--yellow-bg)',   border: 'var(--yellow-border)',  icon: '🔍' },
-  'Experimentation':    { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)',  icon: '⚗' },
-  'Statistics':         { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',    icon: '📊' },
-  'Ambiguous Problems': { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: '🧩' },
-  'GenAI Analytics':    { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',    icon: '🤖' },
-  'Product Sense':      { color: 'var(--blue-text)', bg: 'var(--blue-bg)',     border: 'var(--blue-border)',    icon: '💡' },
-  'SQL & Data':         { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)',  icon: '🗄' },
-  'Career & Interview': { color: 'var(--red)',       bg: 'var(--red-bg)',      border: 'var(--red-border)',     icon: '🎯' },
-  'Mental Models':      { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: '🧠' },
+  'Metrics':            { color: 'var(--green)',     bg: 'var(--green-bg)',    border: 'var(--green-border)',   icon: 'ruler' },
+  'RCA':                { color: 'var(--yellow)',    bg: 'var(--yellow-bg)',   border: 'var(--yellow-border)',  icon: 'search' },
+  'Experimentation':    { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)',  icon: 'flask' },
+  'Statistics':         { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',    icon: 'bar-chart' },
+  'Ambiguous Problems': { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: 'puzzle' },
+  'GenAI Analytics':    { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',    icon: 'bot' },
+  'Product Sense':      { color: 'var(--blue-text)', bg: 'var(--blue-bg)',     border: 'var(--blue-border)',    icon: 'lightbulb' },
+  'SQL & Data':         { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)',  icon: 'archive' },
+  'Career & Interview': { color: 'var(--red)',       bg: 'var(--red-bg)',      border: 'var(--red-border)',     icon: 'target' },
+  'Mental Models':      { color: 'var(--purple)',    bg: 'var(--purple-bg)',   border: 'var(--purple-border)',  icon: 'brain' },
 };
 
 const CATEGORIES = Object.keys(CATEGORY_CONFIG);
@@ -1968,7 +1968,7 @@ export function BlogBrowser({ onNavigate }) {
               borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.65rem',
               fontSize: '0.75rem', color: 'var(--yellow)', fontWeight: 600,
             }}>
-              ⏳ {pendingCount} more coming soon
+              <Icon name='hourglass' size={12} color='currentColor' /> {pendingCount} more coming soon
             </div>
           )}
         </div>
@@ -1988,7 +1988,7 @@ export function BlogBrowser({ onNavigate }) {
               marginBottom: '0.9rem', paddingBottom: '0.6rem',
               borderBottom: `1px solid var(--border-subtle)`,
             }}>
-              <span style={{ fontSize: '1rem' }}>{cfg.icon}</span>
+              <span style={{ fontSize: '1rem' }}><Icon name={cfg.icon} size={16} color='currentColor' /></span>
               <span style={{
                 fontSize: '0.88rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.01em',
               }}>{cat}</span>

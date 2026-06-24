@@ -208,7 +208,7 @@ export function CodeBrowser({ onSelectModule, unlocked, onUnlock, onOpenArticle 
                   </span>
                 )}
                 {isLocked && (
-                  <span style={{ fontSize: '0.75rem', marginLeft: 'auto' }}>🔒</span>
+                  <span style={{ fontSize: '0.75rem', marginLeft: 'auto' }}><Icon name='lock' size={12} color='currentColor' /></span>
                 )}
               </div>
 

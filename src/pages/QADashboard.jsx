@@ -3,6 +3,7 @@
 // Access: click "QA" in footer dev link, or navigate to page key 'qa'
 
 import { useState, useMemo } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 import { statsModules } from '../data/statsModules.js';
 import { metricCases } from '../data/metricCases.js';
 import { designScenarios } from '../data/designScenarios.js';
@@ -52,7 +53,7 @@ function RoomBadge({ room }) {
 }
 
 function Tick({ val }) {
-  return <span style={{ fontSize: '0.8rem', color: val ? 'var(--green)' : 'var(--red, #e53e3e)' }}>{val ? '✓' : '✗'}</span>;
+  return <span style={{ fontSize: '0.8rem', color: val ? 'var(--green)' : 'var(--red, #e53e3e)' }}>{val ? <Icon name='check' size={13} color='currentColor' /> : <Icon name='x' size={13} color='currentColor' />}</span>;
 }
 
 function SectionHeader({ title, count, countColor }) {
@@ -223,7 +224,9 @@ export function QADashboard({ onNavigate, onOpenItem, unlocked, onUnlock, onLock
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{label}</div>
                   {expected !== null && (
                     <div style={{ fontSize: '0.68rem', color: ok ? 'var(--green)' : 'var(--red, #e53e3e)', marginTop: '0.2rem' }}>
-                      {ok ? `✓ expected ${expected}` : `✗ expected ${expected}`}
+                      {ok
+                        ? <><Icon name='check' size={11} color='currentColor' /> expected {expected}</>
+                        : <><Icon name='x' size={11} color='currentColor' /> expected {expected}</>}
                     </div>
                   )}
                 </div>
@@ -452,22 +455,22 @@ export function QADashboard({ onNavigate, onOpenItem, unlocked, onUnlock, onLock
               background: '#fff5f5', border: '1px solid #feb2b2', borderRadius: 'var(--radius-sm)',
               padding: '0.4rem 0.9rem', fontSize: '0.82rem', fontWeight: 600,
               color: 'var(--red, #c53030)', cursor: 'pointer',
-            }}>🗑 Reset all progress</button>
+            }}><Icon name='trash' size={13} color='currentColor' /> Reset all progress</button>
             <button onClick={handleUnlock} style={{
               background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius-sm)',
               padding: '0.4rem 0.9rem', fontSize: '0.82rem', fontWeight: 600,
               color: 'var(--green)', cursor: 'pointer',
-            }}>🔓 Force unlock beta</button>
+            }}><Icon name='unlock' size={13} color='currentColor' /> Force unlock beta</button>
             <button onClick={handleLock} style={{
               background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
               padding: '0.4rem 0.9rem', fontSize: '0.82rem', fontWeight: 600,
               color: 'var(--text-muted)', cursor: 'pointer',
-            }}>🔒 Lock / clear unlock</button>
+            }}><Icon name='lock' size={13} color='currentColor' /> Lock / clear unlock</button>
             <button onClick={exportLS} style={{
               background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
               padding: '0.4rem 0.9rem', fontSize: '0.82rem', fontWeight: 600,
               color: 'var(--text-secondary)', cursor: 'pointer',
-            }}>📋 Export localStorage JSON</button>
+            }}><Icon name='clipboard' size={13} color='currentColor' /> Export localStorage JSON</button>
           </div>
 
           <SectionHeader title="localStorage Keys" />

@@ -519,7 +519,7 @@ export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnloc
                     fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
                     color: levelCfg.color, background: levelCfg.bg, border: `1px solid ${levelCfg.border}`,
                     borderRadius: 'var(--radius-sm)', padding: '0.08rem 0.35rem',
-                  }}>✓ {levelCfg.label}</span>
+                  }}><Icon name='check' size={11} color='currentColor' /> {levelCfg.label}</span>
                 )}
               </div>
 
@@ -678,9 +678,9 @@ export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnloc
                     color: 'var(--text-dim)', background: 'var(--surface-2)', border: '1px solid var(--border)',
                     borderRadius: 'var(--radius-sm)', padding: '0.08rem 0.35rem',
                   }}>{m.domain}</span>
-                  {isLocked && <span style={{ fontSize: '0.8rem', marginLeft: 'auto' }}>🔒</span>}
+                  {isLocked && <span style={{ fontSize: '0.8rem', marginLeft: 'auto' }}><Icon name='lock' size={13} color='currentColor' /></span>}
                   {prog && (
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', marginLeft: 'auto' }}>✓</span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', marginLeft: 'auto' }}><Icon name='check' size={11} color='currentColor' /></span>
                   )}
                 </div>
 

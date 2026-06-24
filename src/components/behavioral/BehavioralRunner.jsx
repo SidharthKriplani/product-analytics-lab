@@ -304,7 +304,7 @@ export function BehavioralRunner({ caseId, onBack, onNext, onNavigate }) {
           />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.8rem', color: response.trim().length < 60 ? 'var(--text-dim)' : 'var(--green)' }}>
-              {response.trim().length < 60 ? `${response.trim().length}/60 characters to unlock` : '✓ Ready to reveal'}
+              {response.trim().length < 60 ? `${response.trim().length}/60 characters to unlock` : <><Icon name='check' size={13} color='var(--green)' /> Ready to reveal</>}
             </span>
             {speechSupported && (
               <button
@@ -349,7 +349,7 @@ export function BehavioralRunner({ caseId, onBack, onNext, onNavigate }) {
                 color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
               }}
             >
-              {noteSaved ? '✓ Saved' : 'Save note'}
+              {noteSaved ? <><Icon name='check' size={12} color='var(--green)' /> Saved</> : 'Save note'}
             </button>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -528,7 +528,7 @@ export function BehavioralRunner({ caseId, onBack, onNext, onNavigate }) {
               background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '7px',
               padding: '0.5rem 1rem', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer',
             }}>
-              ↺ Try again
+              <Icon name='rotate-ccw' size={14} color='currentColor' /> Try again
             </button>
             <button onClick={onBack} style={{
               background: 'none', border: '1px solid var(--border)', borderRadius: '7px',

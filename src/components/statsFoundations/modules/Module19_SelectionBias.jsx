@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../../shared/Icon.jsx';
 
 // Fixed dot data: 25 active (high engagement, high retention) + 15 churned (low engagement, low retention)
 const ACTIVE_DOTS = [
@@ -23,17 +24,17 @@ const CHURNED_DOTS = [
 
 const EXAMPLES = [
   {
-    icon: '🚀',
+    icon: 'rocket',
     title: 'Onboarding analysis',
     desc: 'Users who completed setup look great. But 40% dropped before completing — they\'re missing from your analysis.',
   },
   {
-    icon: '📋',
+    icon: 'clipboard',
     title: 'Feature satisfaction surveys',
     desc: 'Only engaged users respond. Churned users — who might have left because of the feature — never answer.',
   },
   {
-    icon: '📊',
+    icon: 'bar-chart',
     title: 'Retention cohort',
     desc: 'Only users who stayed are in your "retained users" analysis. You\'re measuring the survivors\' behavior.',
   },
@@ -191,7 +192,7 @@ export function Module19_SelectionBias({ module, onNext }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           {EXAMPLES.map((ex, i) => (
             <div key={i} style={{ display: 'flex', gap: '0.75rem', padding: '0.6rem 0.75rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-              <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{ex.icon}</span>
+              <span style={{ flexShrink: 0 }}><Icon name={ex.icon} size={18} color='var(--teal)' /></span>
               <div>
                 <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.2rem' }}>{ex.title}</div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{ex.desc}</div>

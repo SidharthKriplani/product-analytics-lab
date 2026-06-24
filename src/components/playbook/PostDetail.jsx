@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { trainerMCQ } from '../../data/trainerMCQ.js';
+import { Icon } from '../shared/Icon.jsx';
 
 const ROOM_CONFIG = {
   stats:                { label: 'Stats Room',             color: 'var(--accent)'    },
@@ -184,7 +185,7 @@ function KeyTakeaways({ items, catColor }) {
         fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
         letterSpacing: '0.09em', color: catColor || 'var(--text-dim)', marginBottom: '0.75rem',
       }}>
-        ✦ Key Takeaways
+        <Icon name="sparkle" size={11} color="currentColor" /> Key Takeaways
       </div>
       <ul style={{ margin: 0, paddingLeft: '1.3rem' }}>
         {items.map((item, i) => (
@@ -407,7 +408,7 @@ export function PostDetail({ post, onBack, onOpenItem }) {
               border: '1px solid var(--red-border)', borderRadius: 'var(--radius-sm)',
               padding: '0.1rem 0.4rem',
             }}>
-              🏢 {post.source}
+              <Icon name="building-2" size={11} color="currentColor" /> {post.source}
             </span>
           )}
         </div>

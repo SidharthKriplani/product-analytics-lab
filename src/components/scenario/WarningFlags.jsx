@@ -1,5 +1,7 @@
+import { Icon } from '../shared/Icon.jsx';
+
 function SeverityIcon({ severity }) {
-  if (severity === 'critical') return <span style={{ color: 'var(--red)', fontSize: '1rem' }}>⚠</span>;
+  if (severity === 'critical') return <span style={{ color: 'var(--red)', fontSize: '1rem' }}><Icon name='alert-triangle' size={16} color='var(--red)' /></span>;
   if (severity === 'warning') return <span style={{ color: 'var(--yellow)', fontSize: '1rem' }}>◉</span>;
   return <span style={{ color: 'var(--accent)', fontSize: '1rem' }}>ℹ</span>;
 }
@@ -47,7 +49,7 @@ export function WarningFlags({ flags, checked, onToggle, interactive }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0, transition: 'all 0.15s',
                 }}>
-                  {isChecked && <span style={{ color: '#fff', fontSize: '10px', fontWeight: 900 }}>✓</span>}
+                  {isChecked && <span style={{ color: '#fff', fontSize: '10px', fontWeight: 900 }}><Icon name='check' size={10} color='#fff' /></span>}
                 </div>
               )}
               <SeverityIcon severity={flag.severity} />

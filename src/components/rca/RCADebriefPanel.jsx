@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../shared/Icon.jsx';
 
 export function RCADebriefPanel({ rcaCase, onRetry, onBack, onNext }) {
   const { seniorDiagnosis, leadershipNote, spokenSummary } = rcaCase;
@@ -101,7 +102,7 @@ export function RCADebriefPanel({ rcaCase, onRetry, onBack, onNext }) {
             }}
           >
             <span>{leadershipOpen ? '▾' : '▸'}</span>
-            <span>💼 Leadership Lens</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><Icon name="briefcase" size={14} color="currentColor" /> Leadership Lens</span>
           </button>
           {leadershipOpen && (
             <div style={{
@@ -115,7 +116,7 @@ export function RCADebriefPanel({ rcaCase, onRetry, onBack, onNext }) {
                 fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
                 letterSpacing: '0.08em', color: 'var(--purple)', marginBottom: '0.45rem',
               }}>
-                💼 How a Staff DS thinks about this
+                <Icon name="briefcase" size={12} color="var(--purple)" /> How a Staff DS thinks about this
               </div>
               <p style={{
                 margin: 0, fontSize: '0.9rem', color: 'var(--text)',
@@ -147,7 +148,7 @@ export function RCADebriefPanel({ rcaCase, onRetry, onBack, onNext }) {
             }}
           >
             <span>{spokenOpen ? '▾' : '▸'}</span>
-            <span>🎙 30-Second Answer</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><Icon name="mic" size={14} color="currentColor" /> 30-Second Answer</span>
           </button>
           {spokenOpen && (
             <div style={{

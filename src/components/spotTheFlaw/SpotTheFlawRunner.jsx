@@ -4,6 +4,7 @@ import { track } from '../../utils/analytics.js';
 import { spotTheFlawCases } from '../../data/spotTheFlawCases.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 const ROOM_KEY = 'spot-the-flaw';
 function loadNote(id) { try { const d = JSON.parse(localStorage.getItem('pal-notes-v1') || '{}'); return d[ROOM_KEY + ':' + id] || ''; } catch { return ''; } }
@@ -144,7 +145,7 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
             display: 'flex', alignItems: 'center', gap: '0.5rem',
             marginBottom: '0.9rem',
           }}>
-            <span style={{ fontSize: '0.95rem' }}>⚠️</span>
+            <span style={{ fontSize: '0.95rem', display: 'inline-flex' }}><Icon name='alert-triangle' size={15} color='currentColor' /></span>
             <span style={{
               fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase',
               letterSpacing: '0.08em', color: 'var(--red)',
@@ -399,8 +400,9 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
         <div style={{
           fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase',
           letterSpacing: '0.07em', color: 'var(--red)', marginBottom: '0.5rem',
+          display: 'flex', alignItems: 'center', gap: '0.35rem',
         }}>
-          🐛 The Flaw
+          <Icon name='bug' size={12} color='currentColor' /> The Flaw
         </div>
         <p style={{ color: 'var(--text)', fontSize: '0.92rem', lineHeight: 1.7, margin: 0 }}>
           {caseData.flaw}
@@ -418,8 +420,9 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
         <div style={{
           fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase',
           letterSpacing: '0.07em', color: 'var(--yellow)', marginBottom: '0.5rem',
+          display: 'flex', alignItems: 'center', gap: '0.35rem',
         }}>
-          💥 If Uncorrected
+          <Icon name='zap' size={12} color='currentColor' /> If Uncorrected
         </div>
         <p style={{ color: 'var(--text)', fontSize: '0.92rem', lineHeight: 1.7, margin: 0 }}>
           {caseData.impact}
@@ -437,8 +440,9 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
         <div style={{
           fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase',
           letterSpacing: '0.07em', color: 'var(--green)', marginBottom: '0.5rem',
+          display: 'flex', alignItems: 'center', gap: '0.35rem',
         }}>
-          ✅ The Fix
+          <Icon name='check-circle' size={12} color='currentColor' /> The Fix
         </div>
         <p style={{ color: 'var(--text)', fontSize: '0.92rem', lineHeight: 1.7, margin: 0 }}>
           {caseData.fix}
@@ -493,7 +497,9 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
             fontSize: '0.78rem', cursor: 'pointer',
           }}
         >
-          {noteSaved ? '✓ Saved' : 'Save note'}
+          {noteSaved
+            ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><Icon name='check' size={12} color='currentColor' /> Saved</span>
+            : 'Save note'}
         </button>
       </div>
 
@@ -542,7 +548,7 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
             color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer',
           }}
         >
-          ↺ Try again
+          <Icon name='rotate-ccw' size={14} color='currentColor' /> Try again
         </button>
         <button
           onClick={onBack}

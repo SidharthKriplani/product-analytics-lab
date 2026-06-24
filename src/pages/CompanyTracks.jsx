@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { GateOverlay } from '../components/shared/GateOverlay.jsx';
 import { companyTracks, articleTitleMap } from '../data/companyTracks.js';
 import { caseTitleMap } from '../data/caseIndex.js';
+import { Icon } from '../components/shared/Icon.jsx';
 
 const ROOM_LABELS = {
   'stat-foundations': 'Foundations',
@@ -110,7 +111,7 @@ function ProgressRing({ done, total, color }) {
   const offset = circumference * (1 - pct);
   const size = radius * 2;
   // Center label: percentage when partial, check when complete, dash when none started
-  const centerLabel = complete ? '✓' : (done === 0 ? '0%' : Math.round(pct * 100) + '%');
+  const centerLabel = done === 0 ? '0%' : Math.round(pct * 100) + '%';
 
   return (
     <div
@@ -154,7 +155,7 @@ function ProgressRing({ done, total, color }) {
         color: complete ? 'var(--green)' : (done === 0 ? 'var(--text-dim)' : ringColor),
         lineHeight: 1,
       }}>
-        {centerLabel}
+        {complete ? <Icon name='check' size={13} color='currentColor' /> : centerLabel}
       </span>
     </div>
   );
@@ -924,7 +925,7 @@ function TrackDetail({ track, onBack, onNavigate }) {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '0.68rem', color: 'var(--green)', flexShrink: 0,
                     }}>
-                      {done ? '✓' : ''}
+                      {done ? <Icon name='check' size={11} color='currentColor' /> : ''}
                     </span>
                     <span style={{
                       fontSize: '0.85rem', fontWeight: 500,

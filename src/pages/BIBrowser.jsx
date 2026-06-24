@@ -3,6 +3,7 @@ import { biCases } from '../data/biCases.js';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getAllBIProgress } from '../utils/biProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
+import { Icon } from '../components/shared/Icon.jsx';
 
 const DIFF_CFG = {
   analyst: { label: 'Analyst', color: 'var(--blue-text)', bg: 'var(--blue-bg)',    border: 'var(--blue-border)' },
@@ -286,7 +287,7 @@ export function BIBrowser({ onSelectCase, unlocked, onOpenArticle }) {
                   </span>
                 )}
 
-                {isLocked && <span style={{ fontSize: '0.75rem' }}>🔒</span>}
+                {isLocked && <span style={{ fontSize: '0.75rem' }}><Icon name='lock' size={12} color='currentColor' /></span>}
 
                 {prog && (
                   <span style={{
@@ -294,7 +295,7 @@ export function BIBrowser({ onSelectCase, unlocked, onOpenArticle }) {
                     color: RATING_COLOR[prog.rating] || 'var(--yellow)',
                     marginLeft: 'auto',
                   }}>
-                    {prog.rating === 'strong' ? '✓ Nailed it' : prog.rating === 'partial' ? '~ Close' : '✗ Revisit'}
+                    {prog.rating === 'strong' ? (<><Icon name='check' size={11} color='currentColor' /> Nailed it</>) : prog.rating === 'partial' ? '~ Close' : (<><Icon name='x' size={11} color='currentColor' /> Revisit</>)}
                   </span>
                 )}
               </div>

@@ -3,6 +3,7 @@ import { productDesignScenarios } from '../../data/productDesignScenarios.js';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 const NOTES_KEY = 'pal-notes-v1';
 
@@ -60,7 +61,7 @@ function PhaseNav({ phases, currentIndex, completedIds }) {
             border: `1px solid ${isActive ? 'var(--purple-border)' : isDone ? 'var(--border)' : 'var(--border)'}`,
             transition: 'all 0.12s',
           }}>
-            {isDone && !isActive ? '✓ ' : ''}{phase.label}
+            {isDone && !isActive ? <><Icon name="check" size={11} color="currentColor" /> </> : ''}{phase.label}
           </div>
         );
       })}

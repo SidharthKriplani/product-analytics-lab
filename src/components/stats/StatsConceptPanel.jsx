@@ -1,4 +1,5 @@
 import { ConceptChip, ConceptsSection } from '../concepts/ConceptChip.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 // Senior analyst read + concept links + related room CTAs
 
@@ -127,7 +128,7 @@ export function StatsConceptPanel({
           onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-border)'; e.currentTarget.style.color = 'var(--accent)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
         >
-          ↺ Try again
+          <Icon name='rotate-ccw' size={12} color='currentColor' /> Try again
         </button>
       </div>
     </div>

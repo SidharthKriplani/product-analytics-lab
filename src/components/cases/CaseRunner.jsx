@@ -10,6 +10,7 @@ import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
 import { GateOverlay } from '../shared/GateOverlay.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 // ─── Seeded shuffle helpers ───
 // Deterministic per caseId+phaseId so the same tester sees the same order
@@ -350,7 +351,7 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
                   }}
                 >
                   <span>{spokenOpen ? '▾' : '▸'}</span>
-                  <span>🎙 30-Second Answer</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><Icon name='mic' size={15} color='currentColor' /> 30-Second Answer</span>
                 </button>
                 {spokenOpen && (
                   <div style={{

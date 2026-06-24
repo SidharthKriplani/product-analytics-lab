@@ -1,6 +1,8 @@
 // Product Analytics Lab — Guided Path Card
 // Renders a single learning path with sequence, completion status, and next item CTA
 
+import { Icon } from '../shared/Icon.jsx';
+
 export function GuidedPathCard({ path, completionMap, onNavigate }) {
   // completionMap: { 'stats:stat01-pvalue-decision': true, 'review:s01-checkout-trap': true, ... }
   const completed = path.sequence.filter(item => completionMap[`${item.room}:${item.itemId}`]);
@@ -83,7 +85,7 @@ export function GuidedPathCard({ path, completionMap, onNavigate }) {
           fontSize: '0.78rem', fontWeight: 600,
           color: path.color, padding: '0.4rem',
         }}>
-          ✓ Path complete
+          <Icon name="check" size={13} color="currentColor" /> Path complete
         </div>
       )}
     </div>

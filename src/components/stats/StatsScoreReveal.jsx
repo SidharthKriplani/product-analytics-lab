@@ -1,10 +1,12 @@
 // Immediate feedback after option selection + submit
 
+import { Icon } from '../shared/Icon.jsx';
+
 const LEVEL_CONFIG = {
-  staff:   { label: 'Staff-Level',    color: 'var(--teal)',      bg: 'var(--teal-bg)',    border: 'var(--teal-border)',   icon: '★' },
-  strong:  { label: 'Senior-Ready',   color: 'var(--accent)',    bg: 'var(--accent-bg)',  border: 'var(--accent-border)', icon: '◆' },
-  partial: { label: 'Analyst-Ready',  color: 'var(--yellow)',    bg: 'var(--yellow-bg)',  border: 'var(--yellow-border)', icon: '~' },
-  wrong:   { label: 'Needs Work',     color: 'var(--red)',       bg: 'var(--red-bg)',     border: 'var(--red-border)',    icon: '✕' },
+  staff:   { label: 'Staff-Level',    color: 'var(--teal)',      bg: 'var(--teal-bg)',    border: 'var(--teal-border)',   icon: 'star-filled' },
+  strong:  { label: 'Senior-Ready',   color: 'var(--accent)',    bg: 'var(--accent-bg)',  border: 'var(--accent-border)', icon: 'diamond' },
+  partial: { label: 'Analyst-Ready',  color: 'var(--yellow)',    bg: 'var(--yellow-bg)',  border: 'var(--yellow-border)', icon: 'minus' },
+  wrong:   { label: 'Needs Work',     color: 'var(--red)',       bg: 'var(--red-bg)',     border: 'var(--red-border)',    icon: 'x' },
 };
 
 export function StatsScoreReveal({ option, onContinue }) {
@@ -20,7 +22,7 @@ export function StatsScoreReveal({ option, onContinue }) {
         background: cfg.bg, border: `1.5px solid ${cfg.border}`,
         borderRadius: 'var(--radius)',
       }}>
-        <span style={{ fontSize: '1.1rem' }}>{cfg.icon}</span>
+        <span><Icon name={cfg.icon} size={18} color={cfg.color} /></span>
         <div>
           <div style={{ fontSize: '0.9rem', fontWeight: 800, color: cfg.color, letterSpacing: '-0.01em' }}>
             {cfg.label}

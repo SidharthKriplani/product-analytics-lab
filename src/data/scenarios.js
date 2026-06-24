@@ -312,7 +312,7 @@ export const scenarios = [
         pValue: 0.0001,
         confidenceInterval: null,
         significant: true,
-        note: "⚠️ SAMPLE RATIO MISMATCH. Assignment is significantly skewed. This invalidates the experiment."
+        note: "Warning: SAMPLE RATIO MISMATCH. Assignment is significantly skewed. This invalidates the experiment."
       }
     ],
 
@@ -4427,7 +4427,7 @@ export const scenarios = [
           metric: '8 funnel metrics tested simultaneously',
           type: 'diagnostic',
           direction: 'mixed',
-          delta: 'Listing completion rate: p=0.03 ✓. Photo upload rate: p=0.41. Pricing setup completion: p=0.02 ✓. Message response rate: p=0.67. Availability setup: p=0.18. Superhost progress score: p=0.04 ✓. Review collection rate: p=0.29. First booking (primary): p=0.08.',
+          delta: 'Listing completion rate: p=0.03. Photo upload rate: p=0.41. Pricing setup completion: p=0.02. Message response rate: p=0.67. Availability setup: p=0.18. Superhost progress score: p=0.04. Review collection rate: p=0.29. First booking (primary): p=0.08.',
           pValue: null,
           confidenceInterval: null,
           significant: false,

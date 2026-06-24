@@ -97,7 +97,7 @@ export function DebriefCopyButton({ title, notes, modelAnswer, tags, difficulty,
         }
       }}
     >
-      {copied ? <span style={{ fontSize: '0.85rem' }}>✓</span> : <Icon name="clipboard" size={14} color="currentColor" />}
+      {copied ? <span style={{ fontSize: '0.85rem' }}><Icon name='check' size={14} color='var(--green)' /></span> : <Icon name="clipboard" size={14} color="currentColor" />}
       <span>{copied ? 'Copied!' : 'Copy debrief'}</span>
     </button>
   );

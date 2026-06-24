@@ -166,9 +166,9 @@ export function FoundationBrowser({
                   {mod.index}.
                 </span>
                 <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {locked ? '🔒 ' : ''}{mod.title}
+                  {locked ? <Icon name='lock' size={13} color='currentColor' /> : null}{locked ? ' ' : ''}{mod.title}
                 </span>
-                {done && <span style={{ marginLeft: 'auto', fontSize: '0.68rem', fontWeight: 700, color: 'var(--green)', flexShrink: 0 }}>✓</span>}
+                {done && <span style={{ marginLeft: 'auto', fontSize: '0.68rem', fontWeight: 700, color: 'var(--green)', flexShrink: 0 }}><Icon name='check' size={11} color='var(--green)' /></span>}
               </div>
 
               {/* Subtitle */}

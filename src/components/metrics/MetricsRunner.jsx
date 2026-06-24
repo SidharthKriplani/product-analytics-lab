@@ -225,7 +225,7 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
                 borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.75rem',
                 color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
               }}
-            >{noteSaved ? '✓ Saved' : 'Save note'}</button>
+            >{noteSaved ? <><Icon name="check" size={12} color="var(--green)" /> Saved</> : 'Save note'}</button>
           </div>
           <LeadershipLens note={metricCase.leadershipNote} />
           <MetricDebriefPanel

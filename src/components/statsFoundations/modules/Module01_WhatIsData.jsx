@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { Icon } from '../../shared/Icon.jsx';
 import { loadSFState, saveSFState } from '../../../utils/statsFoundationsState.js';
 
 const VARIABLES = [
@@ -182,7 +183,7 @@ export function Module01_WhatIsData({ module, onNext }) {
                   fontSize: '0.82rem', fontWeight: 500,
                   display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
                 }}>
-                  {checked && v.correct === 'numerical' ? '✓ ' : checked ? '✗ ' : ''}
+                  {checked && v.correct === 'numerical' ? <Icon name='check' size={13} color='var(--green)' /> : checked ? <Icon name='x' size={13} color='var(--red)' /> : null}
                   {v.label}
                   {checked && numericalAllCorrect && v.correct === 'numerical' && v.subtype && (
                     <span style={{ fontSize: '0.72rem', fontWeight: 400, opacity: 0.8 }}> ({v.subtype})</span>
@@ -223,7 +224,7 @@ export function Module01_WhatIsData({ module, onNext }) {
                   fontSize: '0.82rem', fontWeight: 500,
                   display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
                 }}>
-                  {checked && v.correct === 'categorical' ? '✓ ' : checked ? '✗ ' : ''}
+                  {checked && v.correct === 'categorical' ? <Icon name='check' size={13} color='var(--green)' /> : checked ? <Icon name='x' size={13} color='var(--red)' /> : null}
                   {v.label}
                   {!checked && (
                     <button

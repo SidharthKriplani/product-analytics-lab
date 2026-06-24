@@ -1,3 +1,5 @@
+import { Icon } from '../shared/Icon.jsx';
+
 function Row({ label, value }) {
   return (
     <div style={{
@@ -26,7 +28,7 @@ export function ExperimentDesign({ design }) {
           <Row label="Guardrails" value={
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
               {design.guardrailMetrics.map((g, i) => (
-                <span key={i} style={{ color: 'var(--red)', fontSize: '0.8rem' }}>⚑ {g}</span>
+                <span key={i} style={{ color: 'var(--red)', fontSize: '0.8rem' }}><Icon name='flag' size={13} color='var(--red)' /> {g}</span>
               ))}
             </div>
           } />

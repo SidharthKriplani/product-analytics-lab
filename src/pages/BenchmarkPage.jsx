@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { BENCHMARK_CASES, AREA_META, RECOMMENDED_PATH } from '../data/benchmarkCases.js';
+import { Icon } from '../components/shared/Icon.jsx';
 import { track } from '../utils/analytics.js';
 
 const STORAGE_KEY = 'pal-benchmark-v1';
@@ -53,7 +54,7 @@ function IntroScreen({ onStart }) {
             background: 'var(--accent-bg)', border: '1px solid var(--accent-border)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '1.1rem',
-          }}>⚡</div>
+          }}><Icon name='zap' size={18} color='currentColor' /></div>
           <div>
             <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               Free Benchmark
@@ -181,7 +182,7 @@ function QuestionScreen({ c, idx, total, selectedIdx, revealed, onSelect, onReve
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '0.7rem', fontWeight: 700,
               }}>
-                {revealed && i === c.correctIdx ? '✓' : revealed && i === selectedIdx ? '✗' : String.fromCharCode(65 + i)}
+                {revealed && i === c.correctIdx ? <Icon name='check' size={11} color='currentColor' /> : revealed && i === selectedIdx ? <Icon name='x' size={11} color='currentColor' /> : String.fromCharCode(65 + i)}
               </span>
               <span style={{ fontSize: '0.875rem', lineHeight: 1.6 }}>{opt}</span>
             </button>
@@ -303,7 +304,7 @@ function ResultScreen({ answers, user, onNavigate, onSignIn, onRetake }) {
             return (
               <div key={a.areaId} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <span style={{ fontSize: '0.85rem', color: a.correct ? '#16a34a' : '#dc2626', fontWeight: 700, width: 18 }}>
-                  {a.correct ? '✓' : '✗'}
+                  {a.correct ? <Icon name='check' size={13} color='currentColor' /> : <Icon name='x' size={13} color='currentColor' />}
                 </span>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: meta.color, flexShrink: 0 }} />
                 <span style={{ fontSize: '0.85rem', color: 'var(--text)', fontWeight: 500, flex: 1 }}>{meta.label}</span>

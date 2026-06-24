@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { loadSFState, saveSFState } from '../../../utils/statsFoundationsState.js';
+import { Icon } from '../../shared/Icon.jsx';
 
 const MCQ_RD = {
   question: 'A loyalty program gives a bonus reward to customers who spend over $500 in a month. You want to estimate the causal effect of the reward on next-month retention. Why is regression discontinuity valid here?',
@@ -250,12 +251,12 @@ export function Module23_RD({ module, onNext }) {
                 </button>
                 {mcqRevealed && isChosen && (
                   <div style={{ fontSize: '0.8rem', color: opt.correct ? 'var(--green)' : 'var(--red)', lineHeight: 1.55, marginTop: '0.3rem', paddingLeft: '0.25rem' }}>
-                    {opt.correct ? '✓ ' : '✗ '}{opt.feedback}
+                    {opt.correct ? <Icon name='check' size={13} color='currentColor' /> : <Icon name='x' size={13} color='currentColor' />} {opt.feedback}
                   </div>
                 )}
                 {mcqRevealed && !isChosen && opt.correct && (
                   <div style={{ fontSize: '0.8rem', color: 'var(--green)', lineHeight: 1.55, marginTop: '0.3rem', paddingLeft: '0.25rem' }}>
-                    ✓ {opt.feedback}
+                    <Icon name='check' size={13} color='currentColor' /> {opt.feedback}
                   </div>
                 )}
               </div>

@@ -4,6 +4,7 @@ import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
 import { getAllDesignProgress } from '../utils/designProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.jsx';
+import { Icon } from '../components/shared/Icon.jsx';
 
 const LEVEL_COLORS = {
   staff_level:   { color: 'var(--teal)',      bg: 'var(--teal-bg)',   border: 'var(--teal-border)' },
@@ -176,7 +177,7 @@ export function DesignBrowser({ onSelectScenario, onOpenArticle, onNavigate }) {
 
                 {scenario.pairedReviewScenarioId && (
                   <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                    Pairs with {scenario.pairedReviewScenarioId.replace(/^s\d+-/, '').replace(/-/g, ' ')} ↔
+                    Pairs with {scenario.pairedReviewScenarioId.replace(/^s\d+-/, '').replace(/-/g, ' ')} <Icon name='move-horizontal' size={12} color='currentColor' />
                   </span>
                 )}
               </div>

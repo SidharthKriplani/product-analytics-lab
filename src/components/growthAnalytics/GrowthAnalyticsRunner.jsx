@@ -5,6 +5,7 @@ import { track } from '../../utils/analytics.js';
 import { growthAnalyticsCases } from '../../data/growthAnalyticsCases.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 const ROOM_KEY = 'growth-analytics';
 const NOTES_KEY = 'pal-notes-v1';
@@ -605,7 +606,7 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
             }}
             title={bookmarked ? 'Remove bookmark' : 'Save for later'}
           >
-            {bookmarked ? '🔖' : '♡'}
+            {bookmarked ? <Icon name="bookmark" size={15} color="var(--purple)" /> : <Icon name="heart" size={15} color="currentColor" />}
             <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>
               {bookmarked ? 'Saved' : 'Save'}
             </span>
@@ -733,7 +734,7 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
 
             <div style={{ marginBottom: 16, padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 8 }}>
-                ✏️ Your notes <span style={{ fontWeight: 400, opacity: 0.6 }}>(saved locally)</span>
+                <Icon name="pen-line" size={12} color="currentColor" /> Your notes <span style={{ fontWeight: 400, opacity: 0.6 }}>(saved locally)</span>
               </div>
               <textarea
                 value={userNote}
@@ -754,7 +755,7 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
                   borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.75rem',
                   color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
                 }}
-              >{noteSaved ? '✓ Saved' : 'Save note'}</button>
+              >{noteSaved ? <><Icon name="check" size={12} color="var(--green)" /> Saved</> : 'Save note'}</button>
             </div>
 
       {/* Reveal Model Answer button */}
@@ -891,7 +892,7 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
                 transition: 'border-color 0.1s, color 0.1s',
               }}
             >
-              📋 Export as Markdown
+              <Icon name="clipboard" size={13} color="currentColor" /> Export as Markdown
             </button>
             {copiedToast && (
               <span style={{
@@ -960,7 +961,7 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
                 }}
               >
                 <span>{leadershipOpen ? '▾' : '▸'}</span>
-                <span>💼 Leadership Lens</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><Icon name="briefcase" size={14} color="currentColor" /> Leadership Lens</span>
               </button>
               {leadershipOpen && (
                 <div style={{
@@ -974,7 +975,7 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
                     fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
                     letterSpacing: '0.08em', color: 'var(--purple)', marginBottom: '0.45rem',
                   }}>
-                    💼 How a Staff DS thinks about this
+                    <Icon name="briefcase" size={12} color="var(--purple)" /> How a Staff DS thinks about this
                   </div>
                   <p style={{
                     margin: 0, fontSize: '0.9rem', color: 'var(--text)',
@@ -1074,7 +1075,7 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
                 color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer',
               }}
             >
-              ↺ Try again
+              <Icon name="rotate-ccw" size={14} color="currentColor" /> Try again
             </button>
             <button
               onClick={onBack}
@@ -1104,7 +1105,7 @@ export function GrowthAnalyticsRunner({ caseId, onBack, onNext, unlocked, onNavi
                 cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500,
               }}
             >
-              {bookmarked ? '🔖 Saved' : '🔖 Save'}
+              {bookmarked ? <><Icon name="bookmark" size={14} color="var(--yellow)" /> Saved</> : <><Icon name="bookmark" size={14} color="currentColor" /> Save</>}
             </button>
             {onNext && rating && (
               <button

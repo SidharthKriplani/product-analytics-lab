@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 import { STUDY_CARDS } from '../study/studyCards.js';
 import { loadReviews, saveReviews, defaultReview, gradeCard, isDue, maturityPct } from '../study/sm2.js';
 
@@ -180,7 +181,7 @@ export function StudyRoom() {
 
         {totalDue === 0 ? (
           <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✓</div>
+            <div style={{ marginBottom: '0.5rem' }}><Icon name='check' size={32} color='var(--green)' /></div>
             <div>Nothing due. Come back tomorrow.</div>
           </div>
         ) : (

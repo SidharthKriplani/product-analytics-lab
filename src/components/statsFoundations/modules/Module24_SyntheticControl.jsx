@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { loadSFState, saveSFState } from '../../../utils/statsFoundationsState.js';
+import { Icon } from '../../shared/Icon.jsx';
 
 const MCQ_SC = {
   question: 'One state bans a product. You want to estimate the sales impact. No other state implemented the same ban. Which method is most appropriate?',
@@ -233,10 +234,10 @@ export function Module24_SyntheticControl({ module, onNext }) {
         {revealed && (
           <div className="pal-reveal-in" style={{ fontSize: '0.85rem', color: selectedDonor?.valid ? 'var(--green)' : 'var(--red)', fontWeight: 700 }}>
             {selectedDonor?.valid
-              ? '✓ Correct — Donor A has the lowest pre-period RMSE and was not itself treated. Good synthetic control.'
+              ? <><Icon name='check' size={15} color='currentColor' /> Correct — Donor A has the lowest pre-period RMSE and was not itself treated. Good synthetic control.</>
               : selected === 'B'
-                ? '✗ Donor B diverges sharply pre-period — it doesn\'t track the treated unit, so post-period divergence is uninterpretable as a causal effect.'
-                : '✗ Donor C has good pre-period fit, but it received a similar intervention at t=6. Using it as a counterfactual contaminates the estimate — the "control" is itself treated.'}
+                ? <><Icon name='x' size={15} color='currentColor' /> Donor B diverges sharply pre-period — it doesn't track the treated unit, so post-period divergence is uninterpretable as a causal effect.</>
+                : <><Icon name='x' size={15} color='currentColor' /> Donor C has good pre-period fit, but it received a similar intervention at t=6. Using it as a counterfactual contaminates the estimate — the "control" is itself treated.</>}
           </div>
         )}
       </div>
@@ -351,12 +352,12 @@ export function Module24_SyntheticControl({ module, onNext }) {
                 </button>
                 {mcqRevealed && isChosen && (
                   <div style={{ fontSize: '0.8rem', color: opt.correct ? 'var(--green)' : 'var(--red)', lineHeight: 1.55, marginTop: '0.3rem', paddingLeft: '0.25rem' }}>
-                    {opt.correct ? '✓ ' : '✗ '}{opt.feedback}
+                    {opt.correct ? <Icon name='check' size={13} color='currentColor' /> : <Icon name='x' size={13} color='currentColor' />} {opt.feedback}
                   </div>
                 )}
                 {mcqRevealed && !isChosen && opt.correct && (
                   <div style={{ fontSize: '0.8rem', color: 'var(--green)', lineHeight: 1.55, marginTop: '0.3rem', paddingLeft: '0.25rem' }}>
-                    ✓ {opt.feedback}
+                    <Icon name='check' size={13} color='currentColor' /> {opt.feedback}
                   </div>
                 )}
               </div>

@@ -303,9 +303,9 @@ export function ScenarioBrowser({ allProgress, onSelect, onSelectStats, unlocked
                       borderRadius: 'var(--radius-sm)', padding: '0.08rem 0.35rem',
                     }}>{m.concept}</span>
                   )}
-                  {isLocked && <span style={{ fontSize: '0.8rem', marginLeft: 'auto' }}>🔒</span>}
+                  {isLocked && <span style={{ fontSize: '0.8rem', marginLeft: 'auto' }}><Icon name='lock' size={13} color='currentColor' /></span>}
                   {prog?.bestLevel && (
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', marginLeft: 'auto' }}>✓</span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', marginLeft: 'auto' }}><Icon name='check' size={12} color='var(--green)' /></span>
                   )}
                 </div>
 

@@ -2481,9 +2481,9 @@ export const metricCases = [
         options: [
           {
             id: 'a',
-            label: 'Demand-weighted supply coverage — share of high-demand search queries with 5+ in-stock, rated 4★+ listings available',
+            label: 'Demand-weighted supply coverage — share of high-demand search queries with 5+ in-stock, rated 4-star+ listings available',
             scoreValue: 2,
-            rationale: 'This metric weights coverage by where demand actually is, not by total catalog size. A marketplace can have millions of listings while having zero coverage for its top 100 search queries if all inventory is in low-demand categories. The 5-listing floor and quality threshold (4★+) ensure coverage means real options, not just presence. "Demand-weighted" makes it impossible to game by listing more products in low-interest categories.',
+            rationale: 'This metric weights coverage by where demand actually is, not by total catalog size. A marketplace can have millions of listings while having zero coverage for its top 100 search queries if all inventory is in low-demand categories. The 5-listing floor and quality threshold (4-star+) ensure coverage means real options, not just presence. "Demand-weighted" makes it impossible to game by listing more products in low-interest categories.',
           },
           {
             id: 'b',

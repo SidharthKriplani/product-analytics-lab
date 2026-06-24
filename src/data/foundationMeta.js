@@ -1,7 +1,7 @@
 export const FOUNDATION_DOMAINS = {
   metrics: {
     label: 'Metrics',
-    icon: '📐',
+    icon: 'ruler',
     color: 'var(--green)',
     bg: 'var(--green-bg)',
     border: 'var(--green-border)',
@@ -23,7 +23,7 @@ export const FOUNDATION_DOMAINS = {
   },
   rca: {
     label: 'RCA',
-    icon: '🔍',
+    icon: 'search',
     color: 'var(--yellow)',
     bg: 'var(--yellow-bg)',
     border: 'var(--yellow-border)',
@@ -42,7 +42,7 @@ export const FOUNDATION_DOMAINS = {
   },
   experimentation: {
     label: 'Experimentation',
-    icon: '⚗',
+    icon: 'flask',
     color: 'var(--accent)',
     bg: 'var(--accent-bg)',
     border: 'var(--accent-border)',
@@ -65,7 +65,7 @@ export const FOUNDATION_DOMAINS = {
   },
   statistics: {
     label: 'Statistics',
-    icon: '📊',
+    icon: 'bar-chart',
     color: 'var(--teal)',
     bg: 'var(--teal-bg)',
     border: 'var(--teal-border)',
@@ -81,7 +81,7 @@ export const FOUNDATION_DOMAINS = {
   },
   growth: {
     label: 'Growth Analytics',
-    icon: '📈',
+    icon: 'trending-up',
     color: 'var(--green)',
     bg: 'var(--green-bg)',
     border: 'var(--green-border)',
@@ -97,7 +97,7 @@ export const FOUNDATION_DOMAINS = {
   },
   bi: {
     label: 'BI & Reporting',
-    icon: '📊',
+    icon: 'bar-chart',
     color: 'var(--yellow)',
     bg: 'var(--yellow-bg)',
     border: 'var(--yellow-border)',
@@ -110,7 +110,7 @@ export const FOUNDATION_DOMAINS = {
   },
   instrumentation: {
     label: 'Instrumentation',
-    icon: '🔧',
+    icon: 'hammer',
     color: 'var(--teal)',
     bg: 'var(--teal-bg)',
     border: 'var(--teal-border)',
@@ -123,7 +123,7 @@ export const FOUNDATION_DOMAINS = {
   },
   takehome: {
     label: 'Take-Home',
-    icon: '📝',
+    icon: 'pen-line',
     color: 'var(--purple)',
     bg: 'var(--purple-bg)',
     border: 'var(--purple-border)',
@@ -136,7 +136,7 @@ export const FOUNDATION_DOMAINS = {
   },
   'product-design': {
     label: 'PM Design',
-    icon: '🎨',
+    icon: 'palette',
     color: 'var(--purple)',
     bg: 'var(--purple-bg)',
     border: 'var(--purple-border)',
@@ -149,7 +149,7 @@ export const FOUNDATION_DOMAINS = {
   },
   prioritization: {
     label: 'Prioritization',
-    icon: '⚖',
+    icon: 'scale',
     color: 'var(--accent)',
     bg: 'var(--accent-bg)',
     border: 'var(--accent-border)',
@@ -163,7 +163,7 @@ export const FOUNDATION_DOMAINS = {
   },
   code: {
     label: 'Code & SQL',
-    icon: '🗄',
+    icon: 'archive',
     color: 'var(--accent)',
     bg: 'var(--accent-bg)',
     border: 'var(--accent-border)',

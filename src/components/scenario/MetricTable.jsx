@@ -1,3 +1,5 @@
+import { Icon } from '../shared/Icon.jsx';
+
 function getDirectionStyle(metric) {
   const { direction, type, significant } = metric;
   if (type === 'diagnostic') return { color: 'var(--text-muted)' };
@@ -75,10 +77,10 @@ export function MetricTable({ metrics }) {
                 <td style={{ padding: '0.5rem 0.6rem', textAlign: 'center', fontSize: '1rem' }}>
                   {metric.significant === true ? (
                     <span style={{ color: isGuardrail ? 'var(--red)' : 'var(--green)' }}>
-                      {isGuardrail ? '⚠' : '✓'}
+                      {isGuardrail ? <Icon name='alert-triangle' size={16} color='var(--red)' /> : <Icon name='check' size={16} color='var(--green)' />}
                     </span>
                   ) : metric.significant === false ? (
-                    <span style={{ color: 'var(--text-dim)' }}>✗</span>
+                    <span style={{ color: 'var(--text-dim)' }}><Icon name='x' size={16} color='var(--text-dim)' /></span>
                   ) : '—'}
                 </td>
               </tr>

@@ -372,7 +372,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                 e.currentTarget.style.background = 'none';
               }}
             >
-              {theme === 'dark' ? '☀' : '🌙'}
+              {theme === 'dark' ? <Icon name="sun" size={16} color="currentColor" /> : <Icon name="moon" size={16} color="currentColor" />}
             </button>
           )}
         </div>

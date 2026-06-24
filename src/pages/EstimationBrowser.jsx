@@ -350,7 +350,7 @@ export function EstimationBrowser({ onStart, unlocked }) {
                       </span>
                     )}
 
-                    {isLocked && <span style={{ fontSize: '0.75rem' }}>🔒</span>}
+                    {isLocked && <span style={{ fontSize: '0.75rem' }}><Icon name='lock' size={12} color='currentColor' /></span>}
                   </div>
 
                   {/* Title */}
@@ -387,10 +387,10 @@ export function EstimationBrowser({ onStart, unlocked }) {
                     whiteSpace: 'nowrap', flexShrink: 0,
                   }}>
                     {prog.rating === 'strong'
-                      ? '✓ Nailed it'
+                      ? (<><Icon name='check' size={12} color='currentColor' /> Nailed it</>)
                       : prog.rating === 'partial'
                       ? '~ Close'
-                      : '✗ Revisit'}
+                      : (<><Icon name='x' size={12} color='currentColor' /> Revisit</>)}
                   </div>
                 )}
               </div>

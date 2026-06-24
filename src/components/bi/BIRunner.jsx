@@ -9,6 +9,7 @@ import { biCases } from '../../data/biCases.js';
 import { ChartScenario } from './ChartScenario.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 const ROOM_KEY = 'bi';
 const NOTES_KEY = 'pal-notes-v1';
@@ -419,7 +420,7 @@ function RevealScreen({ caseData, onBack, onNext, unlocked, onNavigate }) {
           letterSpacing: '0.07em', color: 'var(--purple, #9b59b6)', marginBottom: '0.45rem',
           display: 'flex', alignItems: 'center', gap: '0.35rem',
         }}>
-          <span>💼</span>
+          <Icon name='briefcase' size={13} color='var(--purple, #9b59b6)' />
           <span>Leadership Lens</span>
         </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.75, margin: 0 }}>
@@ -534,7 +535,7 @@ function RevealScreen({ caseData, onBack, onNext, unlocked, onNavigate }) {
 
             <div style={{ marginBottom: 16, padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 8 }}>
-                ✏️ Your notes <span style={{ fontWeight: 400, opacity: 0.6 }}>(saved locally)</span>
+                <Icon name='pen-line' size={12} color='currentColor' /> Your notes <span style={{ fontWeight: 400, opacity: 0.6 }}>(saved locally)</span>
               </div>
               <textarea
                 value={userNote}
@@ -555,7 +556,7 @@ function RevealScreen({ caseData, onBack, onNext, unlocked, onNavigate }) {
                   borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.75rem',
                   color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
                 }}
-              >{noteSaved ? '✓ Saved' : 'Save note'}</button>
+              >{noteSaved ? <><Icon name='check' size={12} color='var(--green)' /> Saved</> : 'Save note'}</button>
             </div>
 
       {/* Actions */}

@@ -268,7 +268,7 @@ function ModuleCard({ module, index, allProgress, firstUnstartedId, onSelectModu
         fontSize: '0.72rem', fontWeight: 800,
         color: levelCfg ? levelCfg.color : 'var(--text-dim)',
       }}>
-        {levelCfg ? '✓' : String(origNum).padStart(2, '0')}
+        {levelCfg ? <Icon name='check' size={13} color='currentColor' /> : String(origNum).padStart(2, '0')}
       </div>
 
       {/* Content */}

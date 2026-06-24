@@ -1,4 +1,5 @@
 import { ConceptChip } from '../concepts/ConceptChip.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 // Renders all fields for a single design phase
 // Handles single_select and multi_select field types
@@ -104,8 +105,8 @@ function FieldItem({ field, value, onChange, onOpenConcept }) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 {selected && (
-                  <span style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 900 }}>
-                    {isMulti ? '✓' : '●'}
+                  <span style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {isMulti ? <Icon name='check' size={10} color='currentColor' /> : '●'}
                   </span>
                 )}
               </div>

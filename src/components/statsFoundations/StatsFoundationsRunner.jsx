@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Icon } from '../shared/Icon.jsx';
 import { FoundationRunnerShell } from '../shared/FoundationRunnerShell.jsx';
 import { statsFoundationsModules } from '../../data/statsFoundationsModules.js';
 
@@ -9,7 +10,7 @@ class ModuleErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⚠️</div>
+          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}><Icon name='alert-triangle' size={32} color='currentColor' /></div>
           <div style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Module failed to load</div>
           <div style={{ fontSize: '0.85rem', marginBottom: '1.5rem' }}>{String(this.state.error)}</div>
           <button onClick={() => this.setState({ hasError: false, error: null })} style={{ padding: '8px 20px', background: 'var(--yellow)', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600 }}>Try Again</button>

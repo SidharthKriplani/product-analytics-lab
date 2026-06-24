@@ -449,7 +449,7 @@ function RevealScreen({ caseData, onBack, onNext, onNavigate }) {
             display: 'flex', alignItems: 'center', gap: '0.5rem',
           }}
         >
-          <span style={{ fontSize: '0.9rem' }}>💼</span>
+          <span style={{ display: 'inline-flex' }}><Icon name="briefcase" size={15} color="var(--purple, #9b59b6)" /></span>
           <span style={{
             fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase',
             letterSpacing: '0.07em', color: 'var(--purple, #9b59b6)',
@@ -538,7 +538,7 @@ function RevealScreen({ caseData, onBack, onNext, onNavigate }) {
             borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.75rem',
             color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
           }}
-        >{noteSaved ? '✓ Saved' : 'Save note'}</button>
+        >{noteSaved ? <><Icon name="check" size={12} color="var(--green)" /> Saved</> : 'Save note'}</button>
       </div>
 
       {/* Star rating */}
@@ -563,7 +563,7 @@ function RevealScreen({ caseData, onBack, onNext, onNavigate }) {
               onMouseEnter={e => { e.currentTarget.style.color = 'var(--teal)'; }}
               onMouseLeave={e => { e.currentTarget.style.color = star <= rating ? 'var(--teal)' : 'var(--border)'; }}
             >
-              ★
+              <Icon name="star-filled" size={24} color="currentColor" />
             </button>
           ))}
           {rating > 0 && (

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { tryUnlock, isUnlocked } from '../utils/unlock.js';
+import { Icon } from '../components/shared/Icon.jsx';
 
 const PRICING_PLANS = [
   {
@@ -59,7 +60,7 @@ const FEATURES = [
 ];
 
 function Cell({ value, accent }) {
-  if (value === true)  return <span style={{ color: accent || 'var(--green)', fontWeight: 700, fontSize: '1rem' }}>✓</span>;
+  if (value === true)  return <span style={{ color: accent || 'var(--green)', fontWeight: 700, fontSize: '1rem' }}><Icon name='check' size={16} color={accent || 'var(--green)'} /></span>;
   if (value === false) return <span style={{ color: 'var(--border)', fontSize: '1rem' }}>—</span>;
   return <span style={{ fontSize: '0.8rem', fontWeight: 600, color: accent || 'var(--text-muted)' }}>{value}</span>;
 }
@@ -409,7 +410,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
               color: 'var(--accent)', background: 'var(--accent-bg)',
               border: '1px solid var(--accent-border)', borderRadius: '8px',
             }}>
-              ✓ Signed in
+              <Icon name='check' size={13} color='currentColor' /> Signed in
             </span>
           )}
 
@@ -422,7 +423,7 @@ export function Plans({ onBack, onShowAuth, onNavigate, user, unlocked: unlocked
               color: 'var(--teal)', background: 'rgba(20,184,166,0.08)',
               border: '1px solid var(--teal-border, rgba(20,184,166,0.3))', borderRadius: '8px',
             }}>
-              ✓ Full lab unlocked
+              <Icon name='check' size={13} color='currentColor' /> Full lab unlocked
             </span>
           ) : (
             <form onSubmit={handleUnlock} style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>

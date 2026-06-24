@@ -1,6 +1,8 @@
 // CaseScoreReveal — shown after all phases are submitted
 // Props: { score, maxScore, level, phaseChoices, businessCase, onContinue }
 
+import { Icon } from '../shared/Icon.jsx';
+
 const PHASE_LABELS = {
   clarify:    'Clarify the Decision',
   kpi:        'Choose the KPI',
@@ -11,16 +13,16 @@ const PHASE_LABELS = {
 };
 
 const LEVEL_CONFIG = {
-  staff:   { color: 'var(--teal)',      bg: 'var(--teal-bg)',   border: 'var(--teal-border)',   label: 'Staff Analyst', emoji: '★', desc: 'You structured this like a senior-to-staff analyst. Clear decision scope, right metrics, causal method.' },
-  senior:  { color: 'var(--accent)',    bg: 'var(--accent-bg)', border: 'var(--accent-border)', label: 'Senior Analyst', emoji: '◆', desc: 'Solid analytical thinking. A few phases had room for sharper framing.' },
-  analyst: { color: 'var(--blue-text)', bg: 'var(--blue-bg)',   border: 'var(--blue-border)',   label: 'Analyst', emoji: '◉', desc: 'Getting there. Focus on clarifying the decision scope and choosing metrics that include economics.' },
-  junior:  { color: 'var(--yellow)',    bg: 'var(--yellow-bg)', border: 'var(--yellow-border)', label: 'Junior miss', emoji: '○', desc: 'The analysis jumped ahead of the decision. Read the senior answer carefully — it shows the right sequencing.' },
+  staff:   { color: 'var(--teal)',      bg: 'var(--teal-bg)',   border: 'var(--teal-border)',   label: 'Staff Analyst', emoji: 'star-filled', desc: 'You structured this like a senior-to-staff analyst. Clear decision scope, right metrics, causal method.' },
+  senior:  { color: 'var(--accent)',    bg: 'var(--accent-bg)', border: 'var(--accent-border)', label: 'Senior Analyst', emoji: 'diamond', desc: 'Solid analytical thinking. A few phases had room for sharper framing.' },
+  analyst: { color: 'var(--blue-text)', bg: 'var(--blue-bg)',   border: 'var(--blue-border)',   label: 'Analyst', emoji: 'circle-dot', desc: 'Getting there. Focus on clarifying the decision scope and choosing metrics that include economics.' },
+  junior:  { color: 'var(--yellow)',    bg: 'var(--yellow-bg)', border: 'var(--yellow-border)', label: 'Junior miss', emoji: 'circle', desc: 'The analysis jumped ahead of the decision. Read the senior answer carefully — it shows the right sequencing.' },
 };
 
 const OPTION_LEVEL_CONFIG = {
-  strong:  { color: 'var(--teal)',   symbol: '✓' },
-  partial: { color: 'var(--yellow)', symbol: '~' },
-  wrong:   { color: 'var(--red)',    symbol: '✕' },
+  strong:  { color: 'var(--teal)',   symbol: 'check' },
+  partial: { color: 'var(--yellow)', symbol: 'minus' },
+  wrong:   { color: 'var(--red)',    symbol: 'x' },
 };
 
 export function CaseScoreReveal({ score, maxScore, level, phaseChoices, businessCase, onContinue }) {
@@ -39,7 +41,7 @@ export function CaseScoreReveal({ score, maxScore, level, phaseChoices, business
         borderRadius: 'var(--radius)',
         textAlign: 'center',
       }}>
-        <div style={{ fontSize: '2rem', marginBottom: '0.4rem' }}>{cfg.emoji}</div>
+        <div style={{ marginBottom: '0.4rem' }}><Icon name={cfg.emoji} size={28} color={cfg.color} /></div>
         <div style={{
           fontSize: '1.4rem', fontWeight: 900, color: cfg.color, letterSpacing: '-0.01em',
           marginBottom: '0.2rem',
@@ -77,11 +79,10 @@ export function CaseScoreReveal({ score, maxScore, level, phaseChoices, business
                 border: '1px solid var(--border-subtle)',
               }}>
                 <span style={{
-                  fontSize: '0.82rem', fontWeight: 700,
-                  color: optLevel ? optLevel.color : 'var(--text-dim)',
                   width: '16px', textAlign: 'center', flexShrink: 0,
+                  display: 'inline-flex', justifyContent: 'center',
                 }}>
-                  {optLevel ? optLevel.symbol : '—'}
+                  <Icon name={optLevel ? optLevel.symbol : 'minus'} size={14} color={optLevel ? optLevel.color : 'var(--text-dim)'} />
                 </span>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', flex: 1 }}>
                   {phaseLabel}

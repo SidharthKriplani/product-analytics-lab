@@ -1,3 +1,5 @@
+import { Icon } from '../shared/Icon.jsx';
+
 export function LockOverlay({ onUnlock }) {
   return (
     <div className="pal-slide-up" style={{
@@ -13,7 +15,7 @@ export function LockOverlay({ onUnlock }) {
       padding: '2rem',
       textAlign: 'center',
     }}>
-      <div style={{ fontSize: '2rem' }}>🔒</div>
+      <div style={{ fontSize: '2rem', display: 'flex' }}><Icon name='lock' size={32} color='currentColor' /></div>
       <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text)' }}>Private Beta</div>
       <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: '260px' }}>
         This scenario is part of the paid tier. Paid access coming soon — unlock code enabled for private beta.

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { track } from '../../utils/analytics.js';
+import { Icon } from './Icon.jsx';
 
 // ShareLinkButton — copies the current page URL to clipboard.
 // Place in any runner header. Works automatically because App.jsx
@@ -73,8 +74,8 @@ export function ShareLinkButton({ room }) {
       }}
     >
       {copied
-        ? <span style={{ fontSize: '0.82rem' }}>✓</span>
-        : <span style={{ fontSize: '0.85rem' }}>🔗</span>}
+        ? <span style={{ fontSize: '0.82rem', display: 'inline-flex' }}><Icon name='check' size={13} color='currentColor' /></span>
+        : <span style={{ fontSize: '0.85rem', display: 'inline-flex' }}><Icon name='link' size={15} color='currentColor' /></span>}
       <span>{copied ? 'Copied!' : 'Share'}</span>
     </button>
   );

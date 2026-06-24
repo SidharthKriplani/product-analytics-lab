@@ -184,7 +184,7 @@ export function PrioritizationBrowser({ onStart, unlocked, onOpenArticle }) {
                         borderRadius: '4px', padding: '0.1rem 0.4rem',
                       }}>Free</span>
                     )}
-                    {isLocked && <span style={{ fontSize: '0.75rem' }}>🔒</span>}
+                    {isLocked && <span style={{ fontSize: '0.75rem' }}><Icon name='lock' size={12} color='currentColor' /></span>}
                   </div>
                   <div style={{ fontWeight: 600, fontSize: '0.97rem', color: 'var(--text)', marginBottom: '0.2rem' }}>
                     {scenario.title}
@@ -215,7 +215,11 @@ export function PrioritizationBrowser({ onStart, unlocked, onOpenArticle }) {
                     borderRadius: '6px', padding: '0.3rem 0.6rem',
                     whiteSpace: 'nowrap', flexShrink: 0,
                   }}>
-                    {prog.rating === 'strong' ? '✓ Nailed it' : prog.rating === 'partial' ? '~ Partial' : '✗ Revisit'}
+                    {prog.rating === 'strong'
+                      ? <><Icon name='check' size={12} color='currentColor' /> Nailed it</>
+                      : prog.rating === 'partial'
+                        ? '~ Partial'
+                        : <><Icon name='x' size={12} color='currentColor' /> Revisit</>}
                   </div>
                 )}
               </div>

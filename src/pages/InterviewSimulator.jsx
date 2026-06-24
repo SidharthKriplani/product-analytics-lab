@@ -4,6 +4,7 @@ import { statsModules } from '../data/statsModules.js';
 import { rcaCases } from '../data/rcaCases.js';
 import { metricCases } from '../data/metricCases.js';
 import { estimationProblems } from '../data/estimationProblems.js';
+import { Icon } from '../components/shared/Icon.jsx';
 import { behavioralQuestions } from '../data/behavioralQuestions.js';
 import { productDesignScenarios } from '../data/productDesignScenarios.js';
 import { prioritizationScenarios } from '../data/prioritizationScenarios.js';
@@ -738,7 +739,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
             borderRadius: '10px',
             padding: '0.3rem 0.85rem',
           }}>
-            <span style={{ fontSize: '1rem' }}>⏱</span> {formatTime(elapsed)}
+            <span style={{ fontSize: '1rem' }}><Icon name='timer' size={16} color='currentColor' /></span> {formatTime(elapsed)}
           </div>
         </div>
 
@@ -922,7 +923,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 color: '#fff', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0,
                               }}>
-                                {checked ? '✓' : ''}
+                                {checked ? <Icon name='check' size={11} color='currentColor' /> : ''}
                               </span>
                               <span style={{ fontSize: '0.85rem', lineHeight: 1.55, color: checked ? 'var(--text)' : 'var(--text-muted)' }}>
                                 {point}
@@ -975,7 +976,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                 }}
                 title={isListening ? 'Stop recording' : 'Speak your answer'}
               >
-                {isListening ? '🔴 Stop' : '🎤 Speak'}
+                {isListening ? (<><Icon name='record' size={13} color='currentColor' /> Stop</>) : (<><Icon name='mic' size={13} color='currentColor' /> Speak</>)}
               </button>
             )}
           </div>
@@ -1440,7 +1441,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                       color: wasCorrect ? 'var(--green)' : 'var(--red)',
                       border: `1px solid ${wasCorrect ? 'var(--green-border)' : 'var(--red-border)'}`,
                     }}>
-                      {wasCorrect ? '✓ Correct' : '✗ Wrong'}
+                      {wasCorrect ? (<><Icon name='check' size={12} color='currentColor' /> Correct</>) : (<><Icon name='x' size={12} color='currentColor' /> Wrong</>)}
                     </span>
                   )}
                   {!wasQuestionMCQ && rubric.length > 0 && (
@@ -1549,7 +1550,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
                                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                                   color: '#fff', fontSize: '0.65rem', fontWeight: 700, flexShrink: 0,
                                 }}>
-                                  {checked ? '✓' : ''}
+                                  {checked ? <Icon name='check' size={11} color='currentColor' /> : ''}
                                 </span>
                                 <span style={{ fontSize: '0.83rem', lineHeight: 1.5, color: checked ? 'var(--text)' : 'var(--text-muted)' }}>
                                   {point}
@@ -1640,7 +1641,7 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
               onMouseEnter={(e) => e.target.style.background = 'rgba(0,0,0,0.25)'}
               onMouseLeave={(e) => e.target.style.background = 'rgba(0,0,0,0.15)'}
             >
-              📋 Copy Score
+              <Icon name='clipboard' size={14} color='currentColor' /> Copy Score
             </button>
           </div>
         </div>

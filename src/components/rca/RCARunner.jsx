@@ -280,7 +280,7 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
                   color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
                 }}
               >
-                {noteSaved ? '✓ Saved' : 'Save note'}
+                {noteSaved ? <><Icon name="check" size={12} color="var(--green)" /> Saved</> : 'Save note'}
               </button>
             </div>
           )}
@@ -371,7 +371,7 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
               padding: '1.25rem',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '1rem' }}>🛠</span>
+                <span><Icon name='wrench' size={16} color='var(--yellow)' /></span>
                 <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--yellow)' }}>
                   Bonus: SQL Validation
                 </span>
@@ -627,7 +627,7 @@ function SQLValidationStep({ sqlStep, response, onResponseChange, revealed, onRe
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
             {response.trim().length < 20
               ? `Write at least ${20 - response.trim().length} more characters to reveal the model answer`
-              : '✓ Ready to reveal'}
+              : <><Icon name="check" size={12} color="var(--green)" /> Ready to reveal</>}
           </div>
         )}
       </div>

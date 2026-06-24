@@ -1,11 +1,13 @@
 // Score reveal after submitting a Design Room scenario
 // Shows: level badge, dimension breakdown bars, strongest/weakest, next-level gap
 
+import { Icon } from '../shared/Icon.jsx';
+
 const LEVEL_CONFIG = {
-  staff_level:   { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',   emoji: '★' },
-  senior_ready:  { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)', emoji: '◆' },
-  analyst_ready: { color: 'var(--blue-text)', bg: 'var(--blue-bg)',     border: 'var(--blue-border)',   emoji: '◉' },
-  incomplete:    { color: 'var(--text-dim)',  bg: 'var(--surface-2)',   border: 'var(--border)',        emoji: '○' },
+  staff_level:   { color: 'var(--teal)',      bg: 'var(--teal-bg)',     border: 'var(--teal-border)',   emoji: 'star-filled' },
+  senior_ready:  { color: 'var(--accent)',    bg: 'var(--accent-bg)',   border: 'var(--accent-border)', emoji: 'diamond' },
+  analyst_ready: { color: 'var(--blue-text)', bg: 'var(--blue-bg)',     border: 'var(--blue-border)',   emoji: 'circle-dot' },
+  incomplete:    { color: 'var(--text-dim)',  bg: 'var(--surface-2)',   border: 'var(--border)',        emoji: 'circle' },
 };
 
 export function DesignScoreReveal({ result, onContinue, continueLabel = 'View full debrief' }) {
@@ -25,7 +27,7 @@ export function DesignScoreReveal({ result, onContinue, continueLabel = 'View fu
         borderRadius: 'var(--radius)',
         textAlign: 'center',
       }}>
-        <div style={{ fontSize: '2rem', marginBottom: '0.4rem' }}>{cfg.emoji}</div>
+        <div style={{ marginBottom: '0.4rem' }}><Icon name={cfg.emoji} size={28} color={cfg.color} /></div>
         <div style={{
           fontSize: '1.4rem', fontWeight: 900, color: cfg.color, letterSpacing: '-0.01em',
           marginBottom: '0.2rem',

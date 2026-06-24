@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { signOut } from '../../utils/auth.js';
+import { Icon } from '../shared/Icon.jsx';
 
 // NOTE: This component is not currently rendered. Navigation is handled by Sidebar.jsx.
 // Kept as a reference/alternative desktop nav. Do not import without updating App.jsx routing.
@@ -150,7 +151,7 @@ export function Header({ currentPage, onNavigate, unlockedStatus, theme, onToggl
             borderRadius: '6px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '12px', flexShrink: 0,
-          }}>⚗</div>
+          }}><Icon name="flask" size={14} color="#fff" /></div>
           <span style={{
             fontWeight: 700, fontSize: '0.875rem', color: 'var(--text)',
             letterSpacing: '-0.02em', whiteSpace: 'nowrap',
@@ -232,7 +233,7 @@ export function Header({ currentPage, onNavigate, unlockedStatus, theme, onToggl
               alignSelf: 'center',
             }}
           >
-            {theme === 'dark' ? '☀' : '🌙'}
+            {theme === 'dark' ? <Icon name="sun" size={16} color="currentColor" /> : <Icon name="moon" size={16} color="currentColor" />}
           </button>
 
           {/* Auth: sign in button or user avatar */}
@@ -339,7 +340,7 @@ export function Header({ currentPage, onNavigate, unlockedStatus, theme, onToggl
                 alignSelf: 'center',
               }}
             >
-              🔒 Beta
+              <Icon name="lock" size={13} color="currentColor" /> Beta
             </button>
           )}
           {unlockedStatus && (
@@ -353,7 +354,8 @@ export function Header({ currentPage, onNavigate, unlockedStatus, theme, onToggl
               marginLeft: '0.15rem',
               alignSelf: 'center',
               flexShrink: 0,
-            }}>✓ Beta</span>
+              display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+            }}><Icon name="check" size={12} color="var(--green)" /> Beta</span>
           )}
         </nav>
       </div>

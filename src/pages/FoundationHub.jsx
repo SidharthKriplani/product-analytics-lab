@@ -1,4 +1,5 @@
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
+import { Icon } from '../components/shared/Icon.jsx';
 
 export function FoundationHub({ onOpenArticle, onNavigate }) {
   const domains = Object.entries(FOUNDATION_DOMAINS);
@@ -46,10 +47,9 @@ export function FoundationHub({ onOpenArticle, onNavigate }) {
                 borderRadius: 'var(--radius-sm)',
                 background: domain.bg,
                 border: '1px solid ' + domain.border,
-                fontSize: '0.95rem',
                 flexShrink: 0,
               }}>
-                {domain.icon}
+                <Icon name={domain.icon} size={18} color={domain.color} />
               </span>
               <h2 style={{
                 fontSize: '0.95rem',

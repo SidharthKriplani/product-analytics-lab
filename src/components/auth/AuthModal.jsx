@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { signInWithEmail, signInWithGoogle, signInWithGitHub } from '../../utils/auth.js';
 import { BrandMark } from '../shared/BrandMark.jsx';
+import { Icon } from '../shared/Icon.jsx';
 
 export function AuthModal({ onClose, onSuccess }) {
   const [step, setStep] = useState('main'); // 'main' | 'sent'
@@ -64,8 +65,9 @@ export function AuthModal({ onClose, onSuccess }) {
             position: 'absolute', top: '0.85rem', right: '0.85rem',
             background: 'none', border: 'none', cursor: 'pointer',
             color: 'var(--text-muted)', fontSize: '1.1rem', lineHeight: 1, padding: '0.25rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
-        >×</button>
+        ><Icon name='x' size={18} color='currentColor' /></button>
 
         {/* Slot 5 — brand at the sign-in moment (BrandMark wordmark, D-19) */}
         <div style={{ marginBottom: '1.25rem' }}>
@@ -174,7 +176,7 @@ export function AuthModal({ onClose, onSuccess }) {
         {step === 'sent' && (
           <>
             <div style={{ textAlign: 'center', padding: '0.5rem 0 1rem' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>📬</div>
+              <div style={{ marginBottom: '0.75rem' }}><Icon name='mail' size={36} color='var(--accent)' /></div>
               <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)' }}>
                 Check your inbox
               </h2>

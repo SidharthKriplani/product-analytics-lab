@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../components/shared/Icon.jsx';
 
 // ── Math helpers ────────────────────────────────────────────────────
 function erf(x) {
@@ -126,7 +127,7 @@ export function ABTestInterpreter({ onBack }) {
 
   const verdictConfig = {
     ship: {
-      icon: '✅',
+      icon: 'check-circle',
       label: 'Ship',
       color: 'var(--green)',
       bg: 'var(--green-bg, rgba(34,197,94,0.08))',
@@ -134,7 +135,7 @@ export function ABTestInterpreter({ onBack }) {
       text: `The treatment shows a statistically significant positive lift at your chosen significance level. No SRM was detected, so the test infrastructure looks sound. You have evidence to ship.`,
     },
     nogo: {
-      icon: '❌',
+      icon: 'x-circle',
       label: 'Do Not Ship',
       color: 'var(--red, #ef4444)',
       bg: 'rgba(239,68,68,0.08)',
@@ -142,7 +143,7 @@ export function ABTestInterpreter({ onBack }) {
       text: `The treatment shows a statistically significant negative effect — the treatment is actively hurting your metric. Do not ship; investigate what caused the regression.`,
     },
     inconclusive: {
-      icon: '⚠️',
+      icon: 'alert-triangle',
       label: 'Inconclusive',
       color: 'var(--accent)',
       bg: 'rgba(250,204,21,0.08)',
@@ -150,7 +151,7 @@ export function ABTestInterpreter({ onBack }) {
       text: `The result is not statistically significant at your chosen α. You don't have enough evidence to confidently attribute the observed difference to the treatment. Consider running longer or with a larger sample.`,
     },
     srm: {
-      icon: '🚨',
+      icon: 'siren',
       label: 'Invalid — SRM Detected',
       color: 'var(--orange, #f97316)',
       bg: 'rgba(249,115,22,0.08)',
@@ -397,7 +398,7 @@ export function ABTestInterpreter({ onBack }) {
               color: result.isSignificant ? 'var(--green)' : 'var(--text-muted)',
               marginBottom: '0.75rem',
             }}>
-              {result.isSignificant ? '✓' : '✗'} {result.isSignificant ? 'Significant' : 'Not significant'} at α={result.alpha}
+              <Icon name={result.isSignificant ? 'check' : 'x'} size={14} color='currentColor' /> {result.isSignificant ? 'Significant' : 'Not significant'} at α={result.alpha}
             </div>
 
             <div style={{ marginTop: '0.5rem' }}>
@@ -441,7 +442,7 @@ export function ABTestInterpreter({ onBack }) {
                 fontSize: '0.88rem',
                 fontWeight: 600,
               }}>
-                ⚠️ SRM detected — your groups are not equal size (p = {fmt(result.srmP, 4)}). Results may be invalid.
+                <Icon name='alert-triangle' size={14} color='currentColor' /> SRM detected — your groups are not equal size (p = {fmt(result.srmP, 4)}). Results may be invalid.
               </div>
             ) : (
               <div style={{
@@ -453,7 +454,7 @@ export function ABTestInterpreter({ onBack }) {
                 fontSize: '0.88rem',
                 fontWeight: 600,
               }}>
-                ✓ No SRM detected (p = {fmt(result.srmP, 4)})
+                <Icon name='check' size={14} color='currentColor' /> No SRM detected (p = {fmt(result.srmP, 4)})
               </div>
             )}
           </div>
@@ -483,7 +484,7 @@ export function ABTestInterpreter({ onBack }) {
                 padding: '1.5rem',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
-                  <span style={{ fontSize: '1.5rem' }}>{vc.icon}</span>
+                  <Icon name={vc.icon} size={24} color={vc.color} />
                   <span style={{ fontSize: '1.15rem', fontWeight: 800, color: vc.color }}>{vc.label}</span>
                 </div>
                 <p style={{ color: 'var(--text)', fontSize: '0.9rem', lineHeight: 1.7, margin: 0 }}>

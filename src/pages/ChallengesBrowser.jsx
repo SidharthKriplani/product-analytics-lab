@@ -265,14 +265,14 @@ export function ChallengesBrowser({ onSelectChallenge, onSelectFullLoop, unlocke
                   </span>
                 )}
 
-                {isLocked && <span style={{ fontSize: '0.8rem' }}>🔒</span>}
+                {isLocked && <span style={{ fontSize: '0.8rem' }}><Icon name='lock' size={13} color='currentColor' /></span>}
 
                 {prog && (
                   <span style={{
                     fontSize: '0.7rem', fontWeight: 700,
                     color: RATING_COLOR[prog.rating] || 'var(--red)',
                   }}>
-                    ✓
+                    <Icon name='check' size={11} color='currentColor' />
                   </span>
                 )}
               </div>
@@ -328,7 +328,7 @@ export function ChallengesBrowser({ onSelectChallenge, onSelectFullLoop, unlocke
                     background: 'var(--surface-2)', border: '1px solid var(--border)',
                     borderRadius: '6px', padding: '0.3rem 0.7rem',
                   }}>
-                    {prog.rating === 'strong' ? '✓ Nailed it' : prog.rating === 'partial' ? '~ Close' : '✗ Revisit'}
+                    {prog.rating === 'strong' ? (<><Icon name='check' size={12} color='currentColor' /> Nailed it</>) : prog.rating === 'partial' ? '~ Close' : (<><Icon name='x' size={12} color='currentColor' /> Revisit</>)}
                   </span>
                 ) : (
                   <span />
@@ -471,11 +471,11 @@ export function ChallengesBrowser({ onSelectChallenge, onSelectFullLoop, unlocke
                     </span>
                   )}
 
-                  {isLocked && <span style={{ fontSize: '0.8rem', marginLeft: 'auto' }}>🔒</span>}
+                  {isLocked && <span style={{ fontSize: '0.8rem', marginLeft: 'auto' }}><Icon name='lock' size={13} color='currentColor' /></span>}
 
                   {prog && (
                     <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)' }}>
-                      ✓
+                      <Icon name='check' size={11} color='currentColor' />
                     </span>
                   )}
                 </div>
@@ -502,7 +502,7 @@ export function ChallengesBrowser({ onSelectChallenge, onSelectFullLoop, unlocke
                       background: 'var(--surface-2)', border: '1px solid var(--border)',
                       borderRadius: '6px', padding: '0.3rem 0.7rem',
                     }}>
-                      ✓ Completed
+                      <Icon name='check' size={12} color='currentColor' /> Completed
                     </span>
                   ) : (
                     <span />

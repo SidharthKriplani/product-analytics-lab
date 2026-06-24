@@ -197,7 +197,7 @@ export function ProductDesignBrowser({ onSelectScenario, unlocked, onUnlock, onO
                     fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)',
                     marginLeft: 'auto',
                   }}>
-                    🔒 Unlock
+                    <Icon name='lock' size={11} color='currentColor' /> Unlock
                   </span>
                 )}
               </div>
