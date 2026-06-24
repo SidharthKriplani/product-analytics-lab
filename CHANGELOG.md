@@ -4,6 +4,10 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.68.0] — 2026-06-24 [ABOUT: BREAKLABS FOUR-PILLAR FRAMING]
+
+Added a "Part of BreakLabs" section to the About page framing PAL within the BreakLabs four-pillar model — recall, depth, fluency, judgment — with each pillar anchored to where it's trained (recall → MCQ Trainer, depth → Foundation rooms, fluency → Programming Lab, judgment → PAL practice rooms). Reinforces PAL's positioning: judgment is the wedge most tools skip. Tightened the user's "every IT professional" to "every technical interview — and the job itself" since BreakLabs is data/analytics/SWE-for-data/ML, not general IT. File: `src/pages/About.jsx`.
+
 ## [5.67.0] — 2026-06-24 [CODE LAB REDIRECT + LABEL SWEEP → PROGRAMMING LAB]
 
 Finishes the Programming Lab migration: the older Code Lab/Code Room now redirects too, and every leftover "Code Room"/"Code Lab"/"Python Lab" destination label across the app reads "Programming Lab".

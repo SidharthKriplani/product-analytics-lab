@@ -9,6 +9,17 @@ The gap PAL fills: most prep resources teach you what A/B testing, RCA, and metr
 17 rooms. 150+ cases. SQL Lab with 192 problems. Foundation modules across Stats, Experimentation, RCA, and Metrics. Every case tests judgment, not recall.`,
     },
     {
+      title: 'Part of BreakLabs',
+      body: `PAL is part of BreakLabs, built around the four competencies every technical interview — and the job itself — actually tests:
+
+Recall — do you know the concepts cold? Definitions, formulas, what SRM or CUPED is. (In PAL: the MCQ Trainer.)
+Depth — do you understand why they work, well enough to reason past the textbook? (In PAL: the Foundation rooms.)
+Fluency — can you execute without fighting the tools — write the SQL, the Python, the transform? (Programming Lab, the sibling SWE-for-data app.)
+Judgment — given messy, ambiguous data and real stakes, do you make the right call? (PAL's practice rooms — the whole point.)
+
+Most prep tools drill recall and fluency. Judgment is the part that actually decides senior interviews — and it's the reason PAL exists.`,
+    },
+    {
       title: "Who it's for",
       body: `Product analysts, data analysts, business analysts, and PMs preparing for senior IC and leadership-track interviews.
 
