@@ -76,7 +76,7 @@ const NAV_FRAMES = [
       { id: 'simulator',      label: 'Mock Interview' },
       { id: 'defense-doc',    label: 'Defense Strategy' },
       { id: 'company-tracks', label: 'Company Tracks' },
-      { id: 'community-feed', label: 'Feed' },
+      // { id: 'community-feed', label: 'Feed' }, // hidden for now — route still works at #/community-feed
     ],
   },
 ];
