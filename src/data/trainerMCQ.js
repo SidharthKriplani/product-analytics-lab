@@ -392,12 +392,12 @@ export const trainerMCQ = [
     options: [
       {
         id: 'a',
-        text: 'It increases the sample size by resampling from historical data.',
+        text: 'It augments the live experiment data by resampling each user\'s historical observations, increasing the effective sample size used in the test.',
         correct: false,
       },
       {
         id: 'b',
-        text: 'It subtracts a covariate correlated with the outcome metric (e.g., pre-experiment metric value) to reduce residual variance, effectively increasing statistical power.',
+        text: 'It subtracts a pre-experiment covariate correlated with the outcome to reduce residual variance, increasing statistical power.',
         correct: true,
       },
       {
@@ -629,11 +629,11 @@ export const trainerMCQ = [
       { id: 'a', text: 'Yes — net DAU grew by 100K.', correct: false },
       {
         id: 'b',
-        text: 'Partially — while net growth is positive, the high churn (150K) relative to new users (200K) indicates the retention engine needs work to sustain growth.',
+        text: 'Partially — net growth is positive, but churn (150K) is high relative to new users (200K), so the retention engine needs work.',
         correct: true,
       },
       { id: 'c', text: 'No — resurrected users inflate the true growth rate.', correct: false },
-      { id: 'd', text: 'Yes — churn rate (15% of prior DAU) is within normal SaaS benchmarks.', correct: false },
+      { id: 'd', text: 'Yes — a weekly churn of 15% of prior DAU sits comfortably inside the normal SaaS benchmark range, so retention is not a concern here.', correct: false },
     ],
     explanation:
       'Growth accounting decomposes DAU change into its sources, revealing the health of acquisition vs. retention. Net growth of 100K looks positive, but churning 150K users per week (15% weekly churn) while acquiring only 200K is a leaky bucket: if acquisition slows, growth quickly goes negative. Sustainable growth requires improving retention (lowering churn) rather than outrunning it with acquisition. Option D applies SaaS monthly churn benchmarks to daily DAU, which is an inappropriate comparison.',
@@ -700,10 +700,10 @@ export const trainerMCQ = [
       { id: 'a', text: 'Messages sent cannot be measured accurately at scale.', correct: false },
       {
         id: 'b',
-        text: 'It measures activity (output) rather than value delivered — high message volume could indicate communication inefficiency rather than productive collaboration.',
+        text: 'It measures activity (output) rather than value delivered — high volume can signal communication inefficiency, not productive collaboration.',
         correct: true,
       },
-      { id: 'c', text: 'It is a lagging indicator and cannot guide real-time decisions.', correct: false },
+      { id: 'c', text: 'It is a lagging indicator that only reflects past behavior, so it arrives too late to guide the real-time, in-the-moment product decisions a North Star should drive.', correct: false },
       { id: 'd', text: 'It conflates new and existing users, making trend analysis unreliable.', correct: false },
     ],
     explanation:
@@ -996,12 +996,12 @@ export const trainerMCQ = [
       },
       {
         id: 'b',
-        text: 'Feature X may be a power-user feature correlated with high engagement rather than a cause of it; investigate whether usage predicts retention after controlling for prior engagement (reverse causality check).',
+        text: 'Feature X may correlate with high engagement rather than cause it; test whether usage predicts retention after controlling for prior engagement.',
         correct: true,
       },
       {
         id: 'c',
-        text: 'Feature X is highly valuable and should be promoted to all users immediately.',
+        text: 'Feature X is clearly valuable to the power users who adopt it, so the obvious win is to surface it prominently and promote it to the full user base right away.',
         correct: false,
       },
       {

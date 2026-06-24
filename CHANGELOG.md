@@ -4,6 +4,14 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.77.0] — 2026-06-24 [mf13/mf10 REBUILT + KEYED ROOMS AUDITED & FIXED]
+
+Closed the V5.76 open item and ran the loop on the keyed rooms.
+- **mf13 + mf10 interactives rebuilt** to match their re-angled data (MetricsFoundationsRunner.jsx). mf10 now teaches "a flat rate hiding a collapse" (slider drops orders + sessions together, conversion rate pinned at 4% while absolute counts crater, paired bars). mf13 now teaches "a null result is not no effect" (CI on a number line crossing zero, sample-size slider tightens it, verdict distinguishes underpowered-null vs proven-no-effect; CI anchored to −1%/+6% at n=1,000). Both now render `module.keyInsight`/`module.connection` (mf13 previously hardcoded its takeaway). Arithmetic verified; parse OK.
+- **MCQ Trainer (40) audited:** content-correct — no wrong answer keys, no ambiguous items, no contradicting explanations (computational ones spot-verified). Fixed the 4 worst length-bias tells (mcq14/22/25/37) by tightening the correct option + lengthening a distractor, preserving correctness. 25 milder length-tells remain (flagged, not mass-rewritten to avoid degrading quality).
+- **Spot-the-Flaw (17) audited + 2 real bugs fixed:** STF14 keyed flaw was factually wrong (claimed pandas `fillna(0)` on a string column yields `"0"`; it inserts integer `0`, so the bug never fired) — rewritten so the mechanism is genuinely present (string `order_id` compared to int `0`), verified empirically (buggy → 100%, fixed → 22.4%). STF01's `flaw` text had internal contradictions vs its setup (cited 12% not +6.3%; said control not treatment had 10.41%) — corrected.
+- Deterministic + parse gates green. Files: `MetricsFoundationsRunner.jsx`, `src/data/trainerMCQ.js`, `src/data/spotTheFlawCases.js`.
+
 ## [5.76.0] — 2026-06-24 [FOUNDATIONS INTERACTIVE LAYER — AUDIT + FIX]
 
 Closed the rubric's interactive requirement: audited the runner/interactive layer (Exp/RCA/Metrics runners ~9.4k lines + 32 Stats module components) and fixed real bugs the data audit couldn't see. Coverage confirmed strong (every module has a load-bearing interactive + check). Fixes (all 9 touched files parse):

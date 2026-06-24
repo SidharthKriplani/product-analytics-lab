@@ -1487,49 +1487,61 @@ function Module_MF09({ module, onNext }) {
   );
 }
 
-// ─── Module 10: Ratio Metrics in Depth ───────────────────────────────────────
+// ─── Module 10: When a Flat Rate Is the Lie ───────────────────────────────────
 
 const MF10_MCQ = {
-  question: 'Overall conversion rate fell from 3.2% to 2.8%. Mobile conversion is 2.0% (unchanged). Desktop conversion is 5.0% (unchanged). What happened?',
+  question: 'Your conversion rate has sat at exactly 4.0% for three months, so the checkout flow gets declared "stable." Then someone pulls absolute counts: orders are down 30% and sessions are down 30% over the same period. What is actually happening?',
   options: [
-    'There is a measurement error — both segment rates are unchanged so overall cannot fall',
-    'Mobile traffic share grew — mix shift pulled the overall rate down even though both segments are healthy',
-    'Desktop conversion must have actually fallen; the data is inconsistent',
-    'The denominator shrank, which mechanically reduced the overall rate',
+    'Nothing — a flat conversion rate proves the funnel is healthy and stable',
+    'The business is shrinking: orders and sessions both collapsed together, so the rate held flat while the numerator and denominator both cratered',
+    'Conversion improved, because holding the rate steady through a downturn is a win',
+    'There must be a tracking bug — the rate cannot stay flat if the counts are falling',
   ],
-  correct: 'Mobile traffic share grew — mix shift pulled the overall rate down even though both segments are healthy',
-  explanation: 'This is a textbook mix shift (Simpson\'s Paradox). Mobile converts at 2% and desktop at 5%. If the share of mobile sessions grows, the weighted average falls — even with zero change inside either segment. Always check the denominator composition before diagnosing a conversion drop.',
+  correct: 'The business is shrinking: orders and sessions both collapsed together, so the rate held flat while the numerator and denominator both cratered',
+  explanation: 'A ratio is two numbers in a trench coat. If orders (numerator) and sessions (denominator) fall by the same proportion, the rate does not move at all — 2,800 / 70,000 is still 4.0%, exactly like 4,000 / 100,000. The flat rate masked a 30% collapse in the business. A stable rate is never, on its own, evidence of a stable system. Always pull the raw numerator and denominator counts before concluding nothing is happening.',
 };
 
 function Module_MF10({ module, onNext }) {
   const saved10 = useMemo(function() { return loadMFState('mf10'); }, []);
-  const [mobileSessions, setMobileSessions] = useState(function() { return saved10 && saved10.mobileSessions !== undefined ? saved10.mobileSessions : 6000; });
-  const [mobileRPS, setMobileRPS] = useState(function() { return saved10 && saved10.mobileRPS !== undefined ? saved10.mobileRPS : 1.20; });
-  const [desktopSessions, setDesktopSessions] = useState(function() { return saved10 && saved10.desktopSessions !== undefined ? saved10.desktopSessions : 4000; });
-  const [desktopRPS, setDesktopRPS] = useState(function() { return saved10 && saved10.desktopRPS !== undefined ? saved10.desktopRPS : 3.50; });
+  // collapse = % both numerator (orders) and denominator (sessions) have fallen, together
+  const [collapse, setCollapse] = useState(function() { return saved10 && saved10.collapse !== undefined ? saved10.collapse : 0; });
   const [selected, setSelected] = useState(function() { return saved10 ? saved10.selected : null; });
   const [revealed, setRevealed] = useState(function() { return saved10 ? saved10.revealed : false; });
 
   useEffect(function() {
-    saveMFState('mf10', { mobileSessions: mobileSessions, mobileRPS: mobileRPS, desktopSessions: desktopSessions, desktopRPS: desktopRPS, selected: selected, revealed: revealed });
-  }, [mobileSessions, mobileRPS, desktopSessions, desktopRPS, selected, revealed]);
+    saveMFState('mf10', { collapse: collapse, selected: selected, revealed: revealed });
+  }, [collapse, selected, revealed]);
 
-  const totalSessions = mobileSessions + desktopSessions;
-  const totalRevenue = mobileSessions * mobileRPS + desktopSessions * desktopRPS;
-  const overallRPS = totalSessions > 0 ? totalRevenue / totalSessions : 0;
-  const mobilePct = totalSessions > 0 ? Math.round((mobileSessions / totalSessions) * 100) : 0;
-  const isMixWarning = mobilePct > 70;
+  // Baseline business: 100,000 sessions, 4,000 orders → 4.0% conversion.
+  // The collapse slider drops BOTH numerator and denominator by the same proportion,
+  // so the rate stays pinned at 4.0% while the absolute counts crater.
+  const BASE_SESSIONS = 100000;
+  const BASE_ORDERS = 4000;
+  const factor = 1 - collapse / 100;
+  const sessions = Math.round(BASE_SESSIONS * factor);
+  const orders = Math.round(BASE_ORDERS * factor);
+  const rate = sessions > 0 ? (orders / sessions) * 100 : 0;
+  const isCollapseWarning = collapse >= 20;
 
   function applyPreset() {
-    setMobileSessions(8500);
-    setDesktopSessions(4000);
-    setMobileRPS(1.20);
-    setDesktopRPS(3.50);
+    setCollapse(30);
   }
 
   function handleCheck() {
     if (selected !== null) setRevealed(true);
   }
+
+  // Bar chart: absolute sessions and orders, baseline (ghost) vs current.
+  const W10 = 420; const H10 = 150;
+  const padL10 = 8; const padR10 = 8; const padT10 = 14; const padB10 = 22;
+  const innerW10 = W10 - padL10 - padR10;
+  const innerH10 = H10 - padT10 - padB10;
+  // Two groups (Sessions, Orders); scale each group to its own baseline so both are visible.
+  const groupW = innerW10 / 2;
+  const sessFull = innerH10;                                  // baseline sessions = full height
+  const sessCur = innerH10 * factor;
+  const ordFull = innerH10 * (BASE_ORDERS / BASE_SESSIONS) * 6; // exaggerate orders bar so it's legible vs sessions
+  const ordCur = ordFull * factor;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -1537,101 +1549,78 @@ function Module_MF10({ module, onNext }) {
       <div>
         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Thursday afternoon revenue review. The CFO pulls up the weekly dashboard and points at a chart: &quot;Revenue per session is down 12% month-over-month. What happened?&quot; The room tenses. The product team shipped nothing that should have affected monetization. Ad pricing hasn&apos;t changed. The content team hasn&apos;t touched the paywall. So where did 12% go?
+          Thursday revenue review. The PM pulls up the conversion chart: a perfectly flat line at 4.0% for three straight months. &quot;Checkout is stable,&quot; she says, &quot;let&apos;s reallocate the team.&quot; Everyone nods. The rate hasn&apos;t budged, so nothing is wrong — right?
         </p>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Revenue per session is a ratio. And ratios lie when the denominator composition shifts. If a viral social campaign brought in 3x more mobile users this month — users who browse but rarely purchase — the per-session revenue drops even though desktop monetization is unchanged. The numerator (total revenue) might even be up. The denominator (total sessions) just grew faster, and the new sessions came from a lower-monetizing segment. The explorer below lets you manipulate the mix and watch this happen in real time.
+          Then someone pulls the absolute counts. Orders are down 30%. Sessions are down 30%. The business is quietly bleeding out, and the conversion rate never twitched — because the numerator and denominator fell by the same proportion. A ratio is two numbers in a trench coat: when both halves collapse together, the rate sits perfectly still on top of two failing trends. The explorer below lets you crash both counts and watch the rate refuse to move.
         </p>
       </div>
 
       <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0 }}>
-        Every ratio metric has three levers: numerator movement, denominator movement, and mix shift. A rate can fall even when every individual segment improves — if the mix shifts toward lower-converting segments. Use the explorer below to see this live.
+        A flat ratio is one of the most dangerous signals in analytics precisely because it looks reassuring. A rate can hold steady while the numerator and denominator both crater in lockstep — so a stable rate is never, on its own, evidence of a stable system. Always monitor the absolute numerator and denominator volumes alongside any rate.
       </p>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '-1rem' }}>Try It: Decompose Revenue per Session</div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '-1rem' }}>Try It: Crash the Volumes, Watch the Rate Hold</div>
       <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Revenue per Session decomposition</div>
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Conversion rate vs. absolute volumes</div>
         <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.75rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-          <strong>What to do:</strong> Drag the sliders to adjust session counts and revenue per session for each platform — watch the overall RPSession update in real time and notice when a mix shift drives it down.
+          <strong>What to do:</strong> Drag the slider to drop both orders and sessions by the same proportion. Watch the conversion rate stay pinned at 4.0% while the absolute counts collapse.
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-          <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
-              Mobile sessions: <strong style={{ color: 'var(--text)' }}>{mobileSessions.toLocaleString()}</strong>
-            </label>
-            <input
-              type="range"
-              min="1000"
-              max="9000"
-              step="100"
-              value={mobileSessions}
-              onChange={function(e) { setMobileSessions(Number(e.target.value)); }}
-              style={{ width: '100%', accentColor: 'var(--green)' }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
-              Mobile RPSession: <strong style={{ color: 'var(--text)' }}>${mobileRPS.toFixed(2)}</strong>
-            </label>
-            <input
-              type="range"
-              min="0.50"
-              max="3.00"
-              step="0.05"
-              value={mobileRPS}
-              onChange={function(e) { setMobileRPS(Number(e.target.value)); }}
-              style={{ width: '100%', accentColor: 'var(--green)' }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
-              Desktop sessions: <strong style={{ color: 'var(--text)' }}>{desktopSessions.toLocaleString()}</strong>
-            </label>
-            <input
-              type="range"
-              min="1000"
-              max="9000"
-              step="100"
-              value={desktopSessions}
-              onChange={function(e) { setDesktopSessions(Number(e.target.value)); }}
-              style={{ width: '100%', accentColor: 'var(--accent)' }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
-              Desktop RPSession: <strong style={{ color: 'var(--text)' }}>${desktopRPS.toFixed(2)}</strong>
-            </label>
-            <input
-              type="range"
-              min="1.00"
-              max="6.00"
-              step="0.10"
-              value={desktopRPS}
-              onChange={function(e) { setDesktopRPS(Number(e.target.value)); }}
-              style={{ width: '100%', accentColor: 'var(--accent)' }}
-            />
+        <div style={{ marginBottom: '1.25rem' }}>
+          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+            Drop both orders &amp; sessions by: <strong style={{ color: 'var(--text)' }}>{collapse}%</strong>
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="50"
+            step="5"
+            value={collapse}
+            onChange={function(e) { setCollapse(Number(e.target.value)); }}
+            style={{ width: '100%', accentColor: 'var(--green)' }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+            <span>0% (baseline)</span><span>50% collapse</span>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(180px, 100%), 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(160px, 100%), 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
           <div style={{ background: 'var(--surface-2, var(--surface))', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Total sessions</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)' }}>{totalSessions.toLocaleString()}</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Sessions (denom.)</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent)' }}>{sessions.toLocaleString()}</div>
           </div>
           <div style={{ background: 'var(--surface-2, var(--surface))', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Overall RPSession</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--green)' }}>${overallRPS.toFixed(2)}</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Orders (numer.)</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--purple)' }}>{orders.toLocaleString()}</div>
           </div>
-          <div style={{ background: isMixWarning ? 'var(--yellow-bg)' : 'var(--surface-2, var(--surface))', border: '1.5px solid ' + (isMixWarning ? 'var(--yellow-border)' : 'var(--border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-            <div style={{ fontSize: '0.7rem', color: isMixWarning ? 'var(--yellow)' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Mobile share</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: isMixWarning ? 'var(--yellow)' : 'var(--text)' }}>{mobilePct}%</div>
+          <div style={{ background: 'var(--green-bg)', border: '1.5px solid var(--green-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Conversion rate</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--green)' }}>{rate.toFixed(1)}%</div>
           </div>
         </div>
 
-        {isMixWarning && (
-          <div className="pal-reveal-in" style={{ fontSize: '0.83rem', color: 'var(--yellow)', background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.9rem', lineHeight: 1.55 }}>
-            Mix shift — mobile is dominating; RPSession will fall even if both segments improve.
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
+          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.4rem', textAlign: 'center' }}>Absolute volumes — faded bars are the baseline</div>
+          <svg viewBox={'0 0 ' + W10 + ' ' + H10} width="100%" style={{ display: 'block' }}>
+            <line x1={padL10} y1={padT10 + innerH10} x2={W10 - padR10} y2={padT10 + innerH10} stroke="var(--border)" strokeWidth="1" />
+            {/* Sessions group */}
+            <rect x={padL10 + groupW * 0.30} y={padT10 + innerH10 - sessFull} width={groupW * 0.18} height={sessFull} rx="2" fill="var(--accent)" opacity="0.2" />
+            <rect x={padL10 + groupW * 0.52} y={padT10 + innerH10 - sessCur} width={groupW * 0.18} height={sessCur} rx="2" fill="var(--accent)" />
+            <text x={padL10 + groupW * 0.5} y={padT10 + innerH10 + 14} textAnchor="middle" fontSize="9" fill="var(--text-muted)">Sessions</text>
+            {/* Orders group */}
+            <rect x={padL10 + groupW + groupW * 0.30} y={padT10 + innerH10 - ordFull} width={groupW * 0.18} height={ordFull} rx="2" fill="var(--purple)" opacity="0.2" />
+            <rect x={padL10 + groupW + groupW * 0.52} y={padT10 + innerH10 - ordCur} width={groupW * 0.18} height={ordCur} rx="2" fill="var(--purple)" />
+            <text x={padL10 + groupW + groupW * 0.5} y={padT10 + innerH10 + 14} textAnchor="middle" fontSize="9" fill="var(--text-muted)">Orders</text>
+          </svg>
+          <div style={{ textAlign: 'center', fontSize: '0.78rem', color: isCollapseWarning ? 'var(--yellow)' : 'var(--text-muted)', marginTop: '0.3rem', fontWeight: isCollapseWarning ? 700 : 500 }}>
+            Both bars shrink, but the rate above stays {rate.toFixed(1)}%.
+          </div>
+        </div>
+
+        {isCollapseWarning && (
+          <div className="pal-reveal-in" style={{ marginTop: '0.85rem', fontSize: '0.83rem', color: 'var(--yellow)', background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.9rem', lineHeight: 1.55 }}>
+            The rate is flat at 4.0% — but sessions and orders are each down {collapse}%. A flat rate is hiding a {collapse}% collapse in the business.
           </div>
         )}
 
@@ -1648,15 +1637,15 @@ function Module_MF10({ module, onNext }) {
               fontSize: '0.82rem',
               cursor: 'pointer',
             }}
-          >Add mobile users (preset)</button>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginLeft: '0.6rem' }}>Sets mobile to 8,500; desktop stays. Watch overall RPSession fall.</span>
+          >Collapse both 30% (preset)</button>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginLeft: '0.6rem' }}>Sessions 100k&rarr;70k, orders 4k&rarr;2.8k. Rate stays 4.0%.</span>
         </div>
       </div>
 
       <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.1rem' }}>
         <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.75rem' }}>{MF10_MCQ.question}</div>
         <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.65rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-          <strong>What to do:</strong> Select the answer that explains how overall conversion can fall even when both segment rates are unchanged, then click Check answer.
+          <strong>What to do:</strong> Select the answer that explains how a conversion rate can stay perfectly flat while the underlying business collapses, then click Check answer.
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', marginBottom: '0.75rem' }}>
           {MF10_MCQ.options.map(function(opt) {
@@ -2061,59 +2050,57 @@ function Module_MF12({ module, onNext }) {
   );
 }
 
-// ─── Module 13: Metric Sensitivity ───────────────────────────────────────────
+// ─── Module 13: A Null Result Is Not "No Effect" ─────────────────────────────
 
 function Module_MF13({ module, onNext }) {
   const saved13 = useMemo(function() { return loadMFState('mf13'); }, []);
-  const [cv, setCv] = useState(function() { return saved13 && saved13.cv !== undefined ? saved13.cv : 1.2; });
+  // sampleSize index drives how tight the confidence interval is around a fixed observed effect.
+  const [n, setN] = useState(function() { return saved13 && saved13.n !== undefined ? saved13.n : 1000; });
   const [answer, setAnswer] = useState(function() { return saved13 && saved13.answer !== undefined ? saved13.answer : null; });
   const [revealed, setRevealed] = useState(function() { return saved13 ? saved13.revealed : false; });
 
   useEffect(function() {
-    saveMFState('mf13', { cv: cv, answer: answer, revealed: revealed });
-  }, [cv, answer, revealed]);
+    saveMFState('mf13', { n: n, answer: answer, revealed: revealed });
+  }, [n, answer, revealed]);
 
-  // Sample size approximation: n ~ (z_alpha + z_beta)^2 * sigma^2 / delta^2
-  // Simplified: n ~ CV^2 * constant (holding delta/mean fixed)
-  // Base case: cv=0.5 gives n=250, cv=2.0 gives n=4000
-  var baseN = 250;
-  var sampN = Math.round(baseN * (cv / 0.5) * (cv / 0.5));
+  // The observed point estimate is held fixed at +2.5%. The half-width of the 95% CI
+  // shrinks as sample size grows: half-width ∝ 1/sqrt(n). Anchor: at n=1,000 the CI is
+  // roughly -1.0% to +6.0% (half-width 3.5); it tightens toward the point estimate as n rises.
+  var OBSERVED = 2.5;
+  var halfWidth = 3.5 * Math.sqrt(1000 / n); // 1/sqrt(n) scaling, anchored at n=1000 → 3.5
+  var ciLow = OBSERVED - halfWidth;
+  var ciHigh = OBSERVED + halfWidth;
+  // "Significant" = CI excludes 0. "Proven no effect" = CI tightly hugs 0 (whole interval within ±0.5%).
+  var crossesZero = ciLow < 0 && ciHigh > 0;
+  var isSignificant = !crossesZero;
+  var provenNull = Math.abs(ciLow) < 0.5 && Math.abs(ciHigh) < 0.5;
+  var verdict = isSignificant
+    ? 'Significant — CI excludes 0; you have detected a real effect.'
+    : (provenNull
+      ? 'Proven ~no effect — the CI tightly hugs 0; even the largest plausible effect is tiny.'
+      : 'Underpowered null — the CI straddles 0 and still includes meaningful wins. You cannot detect the effect, not prove it is absent.');
 
-  // SVG for distribution visualization
-  var W = 420; var H = 100;
-  var padL = 10; var padR = 10; var padT = 10; var padB = 20;
-  var innerW = W - padL - padR; var innerH = H - padT - padB;
-
-  // Draw approximate normal distribution curve for given CV
-  var pts = 60;
-  function gauss(x, sigma) {
-    return Math.exp(-0.5 * (x / sigma) * (x / sigma));
+  // Number line: maps effect % to x. Domain roughly -8% .. +10%.
+  var W = 420; var H = 92;
+  var padL = 14; var padR = 14; var padT = 28; var padB = 24;
+  var innerW = W - padL - padR;
+  var axisY = padT + 18;
+  var DMIN = -8; var DMAX = 10;
+  function xOf(v) {
+    var clamped = Math.max(DMIN, Math.min(DMAX, v));
+    return padL + ((clamped - DMIN) / (DMAX - DMIN)) * innerW;
   }
-
-  function makeCurvePath(sigma) {
-    var result = [];
-    for (var i = 0; i < pts; i++) {
-      var t = i / (pts - 1);
-      var x = -3 + t * 6;
-      var y = gauss(x, sigma);
-      var svgX = padL + t * innerW;
-      var svgY = padT + innerH - y * innerH * 0.88;
-      result.push((i === 0 ? 'M' : 'L') + ' ' + svgX + ' ' + svgY);
-    }
-    return result.join(' ');
-  }
-
-  var narrowPath = makeCurvePath(0.8);
-  var widePath = makeCurvePath(cv);
+  var zeroX = xOf(0);
+  var ciColor = isSignificant ? 'var(--green)' : (provenNull ? 'var(--green)' : 'var(--yellow)');
 
   var mcqOptions = [
-    { label: 'A. Revenue per user — because it is the most important business metric.', correct: false },
-    { label: 'B. Click-through rate — it has lower variance relative to its mean, making small effects detectable with fewer users.', correct: true },
-    { label: 'C. Revenue per user — because it directly measures monetization impact.', correct: false },
-    { label: 'D. Session length — because it is correlated with engagement.', correct: false },
+    { label: 'A. The feature does nothing — a non-significant result means there is no effect.', correct: false },
+    { label: 'B. The test is underpowered: the wide CI (-1% to +6%) still includes a meaningful win, so we cannot rule one out — not "no effect."', correct: true },
+    { label: 'C. The feature definitely helps — the point estimate is positive, so ship it.', correct: false },
+    { label: 'D. The metric is broken; rerun the analysis until it reaches significance.', correct: false },
   ];
 
-  var cvLabel = Math.round(cv * 10) / 10;
+  function fmt(v) { return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -2121,85 +2108,82 @@ function Module_MF13({ module, onNext }) {
       <div>
         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          You&apos;re designing the measurement plan for a new recommendation engine experiment. The PM wants to use revenue per user as the primary metric — &quot;it&apos;s the metric leadership cares about.&quot; You pull historical data and run a power analysis. At the expected 3% lift, revenue per user requires 480,000 users per arm. At current traffic, that is a 14-week experiment. The PM&apos;s face falls. &quot;We can&apos;t hold a test for 14 weeks. Is there another option?&quot;
+          The recommendation-tweak experiment closes after four weeks. The readout deck has one line in bold: &quot;Result: not significant (p = 0.21). No effect. Killing the feature.&quot; The room moves on. But you look past the p-value at the confidence interval: the observed lift is <strong>+2.5%</strong>, with a 95% CI running from <strong>-1% to +6%</strong>. That interval is screaming something the headline ignored.
         </p>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          There is — but it requires understanding why some metrics are cheap to experiment with and others are expensive. The answer is variance. Revenue per user has a massive coefficient of variation because a handful of whales generate 50x the revenue of a typical user. Click-through rate, by contrast, is binary (0 or 1) with variance bounded by p*(1-p). The same 3% lift can be detected with 50x fewer users on CTR than on revenue. The slider below lets you see this relationship directly.
+          &quot;Not significant&quot; only means the data could not rule out zero. It does <em>not</em> mean the true effect is zero. A CI of -1% to +6% is perfectly consistent with a genuine 5% win — you simply did not collect enough data to tell a real-but-small effect apart from flat. That is a detection failure, not a verdict. The slider below holds the observed effect fixed at +2.5% and lets you grow the sample size: watch the CI tighten and the honest read change.
         </p>
       </div>
 
       <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
-        Metric sensitivity determines how quickly an experiment can detect a real effect. A metric
-        with high variance relative to its mean (high CV = SD / mean) requires far more samples to
-        detect the same lift. This is why revenue per user is notoriously expensive to experiment
-        with — a small number of high spenders creates extreme variance.
+        A null result has two completely different meanings. &quot;We proved no effect&quot; requires a tight CI that hugs zero (an equivalence test). &quot;We couldn&apos;t detect one&quot; is a wide CI that still includes meaningful effects. Confusing the two is how teams quietly throw away real wins — an underpowered test systematically discards small effects by labelling them &quot;null.&quot; The honest summary of any null is its MDE: the smallest effect the test could have caught.
       </p>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '-1rem' }}>Try It: Adjust the Variance</div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '-1rem' }}>Try It: Grow the Sample, Watch the CI</div>
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.1rem' }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.75rem' }}>
-          Adjust coefficient of variation (CV) — watch sample size requirements change
-        </div>
         <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.75rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-          <strong>What to do:</strong> Drag the CV slider to adjust the coefficient of variation — watch how the required sample size changes as the metric becomes noisier or more precise.
+          <strong>What to do:</strong> The observed effect is fixed at +2.5%. Drag the sample-size slider and watch the 95% confidence interval tighten. Notice when it stops crossing zero — that is the moment you can finally tell a real effect from flat.
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-              <span style={{ fontSize: '0.82rem', color: 'var(--text)', fontWeight: 600 }}>CV (SD / mean)</span>
-              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent)' }}>{cvLabel}</span>
-            </div>
-            <input type="range" min={0.3} max={3.0} step={0.1} value={cv}
-              onChange={function(e) { setCv(parseFloat(e.target.value)); }}
-              style={{ width: '100%', accentColor: 'var(--accent)' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              <span>0.3 (low)</span><span>3.0 (high)</span>
-            </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+            <span style={{ fontSize: '0.82rem', color: 'var(--text)', fontWeight: 600 }}>Sample size per arm</span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent)' }}>{n.toLocaleString()}</span>
           </div>
-          <div style={{ textAlign: 'center', padding: '0.85rem', background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-sm)' }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>Required sample size</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent)' }}>{sampN.toLocaleString()}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>per arm, to detect 5% lift</div>
+          <input type="range" min={1000} max={40000} step={1000} value={n}
+            onChange={function(e) { setN(parseInt(e.target.value)); }}
+            style={{ width: '100%', accentColor: 'var(--accent)' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+            <span>1k (underpowered)</span><span>40k (well powered)</span>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(150px, 100%), 1fr))', gap: '0.6rem', marginBottom: '1rem' }}>
+          <div style={{ textAlign: 'center', padding: '0.7rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Observed effect</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text)' }}>{fmt(OBSERVED)}</div>
+          </div>
+          <div style={{ textAlign: 'center', padding: '0.7rem', background: ciColor === 'var(--green)' ? 'var(--green-bg)' : 'var(--yellow-bg)', border: '1px solid ' + (ciColor === 'var(--green)' ? 'var(--green-border)' : 'var(--yellow-border)'), borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: ciColor, textTransform: 'uppercase' }}>95% CI</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: ciColor }}>{fmt(ciLow)} to {fmt(ciHigh)}</div>
+          </div>
+          <div style={{ textAlign: 'center', padding: '0.7rem', background: crossesZero ? 'var(--yellow-bg)' : 'var(--green-bg)', border: '1px solid ' + (crossesZero ? 'var(--yellow-border)' : 'var(--green-border)'), borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: crossesZero ? 'var(--yellow)' : 'var(--green)', textTransform: 'uppercase' }}>Crosses zero?</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: crossesZero ? 'var(--yellow)' : 'var(--green)' }}>{crossesZero ? 'Yes' : 'No'}</div>
           </div>
         </div>
 
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
-          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.4rem', textAlign: 'center' }}>Distribution width at CV = {cvLabel}</div>
+          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.4rem', textAlign: 'center' }}>Effect on a number line (CI bar; dashed line is zero / &quot;no effect&quot;)</div>
           <svg viewBox={'0 0 ' + W + ' ' + H} width="100%" style={{ display: 'block' }}>
-            <line x1={padL} y1={padT + innerH} x2={W - padR} y2={padT + innerH} stroke="var(--border)" strokeWidth="1" />
-            <path d={narrowPath} fill="none" stroke="var(--teal)" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6" />
-            <path d={widePath} fill="none" stroke="var(--accent)" strokeWidth="2" />
-            <text x={padL + 8} y={padT + 16} fontSize="9" fill="var(--teal)" opacity="0.8">Low CV (reference)</text>
-            <text x={padL + 8} y={padT + 30} fontSize="9" fill="var(--accent)" fontWeight="700">CV = {cvLabel}</text>
-            <line x1={W / 2} y1={padT} x2={W / 2} y2={padT + innerH} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="2 2" />
-            <text x={W / 2} y={H - 2} textAnchor="middle" fontSize="8" fill="var(--text-muted)">mean</text>
+            {/* axis */}
+            <line x1={padL} y1={axisY} x2={W - padR} y2={axisY} stroke="var(--border)" strokeWidth="1" />
+            {/* zero line */}
+            <line x1={zeroX} y1={padT - 8} x2={zeroX} y2={H - padB + 4} stroke="var(--red)" strokeWidth="1.2" strokeDasharray="3 3" />
+            <text x={zeroX} y={padT - 12} textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--red)">0 (no effect)</text>
+            {/* CI bar */}
+            <line x1={xOf(ciLow)} y1={axisY} x2={xOf(ciHigh)} y2={axisY} stroke={ciColor} strokeWidth="6" strokeLinecap="round" opacity="0.85" />
+            <line x1={xOf(ciLow)} y1={axisY - 7} x2={xOf(ciLow)} y2={axisY + 7} stroke={ciColor} strokeWidth="2" />
+            <line x1={xOf(ciHigh)} y1={axisY - 7} x2={xOf(ciHigh)} y2={axisY + 7} stroke={ciColor} strokeWidth="2" />
+            {/* point estimate */}
+            <circle cx={xOf(OBSERVED)} cy={axisY} r="4.5" fill="var(--text)" stroke="var(--surface)" strokeWidth="1.5" />
+            {/* axis ticks */}
+            {[-8, -4, 0, 4, 8].map(function(t) {
+              return <text key={'tk' + t} x={xOf(t)} y={H - 6} textAnchor="middle" fontSize="8" fill="var(--text-muted)">{(t > 0 ? '+' : '') + t + '%'}</text>;
+            })}
           </svg>
-        </div>
-
-        <div style={{ marginTop: '0.75rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: '0.6rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          {[
-            { metric: 'Click-through rate', cv: '~0.3-0.5', note: 'Most sensitive — binary outcomes' },
-            { metric: 'Session length', cv: '~0.8-1.2', note: 'Moderate — right-skewed' },
-            { metric: 'Revenue per user', cv: '~1.5-3.5', note: 'Least sensitive — zero-inflated' },
-          ].map(function(row) {
-            return (
-              <div key={row.metric} style={{ padding: '0.5rem 0.7rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-                <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '0.15rem' }}>{row.metric}</div>
-                <div>CV: {row.cv}</div>
-                <div>{row.note}</div>
-              </div>
-            );
-          })}
+          <div style={{ textAlign: 'center', fontSize: '0.8rem', fontWeight: 700, color: ciColor, marginTop: '0.3rem', lineHeight: 1.4 }}>
+            {verdict}
+          </div>
         </div>
       </div>
 
       <div>
         <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.75rem' }}>
-          You are testing a new feature and need to detect a 3% lift. Which metric should you choose as your primary outcome to minimize experiment runtime?
+          A feature tests non-significant. The observed effect is +2.5% with a 95% CI of -1% to +6%. What is the correct read?
         </div>
         <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', marginBottom: '0.65rem', fontSize: '0.83rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-          <strong>What to do:</strong> Select the metric with the lowest coefficient of variation — the one that will detect a 3% lift with the fewest users — then click Check.
+          <strong>What to do:</strong> Pick the read that distinguishes &quot;we couldn&apos;t detect an effect&quot; from &quot;we proved there is none,&quot; then click Check.
         </div>
 
         {mcqOptions.map(function(opt, i) {
@@ -2226,17 +2210,11 @@ function Module_MF13({ module, onNext }) {
         {revealed && (
           <div className="pal-reveal-in">
             <div style={{ marginTop: '0.5rem', padding: '0.65rem 0.85rem', background: mcqOptions[answer] && mcqOptions[answer].correct ? 'var(--teal-bg)' : 'var(--red-bg)', border: '1px solid ' + (mcqOptions[answer] && mcqOptions[answer].correct ? 'var(--teal-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', fontSize: '0.83rem', color: 'var(--text)', lineHeight: 1.5 }}>
-              CTR is a binary metric (clicked vs. not clicked) — its variance is determined by p*(1-p), which is tightly bounded. Revenue per user has a long right tail driven by a small number of heavy spenders, making its SD several times its mean. To detect the same 3% lift, you might need 20x more users for revenue vs. CTR.
+              A CI of -1% to +6% includes both zero and a substantial +5% win. The test simply was not powered to separate the two — so the only honest statement is &quot;we could not detect an effect this small.&quot; To actually conclude the feature does nothing, you would need a tight CI hugging zero (an equivalence test), not a p-value above 0.05. Killing the feature here risks discarding a real win.
             </div>
-            <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem', marginTop: '1.25rem' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.4rem' }}>Key Insight</div>
-              <div style={{ fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.6 }}>
-                When you cannot change the metric you care about, change what you measure in the experiment. If you must detect a revenue effect but revenue-per-user requires 6 months, find a proxy metric — a leading indicator with lower CV that predicts long-term revenue. CUPED can also reduce effective CV by 30-50%.
-              </div>
-            </div>
-            <button onClick={onNext} className="pal-glow-pulse" style={{ marginTop: '1.5rem', padding: '0.65rem 1.6rem', background: 'var(--green)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}>
-              Complete module →
-            </button>
+            <InsightBox label="Key Insight" color="var(--green)" bg="var(--green-bg)" border="var(--green-border)">{module.keyInsight}</InsightBox>
+            <InsightBox label="Connects to Experiments" color="var(--accent)" bg="var(--accent-bg)" border="var(--accent-border)">{module.connection}</InsightBox>
+            <NextBtn onClick={onNext} label="Complete module →" />
           </div>
         )}
       </div>
