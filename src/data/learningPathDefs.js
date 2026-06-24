@@ -52,7 +52,7 @@ export const LEARNING_PATHS = [
     estimatedWeeks: 4,
     description: 'Structured SQL practice — 130 problems across 12 datamarts, difficulty-ordered, stakeholder-framed.',
     steps: [
-      { id: 'sql-1', label: 'Code Room', detail: 'SQL patterns, window functions, sessionization', nav: 'code', type: 'practice' },
+      { id: 'sql-1', label: 'Programming Lab', detail: 'SQL patterns, window functions, sessionization', nav: 'code', type: 'practice' },
       { id: 'sql-2', label: 'SQL Lab — Easy', detail: '50 Easy problems across 12 datamarts', nav: 'sql-lab', type: 'practice' },
       { id: 'sql-3', label: 'SQL Lab — Medium', detail: '40 Medium problems: CTEs, window functions', nav: 'sql-lab', type: 'practice' },
       { id: 'sql-4', label: 'SQL Lab — Hard', detail: '25 Hard problems: multi-CTE chains, gaps-and-islands', nav: 'sql-lab', type: 'practice' },

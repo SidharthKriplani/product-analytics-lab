@@ -60,7 +60,7 @@ Core analytics practice rooms:
 
 Practice tools:
 — SQL Lab: 192 graded problems across Easy, Medium, Hard, Master, and Forensic levels
-— Code Room: Python + SQL execution environment
+— Programming Lab: SWE-for-data fluency practice — now a standalone BreakLabs app (opens separately)
 — MCQ Trainer: 40 multiple-choice questions across core concepts
 — Interview Simulator: timed practice sessions with role-specific question banks
 — Cross-Room Challenges: multi-room scenarios that integrate skills
@@ -86,7 +86,7 @@ Filter by difficulty in any room browser using the chips above the case list.`,
       title: 'Technical details',
       body: `Fully static React + Vite SPA. No backend, no database, no API calls. All case content ships as JavaScript data files. Progress is stored in your browser's localStorage. Nothing leaves your device.
 
-SQL Lab runs SQLite in the browser via sql.js (WASM). Python Code Lab runs via Pyodide. Both are fully in-browser — no server-side execution.
+SQL Lab runs SQLite in the browser via sql.js (WASM), fully in-browser with no server-side execution. Python practice now lives in Programming Lab, a separate BreakLabs app.
 
 Deployed on Vercel. Works offline once loaded. Free to use with access code; full access via one-time unlock.`,
     },

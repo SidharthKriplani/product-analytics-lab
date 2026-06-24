@@ -447,8 +447,8 @@ export default function App() {
       'exp-foundations': 'Experimentation Foundations — Product Analytics Lab',
       'exp-foundations-runner': 'Experimentation Foundations — Product Analytics Lab',
       'sql-lab': 'SQL Lab — Product Analytics Lab',
-      'code': 'Code Lab — Product Analytics Lab',
-      'code-runner': 'Code Lab — Product Analytics Lab',
+      'code': 'Programming Lab — Product Analytics Lab',
+      'code-runner': 'Programming Lab — Product Analytics Lab',
     };
     document.title = titles[page] || 'Product Analytics Lab';
   }, [page]);
@@ -1692,20 +1692,9 @@ export default function App() {
             <CheatSheet onNavigate={navigate} />
           </Suspense>
         )}
-        {page === 'code' && (
+        {(page === 'code' || page === 'code-runner') && (
           <Suspense fallback={null}>
-            <CodeBrowser onSelectModule={openCodeModule} unlocked={unlocked} onUnlock={() => setPage('plans')} onOpenArticle={openPlaybookArticle} />
-          </Suspense>
-        )}
-        {page === 'code-runner' && activeCodeModuleId && (
-          <Suspense fallback={null}>
-            <CodeRunner
-              caseId={activeCodeModuleId}
-              savedProgress={getCodeProgress(activeCodeModuleId)}
-              onBack={() => setPage('code')}
-              onNext={() => setPage('code')}
-              onNavigate={navigate}
-            />
+            <ProgrammingLabMoved />
           </Suspense>
         )}
         {page === 'python-lab' && (

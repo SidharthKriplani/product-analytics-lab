@@ -11,7 +11,7 @@ const ROOM_LABELS = {
   'browser': 'Review',
   'rca': 'RCA',
   'cases': 'Cases',
-  'code': 'Code',
+  'code': 'Programming Lab',
   'product-design': 'PM Design',
   'prioritization': 'Prioritize',
   'behavioral': 'Behavioral',

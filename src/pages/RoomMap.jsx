@@ -34,7 +34,7 @@ export function RoomMap({ onNavigate }) {
       description: 'Self-contained SQL practice — beginner to Master difficulty, all business-context framing.',
       nodes: [
         { id: 'sql-lab', label: 'SQL Lab', type: 'practice', time: '10–30 hrs', note: '130 problems across 12 datamarts — Easy to Master, stakeholder-framed prompts' },
-        { id: 'code', label: 'Code Room', type: 'practice', time: '~2 hrs', note: 'SQL + Python in product analytics context — sessionization, CUPED, cohorts' },
+        { id: 'code', label: 'Programming Lab', type: 'practice', time: '~2 hrs', note: 'Now a standalone BreakLabs app — opens separately' },
       ],
     },
     {

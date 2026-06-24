@@ -4,6 +4,15 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.67.0] — 2026-06-24 [CODE LAB REDIRECT + LABEL SWEEP → PROGRAMMING LAB]
+
+Finishes the Programming Lab migration: the older Code Lab/Code Room now redirects too, and every leftover "Code Room"/"Code Lab"/"Python Lab" destination label across the app reads "Programming Lab".
+
+- **`App.jsx`** — `page === 'code'` and `page === 'code-runner'` now render `ProgrammingLabMoved` (was `CodeBrowser`/`CodeRunner`), so every internal link to the Code Lab (Company Tracks, learning paths, challenges, search, blog CTAs, RoomMap, deep links) lands on the redirect. Page titles for those routes updated to "Programming Lab — Product Analytics Lab". `CodeBrowser`/`CodeRunner` imports left dormant.
+- **Label sweep (10 files)** — renamed user-facing room labels to "Programming Lab" in `RoomMap.jsx`, `roomConfig.js`, `learningPathDefs.js`, `DefenseDocGenerator.jsx`, `BookmarksBrowser.jsx`, `SearchPage.jsx`, `CompanyTracks.jsx`, `Header.jsx`, `BlogBrowser.jsx` (6 roomLabels + 6 CTAs), and `About.jsx`. Route ids (`'code'`, `'python-lab'`, `'code-runner'`), module ids (`code01-…`), progress keys (`pal-code-progress-v1`), icon names, and challenge content-type tags (`'SQL / Code'`) were deliberately left untouched.
+
+Net effect: anywhere a user could reach the Python or Code lab now points at the standalone Programming Lab. Dormant files (`PythonLabBrowser`, `CodeBrowser`, `CodeRunner`, `codeModules`, `codeProgress`) remain in the tree, unrouted, in case of rollback.
+
 ## [5.66.0] — 2026-06-24 [PYTHON LAB → PROGRAMMING LAB (EXTERNAL)]
 
 The in-app Python practice graduated into its own BreakLabs app, Programming Lab (programming-lab.vercel.app — "the SWE-for-data fluency lab"). PAL now points there instead of hosting it in-app.

@@ -30,7 +30,7 @@ const ROOM_LABEL = {
   'prioritization':    'Prioritization',
   'behavioral':        'Behavioral',
   'estimation':        'Estimation',
-  'code':              'Code',
+  'code':              'Programming Lab',
 };
 
 const DIFF_CFG = {

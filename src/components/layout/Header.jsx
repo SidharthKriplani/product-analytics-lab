@@ -17,7 +17,7 @@ export function Header({ currentPage, onNavigate, unlockedStatus, theme, onToggl
         { id: 'browser', label: 'Review' },
         { id: 'rca', label: 'RCA' },
         { id: 'cases', label: 'Cases' },
-        { id: 'code', label: 'Code' },
+        { id: 'code', label: 'Programming Lab' },
         { id: 'product-design', label: 'PM Design' },
         { id: 'prioritization', label: 'Prioritize' },
         { id: 'behavioral', label: 'Behavioral' },

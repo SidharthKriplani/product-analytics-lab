@@ -40,7 +40,7 @@ const ROOM_META = {
   'rca-foundations':     { label: 'RCA Foundations',        color: 'var(--teal)',    page: 'rca-foundations' },
   'rca':                 { label: 'RCA',                    color: 'var(--teal)',    page: 'rca' },
   'cases':               { label: 'Cases',                  color: 'var(--teal)',    page: 'cases' },
-  'code':                { label: 'Code Lab',               color: 'var(--purple)',  page: 'code' },
+  'code':                { label: 'Programming Lab',        color: 'var(--purple)',  page: 'code' },
   'product-design':      { label: 'Product Design',         color: 'var(--purple)',  page: 'product-design' },
   'prioritization':      { label: 'Prioritization',         color: 'var(--purple)',  page: 'prioritization' },
   'bi':                  { label: 'BI & Reporting',         color: 'var(--yellow)',  page: 'bi' },

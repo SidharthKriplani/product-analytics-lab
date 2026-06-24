@@ -34,7 +34,7 @@ export const ROOM_CONFIG = {
   },
   code: {
     icon: 'file-text',
-    label: 'Code Room',
+    label: 'Programming Lab',
     color: 'var(--purple)',
     bg: 'var(--purple-bg)',
     shortcut: 'o',

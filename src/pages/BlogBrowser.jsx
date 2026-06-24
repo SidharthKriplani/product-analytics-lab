@@ -1367,7 +1367,7 @@ const POSTS = [
     summary: 'Step-level conversion rates, drop-off diagnosis, and cohort-level funnel comparison — all in SQL. The query patterns every product analyst needs in their toolkit.',
     readMin: 5,
     room: 'code',
-    roomLabel: 'Code Room',
+    roomLabel: 'Programming Lab',
     content: [
       { type: 'text', text: 'Funnel analysis in SQL has three steps: define the funnel steps as events, build the ordered sequence per user, and calculate step-by-step conversion rates. The ordering problem is where most analysts get tripped up. Events must be in sequence — a user who purchased before adding to cart (due to a direct-link checkout) should not be counted as having completed the funnel in order. The query pattern uses MAX(CASE WHEN ...) to flag whether each user completed each step, which handles the ordering correctly when you combine it with a date filter.' },
       { type: 'heading', text: 'The Three-Step Checkout Funnel Query' },
@@ -1376,7 +1376,7 @@ const POSTS = [
       { type: 'heading', text: 'Segmentation: Finding Where a Specific Cohort Drops' },
       { type: 'text', text: 'The funnel query becomes a diagnostic tool when you add a segmentation dimension. Run the same query with a GROUP BY platform or GROUP BY cohort_week to find where a specific segment drops off. If iOS and Android users have similar cart-to-checkout rates but Android users have a 20pp lower checkout-to-purchase rate, the problem is in the Android checkout flow. The funnel query with segmentation identifies this instantly — without segmentation, the blended rate hides the Android problem.' },
       { type: 'callout', label: 'Window functions vs self-joins for funnel ordering', text: 'For strict ordering requirements — user must complete step N before step N+1 — the MAX(CASE WHEN) pattern doesn\'t enforce sequence. Use a self-join or window function approach: assign a step rank to each event using ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_timestamp), then filter for step N+1 events that occur after step N events. This is more complex but correctly handles cases where you need to verify that the funnel was traversed in order.' },
-      { type: 'cta', room: 'code', label: 'Practice this in the Code Room →' },
+      { type: 'cta', room: 'code', label: 'Practice this in Programming Lab →' },
     ],
   },
   {
@@ -1386,7 +1386,7 @@ const POSTS = [
     summary: 'How to compute retention at each horizon, how to visualize cohort curves, and what shape of curve tells you what about your product\'s stickiness.',
     readMin: 5,
     room: 'code',
-    roomLabel: 'Code Room',
+    roomLabel: 'Programming Lab',
     content: [
       { type: 'text', text: 'Retention is the fraction of users who return N days after their first use. It is the single most important metric for product health because it measures whether users found enough value to come back. A product with 40% D7 retention is keeping nearly half of its new users engaged after a week — a strong signal. A product with 5% D7 retention is losing 95% of new users in the first week, regardless of how many it acquires. Acquisition without retention is a leaky bucket — you pour users in, and they flow out before compounding into a sustainable user base.' },
       { type: 'heading', text: 'The Cohort Approach' },
@@ -1395,7 +1395,7 @@ const POSTS = [
       { type: 'heading', text: 'How to Read the Retention Table' },
       { type: 'text', text: 'The retention table has cohort weeks as rows and weeks-since-start as columns. Each cell shows the retention rate for that cohort at that time horizon. Reading diagonally gives you the same calendar week across different cohorts — a useful check for seasonal effects. Reading across a row shows the decay curve for a single cohort. Reading down a column shows whether newer cohorts are retaining better or worse than older ones at the same time horizon. If column 4 (4-week retention) is declining across the rows as you move to newer cohorts, your product is losing its grip on newer users.' },
       { type: 'callout', label: 'The shape of the curve tells you what\'s wrong', text: 'A retention curve that drops sharply in week 1 then flattens points to an onboarding problem: users who survive the first week tend to stay. A curve that drops gradually over many weeks points to a long-term engagement problem: users are slowly disengaging even after finding initial value. A curve with a "smile" (drops then rises) is extremely rare and usually indicates a product with both casual and power-user use cases. Most products should target flattening the decay curve as quickly as possible after the initial drop.' },
-      { type: 'cta', room: 'code', label: 'Practice this in the Code Room →' },
+      { type: 'cta', room: 'code', label: 'Practice this in Programming Lab →' },
     ],
   },
   {
@@ -1405,7 +1405,7 @@ const POSTS = [
     summary: 'Aggregating across acquisition cohorts hides composition changes. A product that looks healthy in aggregate may be surviving on strong old cohorts while new cohorts fail.',
     readMin: 4,
     room: 'code',
-    roomLabel: 'Code Room',
+    roomLabel: 'Programming Lab',
     content: [
       { type: 'text', text: 'Cohort analysis is any analysis that groups users by a shared starting characteristic — signup week, first purchase date, plan tier, acquisition channel — and tracks their behavior over time. The query structure is always the same: define the cohort in one CTE, join to downstream events in a second CTE, then aggregate by cohort and time period. The business question cohort analysis answers that aggregate metrics cannot: are newer users behaving differently from older users, and in which direction?' },
       { type: 'heading', text: 'The Query Structure: Define → Join → Aggregate' },
@@ -1414,7 +1414,7 @@ const POSTS = [
       { type: 'heading', text: 'The Pivot Step' },
       { type: 'text', text: 'The output of the cohort query is long-format: each row is a cohort-week combination. To produce the triangle visualization (cohort weeks as rows, time-since-start as columns), you need to pivot the data. In SQL, this is done with conditional aggregation: MAX(CASE WHEN weeks_since_start = 0 THEN retention_pct END) as week_0, MAX(CASE WHEN weeks_since_start = 1 THEN retention_pct END) as week_1, and so on. Most BI tools (Looker, Metabase, Tableau) can pivot automatically if you provide the long-format query.' },
       { type: 'callout', label: 'Reading the cohort table', text: 'Reading diagonally: the same calendar week across different cohorts — useful for detecting seasonal effects or a platform-wide change.\nReading across a row: the decay curve for a single cohort — useful for understanding individual cohort health.\nReading down a column: the same time-since-start across different cohorts — the key question is whether the column values are increasing (cohorts improving), decreasing (cohorts degrading), or flat (stable product quality).\n\nIf any column is steadily declining, your product is losing effectiveness at that retention horizon for newer users.' },
-      { type: 'cta', room: 'code', label: 'Practice this in the Code Room →' },
+      { type: 'cta', room: 'code', label: 'Practice this in Programming Lab →' },
     ],
   },
   {
@@ -1424,7 +1424,7 @@ const POSTS = [
     summary: 'The four window function patterns that appear in almost every product analytics SQL problem — with worked examples for session analysis, ranking, and time-series metrics.',
     readMin: 5,
     room: 'code',
-    roomLabel: 'Code Room',
+    roomLabel: 'Programming Lab',
     content: [
       { type: 'text', text: 'Window functions are the most powerful SQL feature most product analysts underuse. Unlike GROUP BY aggregations, window functions compute a value across a set of rows related to the current row without collapsing them into a single output row. This means you can have both row-level detail and aggregate context in the same query — which is precisely what most product analytics problems require. The four patterns you need are: ROW_NUMBER for ranking within groups, LAG/LEAD for comparing to prior or next rows, SUM OVER for running totals, and NTILE for percentile buckets.' },
       { type: 'heading', text: 'ROW_NUMBER: Ranking Within Groups' },
@@ -1436,7 +1436,7 @@ const POSTS = [
       { type: 'heading', text: 'SUM OVER: Running Totals and Moving Averages' },
       { type: 'text', text: 'SUM(column) OVER (ORDER BY date_column ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) computes a 7-day rolling sum — the sum of the current row plus the 6 rows before it, in date order. For a rolling 7-day DAU, use COUNT(DISTINCT user_id) as the inner metric and wrap it in the window. The frame clause (ROWS BETWEEN N PRECEDING AND CURRENT ROW) controls the rolling window size. Use ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW for a cumulative sum that grows from the beginning of the partition to the current row.' },
       { type: 'callout', label: 'When to use window functions vs GROUP BY', text: 'Use GROUP BY when the output should be one row per group (no row-level detail needed). Use window functions when you need both the aggregate value AND the individual row\'s data in the same result set. If you find yourself joining a GROUP BY subquery back to the original table to get row-level detail alongside an aggregate, replace the join with a window function — the query will be simpler and faster.' },
-      { type: 'cta', room: 'code', label: 'Practice window function queries in the Code Room →' },
+      { type: 'cta', room: 'code', label: 'Practice window function queries in Programming Lab →' },
     ],
   },
   {
@@ -1446,7 +1446,7 @@ const POSTS = [
     summary: 'Nulls, duplicates, grain mismatches, and timestamp anomalies. The checks that catch silent errors before they become wrong conclusions. A checklist with SQL patterns.',
     readMin: 4,
     room: 'code',
-    roomLabel: 'Code Room',
+    roomLabel: 'Programming Lab',
     content: [
       { type: 'text', text: 'Most analysis errors are not statistical — they are data quality errors. A null value treated as zero inflates denominators. A duplicated row from a fan-out join inflates counts. A timestamp stored in UTC interpreted as local time shifts your daily buckets by 5 to 8 hours. These errors produce numbers that look plausible and are completely wrong. The five dimensions of data quality — completeness, consistency, accuracy, timeliness, and uniqueness — each require a specific check before you touch any metric.' },
       { type: 'heading', text: 'The Five Checks You Run Before Anything Else' },
@@ -1455,7 +1455,7 @@ const POSTS = [
       { type: 'heading', text: 'The Fan-Out Join Problem' },
       { type: 'text', text: 'The most silent data quality error in SQL is a fan-out join: joining a table to another table where the join produces more rows than expected because the join key is not unique on one side. Joining the orders table to the reviews table on order_id, where one order can have multiple reviews, produces one row per review — not one row per order. Every user-level metric you compute from this joined table is inflated by the number of reviews per order. The check: after any join, verify that COUNT(*) in the result equals the expected number of rows at the intended grain. If it doesn\'t, you have a fan-out and need to aggregate before joining.' },
       { type: 'callout', label: 'The pre-analysis checklist', text: '1. Row count and date range — does the data cover the expected period?\n2. Null rates on all key columns — are the columns you plan to use sufficiently populated?\n3. Uniqueness at the expected grain — any duplicates at the primary key level?\n4. Distribution of numeric columns — any outliers that could distort means?\n5. After joins: verify row count at expected grain — did the join fan out?\n6. Timestamp timezone — are dates in UTC, local, or mixed? How do daily buckets behave at midnight?' },
-      { type: 'cta', room: 'code', label: 'Practice data quality checks in the Code Room →' },
+      { type: 'cta', room: 'code', label: 'Practice data quality checks in Programming Lab →' },
     ],
   },
   {
@@ -1465,7 +1465,7 @@ const POSTS = [
     summary: 'Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches errors when it breaks.',
     readMin: 5,
     room: 'code',
-    roomLabel: 'Code Room',
+    roomLabel: 'Programming Lab',
     content: [
       { type: 'text', text: 'Most product teams use an experimentation platform — Optimizely, Statsig, Eppo, or an internal tool — to compute A/B test results. These tools handle the statistics invisibly. Understanding what they\'re doing matters for two reasons: you can catch errors when the tool produces a suspicious result, and in interviews you\'ll be asked to compute results manually. The SQL pattern is straightforward: aggregate per variant, compute mean and variance per variant, apply the two-sample t-test formula.' },
       { type: 'heading', text: 'Step 1: The SRM Check First' },
@@ -1474,7 +1474,7 @@ const POSTS = [
       { type: 'heading', text: 'The Formula and What Each Part Does' },
       { type: 'text', text: 'The t-statistic formula is: t = (mean_T - mean_C) / sqrt(var_T/n_T + var_C/n_C). The numerator is the observed difference between groups. The denominator is the standard error — how much the observed difference could bounce around by chance given the sample sizes and variances. A large numerator relative to the denominator means the signal is strong relative to the noise. VAR_SAMP computes sample variance (divides by n-1 rather than n), which is the correct formula for statistical inference. The 95% confidence interval around the mean difference is: mean_diff ± 1.96 × standard_error.' },
       { type: 'callout', label: 'The binary metric version: CVR, not revenue', text: 'For binary metrics like conversion rate (0 or 1 per user), the variance formula simplifies. For a binary outcome with mean p, the sample variance is p × (1-p). So for checkout CVR:\nse = sqrt(p_T*(1-p_T)/n_T + p_C*(1-p_C)/n_C)\nt = (p_T - p_C) / se\n\nIn SQL: replace AVG(revenue) with AVG(converted::int) and VAR_SAMP(revenue) with AVG(converted::int) * (1 - AVG(converted::int)) — or just let VAR_SAMP handle it on the 0/1 column.' },
-      { type: 'cta', room: 'code', label: 'Practice A/B test SQL in the Code Room →' },
+      { type: 'cta', room: 'code', label: 'Practice A/B test SQL in Programming Lab →' },
     ],
   },
 

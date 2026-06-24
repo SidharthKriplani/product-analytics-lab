@@ -29,7 +29,7 @@ const ROOMS = [
   { key: 'rcaCases',                label: 'RCA',               page: 'rca',                idField: 'id', titleField: 'title' },
   { key: 'businessCases',           label: 'Cases',             page: 'cases',              idField: 'id', titleField: 'title' },
   { key: 'productDesignScenarios',  label: 'PM Design',         page: 'product-design',     idField: 'id', titleField: 'title' },
-  { key: 'codeModules',             label: 'Code',              page: 'code',               idField: 'id', titleField: 'title' },
+  { key: 'codeModules',             label: 'Programming Lab',   page: 'code',               idField: 'id', titleField: 'title' },
   { key: 'prioritizationScenarios', label: 'Prioritization',    page: 'prioritization',     idField: 'id', titleField: 'title' },
   { key: 'behavioralQuestions',     label: 'Behavioral',        page: 'behavioral',         idField: 'id', titleField: 'title' },
   { key: 'estimationProblems',      label: 'Estimation',        page: 'estimation',         idField: 'id', titleField: 'title' },
