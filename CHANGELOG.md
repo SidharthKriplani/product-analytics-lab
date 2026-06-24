@@ -4,6 +4,14 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.98.0] — 2026-06-25 [ANALYST UNIVERSE REBUILT AS A LOOP · SQL-LAB SPEC → PYLAB BLUEPRINT]
+
+**Analyst Universe rebuilt (`UniverseView.jsx`).** The old version was a lopsided spoke-star with a single random Build→Monitor arc and labels that collided (the broken y-only nudge moved opposite-side labels onto nodes). Replaced with an actual **loop**: 7 stages on one ring in workflow order (Monitor→Diagnose→Understand→Communicate→Design→Analyze→Build→back), the ring illuminating with overall progress (top, clockwise), clockwise flow chevrons, stage names placed radially with quadrant anchors (no collisions at 7 evenly-spaced nodes), overall % in the hub. Room mapping moved to the numbered list below the map (kept the SVG clean) + hover tooltips. Mobile = ordered numbered list. Same data wiring (`computeArmProgress`, click-to-room). Intended to become PAL's Layer-2 "door" (relocation out of Progress still pending). Build 895 ✓.
+
+**SQL Lab spec is now the PyLab clone blueprint (`docs/SQL-LAB-SPEC.md`).** Brought current — added the Easy-tier scaffolding ramp (§9A) and the beginner level (§9B, `SqlLabBeginnerPage.jsx` + `sqlBeginnerLessons.js`), updated the file map — and added **§13 "Cloning to PyLab"**: a full SQL→Python mapping (sql.js→Pyodide, datamarts→fixtures, row/column check→DataFrame/return-value compare, Forensic→Trap Museum, judgment layer→method dial, the ramp + beginner level + both quality gates) so PyLab can mirror it feature-for-feature.
+
+**Strategy logged** to `HQ/DECISIONS.md` as **D-25** (3-layer architecture + ungate-to-community pivot + open decisions D1–D4). HQ is disk-only (not in this repo).
+
 ## [5.97.0] — 2026-06-25 [RÉSUMÉ + DEFENSE STRATEGY ARCHIVED]
 
 **Both features parked (code kept, fully reversible) per product call to not pursue résumé or Defense Strategy for now.**

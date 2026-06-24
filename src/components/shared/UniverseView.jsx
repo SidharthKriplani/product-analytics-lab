@@ -1,9 +1,11 @@
 // UniverseView.jsx
-// The Analyst Universe — star map showing the interconnected workflow of a product analyst.
-// 7 arms correspond to the real BA/PM job loop:
-//   Monitor → Diagnose → Understand → Communicate → Design → Analyze → Build
-// Arms illuminate based on progress in their rooms (from Progress.jsx allRoomProgress).
-// V2: animated arms on load, glow effects, hover tooltips, loop arc, clickable navigation.
+// The Analyst Universe — a workflow LOOP map of a product analyst's job.
+// 7 stages around ONE ring, in order:
+//   Monitor → Diagnose → Understand → Communicate → Design → Analyze → Build → (back to Monitor)
+// Each stage node fills with progress in its rooms; the ring itself illuminates
+// with overall progress, and clockwise chevrons make it read as one continuous
+// loop (not separate subjects). Clicking a stage jumps to its room. Mobile falls
+// back to an ordered list.
 
 import { useState } from 'react';
 
@@ -69,80 +71,18 @@ const ARM_DEFS = [
 const ARM_COUNT = ARM_DEFS.length;
 const CX = 260;
 const CY = 260;
-const ARM_LENGTH = 155;
-const INNER_NODE_R = 4;
-const OUTER_NODE_R = 7;
-const CENTER_R = 28;
+const R_RING = 150;   // node ring radius (the loop itself)
+const NODE_R = 9;     // stage node radius
+const CENTER_R = 34;  // center hub radius
 
 function toRad(deg) { return (deg * Math.PI) / 180; }
 
-function armAngle(idx) {
-  // Start from -90deg (top), go clockwise
-  return -90 + (idx * 360) / ARM_COUNT;
-}
+// Stage 0 sits at top (-90°); stages run clockwise around the ring.
+function stageAngle(idx) { return -90 + (idx * 360) / ARM_COUNT; }
 
-function armEndpoint(idx, fraction) {
-  const a = toRad(armAngle(idx));
-  return {
-    x: CX + ARM_LENGTH * fraction * Math.cos(a),
-    y: CY + ARM_LENGTH * fraction * Math.cos(a - Math.PI / 2) * -1,
-  };
-  // simplified:
-}
-
-function pt(idx, fraction) {
-  const a = toRad(armAngle(idx));
-  return {
-    x: CX + ARM_LENGTH * fraction * Math.cos(a),
-    y: CY + ARM_LENGTH * fraction * Math.sin(a),
-  };
-}
-
-function labelPt(idx) {
-  const a = toRad(armAngle(idx));
-  const dist = ARM_LENGTH + 32;
-  return {
-    x: CX + dist * Math.cos(a),
-    y: CY + dist * Math.sin(a),
-  };
-}
-
-function sublabelPt(idx) {
-  const a = toRad(armAngle(idx));
-  const dist = ARM_LENGTH + 46;
-  return {
-    x: CX + dist * Math.cos(a),
-    y: CY + dist * Math.sin(a),
-  };
-}
-
-// Collision avoidance: nudge labels that would overlap vertically
-function adjustedLabelPositions(arms) {
-  const MIN_GAP = 22;
-  const positions = arms.map((arm, idx) => {
-    const lp = labelPt(idx);
-    const sp = sublabelPt(idx);
-    const angle = armAngle(idx);
-    const textAnchor = Math.cos(toRad(angle)) > 0.3 ? 'start'
-      : Math.cos(toRad(angle)) < -0.3 ? 'end'
-      : 'middle';
-    return { idx, lp: { ...lp }, sp: { ...sp }, textAnchor, angle };
-  });
-  // Sort by y to detect vertical collisions, then nudge apart
-  const sorted = [...positions].sort((a, b) => a.lp.y - b.lp.y);
-  for (let i = 1; i < sorted.length; i++) {
-    const prev = sorted[i - 1];
-    const curr = sorted[i];
-    const gap = curr.lp.y - prev.lp.y;
-    if (gap < MIN_GAP) {
-      const shift = (MIN_GAP - gap) / 2;
-      prev.lp.y -= shift;
-      prev.sp.y -= shift;
-      curr.lp.y += shift;
-      curr.sp.y += shift;
-    }
-  }
-  return positions;
+function ringPt(idx, r = R_RING) {
+  const a = toRad(stageAngle(idx));
+  return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
 }
 
 function computeArmProgress(arm, allRoomProgress) {
@@ -157,18 +97,16 @@ function computeArmProgress(arm, allRoomProgress) {
 
 export function UniverseView({ allRoomProgress, onArmClick }) {
   const [hoveredArm, setHoveredArm] = useState(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
+  const [isMobile] = useState(window.innerWidth < 600);
 
   const arms = ARM_DEFS.map((arm, idx) => ({
     ...arm,
     idx,
     progress: computeArmProgress(arm, allRoomProgress),
-    angle: armAngle(idx),
   }));
 
   const totalProgress = arms.reduce((s, a) => s + a.progress, 0) / arms.length;
 
-  // Handle arm clicks for navigation
   const handleArmClick = (armId) => {
     const roomMap = {
       monitor: 'metrics',
@@ -179,13 +117,11 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
       analyze: 'review',
       build: 'sql-lab',
     };
-    if (onArmClick) {
-      onArmClick(roomMap[armId]);
-    }
+    if (onArmClick) onArmClick(roomMap[armId]);
   };
 
+  // ─── Mobile fallback — ordered list ───────────────────────────────────────
   if (isMobile) {
-    // Mobile fallback — list layout
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', width: '100%' }}>
         <div style={{ textAlign: 'center' }}>
@@ -193,39 +129,27 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
             Analyst Universe
           </div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', maxWidth: '460px', lineHeight: 1.55 }}>
-            Every arm is a step in the real analyst workflow — from monitoring your metrics to building the fix. They are not separate subjects. They are one loop.
+            Seven stages of the analyst's job, in order — one continuous loop, not separate subjects.
           </div>
         </div>
 
-        {/* Mobile list layout */}
         <div style={{ width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          {arms.map(arm => (
+          {arms.map((arm, i) => (
             <div
               key={arm.id}
               onClick={() => handleArmClick(arm.id)}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.75rem 1rem',
-                background: 'var(--surface)',
-                border: `1px solid var(--border)`,
-                borderRadius: 'var(--radius)',
-                cursor: 'pointer',
-                transition: 'all var(--transition)',
+                display: 'flex', alignItems: 'center', gap: '0.75rem',
+                padding: '0.75rem 1rem', background: 'var(--surface)',
+                border: '1px solid var(--border)', borderRadius: 'var(--radius)',
+                cursor: 'pointer', transition: 'all var(--transition)',
               }}
-              onMouseEnter={() => setHoveredArm(arm.id)}
-              onMouseLeave={() => setHoveredArm(null)}
             >
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-dim)', width: '16px', flexShrink: 0 }}>{i + 1}</div>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: arm.progress > 0 ? arm.color : 'var(--border)', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text)' }}>{arm.label}</div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{arm.sublabel}</div>
-                {arm.id === 'monitor' && arm.progress === 0 && (
-                  <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--accent)', marginTop: '0.15rem' }}>
-                    {'Start here →'}
-                  </div>
-                )}
               </div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                 {Math.round(arm.progress * 100)}%
@@ -234,7 +158,6 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
           ))}
         </div>
 
-        {/* Workflow narrative */}
         <div style={{
           width: '100%', maxWidth: '480px',
           background: 'var(--surface)', border: '1px solid var(--border)',
@@ -254,307 +177,142 @@ export function UniverseView({ allRoomProgress, onArmClick }) {
     );
   }
 
+  // ─── Desktop — the loop ────────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
 
-      {/* Universe label */}
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>
           Analyst Universe
         </div>
         <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', maxWidth: '460px', lineHeight: 1.55 }}>
-          Every arm is a step in the real analyst workflow — from monitoring your metrics to building the fix. They are not separate subjects. They are one loop.
+          The seven stages of the analyst's job, arranged as one loop. Your progress lights up the ring — these are not separate subjects.
         </div>
       </div>
 
-      {/* SVG star map */}
-      <div style={{ width: '100%', maxWidth: '520px' }}>
-        <svg
-          viewBox="0 0 520 520"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ width: '100%', height: 'auto', overflow: 'visible' }}
-        >
-          {/* Filter defs for glow */}
+      <div style={{ width: '100%', maxWidth: '440px' }}>
+        <svg viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
           <defs>
-            <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-              <feMerge>
-                <feMergeNode in="coloredBlur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-            <filter id="arcGlow" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="1.5" result="coloredBlur" />
-              <feMerge>
-                <feMergeNode in="coloredBlur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
+            <filter id="nodeGlow" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="3" result="b" />
+              <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
           </defs>
-          {/* Background dim lines (full arm length) */}
+
+          {/* faint spokes from hub to each stage */}
           {arms.map(arm => {
-            const outer = pt(arm.idx, 1);
-            return (
-              <line
-                key={'bg-' + arm.id}
-                x1={CX} y1={CY}
-                x2={outer.x} y2={outer.y}
-                stroke={arm.color}
-                strokeWidth="1.5"
-                opacity="0.12"
-              />
-            );
+            const n = ringPt(arm.idx);
+            return <line key={'spoke-' + arm.id} x1={CX} y1={CY} x2={n.x} y2={n.y} stroke="var(--border)" strokeWidth="1" opacity="0.3" />;
           })}
 
-          {/* Loop arc connecting Build back to Monitor — subtle curved line around back */}
-          {(() => {
-            const buildOuter = pt(6, 1);
-            const monitorOuter = pt(0, 1);
-            const arcProgress = totalProgress > 0 ? Math.min(totalProgress, 1) : 0;
-            // Quadratic bezier curve going around the back, with control point offset
-            const controlX = CX - 100;
-            const controlY = CY - 40;
-            const pathData = `M ${buildOuter.x} ${buildOuter.y} Q ${controlX} ${controlY} ${monitorOuter.x} ${monitorOuter.y}`;
+          {/* the loop track */}
+          <circle cx={CX} cy={CY} r={R_RING} fill="none" stroke="var(--border)" strokeWidth="2" opacity="0.55" />
 
-            return (
-              <g key="loop-arc">
-                {/* Background arc (always visible, dim) */}
-                <path
-                  d={pathData}
-                  fill="none"
-                  stroke="var(--accent)"
-                  strokeWidth="1.5"
-                  opacity="0.12"
-                />
-                {/* Illuminated arc (grows with progress) */}
-                {arcProgress > 0 && (
-                  <path
-                    d={pathData}
-                    fill="none"
-                    stroke="var(--accent)"
-                    strokeWidth="2.5"
-                    opacity={0.6 + arcProgress * 0.2}
-                    strokeDasharray="300"
-                    strokeDashoffset={300 * (1 - arcProgress)}
-                    filter="url(#arcGlow)"
-                    className="pal-loop-draw"
-                    style={{ animation: 'palLoopDraw 1.2s ease-out both' }}
-                  />
-                )}
-              </g>
-            );
-          })()}
-
-          {/* Progress lines (illuminated + animated draw) + 0% stubs */}
-          {arms.map(arm => {
-            const isZero = arm.progress === 0;
-            const fraction = isZero ? 0.04 : Math.max(0.08, arm.progress);
-            const lit = pt(arm.idx, fraction);
-            const delay = (arm.idx * 70) + 'ms';
-            const lineLen = ARM_LENGTH * fraction;
-            return (
-              <g
-                key={'lit-' + arm.id}
-                onClick={() => handleArmClick(arm.id)}
-                style={{ cursor: 'pointer' }}
-              >
-                <line
-                  x1={CX} y1={CY}
-                  x2={lit.x} y2={lit.y}
-                  stroke={arm.color}
-                  strokeWidth={isZero ? '2' : '2.5'}
-                  opacity={isZero ? 0.3 : (hoveredArm === arm.id ? 1 : 0.85)}
-                  strokeLinecap="round"
-                  strokeDasharray={lineLen + ' ' + lineLen}
-                  strokeDashoffset="0"
-                  className="pal-arm-draw"
-                  style={{ animation: 'palArmDraw 0.55s ease-out both', animationDelay: delay, transition: 'opacity var(--transition)' }}
-                />
-              </g>
-            );
-          })}
-
-          {/* Inner foundation checkpoint nodes */}
-          {arms.map(arm => {
-            const inner = pt(arm.idx, 0.42);
-            const done = arm.progress >= 0.2;
-            const delay = (arm.idx * 70 + 300) + 'ms';
-            return (
-              <g
-                key={'inner-' + arm.id}
-                onMouseEnter={() => setHoveredArm(arm.id)}
-                onMouseLeave={() => setHoveredArm(null)}
-                onClick={() => handleArmClick(arm.id)}
-                style={{ cursor: 'pointer' }}
-              >
-                <circle
-                  cx={inner.x}
-                  cy={inner.y}
-                  r={INNER_NODE_R}
-                  fill={done ? arm.color : 'var(--bg)'}
-                  stroke={arm.color}
-                  strokeWidth="1.5"
-                  opacity={hoveredArm === arm.id && done ? 1 : (done ? 0.9 : 0.3)}
-                  className="pal-node-appear"
-                  filter={hoveredArm === arm.id && done ? 'url(#nodeGlow)' : undefined}
-                  style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay, transition: 'opacity var(--transition), filter var(--transition)' }}
-                />
-                <title>
-                  {arm.label}: {Math.round(arm.progress * 100)}% complete
-                  {hoveredArm === arm.id && arm.rooms && arm.rooms.length > 0 ? '\n' + arm.rooms.map(r => {
-                    const roomProgress = allRoomProgress.find(x => x.label === r);
-                    return roomProgress ? `${r}: ${roomProgress.completed}/${roomProgress.total}` : r;
-                  }).join('\n') : ''}
-                </title>
-              </g>
-            );
-          })}
-
-          {/* Outer endpoint nodes */}
-          {arms.map(arm => {
-            const outer = pt(arm.idx, 1);
-            const done = arm.progress >= 0.75;
-            const started = arm.progress > 0;
-            const delay = (arm.idx * 70 + 400) + 'ms';
-            return (
-              <g
-                key={'outer-' + arm.id}
-                onMouseEnter={() => setHoveredArm(arm.id)}
-                onMouseLeave={() => setHoveredArm(null)}
-                onClick={() => handleArmClick(arm.id)}
-                style={{ cursor: 'pointer' }}
-              >
-                <circle
-                  cx={outer.x}
-                  cy={outer.y}
-                  r={OUTER_NODE_R}
-                  fill={done ? arm.color : 'var(--bg)'}
-                  stroke={arm.color}
-                  strokeWidth={started ? '2' : '1.5'}
-                  opacity={hoveredArm === arm.id && started ? (done ? 1 : 0.8) : (started ? 1 : 0.25)}
-                  className="pal-node-appear"
-                  filter={hoveredArm === arm.id && started ? 'url(#nodeGlow)' : undefined}
-                  style={{ animation: 'palNodeAppear 0.3s ease-out both', animationDelay: delay, transition: 'opacity var(--transition), filter var(--transition)' }}
-                />
-                <title>
-                  {arm.label}: {Math.round(arm.progress * 100)}% complete
-                  {hoveredArm === arm.id && arm.rooms && arm.rooms.length > 0 ? '\n' + arm.rooms.map(r => {
-                    const roomProgress = allRoomProgress.find(x => x.label === r);
-                    return roomProgress ? `${r}: ${roomProgress.completed}/${roomProgress.total}` : r;
-                  }).join('\n') : ''}
-                </title>
-              </g>
-            );
-          })}
-
-          {/* Arm labels (collision-adjusted) */}
-          {adjustedLabelPositions(arms).map(pos => {
-            const arm = arms[pos.idx];
-            return (
-              <g key={'label-' + arm.id}>
-                <text
-                  x={pos.lp.x}
-                  y={pos.lp.y}
-                  textAnchor={pos.textAnchor}
-                  dominantBaseline="middle"
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    fill: arm.progress > 0 ? arm.color : 'var(--text-dim)',
-                    fontFamily: 'inherit',
-                    opacity: arm.progress > 0 ? 1 : 0.5,
-                  }}
-                >
-                  {arm.label}
-                </text>
-                <text
-                  x={pos.sp.x}
-                  y={pos.sp.y}
-                  textAnchor={pos.textAnchor}
-                  dominantBaseline="middle"
-                  style={{
-                    fontSize: '8.5px',
-                    fill: 'var(--text-dim)',
-                    fontFamily: 'inherit',
-                    opacity: 0.65,
-                  }}
-                >
-                  {arm.sublabel}
-                </text>
-                {arm.id === 'monitor' && arm.progress === 0 && (
-                  <text
-                    x={pos.sp.x}
-                    y={pos.sp.y + 14}
-                    textAnchor={pos.textAnchor}
-                    dominantBaseline="middle"
-                    style={{
-                      fontSize: '8px',
-                      fontWeight: 600,
-                      fill: 'var(--accent)',
-                      fontFamily: 'inherit',
-                    }}
-                  >
-                    {'Start here →'}
-                  </text>
-                )}
-              </g>
-            );
-          })}
-
-          {/* Center circle */}
-          <circle
-            cx={CX} cy={CY} r={CENTER_R}
-            fill="var(--surface)"
-            stroke="var(--border)"
-            strokeWidth="1.5"
-          />
-          {/* Center progress ring */}
+          {/* overall progress illuminated around the loop (starts at top, clockwise) */}
           {totalProgress > 0 && (() => {
-            const circ = 2 * Math.PI * CENTER_R;
-            const filled = totalProgress * circ;
-            const gap = circ - filled;
+            const C = 2 * Math.PI * R_RING;
             return (
               <circle
-                cx={CX} cy={CY}
-                r={CENTER_R}
-                fill="none"
-                stroke="var(--accent)"
-                strokeWidth="2.5"
-                strokeDasharray={filled + ' ' + gap}
-                strokeDashoffset={circ * 0.25}
-                opacity="0.6"
+                cx={CX} cy={CY} r={R_RING} fill="none"
+                stroke="var(--accent)" strokeWidth="3" strokeLinecap="round"
+                strokeDasharray={(C * totalProgress) + ' ' + C}
+                transform={'rotate(-90 ' + CX + ' ' + CY + ')'}
+                opacity="0.7"
               />
             );
           })()}
-          <text
-            x={CX} y={CY - 5}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            style={{ fontSize: '9px', fontWeight: 700, fill: 'var(--text-muted)', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '0.05em' }}
-          >
-            Product
+
+          {/* clockwise flow chevrons between stages */}
+          {arms.map(arm => {
+            const mid = stageAngle(arm.idx) + (360 / ARM_COUNT) / 2;
+            const p = { x: CX + R_RING * Math.cos(toRad(mid)), y: CY + R_RING * Math.sin(toRad(mid)) };
+            return (
+              <path
+                key={'chev-' + arm.id}
+                d="M -3 -4 L 3 0 L -3 4" fill="none"
+                stroke="var(--text-dim)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                opacity="0.5"
+                transform={'translate(' + p.x + ' ' + p.y + ') rotate(' + (mid + 90) + ')'}
+              />
+            );
+          })}
+
+          {/* stage nodes */}
+          {arms.map(arm => {
+            const n = ringPt(arm.idx);
+            const started = arm.progress > 0;
+            const delay = (arm.idx * 70) + 'ms';
+            return (
+              <g
+                key={'node-' + arm.id}
+                onClick={() => handleArmClick(arm.id)}
+                onMouseEnter={() => setHoveredArm(arm.id)}
+                onMouseLeave={() => setHoveredArm(null)}
+                style={{ cursor: 'pointer' }}
+              >
+                <circle
+                  cx={n.x} cy={n.y} r={NODE_R}
+                  fill={started ? arm.color : 'var(--surface)'}
+                  fillOpacity={started ? (0.3 + arm.progress * 0.7) : 1}
+                  stroke={arm.color}
+                  strokeWidth={hoveredArm === arm.id ? 2.5 : 2}
+                  opacity={started ? 1 : 0.45}
+                  filter={hoveredArm === arm.id ? 'url(#nodeGlow)' : undefined}
+                  style={{ animation: 'palNodeAppear 0.35s ease-out both', animationDelay: delay, transition: 'stroke-width var(--transition), opacity var(--transition)' }}
+                />
+                <title>
+                  {arm.label}: {Math.round(arm.progress * 100)}%
+                  {'\n' + arm.rooms.map(r => {
+                    const rp = allRoomProgress.find(x => x.label === r);
+                    return rp ? (r + ': ' + rp.completed + '/' + rp.total) : r;
+                  }).join('\n')}
+                </title>
+              </g>
+            );
+          })}
+
+          {/* stage names — radial, anchored by quadrant (no collisions at 7 evenly-spaced nodes) */}
+          {arms.map(arm => {
+            const a = stageAngle(arm.idx);
+            const c = Math.cos(toRad(a));
+            const lx = CX + (R_RING + 26) * c;
+            const ly = CY + (R_RING + 26) * Math.sin(toRad(a));
+            const anchor = c > 0.25 ? 'start' : c < -0.25 ? 'end' : 'middle';
+            const started = arm.progress > 0;
+            return (
+              <text
+                key={'label-' + arm.id}
+                x={lx} y={ly} textAnchor={anchor} dominantBaseline="middle"
+                style={{ fontSize: '12px', fontWeight: 700, fill: started ? arm.color : 'var(--text-dim)', fontFamily: 'inherit', opacity: started ? 1 : 0.65, pointerEvents: 'none' }}
+              >
+                {arm.label}
+              </text>
+            );
+          })}
+
+          {/* center hub — overall % */}
+          <circle cx={CX} cy={CY} r={CENTER_R} fill="var(--surface)" stroke="var(--border)" strokeWidth="1.5" />
+          <text x={CX} y={CY - 5} textAnchor="middle" dominantBaseline="middle" style={{ fontSize: '17px', fontWeight: 800, fill: 'var(--text)', fontFamily: 'inherit' }}>
+            {Math.round(totalProgress * 100)}%
           </text>
-          <text
-            x={CX} y={CY + 7}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            style={{ fontSize: '9px', fontWeight: 700, fill: 'var(--text-muted)', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '0.05em' }}
-          >
-            Analyst
+          <text x={CX} y={CY + 12} textAnchor="middle" dominantBaseline="middle" style={{ fontSize: '7px', fontWeight: 700, fill: 'var(--text-muted)', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '0.09em' }}>
+            The loop
           </text>
         </svg>
       </div>
 
-      {/* Arm progress list */}
-      <div style={{ width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-        {arms.map(arm => (
-          <div key={arm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      {/* Stage list — carries the room mapping the map keeps clean */}
+      <div style={{ width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        {arms.map((arm, i) => (
+          <div key={arm.id} onClick={() => handleArmClick(arm.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-dim)', width: '14px', flexShrink: 0 }}>{i + 1}</div>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: arm.progress > 0 ? arm.color : 'var(--border)', flexShrink: 0 }} />
-            <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text)', width: '90px', flexShrink: 0 }}>
-              {arm.label}
+            <div style={{ width: '170px', flexShrink: 0 }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text)' }}>{arm.label}</div>
+              <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)' }}>{arm.sublabel}</div>
             </div>
             <div style={{ flex: 1, height: '4px', background: 'var(--border)', borderRadius: '999px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.round(arm.progress * 100)}%`, background: arm.color, borderRadius: '999px', transition: 'width 0.4s ease' }} />
+              <div style={{ height: '100%', width: Math.round(arm.progress * 100) + '%', background: arm.color, borderRadius: '999px', transition: 'width 0.4s ease' }} />
             </div>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', width: '32px', textAlign: 'right', flexShrink: 0 }}>
               {Math.round(arm.progress * 100)}%

@@ -1,6 +1,8 @@
 # SQL LAB — Full Specification
 
-_Created 2026-06-24. The master spec for PAL's SQL Lab: what it is, how it works, its data model, formats, quality system, and how to extend it. Written so someone could understand — or re-implement — SQL Lab end to end. Cross-links the deeper docs at the bottom; this is the index._
+_Created 2026-06-24. Last updated 2026-06-25. The master spec for PAL's SQL Lab: what it is, how it works, its data model, formats, scaffolding ramp, beginner level, quality system, and how to extend it. Written so someone could understand — or re-implement — SQL Lab end to end._
+
+**This doc is also the portable blueprint for PyLab (in the Programming Lab).** SQL Lab and PyLab are the shared **Layer-3 "Code" tooling** of BreakLabs (any single lab subscription unlocks both — see HQ/DECISIONS D-25). The intent is that PyLab mirrors SQL Lab's structure feature-for-feature, swapping the SQL engine for Python. §13 maps every SQL Lab piece to its Python equivalent._
 
 ---
 
@@ -16,6 +18,8 @@ SQL Lab is an in-browser SQL practice environment inside Product Analytics Lab. 
 - **3 formats** — Standard (~141, `format` absent/`'query'`), **Forensic** (36, `format: 'forensic'`), and the **Judgment layer** authored on 106 problems (additive, any tier).
 - **13 datamarts** — ecomm, saas, fintech, consumer, health, gaming, logistics, marketplace, food_delivery, social_network, edtech, hr_analytics, swiggy. "Wider not longer": many schemas so users can't memorize one table layout.
 - **18/18 benchmark categories covered** (see `SQL-COVERAGE-REPORT.md`).
+- **Plus a separate beginner level** — ~18 sequential, isolated SQLBolt-style lessons on a simple movies datamart (§9B).
+- **Plus an Easy-tier scaffolding ramp** — the first 15 Easy problems fade their training wheels over 3 batches (§9A).
 
 ## 3. Architecture
 
@@ -94,18 +98,41 @@ The bank currently passes both gates with **0 failures**.
 - **Filters:** difficulty chips, company filter (incl. `alsoAskedAt`), status, search.
 - **Share** button produces a deep link to the current problem.
 
+## 9A. The Easy-tier scaffolding ramp (training wheels)
+
+The first **15 Easy problems** (by `difficulty === 'Easy'`, in source order — NOT by id prefix) fade their scaffolding over **3 batches of 5**. The thing that fades is **how much schema help** you're handed; the deliverable bullets ride along through batches 1 and 2. All of it is **pure presentation, derived at render time** — nothing is stored on the problem.
+
+| Batch | Problems | Bullets (deliverable) | Schema shown |
+|---|---|---|---|
+| **1/3 — Full scaffolding** | Easy #1–5 | ✅ one bullet per output column ("For each matching row, return: …") + order + row count | **Only the tables the solution uses** |
+| **2/3 — Find the tables** | Easy #6–10 | ✅ same bullets | **All tables** (learner figures out which are needed) |
+| **3/3 — On your own** | Easy #11–15 | ❌ none | All tables, normal collapsible accordion — identical to the other ~180 problems |
+
+Mechanics (`SqlLabPage.jsx`): `easyRampStage(problem)` returns 1/2/3/0; `deriveRequirements(problem)` builds the bullets from `expectedColumns` / `expectedRowCount` / the sort phrase parsed out of `prompt`; `solutionTables(problem, dm)` derives batch-1's relevant tables by whole-word-matching each datamart table name against the problem's stored `solution` SQL (so it stays correct even if a solution changes — no per-problem table list to maintain). A small "Training wheels N/3" marker signals the rung. **The bullets-as-separate-lines was a deliberate fix** — a single comma-list ("Output 3 columns: a, b, c") is the exact line beginners misread.
+
+## 9B. The beginner level (sequential, isolated)
+
+A separate, **SQLBolt-style** on-ramp for people who don't know SQL yet — distinct from the judgment-first main bank.
+
+- **Sequential + isolated:** ~18 lessons done in order; when the beginner level is on, the main bank's levels aren't shown (no choice paralysis). Gentle entry; a learner can self-rate as a beginner or unlock from a short diagnostic.
+- **Single simple datamart (movies):** one easy-to-hold schema so attention is on the SQL concept, not the schema. Lessons ramp one concept at a time (SELECT → WHERE → ORDER BY → aggregates → GROUP BY → joins …), single-table first, gradually widening.
+- **Same live engine** (sql.js) and run/check loop as the main lab.
+- **Files:** `src/pages/SqlLabBeginnerPage.jsx` (the sequential runner + gating/isolation/entry) and `src/data/sqlBeginnerLessons.js` (the lesson content). The movies tables live in `sqlLabDatamarts.js`.
+
 ## 10. File map
 
 ```
-src/data/sqlLabProblems.js      — the 192 problems (the bank)
-src/data/sqlLabDatamarts.js     — 13 datamarts (schemas + seed rows)
-src/pages/SqlLabPage.jsx        — the page: browser list + runner + DB build + run/check
+src/data/sqlLabProblems.js          — the 192 problems (the bank)
+src/data/sqlLabDatamarts.js         — 13 datamarts + the beginner movies datamart (schemas + seed rows)
+src/data/sqlBeginnerLessons.js      — the ~18 sequential beginner lessons
+src/pages/SqlLabPage.jsx            — the page: browser list + runner + DB build + run/check + Easy-tier ramp (§9A)
+src/pages/SqlLabBeginnerPage.jsx    — the beginner level: sequential runner + gating/isolation/entry (§9B)
 src/components/shared/SqlEditor.jsx — CodeMirror editor wrapper
-public/sql-wasm.wasm            — the SQLite WASM engine
-scripts/audit_sql_lab.py        — mechanical gate (Tier-1)
-scripts/sql_content_scan.mjs    — content gate (exits non-zero on GATE fail)
-scripts/run_sql.py              — author/verify helper (run any query on a datamart)
-scripts/apply_patch.mjs         — bulk content patch integrator
+public/sql-wasm.wasm                — the SQLite WASM engine
+scripts/audit_sql_lab.py            — mechanical gate (Tier-1)
+scripts/sql_content_scan.mjs        — content gate (exits non-zero on GATE fail)
+scripts/run_sql.py                  — author/verify helper (run any query on a datamart)
+scripts/apply_patch.mjs             — bulk content patch integrator
 ```
 
 ## 11. How to add a problem (checklist)
@@ -132,3 +159,31 @@ scripts/apply_patch.mjs         — bulk content patch integrator
 | `SQL_LAB_PLAN.md` | build history: problem-count decisions, difficulty rubric origins, session log |
 
 _This spec is the entry point; the table above is the rest of the map._
+
+---
+
+## 13. Cloning to PyLab — the portable blueprint
+
+PyLab (in the Programming Lab) should be the same machine with Python swapped in for SQL. The thesis, the run/check loop, the debrief, the formats, the scaffolding ramp, the beginner level, and the two-gate quality system all port directly. What changes is the **engine** and the **answer-comparison**.
+
+**What maps to what:**
+
+| SQL Lab | PyLab equivalent |
+|---|---|
+| `sql.js` (SQLite WASM) in the browser | **Pyodide** (CPython WASM) in the browser — PL already runs it |
+| Datamart = `CREATE TABLE` + seed rows | **Fixtures** — seed DataFrames / input objects defined per problem (or a shared module imported into the cell) |
+| `solution` = canonical SQL | `solution` = canonical Python (the source of truth for expected output) |
+| Check = row count + `expectedColumns` + `checkValues` positional match | Check = compare the function's **return value / printed output / resulting DataFrame** to the solution's, with type-aware equality (DataFrame equals, set/df tolerance, float epsilon) |
+| **Forensic** = a query that runs but returns a plausible wrong answer; user fixes it | **Forensic** = Python that runs but is subtly wrong (off-by-one, mutation-in-loop, `SettingWithCopy`, wrong axis, dtype coercion) — PL's "Trap Museum" is exactly this |
+| **Judgment layer** = `methods[]` / `dial` / `mcqs` (window vs correlated vs self-join…) | **Methods** = vectorized vs apply vs loop vs comprehension; `dial` = which under what data size / readability / memory; **PL already built this** (method dial + traps + follow-up chains) |
+| **Easy-tier scaffolding ramp** (§9A): bullets fade, schema (=tables) fades | Same ramp: bullets fade; the **fixtures/columns shown** fade relevant→all→all. Derive "relevant inputs" from the solution the same way `solutionTables` does. |
+| **Beginner level** (§9B): sequential movies datamart, single-table → wider | Sequential beginner Python track: one tiny fixture, one concept per lesson (variables → lists → dict → comprehension → pandas Series → DataFrame …) |
+| CodeMirror SQL editor (schema-only autocomplete) | CodeMirror **Python** mode (symbol-only autocomplete from the fixture names) |
+| Mechanical gate `audit_sql_lab.py` (every solution runs, output matches) | Run every `solution` under Pyodide/CPython in CI; assert it executes and the checker passes; assert each Forensic/trap actually runs + diverges |
+| Content gate `sql_content_scan.mjs` (no technique-naming, no filler, hints scaffold, debrief teaches a wrong-answer-that-runs) | Same deterministic content gate over Python prompts/debriefs |
+| `SQL-DIFFICULTY-RUBRIC.md` (tier = MAX(mechanical, conceptual)) | A parallel Python difficulty rubric (e.g. one transform = Easy; groupby+merge = Medium; multi-step pipeline / time-series / custom agg = Hard) |
+| Data-file syntax rules (single quotes, escape `\'`, no backticks) | Same JS-data-file rules apply to the Python **problem metadata** files (the Python source itself lives in normal strings) |
+
+**What ports unchanged:** the thesis (practice judgment, not recall — teach the wrong-answer-that-runs), the run-vs-check split, the executed-from-real-output debrief discipline, the "wider not longer" fixture philosophy (many small fixtures so users can't memorize one), deep-link routing, progress/heatmap rollup, and the two-gate "0 failures before commit" bar.
+
+**Build order for PyLab to match SQL Lab:** (1) engine + run/check loop on one fixture; (2) the problem schema + a handful of Standard problems gated by both gates; (3) Forensic/trap format; (4) the judgment layer (PL has this); (5) the Easy-tier ramp; (6) the beginner level. Then it is "the same way."
