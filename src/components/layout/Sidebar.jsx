@@ -96,11 +96,15 @@ const NAV_FRAMES = [
 
 // EXTRAS — quiet bottom catch-all (not a frame). Parked / leftover surfaces.
 const EXTRAS_ITEMS = [
-  { id: 'behavioral', label: 'Behavioral' },
-  { id: 'bookmarks',  label: 'Saved' },
-  { id: 'study',      label: 'Study Room' },
-  { id: 'about',      label: 'About' },
+  { id: 'behavioral',  label: 'Behavioral' },
+  { id: 'bookmarks',   label: 'Saved' },
+  { id: 'study',       label: 'Study Room' },
+  { id: 'leaderboard', label: 'Leaderboard' },
+  { id: 'about',       label: 'About' },
 ];
+
+// External community (WhatsApp) — opens in a new tab, not an in-app page.
+const COMMUNITY_URL = 'https://chat.whatsapp.com/JbIaqV87fwh8Ym3ufH5CFx?mode=gi_t';
 
 // ─── Derived active-state (replaces the old 40-line getIsActive ||-chain) ───
 // A runner sub-page maps back to its base tab id. Most strip the '-runner' suffix;
@@ -522,6 +526,22 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
             {EXTRAS_ITEMS.map(item => (
               <NavItem key={item.id} id={item.id} label={item.label} currentPage={currentPage} onNav={handleNav} />
             ))}
+            <a
+              href={COMMUNITY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.45rem',
+                width: '100%', boxSizing: 'border-box',
+                padding: '0.34rem 0.65rem', borderRadius: 'var(--radius-sm)',
+                color: 'var(--text-muted)', fontSize: '0.825rem', fontWeight: 400,
+                textDecoration: 'none', cursor: 'pointer', lineHeight: 1.5, letterSpacing: '-0.005em',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+            >
+              <span>Community ↗</span>
+            </a>
           </div>
 
         </nav>

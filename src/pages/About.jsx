@@ -155,6 +155,15 @@ Deployed on Vercel. Works offline once loaded. Free to use with access code; ful
               borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none',
             }}
           >Connect on LinkedIn</a>
+          <a
+            href="https://chat.whatsapp.com/JbIaqV87fwh8Ym3ufH5CFx?mode=gi_t"
+            target="_blank" rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex', alignItems: 'center', padding: '0.5rem 1rem',
+              background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)',
+              borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none',
+            }}
+          >Join the community</a>
         </div>
         <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: '0.9rem 0 0' }}>
           sidharthkriplani@gmail.com · linkedin.com/in/sidharth-kriplani

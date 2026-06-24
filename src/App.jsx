@@ -7,6 +7,7 @@ import { track } from './utils/analytics.js';
 import { stateToHash, parseHash } from './utils/hashRouting.js';
 import { onAuthStateChange } from './utils/auth.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from './utils/syncProgress.js';
+import { upsertLeaderboardRow } from './utils/leaderboard.js';
 // Slim index — id, isFree, title only (for routing and paywall checks)
 import {
   scenarioIndex, designScenarioIndex, statsModuleIndex, metricCaseIndex,
@@ -57,6 +58,7 @@ const Progress              = lazy(() => import('./pages/Progress.jsx').then(m =
 const ProfilePage           = lazy(() => import('./pages/ProfilePage.jsx').then(m => ({ default: m.ProfilePage })));
 const Unlock                = lazy(() => import('./pages/Unlock.jsx').then(m => ({ default: m.Unlock })));
 const About                 = lazy(() => import('./pages/About.jsx').then(m => ({ default: m.About })));
+const Leaderboard           = lazy(() => import('./pages/Leaderboard.jsx').then(m => ({ default: m.Leaderboard })));
 const RoomMap               = lazy(() => import('./pages/RoomMap.jsx').then(m => ({ default: m.RoomMap })));
 const FailuresCatalog       = lazy(() => import('./pages/FailuresCatalog.jsx').then(m => ({ default: m.FailuresCatalog })));
 const JudgmentBank          = lazy(() => import('./pages/JudgmentBank.jsx').then(m => ({ default: m.JudgmentBank })));
@@ -362,6 +364,7 @@ export default function App() {
           setUser(session.user);
           setAuthSettled(true);
           refreshProgress();
+          upsertLeaderboardRow(session.user);
           if (event === 'SIGNED_IN') {
             track('user_signed_in', {});
             if (pendingGateConversionRef.current) {
@@ -384,7 +387,7 @@ export default function App() {
     function handleVisibilityChange() {
       if (document.visibilityState === 'hidden') {
         setUser(currentUser => {
-          if (currentUser) pushProgressToSupabase(currentUser);
+          if (currentUser) { pushProgressToSupabase(currentUser); upsertLeaderboardRow(currentUser); }
           return currentUser;
         });
       }
@@ -1605,6 +1608,7 @@ export default function App() {
           <Unlock onUnlocked={handleUnlocked} alreadyUnlocked={unlocked} onNavigate={navigate} />
         )}
         {page === 'about' && <About />}
+        {page === 'leaderboard' && <Leaderboard user={user} />}
         {page === 'interview-qa' && (
           <InterviewQABrowser unlocked={unlocked} onBack={() => navigate('home')} />
         )}

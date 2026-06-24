@@ -4,6 +4,18 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.65.0] — 2026-06-24 [LEADERBOARD + WHATSAPP COMMUNITY]
+
+Adds a real, Supabase-backed leaderboard (ranks signed-in users by total solved across all rooms) and a Community link to the WhatsApp group. Decisions: names from Google/GitHub OAuth metadata with an anonymous `Analyst-XXXX` fallback for email-only sign-ins; ranked by total problems/modules solved across all 17 rooms; all-time board for v1.
+
+- **New `src/utils/leaderboard.js`** — `computeTotalSolved()` counts done items across every room's localStorage progress key using the same per-room predicate the Progress page uses (no 22 data-file imports — counts saved progress directly); `getDisplayName(user)` (OAuth name → anon handle); `upsertLeaderboardRow(user)` (writes own row only, RLS-guarded); `fetchLeaderboard(limit)`.
+- **New `src/pages/Leaderboard.jsx`** — top 100, your-standing card (rank + total), gold/silver/bronze rank colors, current-user row highlighted, loading/empty/unavailable states, staggered row entrance.
+- **`App.jsx`** — lazy import + `page === 'leaderboard'` route; `upsertLeaderboardRow` fired on auth-settle and on visibility-hidden, right alongside the existing progress sync.
+- **`Sidebar.jsx`** — `Leaderboard` nav item in EXTRAS + a `Community ↗` external link to the WhatsApp group (`chat.whatsapp.com/JbIaqV87...`).
+- **`About.jsx`** — added a "Join the community" button to the contact card.
+
+Backend: requires a `leaderboard` table (public SELECT, owner-only upsert) — SQL provided to and run by the owner in Supabase. The board stays empty until users sign in and sync. Files: `src/utils/leaderboard.js` (new), `src/pages/Leaderboard.jsx` (new), `src/App.jsx`, `src/components/layout/Sidebar.jsx`, `src/pages/About.jsx`.
+
 ## [5.64.0] — 2026-06-24 [ABOUT: CONTACT SECTION + SIDEBAR LINK]
 
 The About page existed and was routed (`page === 'about'`) but had no sidebar entry, so it was unreachable in-app. Added `{ id: 'about', label: 'About' }` to `EXTRAS_ITEMS` in `Sidebar.jsx`. Added a "Feedback, issues & suggestions" card to `About.jsx` with a mailto button (sidharthkriplani@gmail.com) and a LinkedIn link (linkedin.com/in/sidharth-kriplani, pulled from Sidharth's profile skill). Also corrected the stale "130 problems" → "192" in three spots and replaced the old Analyst/Senior/Staff SQL distribution line with the current Easy/Medium/Hard/Master/Forensic levels. Files: `src/pages/About.jsx`, `src/components/layout/Sidebar.jsx`. Note: other About stats are still stale (17 rooms / 150+ cases / Analyst-Senior-Staff taxonomy elsewhere) — not touched this pass. Leaderboard + discussion board deferred pending a backend decision.
