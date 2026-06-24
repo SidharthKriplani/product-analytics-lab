@@ -4,6 +4,33 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.83.0] — 2026-06-24 [POST-CONSOLIDATION POLISH — TABS, LIVE TRIO, PUBLIC PROFILES]
+
+Follow-up to the consolidation: fix how the merged rooms present, fold the orphan BUILD frame, elevate the three LIVE features, and add public profiles + an optional LinkedIn.
+
+**Nav — BUILD folded into DO.** The BUILD frame held one item (Instrumentation); removed the frame and moved Instrumentation into DO (SQL Lab · Programming Lab · Instrumentation). Top-level frames 5 → 4 (KNOW / DO / JUDGE / LIVE). No active-state code changes needed.
+
+**Merged-room sub-nav — segmented tabs (fixes the long-scroll).** New reusable `src/components/shared/SegmentedTabs.jsx` (mirrors DifficultyChips). The three merged browsers no longer stack their two sections in one scroll — they switch via a tab strip, one section visible at a time:
+- Metrics → `Metrics | Growth Analytics` (accent green)
+- A/B Judgment (ScenarioBrowser) → `Readouts | Claim Checks` (accent blue)
+- Challenges → `Challenges | Full Loop` (accent yellow)
+Each defaults to the main section; tab shows a count; the Theory/Cases toggle and filters live inside the active tab. The relocated Theory grids were moved inside their owning section so tabs render mutually exclusively.
+
+**Simulator (InterviewSimulator.jsx) — made to land.** (1) Active-session **progress rail**: one segment per case, colored by self-rating (green/yellow/red), current highlighted. (2) **Scorecard debrief**: a verdict band (Strong showing / Solid, with gaps / Needs work) from MCQ % + self-ratings, a per-room breakdown with pillar chips, and "Practice this →" deep-links to the weakest 1–3 rooms (hash nav). The old recharts bar chart folded in (and recharts import dropped). (3) **Tier → difficulty wired**: `pickRandomByTier` now seeds senior/staff sessions from matching-difficulty cases (all 8 source files expose `difficulty`), with full-array fallback.
+
+**Defense Strategy (DefenseDocGenerator.jsx) — show its power.** (1) **Skill-gap heatmap**: gaps sorted by gapScore, each a severity-graded bar (red/yellow/green by share of max) with weight dots + self-rating chip + a High/Medium/Low legend. Kept at the real skill level — no forced pillar mapping (the data is per-skill). (2) **Plan progress**: an SVG completion ring (done/total via the existing per-room progress check) + a "Today · Resume here" badge on the first day with incomplete steps.
+
+**Company Tracks.** (1) Grid cards now show a **progress ring** (reuses the existing done/total per company). (2) Added Indian tracks to `companyTracks.js`: **Razorpay** (Data Analyst, with payments/settlement/fraud/UPI mental model + 4 experiment cards), plus **Flipkart** and **Swiggy** Product-Analyst roles (the existing DA tracks listed these as coming-soon). All caseRefs reference verified real case ids; single-quote/escape rules honored, no backticks.
+
+**Public profiles + LinkedIn (C + D) — guarded, degrades pre-migration.**
+- New `src/pages/PublicProfile.jsx` at `#/u/<userId>` — name, total solved, per-room breakdown (when present), LinkedIn link (when present). Registered in hashRouting + App lazy route.
+- Leaderboard names are now **clickable** → public profile.
+- ProfilePage gains an **editable LinkedIn field + soft nudge** ("Add your LinkedIn so recruiters viewing the leaderboard can find you"). Optional, never blocks; localStorage fallback when backend/columns absent.
+- `src/utils/leaderboard.js`: `fetchPublicProfile`, `updateMyLinkedin`, `computeRoomBreakdown`; all retry without the new columns if they don't exist, so nothing breaks before the migration.
+- **DB step required:** `docs/migrations/2026-06_public_profiles.sql` adds `linkedin_url text` + `room_breakdown jsonb` to the `leaderboard` table (existing RLS already covers them — no new policy). Run once in the Supabase SQL editor; until then the feature works in degraded mode.
+
+Verification: all 15 touched/created files pass esbuild parse; full Vite build transformed all 877 modules cleanly (only the public/ asset-copy step fails, an environmental iCloud issue, excluded from push). `companyTracks.js` confirmed backtick-free and quote-safe.
+
 ## [5.82.0] — 2026-06-24 [PORTFOLIO CONSOLIDATION — CUTS + 4 MERGES EXECUTED]
 
 Executed the full portfolio plan. Net: the practice surface count drops to ~15 legible rooms.

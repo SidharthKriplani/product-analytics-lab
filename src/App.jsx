@@ -59,6 +59,7 @@ const ProfilePage           = lazy(() => import('./pages/ProfilePage.jsx').then(
 const Unlock                = lazy(() => import('./pages/Unlock.jsx').then(m => ({ default: m.Unlock })));
 const About                 = lazy(() => import('./pages/About.jsx').then(m => ({ default: m.About })));
 const Leaderboard           = lazy(() => import('./pages/Leaderboard.jsx').then(m => ({ default: m.Leaderboard })));
+const PublicProfile         = lazy(() => import('./pages/PublicProfile.jsx').then(m => ({ default: m.PublicProfile })));
 const RoomMap               = lazy(() => import('./pages/RoomMap.jsx').then(m => ({ default: m.RoomMap })));
 const FailuresCatalog       = lazy(() => import('./pages/FailuresCatalog.jsx').then(m => ({ default: m.FailuresCatalog })));
 const JudgmentBank          = lazy(() => import('./pages/JudgmentBank.jsx').then(m => ({ default: m.JudgmentBank })));
@@ -156,6 +157,7 @@ export default function App() {
   const [activeMetricsFoundationId, setActiveMetricsFoundationId] = useState(null);
   const [activeRCAFoundationId, setActiveRCAFoundationId] = useState(null);
   const [activeExpFoundationId, setActiveExpFoundationId] = useState(null);
+  const [publicProfileUserId, setPublicProfileUserId] = useState(null);
   const [playbookInitialArticle, setPlaybookInitialArticle] = useState(null);
   const [unlocked, setUnlocked] = useState(() => isUnlocked());
   const [progressSnapshot, setProgressSnapshot] = useState(() => ({ ...getAllProgress(), challengesProgress: getAllChallengesProgress(), biProgress: getAllBIProgress(), stfProgress: getAllSTFProgress(), takehomeProgress: getAllTakehomeProgress(), instrumentationProgress: getAllInstrumentationProgress() }));
@@ -480,6 +482,19 @@ export default function App() {
     setActiveEstimationId(null);
     setActiveStatFoundationsId(null);
     setActiveGrowthAnalyticsId(null);
+    setPublicProfileUserId(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Public profile — userId acts as the route param. No auth/paywall gate;
+  // profiles are publicly readable. Mirrors the runner open-fn signature so the
+  // hash router can call it for #/u/<userId> deep links and back/forward nav.
+  function openPublicProfile(userId) {
+    if (!userId) return;
+    track('public_profile_viewed', { user_id: userId });
+    setPublicProfileUserId(userId);
+    setPage('public-profile');
+    setSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -943,6 +958,7 @@ export default function App() {
     openMetricsFoundationModule,
     openRCAFoundationModule,
     openExpFoundationModule,
+    openPublicProfile,
   };
 
   // State → hash sync: whenever page or an active ID changes, update the URL hash.
@@ -977,6 +993,7 @@ export default function App() {
       activeMetricsFoundationId,
       activeRCAFoundationId,
       activeExpFoundationId,
+      publicProfileUserId,
     };
     const newHash = '#' + stateToHash(page, activeIds);
     if (window.location.hash !== newHash) {
@@ -987,7 +1004,8 @@ export default function App() {
     activeFullLoopId, activePrioritizationId, activeBehavioralId, activeEstimationId,
     activeStatFoundationsId, activeGrowthAnalyticsId, activeChallengeId,
     activeBICaseId, activeSTFCaseId, activeTakehomeCaseId, activeInstrumentationCaseId,
-    activeSqlProblemId, activeMetricsFoundationId, activeRCAFoundationId, activeExpFoundationId]);
+    activeSqlProblemId, activeMetricsFoundationId, activeRCAFoundationId, activeExpFoundationId,
+    publicProfileUserId]);
 
   // Hash → state sync: on hashchange (browser back/forward), parse hash and drive state.
   useEffect(() => {
@@ -1601,7 +1619,10 @@ export default function App() {
           <Unlock onUnlocked={handleUnlocked} alreadyUnlocked={unlocked} onNavigate={navigate} />
         )}
         {page === 'about' && <About />}
-        {page === 'leaderboard' && <Leaderboard user={user} />}
+        {page === 'leaderboard' && <Leaderboard user={user} onOpenProfile={openPublicProfile} />}
+        {page === 'public-profile' && publicProfileUserId && (
+          <PublicProfile userId={publicProfileUserId} onNavigate={navigate} />
+        )}
         {page === 'interview-qa' && (
           <InterviewQABrowser unlocked={unlocked} onBack={() => navigate('home')} />
         )}

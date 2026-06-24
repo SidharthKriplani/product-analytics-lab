@@ -283,6 +283,7 @@ function MetricAtlasPanel({ activeCategory, onSetCategory, onClose }) {
 import { metricCases } from '../data/metricCases.js';
 import { growthAnalyticsCases } from '../data/growthAnalyticsCases.js';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
+import { SegmentedTabs } from '../components/shared/SegmentedTabs.jsx';
 import { getMetricsProgress } from '../utils/metricsProgress.js';
 import { getGrowthAnalyticsProgress } from '../utils/growthAnalyticsProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
@@ -320,6 +321,7 @@ const sortedGrowth = [...growthAnalyticsCases].sort((a, b) => {
 });
 
 export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnlock, onOpenArticle, onNavigate }) {
+  const [section, setSection] = useState('metrics');
   const [sortBy, setSortBy] = useState('default');
   const [theoryActive, setTheoryActive] = useState(false);
   const [diffFilter, setDiffFilter] = useState('all');
@@ -397,6 +399,19 @@ export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnloc
         <FoundationNudgeCard foundationRoom="metrics-foundations" foundationLabel="Metrics Foundations" onNavigate={onNavigate} />
       )}
 
+      {/* Section segmented tabs — Metrics | Growth Analytics (one section at a time) */}
+      <SegmentedTabs
+        accent='green'
+        value={section}
+        onChange={setSection}
+        tabs={[
+          { id: 'metrics', label: 'Metrics', count: metricCases.length },
+          { id: 'growth', label: 'Growth Analytics', count: growthAnalyticsCases.length },
+        ]}
+      />
+
+      {section === 'metrics' && (
+      <>
       {/* Theory / Cases tab bar */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
         {['Cases', 'Theory'].map(tab => {
@@ -545,9 +560,38 @@ export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnloc
       </div>
       )}
 
-      {/* ── Growth Analytics — cohorts, funnels & growth metrics (folded into Metrics) ── */}
-      {!theoryActive && (
-      <div style={{ marginTop: '2.75rem' }}>
+      {theoryActive && (
+        <div>
+          <div style={{ marginBottom: '1rem', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
+            Read the theory, then practice it in the cases above.
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', gap: '0.75rem' }}>
+            {FOUNDATION_DOMAINS['metrics'].articles.map(a => (
+              <button
+                key={a.id}
+                onClick={() => onOpenArticle && onOpenArticle(a.id)}
+                style={{
+                  textAlign: 'left', background: 'var(--surface)',
+                  border: '1px solid var(--border)', borderRadius: '10px',
+                  padding: '0.9rem 1rem', cursor: 'pointer',
+                  transition: 'border-color 0.15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+              >
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.4 }}>{a.title}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--accent)', marginTop: '0.35rem', fontWeight: 500 }}>Read article →</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      </>
+      )}
+
+      {/* ── Growth Analytics — cohorts, funnels & growth metrics (own tab section) ── */}
+      {section === 'growth' && (
+      <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
           <span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name='trending-up' size={15} color='var(--teal)' />
@@ -668,33 +712,6 @@ export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnloc
           })}
         </div>
       </div>
-      )}
-
-      {theoryActive && (
-        <div>
-          <div style={{ marginBottom: '1rem', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
-            Read the theory, then practice it in the cases above.
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', gap: '0.75rem' }}>
-            {FOUNDATION_DOMAINS['metrics'].articles.map(a => (
-              <button
-                key={a.id}
-                onClick={() => onOpenArticle && onOpenArticle(a.id)}
-                style={{
-                  textAlign: 'left', background: 'var(--surface)',
-                  border: '1px solid var(--border)', borderRadius: '10px',
-                  padding: '0.9rem 1rem', cursor: 'pointer',
-                  transition: 'border-color 0.15s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
-              >
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.4 }}>{a.title}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--accent)', marginTop: '0.35rem', fontWeight: 500 }}>Read article →</div>
-              </button>
-            ))}
-          </div>
-        </div>
       )}
 
     </div>{/* end main content column */}

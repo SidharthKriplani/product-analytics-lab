@@ -99,6 +99,67 @@ function RoomBadge({ room }) {
   );
 }
 
+function ProgressRing({ done, total, color }) {
+  const radius = 17;
+  const stroke = 3.5;
+  const normalizedRadius = radius - stroke / 2;
+  const circumference = 2 * Math.PI * normalizedRadius;
+  const pct = total > 0 ? done / total : 0;
+  const complete = total > 0 && done === total;
+  const ringColor = complete ? 'var(--green)' : (color || 'var(--accent)');
+  const offset = circumference * (1 - pct);
+  const size = radius * 2;
+  // Center label: percentage when partial, check when complete, dash when none started
+  const centerLabel = complete ? '✓' : (done === 0 ? '0%' : Math.round(pct * 100) + '%');
+
+  return (
+    <div
+      style={{ position: 'relative', width: size + 'px', height: size + 'px', flexShrink: 0 }}
+      title={done + ' / ' + total + ' cases completed'}
+      aria-label={done + ' of ' + total + ' cases completed'}
+    >
+      <svg width={size} height={size} style={{ display: 'block', transform: 'rotate(-90deg)' }}>
+        {/* Track background circle */}
+        <circle
+          cx={radius}
+          cy={radius}
+          r={normalizedRadius}
+          fill="none"
+          stroke="var(--border)"
+          strokeWidth={stroke}
+        />
+        {/* Progress arc */}
+        {pct > 0 && (
+          <circle
+            cx={radius}
+            cy={radius}
+            r={normalizedRadius}
+            fill="none"
+            stroke={ringColor}
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+          />
+        )}
+      </svg>
+      <span style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: complete ? '0.72rem' : '0.58rem',
+        fontWeight: 700,
+        color: complete ? 'var(--green)' : (done === 0 ? 'var(--text-dim)' : ringColor),
+        lineHeight: 1,
+      }}>
+        {centerLabel}
+      </span>
+    </div>
+  );
+}
+
 function CompanyAvatar({ track, size }) {
   const sz = size || 44;
   return (
@@ -168,24 +229,7 @@ function CompanyCard({ track, onSelect, index }) {
             </div>
           )}
         </div>
-        {completedCount > 0 && completedCount < totalCases && (
-          <div style={{
-            fontSize: '0.72rem', fontWeight: 600, color: 'var(--green)',
-            background: 'var(--green-bg)', border: '1px solid var(--green-border)',
-            borderRadius: '999px', padding: '2px 8px', whiteSpace: 'nowrap',
-          }}>
-            {completedCount}/{totalCases} done
-          </div>
-        )}
-        {completedCount > 0 && completedCount === totalCases && (
-          <div style={{
-            fontSize: '0.72rem', fontWeight: 700, color: '#fff',
-            background: 'var(--green)', borderRadius: '999px',
-            padding: '2px 10px', whiteSpace: 'nowrap',
-          }}>
-            Complete
-          </div>
-        )}
+        <ProgressRing done={completedCount} total={totalCases} color={track.color} />
       </div>
 
       <div style={{ height: '1px', background: 'var(--border-subtle)' }} />

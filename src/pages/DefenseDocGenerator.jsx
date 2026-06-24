@@ -673,24 +673,47 @@ export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocke
 
         return (
           <div>
-            {/* Gap scorecard */}
+            {/* Skill-gap heatmap — sorted by gapScore desc, severity-graded by share of max gap */}
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem 1.4rem', marginBottom: '1.5rem' }}>
-              <div style={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '1rem' }}>Skill gap map</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {gaps.map(g => (
-                  <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: 160, fontSize: '0.78rem', fontWeight: 500, color: 'var(--text)', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.label}</div>
-                    <div style={{ flex: 1, height: 6, background: 'var(--surface-2)', borderRadius: 3, overflow: 'hidden', minWidth: 40 }}>
-                      <div style={{ height: '100%', width: ((g.gapScore / maxGap) * 100) + '%', background: ratingColor[g.rating], borderRadius: 3, transition: 'width 0.5s' }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>Skill gap heatmap</div>
+                {/* Legend */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', flexWrap: 'wrap' }}>
+                  {[
+                    { label: 'High', color: 'var(--red)' },
+                    { label: 'Medium', color: 'var(--yellow)' },
+                    { label: 'Low', color: 'var(--green)' },
+                  ].map(l => (
+                    <span key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.66rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                      <span style={{ width: 9, height: 9, borderRadius: 2, background: l.color, flexShrink: 0 }} />
+                      {l.label} priority
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                {gaps.map(g => {
+                  // Severity by share of the largest gap — high >= 0.66, medium >= 0.33, else low
+                  const share = g.gapScore / maxGap;
+                  const sevColor = share >= 0.66 ? 'var(--red)' : share >= 0.33 ? 'var(--yellow)' : 'var(--green)';
+                  return (
+                    <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                      <div style={{ width: 150, fontSize: '0.78rem', fontWeight: 600, color: 'var(--text)', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.label}</div>
+                      {/* Weight dots — reuse the configure-step indicator */}
+                      <div style={{ display: 'flex', gap: 3, flexShrink: 0, width: 27 }}>
+                        {[1, 2, 3].map(w => (
+                          <div key={w} style={{ width: 7, height: 7, borderRadius: '50%', background: w <= g.weight ? 'var(--purple)' : 'var(--border)', opacity: w <= g.weight ? 1 : 0.35 }} />
+                        ))}
+                      </div>
+                      {/* Self-rating chip */}
+                      <span style={{ fontSize: '0.64rem', fontWeight: 700, color: ratingColor[g.rating], background: ratingBg[g.rating], border: '1px solid ' + ratingBorder[g.rating], borderRadius: 4, padding: '0.1rem 0.4rem', flexShrink: 0, width: 52, textAlign: 'center', boxSizing: 'border-box' }}>{ratingLabel[g.rating]}</span>
+                      {/* Severity-graded bar — width proportional to gapScore / maxGap */}
+                      <div style={{ flex: 1, height: 9, background: 'var(--surface-2)', borderRadius: 99, overflow: 'hidden', minWidth: 40 }}>
+                        <div style={{ height: '100%', width: Math.max(share * 100, 6) + '%', background: sevColor, borderRadius: 99, transition: 'width 0.5s ease' }} />
+                      </div>
                     </div>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: ratingColor[g.rating], width: 42, textAlign: 'right', flexShrink: 0 }}>{ratingLabel[g.rating]}</span>
-                    {g.weight >= 2 && (
-                      <span style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--purple)', background: 'var(--purple-bg)', border: '1px solid var(--purple-border)', borderRadius: 3, padding: '0.1rem 0.35rem', flexShrink: 0 }}>
-                        {g.weight === 3 ? 'High JD' : 'Med JD'}
-                      </span>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -763,7 +786,14 @@ export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocke
             )}
 
             {/* Day plan output */}
-            {stratPlan.type === 'plan' && (
+            {stratPlan.type === 'plan' && (() => {
+              // 'Today' = first day with any incomplete step; null if every day is fully done.
+              const dayHasIncomplete = dayNum => planSteps.some(s => s.day === dayNum && !isCaseDone(s.roomId, s.caseId));
+              const todayDay = (() => {
+                const found = stratPlan.days.find(d => dayHasIncomplete(d.day));
+                return found ? found.day : null;
+              })();
+              return (
               <div style={{ marginBottom: '1.25rem' }}>
                 <div style={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
                   Your {stratPlan.days.length}-day plan
@@ -771,12 +801,18 @@ export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocke
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                   {stratPlan.days.map(dayObj => {
                     const tc = tierColors[dayObj.tier] || tierColors.practice;
+                    const isToday = dayObj.day === todayDay;
                     return (
-                      <div key={dayObj.day} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem', borderLeft: '3px solid ' + tc.color }}>
+                      <div key={dayObj.day} style={{ background: 'var(--surface)', border: isToday ? '1.5px solid var(--purple-border)' : '1px solid var(--border)', boxShadow: isToday ? '0 0 0 2px var(--purple-bg)' : 'none', borderRadius: 'var(--radius)', padding: '1rem 1.1rem', borderLeft: '3px solid ' + tc.color }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem', flexWrap: 'wrap', gap: '0.4rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
                             <span style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text)' }}>{dayObj.label}</span>
                             <span style={{ fontWeight: 500, fontSize: '0.78rem', color: 'var(--text-muted)' }}>— {dayObj.theme}</span>
+                            {isToday && (
+                              <span style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#fff', background: 'var(--purple)', borderRadius: 4, padding: '0.12rem 0.45rem' }}>
+                                Today · Resume here
+                              </span>
+                            )}
                           </div>
                           <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: tc.color, background: tc.bg, border: '1px solid ' + tc.border, borderRadius: 4, padding: '0.12rem 0.45rem' }}>
                             {tc.label}
@@ -857,33 +893,50 @@ export function DefenseDocGenerator({ onBack, onNavigate, onOpenArticle, unlocke
                   })}
                 </div>
               </div>
-            )}
+              );
+            })()}
 
             {/* Plan progress + nudge */}
             {planSteps.length > 0 && (() => {
               const doneCount = planSteps.filter(s => isCaseDone(s.roomId, s.caseId)).length;
               const pct = doneCount / planSteps.length;
+              const pctRound = Math.round(pct * 100);
               const showNudge = !unlocked && pct >= 0.35;
+              // Progress ring geometry
+              const R = 26, C = 2 * Math.PI * R;
               return (
                 <div style={{ marginBottom: '1.25rem' }}>
-                  {/* Progress bar */}
-                  <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.9rem 1.1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                        Plan progress
-                      </span>
-                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: pct >= 0.35 ? 'var(--purple)' : 'var(--text-muted)' }}>
-                        {doneCount} / {planSteps.length} cases
-                      </span>
-                    </div>
-                    <div style={{ height: 6, background: 'var(--surface-2)', borderRadius: 99, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${Math.round(pct * 100)}%`, background: 'var(--purple)', borderRadius: 99, transition: 'width 0.4s ease' }} />
-                    </div>
-                    {doneCount === 0 && (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '0.4rem' }}>
-                        Complete plan cases and this bar updates automatically.
+                  {/* Progress ring + bar */}
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.1rem', display: 'flex', alignItems: 'center', gap: '1.1rem' }}>
+                    {/* Ring */}
+                    <div style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
+                      <svg width="64" height="64" viewBox="0 0 64 64" style={{ transform: 'rotate(-90deg)' }}>
+                        <circle cx="32" cy="32" r={R} fill="none" stroke="var(--surface-2)" strokeWidth="6" />
+                        <circle cx="32" cy="32" r={R} fill="none" stroke="var(--purple)" strokeWidth="6" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - pct)} style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
+                      </svg>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.82rem', fontWeight: 700, color: pct >= 0.35 ? 'var(--purple)' : 'var(--text)' }}>
+                        {pctRound}%
                       </div>
-                    )}
+                    </div>
+                    {/* Bar + counts */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                          Plan progress
+                        </span>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: pct >= 0.35 ? 'var(--purple)' : 'var(--text-muted)' }}>
+                          {doneCount} / {planSteps.length} done
+                        </span>
+                      </div>
+                      <div style={{ height: 6, background: 'var(--surface-2)', borderRadius: 99, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${pctRound}%`, background: 'var(--purple)', borderRadius: 99, transition: 'width 0.4s ease' }} />
+                      </div>
+                      {doneCount === 0 && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '0.4rem' }}>
+                          Complete plan cases and this updates automatically.
+                        </div>
+                      )}
+                    </div>
                   </div>
                   {/* Soft nudge at 35% — only for locked users */}
                   {showNudge && (

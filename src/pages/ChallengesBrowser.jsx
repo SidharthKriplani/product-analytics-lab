@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '../components/shared/Icon.jsx';
+import { SegmentedTabs } from '../components/shared/SegmentedTabs.jsx';
 import { challengesCases } from '../data/challengesCases.js';
 import { fullLoopCases } from '../data/fullLoopCases.js';
 import { getAllChallengesProgress } from '../utils/challengesProgress.js';
@@ -61,6 +62,7 @@ export function ChallengesBrowser({ onSelectChallenge, onSelectFullLoop, unlocke
   const completedCount = Object.keys(allProgress).length;
   const [hoveredId, setHoveredId] = useState(null);
   const [filterDiff, setFilterDiff] = useState('all');
+  const [section, setSection] = useState('challenges');
 
   const seniorCount = sortedCases.filter(c => c.difficulty === 'senior').length;
   const staffCount = sortedCases.filter(c => c.difficulty === 'staff').length;
@@ -122,6 +124,19 @@ export function ChallengesBrowser({ onSelectChallenge, onSelectFullLoop, unlocke
         </div>
       </div>
 
+      {/* Section tabs */}
+      <SegmentedTabs
+        accent='yellow'
+        value={section}
+        onChange={setSection}
+        tabs={[
+          { id: 'challenges', label: 'Challenges', count: sortedCases.length },
+          { id: 'fullloop', label: 'Full Loop', count: sortedFullLoop.length },
+        ]}
+      />
+
+      {section === 'challenges' && (
+        <>
       {/* Difficulty filter bar */}
       <div style={{ display: 'flex', gap: '0.45rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
         {[
@@ -340,8 +355,12 @@ export function ChallengesBrowser({ onSelectChallenge, onSelectFullLoop, unlocke
         })}
       </div>
 
+        </>
+      )}
+
       {/* ── Full Loop — end-to-end cases ── */}
-      <div style={{ marginTop: '2.75rem' }}>
+      {section === 'fullloop' && (
+      <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
           <span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name='layers' size={15} color='var(--teal)' />
@@ -510,6 +529,7 @@ export function ChallengesBrowser({ onSelectChallenge, onSelectFullLoop, unlocke
           })}
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -13,6 +13,7 @@ const PAGE_TO_HASH = {
   'about': 'about',
   'search': 'search',
   'bookmarks': 'bookmarks',
+  'public-profile': 'u', // public profile — userId appended (e.g. #/u/<userId>)
 
   // Foundations (learn)
   'foundations': 'foundations',
@@ -95,6 +96,7 @@ const PAGE_TO_HASH = {
 
 // Runner pages → which activeId state they use
 const RUNNER_ACTIVE_ID_KEY = {
+  'public-profile': 'publicProfileUserId',
   'sql-lab': 'activeSqlProblemId',
   'runner': 'activeScenarioId',
   'design-runner': 'activeDesignScenarioId',
@@ -131,6 +133,7 @@ const HASH_TO_BROWSER_PAGE = {
   'about': 'about',
   'search': 'search',
   'bookmarks': 'bookmarks',
+  'u': 'public-profile',
   'foundations': 'foundations',
   'stats-foundations': 'stat-foundations',
   'metrics-foundations': 'metrics-foundations',
@@ -177,6 +180,7 @@ const HASH_TO_BROWSER_PAGE = {
 
 // Hash segment → runner page value (when a case ID is present)
 const HASH_TO_RUNNER_PAGE = {
+  'u': 'public-profile', // userId acts as the "case ID"
   'sql-lab': 'sql-lab',
   'review': 'runner',
   'design': 'design-runner',
@@ -204,6 +208,7 @@ const HASH_TO_RUNNER_PAGE = {
 
 // Runner page → the open function name to call (used by hashchange handler)
 const RUNNER_OPEN_FN = {
+  'public-profile': 'openPublicProfile',
   'sql-lab': 'openSqlProblem',
   'runner': 'openScenario',
   'design-runner': 'openDesignScenario',

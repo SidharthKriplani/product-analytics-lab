@@ -9,9 +9,18 @@ function rankColor(rank) {
   return 'var(--text-muted)';
 }
 
-export function Leaderboard({ user }) {
+export function Leaderboard({ user, onOpenProfile }) {
   const [rows, setRows] = useState(null); // null = loading
   const [error, setError] = useState(false);
+
+  // Navigate to a user's public profile. Prefer the app helper (keeps history
+  // + tracking consistent); fall back to a hash change so the link still works
+  // if the prop is not passed.
+  function openProfile(userId) {
+    if (!userId) return;
+    if (onOpenProfile) onOpenProfile(userId);
+    else window.location.hash = '#/u/' + userId;
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -95,9 +104,21 @@ export function Leaderboard({ user }) {
                 <span style={{ fontSize: rank <= 3 ? '1rem' : '0.85rem', fontWeight: 800, color: rankColor(rank), textAlign: 'center' }}>
                   {rank}
                 </span>
-                <span style={{ fontSize: '0.9rem', fontWeight: isMe ? 700 : 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <button
+                  type="button"
+                  onClick={() => openProfile(r.user_id)}
+                  title={'View ' + r.display_name + '\'s profile'}
+                  style={{
+                    fontSize: '0.9rem', fontWeight: isMe ? 700 : 500, color: 'var(--text)',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    background: 'none', border: 'none', padding: 0, margin: 0,
+                    textAlign: 'left', cursor: 'pointer', font: 'inherit', minWidth: 0,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.textDecoration = 'underline'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.textDecoration = 'none'; }}
+                >
                   {r.display_name}{isMe ? ' (you)' : ''}
-                </span>
+                </button>
                 <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)' }}>
                   {r.total_solved}
                 </span>

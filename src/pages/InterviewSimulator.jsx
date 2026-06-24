@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { GateOverlay } from '../components/shared/GateOverlay.jsx';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { statsModules } from '../data/statsModules.js';
 import { rcaCases } from '../data/rcaCases.js';
 import { metricCases } from '../data/metricCases.js';
@@ -17,68 +16,88 @@ function pickRandom(arr, seed) {
   return arr[idx];
 }
 
+// Tier-aware pick: prefers cases whose `difficulty` matches the selected tier.
+// Case data exposes a top-level `difficulty` ('analyst' | 'senior' | 'staff',
+// plus a few 'advanced'/'intermediate'/'foundational'). Senior tier prefers
+// senior+analyst; staff tier prefers senior+staff+advanced. Falls back to the
+// full array when no case matches (keeps seeding robust + deterministic).
+const TIER_PREFERRED_DIFFICULTIES = {
+  senior: ['senior', 'analyst', 'intermediate'],
+  staff: ['senior', 'staff', 'advanced'],
+};
+
+function pickRandomByTier(arr, seed, tier) {
+  if (!arr || arr.length === 0) return null;
+  const prefs = TIER_PREFERRED_DIFFICULTIES[tier];
+  if (prefs) {
+    const filtered = arr.filter(c => c && prefs.includes(c.difficulty));
+    if (filtered.length > 0) return filtered[seed % filtered.length];
+  }
+  return arr[seed % arr.length];
+}
+
 function buildSession(role, tier, seed, count = 5) {
   // ─────────────────────────────────────────
   // Data-focused roles (Product Analyst, Business Analyst, Data Analyst)
   // ─────────────────────────────────────────
   const productAnalystQuestions = [
-    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed) },
-    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 1) },
-    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 2) },
-    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 3) },
-    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 4) },
-    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 5) },
-    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 6) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandom(behavioralQuestions, seed + 7) },
-    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 8) },
-    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 9) },
-    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 10) },
-    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 11) },
+    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed, tier) },
+    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed + 1, tier) },
+    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 2, tier) },
+    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 3, tier) },
+    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 4, tier) },
+    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed + 5, tier) },
+    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 6, tier) },
+    { room: 'behavioral', label: 'Behavioral', case: pickRandomByTier(behavioralQuestions, seed + 7, tier) },
+    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 8, tier) },
+    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed + 9, tier) },
+    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 10, tier) },
+    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 11, tier) },
   ];
 
   const businessAnalystQuestions = [
-    { room: 'cases', label: 'Business Case', case: pickRandom(businessCases, seed) },
-    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 1) },
-    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 2) },
-    { room: 'cases', label: 'Business Case', case: pickRandom(businessCases, seed + 3) },
-    { room: 'prioritization', label: 'Prioritization', case: pickRandom(prioritizationScenarios, seed + 4) },
-    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 5) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandom(behavioralQuestions, seed + 6) },
-    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 7) },
-    { room: 'cases', label: 'Business Case', case: pickRandom(businessCases, seed + 8) },
-    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 9) },
-    { room: 'prioritization', label: 'Prioritization', case: pickRandom(prioritizationScenarios, seed + 10) },
-    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 11) },
+    { room: 'cases', label: 'Business Case', case: pickRandomByTier(businessCases, seed, tier) },
+    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 1, tier) },
+    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 2, tier) },
+    { room: 'cases', label: 'Business Case', case: pickRandomByTier(businessCases, seed + 3, tier) },
+    { room: 'prioritization', label: 'Prioritization', case: pickRandomByTier(prioritizationScenarios, seed + 4, tier) },
+    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 5, tier) },
+    { room: 'behavioral', label: 'Behavioral', case: pickRandomByTier(behavioralQuestions, seed + 6, tier) },
+    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 7, tier) },
+    { room: 'cases', label: 'Business Case', case: pickRandomByTier(businessCases, seed + 8, tier) },
+    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 9, tier) },
+    { room: 'prioritization', label: 'Prioritization', case: pickRandomByTier(prioritizationScenarios, seed + 10, tier) },
+    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 11, tier) },
   ];
 
   const dataAnalystQuestions = [
-    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed) },
-    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 1) },
-    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 2) },
-    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 3) },
-    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 4) },
-    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 5) },
-    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 6) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandom(behavioralQuestions, seed + 7) },
-    { room: 'stats', label: 'Statistics', case: pickRandom(statsModules, seed + 8) },
-    { room: 'metrics', label: 'Metrics', case: pickRandom(metricCases, seed + 9) },
-    { room: 'rca', label: 'RCA', case: pickRandom(rcaCases, seed + 10) },
-    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 11) },
+    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed, tier) },
+    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 1, tier) },
+    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 2, tier) },
+    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed + 3, tier) },
+    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 4, tier) },
+    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 5, tier) },
+    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 6, tier) },
+    { room: 'behavioral', label: 'Behavioral', case: pickRandomByTier(behavioralQuestions, seed + 7, tier) },
+    { room: 'stats', label: 'Statistics', case: pickRandomByTier(statsModules, seed + 8, tier) },
+    { room: 'metrics', label: 'Metrics', case: pickRandomByTier(metricCases, seed + 9, tier) },
+    { room: 'rca', label: 'RCA', case: pickRandomByTier(rcaCases, seed + 10, tier) },
+    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 11, tier) },
   ];
 
   const pmQuestions = [
-    { room: 'product-design', label: 'Product Design', case: pickRandom(productDesignScenarios, seed) },
-    { room: 'prioritization', label: 'Prioritization', case: pickRandom(prioritizationScenarios, seed + 1) },
-    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 2) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandom(behavioralQuestions, seed + 3) },
-    { room: 'cases', label: 'Business Case', case: pickRandom(businessCases, seed + 4) },
-    { room: 'product-design', label: 'Product Design', case: pickRandom(productDesignScenarios, seed + 5) },
-    { room: 'prioritization', label: 'Prioritization', case: pickRandom(prioritizationScenarios, seed + 6) },
-    { room: 'estimation', label: 'Estimation', case: pickRandom(estimationProblems, seed + 7) },
-    { room: 'behavioral', label: 'Behavioral', case: pickRandom(behavioralQuestions, seed + 8) },
-    { room: 'cases', label: 'Business Case', case: pickRandom(businessCases, seed + 9) },
-    { room: 'product-design', label: 'Product Design', case: pickRandom(productDesignScenarios, seed + 10) },
-    { room: 'prioritization', label: 'Prioritization', case: pickRandom(prioritizationScenarios, seed + 11) },
+    { room: 'product-design', label: 'Product Design', case: pickRandomByTier(productDesignScenarios, seed, tier) },
+    { room: 'prioritization', label: 'Prioritization', case: pickRandomByTier(prioritizationScenarios, seed + 1, tier) },
+    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 2, tier) },
+    { room: 'behavioral', label: 'Behavioral', case: pickRandomByTier(behavioralQuestions, seed + 3, tier) },
+    { room: 'cases', label: 'Business Case', case: pickRandomByTier(businessCases, seed + 4, tier) },
+    { room: 'product-design', label: 'Product Design', case: pickRandomByTier(productDesignScenarios, seed + 5, tier) },
+    { room: 'prioritization', label: 'Prioritization', case: pickRandomByTier(prioritizationScenarios, seed + 6, tier) },
+    { room: 'estimation', label: 'Estimation', case: pickRandomByTier(estimationProblems, seed + 7, tier) },
+    { room: 'behavioral', label: 'Behavioral', case: pickRandomByTier(behavioralQuestions, seed + 8, tier) },
+    { room: 'cases', label: 'Business Case', case: pickRandomByTier(businessCases, seed + 9, tier) },
+    { room: 'product-design', label: 'Product Design', case: pickRandomByTier(productDesignScenarios, seed + 10, tier) },
+    { room: 'prioritization', label: 'Prioritization', case: pickRandomByTier(prioritizationScenarios, seed + 11, tier) },
   ];
 
   // Select question pool by role
@@ -135,6 +154,41 @@ const ROOM_COLORS = {
   'product-design': 'var(--purple)',
   prioritization: 'var(--green)',
   cases: 'var(--orange, #f97316)',
+};
+
+// Room key → hash route for the room's landing page.
+// Keys match the `room` field set in buildSession; routes confirmed against
+// src/utils/hashRouting.js PAGE_TO_HASH (the room key IS the hash segment for these).
+const ROOM_ROUTES = {
+  metrics: 'metrics',
+  rca: 'rca',
+  stats: 'stats',
+  estimation: 'estimation',
+  'product-design': 'product-design',
+  prioritization: 'prioritization',
+  cases: 'cases',
+  behavioral: 'behavioral',
+};
+
+// Room key → interview pillar label (subtle categorization, not a score).
+const ROOM_PILLARS = {
+  mcq: 'Recall',
+  trainer: 'Recall',
+  estimation: 'Fluency',
+  behavioral: 'Behavioral',
+  metrics: 'Judgment',
+  rca: 'Judgment',
+  stats: 'Judgment',
+  cases: 'Judgment',
+  'product-design': 'Judgment',
+  prioritization: 'Judgment',
+};
+
+const PILLAR_COLORS = {
+  Recall: 'var(--yellow)',
+  Fluency: 'var(--blue, #3b82f6)',
+  Behavioral: 'var(--accent)',
+  Judgment: 'var(--green)',
 };
 
 const SESSION_LENGTH_OPTIONS = [
@@ -565,34 +619,47 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           marginBottom: '2rem', flexWrap: 'wrap', gap: '0.75rem',
         }}>
-          <div style={{ display: 'flex', gap: '0.4rem' }}>
-            {session.map((s, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: '0.25rem 0.6rem',
-                  borderRadius: '20px',
-                  fontSize: '0.78rem',
-                  fontWeight: i === currentCaseIndex ? 700 : 400,
-                  background: i < currentCaseIndex
-                    ? 'var(--green-bg, rgba(34,197,94,0.1))'
-                    : i === currentCaseIndex
-                      ? 'var(--surface-2)'
-                      : 'var(--surface)',
-                  color: i < currentCaseIndex
-                    ? 'var(--green)'
-                    : i === currentCaseIndex
-                      ? 'var(--text)'
-                      : 'var(--text-muted)',
-                  border: i === currentCaseIndex
-                    ? '1px solid var(--border)'
-                    : '1px solid transparent',
-                  cursor: 'default',
-                }}
-              >
-                {i + 1}/{sessionLength}
-              </div>
-            ))}
+          {/* Progress rail — one segment per case, colored by self-rating */}
+          <div
+            className="pal-card-enter"
+            style={{ display: 'flex', gap: '0.3rem', flex: 1, minWidth: 0, flexWrap: 'wrap' }}
+            aria-label={`Case ${currentCaseIndex + 1} of ${sessionLength}`}
+          >
+            {session.map((s, i) => {
+              const isCurrent = i === currentCaseIndex;
+              const wasRevealed = revealedCases.has(i);
+              const wasMcqAnswered = mcqAnswers[i] !== undefined;
+              const rating = ratings[i];
+              const ratingColor =
+                rating === 'strong' ? 'var(--green)'
+                : rating === 'ok' ? 'var(--yellow)'
+                : rating === 'miss' ? 'var(--red)'
+                : null;
+              const answered = rating || wasRevealed || wasMcqAnswered;
+              const segBg = isCurrent
+                ? 'var(--accent)'
+                : ratingColor
+                  ? ratingColor
+                  : answered
+                    ? 'var(--text-muted)'
+                    : 'var(--border)';
+              return (
+                <div
+                  key={i}
+                  title={`Case ${i + 1}${rating ? ' · ' + rating : ''}`}
+                  style={{
+                    height: '6px',
+                    flex: '1 1 0',
+                    minWidth: '14px',
+                    borderRadius: '20px',
+                    background: segBg,
+                    opacity: isCurrent ? 1 : answered ? 0.95 : 0.55,
+                    transform: isCurrent ? 'scaleY(1.5)' : 'scaleY(1)',
+                    transition: 'background 0.18s, transform 0.18s, opacity 0.18s',
+                  }}
+                />
+              );
+            })}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {/* Mode badge */}
@@ -840,6 +907,90 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
     const roleLabel = role === 'ds' ? 'Data / Product Analyst' : 'PM / TPM / Product Lead';
     const hasMCQResults = sessionMode === 'mcq' || sessionMode === 'mixed';
 
+    // ── Scorecard computation ──────────────────────────────────────
+    // Per-room breakdown reusing existing session/mcq/ratings data.
+    const roomStats = {};
+    session.forEach((s, i) => {
+      const key = s.room;
+      if (!roomStats[key]) {
+        roomStats[key] = {
+          room: key,
+          label: s.label,
+          total: 0,
+          mcqTotal: 0,
+          mcqCorrect: 0,
+          strong: 0,
+          ok: 0,
+          miss: 0,
+        };
+      }
+      const r = roomStats[key];
+      r.total += 1;
+      if (isQuestionMCQ(i) && mcqAnswers[i] !== undefined) {
+        r.mcqTotal += 1;
+        const q = mcqQuestions[i];
+        const chosen = q?.options.find(o => o.id === mcqAnswers[i]);
+        if (chosen?.correct) r.mcqCorrect += 1;
+      } else {
+        if (ratings[i] === 'strong') r.strong += 1;
+        else if (ratings[i] === 'ok') r.ok += 1;
+        else if (ratings[i] === 'miss') r.miss += 1;
+      }
+    });
+    const roomBreakdown = Object.values(roomStats);
+
+    // Self-rating tally across the whole session.
+    const ratingTally = { strong: 0, ok: 0, miss: 0 };
+    Object.values(ratings).forEach(v => {
+      if (ratingTally[v] !== undefined) ratingTally[v] += 1;
+    });
+    const totalRated = ratingTally.strong + ratingTally.ok + ratingTally.miss;
+
+    // Overall verdict — combine MCQ accuracy (if any) and self-ratings.
+    const mcqPct = mcqScores.total > 0 ? mcqScores.correct / mcqScores.total : null;
+    // Self-rating score: Strong=1, OK=0.5, Miss=0.
+    const ratingPct = totalRated > 0
+      ? (ratingTally.strong + ratingTally.ok * 0.5) / totalRated
+      : null;
+    let overallPct;
+    if (mcqPct !== null && ratingPct !== null) overallPct = (mcqPct + ratingPct) / 2;
+    else if (mcqPct !== null) overallPct = mcqPct;
+    else if (ratingPct !== null) overallPct = ratingPct;
+    else overallPct = null;
+
+    let verdictLabel, verdictColor, verdictBg;
+    if (overallPct === null) {
+      verdictLabel = 'Session complete';
+      verdictColor = 'var(--text)';
+      verdictBg = 'var(--surface-2)';
+    } else if (overallPct >= 0.8) {
+      verdictLabel = 'Strong showing';
+      verdictColor = 'var(--green)';
+      verdictBg = 'var(--green-bg, rgba(34,197,94,0.1))';
+    } else if (overallPct >= 0.55) {
+      verdictLabel = 'Solid, with gaps';
+      verdictColor = 'var(--yellow)';
+      verdictBg = 'var(--yellow-bg, rgba(234,179,8,0.1))';
+    } else {
+      verdictLabel = 'Needs work';
+      verdictColor = 'var(--red)';
+      verdictBg = 'var(--red-bg, rgba(239,68,68,0.1))';
+    }
+
+    // Weakest rooms for "Practice this" deep-links: rank by lowest MCQ % then
+    // most Misses. Only rooms with a known route get a button.
+    const weakestRooms = roomBreakdown
+      .map(r => {
+        const score = r.mcqTotal > 0
+          ? r.mcqCorrect / r.mcqTotal
+          : (r.strong + r.ok * 0.5) / Math.max(1, r.strong + r.ok + r.miss);
+        const signal = r.mcqTotal > 0 || (r.strong + r.ok + r.miss) > 0;
+        return { ...r, score, signal };
+      })
+      .filter(r => r.signal && r.score < 0.75 && ROOM_ROUTES[r.room])
+      .sort((a, b) => a.score - b.score || b.miss - a.miss)
+      .slice(0, 3);
+
     return (
       <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         <div style={{ marginBottom: '2rem' }}>
@@ -875,55 +1026,165 @@ function InterviewSimulatorInner({ onBack, onNavigate }) {
           </p>
         </div>
 
-        {/* Per-room breakdown chart */}
-        {hasMCQResults && (
-          <div style={{
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
+        {/* ── Verdict band ── */}
+        <div
+          className="pal-reveal-in"
+          style={{
+            background: verdictBg,
+            border: `1px solid ${verdictColor}`,
             borderRadius: '12px',
-            padding: '1.5rem',
-            marginBottom: '2rem',
+            padding: '1.25rem 1.5rem',
+            marginBottom: '1.25rem',
+          }}
+        >
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            flexWrap: 'wrap', gap: '0.75rem',
           }}>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1rem' }}>
-              Skill Breakdown
-            </h3>
-            {(() => {
-              const breakdown = {};
-              session.forEach((s, i) => {
-                const room = s.label;
-                if (!breakdown[room]) breakdown[room] = { total: 0, correct: 0 };
-                breakdown[room].total += 1;
-                if (isQuestionMCQ(i) && mcqAnswers[i] !== undefined) {
-                  const mcqQ = mcqQuestions[i];
-                  const chosenOpt = mcqQ?.options.find(o => o.id === mcqAnswers[i]);
-                  if (chosenOpt?.correct) breakdown[room].correct += 1;
-                }
-              });
-              const chartData = Object.entries(breakdown).map(([room, stats]) => ({
-                room,
-                pct: Math.round((stats.correct / stats.total) * 100),
-              }));
+            <div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.25rem' }}>
+                Overall
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: verdictColor, letterSpacing: '-0.01em' }}>
+                {verdictLabel}
+                {overallPct !== null && (
+                  <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+                    {Math.round(overallPct * 100)}%
+                  </span>
+                )}
+              </div>
+            </div>
+            {/* Headline numbers */}
+            <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time</div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)', fontFamily: 'monospace' }}>{formatTime(elapsed)}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cases</div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)' }}>{session.length}</div>
+              </div>
+              {hasMCQResults && mcqScores.total > 0 && (
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>MCQ</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)' }}>{Math.round(mcqPct * 100)}%</div>
+                </div>
+              )}
+              {totalRated > 0 && (
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Self-rated</div>
+                  <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text)' }}>
+                    <span style={{ color: 'var(--green)' }}>{ratingTally.strong}S</span>
+                    {' · '}
+                    <span style={{ color: 'var(--yellow)' }}>{ratingTally.ok}OK</span>
+                    {' · '}
+                    <span style={{ color: 'var(--red)' }}>{ratingTally.miss}M</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Per-room breakdown ── */}
+        <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          marginBottom: '1.25rem',
+        }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1rem' }}>
+            By Room
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            {roomBreakdown.map(r => {
+              const pillar = ROOM_PILLARS[r.room] || 'Judgment';
+              const pillarColor = PILLAR_COLORS[pillar] || 'var(--text-muted)';
+              const roomColor = ROOM_COLORS[r.room] || 'var(--accent)';
+              const hasMcq = r.mcqTotal > 0;
+              const pct = hasMcq ? Math.round((r.mcqCorrect / r.mcqTotal) * 100) : null;
               return (
-                <div style={{ width: '100%', height: 300 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 30 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                      <XAxis dataKey="room" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} angle={-45} textAnchor="end" height={80} />
-                      <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} label={{ value: '% Correct', angle: -90, position: 'insideLeft' }} domain={[0, 100]} />
-                      <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} contentStyle={{
-                        background: 'var(--surface-2)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '6px',
-                        color: 'var(--text)',
-                      }} />
-                      <Bar dataKey="pct" fill="var(--accent)" radius={[8, 8, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div
+                  key={r.room}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.6rem',
+                    flexWrap: 'wrap',
+                    padding: '0.6rem 0.75rem',
+                    background: 'var(--surface-2)',
+                    borderRadius: '8px',
+                    borderLeft: `3px solid ${roomColor}`,
+                  }}
+                >
+                  <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: '0.88rem' }}>
+                    {r.label}
+                  </span>
+                  <span style={{
+                    fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    padding: '0.12rem 0.45rem', borderRadius: '20px',
+                    color: pillarColor,
+                    background: 'var(--surface)',
+                    border: `1px solid ${pillarColor}`,
+                  }}>
+                    {pillar}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    {r.total} {r.total === 1 ? 'case' : 'cases'}
+                  </span>
+                  <span style={{ marginLeft: 'auto', fontSize: '0.82rem', fontWeight: 700 }}>
+                    {hasMcq ? (
+                      <span style={{ color: pct >= 75 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)' }}>
+                        {pct}% correct
+                      </span>
+                    ) : (r.strong + r.ok + r.miss) > 0 ? (
+                      <span style={{ color: 'var(--text-muted)' }}>
+                        {r.strong > 0 && <span style={{ color: 'var(--green)' }}>{r.strong}S </span>}
+                        {r.ok > 0 && <span style={{ color: 'var(--yellow)' }}>{r.ok}OK </span>}
+                        {r.miss > 0 && <span style={{ color: 'var(--red)' }}>{r.miss}M</span>}
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontStyle: 'italic' }}>not rated</span>
+                    )}
+                  </span>
                 </div>
               );
-            })()}
+            })}
           </div>
-        )}
+
+          {/* Practice this → deep-links for weakest rooms */}
+          {weakestRooms.length > 0 && (
+            <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
+                Practice your weak spots
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {weakestRooms.map(r => {
+                  const route = ROOM_ROUTES[r.room];
+                  return (
+                    <button
+                      key={r.room}
+                      className="pal-card-hover"
+                      onClick={() => { window.location.hash = '#/' + route; }}
+                      style={{
+                        background: 'var(--surface-2)',
+                        border: `1px solid ${ROOM_COLORS[r.room] || 'var(--accent)'}`,
+                        borderRadius: '8px',
+                        padding: '0.5rem 0.9rem',
+                        color: 'var(--text)',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Practice {r.label} →
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {session.map((s, i) => {

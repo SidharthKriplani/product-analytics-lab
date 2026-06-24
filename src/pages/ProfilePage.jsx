@@ -2,6 +2,18 @@ import { useState } from 'react';
 import { signOut } from '../utils/auth.js';
 import { getBookmarks } from '../utils/bookmarks.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from '../utils/syncProgress.js';
+import { updateMyLinkedin } from '../utils/leaderboard.js';
+
+const LINKEDIN_LS_KEY = 'pal-linkedin-url-v1';
+
+// Read the user's current LinkedIn URL — prefer auth metadata, then the local
+// fallback written when the DB column does not exist yet.
+function getInitialLinkedin(user) {
+  const fromMeta = user?.user_metadata?.linkedin_url;
+  if (fromMeta) return fromMeta;
+  try { return localStorage.getItem(LINKEDIN_LS_KEY) || ''; }
+  catch { return ''; }
+}
 
 // ── Stats helpers ─────────────────────────────────────────────────────────────
 
@@ -124,6 +136,30 @@ const btnBase = {
 
 export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme }) {
   const [syncStatus, setSyncStatus] = useState('idle'); // idle | syncing | done | error
+  const [linkedin, setLinkedin] = useState(() => getInitialLinkedin(user));
+  // idle | saving | saved | local | invalid | error
+  const [linkedinStatus, setLinkedinStatus] = useState('idle');
+
+  async function handleSaveLinkedin() {
+    const url = linkedin.trim();
+    if (url && !url.toLowerCase().includes('linkedin.com')) {
+      setLinkedinStatus('invalid');
+      setTimeout(() => setLinkedinStatus('idle'), 3500);
+      return;
+    }
+    setLinkedinStatus('saving');
+    // Always keep a local copy so the value persists across reloads pre-migration.
+    try { localStorage.setItem(LINKEDIN_LS_KEY, url); } catch { /* ignore */ }
+    const res = await updateMyLinkedin(user, url);
+    if (res.ok) {
+      setLinkedinStatus('saved');
+    } else if (res.reason === 'migration-pending' || res.reason === 'no-backend') {
+      setLinkedinStatus('local');
+    } else {
+      setLinkedinStatus('error');
+    }
+    setTimeout(() => setLinkedinStatus('idle'), 4000);
+  }
 
   // ── Not signed in ────────────────────────────────────────────────────────────
   if (!user) {
@@ -243,6 +279,57 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
             >
               Sign out
             </button>
+          </div>
+
+          {/* ── LinkedIn (optional, prompted) ── */}
+          <div style={{ borderTop: '1px solid var(--border)', marginTop: '1.1rem', paddingTop: '1rem' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
+              LinkedIn
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <input
+                type="url"
+                value={linkedin}
+                onChange={e => setLinkedin(e.target.value)}
+                placeholder="https://linkedin.com/in/your-handle"
+                style={{
+                  flex: 1, minWidth: '180px',
+                  background: 'var(--surface-2)', border: '1px solid var(--border)',
+                  borderRadius: '6px', padding: '0.4rem 0.6rem',
+                  fontSize: '0.82rem', color: 'var(--text)',
+                }}
+              />
+              <button
+                onClick={handleSaveLinkedin}
+                disabled={linkedinStatus === 'saving'}
+                style={{ ...btnBase, flexShrink: 0, opacity: linkedinStatus === 'saving' ? 0.6 : 1 }}
+              >
+                {linkedinStatus === 'saving' ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+
+            {/* Status / nudge line */}
+            {linkedinStatus === 'saved' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--green, #059669)', marginTop: '0.45rem' }}>
+                Saved. Recruiters viewing the leaderboard can now find you.
+              </div>
+            ) : linkedinStatus === 'local' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
+                Saved locally — syncing soon.
+              </div>
+            ) : linkedinStatus === 'invalid' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--red, #dc2626)', marginTop: '0.45rem' }}>
+                That does not look like a LinkedIn URL. It should contain linkedin.com.
+              </div>
+            ) : linkedinStatus === 'error' ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--red, #dc2626)', marginTop: '0.45rem' }}>
+                Could not save right now — saved locally for now.
+              </div>
+            ) : !linkedin.trim() ? (
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
+                Add your LinkedIn so recruiters viewing the leaderboard can find you.
+              </div>
+            ) : null}
           </div>
         </Card>
 
