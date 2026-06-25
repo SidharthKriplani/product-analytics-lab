@@ -67,7 +67,7 @@ const PREP_PLANS = [
   },
 ];
 
-const CHEAT_SECTIONS = [
+export const CHEAT_SECTIONS = [
   {
     id: 'sql-datetime',
     label: 'SQL — Date & Time',

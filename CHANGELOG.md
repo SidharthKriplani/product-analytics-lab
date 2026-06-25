@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [6.10.0] — 2026-06-25 [EASY PROMPT RE-AUDIT (7 fixes) + inline SQL cheatsheet]
+
+**Re-audit of the redundancy-pass rewrites** (the proper rubric pass that should've happened inline). Found 7 more Easy prompts with the e55 defect — the scenario undersold the deliverable (mentioned a computed/filter column but not the plain identity columns the query also returns). Fixed by folding the missing columns into the scenario in plain business language (conditions preserved): **e12, e52, e54, e57** (clear) and **e40, e58, e36** (mild). No difficulty mis-tiers found.
+
+**Cheatsheet shortcut fixed.** The crash-course review day linked the whole all-rooms Prep Cheatsheet page (covers every room — incoherent from inside a SQL course). Replaced with an inline, collapsible **SQL Quick Reference** sourced directly from the cheat sheet's 3 SQL sections (Date & Time, Window Functions, Analytics Patterns) via a new `export const CHEAT_SECTIONS` + `SQL_CHEATS` filter — single source, no all-rooms detour. Build 895 ✓.
+
 ## [6.9.0] — 2026-06-25 [CRASH PLANS — difficulty-per-day shape + cheatsheet + row fix]
 
 Restructured the crash plans to the literal crash-course shape (per Sidharth):

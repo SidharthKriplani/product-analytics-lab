@@ -7,6 +7,12 @@ import { ShareLinkButton } from '../components/shared/ShareLinkButton.jsx';
 import { SqlEditor } from '../components/shared/SqlEditor.jsx';
 import { Icon } from '../components/shared/Icon.jsx';
 import { SqlLabBeginnerPage } from './SqlLabBeginnerPage.jsx';
+import { CHEAT_SECTIONS } from './CheatSheet.jsx';
+
+// The SQL-only slice of the shared cheat sheet (Date & Time, Window Functions,
+// Analytics Patterns) — sourced inline on the crash-course review day rather than
+// linking the whole all-rooms cheatsheet page.
+const SQL_CHEATS = CHEAT_SECTIONS.filter(s => /^SQL/.test(s.label));
 
 const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3, Forensic: 5 };
 // V5.53: CodeMirror editor (highlighting + schema autocomplete + indent keeper).
@@ -612,6 +618,39 @@ const SQL_PLANS = {
   },
 };
 
+// Inline SQL quick-reference — the SQL sections of the shared cheat sheet, sourced
+// directly (collapsible) so the review day never sends the user to the all-rooms page.
+function SqlQuickRef() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ marginTop: '0.7rem', border: '1px solid var(--teal-border)', borderRadius: '10px', overflow: 'hidden' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.8rem 1rem', background: 'var(--teal-bg)', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+      >
+        <Icon name='book-open' size={18} color='var(--teal)' />
+        <span style={{ flex: 1, fontSize: '0.86rem', fontWeight: 700, color: 'var(--teal)' }}>SQL Quick Reference</span>
+        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{open ? 'Hide' : 'Show'} · date/time · windows · patterns</span>
+      </button>
+      {open && (
+        <div style={{ padding: '0.4rem 1rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+          {SQL_CHEATS.map(sec => (
+            <div key={sec.id}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', margin: '0.5rem 0 0.35rem' }}>{sec.label}</div>
+              {sec.blocks.map((b, bi) => (
+                <div key={bi} style={{ marginBottom: '0.5rem' }}>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>{b.title}</div>
+                  <pre style={{ margin: 0, padding: '0.5rem 0.7rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '0.72rem', fontFamily: 'monospace', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'pre', lineHeight: 1.5 }}>{b.code}</pre>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Day-by-day plan view for the Intermediate / Advanced tabs. Rows reuse ProblemListRow
 // so they match the All list exactly (no walkthrough, no filters). Last day links the
 // prep cheatsheet.
@@ -644,21 +683,8 @@ function SqlPlanView({ tier, onSelect, solved }) {
                   <ProblemListRow key={p.id} p={p} i={i} isSolved={solved.has(p.id)} onSelect={() => onSelect(p.id)} />
                 ))}
               </div>
-              {/* Cheatsheet link on the review day */}
-              {day.cheatsheet && (
-                <button
-                  onClick={() => { window.location.hash = '#/cheatsheet'; }}
-                  className="pal-card-hover"
-                  style={{ marginTop: '0.7rem', width: '100%', display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.8rem 1rem', background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: '10px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
-                >
-                  <Icon name='book-open' size={20} color='var(--teal)' />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--teal)' }}>Open the Prep Cheatsheet</div>
-                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Time-boxed prep plans + quick reference for every pattern.</div>
-                  </div>
-                  <span style={{ flexShrink: 0, fontSize: '0.9rem', color: 'var(--teal)' }}>{'→'}</span>
-                </button>
-              )}
+              {/* SQL quick reference sourced inline on the review day (no all-rooms link) */}
+              {day.cheatsheet && <SqlQuickRef />}
             </div>
           );
         })}
