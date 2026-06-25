@@ -31,10 +31,10 @@ export function InstrumentationBrowser({ onSelectCase, unlocked, onOpenArticle }
   const [theoryActive, setTheoryActive] = useState(false);
   const [diffFilter, setDiffFilter] = useState('all');
 
-  // ── Filtering (semantics preserved; analyst alias for junior kept) ──
+  // ── Filtering ── (difficulty normalized to analyst/senior/staff — V6.0.0)
   const filtered = instrumentationCases
     .filter(c => activeFilter === 'All' || c.domain === activeFilter)
-    .filter(c => diffFilter === 'all' || c.difficulty === diffFilter || (diffFilter === 'analyst' && c.difficulty === 'junior'))
+    .filter(c => diffFilter === 'all' || c.difficulty === diffFilter)
     .slice()
     .sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
 
@@ -49,7 +49,7 @@ export function InstrumentationBrowser({ onSelectCase, unlocked, onOpenArticle }
       onChange: setDiffFilter,
       options: [
         { value: 'all', label: 'All levels' },
-        { value: 'analyst', label: 'Junior', count: instrumentationCases.filter(c => c.difficulty === 'analyst' || c.difficulty === 'junior').length },
+        { value: 'analyst', label: 'Analyst', count: instrumentationCases.filter(c => c.difficulty === 'analyst').length },
         { value: 'senior', label: 'Senior', count: instrumentationCases.filter(c => c.difficulty === 'senior').length },
         { value: 'staff', label: 'Staff', count: instrumentationCases.filter(c => c.difficulty === 'staff').length },
       ],

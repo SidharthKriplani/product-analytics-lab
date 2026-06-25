@@ -4,6 +4,16 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [6.1.0] — 2026-06-25 [VOCAB NORMALIZATION — first step of the gradient-standard rollout]
+
+First (mechanical) step of the `HQ/GRADIENT-STANDARD.md` rollout: every Axis-B (seniority/judgment) room now uses ONE difficulty vocabulary — `analyst → senior → staff`. Before, the difficulty filter meant different things in different rooms (Instrumentation `junior`, Stats `foundational`/`intermediate`/`advanced`, Metrics/RCA `advanced`).
+
+- **Data normalized** (the `difficulty:` field only, via targeted replace): `junior`→`analyst` (instrumentationCases), `advanced`→`staff` (rcaCases, metricCases, statsModules), `foundational`→`analyst` + `intermediate`→`senior` (statsModules). Result: analyst 141 / senior 252 / staff 92, zero stragglers.
+- **UI filters fixed** so nothing breaks or shows dead options: InstrumentationBrowser (dropped the `junior` alias + "Junior"→"Analyst" label), JudgmentBank (removed the now-empty "Foundational" filter button), InterviewSimulator (tier→difficulty map cleaned to canonical).
+- **Deliberately untouched:** the `level` **performance-grade** scale (`junior→analyst→senior→staff` is the grade a user *earns* — a separate system from problem difficulty); the **Foundations** learn layer (`Beginner`/`Intermediate`/`Advanced` — its own correct teaching ladder, already consistent); and SQL datamart seed rows (`'advanced'`/`'intermediate'` are course-catalog data).
+
+Build 895 ✓. Per-room *ordering into gradients* + on-ramps is still the staged content work the standard governs — this was just the vocabulary prerequisite.
+
 ## [6.0.0] — 2026-06-25 [CHECK/SUBMIT MODEL · SOLVE ANIMATION · GRADIENT STANDARD]
 
 **SQL Lab runner → Check / Submit (two actions, was Run / Check).** `SqlLabPage.jsx`:

@@ -515,7 +515,6 @@ export function JudgmentBank({ onNavigate }) {
         {/* Difficulty */}
         <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
           <FilterBtn active={diffFilter === 'all'} onClick={() => setDiffFilter('all')}>All levels</FilterBtn>
-          <FilterBtn active={diffFilter === 'foundational'} onClick={() => setDiffFilter('foundational')}>Foundational</FilterBtn>
           <FilterBtn active={diffFilter === 'analyst'} onClick={() => setDiffFilter('analyst')}>Analyst</FilterBtn>
           <FilterBtn active={diffFilter === 'senior'} onClick={() => setDiffFilter('senior')}>Senior</FilterBtn>
           <FilterBtn active={diffFilter === 'staff'} onClick={() => setDiffFilter('staff')}>Staff</FilterBtn>

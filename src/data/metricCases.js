@@ -2545,7 +2545,7 @@ export const metricCases = [
     id: 'M16',
     title: 'How Do You Measure Navigation Quality When You Rarely Know the Right Answer?',
     subtitle: 'Wayfind · Consumer Maps · Route Quality',
-    difficulty: 'advanced',
+    difficulty: 'staff',
     isFree: false,
     domain: 'maps',
     linkedConceptIds: ['proxy-metric', 'guardrail-metric', 'primary-metric'],

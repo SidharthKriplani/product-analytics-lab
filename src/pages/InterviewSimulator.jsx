@@ -18,13 +18,13 @@ function pickRandom(arr, seed) {
 }
 
 // Tier-aware pick: prefers cases whose `difficulty` matches the selected tier.
-// Case data exposes a top-level `difficulty` ('analyst' | 'senior' | 'staff',
-// plus a few 'advanced'/'intermediate'/'foundational'). Senior tier prefers
-// senior+analyst; staff tier prefers senior+staff+advanced. Falls back to the
-// full array when no case matches (keeps seeding robust + deterministic).
+// Case data exposes a top-level `difficulty` — normalized to 'analyst' | 'senior'
+// | 'staff' (V6.0.0). Senior tier prefers senior+analyst; staff tier prefers
+// staff+senior. Falls back to the full array when no case matches (keeps seeding
+// robust + deterministic).
 const TIER_PREFERRED_DIFFICULTIES = {
-  senior: ['senior', 'analyst', 'intermediate'],
-  staff: ['senior', 'staff', 'advanced'],
+  senior: ['senior', 'analyst'],
+  staff: ['staff', 'senior'],
 };
 
 function pickRandomByTier(arr, seed, tier) {
