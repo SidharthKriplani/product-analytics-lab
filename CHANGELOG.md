@@ -4,6 +4,21 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [5.99.0] — 2026-06-25 [EASY-TIER RECALIBRATION · RAMP WINDOW CLEANED]
+
+**Three mis-tiered "Easy" problems → Medium**, found by a full audit of the 43-Easy pool against `SQL-DIFFICULTY-RUBRIC.md` (triggered by sql-e09 surfacing as far too hard for the beginner ramp). All three construct a rate — `ROUND(100.0 * SUM(flag) / COUNT(*), 1)` — which is conditional aggregation + ratio (a Medium marker, and real conceptual load above pure counting):
+- **sql-e02** Session Conversion by Source (conversion %).
+- **sql-e09** Provider No-Show Rate (no-show % **+** top-1-by-computed-rate "worst offender" — double trigger; this was the one that prompted the audit).
+- **sql-e44** Premium Rate by Device OS (premium-conversion %).
+
+**Effect on the beginner ramp:** the first-15-Easy training-wheels window auto-recomputes off `difficulty`, so e02 and e09 drop out. Verified the new window (e04, e05, e06, e07, e08, e12, e13, e20, e23, e26, e29, e32, e33, e34, e35) has zero rate / window / anti-join / 3+-join problems — a clean Easy ramp.
+
+**Deliberately kept Easy:** sql-e08 (Top-Performing Content) — `GROUP BY + COUNT + ORDER BY + LIMIT 1` is all Easy-allowed; "top-1 by a computed metric" is not a rubric trigger (the audit over-fired there). But its prompt told users to "filter to the last 30 days" while the solution has no such filter and the data is historical — a literal-reader would get 0 rows and fail Check. **Removed the bogus clause** so the prompt matches the answer.
+
+Gates: SQL T1 clean (only pre-existing T2 tag-vocab warnings), brace diff 0, build 895 ✓. `sqlLabProblems.js` only.
+
+**Open follow-up (not done):** the ramp now opens with two simple 2-table joins (e04, e05) before the first single-table problem. To make the on-ramp lead with pure single-table fundamentals would mean reordering Easy problems at the front of the source array (a deliberate content reorder) — flagged, not done, since it desyncs nothing and the genuine wall (rate/top-1) is already gone. True beginners have the separate sequential Beginner Level.
+
 ## [5.98.0] — 2026-06-25 [ANALYST UNIVERSE REBUILT AS A LOOP · SQL-LAB SPEC → PYLAB BLUEPRINT]
 
 **Analyst Universe rebuilt (`UniverseView.jsx`).** The old version was a lopsided spoke-star with a single random Build→Monitor arc and labels that collided (the broken y-only nudge moved opposite-side labels onto nodes). Replaced with an actual **loop**: 7 stages on one ring in workflow order (Monitor→Diagnose→Understand→Communicate→Design→Analyze→Build→back), the ring illuminating with overall progress (top, clockwise), clockwise flow chevrons, stage names placed radially with quadrant anchors (no collisions at 7 evenly-spaced nodes), overall % in the hub. Room mapping moved to the numbered list below the map (kept the SVG clean) + hover tooltips. Mobile = ordered numbered list. Same data wiring (`computeArmProgress`, click-to-room). Intended to become PAL's Layer-2 "door" (relocation out of Progress still pending). Build 895 ✓.
