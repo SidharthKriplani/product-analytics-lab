@@ -180,13 +180,18 @@ function deriveRequirements(problem) {
   if (!problem) return null;
   const columns = problem.expectedColumns || [];
   const rc = problem.expectedRowCount;
-  // Pull the sort instruction straight out of the prompt sentence, if present.
+  // Ordering: prefer the authored `orderBy` field (the prompt no longer states it,
+  // to avoid duplicating the box). Fall back to parsing the prompt for older problems.
   let order = null;
-  const prompt = problem.prompt || '';
-  const sortMatch = prompt.match(/\b(?:ordered?|sort(?:ed)?)\b[^.]*\bby\b[^.]*/i);
-  if (sortMatch) {
-    let phrase = sortMatch[0].trim().replace(/[\s,;]+$/, '');
-    order = phrase.charAt(0).toUpperCase() + phrase.slice(1);
+  if (problem.orderBy) {
+    order = 'Ordered by ' + problem.orderBy;
+  } else {
+    const prompt = problem.prompt || '';
+    const sortMatch = prompt.match(/\b(?:ordered?|sort(?:ed)?)\b[^.]*\bby\b[^.]*/i);
+    if (sortMatch) {
+      let phrase = sortMatch[0].trim().replace(/[\s,;]+$/, '');
+      order = phrase.charAt(0).toUpperCase() + phrase.slice(1);
+    }
   }
   if (!columns.length && typeof rc !== 'number' && !order) return null;
   return { columns, order, rowCount: typeof rc === 'number' ? rc : null };

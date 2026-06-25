@@ -4,6 +4,15 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [6.6.0] — 2026-06-25 [SQL EASY — PROMPT/DELIVERABLE REDUNDANCY FIXED (Phase 2b)]
+
+The Easy prompt and the "YOUR RESULT SHOULD" box were duplicating the deliverable (prompt said "Return col1, col2… ordered by X"; the box listed the same). Fixed across all **47 Easy** problems:
+- **Prompts rewritten** to END at the problem — scenario + any real conditions/filters folded in (e.g. "those whose status is not 'active'", "at least 2 'app_open' events", "high-risk user") — with the column enumeration and the order-by clause removed. The box now owns the deliverable.
+- **New `orderBy` field** on each Easy problem (e.g. `'opened_at ascending'`); `deriveRequirements` prefers it over parsing the prompt, so the ordering line survives now that prompts don't state it. Falls back to prompt-parse for non-authored problems.
+- Authored via a reviewed subagent pass; conditions verified preserved; brace 0, module parses, build 895 ✓.
+
+Remaining of the merged-statement idea: the explicit per-column derivation hint (e.g. naming `risk_tier` as the high-risk definition) — a further enrichment; the conditions are already in the scenario prose.
+
 ## [6.5.0] — 2026-06-25 [SQL LAB — 3 PLAN TABS (skeletons) + tab-switch animation]
 
 SQL Lab browse view gains a top-level **3-tab switcher** (`SqlPlanTabs`): **All Problems** (the full library + filters + walkthrough, unchanged), **3–4 Days → Intermediate**, **7 Days → Advanced**. Switching to a plan tab **swaps the entire body** — filters, walkthrough and list disappear, replaced by `SqlPlanSkeleton` (day-by-day card scaffold: 4 days for Intermediate, 7 for Advanced, content TBD). Body is keyed by tab so each switch cross-fades (`pal-tab-fade`, reduced-motion safe). SQL-Lab-only, as specified. Build 895 ✓. **Plan content is the skeleton's fill-in — a later pass** (each day = an ordered slice off the difficulty gradient).
