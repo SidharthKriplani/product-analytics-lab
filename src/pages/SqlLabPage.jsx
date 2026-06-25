@@ -126,26 +126,32 @@ function DebriefPanel({ text }) {
   );
 }
 
-const SORTED_PROBLEMS = [...sqlLabProblems].sort((a, b) => DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty]);
+// ─── The Easy on-ramp: gradient order (one new concept per step) ──────────────
+// Easy problems are presented in a deliberate skill gradient — single-table SELECT/
+// WHERE → ORDER BY/LIMIT → whole-table aggregate → COUNT(DISTINCT) → GROUP BY (COUNT,
+// then AVG) → HAVING → first 2-table JOIN → join+GROUP BY → full stack — NOT insertion
+// order. This is the ramp that makes Easy feel easy right after the walkthroughs.
+// Authored from a difficulty audit of every Easy solution. Ids not listed sort last.
+const SQL_EASY_RAMP_ORDER = [
+  'sql-e47', 'sql-e06', 'sql-e55', 'sql-e67', 'sql-e32', 'sql-e69', 'sql-e54', 'sql-e36', // R2 filters
+  'sql-e65', 'sql-e81', 'sql-e51',                                                          // R4 whole-table aggregates
+  'sql-e37', 'sql-e33', 'sql-e26', 'sql-e49', 'sql-e13', 'sql-e29', 'sql-e70', 'sql-e74',  // R5 GROUP BY
+  'sql-e62', 'sql-e34', 'sql-e59', 'sql-e08', 'sql-e39',                                    // R5 cont. + R6 HAVING
+  'sql-e04', 'sql-e12', 'sql-e05', 'sql-e68', 'sql-e52', 'sql-e56', 'sql-e57', 'sql-e23',  // R7 first joins
+  'sql-e78', 'sql-e35', 'sql-e40', 'sql-e60', 'sql-e77', 'sql-e07', 'sql-e20', 'sql-e58',  // R8 join + GROUP BY
+];
+const EASY_ORDER_RANK = Object.fromEntries(SQL_EASY_RAMP_ORDER.map((id, i) => [id, i]));
 
-// ─── Easy-tier scaffolding ramp (training wheels) ─────────────────────────────
-// As a learner moves through the FIRST 15 Easy problems — in the exact order the lab
-// presents them (Easy sorts to the front of SORTED_PROBLEMS; the sort is stable so
-// these stay in source order) — scaffolding fades in 3 batches of 5:
-//   Stage 1 (Easy #1–5):  explicit bullet requirements  + schema preview WITH rows/types.
-//   Stage 2 (Easy #6–10): no bullets, schema NAMES only  + "run SELECT *" nudge.
-//   Stage 3 (Easy #11–15): no bullets, normal schema (closest to the real experience).
-// Everything else (Easy #16+, and all non-Easy) gets stage 0 = no ramp, default render.
-// Identified off the same SORTED_PROBLEMS the browser uses, by actual difficulty field
-// (NOT the sql-e ID prefix — some sql-eNN problems are tagged Medium).
-const EASY_RAMP_IDS = SORTED_PROBLEMS.filter(p => p.difficulty === 'Easy').slice(0, 15).map(p => p.id);
-
-function easyRampStage(problem) {
-  if (!problem) return 0;
-  const i = EASY_RAMP_IDS.indexOf(problem.id);
-  if (i < 0) return 0;        // not in the first 15 Easy → no ramp
-  return Math.floor(i / 5) + 1; // 0–4 → 1, 5–9 → 2, 10–14 → 3
-}
+// Sort by difficulty tier; WITHIN Easy, sort by the gradient rank above so the on-ramp
+// is a true one-concept-per-step climb (not insertion order). Stable for the rest.
+const SORTED_PROBLEMS = [...sqlLabProblems].sort((a, b) => {
+  const d = DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty];
+  if (d !== 0) return d;
+  if (a.difficulty === 'Easy') {
+    return (EASY_ORDER_RANK[a.id] ?? 999) - (EASY_ORDER_RANK[b.id] ?? 999);
+  }
+  return 0;
+});
 
 // Derive learner-facing requirements at RENDER time from the problem's own
 // expected* fields + prompt. Nothing stored on the problem; pure presentation.

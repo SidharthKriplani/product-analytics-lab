@@ -4,6 +4,12 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [6.3.0] — 2026-06-25 [SQL RAMP — PHASE 2a: EASY ON-RAMP ORDERED INTO A GRADIENT]
+
+The Easy tier now presents in a deliberate **one-concept-per-step gradient** instead of insertion order — the core of the "gradual ramp." Authored from a difficulty audit of all 40 Easy solutions: single-table SELECT/WHERE → ORDER BY/LIMIT → whole-table aggregate → COUNT(DISTINCT) → GROUP BY (COUNT then AVG) → HAVING → first 2-table JOIN → join+GROUP BY → full stack. First JOIN lands at position 25 (no JOIN before the single-table fundamentals are covered). `SQL_EASY_RAMP_ORDER` (40 ids) + `EASY_ORDER_RANK` drive a secondary sort inside Easy in `SORTED_PROBLEMS`, so both browse order and prev/next navigation follow the ramp. Removed the dead `easyRampStage`/`EASY_RAMP_IDS`. Verified: the 40 ramp ids equal the 40 Easy problems exactly (no dupes/gaps). Build 895 ✓.
+
+**Phase 2 remaining:** (b) author per-problem `returns`/derivation hints (merged Easy statement); (c) Medium/Hard calibration audit (Easy was done in V5.99). **Phase 3:** roll the ramp into every room.
+
 ## [6.2.0] — 2026-06-25 [SQL RAMP — PHASE 1: TIER-BASED SCAFFOLDING + 4-TABLE CAP]
 
 Reworked the SQL Lab scaffolding from the within-Easy "3-batch training wheels" to **tier-based scaffolding** (the fade now happens across tiers, which is what makes Easy uniformly easy):
