@@ -4,6 +4,14 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [7.2.0] — 2026-06-25 [PHASE 3 polish — concept ramps for Stats + Instrumentation]
+
+Phase 3 recon finding: the difficulty ramp ("easy first") is **already in every room** — all case banks carry `difficulty:` tags and 17 browsers already sort/group by difficulty (it's in the room template). So there was no 12-room build; the only genuine gap was **intra-tier concept ordering** (the SQL `SQL_EASY_RAMP_ORDER` analog), which only SQL had. Added it to the two rooms flagged first:
+- **Stats** (`StatsBrowser.jsx`): `STATS_RAMP_ORDER` (20 modules) makes the default view a pedagogical climb — analyst (reading one test) → senior (interference + causal inference, method-then-applied) → staff (advanced design). Fixes the two ramp breaks in the authored order (analyst `stat17` was buried at position 17; staff modules were scattered among seniors). Card numbers now follow the ramp (sequential 01–20); "By Difficulty" toggle preserved (stable sort keeps ramp order within tier); "Next" follows the ramp.
+- **Instrumentation** (`InstrumentationBrowser.jsx`): `INSTRUMENTATION_RAMP_ORDER` (21 cases) added as the within-tier tiebreak after the existing tier sort — plan→validate→debug (analyst), taxonomy→identity/QA→privacy→lineage (senior), contracts→debt→migration→pipeline (staff). "Next" follows the ramp.
+
+No data-content edits (browser-only, low risk). All ids verified present (20/20, 21/21, no dups/orphans). Build 905 ✓. **Phase 3 considered complete** — the rest of the rooms already ramp by difficulty; further intra-tier ordering is optional per-room polish, not a project.
+
 ## [7.1.0] — 2026-06-25 [LAST-ACTIVE — public "Active Xh ago" on profiles]
 
 Public profiles now show when a user was last active (e.g. "Active 3h ago"), visible to everyone. **Last-active timestamp only** — no dwell/total-time tracking (per Sidharth: "last active at only").

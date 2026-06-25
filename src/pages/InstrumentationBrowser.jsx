@@ -17,6 +17,20 @@ const DOMAIN_LABEL = {
 
 const DIFF_ORDER = { junior: 0, analyst: 0, senior: 1, staff: 2 };
 
+// Concept ramp — pedagogical order WITHIN each difficulty tier (one concept building on
+// the last), used as the tiebreak after the tier sort so the list climbs gently:
+// plan → validate → debug (analyst); taxonomy → identity/QA → privacy → lineage (senior);
+// contracts → debt → migration → pipeline gaps (staff). Mirrors the SQL Lab gradient.
+const INSTRUMENTATION_RAMP_ORDER = [
+  // analyst — plan it, validate it, debug it
+  'inst01', 'inst07', 'inst10', 'inst19', 'inst03', 'inst15',
+  // senior — design, identity/quality, privacy, lineage
+  'inst02', 'inst13', 'inst17', 'inst04', 'inst14', 'inst16', 'inst20', 'inst05', 'inst12', 'inst09',
+  // staff — contracts, debt, migrations, pipeline integrity
+  'inst06', 'inst08', 'inst11', 'inst18', 'inst21',
+];
+const INSTRUMENTATION_RAMP_RANK = Object.fromEntries(INSTRUMENTATION_RAMP_ORDER.map((id, i) => [id, i]));
+
 // Unique domains present in the data, in declared order.
 const ALL_DOMAINS = (() => {
   const seen = new Set();
@@ -36,10 +50,15 @@ export function InstrumentationBrowser({ onSelectCase, unlocked, onOpenArticle }
     .filter(c => activeFilter === 'All' || c.domain === activeFilter)
     .filter(c => diffFilter === 'all' || c.difficulty === diffFilter)
     .slice()
-    .sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
+    .sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9)
+      || (INSTRUMENTATION_RAMP_RANK[a.id] ?? 99) - (INSTRUMENTATION_RAMP_RANK[b.id] ?? 99));
 
   const completedIds = new Set(Object.keys(allProgress));
-  const firstUnstartedId = instrumentationCases.find(c => !completedIds.has(c.id))?.id;
+  // "Next" follows the same ramp: first unstarted in tier→concept order.
+  const rampOrderedAll = [...instrumentationCases].sort((a, b) =>
+    (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9)
+    || (INSTRUMENTATION_RAMP_RANK[a.id] ?? 99) - (INSTRUMENTATION_RAMP_RANK[b.id] ?? 99));
+  const firstUnstartedId = rampOrderedAll.find(c => !completedIds.has(c.id))?.id;
 
   const filters = [
     {

@@ -24,7 +24,26 @@ const LEVEL_CFG = {
 const DIFF_ORDER = { analyst: 0, foundational: 0, intermediate: 1, senior: 1, advanced: 2, staff: 2 };
 const DIFF_GROUP_LABELS = { 0: 'Foundational · Analyst', 1: 'Intermediate · Senior', 2: 'Advanced · Staff' };
 
-const moduleOriginalIndex = new Map(statsModules.map((m, i) => [m.id, i + 1]));
+// Concept ramp — pedagogical easy→hard order within each tier (one concept building on
+// the last), so the default browse experience climbs gently instead of jumping tiers.
+// Analyst: reading a single test → senior: causal-inference methods (concept then applied)
+// → staff: advanced design choices. Mirrors the SQL Lab gradient.
+const STATS_RAMP_ORDER = [
+  // analyst — how to read one test
+  'stat01-pvalue-decision', 'stat02-ci-reality', 'stat03-power-mde', 'stat04-srm-first',
+  'stat05-multiple-testing', 'stat06-guardrail-breach', 'stat07-novelty-effect', 'stat17-did',
+  // senior — interference + causal inference (method, then applied)
+  'stat08-sutva-interference', 'stat10-novelty-effect', 'stat13-did-parallel-trends',
+  'stat14-rd-manipulation', 'stat18-rdd', 'stat15-synthetic-control-donor-pool',
+  'stat19-synthetic-control', 'stat16-iv-exclusion-restriction', 'stat20-iv-selection',
+  // staff — advanced design
+  'stat09-cuped-variance', 'stat11-bayesian-stopping', 'stat12-longrun-shortrun',
+];
+const STATS_RAMP_RANK = Object.fromEntries(STATS_RAMP_ORDER.map((id, i) => [id, i]));
+const rampSorted = [...statsModules].sort((a, b) => (STATS_RAMP_RANK[a.id] ?? 99) - (STATS_RAMP_RANK[b.id] ?? 99));
+
+// Card number reflects ramp position, so the default list reads 01,02,03… in climb order.
+const moduleOriginalIndex = new Map(rampSorted.map((m, i) => [m.id, i + 1]));
 
 export function StatsBrowser({ onSelectModule, onOpenArticle, onNavigate }) {
   const [sortBy, setSortBy] = useState('default');
@@ -34,9 +53,11 @@ export function StatsBrowser({ onSelectModule, onOpenArticle, onNavigate }) {
 
   const completedIds = new Set(Object.keys(allProgress));
 
+  // Default view = the concept ramp; "By Difficulty" re-groups into tiers (stable sort
+  // preserves the ramp order within each tier).
   const displayModules = sortBy === 'difficulty'
-    ? [...statsModules].sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 1) - (DIFF_ORDER[b.difficulty] ?? 1))
-    : statsModules;
+    ? [...rampSorted].sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 1) - (DIFF_ORDER[b.difficulty] ?? 1))
+    : rampSorted;
 
   // Build grouped structure when sorted by difficulty
   const diffGroups = sortBy === 'difficulty'
@@ -47,7 +68,7 @@ export function StatsBrowser({ onSelectModule, onOpenArticle, onNavigate }) {
       })).filter(g => g.modules.length > 0)
     : null;
 
-  const firstUnstartedId = statsModules.find(m => !completedIds.has(m.id))?.id;
+  const firstUnstartedId = rampSorted.find(m => !completedIds.has(m.id))?.id;
 
   return (
     <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem', width: '100%', boxSizing: 'border-box' }}>

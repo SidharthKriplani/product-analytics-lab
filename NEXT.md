@@ -38,6 +38,7 @@ cd /tmp/pal-push && git add -A && git commit -m "V7.1.0: Postgres everywhere (sq
 PAL is live on Vercel (productanalyticslab.com). Build clean at **905 modules**. **BUILD FREEZE in effect — no further builds for ~5 days after this push.**
 - **V7.0** — SQL Lab → **Postgres everywhere (pglite)**, sql.js fully removed from all 3 runtimes (main + Beginner + Full Loop) and from npm. Harness-verified: 192/192 solutions + 336/336 methods + 18/18 beginner + 10/10 full-loop. 22 stale `sqliteNote` fields rewritten to match the ported Postgres solutions.
 - **V7.1** — public **last-active** ("Active Xh ago") on profiles; last-active timestamp only, no dwell tracking.
+- **V7.2** — **Phase 3 polish + finding: the difficulty ramp already exists in every room** (all banks difficulty-tagged, 17 browsers already sort by it). No 12-room build existed. Added the one real gap — intra-tier concept ordering (SQL ramp analog) — to **Stats** (`STATS_RAMP_ORDER`) + **Instrumentation** (`INSTRUMENTATION_RAMP_ORDER`). **Phase 3 = DONE.** Any further per-room intra-tier ordering is optional polish, not a project. ⚠ V7.2 files (`StatsBrowser.jsx`, `InstrumentationBrowser.jsx`, `CHANGELOG.md`, `NEXT.md`) are a separate push from the V7.1 commit.
 
 Earlier sessions:
 - **V5.94** — design-system foundation (`RoomHeader`/`FilterBar`/`CaseCard`), global rails killed, Community feed v1.
