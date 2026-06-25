@@ -4,6 +4,17 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [6.2.0] — 2026-06-25 [SQL RAMP — PHASE 1: TIER-BASED SCAFFOLDING + 4-TABLE CAP]
+
+Reworked the SQL Lab scaffolding from the within-Easy "3-batch training wheels" to **tier-based scaffolding** (the fade now happens across tiers, which is what makes Easy uniformly easy):
+- **Schema by tier, capped at 4 tables.** New `tablesForProblem(problem, dm)`: Easy shows **only the tables the solution uses**; Medium+ shows needed + a couple of distractors, **capped at 4 total (incl. distractors) unless the solution needs more** — the new standing cognitive-load rule. Header reads "tables you need" at Easy, "Schema — N tables" above. Applies bank-wide (no more 5–6 irrelevant tables dumped on an Easy problem).
+- **Requirements by tier.** The spelled-out "For each matching row, your result should return:" block shows at **Easy only**; withheld at Medium+ (you infer the deliverable). `isEasy` gates it.
+- **Retired** the `RampMarker` "Training wheels N/3" + the `easyRampStage`/`EASY_RAMP_IDS` batch logic (left inert; removable). On-ramp *ordering* (single-table-first) and the Beginner Level are unchanged.
+
+Docs: `SQL-LAB-SPEC.md` §9A rewritten to the tier model + the 4-table rule; §6 updated to Check/Submit; `HQ/GRADIENT-STANDARD.md` gains the context-budget rule (§4.7). Build 895 ✓.
+
+**Phase 2 (next): authoring** — per-problem structured `returns` (column + qualifier + derivation hint) so the Easy statement merges into one instruction with the derivation handed over (and withheld at Medium+). **Phase 3:** roll the ramp into every room. Both are staged content work.
+
 ## [6.1.0] — 2026-06-25 [VOCAB NORMALIZATION — first step of the gradient-standard rollout]
 
 First (mechanical) step of the `HQ/GRADIENT-STANDARD.md` rollout: every Axis-B (seniority/judgment) room now uses ONE difficulty vocabulary — `analyst → senior → staff`. Before, the difficulty filter meant different things in different rooms (Instrumentation `junior`, Stats `foundational`/`intermediate`/`advanced`, Metrics/RCA `advanced`).

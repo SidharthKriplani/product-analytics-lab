@@ -183,6 +183,22 @@ function solutionTables(problem, dm) {
   return used.length ? used : all;
 }
 
+// Which tables to SHOW in the schema panel, by difficulty — the scaffolding fade.
+// STANDING RULE: never show more than 4 tables total (including distractors) unless
+// the solution genuinely needs more. Easy hands you only the tables you need; Medium
+// and up add a couple of distractors (still capped at 4) so you have to pick.
+const MAX_SCHEMA_TABLES = 4;
+function tablesForProblem(problem, dm) {
+  if (!dm || !problem) return null;
+  const all = Object.keys(dm.tables);
+  const needed = solutionTables(problem, dm);
+  if (problem.difficulty === 'Easy') return needed;          // only what's needed
+  const cap = Math.max(MAX_SCHEMA_TABLES, needed.length);    // never below what's needed
+  if (needed.length >= cap) return needed;
+  const distractors = all.filter(t => !needed.includes(t)).slice(0, cap - needed.length);
+  return [...needed, ...distractors];
+}
+
 const DIFF_COLOR = {
   Easy:     { bg: 'var(--green-bg,  rgba(16,185,129,0.08))',  text: 'var(--green)',  border: 'var(--green-border,  rgba(16,185,129,0.25))', solid: '#10b981', on: '#06140d' },
   Medium:   { bg: 'var(--yellow-bg, rgba(245,158,11,0.08))',  text: 'var(--yellow)', border: 'var(--yellow-border, rgba(245,158,11,0.25))', solid: '#f59e0b', on: '#1a1205' },
@@ -231,14 +247,16 @@ function Badge({ label, style }) {
 // onlyTables (optional): when given, render ONLY those tables (Stage-1 ramp shows
 // just the tables the solution needs). Header reflects the filtered set. When the
 // toggle is collapsible the chevron shows; force-open callers pass onToggle=undefined.
-function SchemaAccordion({ dm, open, onToggle, onlyTables }) {
+function SchemaAccordion({ dm, open, onToggle, onlyTables, scopedLabel }) {
   if (!dm) return null;
   const allNames = Object.keys(dm.tables);
   const filtered = (onlyTables && onlyTables.length) ? allNames.filter(n => onlyTables.includes(n)) : allNames;
   const scoped = onlyTables && onlyTables.length > 0;
-  const headerText = scoped
-    ? 'Schema — tables you need (' + filtered.length + ')'
-    : 'Schema — ' + dm.name + ' (' + allNames.length + ' tables)';
+  const headerText = !scoped
+    ? 'Schema — ' + dm.name + ' (' + allNames.length + ' tables)'
+    : scopedLabel === 'Tables you need'
+      ? 'Schema — tables you need (' + filtered.length + ')'
+      : 'Schema — ' + filtered.length + ' table' + (filtered.length !== 1 ? 's' : '');
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden', marginTop: '0.75rem' }}>
       <button
@@ -1122,13 +1140,13 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
   }, [problem]);
   const diffStyle = problem ? (DIFF_COLOR[problem.difficulty] || DIFF_COLOR.Easy) : DIFF_COLOR.Easy;
 
-  // Easy-tier scaffolding ramp: which fade-batch (1/2/3) this problem falls in.
-  // 0 = no ramp (default rendering). Derived requirements computed only for stage 1.
-  const rampStage = easyRampStage(problem);
-  // Bullets show on stages 1 & 2 (gone by stage 3). Stage 1 also scopes the schema
-  // to only the tables the solution touches; stages 2 & 3 show every table.
-  const rampRequirements = useMemo(() => ((rampStage === 1 || rampStage === 2) ? deriveRequirements(problem) : null), [problem, rampStage]);
-  const rampTables = useMemo(() => (rampStage === 1 ? solutionTables(problem, dm) : null), [problem, rampStage, dm]);
+  // Tier-based scaffolding (replaces the old within-Easy 3-batch "training wheels"):
+  //  - Easy: the deliverable is spelled out + the schema shows ONLY the tables you need.
+  //  - Medium+: requirements withheld (you infer them); schema shows needed + a couple
+  //    of distractors, capped at 4 tables total (tablesForProblem).
+  const isEasy = problem?.difficulty === 'Easy';
+  const easyRequirements = useMemo(() => (isEasy ? deriveRequirements(problem) : null), [problem, isEasy]);
+  const schemaTables = useMemo(() => tablesForProblem(problem, dm), [problem, dm]);
 
   // Notify parent of problem changes for hash routing
   useEffect(() => {
@@ -1512,10 +1530,8 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.55rem', color: 'var(--text)', lineHeight: 1.3 }}>{problem.title}</h2>
           {/* Prompt */}
           <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--text-muted)', margin: 0 }}>{problem.prompt}</p>
-          {/* Easy-tier scaffolding ramp marker — deliberate "training wheels" cue */}
-          {rampStage > 0 && <RampMarker stage={rampStage} />}
-          {/* Stages 1 & 2: deliverable spelled out as bullets above the editor */}
-          {(rampStage === 1 || rampStage === 2) && <RequirementsBlock req={rampRequirements} />}
+          {/* Easy: the deliverable spelled out (withheld at Medium+, where you infer it) */}
+          {isEasy && <RequirementsBlock req={easyRequirements} />}
           {/* Judgment prompt — Hard / Master problems only */}
           {problem.beforeWriting && (
             <div style={{ marginTop: '0.7rem', padding: '0.5rem 0.75rem', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '6px', borderLeft: '3px solid var(--yellow)' }}>
@@ -1540,16 +1556,15 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           )}
         </div>
 
-        {/* Schema — ramp-gated.
-            Stage 1: ONLY the tables the solution needs, force-expanded (no hunting).
-            Stage 2: ALL tables, force-expanded (learner finds which ones they need).
-            Stage 3 / no-ramp: normal collapsible accordion, all tables — same as the
-            other 180-odd problems. */}
+        {/* Schema — tier-gated, capped at 4 tables (incl. distractors) unless the
+            solution needs more (tablesForProblem). Easy: only the tables you need,
+            force-expanded. Medium+: needed + a couple of distractors, collapsible. */}
         <SchemaAccordion
           dm={dm}
-          onlyTables={rampStage === 1 ? rampTables : null}
-          open={(rampStage === 1 || rampStage === 2) ? true : schemaOpen}
-          onToggle={(rampStage === 1 || rampStage === 2) ? undefined : () => setSchemaOpen(o => !o)}
+          onlyTables={schemaTables}
+          scopedLabel={isEasy ? 'Tables you need' : 'Schema'}
+          open={isEasy ? true : schemaOpen}
+          onToggle={isEasy ? undefined : () => setSchemaOpen(o => !o)}
         />
 
         {/* Expected output */}

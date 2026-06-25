@@ -19,7 +19,7 @@ SQL Lab is an in-browser SQL practice environment inside Product Analytics Lab. 
 - **13 datamarts** — ecomm, saas, fintech, consumer, health, gaming, logistics, marketplace, food_delivery, social_network, edtech, hr_analytics, swiggy. "Wider not longer": many schemas so users can't memorize one table layout.
 - **18/18 benchmark categories covered** (see `SQL-COVERAGE-REPORT.md`).
 - **Plus a separate beginner level** — ~18 sequential, isolated SQLBolt-style lessons on a simple movies datamart (§9B).
-- **Plus an Easy-tier scaffolding ramp** — the first 15 Easy problems fade their training wheels over 3 batches (§9A).
+- **Plus tier-based scaffolding** — the schema breadth + how spelled-out the ask is fade as you climb tiers; schema capped at 4 tables (§9A).
 
 ## 2A. The difficulty gradient — the full ramp (Beginner → Master), and where Forensic sits
 
@@ -101,11 +101,12 @@ One array of objects. Core fields on every problem:
 2. **Forensic** (`format: 'forensic'`) — the prompt shows a query that *runs but returns the wrong answer*; the user writes the corrected query. Tests the judgment skill no autograder platform tests. 36 problems.
 3. **Judgment layer** (additive) — for a problem with several correct approaches, `methods[]` holds each (window vs correlated vs self-join vs aggregate), `dial` says which is best under which conditions (data size, index, engine, ties), and `mcqs[]` quiz the tradeoffs. Surfaced via a `JudgmentLayer` component in the runner.
 
-## 6. Runtime: run & check
+## 6. Runtime: Check & Submit
 
+Two actions (V6.0.0 — was Run/Check):
 - **Build DB:** on open, `build` the datamart into an in-memory `sql.js` Database (schema + seed rows), stored in `dbRef`.
-- **Run** (`▶`): executes the user's query, shows the result table. No verdict.
-- **Check** (`✓`, Cmd/Ctrl+Enter): runs the user's query AND validates: row count == `expectedRowCount`, columns == `expectedColumns`, and every `checkValues` row matches the corresponding output row. Numbers are compared with a sql.js-faithful stringification (whole-number REALs serialize as integers — the `.0` trap).
+- **Check** (`▶`, Cmd/Ctrl+Enter): executes the query and shows the result table. **No verdict, nothing recorded, never marks solved.** This is the free "see what my query does" action.
+- **Submit** (click only): runs the query AND validates — row count == `expectedRowCount`, columns == `expectedColumns`, every `checkValues` row matches (sql.js-faithful stringification; whole-number REALs serialize as integers — the `.0` trap). Correct → marks **solved** (green) + a success animation. **Every Submit is recorded to the Submissions history**, pass or fail. Solved = green = a correct Submit; Checking never marks solved.
 - The expected answer is computed from the problem's `solution`, so checkValues and the solution are kept in lockstep by the mechanical gate.
 
 ## 7. The editor (CodeMirror 6)
@@ -130,17 +131,23 @@ The bank currently passes both gates with **0 failures**.
 - **Filters:** difficulty chips, company filter (incl. `alsoAskedAt`), status, search.
 - **Share** button produces a deep link to the current problem.
 
-## 9A. The Easy-tier scaffolding ramp (training wheels)
+## 9A. Tier-based scaffolding (the fade)
 
-The first **15 Easy problems** (by `difficulty === 'Easy'`, in source order — NOT by id prefix) fade their scaffolding over **3 batches of 5**. The thing that fades is **how much schema help** you're handed; the deliverable bullets ride along through batches 1 and 2. All of it is **pure presentation, derived at render time** — nothing is stored on the problem.
+_Replaces the old within-Easy "3-batch training wheels" (retired V6.x — the fade now happens across **tiers**, not across the first 15 Easy)._
 
-| Batch | Problems | Bullets (deliverable) | Schema shown |
+The scaffolding fades as you climb the construction ramp (§2A). Two dimensions fade:
+
+| Tier | Schema shown | Requirements (the deliverable) | Derived-column hints (e.g. "high-risk = `risk_tier`") |
 |---|---|---|---|
-| **1/3 — Full scaffolding** | Easy #1–5 | ✅ one bullet per output column ("For each matching row, return: …") + order + row count | **Only the tables the solution uses** |
-| **2/3 — Find the tables** | Easy #6–10 | ✅ same bullets | **All tables** (learner figures out which are needed) |
-| **3/3 — On your own** | Easy #11–15 | ❌ none | All tables, normal collapsible accordion — identical to the other ~180 problems |
+| **Easy** | only the tables the solution uses (`tablesForProblem` → `solutionTables`) | **spelled out** — numbered "For each matching row, your result should return:" (`deriveRequirements`), force-shown | **given** (Phase-2 authored) |
+| **Medium** | needed + a couple of distractors, **capped at 4 total** | withheld (you infer them) | **not given** — raw columns provided, you derive |
+| **Hard / Master** | needed + distractors, capped at 4 | withheld | none |
 
-Mechanics (`SqlLabPage.jsx`): `easyRampStage(problem)` returns 1/2/3/0; `deriveRequirements(problem)` builds the bullets from `expectedColumns` / `expectedRowCount` / the sort phrase parsed out of `prompt`; `solutionTables(problem, dm)` derives batch-1's relevant tables by whole-word-matching each datamart table name against the problem's stored `solution` SQL (so it stays correct even if a solution changes — no per-problem table list to maintain). A small "Training wheels N/3" marker signals the rung. **The bullets-as-separate-lines was a deliberate fix** — a single comma-list ("Output 3 columns: a, b, c") is the exact line beginners misread.
+**STANDING RULE (cognitive-load cap):** the schema panel never shows **more than 4 tables total, including distractors, unless the solution genuinely needs more.** Enforced by `tablesForProblem(problem, dm)` (Easy → exactly the needed tables; Medium+ → needed + distractors up to 4; never fewer than the solution requires).
+
+Mechanics (`SqlLabPage.jsx`): `isEasy` gates the requirements block + the force-open schema; `tablesForProblem` picks the displayed tables by tier under the 4-cap; `deriveRequirements` builds the spelled-out returns from `expectedColumns` / `expectedRowCount` / the order phrase parsed from `prompt`. **The bullets-as-separate-lines was a deliberate fix** — a single comma-list ("Output 3 columns: a, b, c") is the exact line beginners misread.
+
+**Phase 2 (authoring, in progress):** a per-problem structured `returns` (each column + optional qualifier + a derivation hint) and a scenario/return split, so the Easy statement reads as one merged instruction with the derivation handed over — and withheld at Medium+. Until authored, the render falls back to `deriveRequirements`.
 
 ## 9B. The beginner level (sequential, isolated)
 
