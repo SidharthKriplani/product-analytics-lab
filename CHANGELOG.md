@@ -4,6 +4,10 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [7.2.1] — 2026-06-25 [BUGFIX — SQL Lab false-negative on correct answers (pglite cold-start race)]
+
+Super-user bug sweep caught a real correctness defect from the Postgres migration. `validateResults` compares against an expected sample computed by running `problem.solution` in pglite at DB-init; on a cold start that sample can lose the race and not be ready at submit time, so validation falls back to the `checkValues` path. That fallback used **exact string equality** (`String(row[i]) === String(val)`) — but pglite returns NUMERIC columns as strings (`'1500.00'`, `'0.5000'`), which don't string-equal a `checkValue` of `1500`. Result: a **correct answer intermittently marked wrong** (recorded as an attempt but never marked solved) depending purely on load timing — the worst kind of bug for a learning tool. Fix: the fallback now uses the same `sqlValuesMatch` (parseFloat 0.01-tolerance) the primary path uses, so correctness is robust regardless of whether the sample loaded. One-line change in `SqlLabPage.jsx`; build 905 ✓. (Deeper root — the sample occasionally failing to load on cold start — is now harmless for grading; optional future hardening: retry the sample computation.)
+
 ## [7.2.0] — 2026-06-25 [PHASE 3 polish — concept ramps for Stats + Instrumentation]
 
 Phase 3 recon finding: the difficulty ramp ("easy first") is **already in every room** — all case banks carry `difficulty:` tags and 17 browsers already sort/group by difficulty (it's in the room template). So there was no 12-room build; the only genuine gap was **intra-tier concept ordering** (the SQL `SQL_EASY_RAMP_ORDER` analog), which only SQL had. Added it to the two rooms flagged first:

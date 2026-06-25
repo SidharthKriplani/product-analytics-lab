@@ -1547,7 +1547,11 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
       if (rowArraysMatch(sortedExp, sortedUser, expected.columns, expected.columns.reduce(function(acc, c, i) { acc[c] = i; return acc; }, {}))) return null;
       return 'Values don\'t match the expected output — check your calculations and data types';
     }
-    // Fallback to checkValues if expected sample not yet loaded
+    // Fallback to checkValues if the expected sample hasn't loaded yet (pglite cold-start
+    // race). MUST use the same numeric-tolerant comparison as the primary path — pglite
+    // returns NUMERIC columns as strings like '1500.00' / '0.5000', which exact-string
+    // compare would reject against a checkValue of 1500, falsely marking a correct answer
+    // wrong. (Bug fix: this fallback previously used String(row[i]) === String(val).)
     var colIdx2 = {};
     res.columns.forEach(function(c, i) { colIdx2[c] = i; });
     for (var check of prob.checkValues) {
@@ -1555,7 +1559,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
         return Object.entries(check).every(function(entry) {
           var c = entry[0]; var val = entry[1];
           var i = colIdx2[c];
-          return i !== undefined && String(row[i]) === String(val);
+          return i !== undefined && sqlValuesMatch(val, row[i]);
         });
       });
       if (!match) return 'Output does not match expected values — double-check your query';
