@@ -4,6 +4,23 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [6.9.0] — 2026-06-25 [CRASH PLANS — difficulty-per-day shape + cheatsheet + row fix]
+
+Restructured the crash plans to the literal crash-course shape (per Sidharth):
+- **Intermediate (4d):** Easy → Easy → Medium → most-common-patterns review **+ the Prep Cheatsheet**.
+- **Advanced (7d):** Easy, Easy → Medium, Medium, Medium → Hard → most-common-patterns review **+ the Prep Cheatsheet** (2 Easy / 3 Medium / 1 Hard / review).
+- Easy days open at aggregates/GROUP BY (basics assumed). The review day's `cheatsheet: true` renders a CTA that opens `#/cheatsheet` (the existing Prep Plans + Quick Reference page).
+- **Visual fix:** plan rows now reuse `ProblemListRow` — identical to the All list (status dot · level · company logo · title · topics), just without the walkthrough/filters. Replaces the custom cramped rows.
+- All curated ids verified to resolve; Hard day confirmed all-Hard. Build 895 ✓.
+
+## [6.8.0] — 2026-06-25 [CRASH PLANS REWORKED — researched + assumes basics known]
+
+The first cut of the plan tabs (V6.7) was mechanical gradient slices: it started at SELECT/WHERE and had uneven 6–12 problem days. Reworked against (a) the user's assumption that **SELECT/WHERE/ORDER BY/LIMIT are a given** and (b) light research on crash-course pacing (≈3–5 problems/day; JOINs + GROUP BY solid *before* windows; windows get their own late days):
+- Both plans now **open at aggregates/GROUP BY** (not the trivial fundamentals), **~5 problems/day**, **windows late**, **forensic as the Day-7 capstone**. Curated explicit ids (verified all resolve).
+- **Intermediate (4d):** Aggregates & GROUP BY → HAVING & multi-aggregate → Joins → First Medium (rates + a 3-table join + a subquery).
+- **Advanced (7d):** Aggregates → HAVING & joins → Rates → Multi-table joins & subqueries → Anti/self-joins & set ops → Windows & CTEs → Forensic.
+- Blurbs state the basics-known assumption + "written from a blank editor." Build 895 ✓.
+
 ## [6.7.0] — 2026-06-25 [SQL LAB — PLAN TABS FILLED (real day-by-day content)]
 
 The Intermediate / Advanced tab skeletons now have **real day-by-day plans** (`SqlPlanView` + `SQL_PLANS`). Each day is a **slice off the gradient orders** (`SQL_EASY_RAMP_ORDER` / `SQL_MEDIUM_RAMP_ORDER` / Forensic), so the plans stay in sync with the difficulty ordering automatically — no separate list to maintain.

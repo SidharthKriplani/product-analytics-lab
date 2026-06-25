@@ -581,77 +581,84 @@ function SqlPlanTabs({ active, onChange }) {
   );
 }
 
-// Skeleton for the time-boxed plan tabs — day-by-day structure, content TBD.
-// The two time-boxed study plans — each day is a slice off the gradient orders, so
-// they stay in sync with the difficulty ordering automatically.
+// The two time-boxed crash plans. Difficulty per day per the literal crash-course shape —
+// Intermediate: Easy, Easy, Medium, then most-common-patterns review + the cheatsheet.
+// Advanced: 2 Easy, 3 Medium, 1 Hard, then most-common-patterns review + the cheatsheet.
+// Basics (SELECT/WHERE/ORDER BY/LIMIT) are assumed, so Easy days open at aggregates.
 const PROBLEM_BY_ID = Object.fromEntries(sqlLabProblems.map(p => [p.id, p]));
-const FORENSIC_IDS = sqlLabProblems.filter(p => p.difficulty === 'Forensic').map(p => p.id);
 const SQL_PLANS = {
   intermediate: {
     title: '3–4 Days to Intermediate',
-    blurb: 'A focused crash plan — the patterns that clear an analyst-level SQL screen, walked in gradient order.',
+    blurb: 'A focused crash plan to clear an analyst-level SQL screen. Assumes you can already SELECT / WHERE / ORDER BY / LIMIT — it opens at aggregates. ~5 problems a day, written from a blank editor.',
     days: [
-      { title: 'Day 1 · Fundamentals',         focus: 'SELECT, WHERE, ORDER BY, single-table aggregates', ids: SQL_EASY_RAMP_ORDER.slice(0, 6) },
-      { title: 'Day 2 · Grouping',              focus: 'GROUP BY, HAVING, multiple aggregates',            ids: SQL_EASY_RAMP_ORDER.slice(11, 18) },
-      { title: 'Day 3 · Joins',                 focus: 'INNER joins and join + GROUP BY',                  ids: SQL_EASY_RAMP_ORDER.slice(29, 37) },
-      { title: 'Day 4 · First real techniques', focus: 'Conditional rates, multi-table joins, a subquery', ids: SQL_MEDIUM_RAMP_ORDER.slice(0, 6) },
+      { title: 'Day 1 · Easy — Aggregates & GROUP BY', focus: 'Whole-table aggregates, then GROUP BY',         ids: ['sql-e65', 'sql-e51', 'sql-e37', 'sql-e26', 'sql-e33'] },
+      { title: 'Day 2 · Easy — HAVING & first joins',  focus: 'HAVING, conditional counts, two-table joins',   ids: ['sql-e29', 'sql-e39', 'sql-h39', 'sql-e04', 'sql-e12'] },
+      { title: 'Day 3 · Medium — Rates & multi-table', focus: 'Conditional rates, a 3-table join, a subquery', ids: ['sql-e02', 'sql-e09', 'sql-m37', 'sql-e10', 'sql-m17'] },
+      { title: 'Day 4 · Most-common patterns', focus: 'A quick review of the highest-frequency patterns, then the prep cheatsheet', ids: ['sql-e01', 'sql-m13', 'sql-m16', 'sql-m36'], cheatsheet: true },
     ],
   },
   advanced: {
     title: '7 Days to Advanced',
-    blurb: 'A full interview-ready arc — fundamentals through windows, CTEs and forensic debugging, walked in gradient order.',
+    blurb: 'A full interview-ready arc — Easy through Hard, then a most-common-patterns review and the cheatsheet. Assumes SELECT / WHERE / ORDER BY / LIMIT are second nature, so it opens at GROUP BY. ~5 problems a day, written from a blank editor.',
     days: [
-      { title: 'Day 1 · Fundamentals',                 focus: 'SELECT, WHERE, ORDER BY, aggregates',           ids: SQL_EASY_RAMP_ORDER.slice(0, 7) },
-      { title: 'Day 2 · Grouping & HAVING',            focus: 'GROUP BY, HAVING, multi-aggregate',             ids: SQL_EASY_RAMP_ORDER.slice(11, 18) },
-      { title: 'Day 3 · Joins',                        focus: 'INNER joins and join + GROUP BY',               ids: SQL_EASY_RAMP_ORDER.slice(29, 37) },
-      { title: 'Day 4 · Rates & multi-table',          focus: 'Conditional rates and 3+ table joins',          ids: SQL_MEDIUM_RAMP_ORDER.slice(0, 11) },
-      { title: 'Day 5 · Subqueries & anti/self-joins', focus: 'Correlated subqueries, anti-joins, self-joins', ids: SQL_MEDIUM_RAMP_ORDER.slice(30, 42) },
-      { title: 'Day 6 · Windows & CTEs',               focus: 'Ranking/offset windows and CTE pipelines',      ids: SQL_MEDIUM_RAMP_ORDER.slice(44, 53) },
-      { title: 'Day 7 · Forensic debugging',           focus: 'Find and fix the query that runs but is wrong', ids: FORENSIC_IDS.slice(0, 6) },
+      { title: 'Day 1 · Easy — Aggregates & GROUP BY',       focus: 'Whole-table aggregates and grouping',            ids: ['sql-e65', 'sql-e51', 'sql-e37', 'sql-e26', 'sql-e33'] },
+      { title: 'Day 2 · Easy — HAVING & joins',              focus: 'HAVING, then two-table joins',                   ids: ['sql-e29', 'sql-e74', 'sql-e39', 'sql-e04', 'sql-e12', 'sql-e78'] },
+      { title: 'Day 3 · Medium — Rates & conditional agg',   focus: 'SUM(CASE)/ratio rates, over a join',             ids: ['sql-e02', 'sql-e44', 'sql-m30', 'sql-e09', 'sql-m37'] },
+      { title: 'Day 4 · Medium — Joins & subqueries',        focus: '3+ table joins, correlated/scalar subqueries',   ids: ['sql-e10', 'sql-m33', 'sql-m25', 'sql-m17', 'sql-dedup1'] },
+      { title: 'Day 5 · Medium — Anti/self-joins & windows', focus: 'Anti-joins, self-joins, first window functions', ids: ['sql-e01', 'sql-e11', 'sql-m36', 'sql-m13', 'sql-m16'] },
+      { title: 'Day 6 · Hard — Composed & advanced',         focus: 'Cohort/retention, gaps-and-islands, window frames, percentiles', ids: ['sql-h01', 'sql-h02', 'sql-h04', 'sql-h52', 'sql-med2'] },
+      { title: 'Day 7 · Most-common patterns', focus: 'A review of the highest-frequency patterns, then the prep cheatsheet', ids: ['sql-e02', 'sql-e01', 'sql-m13', 'sql-m24', 'sql-m36'], cheatsheet: true },
     ],
   },
 };
 
-// Real day-by-day plan view for the Intermediate / Advanced tabs.
-function SqlPlanView({ tier, onSelect }) {
+// Day-by-day plan view for the Intermediate / Advanced tabs. Rows reuse ProblemListRow
+// so they match the All list exactly (no walkthrough, no filters). Last day links the
+// prep cheatsheet.
+function SqlPlanView({ tier, onSelect, solved }) {
   const plan = SQL_PLANS[tier];
   if (!plan) return null;
   return (
-    <div style={{ maxWidth: 820 }}>
-      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: '10px', padding: '1rem 1.15rem', marginBottom: '1.1rem' }}>
+    <div>
+      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: '10px', padding: '1rem 1.15rem', marginBottom: '1.25rem', maxWidth: 760 }}>
         <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--teal)' }}>{plan.title}</div>
         <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.3rem', lineHeight: 1.55 }}>{plan.blurb}</div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {plan.days.map((day, di) => {
           const probs = day.ids.map(id => PROBLEM_BY_ID[id]).filter(Boolean);
           return (
-            <div key={di} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.7rem 0.9rem', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }}>
-                <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: '8px', background: 'var(--teal-bg)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 800 }}>{di + 1}</span>
+            <div key={di}>
+              {/* Day header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '0.6rem' }}>
+                <span style={{ flexShrink: 0, width: 28, height: 28, borderRadius: '8px', background: 'var(--teal-bg)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 800 }}>{di + 1}</span>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text)' }}>{day.title}</div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{day.focus}</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)' }}>{day.title}</div>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{day.focus}</div>
                 </div>
                 <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: '0.7rem', color: 'var(--text-muted)' }}>{probs.length} problems</span>
               </div>
-              <div>
-                {probs.map(p => {
-                  const c = DIFF_COLOR[p.difficulty] || DIFF_COLOR.Easy;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => onSelect(p.id)}
-                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem 0.9rem', background: 'none', borderTop: '1px solid var(--border)', borderLeft: 'none', borderRight: 'none', borderBottom: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
-                    >
-                      <span style={{ flexShrink: 0, fontSize: '0.58rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: c.text, background: c.bg, border: '1px solid ' + c.border, borderRadius: '5px', padding: '1px 6px', minWidth: 56, textAlign: 'center' }}>{p.difficulty}</span>
-                      <span style={{ flex: 1, minWidth: 0, fontSize: '0.84rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
-                      <span style={{ flexShrink: 0, fontSize: '0.72rem', color: 'var(--text-muted)' }}>{p.company}</span>
-                      <span style={{ flexShrink: 0, fontSize: '0.85rem', color: 'var(--text-dim)' }}>{'→'}</span>
-                    </button>
-                  );
-                })}
+              {/* Problems — same row component as the All list */}
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+                {probs.map((p, i) => (
+                  <ProblemListRow key={p.id} p={p} i={i} isSolved={solved.has(p.id)} onSelect={() => onSelect(p.id)} />
+                ))}
               </div>
+              {/* Cheatsheet link on the review day */}
+              {day.cheatsheet && (
+                <button
+                  onClick={() => { window.location.hash = '#/cheatsheet'; }}
+                  className="pal-card-hover"
+                  style={{ marginTop: '0.7rem', width: '100%', display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.8rem 1rem', background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: '10px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+                >
+                  <Icon name='book-open' size={20} color='var(--teal)' />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--teal)' }}>Open the Prep Cheatsheet</div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Time-boxed prep plans + quick reference for every pattern.</div>
+                  </div>
+                  <span style={{ flexShrink: 0, fontSize: '0.9rem', color: 'var(--teal)' }}>{'→'}</span>
+                </button>
+              )}
             </div>
           );
         })}
@@ -726,7 +733,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
 
       <div key={planTab} className="pal-tab-fade">
       {planTab !== 'all' ? (
-        <SqlPlanView tier={planTab} onSelect={onSelect} />
+        <SqlPlanView tier={planTab} onSelect={onSelect} solved={solved} />
       ) : (
       <>
       {/* Beginner tutorial entry — guided, isolated, step-by-step walkthrough */}
