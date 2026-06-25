@@ -21,6 +21,38 @@ SQL Lab is an in-browser SQL practice environment inside Product Analytics Lab. 
 - **Plus a separate beginner level** — ~18 sequential, isolated SQLBolt-style lessons on a simple movies datamart (§9B).
 - **Plus an Easy-tier scaffolding ramp** — the first 15 Easy problems fade their training wheels over 3 batches (§9A).
 
+## 2A. The difficulty gradient — the full ramp (Beginner → Master), and where Forensic sits
+
+The ramp is the spine of the lab. **A learner must be able to start at zero and climb one rung at a time to Master, never hitting a step that needs a technique they haven't met.** Every cliff in that climb is a calibration bug (e.g. a rate problem mis-filed as Easy — see the V5.99 recalibration). Auditing the lab = walking the ramp rung by rung and checking each step adds *exactly one* new thing.
+
+There are **two axes**, and conflating them is the classic mistake:
+
+- **The construction ramp (the climb): Beginner → Easy → Medium → Hard → Master.** Increasing *constructive* difficulty — how much SQL you must build and how much you must decompose. **Master requires solving** (peak construction).
+- **The comprehension layer: Forensic.** Orthogonal — **not** the top of the climb. **Forensic requires understanding**: read a query that runs but returns a plausible wrong answer, diagnose it, fix it. It is tiered by how subtle the *bug* is, and it spans the whole range. It's a different muscle (read/diagnose) from the construction ramp (build), and it's the lab's signature — the wrong-answer-that-runs is exactly what autograders never test.
+
+### The construction ramp, rung by rung
+
+**0 · Beginner Level (pre-ramp — learn the syntax).** SQLBolt-style sequential walkthroughs on the simple movies datamart (§9B). This is *learn*; everything after is *practice*. Exit competency: can write `SELECT / WHERE / ORDER BY` and a basic `GROUP BY`. The next rung must start exactly here — no cliff between "I just learned SQL" and the first real problem. **This hand-off is where beginners bounce if it's wrong.**
+
+**1 · Easy on-ramp (the bridge — guided, ordered).** The first ~15–18 Easy problems, **hand-ordered one concept at a time**: single-table `SELECT` → `WHERE` → `ORDER BY`/`LIMIT` → `DISTINCT` → one aggregate (`COUNT`/`SUM`/`AVG`) → `GROUP BY` → basic `HAVING` → first 2-table `INNER JOIN` → join + `GROUP BY`. The scaffolding fades across 3 batches (§9A: bullets + only-needed-tables → all tables → none). Presented *in that order* with visible step progress, so the climb feels short and finishable. **Insertion order is not a gradient** — this sequence must be authored, not `filter(Easy).slice(0,15)`.
+
+**2 · Easy (consolidation).** The rest of Easy: the same skills across *many* schemas ("wider not longer") to build recognition and fluency, no new machinery. Calibration rule: anything requiring a window, anti-join, self-join, 3+ join, correlated subquery, or a rate/ratio construction does **not** belong here — that's Medium.
+
+**3 · Medium (one lever at a time).** Each Medium = an Easy foundation + **exactly one** non-trivial technique: a single window function, OR an anti-join, OR a self-join, OR a 3+ table join, OR a correlated/scalar subquery, OR conditional aggregation, OR a rate/ratio with safe division, OR a 1–2 CTE pipeline. The learner meets each lever in isolation before combining. The consistency rule (`SQL-DIFFICULTY-RUBRIC.md`) keeps the same pattern at the same tier.
+
+**4 · Hard (compose / advance).** The jump is from "one lever" to **combining** levers or using an advanced one: explicit window frames (`ROWS/RANGE BETWEEN`), 2+ windows, gaps-and-islands, sessionization, a recursive CTE, a 3+ CTE pipeline. The skill is now *structuring* a multi-step query, not just knowing a technique.
+
+**5 · Master (decompose a narrative).** Large multi-CTE analytics narratives: dedup → window → metric chains, retention *curves*, multi-signal scoring engines. Requires real query decomposition and business judgment to even structure. The peak of constructive difficulty — **Master requires solving.**
+
+**Forensic (the understanding axis, alongside — not above Master).** A query that runs and returns a plausible wrong answer; the learner finds and fixes the bug. Tier it by how subtle the bug is, not by query construction. It complements the climb rather than topping it — **Forensic requires understanding.**
+
+### Two more axes layered on the climb (not difficulty rungs)
+
+- **Scaffolding fade** (§9A) — *how much help*, decreasing across the on-ramp. Independent of difficulty.
+- **Judgment layer** (§5, methods/dial/mcqs) — on Medium+, "which correct approach is best, when" — choosing among right answers. The tradeoff muscle, layered on top of construction.
+
+**The promise, stated once:** Beginner Level (learn) → Easy on-ramp (bridge) → Easy consolidation → Medium (one lever each) → Hard (combine) → Master (decompose), with Forensic running alongside as the catch-the-bug muscle. One rung, one new thing. Hold that and nobody bounces.
+
 ## 3. Architecture
 
 - **React + Vite SPA**, hash-routed (`#/sql-lab/<id>`), deployed on Vercel. No server: the SQL engine runs in the browser.
