@@ -133,23 +133,42 @@ function DebriefPanel({ text }) {
 // order. This is the ramp that makes Easy feel easy right after the walkthroughs.
 // Authored from a difficulty audit of every Easy solution. Ids not listed sort last.
 const SQL_EASY_RAMP_ORDER = [
-  'sql-e47', 'sql-e06', 'sql-e55', 'sql-e67', 'sql-e32', 'sql-e69', 'sql-e54', 'sql-e36', // R2 filters
-  'sql-e65', 'sql-e81', 'sql-e51',                                                          // R4 whole-table aggregates
-  'sql-e37', 'sql-e33', 'sql-e26', 'sql-e49', 'sql-e13', 'sql-e29', 'sql-e70', 'sql-e74',  // R5 GROUP BY
-  'sql-e62', 'sql-e34', 'sql-e59', 'sql-e08', 'sql-e39',                                    // R5 cont. + R6 HAVING
-  'sql-e04', 'sql-e12', 'sql-e05', 'sql-e68', 'sql-e52', 'sql-e56', 'sql-e57', 'sql-e23',  // R7 first joins
-  'sql-e78', 'sql-e35', 'sql-e40', 'sql-e60', 'sql-e77', 'sql-e07', 'sql-e20', 'sql-e58',  // R8 join + GROUP BY
+  'sql-e47', 'sql-e06', 'sql-e55', 'sql-e67', 'sql-e32', 'sql-e69', 'sql-e54', 'sql-e36',  // R2 filters
+  'sql-e65', 'sql-e81', 'sql-e51',                                                           // R4 whole-table aggregates
+  'sql-e37', 'sql-m77', 'sql-e33', 'sql-e26', 'sql-e49', 'sql-e13', 'sql-e29', 'sql-m78', 'sql-e70', 'sql-e74', 'sql-h53', // R5 GROUP BY (+ COUNT DISTINCT, conditional agg)
+  'sql-e62', 'sql-e34', 'sql-e59', 'sql-e08', 'sql-e39', 'sql-sw03', 'sql-h39',             // R5 cont. + R6 HAVING
+  'sql-e04', 'sql-e12', 'sql-e05', 'sql-e68', 'sql-e52', 'sql-e56', 'sql-e57', 'sql-e23',   // R7 first joins
+  'sql-e78', 'sql-sw02', 'sql-sw05', 'sql-e35', 'sql-e40', 'sql-e60', 'sql-e77', 'sql-e07', 'sql-e20', 'sql-e58', // R8 join + GROUP BY
 ];
 const EASY_ORDER_RANK = Object.fromEntries(SQL_EASY_RAMP_ORDER.map((id, i) => [id, i]));
 
-// Sort by difficulty tier; WITHIN Easy, sort by the gradient rank above so the on-ramp
-// is a true one-concept-per-step climb (not insertion order). Stable for the rest.
+// Medium on-ramp: ordered by primary non-trivial technique, easiest lever → hardest —
+// conditional-rate → date arith → rate-over-join → 3+table join → correlated subquery →
+// anti-join → self-join → set op → ranking windows → offset/value windows → CTE pipelines.
+// One new lever per step. Authored from a Medium calibration+ordering audit.
+const SQL_MEDIUM_RAMP_ORDER = [
+  'sql-e02', 'sql-e44', 'sql-m41', 'sql-h28', 'sql-h27', 'sql-m30',                          // L1 conditional rate / CASE
+  'sql-e09', 'sql-m37', 'sql-h22', 'sql-meesho-03', 'sql-meesho-07', 'sql-m10', 'sql-h54', 'sql-h31', // L1 rate over a join
+  'sql-m07', 'sql-m42', 'sql-h49', 'sql-sw01', 'sql-sw04',                                   // L2 date arithmetic
+  'sql-e10', 'sql-e42', 'sql-m33', 'sql-m25', 'sql-meesho-01', 'sql-meesho-06', 'sql-meesho-02', 'sql-m61', 'sql-h10', 'sql-meesho-08', 'sql-h32', // L3 3+ table joins
+  'sql-m17', 'sql-dedup1', 'sql-m23', 'sql-m56', 'sql-meesho-05', 'sql-meesho-09',           // L4 correlated/scalar subquery
+  'sql-e01', 'sql-e11', 'sql-e72',                                                            // L5 anti-join
+  'sql-m36', 'sql-h34', 'sql-h42',                                                            // L6 self-join
+  'sql-m43', 'sql-set1',                                                                      // L7 set ops
+  'sql-m13', 'sql-m20', 'sql-m57', 'sql-m24', 'sql-m14', 'sql-meesho-04',                     // L8 ranking windows
+  'sql-e86', 'sql-m76', 'sql-m21', 'sql-meesho-10', 'sql-m32', 'sql-m39', 'sql-m16', 'sql-m28', 'sql-h41', 'sql-h33', 'sql-m29', 'sql-m26', 'sql-m01', 'sql-h13', 'sql-h17', 'sql-m47', // L9 offset/value windows
+  'sql-m09', 'sql-h25', 'sql-h14', 'sql-str1', 'sql-med1',                                    // L10 CTE pipelines
+  'sql-e03', 'sql-m04',                                                                       // unclassified — sort last within Medium
+];
+const MEDIUM_ORDER_RANK = Object.fromEntries(SQL_MEDIUM_RAMP_ORDER.map((id, i) => [id, i]));
+
+// Sort by difficulty tier; WITHIN Easy and Medium, sort by the gradient rank so each is a
+// true one-concept/one-lever-per-step climb (not insertion order). Stable for Hard+.
 const SORTED_PROBLEMS = [...sqlLabProblems].sort((a, b) => {
   const d = DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty];
   if (d !== 0) return d;
-  if (a.difficulty === 'Easy') {
-    return (EASY_ORDER_RANK[a.id] ?? 999) - (EASY_ORDER_RANK[b.id] ?? 999);
-  }
+  if (a.difficulty === 'Easy')   return (EASY_ORDER_RANK[a.id]   ?? 999) - (EASY_ORDER_RANK[b.id]   ?? 999);
+  if (a.difficulty === 'Medium') return (MEDIUM_ORDER_RANK[a.id] ?? 999) - (MEDIUM_ORDER_RANK[b.id] ?? 999);
   return 0;
 });
 
@@ -524,6 +543,67 @@ function ProblemListRow({ p, isSolved, onSelect, i = 0 }) {
 
 function askedAtCount(p) { return 1 + ((p.alsoAskedAt || []).length); }
 
+// Three SQL Lab views: All (full library + filters), and two time-boxed plans.
+// Switching swaps the entire body (filters/walkthrough vanish on the plan tabs).
+function SqlPlanTabs({ active, onChange }) {
+  const tabs = [
+    { id: 'all',          label: 'All Problems',            sub: 'Full library + filters' },
+    { id: 'intermediate', label: '3–4 Days → Intermediate', sub: 'Focused crash plan' },
+    { id: 'advanced',     label: '7 Days → Advanced',       sub: 'Interview-ready arc' },
+  ];
+  return (
+    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.1rem', flexWrap: 'wrap' }}>
+      {tabs.map(t => {
+        const on = active === t.id;
+        return (
+          <button
+            key={t.id}
+            onClick={() => onChange(t.id)}
+            style={{
+              flex: '1 1 200px', textAlign: 'left', cursor: 'pointer',
+              padding: '0.6rem 0.9rem', borderRadius: '10px', fontFamily: 'inherit',
+              background: on ? 'var(--teal-bg)' : 'var(--surface)',
+              border: '1px solid ' + (on ? 'var(--teal-border)' : 'var(--border)'),
+              transition: 'background 0.18s, border-color 0.18s',
+            }}
+          >
+            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: on ? 'var(--teal)' : 'var(--text)' }}>{t.label}</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>{t.sub}</div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Skeleton for the time-boxed plan tabs — day-by-day structure, content TBD.
+function SqlPlanSkeleton({ tier }) {
+  const cfg = tier === 'intermediate'
+    ? { title: '3–4 Days to Intermediate', days: 4, blurb: 'A focused crash plan: the core patterns that clear an analyst-level SQL screen, fast. Each day is a short, ordered set built off the difficulty gradient.' }
+    : { title: '7 Days to Advanced',       days: 7, blurb: 'A full interview-ready arc: from fundamentals through windows, CTEs and forensic debugging — paced over a week, built off the difficulty gradient.' };
+  return (
+    <div style={{ maxWidth: 760 }}>
+      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: '10px', padding: '1rem 1.15rem', marginBottom: '1.1rem' }}>
+        <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--teal)' }}>{cfg.title}</div>
+        <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.3rem', lineHeight: 1.55 }}>{cfg.blurb}</div>
+        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginTop: '0.6rem' }}>Skeleton — plan content coming soon</div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+        {Array.from({ length: cfg.days }).map((_, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', padding: '0.85rem 1rem', background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: '10px' }}>
+            <div style={{ flexShrink: 0, width: 34, height: 34, borderRadius: '8px', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)' }}>{i + 1}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text)' }}>Day {i + 1}</div>
+              <div className="pal-shimmer-box" style={{ height: 8, borderRadius: 99, marginTop: '0.45rem', width: '70%' }} />
+            </div>
+            <span style={{ flexShrink: 0, fontSize: '0.66rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>TBD</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginner }) {
   const [filterDiff, setFilterDiff] = useState('');      // single-select
   const [filterCompany, setFilterCompany] = useState('');
@@ -531,6 +611,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('default');
   const [search, setSearch] = useState('');
+  const [planTab, setPlanTab] = useState('all'); // 'all' | 'intermediate' | 'advanced'
 
   const solvedCount = SORTED_PROBLEMS.filter(p => solved.has(p.id)).length;
 
@@ -584,6 +665,14 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
         >Study Plan</button>
       </div>
 
+      {/* Plan tabs — All / 3–4 day Intermediate / 7 day Advanced. Switching swaps the whole body. */}
+      <SqlPlanTabs active={planTab} onChange={setPlanTab} />
+
+      <div key={planTab} className="pal-tab-fade">
+      {planTab !== 'all' ? (
+        <SqlPlanSkeleton tier={planTab} />
+      ) : (
+      <>
       {/* Beginner tutorial entry — guided, isolated, step-by-step walkthrough */}
       {onStartBeginner && (
         <div
@@ -767,6 +856,9 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
             ))}
           </div>
         )}
+      </div>
+      </>
+      )}
       </div>
     </div>
   );

@@ -747,6 +747,15 @@ table { border-collapse: collapse; }
   animation: palSolveSeal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s both;
 }
 
+/* SQL Lab tab switch — All / Intermediate / Advanced views cross-fade */
+@keyframes palTabFade {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.pal-tab-fade {
+  animation: palTabFade 0.28s ease-out both;
+}
+
 /* Wrong answer shake */
 .pal-shake {
   animation: palShake 0.4s ease both;
@@ -813,6 +822,7 @@ button:not(:disabled):active {
   .pal-success-ring { animation: none !important; }
   .pal-solve-burst { animation: none !important; }
   .pal-solve-seal { animation: none !important; }
+  .pal-tab-fade { animation: none !important; }
   .pal-arm-draw,
   .pal-loop-draw { animation: none !important; }
   .pal-node-appear { animation: none !important; }

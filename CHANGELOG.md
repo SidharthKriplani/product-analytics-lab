@@ -4,6 +4,22 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [6.5.0] — 2026-06-25 [SQL LAB — 3 PLAN TABS (skeletons) + tab-switch animation]
+
+SQL Lab browse view gains a top-level **3-tab switcher** (`SqlPlanTabs`): **All Problems** (the full library + filters + walkthrough, unchanged), **3–4 Days → Intermediate**, **7 Days → Advanced**. Switching to a plan tab **swaps the entire body** — filters, walkthrough and list disappear, replaced by `SqlPlanSkeleton` (day-by-day card scaffold: 4 days for Intermediate, 7 for Advanced, content TBD). Body is keyed by tab so each switch cross-fades (`pal-tab-fade`, reduced-motion safe). SQL-Lab-only, as specified. Build 895 ✓. **Plan content is the skeleton's fill-in — a later pass** (each day = an ordered slice off the difficulty gradient).
+
+## [6.4.0] — 2026-06-25 [SQL RAMP — MEDIUM ORDERED + MEDIUM/HARD CALIBRATED]
+
+**Calibration (audited Medium + Hard vs the rubric, 19 re-tiers).** The Hard tier was ~47% over-tiered — single-window and single-join problems wrongly marked Hard, a false cliff. Fixed:
+- **Hard → Medium (12):** h13, h17, h41, h33 (single window), h34, h42 (single self-join), h10, meesho-08 (3-table join), h32 (2-table join), h54, h31 (LEFT JOIN + conditional agg), sw04 (join + date arith).
+- **Hard → Easy (3):** sw02, sw05 (2-table join + GROUP BY), h53 (single-table conditional agg).
+- **Medium → Easy (4):** m77, m78 (single-table GROUP BY), sw03, h39 (single-table GROUP BY + HAVING).
+- New tier counts: Easy 47 · Medium 73 · Hard 17 · Master 19 · Forensic 36. (Borderline left Hard: cohort/retention multi-CTE composites. Master unchanged.)
+
+**Medium ordered into a gradient.** New `SQL_MEDIUM_RAMP_ORDER` (73) — one-lever-at-a-time: conditional rate → date arith → rate-over-join → 3+table join → correlated subquery → anti-join → self-join → set op → ranking windows → offset/value windows → CTE pipelines. `SORTED_PROBLEMS` now gradient-sorts **both** Easy and Medium (Hard+ left as-is per the earlier call — diminishing returns). Easy order updated to 47 (new members slotted by rung). Verified: both order arrays equal their tier sets exactly (no dups/gaps). Build 895 ✓.
+
+So the SQL **construction gradient is now ordered Easy→Medium and calibrated Easy/Medium/Hard.** Remaining: **Phase 2b** (author per-problem derivation hints / merged Easy statement) and **Phase 3** (roll the ramp into every room).
+
 ## [6.3.0] — 2026-06-25 [SQL RAMP — PHASE 2a: EASY ON-RAMP ORDERED INTO A GRADIENT]
 
 The Easy tier now presents in a deliberate **one-concept-per-step gradient** instead of insertion order — the core of the "gradual ramp." Authored from a difficulty audit of all 40 Easy solutions: single-table SELECT/WHERE → ORDER BY/LIMIT → whole-table aggregate → COUNT(DISTINCT) → GROUP BY (COUNT then AVG) → HAVING → first 2-table JOIN → join+GROUP BY → full stack. First JOIN lands at position 25 (no JOIN before the single-table fundamentals are covered). `SQL_EASY_RAMP_ORDER` (40 ids) + `EASY_ORDER_RANK` drive a secondary sort inside Easy in `SORTED_PROBLEMS`, so both browse order and prev/next navigation follow the ramp. Removed the dead `easyRampStage`/`EASY_RAMP_IDS`. Verified: the 40 ramp ids equal the 40 Easy problems exactly (no dupes/gaps). Build 895 ✓.
