@@ -1,4 +1,10 @@
-# SQL Lab — SQLite → Postgres migration (in progress)
+# SQL Lab — SQLite → Postgres migration ✅ DONE (V7.0.0, 2026-06-25)
+
+**COMPLETE + verified + shipped.** 192/192 solutions (rows+cols+checkValues), 336/336 methods, broken-queries all correct under real Postgres (pglite). Engine swapped in `SqlLabPage.jsx`; `@electric-sql/pglite` in package.json; build 906 modules. Harness: `scripts/pg_verify_harness.mjs` (+ harness2/3 variants used checkValues + methods/brokenQuery). **Not migrated:** Beginner page (still sql.js — intro SQL, intentional). The notes below are the historical plan/scope.
+
+---
+
+# SQL Lab — SQLite → Postgres migration (historical plan)
 
 _Started 2026-06-25. Goal: run SQL Lab on real Postgres (via **pglite** — Postgres compiled to WASM, in-browser) instead of SQLite (sql.js). Real interview screens are Postgres/MySQL-flavored; the cheat sheet is already written in Postgres syntax; SQLite-isms like `strftime`/`date(x,'-N years')` are a teaching liability. Must be done thoroughly — builds freeze 5 days after this._
 

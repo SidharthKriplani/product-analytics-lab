@@ -4,6 +4,21 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [7.0.0] — 2026-06-25 [SQL LAB → POSTGRES (pglite). Engine migrated, fully verified.]
+
+SQL Lab now runs on **real Postgres** (`@electric-sql/pglite`, Postgres compiled to WASM, in-browser) instead of SQLite (sql.js). Real interview screens are Postgres-flavored; the cheat sheet was already Postgres syntax; SQLite-isms (`strftime`/`julianday`/`date(x,'-N')`) were a teaching liability. **Done as one atomic change, harness-verified before shipping** (builds freeze after this).
+
+**Data ported + verified** (`scripts/pg_verify_harness.mjs` ran everything against real Postgres):
+- **192/192 solutions** pass on rows + columns + **checkValues** (the app's exact validation).
+- **336/336 judgment-layer methods** run; **35/36 forensic broken-queries** run (the 1 that errors — f34 — is *meant* to: its bug is `=` vs `IN` on a multi-row subquery; the app only displays it).
+- Ported patterns: `ROUND(float,n)`→`ROUND(x::numeric,n)`; `strftime('%s'/'%Y-%m'/…)`→`EXTRACT(EPOCH…)`/`to_char`; `julianday(a)-julianday(b)`→`(a::date - DATE '2000-01-01')` integer-day form (works for diffs AND gaps-and-islands); `date(x,'-N')`→`x::date ± interval`; `instr`→`strpos`. Hand-fixed: alias-in-HAVING (Postgres-strict), lax GROUP BY, recursive-CTE types, `to_char` arithmetic→`EXTRACT`, sub-day timestamp diffs (f19/f24)→epoch-minutes, a CTE named `both` (reserved word). **All 13 datamarts build under Postgres with ZERO changes.**
+
+**Engine swapped** (`SqlLabPage.jsx`): `new SQL.Database()` + sync `.run/.exec/.prepare` → `new PGlite()` + async `await db.exec(schema)` / INSERT / `await db.query()`; new `pgLit`/`pgResult` helpers map pglite's `{rows,fields}` (object rows, numeric-as-string, Date→ISO text) to the app's `{columns, rows[][]}`. `execQuery` is now async. `validateResults` unchanged (its `parseFloat` 0.01-tolerance handles pglite's string numerics). `@electric-sql/pglite` added to package.json. Build 906 modules ✓.
+
+Also: cheat sheet's SQLite `strftime` block → Postgres `to_char`/`EXTRACT`; f34 note made engine-agnostic.
+
+**Intentionally NOT migrated:** the Beginner tutorial page still uses sql.js (intro SELECT/WHERE lessons — the Postgres-vs-SQLite distinction is invisible there, and it's a working surface I didn't want to risk in the same change). Both engines ship; they're separate lazy-loaded pages. Can be swapped later.
+
 ## [6.10.0] — 2026-06-25 [EASY PROMPT RE-AUDIT (7 fixes) + inline SQL cheatsheet]
 
 **Re-audit of the redundancy-pass rewrites** (the proper rubric pass that should've happened inline). Found 7 more Easy prompts with the e55 defect — the scenario undersold the deliverable (mentioned a computed/filter column but not the plain identity columns the query also returns). Fixed by folding the missing columns into the scenario in plain business language (conditions preserved): **e12, e52, e54, e57** (clear) and **e40, e58, e36** (mild). No difficulty mis-tiers found.

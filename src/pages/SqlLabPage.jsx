@@ -15,6 +15,21 @@ import { CHEAT_SECTIONS } from './CheatSheet.jsx';
 const SQL_CHEATS = CHEAT_SECTIONS.filter(s => /^SQL/.test(s.label));
 
 const DIFF_ORDER = { Easy: 0, Medium: 1, Hard: 2, Master: 3, Forensic: 5 };
+
+// pglite (Postgres) helpers — render a datamart row value as a SQL literal for INSERT,
+// and convert a pglite result ({rows: object[], fields:[{name}]}) to the app's
+// {columns, rows:[[...]]} shape (Date → ISO text to match the historical SQLite output).
+function pgLit(v) { if (v === null || v === undefined) return 'NULL'; if (typeof v === 'number') return String(v); if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE'; return "'" + String(v).replace(/'/g, "''") + "'"; }
+function pgResult(res) {
+  const columns = (res && res.fields ? res.fields : []).map(f => f.name);
+  const rows = (res && res.rows ? res.rows : []).map(r => columns.map(c => {
+    const v = r[c];
+    if (v === null || v === undefined) return null;
+    if (v instanceof Date) return v.toISOString().slice(0, 10);
+    return v;
+  }));
+  return { columns, rows };
+}
 // V5.53: CodeMirror editor (highlighting + schema autocomplete + indent keeper).
 // Set to false to fall back to the plain textarea while dogfooding.
 const USE_CM_EDITOR = true;
@@ -1395,33 +1410,26 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
 
     async function initDb() {
       try {
-        const sqlJsModule = await import('sql.js');
-        const initSqlJs = sqlJsModule.default || sqlJsModule;
+        const { PGlite } = await import('@electric-sql/pglite');
         if (cancelled) return;
-        const SQL = await initSqlJs({ locateFile: () => '/sql-wasm.wasm' });
-        if (cancelled) return;
-        const database = new SQL.Database();
+        const database = new PGlite();
 
-        Object.entries(dm.tables).forEach(([tableName, table]) => {
-          database.run(table.schema + ';');
+        for (const [tableName, table] of Object.entries(dm.tables)) {
+          await database.exec(table.schema);
           if (table.rows.length > 0) {
-            const colCount = table.columns.length;
-            const placeholders = '(' + Array(colCount).fill('?').join(',') + ')';
-            const stmt = database.prepare(`INSERT INTO ${tableName} VALUES ${placeholders}`);
-            table.rows.forEach(row => stmt.run(row));
-            stmt.free();
+            const values = table.rows.map(r => '(' + r.map(pgLit).join(',') + ')').join(',');
+            await database.exec('INSERT INTO ' + tableName + ' VALUES ' + values);
           }
-        });
+          if (cancelled) { try { database.close(); } catch {} return; }
+        }
 
         let sample = null;
         try {
-          const solRes = database.exec(problem.solution);
-          if (solRes.length > 0) {
-            sample = { columns: solRes[0].columns, rows: solRes[0].values };
-          }
+          const conv = pgResult(await database.query(problem.solution));
+          if (conv.columns.length > 0) sample = conv;
         } catch {}
 
-        if (cancelled) return;
+        if (cancelled) { try { database.close(); } catch {} return; }
         dbRef.current = database;
         expectedSampleRef.current = sample;
         setDb(database);
@@ -1439,13 +1447,10 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
     return () => { cancelled = true; };
   }, [problemIdx]);
 
-  function execQuery(validate) {
+  async function execQuery(validate) {
     if (!dbRef.current || !query.trim() || !problem) return;
     try {
-      const res = dbRef.current.exec(query);
-      const resultData = res.length === 0
-        ? { columns: [], rows: [] }
-        : { columns: res[0].columns, rows: res[0].values };
+      const resultData = pgResult(await dbRef.current.query(query));
       setResults(resultData);
       setRunError(null);
       if (!validate) {

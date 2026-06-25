@@ -8,7 +8,7 @@ _Created 2026-06-24. Last updated 2026-06-25. The master spec for PAL's SQL Lab:
 
 ## 1. What it is
 
-SQL Lab is an in-browser SQL practice environment inside Product Analytics Lab. The user reads a business-framed prompt, writes SQL against a realistic multi-table schema, **runs it live** (real SQLite in the browser, no backend), and **checks** their result against the expected output. Every problem ends in a **debrief** that teaches a wrong-answer-that-runs, a sanity check, and an interviewer follow-up.
+SQL Lab is an in-browser SQL practice environment inside Product Analytics Lab. The user reads a business-framed prompt, writes SQL against a realistic multi-table schema, **runs it live** (real **Postgres** in the browser via `@electric-sql/pglite` — migrated off SQLite/sql.js in V7.0.0; no backend), and **checks** their result against the expected output. Every problem ends in a **debrief** that teaches a wrong-answer-that-runs, a sanity check, and an interviewer follow-up.
 
 **Thesis:** practice *judgment*, not recall. The bank doesn't just grade whether your SELECT returns the right rows — its debriefs teach the queries that *run and return a plausible wrong answer*, which is what separates someone who can pass an autograder from someone who can be trusted with production data. This thesis shows up in three places: the standard problem debriefs, the dedicated **Forensic** (find-the-bug) format, and the **Judgment layer** (multi-method + scenario-dial + MCQ).
 
@@ -56,7 +56,7 @@ There are **two axes**, and conflating them is the classic mistake:
 ## 3. Architecture
 
 - **React + Vite SPA**, hash-routed (`#/sql-lab/<id>`), deployed on Vercel. No server: the SQL engine runs in the browser.
-- **SQL engine: `sql.js`** (SQLite compiled to WASM). The WASM binary is served from `public/sql-wasm.wasm`. On opening a problem, the page builds an in-memory SQLite DB from the problem's datamart (CREATE TABLE + INSERT from the seed rows), holds it in a ref, and runs the user's query against it.
+- **SQL engine: `@electric-sql/pglite`** (real Postgres compiled to WASM, in-browser; V7.0.0 — was `sql.js`/SQLite). On opening a problem, the page builds an in-memory Postgres DB from the problem's datamart (CREATE TABLE + multi-row INSERT from the seed rows), holds it in a ref (`dbRef`), and runs the user's query against it. Async (`await db.exec/query`); `pgLit`/`pgResult` helpers in `SqlLabPage.jsx` map row literals + the `{rows,fields}` result shape. **Verify with `scripts/pg_verify_harness.mjs`** (runs every solution/method/brokenQuery against real Postgres) — this supersedes the old SQLite `scripts/audit_sql_lab.py` for SQL correctness. The **Beginner level still uses `sql.js`** (intro lessons; intentional).
 - **Lazy-loaded route.** `SqlLabPage.jsx` is `React.lazy()`-imported, so SQL Lab's bundle (including CodeMirror) loads only on first visit and doesn't weigh down initial load.
 - **No external data calls** for solving — everything (schema, seed rows, expected answers) ships in the JS bundle.
 

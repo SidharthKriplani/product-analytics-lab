@@ -121,10 +121,10 @@ DATEDIFF('day', signup_date, event_date)  -- Snowflake/BigQuery
 created_at::date
 CAST(created_at AS DATE)
 
--- SQLite (strftime)
-strftime('%Y-%m', created_at)    -- '2026-06'
-strftime('%w',    created_at)    -- day of week 0–6
-strftime('%Y-%m-%d', created_at) -- date string`,
+-- Format a date/timestamp as text (Postgres)
+to_char(created_at, 'YYYY-MM')     -- '2026-06'
+EXTRACT(DOW FROM created_at)       -- day of week 0–6
+to_char(created_at, 'YYYY-MM-DD')  -- date string`,
       },
     ],
   },
