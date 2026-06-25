@@ -1623,7 +1623,7 @@ export const sqlLabProblems = [
         explanation: 'ROW_NUMBER keeps the entire first-interaction row, so the action column comes along for free once you filter to rn = 1 — no extra join. A plain MIN(occurred_at) returns only the date; to recover the first interaction\'s action you would have to join back to interactions on (user_id, occurred_at), which also risks ties if two interactions share that timestamp. When you need attributes of the first event, the window form is the cleaner extension; for the date alone the aggregate is cheaper.',
       },
     ],
-    sqliteNote: 'Uses JULIANDAY() for date arithmetic — SQLite-specific. PostgreSQL equivalent: DATE_PART(\'day\', first_interaction_at::date - joined_at::date).',
+    sqliteNote: 'Day count comes from differencing the two dates as integers: ((first_interaction_at)::date - DATE \'2000-01-01\') minus the same for joined_at, then CAST AS INTEGER for whole days.',
   },
 
   {
@@ -1713,7 +1713,7 @@ export const sqlLabProblems = [
         explanation: 'All three return the same 15 rows. LAG does it in one ordered pass and reads as "last month\'s count," while the self-join and correlated subquery each re-scan the month list once per row to find the previous month. At a dozen-plus months the cost is trivial, but LAG is the cleanest and the only one that generalizes painlessly to N-month lookback (LAG(..., N)).',
       },
     ],
-    sqliteNote: 'Uses strftime() for month extraction and LAG() window function — both supported in SQLite 3.25+.',
+    sqliteNote: 'Months come from to_char((created_at)::timestamp, \'YYYY-MM\'); LAG(order_count) OVER (ORDER BY order_month) pulls the prior month\'s count for the difference.',
   },
 
   {
@@ -2652,7 +2652,7 @@ export const sqlLabProblems = [
         explanation: 'A correlated subquery taking MAX(s2.started_at) WHERE s2.user_id = s1.user_id AND s2.started_at < s1.started_at returns "the latest session of this same user strictly before the current one" — exactly the previous-row value LAG gives. The same-user filter keeps the lookback within the user, so it does not suffer the cross-user bug of a mis-partitioned window. It re-scans per row (a nested loop), so on an engine that has LAG you would prefer the window, but it is the correct portable substitute when windows are unavailable.',
       },
     ],
-    sqliteNote: 'julianday() converts a date string to a floating-point day number. julianday(a) - julianday(b) gives exact days elapsed.',
+    sqliteNote: 'The day gap differences each date as an integer offset — ((started_at)::date - DATE \'2000-01-01\') minus the same for the prior session — giving exact days elapsed.',
   },
 
   {
@@ -3491,7 +3491,7 @@ export const sqlLabProblems = [
         explanation: 'They agree on every row of this seed, so it is a portability and precision call, not a correctness one. The corrected-strftime form needs no julianday() (which is SQLite-specific) and no 365.25 approximation, so it ports cleanly to engines without a Julian-day function and is exact by construction rather than by a leap-year average. The julianday form is terser and fine here; the corrected-strftime form is the one to carry to a different engine or when you want to avoid any float drift.',
       },
     ],
-    sqliteNote: 'Uses julianday() which is SQLite-specific. In PostgreSQL use: EXTRACT(YEAR FROM AGE(a.scheduled_at::date, p.dob::date)) AS age_at_visit.',
+    sqliteNote: 'Age is elapsed days / 365.25, CAST AS INTEGER: ((scheduled_at)::date - DATE \'2000-01-01\') minus ((dob)::date - DATE \'2000-01-01\') gives the day count, divided by the average year length.',
   },
 
   {
@@ -4129,7 +4129,7 @@ export const sqlLabProblems = [
         explanation: 'LAG(revenue) OVER (ORDER BY order_month) steps to the previous PRESENT row in the CTE, so when a calendar month is absent it compares against the last month that HAS data, not the (empty) immediately-prior calendar month — the growth_pct then silently spans two calendar months. The self-join via MAX(prior month) behaves the same way. To honor "previous calendar month" you must first densify the month axis (generate all months, LEFT JOIN revenue) so gaps appear as zero/NULL rather than being skipped.',
       },
     ],
-    sqliteNote: 'Uses strftime() for month extraction and LAG() — both supported in SQLite 3.25+. PostgreSQL uses DATE_TRUNC and LAG with the same semantics.',
+    sqliteNote: 'Months come from to_char((created_at)::timestamp, \'YYYY-MM\'); LAG(revenue) OVER (ORDER BY order_month) supplies the prior month\'s revenue for the growth calculation.',
   },
 
   {
@@ -4451,7 +4451,7 @@ export const sqlLabProblems = [
         explanation: 'The INNER JOIN to last_interaction (and the EXISTS guard in the correlated form) drops users with no interactions, which is correct for "users with at least one interaction" but wrong for a full roster. Switch to LEFT JOIN from users and let the missing last_interaction_date be NULL, then treat NULL as "never engaged" — otherwise the silent, highest-risk users are invisible and the dormancy metric understates churn.',
       },
     ],
-    sqliteNote: 'Uses julianday() for date arithmetic. In PostgreSQL: (\'2023-12-06\'::date - last_interaction_date::date) AS days_since_last.',
+    sqliteNote: 'days_since_last differences the dates as integers: ((\'2023-12-06\')::date - DATE \'2000-01-01\') minus ((last_interaction_date)::date - DATE \'2000-01-01\'), CAST AS INTEGER for whole days.',
   },
 
   {
@@ -4845,7 +4845,7 @@ export const sqlLabProblems = [
         explanation: 'The islands tag relies on the calendar day and the row position both advancing by exactly 1 per consecutive day, so their difference stays constant within a run. A same-day duplicate order advances ROW_NUMBER without advancing the day, so the difference shifts mid-run and a genuine streak shatters into shorter false islands that can fall below the 3-day threshold. DISTINCT up front keeps one row per active day so the arithmetic stays in lockstep. (date_rownumber is the canonical islands form; lag_gapflag needs DISTINCT for the same reason.)',
       },
     ],
-    sqliteNote: 'Uses julianday() for date arithmetic — SQLite-specific. Equivalent to DATEDIFF in other dialects.',
+    sqliteNote: 'The islands tag uses an integer day value — ((created_at)::date - DATE \'2000-01-01\') minus a date-ordered ROW_NUMBER — which stays constant across a consecutive run and shifts at every gap.',
   },
 
   {
@@ -5127,7 +5127,7 @@ export const sqlLabProblems = [
       },
     ],
     debrief: 'February 2023 has only new revenue ($169.98 from users 1 and 3\'s first orders) — no returning customers yet since the platform was new. By mid-2023, returning revenue dominates as early cohorts come back. The two-CTE structure separates concerns: first_orders anchors each user\'s debut date; order_type labels every order as new or returning using a date equality check. COUNT(DISTINCT CASE WHEN customer_type=\'new\' THEN user_id END) is the idiomatic way to count distinct new buyers — without DISTINCT, a user who placed two orders on their first-ever order date would be counted twice. The critical business distinction: a user is \'new\' only for the order that matches their exact first order date — all subsequent orders, even same-day, are \'returning\'. If a user\'s first order was cancelled, their first completed purchase still counts as \'returning\' in this model (worth raising with the stakeholder). Weak answer: filtering to new users via a subquery in WHERE — this gives new-only revenue but loses the returning dimension and prevents the side-by-side monthly comparison.\n\n**Forensic trap:** A junior analyst drops the DISTINCT from the buyer columns, writing COUNT(CASE WHEN customer_type = \'returning\' THEN user_id END) instead of COUNT(DISTINCT CASE WHEN ...). The revenue columns (SUM-based) stay correct and the result keeps its clean 15-row shape, so the bug hides. But COUNT without DISTINCT tallies qualifying ROWS, not distinct users: in 2024-01, two returning users placed 4 returning orders between them, so returning_buyers reads 4 when only 2 distinct customers bought that month. (A month-string mislabel — labelling the whole debut month \'new\' — would seem like another candidate, but no user in this seed placed a second order in their debut month, so that variant does not diverge here; the COUNT-not-DISTINCT bug is the one that actually changes a number.)\n\n**Sanity check:** For any month, new_buyers + returning_buyers must not exceed the count of distinct user_ids who ordered that month. For 2024-01 that distinct count is 2, so a returning_buyers of 4 is impossible and signals a missing DISTINCT inside the COUNT(CASE WHEN ...). Revenue reconciles separately: new_revenue + returning_revenue for a month equals SUM(subtotal) over that month\'s orders.\n\n**Interviewer follow-up:** \'A first-ever order counts as new — at what point does a customer become returning, and how would a rolling 12-month definition change the split?\'',
-    sqliteNote: 'Uses strftime() for month grouping — SQLite-specific. PostgreSQL equivalent: TO_CHAR(created_at, \'YYYY-MM\').',
+    sqliteNote: 'Month grouping comes from to_char((created_at)::timestamp, \'YYYY-MM\'), which yields the \'YYYY-MM\' bucket each order is aggregated into.',
   },
 
   {
@@ -5539,7 +5539,7 @@ export const sqlLabProblems = [
         explanation: 'It is correct. The consecutive gaps sum to (last - first) because they telescope, and the mean of those (n - 1) gaps is exactly (last - first)/(n - 1) — algebraically identical to averaging the LAG gaps, matching to the rounded day. The load-bearing detail is the divisor: it must be the GAP count (count - 1), not the order count. Swap in COUNT(*) and you get the understating trap. span_count is a legitimate window-free implementation; lag is the canonical one.',
       },
     ],
-    sqliteNote: 'Uses julianday() for date arithmetic. In PostgreSQL use: (created_at::date - LAG(created_at::date) OVER (...)) AS days_between.',
+    sqliteNote: 'days_between differences each order date against the prior one as integers — ((created_at)::date - DATE \'2000-01-01\') minus the same for LAG(created_at) OVER (PARTITION BY user_id ORDER BY created_at).',
   },
 
   {
@@ -5631,7 +5631,7 @@ export const sqlLabProblems = [
         explanation: 'A Q1 signup with no order inside the 30-day window survives the LEFT JOIN as a row whose order columns are NULL; SUM over no rows is NULL, and COALESCE turns that NULL into 0 so the user reports first_month_revenue = 0 instead of dropping out or showing NULL. This is what makes the cohort complete — the zero-revenue users are kept and correctly valued at 0. Without COALESCE the LEFT JOIN still keeps the row, but the revenue would read NULL rather than 0.',
       },
     ],
-    sqliteNote: 'Uses julianday() for date arithmetic. In PostgreSQL use: o.created_at::date <= q.signup_date::date + INTERVAL \'30 days\'.',
+    sqliteNote: 'The 30-day window compares integer day offsets: ((o.created_at)::date - DATE \'2000-01-01\') <= ((q.signup_date)::date - DATE \'2000-01-01\') + 30, kept on the ON clause so zero-revenue users survive the LEFT JOIN.',
   },
 
   {
@@ -6223,7 +6223,7 @@ export const sqlLabProblems = [
         explanation: 'The overlap form adds the interval test — julianday(p1) <= julianday(p2) + p2.days_supply AND the symmetric condition — so a pair only survives if the windows could be active on the same day. On THIS seed it returns the same single row, because patient 1\'s two Lisinopril fills are 2 days apart with 30-day supplies and clearly overlap. The methods diverge on data where the same drug was prescribed by two providers months apart: the plain < self-join still flags it, the overlap form correctly does not. Same dedupe rule, stricter clinical definition.',
       },
     ],
-    sqliteNote: 'Uses julianday() for date arithmetic. In PostgreSQL: ABS((p2.prescribed_at::date - p1.prescribed_at::date)) AS days_between_rx.',
+    sqliteNote: 'days_between_rx is ABS of the integer date difference: ABS(CAST(((p2.prescribed_at)::date - DATE \'2000-01-01\') - ((p1.prescribed_at)::date - DATE \'2000-01-01\') AS INTEGER)), always positive regardless of order.',
   },
 
   {
@@ -6315,7 +6315,7 @@ export const sqlLabProblems = [
         explanation: 'SUM() OVER (ORDER BY day) accumulates in a single ordered pass — O(n) in the number of buckets. The correlated subquery re-sums all prior buckets for each bucket (O(n^2)), and the self-join on m2.day <= m1.day materialises a triangular intermediate of ~n^2/2 rows before the GROUP BY. At ~1,800 buckets that is the difference between one pass and on the order of a million intermediate rows. Magnitudes illustrative; the window is the only linear form.',
       },
     ],
-    sqliteNote: 'Uses strftime() for date truncation. In PostgreSQL: DATE_TRUNC(\'month\', created_at)::date AS month.',
+    sqliteNote: 'The month bucket comes from to_char((created_at)::timestamp, \'YYYY-MM\'); SUM(COUNT(*)) OVER (ORDER BY month) then accumulates the running total.',
   },
 
   {
@@ -6398,7 +6398,7 @@ export const sqlLabProblems = [
         explanation: 'SQLite does not support INTERVAL-based RANGE window frames, so you cannot express "within the last 30 DAYS" as a RANGE clause — RANGE in SQLite works on numeric/row offsets, not date intervals. The self-join encodes the 30-day bound directly in the join predicate with julianday arithmetic, and the correlated count does the same per row; both are correct portable forms. On Postgres you would use the native interval RANGE window. self_join is the canonical SQLite form here.',
       },
     ],
-    sqliteNote: 'Uses julianday() for the join condition date arithmetic. In PostgreSQL use: COUNT(*) OVER (PARTITION BY account_id ORDER BY occurred_at RANGE BETWEEN INTERVAL \'30 days\' PRECEDING AND INTERVAL \'1 day\' PRECEDING).',
+    sqliteNote: 'The 30-day window lives in the self-join predicate as an integer day difference: ((t1.occurred_at)::date - DATE \'2000-01-01\') - ((t2.occurred_at)::date - DATE \'2000-01-01\') <= 30, paired with the strict t2.occurred_at < t1.occurred_at.',
   },
 
   {
@@ -6946,7 +6946,7 @@ export const sqlLabProblems = [
         explanation: 'Both produce the same first-order anchor, but the correlated subquery re-runs an inner MIN for every outer row — a nested loop, roughly O(n*m), so on 50M orders it rescans each user\'s history once per row. The MIN() GROUP BY computes all anchors in a single hash-aggregate pass (linear-ish). Same answer, very different cost; the aggregate (or an equivalent window MIN) is the right choice at scale. Magnitudes are illustrative — the point is one pass versus a per-row rescan.',
       },
     ],
-    sqliteNote: 'Uses julianday() for date differences — SQLite-specific. In other dialects use DATEDIFF() or date subtraction.',
+    sqliteNote: 'The 180-day conversion test differences the dates as integers: ((first_order_date)::date - DATE \'2000-01-01\') - ((signup_date)::date - DATE \'2000-01-01\') <= 180.',
   },
 
   {
@@ -7708,7 +7708,7 @@ export const sqlLabProblems = [
         explanation: 'COUNT(CASE WHEN s.status = \'delivered\' THEN s.shipment_id END) counts only the rows where the CASE yields a non-NULL value — i.e. delivered shipments — and because the join is left and unfiltered, a driver with no delivered shipment still has a group and reads 0. The trap inside this pattern is using COUNT(*) instead of COUNT(CASE ... THEN shipment_id END): COUNT(*) counts every joined row regardless of status, inflating total_deliveries. The conditional-aggregate form matches the ON-clause form exactly and additionally lets you tally other statuses in one pass.',
       },
     ],
-    sqliteNote: 'In PostgreSQL: (\'delivered_date\'::date - \'scheduled_date\'::date) for date arithmetic instead of comparing TEXT values directly. SQLite TEXT dates in YYYY-MM-DD format compare lexicographically, which gives correct results for properly formatted dates.',
+    sqliteNote: 'The on-time test compares the two dates directly with delivered_date <= scheduled_date — no date subtraction needed, since a same-day-or-earlier delivery is on time.',
   },
 
   {
@@ -10012,7 +10012,7 @@ export const sqlLabProblems = [
         explanation: 'They match only because cancelled orders currently have a NULL delivered_at, so their second-difference is NULL and AVG skips them — the data is doing the filtering. The explicit WHERE status = \'delivered\' states the intent and stays correct if a cancelled or failed order ever gets a delivered_at backfilled, at which point the unfiltered query would fold a non-delivery into delivery time. Relying on NULL-skipping is a guarantee you do not hold; the filter is one you do.',
       },
     ],
-    sqliteNote: 'Use strftime(\'%s\', ...) to convert TEXT timestamps to Unix seconds, then divide the difference by 60.0 (REAL) to get minutes as a decimal.',
+    sqliteNote: 'EXTRACT(EPOCH FROM (delivered_at)::timestamp) - EXTRACT(EPOCH FROM (placed_at)::timestamp) gives the gap in seconds; dividing by 60.0 yields minutes as a decimal.',
   },
 
   {
@@ -10496,7 +10496,7 @@ export const sqlLabProblems = [
         explanation: 'Every user\'s earliest event must have session_seq = 1 — a person\'s first event always opens their first session, by definition. If any user\'s first row shows 0 or 2, the look-back (LAG) is reaching across user boundaries because PARTITION BY user_id was dropped, so one person\'s first tap is being measured against a stranger\'s last tap. strftime_gap is the correct, partitioned form; the check is the cheap structural guard that proves the gap is measured within each user.',
       },
     ],
-    sqliteNote: 'Uses strftime(\'%s\', ...) for whole-second gap math on \'YYYY-MM-DD HH:MM\' timestamps — avoids the floating-point imprecision julianday() introduces at the exact 30-minute boundary.',
+    sqliteNote: 'The gap is whole-second math: EXTRACT(EPOCH FROM (occurred_at)::timestamp) - EXTRACT(EPOCH FROM (prev_at)::timestamp) compared to 1800, so an exact 30-minute boundary is precise with no float noise.',
   },
 
   {
@@ -10579,7 +10579,7 @@ export const sqlLabProblems = [
         explanation: 'A single-event session is a real session of length 0 (first timestamp equals last), so it belongs in the average: user 1 averages (25 + 0) / 2 = 12.5 minutes. Dropping zero-length sessions would average only the 25-minute one and overstate how long visits actually run, biasing the engaged-user call. The session-bounds roll-up computes length as MAX minus MIN per session, which is correctly 0 for a one-event session and keeps it in the AVG. (strftime_sessions and julianday_rounded both handle this; the trap never reaches session grain at all.)',
       },
     ],
-    sqliteNote: 'strftime(\'%s\', ...) yields whole-second epoch values on \'YYYY-MM-DD HH:MM\' timestamps; integer division by 60 gives whole minutes and sidesteps julianday() float noise at the 30-minute boundary.',
+    sqliteNote: 'EXTRACT(EPOCH FROM (occurred_at)::timestamp) yields whole-second values; the gap test against 1800 and the MAX-minus-MIN session length (divided by 60) are both exact at the 30-minute boundary.',
   },
 
   {
@@ -10678,7 +10678,7 @@ export const sqlLabProblems = [
         explanation: 'window_midpoint and count_over are both correct and tie-safe — they position rows with ROW_NUMBER, so tied subtotals still occupy distinct positions and the (n+1)/2, (n+2)/2 middle picks the right rows; window_midpoint is the canonical form. rank_midpoint looks the same but uses RANK, which collapses tied subtotals onto one position and grabs the wrong middle row. mean abandons the median entirely. On an engine WITH a built-in (Postgres PERCENTILE_CONT, Snowflake MEDIAN) you would prefer that instead — but in SQLite the ROW_NUMBER position trick is the portable, tie-safe choice.',
       },
     ],
-    sqliteNote: 'SQLite lacks PERCENTILE_CONT / PERCENTILE_DISC; the (n+1)/2, (n+2)/2 position method is the portable true-median pattern. ROUND(AVG(...), 2) returns a whole-number REAL as an integer string in sql.js (e.g. 89.99 stays 89.99, but a clean 80.0 would render as 80).',
+    sqliteNote: 'This solution uses the portable (n+1)/2, (n+2)/2 position method for the true median — engine-agnostic. Postgres also offers PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY value), which is the idiomatic form here.',
   },
 
   {
@@ -10761,7 +10761,7 @@ export const sqlLabProblems = [
         explanation: 'The islands tag relies on the calendar day and the row position both advancing by exactly 1 per consecutive day, keeping their difference constant within a run. A same-day duplicate order advances ROW_NUMBER without advancing the day, so the difference shifts mid-run and a genuine streak shatters into shorter false islands — the per-user MAX then under-reports. DISTINCT up front keeps one row per active day so the arithmetic stays in lockstep. (date_rownumber is the canonical islands form; lag_gapflag needs DISTINCT for the same reason.)',
       },
     ],
-    sqliteNote: 'Uses julianday() for day-level date arithmetic — SQLite-specific; equivalent to DATEDIFF day-counts in other dialects.',
+    sqliteNote: 'The islands tag uses an integer day value — ((active_day)::date - DATE \'2000-01-01\') minus a date-ordered ROW_NUMBER — constant across a consecutive run and shifting at every gap.',
   },
 
   // ─── COVERAGE-GAP ADDITIONS round 2 (percentile · set-ops · gaps-and-islands · recursive · string · dedup) ──
@@ -10857,7 +10857,7 @@ export const sqlLabProblems = [
         explanation: 'p90 is a slow-tail number — 90% of deliveries come in under it — so it must sit at or above the mean, never below. A p90 below the mean means the ranking is upside-down: the ORDER BY is descending where it should be ascending, so the position lands near the fast end. The fix is ordering delivery_min ascending before taking the ceil(0.9n) position. This applies to whichever method you chose; nearest_rank is the canonical one to correct.',
       },
     ],
-    sqliteNote: 'SQLite has no PERCENTILE_CONT; nearest-rank via ROW_NUMBER + COUNT OVER is the portable p90. strftime(\'%s\', ...) on \'YYYY-MM-DD HH:MM:SS\' timestamps gives whole-second gaps; integer division by 60 yields whole minutes (a REAL whole number renders as an integer string in sql.js).',
+    sqliteNote: 'p90 is nearest-rank via ROW_NUMBER + COUNT(*) OVER, keeping the row at position (9*n+9)/10. EXTRACT(EPOCH FROM (delivered_at)::timestamp) - EXTRACT(EPOCH FROM (placed_at)::timestamp) gives the gap in seconds; integer division by 60 yields whole minutes.',
   },
 
   {
@@ -11031,7 +11031,7 @@ export const sqlLabProblems = [
         explanation: 'The up pings are the separators that end one outage and begin the next. If you filter to down first and THEN number, the service-wide counter is built only over down rows, so api\'s 09:20 and 09:35 pings look consecutive and their island tags collapse into one — two outages silently fuse. Numbering over the full table keeps the up rows in the sequence so the seq_all counter still jumps across them. (dual_rownumber is the canonical form; lag_boundary needs the up rows visible for the same reason.)',
       },
     ],
-    sqliteNote: 'The dual-ROW_NUMBER island tag (seq over all rows minus seq within status) is the SQLite-portable way to collapse consecutive same-value rows into ranges; strftime(\'%s\', ...) on \'YYYY-MM-DD HH:MM\' timestamps gives whole-second gaps for the duration.',
+    sqliteNote: 'The dual-ROW_NUMBER island tag (seq over all rows minus seq within status) collapses consecutive same-value rows into ranges; EXTRACT(EPOCH FROM (MAX(checked_at))::timestamp) - EXTRACT(EPOCH FROM (MIN(checked_at))::timestamp) over 60 gives the duration in minutes.',
   },
 
   {
@@ -11121,7 +11121,7 @@ export const sqlLabProblems = [
         explanation: 'Without WITH RECURSIVE you cannot walk arbitrary depth, so a fixed self-join stack is the fallback — and it must have ENOUGH joins for the maximum depth. Four manager-hops reach the CEO from a depth-5 employee, so fixed_4joins covers the contractual cap exactly. fixed_2joins is the same shape but too short and would cap at 3, hiding the bottom two layers. Document that the join count must be widened if the cap ever rises.',
       },
     ],
-    sqliteNote: 'WITH RECURSIVE is supported in SQLite (and sql.js); the anchor/UNION ALL/recursive-member shape is standard. manager_id is carried in the CTE only to drive the join and is dropped from the final projection.',
+    sqliteNote: 'WITH RECURSIVE is standard SQL; the anchor/UNION ALL/recursive-member shape walks the hierarchy to any depth. manager_id is carried in the CTE only to drive the join and is dropped from the final projection.',
   },
 
   {

@@ -380,6 +380,16 @@ Signed in: TRACK shows Profile (with OAuth avatar thumbnail) + Progress + Plans.
 
 ---
 
+## SQL engine — Postgres (pglite) ONLY, across every surface (V7.0.0+)
+
+**There is ONE SQL engine: `@electric-sql/pglite` (real Postgres compiled to WASM, in-browser). sql.js / SQLite is fully removed.** This applies to ALL SQL-running surfaces with no exceptions — the main SQL Lab (`SqlLabPage.jsx`), the Beginner tutorial (`SqlLabBeginnerPage.jsx`), and the Full Loop runner (`FullLoopRunner.jsx`). Rationale: real interview screens are Postgres-flavored, the cheat sheet was already Postgres, and SQLite-isms (`strftime`/`julianday`/`date(x,'-N')`) were a teaching liability. Do not reintroduce sql.js or add a second engine "for the simple cases" — one engine fires everything.
+
+**Consequences for any future SQL work:**
+- All SQL in data files (`solution`/`brokenQuery`/`sql`/method `expr`) must be valid Postgres. No `strftime`/`julianday`/`instr`/`date(x,'-N')`. Use `to_char`/`EXTRACT(EPOCH …)`/integer date subtraction/`strpos`/`x::date ± interval`. Postgres is strict: no alias-in-HAVING, no lax GROUP BY.
+- The engine API is async: `await db.exec(schema)` / `await db.query(sql)` → `{rows: object[], fields: [{name}]}`. The `pgLit`/`pgResult` helpers (in each runner) map that to the app's `{columns, rows[][]}`.
+- **Verify with `scripts/pg_verify_harness.mjs`** (runs every solution + method + brokenQuery against real Postgres). This SUPERSEDES the old SQLite `scripts/audit_sql_lab.py` for SQL correctness.
+- `public/sql-wasm.wasm` is obsolete (no longer referenced/bundled) — it lingers only because the iCloud mount blocks deletion.
+
 ## SQL Lab Content Standard (V4.59.0+)
 
 **SQL Lab problems must meet the multi-approach standard.**

@@ -4,6 +4,15 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [7.1.0] — 2026-06-25 [LAST-ACTIVE — public "Active Xh ago" on profiles]
+
+Public profiles now show when a user was last active (e.g. "Active 3h ago"), visible to everyone. **Last-active timestamp only** — no dwell/total-time tracking (per Sidharth: "last active at only").
+
+- `leaderboard.js`: new `touchLastActive(user)` upserts `last_active_at = now()`. Guarded + graceful — silently no-ops if the column is absent (pre-migration). `fetchPublicProfile` selects `last_active_at` in its rich set (retries base on miss); `normalizeProfile` passes it through.
+- `App.jsx`: `touchLastActive` fires on auth (sign-in / initial session / token refresh) and on tab-hide (`visibilitychange`) — per-session granularity, alongside the existing leaderboard upserts.
+- `PublicProfile.jsx`: new `timeAgo()` helper (just now / Xm / Xh / Xd / Xw, falls back to month-year past ~5 weeks). The hero badge now reads "Active {timeAgo(last_active_at)}", degrading to the member-since date when null.
+- Migration `docs/migrations/2026-06_last_active.sql`: `add column if not exists last_active_at timestamptz` + a `last_active_at desc` index. Idempotent; existing row-scoped RLS covers it (no new policy). **Pending on Sidharth to run in Supabase.**
+
 ## [7.0.0] — 2026-06-25 [SQL LAB → POSTGRES (pglite). Engine migrated, fully verified.]
 
 SQL Lab now runs on **real Postgres** (`@electric-sql/pglite`, Postgres compiled to WASM, in-browser) instead of SQLite (sql.js). Real interview screens are Postgres-flavored; the cheat sheet was already Postgres syntax; SQLite-isms (`strftime`/`julianday`/`date(x,'-N')`) were a teaching liability. **Done as one atomic change, harness-verified before shipping** (builds freeze after this).
@@ -17,7 +26,14 @@ SQL Lab now runs on **real Postgres** (`@electric-sql/pglite`, Postgres compiled
 
 Also: cheat sheet's SQLite `strftime` block → Postgres `to_char`/`EXTRACT`; f34 note made engine-agnostic.
 
-**Intentionally NOT migrated:** the Beginner tutorial page still uses sql.js (intro SELECT/WHERE lessons — the Postgres-vs-SQLite distinction is invisible there, and it's a working surface I didn't want to risk in the same change). Both engines ship; they're separate lazy-loaded pages. Can be swapped later.
+**Postgres EVERYWHERE — sql.js fully removed.** Per the "why keep two engines when one can fire everything" call, the *other* two SQL runtimes were also swapped to pglite in this same atomic change, and `sql.js` was dropped from `package.json`/lock entirely:
+- **Beginner tutorial** (`SqlLabBeginnerPage.jsx`) → pglite. Lessons had zero SQLite-isms, so the data file (`sqlBeginnerLessons.js`) is unchanged; only the engine init + `check()`/`runOrCheck()` went async on `pgResult(await db.query())`. **18/18 lessons verified run.**
+- **Full Loop** (`FullLoopRunner.jsx`) → pglite, dropping the CDN sql.js load for `await import('@electric-sql/pglite')`. Its 9 model queries (`fullLoopSeedData.js`) were ported (notably `date(x,'-N')` → `to_char(... interval,'YYYY-MM-DD')` text form, since the seed columns are TEXT). **10/10 seeds build + model queries run.**
+- The only sql.js artifact left is `public/sql-wasm.wasm` (un-deletable over the iCloud mount — Trash it manually; it's no longer referenced or bundled).
+
+**Stale content swept** (the migration's real blast radius): **22 user-facing `sqliteNote` fields** that said "uses SQLite-specific julianday()/strftime() — in Postgres use Y" were rewritten to accurately describe the *actual* ported Postgres solution (each re-derived from its `solution:` field, not an idealized form — e.g. integer-day-offset diffs, `to_char` months, epoch-minute sub-day gaps). Verified: apostrophe audit OK, brace diff 0, zero stale dialect terms remain. Also: stale code comments in `FullLoopRunner`/`fullLoopSeedData`/`sqlLabDatamarts` and the `About.jsx` "SQLite via sql.js" marketing line updated to pglite/Postgres.
+
+Final build: **905 modules ✓**, `pglite-*.wasm` (10 MB) bundled, no `sql-wasm` in output. `package-lock.json` updated so Vercel installs pglite.
 
 ## [6.10.0] — 2026-06-25 [EASY PROMPT RE-AUDIT (7 fixes) + inline SQL cheatsheet]
 

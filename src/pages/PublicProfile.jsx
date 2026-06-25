@@ -55,6 +55,27 @@ function memberSince(iso) {
   }
 }
 
+// Compact relative "last active" label, e.g. "just now", "5m ago", "3h ago",
+// "2d ago", "3w ago". Falls back to a month/year date past ~5 weeks.
+function timeAgo(iso) {
+  if (!iso) return null;
+  let then;
+  try { then = new Date(iso).getTime(); } catch { return null; }
+  if (!then || Number.isNaN(then)) return null;
+  const secs = Math.floor((Date.now() - then) / 1000);
+  if (secs < 0) return 'just now';
+  if (secs < 60) return 'just now';
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return days + 'd ago';
+  const wks = Math.floor(days / 7);
+  if (wks < 5) return wks + 'w ago';
+  return memberSince(iso);
+}
+
 export function PublicProfile({ userId, onNavigate }) {
   const [profile, setProfile] = useState(undefined); // undefined = loading, null = not found
   const [standing, setStanding] = useState(null); // { rank, total, board } | null
@@ -122,6 +143,7 @@ function StatTile({ value, label, sub, color }) {
 function Profile({ profile, standing }) {
   const [avatarFailed, setAvatarFailed] = useState(false);
   const since = memberSince(profile.updated_at);
+  const lastActive = timeAgo(profile.last_active_at) || (since ? since : null);
   const breakdown = profile.room_breakdown && typeof profile.room_breakdown === 'object'
     ? Object.entries(profile.room_breakdown).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1])
     : [];
@@ -214,8 +236,8 @@ function Profile({ profile, standing }) {
                   Rank #{rank}{total ? ' of ' + total : ''}
                 </span>
               )}
-              {since && (
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Active as of {since}</span>
+              {lastActive && (
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Active {lastActive}</span>
               )}
             </div>
           </div>

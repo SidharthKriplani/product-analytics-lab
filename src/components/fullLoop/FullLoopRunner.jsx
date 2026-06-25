@@ -5,6 +5,20 @@ import { saveFullLoopProgress, getFullLoopProgress, clearFullLoopProgress } from
 import { track } from '../../utils/analytics.js';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
+// pglite (Postgres) result → {columns, rows[][]} (engine migrated off sql.js, V7.0.0).
+function pgResult(res) {
+  var columns = (res && res.fields ? res.fields : []).map(function (f) { return f.name; });
+  var rows = (res && res.rows ? res.rows : []).map(function (r) {
+    return columns.map(function (c) {
+      var v = r[c];
+      if (v === null || v === undefined) return null;
+      if (v instanceof Date) return v.toISOString().slice(0, 10);
+      return v;
+    });
+  });
+  return { columns: columns, rows: rows };
+}
+
 // ─── SVG Phase Icons ───────────────────────────────────────────────────────
 function IconAlert(props) {
   var size = props.size || 20;
@@ -1134,7 +1148,7 @@ function QueryChainPhase(props) {
 
   var dbRef = useRef(null);
 
-  // Initialize sql.js database
+  // Initialize pglite (Postgres) database
   useEffect(function() {
     var seedData = fullLoopSeedData[caseId];
     if (!seedData) {
@@ -1143,37 +1157,19 @@ function QueryChainPhase(props) {
     }
     var cancelled = false;
 
-    function loadAndInit() {
-      var initSqlJs = window.initSqlJs;
-      if (!initSqlJs) {
-        var script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js';
-        script.onload = function() {
-          if (cancelled) return;
-          window.initSqlJs({ locateFile: function(file) { return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/' + file; } }).then(function(SQL) {
-            if (cancelled) return;
-            var db = new SQL.Database();
-            seedData.seedSql.forEach(function(stmt) { db.run(stmt); });
-            dbRef.current = db;
-            setDbReady(true);
-          }).catch(function(e) {
-            if (!cancelled) setDbError('Failed to initialize SQL engine: ' + e.message);
-          });
-        };
-        script.onerror = function() {
-          if (!cancelled) setDbError('Failed to load SQL engine script');
-        };
-        document.head.appendChild(script);
-      } else {
-        initSqlJs({ locateFile: function(file) { return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/' + file; } }).then(function(SQL) {
-          if (cancelled) return;
-          var db = new SQL.Database();
-          seedData.seedSql.forEach(function(stmt) { db.run(stmt); });
-          dbRef.current = db;
-          setDbReady(true);
-        }).catch(function(e) {
-          if (!cancelled) setDbError('Failed to initialize SQL engine: ' + e.message);
-        });
+    async function loadAndInit() {
+      try {
+        var mod = await import('@electric-sql/pglite');
+        if (cancelled) return;
+        var db = new mod.PGlite();
+        for (var i = 0; i < seedData.seedSql.length; i++) {
+          await db.exec(seedData.seedSql[i]);
+          if (cancelled) { try { db.close(); } catch (e) {} return; }
+        }
+        dbRef.current = db;
+        setDbReady(true);
+      } catch (e) {
+        if (!cancelled) setDbError('Failed to initialize SQL engine: ' + e.message);
       }
     }
 
@@ -1188,31 +1184,22 @@ function QueryChainPhase(props) {
     };
   }, [caseId]);
 
-  function handleRunQuery() {
+  async function handleRunQuery() {
     if (!dbRef.current) return;
     var userQuery = userQueries[currentIdx];
     if (!userQuery.trim()) return;
 
     try {
-      var stmt = dbRef.current.exec(userQuery);
-      if (stmt.length > 0) {
-        var newResults = results.slice();
-        newResults[currentIdx] = {
-          columns: stmt[0].columns,
-          values: stmt[0].values.map(function(r) { return r.map(function(v) { return String(v); }); }),
-        };
-        setResults(newResults);
-        var newErrors = errors.slice();
-        newErrors[currentIdx] = '';
-        setErrors(newErrors);
-      } else {
-        var newResults2 = results.slice();
-        newResults2[currentIdx] = { columns: [], values: [] };
-        setResults(newResults2);
-        var newErrors2 = errors.slice();
-        newErrors2[currentIdx] = '';
-        setErrors(newErrors2);
-      }
+      var conv = pgResult(await dbRef.current.query(userQuery));
+      var newResults = results.slice();
+      newResults[currentIdx] = {
+        columns: conv.columns,
+        values: conv.rows.map(function(r) { return r.map(function(v) { return v === null ? 'NULL' : String(v); }); }),
+      };
+      setResults(newResults);
+      var newErrors = errors.slice();
+      newErrors[currentIdx] = '';
+      setErrors(newErrors);
     } catch (e) {
       var newErrors3 = errors.slice();
       newErrors3[currentIdx] = e.message;

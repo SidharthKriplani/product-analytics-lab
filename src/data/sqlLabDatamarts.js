@@ -1622,7 +1622,7 @@ export const datamarts = {
         rows: [
           // order_id, customer_id, restaurant_id, courier_id, created_at, accepted_at, picked_up_at, delivered_at, status, subtotal, delivery_fee
           // Last order for restaurant 7: order 8, 2024-01-10 (churned)
-          // Delivery time = julianday(delivered_at) - julianday(created_at) in minutes
+          // Delivery time = minutes between created_at and delivered_at (Postgres EXTRACT(EPOCH ...)/60)
           [1,  1, 1, 1, '2023-03-10 18:00', '2023-03-10 18:05', '2023-03-10 18:28', '2023-03-10 18:52', 'delivered',    28.50, 3.99],
           [2,  2, 2, 2, '2023-04-15 12:30', '2023-04-15 12:35', '2023-04-15 13:02', '2023-04-15 13:38', 'delivered',    42.00, 3.99],
           [3,  3, 3, 3, '2023-05-20 19:15', '2023-05-20 19:20', '2023-05-20 19:35', '2023-05-20 19:58', 'delivered',    19.80, 2.99],
@@ -1994,7 +1994,7 @@ export const datamarts = {
         ],
         rows: [
           // req_id, dept_id, job_title, opened_date, filled_date, status
-          // Time-to-hire = julianday(filled_date) - julianday(opened_date)
+          // Time-to-hire = whole days between opened_date and filled_date (Postgres date diff)
           [1,  5, 'Sr Engineer',     '2022-08-01', '2022-09-25', 'filled'],
           [2,  5, 'Engineer',        '2022-11-01', '2023-01-12', 'filled'],
           [3,  6, 'Sr Data Analyst', '2023-01-10', '2023-02-28', 'filled'],

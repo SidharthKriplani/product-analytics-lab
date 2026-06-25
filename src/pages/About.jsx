@@ -83,7 +83,7 @@ Filter by difficulty in any room browser using the chips above the case list.`,
       title: 'Technical details',
       body: `React + Vite SPA. Case content ships as JavaScript data files and your progress is stored in your browser's localStorage. Sign in (optional) to sync across devices, post to the Feed, and appear on the leaderboard.
 
-SQL Lab runs SQLite in the browser via sql.js (WASM) — no server-side execution. Code fluency lives in Programming Lab, a separate BreakLabs app.
+SQL Lab runs real Postgres in the browser via pglite (WASM) — no server-side execution. Code fluency lives in Programming Lab, a separate BreakLabs app.
 
 Deployed on Vercel. Works offline once loaded. Currently in beta — free with an access code.`,
     },

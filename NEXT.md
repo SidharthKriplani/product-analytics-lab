@@ -4,9 +4,42 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ---
 
-## ⭐ CURRENT STATE — 2026-06-25 (V5.97.0)
+## 🔴🔴 UNPUSHED — V7.0 + V7.1 ARE COMPLETE & VERIFIED IN THE WORKSPACE BUT NOT YET PUSHED (2026-06-25)
 
-PAL is live on Vercel (productanalyticslab.com). Build clean at 895 modules. Recent sessions:
+**If this is a fresh session: the work below is DONE on disk and build-verified (905 modules ✓, harness pass) but was never pushed to GitHub.** The user paused right before the push. Do NOT rebuild or re-port — just push. (Reason for the pause: pushing to the public repo needs the user's explicit go-ahead; they asked me to checkpoint the MD files first.)
+
+**What's done (all in `src/` etc., verified):**
+- **V7.0 — Postgres everywhere, sql.js fully removed.** Engine swapped to pglite in ALL 3 runtimes; sql.js dropped from npm. Harness-verified 192/192 solutions + 336/336 methods + 18/18 beginner + 10/10 full-loop. 22 `sqliteNote` fields rewritten to match the ported Postgres SQL.
+- **V7.1 — public last-active** ("Active Xh ago") on profiles; timestamp only.
+
+**Files changed for V7.0 + V7.1 (the push must include all of these):**
+- SQL engine + data: `src/data/sqlLabProblems.js`, `src/pages/SqlLabPage.jsx`, `src/pages/SqlLabBeginnerPage.jsx`, `src/components/fullLoop/FullLoopRunner.jsx`, `src/data/fullLoopSeedData.js`, `src/data/sqlLabDatamarts.js` (comments)
+- Copy/docs: `src/pages/CheatSheet.jsx`, `src/pages/About.jsx`, `docs/POSTGRES-MIGRATION.md`, `docs/SQL-LAB-SPEC.md`
+- Deps: `package.json`, `package-lock.json` (pglite in, sql.js out — **lockfile MUST ship or Vercel won't install pglite**)
+- New: `scripts/pg_verify_harness.mjs`, `docs/migrations/2026-06_last_active.sql`
+- Last-active: `src/utils/leaderboard.js`, `src/App.jsx`, `src/pages/PublicProfile.jsx`
+- Spine: `CHANGELOG.md`, `NEXT.md`
+- ⚠ Earlier this session (V6.8–V6.10: crash-plan tabs, Easy-prompt re-audit, inline SQL quick-ref) may ALSO be unpushed — they live in `SqlLabPage.jsx` / `sqlLabProblems.js` / `CheatSheet.jsx`, so copying the current files captures them. `git diff` from the repo path is UNRELIABLE (iCloud mmap) — do NOT trust it; copy the working files and run the `comm -23` check in CLAUDE.md to catch anything missed.
+
+**Push (per CLAUDE.md /tmp-clone workflow — direct git from repo path fails):**
+```bash
+git clone https://github.com/SidharthKriplani/product-analytics-lab /tmp/pal-push
+SRC="/Users/ASUS/Documents/Professional/BreakLabs/labs/product-analytics-lab"
+# copy each file listed above into /tmp/pal-push/<same path>, then:
+cd /tmp/pal-push && git add -A && git commit -m "V7.1.0: Postgres everywhere (sql.js removed, 3 runtimes) + 22 note rewrites + public last-active" && git push origin main
+```
+
+**Then (server-side, on Sidharth):** run the 3 Supabase migrations (incl. `2026-06_last_active.sql`), Trash `public/sql-wasm.wasm`, rotate the GitHub PAT.
+
+---
+
+## ⭐ CURRENT STATE — 2026-06-25 (V7.1.0)
+
+PAL is live on Vercel (productanalyticslab.com). Build clean at **905 modules**. **BUILD FREEZE in effect — no further builds for ~5 days after this push.**
+- **V7.0** — SQL Lab → **Postgres everywhere (pglite)**, sql.js fully removed from all 3 runtimes (main + Beginner + Full Loop) and from npm. Harness-verified: 192/192 solutions + 336/336 methods + 18/18 beginner + 10/10 full-loop. 22 stale `sqliteNote` fields rewritten to match the ported Postgres solutions.
+- **V7.1** — public **last-active** ("Active Xh ago") on profiles; last-active timestamp only, no dwell tracking.
+
+Earlier sessions:
 - **V5.94** — design-system foundation (`RoomHeader`/`FilterBar`/`CaseCard`), global rails killed, Community feed v1.
 - **V5.95** — design system rolled to every room browser, Simulator → mock-onsite gold, About/Profile/Progress/Plans/Pricing refreshed.
 - **V5.96** — SQL Easy-tier ramp fixed to spec (bullets in batches 1&2 / schema fade relevant→all→all; batch-3 = normal), Community feed hidden from nav.
@@ -18,7 +51,8 @@ PAL is live on Vercel (productanalyticslab.com). Build clean at 895 modules. Rec
 - **Community feed** — nav item commented (V5.96); route + `Community.jsx` + `feed.js` preserved.
 
 **Pending on Sidharth (server-side — I can't do these):**
-- Run `docs/migrations/2026-06_public_profiles.sql` + `docs/migrations/2026-06_feed.sql` in Supabase.
+- Run `docs/migrations/2026-06_public_profiles.sql` + `docs/migrations/2026-06_feed.sql` + **`docs/migrations/2026-06_last_active.sql`** in Supabase. (Until last_active runs, profiles fall back to the member-since date — no breakage.)
+- **Trash `public/sql-wasm.wasm`** — leftover from the Postgres migration; un-deletable over the iCloud mount, no longer referenced or bundled.
 - ⚠ **Rotate the exposed GitHub PAT** in `.git/config` (open since 2026-06-22 — see the git block below). Critical BEFORE any cross-lab Supabase wiring.
 
 ---
@@ -104,7 +138,7 @@ git push origin main
 ## Recently shipped
 
 - ✅ 2026-06-25 — **V6.10.0 Easy prompt re-audit (7 fixes) + inline SQL cheatsheet.** Fixed e12/e52/e54/e57/e40/e58/e36 (undersold-deliverable, same class as e55). Crash-course review day now sources the SQL cheat sheet inline (`CHEAT_SECTIONS` exported, `SQL_CHEATS` filter, `SqlQuickRef`) instead of linking the all-rooms page. Also fixed e55 + e67 (magic-date→date() modifier) earlier today.
-- ✅ 2026-06-25 — **V7.0.0 SQL Lab → Postgres (pglite). DONE + verified.** 192/192 solutions (rows+cols+checkValues) + 336/336 methods + broken-queries all correct under real Postgres; engine swapped (`SqlLabPage.jsx` async pglite runner + `pgLit`/`pgResult`); `@electric-sql/pglite` in package.json; build 906. Cheatsheet/f34 de-SQLited. **Beginner page still sql.js (intentional).** Details: `docs/POSTGRES-MIGRATION.md`, CHANGELOG 7.0.0.
+- ✅ 2026-06-25 — **V7.0.0 SQL Lab → Postgres (pglite) EVERYWHERE. DONE + verified (UNPUSHED — see top block).** 192/192 solutions (rows+cols+checkValues) + 336/336 methods + broken-queries correct under real Postgres + 18/18 beginner + 10/10 full-loop; engine swapped in ALL 3 runtimes (main + Beginner + Full Loop); `@electric-sql/pglite` in package.json, **sql.js removed**; build 905. Cheatsheet/About/f34 de-SQLited; 22 `sqliteNote` fields rewritten. Details: `docs/POSTGRES-MIGRATION.md`, CHANGELOG 7.0.0 + 7.1.0.
 - ✅ **QUEUED — dwell tracking: LAST-ACTIVE ONLY** (drop total time). Supabase `last_active_at`, client tracker, show on PublicProfile + leaderboard.
 
 ## ⛔ FREEZE NOTE

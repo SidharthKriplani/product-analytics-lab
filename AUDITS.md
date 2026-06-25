@@ -39,6 +39,24 @@ Start here when running an audit. Add rows as new types emerge.
 
 ---
 
+## Part XXXIX — V7.0 Postgres migration verification (2026-06-25)
+
+### 180. ✅ SQL engine migration — full harness verification before the freeze (V7.0.0)
+
+**Type:** Architecture / Build safety / Framework-Technical / Content Integrity
+
+SQL Lab migrated SQLite (sql.js) → Postgres (pglite) across ALL 3 runtimes. Verified end-to-end with `scripts/pg_verify_harness.mjs` (builds each datamart in real Postgres, runs every query, compares rows + columns + checkValues with parseFloat 0.01 tolerance, Date→ISO):
+- **192/192 solutions** pass (rows + cols + checkValues). **336/336 judgment-layer methods** run. **35/36 forensic broken-queries** run (f34 errors by design — `=` vs `IN` on a multi-row subquery, display-only).
+- **18/18 Beginner lessons** + **10/10 Full Loop seeds/model-queries** run on pglite.
+- **All 13 datamarts build under Postgres with ZERO DDL changes** (INTEGER/TEXT/REAL all valid in PG) — found early, big de-risk.
+- Final build: **905 modules ✓**, `pglite-*.wasm` bundled, no `sql-wasm` in output.
+
+**Content-integrity finding (resolved):** the migration left **22 user-facing `sqliteNote` fields** contradicting the now-Postgres queries ("uses SQLite-specific julianday()… in Postgres use Y"). All 22 rewritten to describe the actual ported solution; apostrophe audit OK, brace diff 0, zero stale dialect terms. Stale code comments + About/CheatSheet copy also fixed.
+
+**⚠ Open (server-side / user):** push to GitHub still pending (see NEXT.md UNPUSHED block); run `2026-06_last_active.sql` migration; Trash obsolete `public/sql-wasm.wasm`.
+
+---
+
 ## Part XXXIII — V5.34.x Build Audit (2026-06-18)
 
 ### 153. ✅ Build Audit — Missing file + statefulness gaps (V5.34.3–V5.34.4)

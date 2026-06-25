@@ -167,6 +167,25 @@ export async function upsertLeaderboardRow(user, extra = {}) {
   }
 }
 
+// Bump the signed-in user's last_active_at = now. Public "last seen" signal — call
+// it on app activity (the caller throttles). Guarded + graceful: no-op without a
+// backend, and silently skips if the column is absent (pre-migration).
+export async function touchLastActive(user) {
+  if (!supabase || !user) return;
+  const now = new Date().toISOString();
+  const row = {
+    user_id: user.id,
+    display_name: getDisplayName(user),
+    total_solved: computeTotalSolved(),
+    last_active_at: now,
+    updated_at: now,
+  };
+  try {
+    const { error } = await supabase.from('leaderboard').upsert(row, { onConflict: 'user_id' });
+    if (error && !isMissingColumnError(error)) console.warn('[PAL last-active] upsert failed:', error.message);
+  } catch (e) { /* ignore */ }
+}
+
 // Heuristic: detect a "column does not exist" / unknown-column error from PostgREST
 // so callers can gracefully fall back to the pre-migration schema.
 function isMissingColumnError(error) {
@@ -278,7 +297,7 @@ export async function confirmMyEmployment(user) {
 // miss / no backend.
 export async function fetchPublicProfile(userId) {
   if (!supabase || !userId) return null;
-  const RICH = 'user_id, display_name, total_solved, updated_at, linkedin_url, room_breakdown, current_company, current_role, company_updated_at, resume_url, avatar_url';
+  const RICH = 'user_id, display_name, total_solved, updated_at, linkedin_url, room_breakdown, current_company, current_role, company_updated_at, resume_url, avatar_url, last_active_at';
   const BASE = 'user_id, display_name, total_solved, updated_at';
 
   async function run(cols) {
@@ -319,6 +338,7 @@ function normalizeProfile(row) {
     company_updated_at: row.company_updated_at || null,
     resume_url: row.resume_url || null,
     avatar_url: row.avatar_url || null,
+    last_active_at: row.last_active_at || null,
   };
 }
 

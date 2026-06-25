@@ -56,7 +56,7 @@ There are **two axes**, and conflating them is the classic mistake:
 ## 3. Architecture
 
 - **React + Vite SPA**, hash-routed (`#/sql-lab/<id>`), deployed on Vercel. No server: the SQL engine runs in the browser.
-- **SQL engine: `@electric-sql/pglite`** (real Postgres compiled to WASM, in-browser; V7.0.0 — was `sql.js`/SQLite). On opening a problem, the page builds an in-memory Postgres DB from the problem's datamart (CREATE TABLE + multi-row INSERT from the seed rows), holds it in a ref (`dbRef`), and runs the user's query against it. Async (`await db.exec/query`); `pgLit`/`pgResult` helpers in `SqlLabPage.jsx` map row literals + the `{rows,fields}` result shape. **Verify with `scripts/pg_verify_harness.mjs`** (runs every solution/method/brokenQuery against real Postgres) — this supersedes the old SQLite `scripts/audit_sql_lab.py` for SQL correctness. The **Beginner level still uses `sql.js`** (intro lessons; intentional).
+- **SQL engine: `@electric-sql/pglite`** (real Postgres compiled to WASM, in-browser; V7.0.0 — was `sql.js`/SQLite). On opening a problem, the page builds an in-memory Postgres DB from the problem's datamart (CREATE TABLE + multi-row INSERT from the seed rows), holds it in a ref (`dbRef`), and runs the user's query against it. Async (`await db.exec/query`); `pgLit`/`pgResult` helpers in `SqlLabPage.jsx` map row literals + the `{rows,fields}` result shape. **Verify with `scripts/pg_verify_harness.mjs`** (runs every solution/method/brokenQuery against real Postgres) — this supersedes the old SQLite `scripts/audit_sql_lab.py` for SQL correctness. The **Beginner level + Full Loop also run pglite** (V7.0 final — sql.js fully removed across all 3 SQL runtimes).
 - **Lazy-loaded route.** `SqlLabPage.jsx` is `React.lazy()`-imported, so SQL Lab's bundle (including CodeMirror) loads only on first visit and doesn't weigh down initial load.
 - **No external data calls** for solving — everything (schema, seed rows, expected answers) ships in the JS bundle.
 
@@ -104,9 +104,9 @@ One array of objects. Core fields on every problem:
 ## 6. Runtime: Check & Submit
 
 Two actions (V6.0.0 — was Run/Check):
-- **Build DB:** on open, `build` the datamart into an in-memory `sql.js` Database (schema + seed rows), stored in `dbRef`.
+- **Build DB:** on open, `build` the datamart into an in-memory **pglite (Postgres)** database (schema + seed rows), stored in `dbRef`.
 - **Check** (`▶`, Cmd/Ctrl+Enter): executes the query and shows the result table. **No verdict, nothing recorded, never marks solved.** This is the free "see what my query does" action.
-- **Submit** (click only): runs the query AND validates — row count == `expectedRowCount`, columns == `expectedColumns`, every `checkValues` row matches (sql.js-faithful stringification; whole-number REALs serialize as integers — the `.0` trap). Correct → marks **solved** (green) + a success animation. **Every Submit is recorded to the Submissions history**, pass or fail. Solved = green = a correct Submit; Checking never marks solved.
+- **Submit** (click only): runs the query AND validates — row count == `expectedRowCount`, columns == `expectedColumns`, every `checkValues` row matches (pglite-faithful stringification; numerics come back as strings, Date→ISO — `validateResults` uses `parseFloat` 0.01-tolerance). Correct → marks **solved** (green) + a success animation. **Every Submit is recorded to the Submissions history**, pass or fail. Solved = green = a correct Submit; Checking never marks solved.
 - The expected answer is computed from the problem's `solution`, so checkValues and the solution are kept in lockstep by the mechanical gate.
 
 ## 7. The editor (CodeMirror 6)
@@ -117,7 +117,7 @@ Two actions (V6.0.0 — was Run/Check):
 
 Two automated gates run before any SQL Lab commit, plus frozen standards:
 
-- **Mechanical gate — `scripts/audit_sql_lab.py`** (Tier-1 in `EVAL_RUBRICS.md`): every solution + brokenQuery runs in SQLite; row counts / columns / checkValues / determinism / schema integrity verified. Exit 1 blocks commit.
+- **Mechanical gate — `scripts/pg_verify_harness.mjs`** (supersedes the old SQLite `audit_sql_lab.py` as of V7.0): every solution + method + brokenQuery runs against real Postgres (pglite); row counts / columns / checkValues verified.
 - **Content gate — `scripts/sql_content_scan.mjs`**: deterministic checks the mechanical gate can't see — prompt must not name the technique, no filler, hints must scaffold (not hand the answer), debrief must teach a wrong-answer-that-runs. Exit 1 on any GATE failure. The bar is frozen in `SQL-CONTENT-STANDARD.md`.
 - **Authoring helper — `scripts/run_sql.py`**: runs any solution or candidate wrong-query against the real datamart, so debriefs are authored from *executed* output and every wrong-answer is verified to run and diverge.
 - **Difficulty** is governed by `SQL-DIFFICULTY-RUBRIC.md` (tier = MAX(mechanical, conceptual); single window = Medium; frames/multi-window/gaps/recursion/3+ CTE = Hard; multi-CTE narrative = Master; same pattern ⇒ same tier).
@@ -155,7 +155,7 @@ A separate, **SQLBolt-style** on-ramp for people who don't know SQL yet — dist
 
 - **Sequential + isolated:** ~18 lessons done in order; when the beginner level is on, the main bank's levels aren't shown (no choice paralysis). Gentle entry; a learner can self-rate as a beginner or unlock from a short diagnostic.
 - **Single simple datamart (movies):** one easy-to-hold schema so attention is on the SQL concept, not the schema. Lessons ramp one concept at a time (SELECT → WHERE → ORDER BY → aggregates → GROUP BY → joins …), single-table first, gradually widening.
-- **Same live engine** (sql.js) and run/check loop as the main lab.
+- **Same live engine** (pglite / Postgres) and run/check loop as the main lab.
 - **Files:** `src/pages/SqlLabBeginnerPage.jsx` (the sequential runner + gating/isolation/entry) and `src/data/sqlBeginnerLessons.js` (the lesson content). The movies tables live in `sqlLabDatamarts.js`.
 
 ## 10. File map
@@ -167,7 +167,7 @@ src/data/sqlBeginnerLessons.js      — the ~18 sequential beginner lessons
 src/pages/SqlLabPage.jsx            — the page: browser list + runner + DB build + run/check + Easy-tier ramp (§9A)
 src/pages/SqlLabBeginnerPage.jsx    — the beginner level: sequential runner + gating/isolation/entry (§9B)
 src/components/shared/SqlEditor.jsx — CodeMirror editor wrapper
-public/sql-wasm.wasm                — the SQLite WASM engine
+public/sql-wasm.wasm                — OBSOLETE (old SQLite WASM; removed in V7.0, Trash manually)
 scripts/audit_sql_lab.py            — mechanical gate (Tier-1)
 scripts/sql_content_scan.mjs        — content gate (exits non-zero on GATE fail)
 scripts/run_sql.py                  — author/verify helper (run any query on a datamart)

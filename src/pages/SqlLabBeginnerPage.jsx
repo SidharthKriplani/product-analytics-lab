@@ -18,6 +18,20 @@ import { SqlEditor } from '../components/shared/SqlEditor.jsx';
 import { Icon } from '../components/shared/Icon.jsx';
 import { track } from '../utils/analytics.js';
 
+// pglite (Postgres) helpers — same as SqlLabPage. Render a row value as a SQL
+// literal for INSERT, and convert a pglite result to the app's {columns, rows[][]}.
+function pgLit(v) { if (v === null || v === undefined) return 'NULL'; if (typeof v === 'number') return String(v); if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE'; return "'" + String(v).replace(/'/g, "''") + "'"; }
+function pgResult(res) {
+  const columns = (res && res.fields ? res.fields : []).map(f => f.name);
+  const rows = (res && res.rows ? res.rows : []).map(r => columns.map(c => {
+    const v = r[c];
+    if (v === null || v === undefined) return null;
+    if (v instanceof Date) return v.toISOString().slice(0, 10);
+    return v;
+  }));
+  return { columns, rows };
+}
+
 const PROGRESS_KEY = 'pal-sql-beginner-v1';
 const TOTAL = BEGINNER_LESSONS.length;
 // The 3 lessons used by the "know some already?" quick-check skip path.
@@ -302,16 +316,15 @@ function QuickCheck({ db, onResult, onCancel }) {
     return out;
   }, []);
 
-  function check() {
+  async function check() {
     if (!db || !lesson || !query.trim()) return;
     let ok = false;
     try {
-      const res = db.exec(query);
-      const resultData = res.length === 0 ? { columns: [], rows: [] } : { columns: res[0].columns, rows: res[0].values };
+      const resultData = pgResult(await db.query(query));
       let expected = null;
       try {
-        const solRes = db.exec(lesson.solution);
-        if (solRes.length > 0) expected = { columns: solRes[0].columns, rows: solRes[0].values };
+        const conv = pgResult(await db.query(lesson.solution));
+        if (conv.columns.length > 0) expected = conv;
       } catch {}
       ok = validateResults(resultData, lesson, expected) === null;
     } catch { ok = false; }
@@ -413,18 +426,17 @@ function LessonView({ db, lesson, isLast, onComplete, onNext, onFinish }) {
     return out;
   }, [lesson.id]);
 
-  const runOrCheck = useCallback(function (validate) {
+  const runOrCheck = useCallback(async function (validate) {
     if (!db || !query.trim()) return;
     try {
-      const res = db.exec(query);
-      const resultData = res.length === 0 ? { columns: [], rows: [] } : { columns: res[0].columns, rows: res[0].values };
+      const resultData = pgResult(await db.query(query));
       setResults(resultData);
       setRunError(null);
       if (!validate) { setVerdict(null); return; }
       let expected = null;
       try {
-        const solRes = db.exec(lesson.solution);
-        if (solRes.length > 0) expected = { columns: solRes[0].columns, rows: solRes[0].values };
+        const conv = pgResult(await db.query(lesson.solution));
+        if (conv.columns.length > 0) expected = conv;
       } catch {}
       const reason = validateResults(resultData, lesson, expected);
       const ok = reason === null;
@@ -617,24 +629,17 @@ export function SqlLabBeginnerPage({ onExit }) {
     let cancelled = false;
     async function init() {
       try {
-        const m = await import('sql.js');
-        const initSqlJs = m.default || m;
+        const { PGlite } = await import('@electric-sql/pglite');
         if (cancelled) return;
-        const SQL = await initSqlJs({ locateFile: function () { return '/sql-wasm.wasm'; } });
-        if (cancelled) return;
-        const database = new SQL.Database();
-        Object.entries(BEGINNER_DATAMART.tables).forEach(function (entry) {
-          const tableName = entry[0];
-          const table = entry[1];
-          database.run(table.schema + ';');
+        const database = new PGlite();
+        for (const [tableName, table] of Object.entries(BEGINNER_DATAMART.tables)) {
+          await database.exec(table.schema);
           if (table.rows.length > 0) {
-            const colCount = table.columns.length;
-            const placeholders = '(' + Array(colCount).fill('?').join(',') + ')';
-            const stmt = database.prepare('INSERT INTO ' + tableName + ' VALUES ' + placeholders);
-            table.rows.forEach(function (row) { stmt.run(row); });
-            stmt.free();
+            const values = table.rows.map(r => '(' + r.map(pgLit).join(',') + ')').join(',');
+            await database.exec('INSERT INTO ' + tableName + ' VALUES ' + values);
           }
-        });
+          if (cancelled) { try { database.close(); } catch {} return; }
+        }
         if (cancelled) return;
         dbRef.current = database;
         setDb(database);

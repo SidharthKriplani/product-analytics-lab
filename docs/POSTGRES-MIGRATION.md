@@ -1,6 +1,6 @@
 # SQL Lab — SQLite → Postgres migration ✅ DONE (V7.0.0, 2026-06-25)
 
-**COMPLETE + verified + shipped.** 192/192 solutions (rows+cols+checkValues), 336/336 methods, broken-queries all correct under real Postgres (pglite). Engine swapped in `SqlLabPage.jsx`; `@electric-sql/pglite` in package.json; build 906 modules. Harness: `scripts/pg_verify_harness.mjs` (+ harness2/3 variants used checkValues + methods/brokenQuery). **Not migrated:** Beginner page (still sql.js — intro SQL, intentional). The notes below are the historical plan/scope.
+**COMPLETE + verified + shipped.** 192/192 solutions (rows+cols+checkValues), 336/336 methods, broken-queries all correct under real Postgres (pglite). Engine swapped in `SqlLabPage.jsx`; `@electric-sql/pglite` in package.json; build 906 modules. Harness: `scripts/pg_verify_harness.mjs` (+ harness2/3 variants used checkValues + methods/brokenQuery). **Postgres everywhere:** all 3 runtimes migrated to pglite (main Lab + Beginner + Full Loop) and sql.js removed from npm (V7.0 final). Only leftover is `public/sql-wasm.wasm` (un-deletable over the iCloud mount; obsolete, Trash manually). Also: 22 stale `sqliteNote` fields rewritten to match the ported Postgres SQL. The notes below are the historical plan/scope.
 
 ---
 

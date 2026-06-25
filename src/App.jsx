@@ -7,7 +7,7 @@ import { track } from './utils/analytics.js';
 import { stateToHash, parseHash } from './utils/hashRouting.js';
 import { onAuthStateChange } from './utils/auth.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from './utils/syncProgress.js';
-import { upsertLeaderboardRow } from './utils/leaderboard.js';
+import { upsertLeaderboardRow, touchLastActive } from './utils/leaderboard.js';
 import { EmploymentReminder } from './components/shared/EmploymentReminder.jsx';
 import { CaptureNudge } from './components/shared/CaptureNudge.jsx';
 // Slim index — id, isFree, title only (for routing and paywall checks)
@@ -374,6 +374,7 @@ export default function App() {
           setAuthSettled(true);
           refreshProgress();
           upsertLeaderboardRow(session.user);
+          touchLastActive(session.user);
           if (event === 'SIGNED_IN') {
             track('user_signed_in', {});
             if (pendingGateConversionRef.current) {
@@ -396,7 +397,7 @@ export default function App() {
     function handleVisibilityChange() {
       if (document.visibilityState === 'hidden') {
         setUser(currentUser => {
-          if (currentUser) { pushProgressToSupabase(currentUser); upsertLeaderboardRow(currentUser); }
+          if (currentUser) { pushProgressToSupabase(currentUser); upsertLeaderboardRow(currentUser); touchLastActive(currentUser); }
           return currentUser;
         });
       }
