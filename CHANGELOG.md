@@ -4,6 +4,19 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [6.0.0] — 2026-06-25 [CHECK/SUBMIT MODEL · SOLVE ANIMATION · GRADIENT STANDARD]
+
+**SQL Lab runner → Check / Submit (two actions, was Run / Check).** `SqlLabPage.jsx`:
+- **Check** (Cmd/Ctrl+Enter) = run the query and see the output. No verdict, nothing recorded, never marks solved. (This is the old "Run" logic; the keybind moved here.)
+- **Submit** (click only) = your solution gets evaluated; correct → shown correct → marks solved (green). Every Submit is written to history, pass or fail. (Old "Check" logic; recording + solve-marking live only here now.)
+- **Solved = green = a correct Submit.** Checking never marks solved — kills the "I passed but it's not green" confusion. If a user spams Submit and pollutes their own history, that's on them (deliberate per product call).
+- "Past attempts" panel → **Submissions**. Editor content already persisted per-problem on every keystroke (unchanged) — so "resume later even if you never ran it" was already true.
+- Net rename: old Run→Check, old Check→Submit; recording/solve moved off Check onto Submit; helper text + placeholders updated.
+
+**Bigger solve animation.** A correct Submit now shows a full-width success banner — green wash + a check **seal** that pops in (`pal-solve-burst` + `pal-solve-seal` in `index.css`), with elapsed time and "Submitted & recorded." Replaces the small inline ring. `prefers-reduced-motion` safe. Tasteful (Monochrome Instrument — no confetti); reusable in other runners later.
+
+**The Gradient Standard (HQ, cross-lab).** New `HQ/GRADIENT-STANDARD.md`: difficulty must ramp in every room — calibrated tiers + ordered gradient + an on-ramp + visible progress; the three axes (Construction Easy→Master / Seniority analyst→senior→staff / Comprehension-forensic); the canonical vocab + the normalization map for today's inconsistency (junior→analyst, foundational→analyst, intermediate→senior, advanced→staff); and the staged per-room rollout order. SQL Lab is the finished reference (`SQL-LAB-SPEC.md` §2A). **Per-room application is the staged rollout — NOT done this turn** (it's real per-room content judgment; doing it blind would be shallow).
+
 ## [5.99.0] — 2026-06-25 [EASY-TIER RECALIBRATION · RAMP WINDOW CLEANED]
 
 **Three mis-tiered "Easy" problems → Medium**, found by a full audit of the 43-Easy pool against `SQL-DIFFICULTY-RUBRIC.md` (triggered by sql-e09 surfacing as far too hard for the beginner ramp). All three construct a rate — `ROUND(100.0 * SUM(flag) / COUNT(*), 1)` — which is conditional aggregation + ratio (a Medium marker, and real conceptual load above pure counting):

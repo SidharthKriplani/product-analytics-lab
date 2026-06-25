@@ -770,7 +770,7 @@ function SubmissionsHistory({ problemId, onRestore }) {
           cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 500,
         }}
       >
-        <span>Past attempts ({subs.length})</span>
+        <span>Submissions ({subs.length})</span>
         <span style={{ fontSize: '0.62rem', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
       </button>
       {open && (
@@ -1244,13 +1244,13 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
       setResults(resultData);
       setRunError(null);
       if (!validate) {
-        // Run mode: show results, clear any previous verdict
+        // Check mode: show results only, clear any previous verdict (no record, no solve)
         setCorrect(null);
         setFailReason(null);
         setHasRun(false);
         return;
       }
-      // Check mode: validate and record
+      // Submit mode: evaluate, record the attempt, mark solved if correct
       setHasRun(true);
       const reason = validateResults(resultData, problem, expectedSampleRef.current);
       const isCorrect = reason === null;
@@ -1269,8 +1269,10 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
     }
   }
 
-  function runQuery() { execQuery(false); }
-  function checkQuery() { execQuery(true); }
+  // Check = run the query and show output only — no verdict, no record, no solve. Bound to Cmd/Ctrl+Enter.
+  function checkQuery() { execQuery(false); }
+  // Submit = evaluate vs expected, record the attempt, mark solved if correct. Click only (deliberate commit).
+  function submitQuery() { execQuery(true); }
 
   function sqlValuesMatch(expected, actual) {
     if (expected === null && actual === null) return true;
@@ -1722,7 +1724,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
             {elapsedSec > 0
               ? `${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} elapsed`
               : `~${problem.estimatedMin} min`
-            }{' · Ctrl+Enter to run'}
+            }{' · Ctrl+Enter to check'}
           </div>
           <button
             onClick={() => setShowPlanModal(true)}
@@ -1750,7 +1752,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                 onChange={v => { startTimer(); setQuery(v); if (problem) saveQueryLS(problem.id, v); }}
                 onCheck={checkQuery}
                 schema={cmSchema}
-                placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Cmd/Ctrl+Enter to run' : '-- Write your SQL here\n-- Cmd/Ctrl+Enter to run'}
+                placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Cmd/Ctrl+Enter to check, then Submit' : '-- Write your SQL here\n-- Cmd/Ctrl+Enter to check, then Submit'}
                 height="46vh"
               />
             ) : (
@@ -1763,7 +1765,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
               }}
               onKeyDown={handleKeyDown}
               spellCheck={false}
-              placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Ctrl+Enter to run' : '-- Write your SQL here\n-- Ctrl+Enter to run'}
+              placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Ctrl+Enter to check, then Submit' : '-- Write your SQL here\n-- Ctrl+Enter to check, then Submit'}
               style={{
                 width: '100%', height: '46vh', minHeight: '200px', resize: 'vertical', fontFamily: 'monospace',
                 fontSize: '0.82rem', lineHeight: 1.6, padding: '0.75rem',
@@ -1776,27 +1778,35 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
             {/* Buttons row */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
-                onClick={runQuery}
+                onClick={checkQuery}
                 disabled={!query.trim() || !dbRef.current}
                 style={{
                   padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem',
                   background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer',
                   opacity: (query.trim() && dbRef.current) ? 1 : 0.4,
                 }}
-                title="Run your query and see results — no pass/fail verdict"
-              >▶ Run</button>
+                title="Check — run your query and see the output (no pass/fail). ⌘/Ctrl+Enter"
+              >▶ Check</button>
               <button
-                onClick={checkQuery}
+                onClick={submitQuery}
                 disabled={!query.trim() || !dbRef.current}
                 style={{
                   padding: '0.45rem 0.9rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem',
                   background: 'var(--teal)', color: '#fff', border: 'none', cursor: 'pointer',
                   opacity: (query.trim() && dbRef.current) ? 1 : 0.4,
                 }}
-                title="Check your answer — validates against the expected output (⌘Enter)"
-              ><Icon name='check' size={13} color='currentColor' /> Check</button>
+                title="Submit your final answer — evaluates it and records the attempt"
+              ><Icon name='check' size={13} color='currentColor' /> Submit</button>
               {hasRun && correct === true && (
-                <span className="pal-success-ring" style={{ fontSize: '0.78rem', color: 'var(--green)', fontWeight: 600 }}><Icon name='check' size={13} color='var(--green)' /> Correct — well done</span>
+                <div className="pal-solve-burst" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.75rem 1rem', borderRadius: '10px', background: 'var(--green-bg, rgba(16,185,129,0.10))', border: '1px solid var(--green-border, rgba(16,185,129,0.35))', borderLeft: '3px solid var(--green)' }}>
+                  <span className="pal-solve-seal" style={{ flexShrink: 0, width: '32px', height: '32px', borderRadius: '50%', background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon name='check' size={19} color='#06140d' />
+                  </span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--green)' }}>
+                    Correct{elapsedSec > 0 ? ' · ' + Math.floor(elapsedSec / 60) + ':' + String(elapsedSec % 60).padStart(2, '0') : ''}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Submitted &amp; recorded.</span>
+                </div>
               )}
               {hasRun && correct === false && !runError && (
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
