@@ -4,6 +4,13 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [6.7.0] — 2026-06-25 [SQL LAB — PLAN TABS FILLED (real day-by-day content)]
+
+The Intermediate / Advanced tab skeletons now have **real day-by-day plans** (`SqlPlanView` + `SQL_PLANS`). Each day is a **slice off the gradient orders** (`SQL_EASY_RAMP_ORDER` / `SQL_MEDIUM_RAMP_ORDER` / Forensic), so the plans stay in sync with the difficulty ordering automatically — no separate list to maintain.
+- **3–4 Days → Intermediate (4 days):** Fundamentals → Grouping → Joins → First real techniques.
+- **7 Days → Advanced (7 days):** Fundamentals → Grouping & HAVING → Joins → Rates & multi-table → Subqueries & anti/self-joins → Windows & CTEs → Forensic debugging.
+- Each day is a card listing its problems (difficulty badge + title + company), every row clickable to open the problem (`onSelect`). Verified all days resolve to real problems. Build 895 ✓.
+
 ## [6.6.0] — 2026-06-25 [SQL EASY — PROMPT/DELIVERABLE REDUNDANCY FIXED (Phase 2b)]
 
 The Easy prompt and the "YOUR RESULT SHOULD" box were duplicating the deliverable (prompt said "Return col1, col2… ordered by X"; the box listed the same). Fixed across all **47 Easy** problems:
