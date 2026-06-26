@@ -4,42 +4,44 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ---
 
-## 🔴🔴 UNPUSHED — V7.0 + V7.1 ARE COMPLETE & VERIFIED IN THE WORKSPACE BUT NOT YET PUSHED (2026-06-25)
+## 🔴 UNPUSHED — V7.2.x may be unpushed (handoff to a fresh session, 2026-06-26)
 
-**If this is a fresh session: the work below is DONE on disk and build-verified (905 modules ✓, harness pass) but was never pushed to GitHub.** The user paused right before the push. Do NOT rebuild or re-port — just push. (Reason for the pause: pushing to the public repo needs the user's explicit go-ahead; they asked me to checkpoint the MD files first.)
+**V7.0 + V7.1 ARE pushed** (commits `97efe16` + `7064f52`). The **V7.2.x** work below is done + build-verified (**905 modules ✓**) but the user ran pushes by hand across a long session, so not all of it is confirmed on remote. Safe move: run the **combined push** below — `git add -A` only stages real diffs, so re-copying already-pushed files is harmless. Do NOT rebuild/re-port.
 
-**What's done (all in `src/` etc., verified):**
-- **V7.0 — Postgres everywhere, sql.js fully removed.** Engine swapped to pglite in ALL 3 runtimes; sql.js dropped from npm. Harness-verified 192/192 solutions + 336/336 methods + 18/18 beginner + 10/10 full-loop. 22 `sqliteNote` fields rewritten to match the ported Postgres SQL.
-- **V7.1 — public last-active** ("Active Xh ago") on profiles; timestamp only.
+**Done since the V7.1.0 push:**
+- **V7.2.0** — concept ramps: Stats (`STATS_RAMP_ORDER`) + Instrumentation (`INSTRUMENTATION_RAMP_ORDER`). Phase 3 finding: the easy→hard difficulty ramp ALREADY exists in every room (all banks difficulty-tagged, 17 browsers sort by it) — there was no 12-room build to do. Phase 3 = DONE.
+- **V7.2.1** — SQL Lab cold-start false-negative fix: `validateResults` checkValues-fallback used exact-string compare, so pglite numerics (`'1500.00'`) intermittently marked CORRECT answers wrong. Now uses `sqlValuesMatch` tolerance.
+- **V7.2.2** — "solvable from the prompt alone" sweep: audited all 192 problems, fixed **17** (m41 + 16) by **prompt-only** edits matching the harness-verified solution (solutions/expectedColumns/checkValues untouched → zero grading change). Added Tier-1 rubric criterion #22. `master25` made deterministic.
+- **V7.2.3** — per-room progress reset fix: was broken for signed-in users (reload → Supabase pull restored cleared progress) and reloaded the page. Now clears local + server (`deleteProgressKeys` in `syncProgress.js`) + refreshes in place, no reload. No migration needed (existing `for all` RLS covers delete).
+- **V7.2.4** — docs: foundation **Tier-0 curriculum rubric** + "show the mechanism" / "depth dial" standards in `EVAL_RUBRICS.md`; cross-lab borrow logged in `CROSS_LAB.md`.
 
-**Files changed for V7.0 + V7.1 (the push must include all of these):**
-- SQL engine + data: `src/data/sqlLabProblems.js`, `src/pages/SqlLabPage.jsx`, `src/pages/SqlLabBeginnerPage.jsx`, `src/components/fullLoop/FullLoopRunner.jsx`, `src/data/fullLoopSeedData.js`, `src/data/sqlLabDatamarts.js` (comments)
-- Copy/docs: `src/pages/CheatSheet.jsx`, `src/pages/About.jsx`, `docs/POSTGRES-MIGRATION.md`, `docs/SQL-LAB-SPEC.md`
-- Deps: `package.json`, `package-lock.json` (pglite in, sql.js out — **lockfile MUST ship or Vercel won't install pglite**)
-- New: `scripts/pg_verify_harness.mjs`, `docs/migrations/2026-06_last_active.sql`
-- Last-active: `src/utils/leaderboard.js`, `src/App.jsx`, `src/pages/PublicProfile.jsx`
-- Spine: `CHANGELOG.md`, `NEXT.md`
-- ⚠ Earlier this session (V6.8–V6.10: crash-plan tabs, Easy-prompt re-audit, inline SQL quick-ref) may ALSO be unpushed — they live in `SqlLabPage.jsx` / `sqlLabProblems.js` / `CheatSheet.jsx`, so copying the current files captures them. `git diff` from the repo path is UNRELIABLE (iCloud mmap) — do NOT trust it; copy the working files and run the `comm -23` check in CLAUDE.md to catch anything missed.
-
-**Push (per CLAUDE.md /tmp-clone workflow — direct git from repo path fails):**
+**Combined push (everything since `7064f52`; `EXTERNAL-ASSESSMENT.md` EXCLUDED — internal strategy, repo is PUBLIC):**
 ```bash
+cd /tmp && rm -rf /tmp/pal-push
 git clone https://github.com/SidharthKriplani/product-analytics-lab /tmp/pal-push
 SRC="/Users/ASUS/Documents/Professional/BreakLabs/labs/product-analytics-lab"
-# copy each file listed above into /tmp/pal-push/<same path>, then:
-cd /tmp/pal-push && git add -A && git commit -m "V7.1.0: Postgres everywhere (sql.js removed, 3 runtimes) + 22 note rewrites + public last-active" && git push origin main
+cp "$SRC/src/pages/StatsBrowser.jsx"           /tmp/pal-push/src/pages/StatsBrowser.jsx
+cp "$SRC/src/pages/InstrumentationBrowser.jsx" /tmp/pal-push/src/pages/InstrumentationBrowser.jsx
+cp "$SRC/src/pages/SqlLabPage.jsx"             /tmp/pal-push/src/pages/SqlLabPage.jsx
+cp "$SRC/src/pages/Progress.jsx"               /tmp/pal-push/src/pages/Progress.jsx
+cp "$SRC/src/utils/syncProgress.js"           /tmp/pal-push/src/utils/syncProgress.js
+cp "$SRC/src/data/sqlLabProblems.js"          /tmp/pal-push/src/data/sqlLabProblems.js
+cp "$SRC/docs/EVAL_RUBRICS.md"                /tmp/pal-push/docs/EVAL_RUBRICS.md
+cp "$SRC/CHANGELOG.md" "$SRC/NEXT.md" "$SRC/CROSS_LAB.md" /tmp/pal-push/
+cd /tmp/pal-push && git add -A && git commit -m "V7.2.0-7.2.4: concept ramps + SQL validation cold-start fix + prompt-solvability sweep (17) + per-room reset fix + foundation curriculum rubric" && git push origin main
 ```
 
-**Then (server-side, on Sidharth):** run the 3 Supabase migrations (incl. `2026-06_last_active.sql`), Trash `public/sql-wasm.wasm`, rotate the GitHub PAT.
+**Server-side / housekeeping (Sidharth):** run `docs/migrations/2026-06_last_active.sql` in Supabase; Trash `public/sql-wasm.wasm` + `outputs_probs_tmp.jsonl` (both iCloud-undeletable from the agent); rotate the GitHub PAT. **`EXTERNAL-ASSESSMENT.md` stays LOCAL — never push it** (CalibreOS teardown + pricing + operating plan; repo is public).
 
 ---
 
-## ⭐ CURRENT STATE — 2026-06-25 (V7.1.0)
+## ⭐ CURRENT STATE — 2026-06-26 (V7.2.4) — handoff to a fresh Sonnet session
 
-PAL is live on Vercel (productanalyticslab.com). Build clean at **905 modules**. **BUILD FREEZE in effect — no further builds for ~5 days after this push.**
+PAL is live on Vercel (productanalyticslab.com). Build clean at **905 modules**. See the UNPUSHED block above for the combined push command. **Next suggested work: run the Tier-0 foundation curriculum audit** (defined in `docs/EVAL_RUBRICS.md`, logged in `CROSS_LAB.md`) — depth uniformity + coverage + topic-merit across the 4 foundation rooms. Standing gate: be the super-user / bug-sweep before promoting SQL Lab at volume (caught 3 real bugs this session: cold-start false-negative, prompt-solvability class, per-room reset).
 - **V7.0** — SQL Lab → **Postgres everywhere (pglite)**, sql.js fully removed from all 3 runtimes (main + Beginner + Full Loop) and from npm. Harness-verified: 192/192 solutions + 336/336 methods + 18/18 beginner + 10/10 full-loop. 22 stale `sqliteNote` fields rewritten to match the ported Postgres solutions.
 - **V7.1** — public **last-active** ("Active Xh ago") on profiles; last-active timestamp only, no dwell tracking.
 - **Strategy/competitive assessment logged LOCALLY in `EXTERNAL-ASSESSMENT.md`** — deliberately kept OUT of this public repo (internal: market read, moat thesis, competitor watch, pricing + operating plan). Do not commit it. **Near-term action gate: SQL Lab is promotable, but be the super-user + run a personal bug-sweep BEFORE pushing usage at volume** (engine went async pglite in V7.0; already caught the cold-start false-negative + the prompt-solvability class).
-- **V7.2** — **Phase 3 polish + finding: the difficulty ramp already exists in every room** (all banks difficulty-tagged, 17 browsers already sort by it). No 12-room build existed. Added the one real gap — intra-tier concept ordering (SQL ramp analog) — to **Stats** (`STATS_RAMP_ORDER`) + **Instrumentation** (`INSTRUMENTATION_RAMP_ORDER`). **Phase 3 = DONE.** Any further per-room intra-tier ordering is optional polish, not a project. ⚠ V7.2 files (`StatsBrowser.jsx`, `InstrumentationBrowser.jsx`, `CHANGELOG.md`, `NEXT.md`) are a separate push from the V7.1 commit.
+- **V7.2.0–7.2.4** — Stats/Instrumentation concept ramps (Phase 3 done — the ramp already existed everywhere); SQL cold-start validation fix; **prompt-solvability sweep** (17 problems fixed + new Tier-1 rubric criterion #22); per-room progress reset fix; foundation **Tier-0 curriculum rubric**. Full detail in the UNPUSHED block above + CHANGELOG 7.2.0–7.2.4.
 
 Earlier sessions:
 - **V5.94** — design-system foundation (`RoomHeader`/`FilterBar`/`CaseCard`), global rails killed, Community feed v1.

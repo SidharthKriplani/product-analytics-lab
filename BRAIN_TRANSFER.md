@@ -1,6 +1,8 @@
-# Brain Transfer — V5.30.x
+# Brain Transfer — V7.2.4
 
-**Version:** V5.30.x (Casefile OS shipped — check CHANGELOG for exact tag) | **Build:** ✓ | **Date:** 2026-06-17 | **PM Audit:** #149 complete
+**Version:** V7.2.4 | **Build:** ✓ 905 modules | **Date:** 2026-06-26 | Fresh session, handed off from a long prior session.
+
+> ⚠️ **THE DETAILED LOG BELOW IS STALE (written at V5.30.x, 2026-06-17).** For the real current state, read **`NEXT.md` top first** — the 🔴 UNPUSHED block (has the combined push command for V7.2.x) + the ⭐ CURRENT STATE block. Since V5.30: Postgres-everywhere SQL migration (V7.0, sql.js fully removed → pglite), public last-active (V7.1), then **V7.2.0–7.2.4** — Stats/Instrumentation concept ramps, a SQL cold-start validation fix, a 192-problem "solvable from the prompt alone" sweep (17 fixed) + a new Tier-1 rubric criterion, a per-room progress reset fix, and a foundation **Tier-0 curriculum rubric**. Internal strategy + competitive analysis is in **`EXTERNAL-ASSESSMENT.md` — LOCAL ONLY, never push (repo is public)**. Suggested next work: run the Tier-0 foundation curriculum audit (see `CROSS_LAB.md`). The session log below predates all of this — treat as history.
 
 ---
 

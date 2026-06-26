@@ -141,6 +141,21 @@ This is the gate that makes the difference between "rigorously built" and "actua
 **Nature:** interactive teaching modules (concept → intuition → interactive widget → check). ~65 modules total.
 **Reality:** correctness here is a factual/statistical *claim*, not an executable result — so most substance is manual review. Automate schema, build-safety, and any MCQ answer-key; do not fake the rest.
 
+### Tier 0 — Curriculum-level review (periodic, human — NOT a per-commit gate)
+
+Tier 1/2/3 grade whether each *module* is good. **Tier 0 grades whether the *curriculum* is right** — the design questions no per-module check can see. Run it a few times a year (per major release), across a whole room at once, not per commit. The trap to avoid: do NOT fuse these into the per-commit gate — they're judgment calls, and a rubric too heavy to run is worse than a sharp short one. (Borrowed from an MSL foundation-rubric conversation, 2026-06-26 — see `CROSS_LAB.md`.)
+
+1. **Topic selection + merit.** Is this the right *set* of topics for the room's goal? Every module must justify its existence in one line — "why this is here + what interview moment it serves." If it can't, cut it.
+2. **Depth ∝ interview importance.** Module-count and depth on a topic should track how often it actually shows up in real interviews — not how easy it was to write. Flag the over-built (rare topic, deep coverage) and the under-built (common topic, thin coverage).
+3. **Depth uniformity across rooms.** Stat / RCA / Metrics / Exp Foundations should feel like ONE product, not four. Audit: is any room markedly richer or thinner than the others at the same tier? Normalize the outliers.
+4. **First-principles arc (room-level).** Reading a room top-to-bottom, does it build from what a college beginner has (school math + intro CS), one concept on the last, with no unexplained leaps? (Per-module progression is Tier 2; this is the whole-arc version.)
+5. **Coverage gaps + redundancy.** Does the room span its topic space? Any duplicate / near-duplicate modules, or holes a candidate would visibly hit?
+
+### Two standards that raise the per-module bar (added 2026-06-26, MSL-inspired)
+
+- **Show the mechanism** (sharpens the Tier-2 "load-bearing interactive"). The interactive must *illustrate the causal mechanism*, not merely exist. A confidence-interval module lets you watch the interval narrow as n grows; a power module animates power rising with effect size; an optimization concept shows error falling across iterations. Test: after manipulating it, does the learner understand *why*, not just *that*? A slider that changes a number but not the understanding fails.
+- **Depth dial** (beginner-safe AND aggressive-thorough). Every module serves both a complete beginner and a competent learner who wants to go hard — without daunting the first or boring the second. Pattern: a simple REQUIRED spine (core intuition + one worked example + the takeaway) plus OPTIONAL, clearly-marked "go deeper" layers (derivations, edge cases, the rigorous version). A module that silently picks one audience fails. This is also the retention lever — a reference you return to, not a one-time tutorial.
+
 ### Tier 1 — block commit (automatable)
 1. Required fields on every module: `id`, `title`, an `order`/position, `estimatedMin`, and the room's content field(s) (sections/blocks). Confirm exact field names against the actual schema when building the audit.
 2. Unique module `id`s within a room; `order` is contiguous (no gaps/dupes) so progression renders correctly.

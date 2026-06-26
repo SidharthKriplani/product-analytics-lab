@@ -4,6 +4,10 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [7.2.4] — 2026-06-26 [DOCS — foundation curriculum rubric (Tier 0) + two sharpened standards]
+
+Added a **Tier-0 curriculum-level review layer** to the Foundation-rooms rubric in `docs/EVAL_RUBRICS.md` (periodic human review, NOT a per-commit gate): topic selection/merit, depth ∝ interview importance, depth uniformity across the four rooms, room-level first-principles arc, coverage/redundancy. Plus two standards that sharpen the per-module bar: **"show the mechanism"** (the interactive must illustrate the causal mechanism, not just exist) and **"depth dial"** (every module serves both a complete beginner and an aggressive learner via a required spine + optional go-deeper layers). Insight (from an MSL foundation-rubric conversation): a good foundation rubric is really *two* rubrics — per-module quality (PAL already had it) + curriculum design (PAL was missing it). Logged the cross-lab borrow in `CROSS_LAB.md`; **pending action**: run the Tier-0 audit across PAL's 4 foundation rooms. Docs-only, no code change.
+
 ## [7.2.3] — 2026-06-26 [BUGFIX — per-room progress reset (didn't work for signed-in users + reloaded the page)]
 
 The Progress page's per-room "Reset" buttons were broken for signed-in users and reloaded the page. Root cause: `makeRoomResetter` only did `localStorage.removeItem(key)` then `window.location.reload()` — but on reload, `pullProgressFromSupabase` restored the just-cleared row from the server, so the reset appeared to do nothing. The reload was both the bad UX and the trigger that undid the reset.
