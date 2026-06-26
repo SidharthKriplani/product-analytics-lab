@@ -44,6 +44,9 @@ The goal: no content ships without passing Tier 1. Tier 2 failures get logged in
 #### strftime safety
 21. Any solution using `strftime('%s', col)` must reference a column whose values are TEXT timestamps in ISO 8601 format (`YYYY-MM-DD HH:MM:SS`). Mismatched formats cause strftime to return NULL silently, producing wrong-but-non-erroring output.
 
+#### Prompt solvability (added 2026-06-25 — the "m41 class")
+22. **Solvable from the prompt alone.** A solver reading ONLY the `prompt` (not the solution or debrief) must be able to derive the EXACT expected output. Every parameter the solution depends on must be stated in the prompt: numeric thresholds / bands / bucket cutoffs (e.g. small/medium/large $ boundaries), definitions of vague terms ("high-value", "active", "recent", "churned", "power user", "underperforming"), top-N / ranking N, date or time windows, rounding precision, and any tie-break that changes which rows return. If a constant or rule lives only in the solution, it is a **BLOCKER** — the problem is unsolvable as written (the solver can only reverse-engineer the parameter from the expected output, i.e. guess), and it must not ship. Also covers prompt↔grader mismatch: `expectedColumns` (names/order) must match what the prompt asks the solver to return. **Heuristic flag** (partial automation): any prompt naming a band/tier/segment/bucket/"high|low|top|recent|active" whose concrete cutoff does not appear in the prompt text. **Final check is the Tier-3 blind solve-through** (below). This class was missed across ≥11 problems before it was added here — origin was bulk authoring/porting that polished prose without re-verifying derivability.
+
 ---
 
 ### Tier 2 — Warn, triage in AUDITS.md
@@ -121,7 +124,7 @@ The split that matters: **a room is only as auto-gradable as its answers are exe
 
 The automated gates catch broken or malformed content. They are blind to the failures that actually sink a prep product: an item that is boring, pointless, ambiguous, or that tests recall while pretending to test judgment. That pass is human. The protocol — designed to be runnable by one person, not a team:
 
-1. **Blind solve-through.** Solve a sample cold, answer hidden. If you can't tell what's being asked, or the "judgment" has one obvious answer, it fails.
+1. **Blind solve-through.** Solve a sample cold, answer hidden. If you can't tell what's being asked, or the "judgment" has one obvious answer, it fails. **And — the "solvable from the prompt alone" rule —** if you *can* tell what's being asked but cannot derive the EXACT expected output because a threshold, window, top-N, definition, or tie-break lives only in the answer, it fails. You should never have to reverse-engineer a parameter from the expected output.
 2. **Three questions per item:** (a) Would this actually come up in a real interview or on the job? (b) Does it test judgment, not recall/lookup? (c) Is it interesting — worth a strong candidate's time? Any "no" → fix or cut.
 3. **Red-team the answer.** Try to defend the most tempting *wrong* answer. If you can defend it, the item is ambiguous or the key isn't clearly right.
 4. **Sample, don't boil the ocean.** You cannot re-read the whole bank each release. Review: every newly added item, a random N per room per cycle, and — once usage exists — every item with low completion or a high give-up rate. Let the data point your human attention.

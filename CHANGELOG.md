@@ -4,6 +4,19 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [7.2.2] — 2026-06-26 [CONTENT — "solvable from the prompt alone" sweep (17 problems) + rubric criterion]
+
+A super-user session surfaced a systemic content defect (problem `sql-m41`): the prompt named "small/medium/large buckets" but the dollar cutoffs lived only in the solution — unsolvable as written (you'd reverse-engineer the boundaries from the expected counts, i.e. guess). Same class as the old e55 bug. Root cause: bulk authoring/porting polished prose without re-verifying derivability, and the content gate never checked it.
+
+**Full audit of all 192 problems** for the class → **11 blockers + 7 minors + 174 clean.** Fixed 17 (m41 + 16) by editing **only the prompt** (and any contradicting debrief sentence) to state the parameter the harness-verified solution already uses — **solutions / expectedColumns / checkValues untouched, so zero grading change.** Highlights:
+- Forensic numeric constants stated: `f19` on-time = 60 min, `f11` delivered-only, `f21` 2.9% processing fee, `f23` churn numerator/denominator + dates, `f24` prep = accepted→picked_up.
+- Master scoring recipes stated: `master04` health-score weights/window/labels, `master19` performance bands, `master02` 180-day window.
+- Contradictions resolved to match the graded solution: `master05` ("3 std dev" → "3× average"), `master01` (removed a false ">70" filter + unused "balance"; stated the real KYC/tier/dispute rubric), `h11` (prompt columns → grader's `[patient_id, last_no_show_date]`; dropped an unimplemented 365-day clause), `h05` (stated the real "10 points below practice average" rule; removed a non-existent ≥10-appointments filter).
+- Minors: `e09` rounding 1dp, `m20` top-3, `master09` column aliases.
+- `master25` — fixed a real **determinism gap**: `top_action_type` used `ROW_NUMBER` with no tie-break (engine-arbitrary on ties). Added a deterministic alphabetical secondary sort to the solution + canonical method, stated it in the prompt, updated the debrief. Verified in pglite: output unchanged (video/image/text all `like`, video checkValue `4/12/3.00` holds) — now robust if the seed ever changes.
+
+**Rubric:** added **Tier-1 (block-commit) criterion #22 "solvable from the prompt alone"** to `docs/EVAL_RUBRICS.md` + a sharpened Tier-3 blind-solve rule, so this class can't ship again. Build 905 ✓.
+
 ## [7.2.1] — 2026-06-25 [BUGFIX — SQL Lab false-negative on correct answers (pglite cold-start race)]
 
 Super-user bug sweep caught a real correctness defect from the Postgres migration. `validateResults` compares against an expected sample computed by running `problem.solution` in pglite at DB-init; on a cold start that sample can lose the race and not be ready at submit time, so validation falls back to the `checkValues` path. That fallback used **exact string equality** (`String(row[i]) === String(val)`) — but pglite returns NUMERIC columns as strings (`'1500.00'`, `'0.5000'`), which don't string-equal a `checkValue` of `1500`. Result: a **correct answer intermittently marked wrong** (recorded as an attempt but never marked solved) depending purely on load timing — the worst kind of bug for a learning tool. Fix: the fallback now uses the same `sqlValuesMatch` (parseFloat 0.01-tolerance) the primary path uses, so correctness is robust regardless of whether the sample loaded. One-line change in `SqlLabPage.jsx`; build 905 ✓. (Deeper root — the sample occasionally failing to load on cold start — is now harmless for grading; optional future hardening: retry the sample computation.)
