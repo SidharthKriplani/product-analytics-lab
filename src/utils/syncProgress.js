@@ -118,6 +118,29 @@ export async function pullProgressFromSupabase(user) {
   }
 }
 
+// ─── Delete: clear specific keys server-side ─────────────────────────────────
+// Used by per-room "Reset" on the Progress page. Without this, a reset only clears
+// localStorage — then the next sign-in/reload pull restores the row from the server,
+// making the reset look like it did nothing. Fire-and-forget; resolves the current
+// user from the cached session so callers don't need to thread `user` through props.
+
+export async function deleteProgressKeys(keys) {
+  if (!supabase || !keys || keys.length === 0) return;
+  try {
+    const { data: { session } = {} } = await supabase.auth.getSession();
+    const user = session?.user;
+    if (!user) return;
+    const { error } = await supabase
+      .from('user_progress')
+      .delete()
+      .eq('user_id', user.id)
+      .in('key', keys);
+    if (error) console.warn('[PAL sync] delete failed:', error.message);
+  } catch (e) {
+    console.warn('[PAL sync] delete threw:', e && e.message);
+  }
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function buildRow(userId, key) {

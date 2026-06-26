@@ -7,6 +7,7 @@ import { getDueReviews } from '../utils/srQueue.js';
 // Set to false to soft-hide the Universe view toggle without removing code
 const SHOW_UNIVERSE_TOGGLE = true;
 import { clearProgress } from '../utils/progress.js';
+import { deleteProgressKeys } from '../utils/syncProgress.js';
 import { getAllStatsProgress } from '../utils/statsProgress.js';
 import { getAllMetricsProgress } from '../utils/metricsProgress.js';
 import { getAllRCAProgress } from '../utils/rcaProgress.js';
@@ -221,7 +222,8 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
   function makeRoomResetter(keys) {
     return () => {
       keys.forEach(k => { try { localStorage.removeItem(k); } catch {} });
-      window.location.reload();
+      deleteProgressKeys(keys);   // clear the server copy too — else the next sync/reload restores it
+      if (onClear) onClear();     // refresh the page in place — no reload
     };
   }
 
@@ -268,15 +270,16 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
       onReset: makeRoomResetter(['pal-pri-progress-v1']) },
     { label: 'Product Design', completed: productDesignCompleted.length, total: productDesignScenarios.length,
       onReset: () => {
+        const toRemove = [];
         try {
-          const toRemove = [];
           for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
             if (k && k.startsWith('pd-progress-')) toRemove.push(k);
           }
           toRemove.forEach(k => localStorage.removeItem(k));
         } catch {}
-        window.location.reload();
+        deleteProgressKeys(toRemove);   // clear the server copies too
+        if (onClear) onClear();         // refresh in place — no reload
       } },
     { label: 'SQL Lab', completed: sqlLabProblems.filter(p => sqlSolved.has(p.id)).length, total: sqlLabProblems.length,
       onReset: makeRoomResetter(['pal-sql-lab-solved-v1', 'pal-sql-lab-times-v1', 'pal-sql-lab-dates-v1']) },

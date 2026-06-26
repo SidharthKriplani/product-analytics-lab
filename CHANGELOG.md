@@ -4,6 +4,17 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [7.2.3] — 2026-06-26 [BUGFIX — per-room progress reset (didn't work for signed-in users + reloaded the page)]
+
+The Progress page's per-room "Reset" buttons were broken for signed-in users and reloaded the page. Root cause: `makeRoomResetter` only did `localStorage.removeItem(key)` then `window.location.reload()` — but on reload, `pullProgressFromSupabase` restored the just-cleared row from the server, so the reset appeared to do nothing. The reload was both the bad UX and the trigger that undid the reset.
+
+Fix (`Progress.jsx` + `syncProgress.js`):
+- New `deleteProgressKeys(keys)` in `syncProgress.js` — deletes the rows from the `user_progress` table (resolves the user from the cached session; allowed by the existing `for all` RLS policy, so **no migration needed**). Without this the server copy survived and re-synced back.
+- Reset now: clears localStorage → `deleteProgressKeys` (server) → `onClear()` (= App `refreshProgress`, a fresh snapshot) to re-render the page **in place — no reload**. Applies to all per-room resetters and the Product Design dynamic-key resetter.
+- Because `refreshProgress` rebuilds the snapshot and the page re-reads each room's localStorage on render, every count (including the prop-based A/B Judgment room) updates immediately.
+
+Build 905 ✓. (Noted-not-fixed: the Progress page's "Clear all" `handleClear` only removes 6 keys and also doesn't clear the server — separate, pre-existing; the per-room resets are the ones reported. The learning-path step toggle still `reload()`s on click — separate UX nit.)
+
 ## [7.2.2] — 2026-06-26 [CONTENT — "solvable from the prompt alone" sweep (17 problems) + rubric criterion]
 
 A super-user session surfaced a systemic content defect (problem `sql-m41`): the prompt named "small/medium/large buckets" but the dollar cutoffs lived only in the solution — unsolvable as written (you'd reverse-engineer the boundaries from the expected counts, i.e. guess). Same class as the old e55 bug. Root cause: bulk authoring/porting polished prose without re-verifying derivability, and the content gate never checked it.
