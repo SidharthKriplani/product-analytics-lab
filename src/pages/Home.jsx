@@ -319,6 +319,125 @@ export function Home({ onNavigate, onShowAuth, onOpenAha }) {
 
       </div>
 
+      {/* ── Room cards — what each room trains ── */}
+      <div
+        className="pal-landing-el"
+        style={{
+          position: 'relative', zIndex: 1,
+          animationDelay: '760ms',
+          marginTop: '2.5rem',
+          width: '100%',
+          maxWidth: '860px',
+          padding: '0 1.5rem',
+          boxSizing: 'border-box',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            17 practice rooms — one gap at a time
+          </span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(250px, 100%), 1fr))', gap: '0.75rem' }}>
+          {[
+            {
+              name: 'SQL Lab',
+              id: 'sql-lab',
+              accent: 'var(--teal)',
+              bullets: [
+                '192 problems — Easy to Forensic',
+                'Postgres runs in-browser, no setup',
+                'Company-tagged: Shopify, Meta, Meesho',
+                'Mock Interview Mode with 15-min timer',
+              ],
+            },
+            {
+              name: 'Metrics',
+              id: 'metrics',
+              accent: 'var(--blue, #3b82f6)',
+              bullets: [
+                'Define metrics under ambiguity, not just "DAU dropped"',
+                'Proxy vs. outcome, north star vs. guardrail trade-offs',
+                'Rubric-scored against what interviewers look for',
+              ],
+            },
+            {
+              name: 'A/B Judgment',
+              id: 'browser',
+              accent: 'var(--purple, #8b5cf6)',
+              bullets: [
+                'The stat-sig result you should NOT ship — spot why',
+                'SRM, novelty effects, Bonferroni in practice',
+                'Ship / no-ship decisions under real ambiguity',
+              ],
+            },
+            {
+              name: 'RCA',
+              id: 'rca',
+              accent: 'var(--yellow)',
+              bullets: [
+                'DAU dropped 31% — walk the real diagnostic sequence',
+                'Segment, platform, funnel triage — in order',
+                'Stop at symptom vs. find the structural root cause',
+              ],
+            },
+            {
+              name: 'Spot the Flaw',
+              id: 'spot-the-flaw',
+              accent: 'var(--red)',
+              bullets: [
+                'A clean analysis with one fatal mistake — find it',
+                'Trains skepticism: the most undervalued interview skill',
+                'No sign-up needed — try one now',
+              ],
+            },
+            {
+              name: 'Product Design',
+              id: 'product-design',
+              accent: 'var(--green)',
+              bullets: [
+                'Ship / no-ship with real trade-off pressure',
+                'Instrumentation gaps, success metrics, experiment design',
+                'Meesho, Swiggy, PhonePe interview scenarios',
+              ],
+            },
+          ].map(function(room) {
+            return (
+              <button
+                key={room.id}
+                onClick={function() { onNavigate && onNavigate(room.id); }}
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '12px',
+                  padding: '1rem 1.1rem',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  color: 'var(--text)',
+                  transition: 'border-color 0.15s, transform 0.1s',
+                }}
+                onMouseEnter={function(e) { e.currentTarget.style.borderColor = room.accent; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                onMouseLeave={function(e) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: room.accent, marginBottom: '0.6rem', letterSpacing: '0.01em' }}>
+                  {room.name}
+                </div>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  {room.bullets.map(function(b) {
+                    return (
+                      <li key={b} style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.5, paddingLeft: '0.85rem', position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: 0, color: room.accent, fontWeight: 700, fontSize: '0.65rem' }}>▸</span>
+                        {b}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Testimonials — outside the 560px wrapper so 1x4 has room */}
       {/* FULL QUOTES PRESERVED — restore if switching back to 2x2 card layout:
           Amaya:    "As a complete beginner in Statistics, PAL gave me a clear, structured path — I always knew exactly what to focus on next. The progression has been genuinely helpful, and I feel like I'm building a real foundation, not just memorising concepts."

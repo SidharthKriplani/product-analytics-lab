@@ -342,6 +342,32 @@ function normalizeProfile(row) {
   };
 }
 
+// Fetch aggregate stats across all leaderboard users for peer benchmarking.
+// Returns { count, avgTotal, avgSql, sqlCounts, totalCounts } or null on failure.
+export async function fetchLeaderboardAgg() {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from('leaderboard')
+      .select('total_solved, room_breakdown');
+    if (error || !data || data.length === 0) return null;
+    const sqlCounts = data.map(function(r) {
+      var rb = r.room_breakdown;
+      if (!rb) return 0;
+      var parsed = typeof rb === 'string' ? JSON.parse(rb) : rb;
+      return parsed['sql-lab'] || 0;
+    });
+    const totalCounts = data.map(function(r) { return r.total_solved || 0; });
+    const count = data.length;
+    const avgTotal = Math.round(totalCounts.reduce(function(a, b) { return a + b; }, 0) / count);
+    const avgSql = Math.round(sqlCounts.reduce(function(a, b) { return a + b; }, 0) / count);
+    return { count, avgTotal, avgSql, sqlCounts, totalCounts };
+  } catch (e) {
+    console.warn('[PAL leaderboard] agg fetch threw:', e && e.message);
+    return null;
+  }
+}
+
 // Fetch the top N rows, ranked by total_solved desc.
 export async function fetchLeaderboard(limit = 100) {
   if (!supabase) return null;

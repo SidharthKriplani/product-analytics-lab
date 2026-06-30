@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UniverseView } from '../components/shared/UniverseView.jsx';
 import { ReadinessWidget } from '../components/shared/ReadinessWidget.jsx';
 import { Icon } from '../components/shared/Icon.jsx';
@@ -8,6 +8,7 @@ import { getDueReviews } from '../utils/srQueue.js';
 const SHOW_UNIVERSE_TOGGLE = true;
 import { clearProgress } from '../utils/progress.js';
 import { deleteProgressKeys } from '../utils/syncProgress.js';
+import { fetchLeaderboardAgg } from '../utils/leaderboard.js';
 import { getAllStatsProgress } from '../utils/statsProgress.js';
 import { getAllMetricsProgress } from '../utils/metricsProgress.js';
 import { getAllRCAProgress } from '../utils/rcaProgress.js';
@@ -171,6 +172,10 @@ function SectionCard({ icon, title, open, onToggle, badge, children }) {
 
 export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked }) {
   const [universeView, setUniverseView] = useState(false);
+  const [lbAgg, setLbAgg] = useState(null);
+  useEffect(function() {
+    fetchLeaderboardAgg().then(function(agg) { if (agg) setLbAgg(agg); });
+  }, []);
   const completed = scenarios.filter(s => allProgress[s.id]?.attempts?.length > 0);
   const notStarted = scenarios.filter(s => !allProgress[s.id]?.attempts?.length);
   const totalAttempts = Object.values(allProgress).reduce((sum, p) => sum + (p.attempts?.length || 0), 0);
@@ -1598,6 +1603,55 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                         </div>
                       </div>
                     </div>
+                  </div>
+                );
+              })()}
+
+              {/* Peer Benchmark — shown once leaderboard data loads */}
+              {lbAgg && lbAgg.count > 1 && (() => {
+                var userSql = totalSqlSolved;
+                var ahead = lbAgg.sqlCounts.filter(function(n) { return n < userSql; }).length;
+                var pct = Math.round((ahead / lbAgg.count) * 100);
+                var userBarW = Math.min(100, lbAgg.avgSql > 0 ? (userSql / Math.max(userSql, lbAgg.avgSql, 1)) * 100 : 100);
+                var avgBarW = Math.min(100, userSql > 0 ? (lbAgg.avgSql / Math.max(userSql, lbAgg.avgSql, 1)) * 100 : 50);
+                var pctColor = pct >= 75 ? 'var(--green)' : pct >= 50 ? 'var(--teal)' : pct >= 25 ? 'var(--yellow)' : 'var(--text-muted)';
+                return (
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.9rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Peer Benchmark</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{lbAgg.count} users</div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text)' }}>You</span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--teal)', fontWeight: 700 }}>{userSql} solved</span>
+                        </div>
+                        <div style={{ height: 6, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: userBarW + '%', background: 'var(--teal)', borderRadius: 99, transition: 'width 0.4s' }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Leaderboard avg</span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lbAgg.avgSql} solved</span>
+                        </div>
+                        <div style={{ height: 6, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: avgBarW + '%', background: 'var(--border-strong, #4b5563)', borderRadius: 99 }} />
+                        </div>
+                      </div>
+                    </div>
+                    {userSql > 0 && (
+                      <div style={{ marginTop: '0.65rem', fontSize: '0.75rem' }}>
+                        <span style={{ color: pctColor, fontWeight: 700 }}>Top {100 - pct}%</span>
+                        <span style={{ color: 'var(--text-muted)' }}> — ahead of {pct}% of users on SQL</span>
+                      </div>
+                    )}
+                    {userSql === 0 && (
+                      <div style={{ marginTop: '0.65rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        Solve your first problem to see where you stand.
+                      </div>
+                    )}
                   </div>
                 );
               })()}
