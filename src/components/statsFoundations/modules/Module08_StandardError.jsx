@@ -265,7 +265,7 @@ export function Module08_StandardError({ module, onNext }) {
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'Your confidence interval width is 2 × 1.96 × SE. To get a CI half as wide — and detect effects half as large — you need 4× more users per variant. This is the core tradeoff in A/B test sample size planning. SE is what you're managing when you size an experiment.'}
+          {module?.connection || 'Your confidence interval width is 2 × 1.96 × SE. To get a CI half as wide — and detect effects half as large — you need 4× more users per variant. This is the core tradeoff in A/B test sample size planning. SE is what you\'re managing when you size an experiment.'}
         </div>
       </div>
 

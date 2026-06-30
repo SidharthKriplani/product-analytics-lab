@@ -285,7 +285,7 @@ export function Module18_RegressionToMean({ module, onNext }) {
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'Regression to the mean is why experiments require pre-specified control groups, not post-hoc comparisons. A/B tests avoid RTM contamination because both groups experience the same noise environment simultaneously — the control group's regression in the same period is subtracted from the treatment group's regression, leaving only the genuine treatment effect.'}
+          {module?.connection || 'Regression to the mean is why experiments require pre-specified control groups, not post-hoc comparisons. A/B tests avoid RTM contamination because both groups experience the same noise environment simultaneously — the control group\'s regression in the same period is subtracted from the treatment group\'s regression, leaving only the genuine treatment effect.'}
         </div>
       </div>
 
