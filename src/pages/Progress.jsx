@@ -1547,6 +1547,62 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                   );
                 })}
               </div>
+
+              {/* Weak Topics — only when user has enough solves to show meaningful gaps */}
+              {totalSqlSolved >= 5 && (() => {
+                const tagStats = {};
+                sqlLabProblems.forEach(function(p) {
+                  (p.tags || []).forEach(function(tag) {
+                    if (!tagStats[tag]) tagStats[tag] = { total: 0, solved: 0 };
+                    tagStats[tag].total++;
+                    if (sqlSolved.has(p.id)) tagStats[tag].solved++;
+                  });
+                });
+                const weakTopics = Object.entries(tagStats)
+                  .filter(function(entry) { return entry[1].total >= 3 && entry[1].solved < entry[1].total; })
+                  .map(function(entry) { return { tag: entry[0], total: entry[1].total, solved: entry[1].solved, rate: entry[1].solved / entry[1].total }; })
+                  .sort(function(a, b) { return a.rate - b.rate; })
+                  .slice(0, 6);
+                if (weakTopics.length === 0) return null;
+                function fmtTag(t) {
+                  return t.replace(/_/g, ' ').replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+                }
+                return (
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.9rem' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.65rem' }}>
+                      Weak Topics
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                      {weakTopics.map(function(item) {
+                        var barColor = item.rate < 0.3 ? 'var(--red)' : item.rate < 0.6 ? 'var(--yellow)' : 'var(--teal)';
+                        return (
+                          <div key={item.tag} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fmtTag(item.tag)}</span>
+                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', flexShrink: 0, marginLeft: '0.5rem' }}>{item.solved}/{item.total}</span>
+                              </div>
+                              <div style={{ height: 4, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: (item.rate * 100) + '%', background: barColor, borderRadius: 99 }} />
+                              </div>
+                            </div>
+                            {onNavigate && (
+                              <button
+                                onClick={function() { onNavigate('sql-lab'); }}
+                                style={{
+                                  flexShrink: 0, padding: '0.25rem 0.6rem', borderRadius: '5px',
+                                  background: 'var(--surface-2)', border: '1px solid var(--border)',
+                                  color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer',
+                                }}
+                              >Practice →</button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </SectionCard>
         );

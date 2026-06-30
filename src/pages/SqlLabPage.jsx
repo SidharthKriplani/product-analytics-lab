@@ -1314,6 +1314,9 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
   const timerRef = useRef(null);
   const timerStartRef = useRef(null);
   const [elapsedSec, setElapsedSec] = useState(0);
+  const [mockMode, setMockMode] = useState(false);
+  const [mockTimeLeft, setMockTimeLeft] = useState(null); // seconds remaining; null = not running
+  const mockIntervalRef = useRef(null);
   const [solved, setSolved] = useState(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('pal-sql-lab-solved-v1') || '[]');
@@ -1400,6 +1403,10 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
     setHintsShown(0);
     setElapsedSec(0);
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    // Exit mock mode on problem change
+    setMockMode(false);
+    setMockTimeLeft(null);
+    if (mockIntervalRef.current) { clearInterval(mockIntervalRef.current); mockIntervalRef.current = null; }
     timerStartRef.current = null;
 
     if (dbRef.current) {
@@ -1575,10 +1582,38 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
     }, 1000);
   }
 
+  const MOCK_DURATION_SEC = 15 * 60; // 15 minutes
+
+  function startMockMode() {
+    setMockMode(true);
+    setMockTimeLeft(MOCK_DURATION_SEC);
+    startTimer(); // also start elapsed timer
+    if (mockIntervalRef.current) clearInterval(mockIntervalRef.current);
+    mockIntervalRef.current = setInterval(() => {
+      setMockTimeLeft(prev => {
+        if (prev === null) return null;
+        if (prev <= 1) {
+          clearInterval(mockIntervalRef.current);
+          mockIntervalRef.current = null;
+          // Time's up: auto-submit if there's a query
+          submitQuery();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  function exitMockMode() {
+    setMockMode(false);
+    setMockTimeLeft(null);
+    if (mockIntervalRef.current) { clearInterval(mockIntervalRef.current); mockIntervalRef.current = null; }
+  }
+
   function handleKeyDown(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
-      checkQuery();
+      if (mockMode) { submitQuery(); } else { checkQuery(); }
     }
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -1805,10 +1840,19 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           ) : null}
         </div>
 
-        {/* SQLite note */}
-        {problem.sqliteNote && (
-          <div style={{ marginTop: '0.55rem', padding: '0.4rem 0.6rem', borderRadius: '4px', background: 'var(--surface-2)', fontSize: '0.7rem', color: 'var(--text-muted)', borderLeft: '2px solid var(--teal)' }}>
-            {problem.sqliteNote}
+        {/* Check→Submit nudge — shown after Check (results visible, no verdict yet) */}
+        {results && !hasRun && !runError && correct === null && (
+          <div style={{
+            marginTop: '0.5rem', padding: '0.45rem 0.75rem',
+            borderRadius: '6px',
+            background: 'rgba(20,184,166,0.07)',
+            border: '1px solid rgba(20,184,166,0.28)',
+            borderLeft: '3px solid var(--teal)',
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+          }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--teal)', fontWeight: 600, letterSpacing: '0.01em' }}>
+              Query ran. Click <strong>Submit</strong> to evaluate and record your solve.
+            </span>
           </div>
         )}
 
@@ -1827,7 +1871,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
           var allExhausted = hintsShown >= hintCap;
           return (
             <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              {steps.length > 0 && !allExhausted && (
+              {steps.length > 0 && !allExhausted && !mockMode && (
                 <button
                   onClick={function() { track('sql_hint_used', { problemId: problem.id, hintIndex: hintsShown + 1, difficulty: problem.difficulty }); setHintsShown(function(n) { return Math.min(n + 1, hintCap); }); }}
                   style={{
@@ -1837,6 +1881,11 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                     border: '1px solid rgba(20,184,166,0.25)', cursor: 'pointer',
                   }}
                 >Hint {hintsShown + 1} of {hintCap}</button>
+              )}
+              {mockMode && (
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontStyle: 'italic', padding: '0.35rem 0' }}>
+                  Hints disabled in Mock Interview Mode.
+                </div>
               )}
               {hintsShown > 0 && (
                 <>
@@ -1930,17 +1979,42 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
 
         {/* Timer row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexShrink: 0 }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-            <Icon name='timer' size={12} color='currentColor' />
-            {elapsedSec > 0
-              ? `${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} elapsed`
-              : `~${problem.estimatedMin} min`
-            }{' · Ctrl+Enter to check'}
+          {mockMode ? (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', padding: '2px 7px', borderRadius: '4px', background: 'rgba(234,88,12,0.12)', color: '#ea580c', border: '1px solid rgba(234,88,12,0.3)' }}>Mock</span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: mockTimeLeft !== null && mockTimeLeft < 120 ? 'var(--red)' : 'var(--text)', fontFamily: 'monospace', letterSpacing: '0.04em' }}>
+                {mockTimeLeft !== null ? Math.floor(mockTimeLeft / 60) + ':' + String(mockTimeLeft % 60).padStart(2, '0') : '15:00'}
+              </span>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>· Submit only</span>
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+              <Icon name='timer' size={12} color='currentColor' />
+              {elapsedSec > 0
+                ? `${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} elapsed`
+                : `~${problem.estimatedMin} min`
+              }{' · Ctrl+Enter to check'}
+            </div>
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            {!mockMode && !hasRun && !solved.has(problem.id) && (
+              <button
+                onClick={startMockMode}
+                style={{ background: 'rgba(234,88,12,0.08)', border: '1px solid rgba(234,88,12,0.28)', borderRadius: 'var(--radius-sm)', padding: '0.25rem 0.65rem', fontSize: '0.72rem', fontWeight: 600, color: '#ea580c', cursor: 'pointer' }}
+                title="Start a 15-minute timed mock interview: no hints, Submit only"
+              >Mock</button>
+            )}
+            {mockMode && (
+              <button
+                onClick={exitMockMode}
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.25rem 0.65rem', fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', cursor: 'pointer' }}
+              >End Mock</button>
+            )}
+            <button
+              onClick={() => setShowPlanModal(true)}
+              style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.25rem 0.65rem', fontSize: '0.72rem', fontWeight: 600, color: 'var(--teal)', cursor: 'pointer' }}
+            >Study Plan</button>
           </div>
-          <button
-            onClick={() => setShowPlanModal(true)}
-            style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.25rem 0.65rem', fontSize: '0.72rem', fontWeight: 600, color: 'var(--teal)', cursor: 'pointer' }}
-          >Study Plan</button>
         </div>
 
         {/* SQL engine loading/error */}
@@ -1961,7 +2035,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
               <SqlEditor
                 value={query}
                 onChange={v => { startTimer(); setQuery(v); if (problem) saveQueryLS(problem.id, v); }}
-                onCheck={checkQuery}
+                onCheck={mockMode ? submitQuery : checkQuery}
                 schema={cmSchema}
                 placeholder={problem.format === 'forensic' ? '-- Write the corrected query here\n-- Cmd/Ctrl+Enter to check, then Submit' : '-- Write your SQL here\n-- Cmd/Ctrl+Enter to check, then Submit'}
                 height="46vh"
@@ -1988,6 +2062,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
 
             {/* Buttons row */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {!mockMode && (
               <button
                 onClick={checkQuery}
                 disabled={!query.trim() || !dbRef.current}
@@ -1998,6 +2073,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
                 }}
                 title="Check — run your query and see the output (no pass/fail). ⌘/Ctrl+Enter"
               >▶ Check</button>
+              )}
               <button
                 onClick={submitQuery}
                 disabled={!query.trim() || !dbRef.current}
