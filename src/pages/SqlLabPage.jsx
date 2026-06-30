@@ -3,6 +3,7 @@ import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { datamarts } from '../data/sqlLabDatamarts.js';
 import { COMPANY_DOMAINS } from '../data/companyDirectory.js';
 import { track } from '../utils/analytics.js';
+import { upsertLeaderboardRow } from '../utils/leaderboard.js';
 import { ShareLinkButton } from '../components/shared/ShareLinkButton.jsx';
 import { SqlEditor } from '../components/shared/SqlEditor.jsx';
 import { Icon } from '../components/shared/Icon.jsx';
@@ -261,6 +262,8 @@ const DIFF_COLOR = {
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard', 'Master', 'Forensic'];
 const ALL_COMPANIES = [...new Set(SORTED_PROBLEMS.map(p => p.company))].sort();
 const ALL_TOPICS = [...new Set(SORTED_PROBLEMS.flatMap(p => p.tags || []))].sort();
+const ALL_DATAMARTS = [...new Set(SORTED_PROBLEMS.map(p => p.datamartId).filter(Boolean))].sort()
+  .map(id => ({ id, label: datamarts[id]?.name || id }));
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 
@@ -712,6 +715,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
   const [filterDiff, setFilterDiff] = useState('');      // single-select
   const [filterCompany, setFilterCompany] = useState('');
   const [filterTopic, setFilterTopic] = useState('');
+  const [filterDatamart, setFilterDatamart] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('default');
   const [search, setSearch] = useState('');
@@ -724,6 +728,7 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
     if (filterDiff && p.difficulty !== filterDiff) return false;
     if (filterCompany && p.company !== filterCompany && !(p.alsoAskedAt || []).includes(filterCompany)) return false;
     if (filterTopic && !(p.tags || []).includes(filterTopic)) return false;
+    if (filterDatamart && p.datamartId !== filterDatamart) return false;
     if (filterStatus === 'solved' && !solved.has(p.id)) return false;
     if (filterStatus === 'unsolved' && solved.has(p.id)) return false;
     if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
@@ -736,13 +741,13 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
   else if (sortBy === 'quickest') displayed.sort((a, b) => (a.estimatedMin || 99) - (b.estimatedMin || 99));
 
   // Changing any filter/sort remounts the list so rows re-run the entrance animation.
-  const listKey = [filterDiff, filterCompany, filterTopic, filterStatus, sortBy, search].join('|');
+  const listKey = [filterDiff, filterCompany, filterTopic, filterDatamart, filterStatus, sortBy, search].join('|');
 
   function toggleDiff(d) { setFilterDiff(prev => (prev === d ? '' : d)); }
   function clearAll() {
-    setFilterDiff(''); setFilterCompany(''); setFilterTopic(''); setFilterStatus('all'); setSortBy('default'); setSearch('');
+    setFilterDiff(''); setFilterCompany(''); setFilterTopic(''); setFilterDatamart(''); setFilterStatus('all'); setSortBy('default'); setSearch('');
   }
-  const anyFilter = filterDiff || filterCompany || filterTopic || filterStatus !== 'all' || search;
+  const anyFilter = filterDiff || filterCompany || filterTopic || filterDatamart || filterStatus !== 'all' || search;
 
   return (
     <div className="sql-lab-browse-panel">
@@ -875,6 +880,24 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
           <option value="">All topics</option>
           {ALL_TOPICS.map(t => (
             <option key={t} value={t}>{t} ({SORTED_PROBLEMS.filter(p => (p.tags || []).includes(t)).length})</option>
+          ))}
+        </select>
+
+        {/* Industry dropdown */}
+        <select
+          value={filterDatamart}
+          onChange={e => setFilterDatamart(e.target.value)}
+          style={{
+            padding: '3px 0.6rem', borderRadius: '6px', fontSize: '0.72rem',
+            background: filterDatamart ? 'rgba(20,184,166,0.08)' : 'var(--surface-2)',
+            color: filterDatamart ? 'var(--teal)' : 'var(--text-muted)',
+            border: filterDatamart ? '1px solid rgba(20,184,166,0.35)' : '1px solid var(--border)',
+            cursor: 'pointer', outline: 'none', transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+          }}
+        >
+          <option value="">All industries</option>
+          {ALL_DATAMARTS.map(dm => (
+            <option key={dm.id} value={dm.id}>{dm.label} ({SORTED_PROBLEMS.filter(p => p.datamartId === dm.id).length})</option>
           ))}
         </select>
 
@@ -1283,7 +1306,7 @@ function JudgmentLayer({ problem }) {
   );
 }
 
-export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
+export function SqlLabPage({ onBack, initialProblemId, onProblemChange, user }) {
   const [mode, setMode] = useState(initialProblemId ? 'solve' : 'browse');
   const [problemIdx, setProblemIdx] = useState(function () {
     if (initialProblemId) {
@@ -1377,12 +1400,15 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange }) {
       localStorage.setItem('pal-sql-lab-dates-v1', JSON.stringify(dateDiary));
     } catch {}
     track('sql_problem_solved', { problemId: problem.id, difficulty: problem.difficulty, datamartId: problem.datamartId, elapsedSec: elapsed });
+    const isNewSolve = !solved.has(problem.id);
     setSolved(prev => {
       const next = new Set(prev);
       next.add(problem.id);
       try { localStorage.setItem('pal-sql-lab-solved-v1', JSON.stringify([...next])); } catch {}
       return next;
     });
+    // Sync to leaderboard immediately on first-time solve so the board stays live.
+    if (isNewSolve && user) upsertLeaderboardRow(user);
   }, [correct]);
 
   // Re-init DB on problem change + restore saved query
