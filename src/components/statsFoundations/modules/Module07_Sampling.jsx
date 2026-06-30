@@ -52,6 +52,15 @@ function buildHistogram(means, binCount = 20) {
 
 const SPEED_MS = { slow: 600, medium: 250, fast: 80 };
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module07_Sampling({ module, onNext }) {
   const [sampleSize, setSampleSize] = useState(30);
   const [speed, setSpeed] = useState('medium');
@@ -125,26 +134,41 @@ export function Module07_Sampling({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          You need to estimate the average daily active usage time for a product with 50 million users. You obviously can\'t query every single user\'s data in real time. So you take a sample — but how large does that sample need to be, and how much will your estimate jump around from sample to sample?
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You want to understand how your users behave. Specifically: what is the typical session duration? What fraction convert? What do they actually think of the new onboarding flow?
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Every metric you report in a dashboard is a sample statistic, not the true population value. Understanding sampling variability is what separates analysts who say "the number is 7.3" from analysts who say "the number is 7.3 plus or minus 0.4." Draw repeated samples below to see how sample means scatter around the truth.
+        <p style={prose}>
+          The honest answer requires data from every user. That's the ground truth. But your product has millions of users, surveys have response costs, and querying your full event log for every analysis would be slow and expensive. Measuring everyone for every question is impractical. So you measure a subset and use it to make claims about the whole. This is sampling. The question isn't whether to sample — you nearly always are, whether you realize it or not. The question is whether your sample will give you accurate information about the population it's meant to represent.
+        </p>
+        <p style={prose}>
+          The natural first approach is to use whoever is convenient. Survey users who open the email. Analyze the first thousand signups. Pull data from the most active users because their behavior is easiest to observe. This fails in a specific way: convenience samples are systematically biased. Email-openers are more engaged than your typical user. The first thousand signups are early adopters — typically more forgiving and more technically sophisticated. Active users are, by definition, not representative of the majority who churn quietly. Every convenience shortcut introduces a systematic difference between your sample and the population you're claiming to understand.
+        </p>
+        <p style={prose}>
+          A biased sample doesn't get better with size. Ten thousand email-openers are still all email-openers. More data from the wrong population just makes you more confidently wrong.
+        </p>
+        <p style={prose}>
+          What you need is a selection mechanism where each member of the population has a known, equal probability of being chosen — independent of the outcome you're measuring. This is <strong style={{ color: 'var(--text)' }}>random sampling</strong>. The randomness breaks the link between selection and outcome. If session duration doesn't influence whether you get selected, the sample's session distribution will match the population's — not perfectly (there's always variance), but without systematic bias.
+        </p>
+        <p style={prose}>
+          Sample size matters, but its relationship to accuracy is often misunderstood. Accuracy is determined by absolute sample size, not the fraction of the population you've captured. A sample of 1,000 from a population of 10,000 is not meaningfully more accurate than a sample of 1,000 from a population of 100 million — what matters is n, not n/N.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Draw Repeated Samples</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You want to estimate average revenue per user for your product. You decide to sample from users who made at least one purchase in the last 90 days. What population are you actually estimating, and how does it differ from all users?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        We can never measure an entire population, so we take a <strong>sample</strong> and compute a statistic like the mean.
-        Each sample gives a slightly different mean — but those sample means cluster around the true population mean.
-        The spread of those sample means is controlled by your sample size.
-      </p>
+      {/* ── Interactive label ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Draw Repeated Samples</div>
 
-      {/* Instruction */}
+      {/* ── Instructions box ── */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Set a sample size, then click "Draw 20 Samples" to repeatedly sample from the population. Watch the histogram of sample means build up. Compare results at n=5 versus n=100 — notice how a larger sample size produces a tighter, more bell-shaped distribution of means.
       </div>
@@ -283,19 +307,29 @@ export function Module07_Sampling({ module, onNext }) {
         )}
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Sampling from purchasers gives you average revenue per purchasing user, not average revenue per user. These differ by the conversion rate — if 20% of users purchase, your estimate is roughly 5x higher than the true per-user figure. This is sample selection bias: your sampling rule excluded a population segment in a way that directly correlates with the outcome you're measuring.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'With n=5, sample means are all over the place. With n=100, they cluster tightly around the true mean. The standard deviation of sample means — called the standard error — shrinks as n grows. This is why larger samples are more reliable.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Every time you pull a sample, ask: who is excluded by my sampling rule, and does their exclusion correlate with what I'm measuring? If users who opted out of tracking aren't in your data, and opt-out correlates with privacy concern (which correlates with trust, which correlates with engagement) — your sample is biased and you should say so.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a PM asks "we surveyed 200 users and 80% liked it" — ask how those 200 were selected before treating it as representative. Survey respondents, by definition, opted in. Opt-in correlates with having strong opinions. Depending on what the survey was about, you may be systematically hearing from the happy or the unhappy.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> The randomization in A/B tests is random sampling applied to treatment assignment. When you randomize 50/50, you're ensuring neither group's composition is biased toward one type of user. Understanding sampling makes this obvious — and helps you spot when someone's "A/B test" is actually a non-random assignment that makes the comparison meaningless.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'Every A/B test measurement is a sample mean. The reliability of your treatment effect estimate depends on how many users you sampled. Larger n → sample mean closer to the truth → narrower confidence interval → more reliable results.'}
+          {module?.connection || 'Every A/B test measurement is a sample mean. The reliability of your treatment effect estimate depends on how many users you sampled. Larger n means your sample mean is closer to the truth, giving you a narrower confidence interval and more reliable results.'}
         </div>
       </div>
 

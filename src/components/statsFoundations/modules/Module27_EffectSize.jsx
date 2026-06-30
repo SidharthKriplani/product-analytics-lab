@@ -29,6 +29,15 @@ var MCQ_OPTIONS = [
 ];
 var MCQ_ANSWER = 'b';
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module27_EffectSize({ module, onNext }) {
   var [diffMeans, setDiffMeans] = useState(5);
   var [pooledSD, setPooledSD] = useState(10);
@@ -63,15 +72,39 @@ export function Module27_EffectSize({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>Effect size</strong> measures how large a difference actually is, independent of sample size. A p-value tells you whether a difference is statistically distinguishable from zero. Effect size tells you whether anyone should care. The most common measure is <strong>Cohen\'s d</strong> = (mean difference) / (pooled standard deviation).
-      </p>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        With a large enough sample, even a 0.01% difference becomes "statistically significant" — but shipping a change that moves your metric by a fraction of a percent wastes engineering time and adds complexity. Effect size separates real impact from statistical noise amplified by sample size.
-      </p>
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          A 1pp lift in conversion: is that large or small? It depends. If your baseline is 1%, a 1pp lift doubles your conversion rate — it's transformative. If your baseline is 50%, 1pp is noise. The same numerical difference carries completely different meaning depending on context.
+        </p>
+        <p style={prose}>
+          Statistical significance tells you whether an effect is real. It says nothing about size. Effect size is the tool for measuring magnitude — in a way that allows comparison across metrics, studies, and contexts.
+        </p>
+        <p style={prose}>
+          The fundamental problem: raw differences are incomparable. A 2-point difference in NPS and a 2pp difference in conversion and a 2-second difference in page load time are all different things. To compare magnitudes across these, you need a unit-free measure. The most widely used standardized effect size for comparing means is <strong style={{ color: 'var(--text)' }}>Cohen's d</strong>: d = (μ₁ − μ₂) / σ. Cohen's d expresses the difference in standard deviation units. Conventional interpretations: d = 0.2 is small, d = 0.5 is medium, d = 0.8 is large.
+        </p>
+        <p style={prose}>
+          For proportions, two alternatives: <strong style={{ color: 'var(--text)' }}>relative risk</strong> (treatment rate / control rate, multiplicative comparison useful when baseline is low) and <strong style={{ color: 'var(--text)' }}>Number Needed to Treat (NNT)</strong> = 1 / absolute difference. NNT makes cost-benefit calculation direct: if NNT = 125 and one additional conversion is worth £80, the math is immediate.
+        </p>
+        <p style={prose}>
+          The relationship between effect size, sample size, and significance: the t-statistic is approximately d × √(n/2). p-value decreases as either d increases or n increases. For a given p-value, you can't tell if the effect is large-and-small-n or small-and-large-n. This is why significance alone is insufficient — you always need to know the effect size too. Effect size is the content of the result. Statistical significance is just the confidence that the content exists.
+        </p>
+      </div>
+
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Two studies both report d = 0.5 for the same type of intervention (a checkout flow change). One used n = 100 per arm, one used n = 5,000 per arm. Both came back statistically significant. What do the effect sizes tell you, and what does the sample size difference imply for how much you trust each estimate?
+        </p>
+      </div>
+
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Cohen's d Explorer</div>
 
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-        <strong>What to do:</strong> Drag the mean difference and pooled SD sliders to see how Cohen\'s d changes. Notice: increasing the difference OR decreasing the SD both make the distributions separate. Try setting a tiny difference (1) with small SD (3) — the effect is large even though the raw difference is small.
+        <strong>What to do:</strong> Drag the mean difference and pooled SD sliders to see how Cohen's d changes. Notice: increasing the difference OR decreasing the SD both make the distributions separate. Try setting a tiny difference (1) with small SD (3) — the effect is large even though the raw difference is small.
       </div>
 
       {/* Sliders */}
@@ -135,7 +168,7 @@ export function Module27_EffectSize({ module, onNext }) {
       {/* SVG: overlapping distributions */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>
-          Control (blue) vs Treatment (green) — Cohen\'s d = {cohensD.toFixed(2)}
+          Control (blue) vs Treatment (green) — Cohen's d = {cohensD.toFixed(2)}
         </div>
         <svg viewBox="0 0 500 260" width="100%" style={{ overflow: 'visible' }}>
           <line x1={50} y1={220} x2={450} y2={220} stroke="var(--border)" strokeWidth={1.5} />
@@ -168,7 +201,7 @@ export function Module27_EffectSize({ module, onNext }) {
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>Framework</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.7 }}>
-          Always report effect size alongside your p-value. Cohen\'s d standardizes the difference so you can compare across metrics and experiments. A "statistically significant" result with d = 0.05 means the distributions are nearly identical — the test detected a real but meaningless difference. Set your minimum detectable effect (MDE) during experiment design to ensure you only detect effects worth shipping.
+          Always report effect size alongside your p-value. Cohen's d standardizes the difference so you can compare across metrics and experiments. A "statistically significant" result with d = 0.05 means the distributions are nearly identical — the test detected a real but meaningless difference. Set your minimum detectable effect (MDE) during experiment design to ensure you only detect effects worth shipping.
         </div>
       </div>
 
@@ -209,15 +242,25 @@ export function Module27_EffectSize({ module, onNext }) {
         )}
       </div>
 
-      {/* Key Insight */}
+      {/* What you should have confirmed */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Both studies report the same effect size magnitude (d = 0.5), but the n = 100 study has very wide confidence intervals around that estimate — the true effect could be anywhere from 0.1 to 0.9. The n = 5,000 study has tight confidence intervals — d ≈ 0.5 with high precision. The point estimate is the same; the certainty around it differs dramatically. Effect size tells you the magnitude; SE around the effect size tells you how reliably that magnitude was estimated.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'A statistically significant result with a tiny effect size (d < 0.1) is meaningless in practice. Always pair your p-value with Cohen\'s d and translate the effect into business impact before making a ship decision.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Never report a statistically significant result without also reporting the effect size in business-relevant units. "p = 0.002" followed by "4 additional conversions per 10,000 visitors" gives decision-makers what they need. Without the effect size, "significant" is a content-free word that doesn't help anyone decide whether to ship.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When comparing results across experiments, compare effect sizes — not p-values. An experiment with p = 0.04 and d = 0.3 is finding a larger effect than one with p = 0.001 and d = 0.05. P-values reflect both effect size and sample size. Effect size reflects only the former.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Report the confidence interval around your effect size estimate, not just the point estimate. "d = 0.5 [95% CI: 0.1–0.9]" is very different from "d = 0.5 [95% CI: 0.45–0.55]." The first is an uncertain estimate from a small study; the second is a precisely characterised effect from a large one. The CI around the effect size tells you how much to trust the magnitude you observed.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -229,7 +272,7 @@ export function Module27_EffectSize({ module, onNext }) {
         <button
           className="pal-glow-pulse"
           onClick={onNext}
-          style={{ padding: '0.7rem 1.75rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
+          style={{ padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
         >
           Next concept →
         </button>

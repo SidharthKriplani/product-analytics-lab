@@ -57,6 +57,15 @@ function lnGamma(z) {
   return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module31_ANOVA({ module, onNext }) {
   var [meanA, setMeanA] = useState(50);
   var [meanB, setMeanB] = useState(53);
@@ -135,12 +144,36 @@ export function Module31_ANOVA({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        You\'re comparing 4 different onboarding flows (A, B, C, D) and want to know if any of them performs differently. Running all 6 pairwise t-tests inflates your false positive rate from 5% to roughly 26%. <strong>ANOVA</strong> (Analysis of Variance) solves this by testing all groups at once with a single F-test.
-      </p>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        The key insight is that ANOVA decomposes total variance into <em>between-group</em> variance (do the group means differ?) and <em>within-group</em> variance (how noisy is each group?). If between-group variance is large relative to within-group variance, at least one group is genuinely different.
-      </p>
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You're running a multivariate test with four checkout variants — A, B, C, and D. You want to know: do the four variants produce different conversion rates? The naive approach: run pairwise t-tests. A vs B. A vs C. A vs D. B vs C. B vs D. C vs D. Six tests. At α = 0.05, the probability of at least one false positive across six tests is 1 − 0.95^6 ≈ 26%.
+        </p>
+        <p style={prose}>
+          What you need is a single test that asks: do any of these group means differ, as a global question, without running a separate test for every pair? That's <strong style={{ color: 'var(--text)' }}>Analysis of Variance — ANOVA</strong>.
+        </p>
+        <p style={prose}>
+          ANOVA's logic: all variation in your metric data has two sources. <strong style={{ color: 'var(--text)' }}>Between-group variance</strong>: users in variant A behave differently from users in variant D because the variants differ — this is the signal you're trying to detect. <strong style={{ color: 'var(--text)' }}>Within-group variance</strong>: even users in the same variant differ from each other — this is the noise. The <strong style={{ color: 'var(--text)' }}>F-statistic</strong> puts these in proportion: F = between-group variance / within-group variance. If groups are genuinely different, F is large and the p-value is small.
+        </p>
+        <p style={prose}>
+          What ANOVA doesn't tell you: which specific variants differ. This is a separate question requiring <strong style={{ color: 'var(--text)' }}>post-hoc tests</strong>. Tukey's Honest Significant Difference (HSD) runs pairwise comparisons with adjustment that controls the family-wise error rate. It tells you: D vs A significant, D vs C significant, others not significant. The post-hoc tests are the analysis; the ANOVA is the gate.
+        </p>
+        <p style={prose}>
+          Three assumptions to check: independence (observations independent within and across groups), normality within groups (or large n — CLT applies with n ≥ 30 per group), and equal variances across groups. If group variances differ substantially, use <strong style={{ color: 'var(--text)' }}>Welch's ANOVA</strong>. Two-way ANOVA extends to two factors and their interaction — useful when you suspect the best variant differs by device type or market.
+        </p>
+      </div>
+
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          ANOVA comes back significant (p = 0.03) for your four-variant test. Your PM immediately says "variant D has the highest conversion — it's the winner." What would you do before declaring D the winner?
+        </p>
+      </div>
+
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: F-Statistic Explorer</div>
 
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Adjust the group means and shared standard deviation. Watch how the F-statistic and p-value change as you separate or overlap the distributions. When means are far apart or SD is small, the F-statistic grows and ANOVA detects a difference.
@@ -286,15 +319,25 @@ export function Module31_ANOVA({ module, onNext }) {
         )}
       </div>
 
-      {/* Key Insight */}
+      {/* What you should have confirmed */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          ANOVA significant means at least one pair differs — not that D is significantly better than all others. You'd run Tukey's HSD to determine which pairs actually differ. D might be significantly better than A and C, but not significantly better than B. Or D might be the best but not significantly better than any individual variant — just far from the average of all four combined. The post-hoc tests are the analysis; the ANOVA is the gate.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'ANOVA tests whether any group differs from the rest using a single F-test, avoiding the inflated false positive rate of multiple pairwise t-tests. Post-hoc tests then pinpoint which pairs differ — but only after ANOVA rejects the null.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Whenever you're comparing more than two groups, use ANOVA rather than pairwise t-tests as the first step. ANOVA provides the omnibus test that controls the family-wise error rate for the "any difference" question. Post-hoc tests handle the "which specific pairs differ" question with appropriate correction. This is the correct two-step procedure, not optional.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use two-way ANOVA when you have a hypothesis about interaction effects. "Does the checkout flow change work differently for mobile vs. desktop?" is an interaction hypothesis. If you only run separate ANOVAs for mobile and desktop, you can't formally test the interaction. Two-way ANOVA gives you the interaction term directly and with correct error rate control.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When ANOVA comes back non-significant, report this as "no evidence that variants differ" — not "all variants are equal." Non-significance is not evidence of equivalence, especially in underpowered studies. Report the power of the ANOVA test alongside the result: what minimum mean difference would this study have detected at 80% power? If that minimum is 5pp but the variants differ by 2pp, the test was too weak to detect a real and meaningful difference.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -306,7 +349,7 @@ export function Module31_ANOVA({ module, onNext }) {
         <button
           className="pal-glow-pulse"
           onClick={onNext}
-          style={{ padding: '0.7rem 1.75rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
+          style={{ padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
         >
           Next concept →
         </button>

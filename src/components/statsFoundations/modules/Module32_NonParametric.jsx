@@ -61,6 +61,15 @@ function mannWhitneyPValue(skew) {
   return 0.038;
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module32_NonParametric({ module, onNext }) {
   var [skewness, setSkewness] = useState(1);
   var [picked, setPicked] = useState(null);
@@ -86,12 +95,36 @@ export function Module32_NonParametric({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Your A/B test measures <strong>time-to-purchase</strong>. Most users buy in 2-5 minutes, but some take 45+ minutes. The distribution is wildly right-skewed. The t-test assumes the sampling distribution of the mean is approximately normal — with heavy skew and moderate sample sizes, this assumption can fail, making the t-test unreliable.
-      </p>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>Non-parametric tests</strong> like Mann-Whitney U solve this by ranking the data instead of using raw values. Ranks are immune to skew and outliers — the test asks whether one group\'s values tend to be larger than the other\'s, without assuming any particular distribution shape.
-      </p>
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Every parametric test we've covered makes assumptions about the data. T-tests assume the sampling distribution of the mean is approximately normal. ANOVA assumes normality and equal variances across groups. When these assumptions hold, parametric tests are the best choice — they extract maximum information from the data and provide the most statistical power.
+        </p>
+        <p style={prose}>
+          When the assumptions break badly — very small samples where CLT hasn't kicked in, severe outliers, ordinal data (satisfaction ratings, NPS) where the gaps between values aren't meaningful — parametric tests give unreliable p-values.
+        </p>
+        <p style={prose}>
+          <strong style={{ color: 'var(--text)' }}>Non-parametric tests</strong> are the distribution-free alternative. They work by replacing raw values with ranks and analyzing the ranks. Because ranks depend only on ordering, not magnitude, they're unaffected by the shape of the underlying distribution. Pool all observations across groups. Sort them. Assign rank 1 to the smallest, rank 2 to the next, and so on. Now analyze the ranks — their distribution under H₀ is known regardless of the original distribution's shape.
+        </p>
+        <p style={prose}>
+          The core tests: <strong style={{ color: 'var(--text)' }}>Mann-Whitney U</strong> (non-parametric alternative to the independent samples t-test — tests whether one group tends to produce higher ranks). <strong style={{ color: 'var(--text)' }}>Wilcoxon signed-rank</strong> (non-parametric alternative to the paired t-test). <strong style={{ color: 'var(--text)' }}>Kruskal-Wallis</strong> (non-parametric ANOVA for three or more groups). <strong style={{ color: 'var(--text)' }}>Spearman rank correlation</strong> (measures monotonic association, robust to outliers).
+        </p>
+        <p style={prose}>
+          The key trade-off: non-parametric tests have less statistical power than their parametric equivalents when parametric assumptions hold. Ranking throws away information about magnitude — you only use order. This means: don't default to non-parametric just because "the data isn't perfectly normal." If n ≥ 30 per group, use parametric tests — CLT makes them valid. Use non-parametric when the data is genuinely small-n or the distribution is so extreme that even CLT isn't reliable.
+        </p>
+      </div>
+
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You have satisfaction scores (1–5 Likert) from 15 users per cohort. Someone suggests a t-test. What are the two specific problems with using a t-test on this data, and which non-parametric test would you use instead?
+        </p>
+      </div>
+
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: T-Test vs Mann-Whitney Divergence</div>
 
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Drag the skewness slider from normal (1) to heavily skewed (5). Watch how the distribution shape changes and how the t-test and Mann-Whitney U test diverge. With normal data, both agree. With skewed data, the t-test loses power while Mann-Whitney stays reliable.
@@ -204,7 +237,7 @@ export function Module32_NonParametric({ module, onNext }) {
             Tests disagree
           </div>
           <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            The t-test says no effect (p = {tP.toFixed(3)}) while Mann-Whitney detects one (p = {mwP.toFixed(3)}). This happens because skewed outliers inflate the t-test\'s variance estimate, reducing its power. The rank-based test is immune to this because it only cares about relative ordering, not absolute values.
+            The t-test says no effect (p = {tP.toFixed(3)}) while Mann-Whitney detects one (p = {mwP.toFixed(3)}). This happens because skewed outliers inflate the t-test's variance estimate, reducing its power. The rank-based test is immune to this because it only cares about relative ordering, not absolute values.
           </div>
         </div>
       )}
@@ -213,7 +246,7 @@ export function Module32_NonParametric({ module, onNext }) {
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>Framework</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.7 }}>
-          Non-parametric tests replace raw values with ranks, making them distribution-free. Mann-Whitney U compares two independent groups by asking whether one group\'s ranks tend to be higher. Wilcoxon signed-rank handles paired data (pre/post on the same users). Kruskal-Wallis extends Mann-Whitney to 3+ groups (the non-parametric ANOVA). The trade-off: non-parametric tests have slightly less statistical power when the data really is normal — you pay a small power cost for the robustness.
+          Non-parametric tests replace raw values with ranks, making them distribution-free. Mann-Whitney U compares two independent groups by asking whether one group's ranks tend to be higher. Wilcoxon signed-rank handles paired data (pre/post on the same users). Kruskal-Wallis extends Mann-Whitney to 3+ groups (the non-parametric ANOVA). The trade-off: non-parametric tests have slightly less statistical power when the data really is normal — you pay a small power cost for the robustness.
         </div>
       </div>
 
@@ -249,20 +282,30 @@ export function Module32_NonParametric({ module, onNext }) {
         )}
         {revealed && (
           <div className="pal-reveal-in" style={{ marginTop: '0.75rem', padding: '0.75rem 1rem', background: picked === MCQ_ANSWER ? 'var(--green-bg)' : 'var(--red-bg)', border: '1px solid ' + (picked === MCQ_ANSWER ? 'var(--green-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            <strong>{picked === MCQ_ANSWER ? 'Correct!' : 'Not quite.'}</strong> Revenue data is almost always right-skewed with heavy outliers. A t-test\'s power degrades because the extreme values inflate the variance estimate. Mann-Whitney U ranks the values first, so a $10,000 outlier has no more influence than any other data point. It tests whether treatment users\' revenue tends to be higher than control\'s, which is exactly the question you care about.
+            <strong>{picked === MCQ_ANSWER ? 'Correct!' : 'Not quite.'}</strong> Revenue data is almost always right-skewed with heavy outliers. A t-test's power degrades because the extreme values inflate the variance estimate. Mann-Whitney U ranks the values first, so a $10,000 outlier has no more influence than any other data point. It tests whether treatment users' revenue tends to be higher than control's, which is exactly the question you care about.
           </div>
         )}
       </div>
 
-      {/* Key Insight */}
+      {/* What you should have confirmed */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Two problems — (1) n = 15 is small, CLT may not apply, so the normal approximation underlying the t-test is unreliable; (2) a 1–5 Likert scale is ordinal, meaning the differences between scale points aren't guaranteed to be equal (the gap between "dissatisfied" and "neutral" may not be the same as "satisfied" and "very satisfied"). Mann-Whitney U handles both: it ranks the 30 scores from both cohorts combined and tests whether cohort A scores tend to rank higher than cohort B. The interactive shows that when an outlier is introduced, the t-test p-value shifts dramatically while Mann-Whitney's barely moves.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'When your data is skewed, ordinal, or has outliers, non-parametric tests (Mann-Whitney U, Wilcoxon, Kruskal-Wallis) use ranks instead of raw values. They trade a small amount of power for robustness — and on skewed product data, they often detect effects the t-test misses.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> For any satisfaction or NPS analysis with small cohorts (n less than 30), default to non-parametric tests. Ordinal data doesn't satisfy the interval-scale requirement for meaningful means — and n less than 30 means you can't lean on CLT. Mann-Whitney for two groups, Kruskal-Wallis for three or more.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Don't blanket-switch to non-parametric when you see non-normal data with large samples. If n = 500 per group and your metric is right-skewed revenue, the CLT makes parametric tests valid — or log-transform and run a parametric test on the transformed data. Non-parametric tests used unnecessarily sacrifice power, which means you need larger samples to detect the same effect.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Use Spearman correlation instead of Pearson whenever you suspect the relationship is monotonic but not linear, or when you have outliers that would distort Pearson. The correlation between number of features used and LTV is likely monotonic — but possibly not linear (there may be diminishing returns at high feature adoption). Spearman captures the monotonic relationship robustly; Pearson might understate it due to curvature and overstate it if outliers drag the regression line.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -274,7 +317,7 @@ export function Module32_NonParametric({ module, onNext }) {
         <button
           className="pal-glow-pulse"
           onClick={onNext}
-          style={{ padding: '0.7rem 1.75rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
+          style={{ padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
         >
           Next concept →
         </button>

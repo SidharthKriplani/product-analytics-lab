@@ -32,6 +32,15 @@ var MCQ_OPTIONS = [
 ];
 var MCQ_ANSWER = 'c';
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module28_Bootstrap({ module, onNext }) {
   var [resamples, setResamples] = useState([]);
   var [lastSample, setLastSample] = useState(null);
@@ -98,15 +107,39 @@ export function Module28_Bootstrap({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>Bootstrap resampling</strong> builds a sampling distribution empirically. Instead of assuming your data follows a normal distribution, you repeatedly draw samples <em>with replacement</em> from your actual data and compute the statistic of interest each time. The distribution of those statistics gives you a confidence interval without normality assumptions.
-      </p>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        This matters in product analytics because many metrics — revenue per user, session duration, LTV — are heavily right-skewed. A t-test assumes normality of the sampling distribution, which requires large N for skewed data. Bootstrap works with whatever distribution you actually have.
-      </p>
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You know how to compute confidence intervals for the mean: x̄ ± 1.96 × SE, where SE = SD / √n. The formula exists because the CLT guarantees the sampling distribution of the mean is approximately normal. What about the median? The 90th percentile response time? The ratio of two metrics? The difference between 30-day and 60-day retention?
+        </p>
+        <p style={prose}>
+          For complex statistics, there often is no simple analytical formula for the standard error. The sampling distribution can be non-normal, asymmetric, or simply unknown for small samples. If you try to apply a normal-based CI formula anyway, you get an interval that doesn't actually reflect the true uncertainty in your estimate.
+        </p>
+        <p style={prose}>
+          The bootstrap gives you this. The logic is surprisingly simple. In an ideal world, you'd draw thousands of new samples from the population and observe the distribution of estimates directly. You don't have thousands of new samples — but your sample is the best available approximation of the population. So you draw new samples from the sample itself.
+        </p>
+        <p style={prose}>
+          From your sample of n observations, draw a new sample of n <strong style={{ color: 'var(--text)' }}>with replacement</strong> — meaning each draw is independent and an observation can appear multiple times. Compute your statistic on this bootstrap sample. Repeat 1,000 times. The distribution of your statistic across these 1,000 bootstrap samples approximates the true sampling distribution. The bootstrap CI is the 2.5th and 97.5th percentiles of that distribution.
+        </p>
+        <p style={prose}>
+          When does bootstrap work well? When n is large enough that your sample resembles the population (n ≥ 30 as a rough threshold). For very small samples (n less than 10), the bootstrap doesn't add many unique resamples. For extreme statistics (the maximum of your data), the bootstrap is unreliable because the true population maximum is systematically larger than your sample maximum.
+        </p>
+      </div>
+
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You have 50 observations. You bootstrap 1,000 samples. How many unique samples are you actually drawing? (Hint: with n = 50 and replacement, each bootstrap sample is one of 50^50 possible draws, but your data has only 50 distinct values.)
+        </p>
+      </div>
+
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Build the Sampling Distribution</div>
 
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-        <strong>What to do:</strong> Click "Resample" to draw a bootstrap sample (with replacement) from the 10 session durations below. Each resample gives a new mean. After 20+ resamples, the histogram fills in and you\'ll see the 95% confidence interval form from the 2.5th and 97.5th percentiles.
+        <strong>What to do:</strong> Click "Resample" to draw a bootstrap sample (with replacement) from the 10 session durations below. Each resample gives a new mean. After 20+ resamples, the histogram fills in and you'll see the 95% confidence interval form from the 2.5th and 97.5th percentiles.
       </div>
 
       {/* Original data */}
@@ -273,15 +306,25 @@ export function Module28_Bootstrap({ module, onNext }) {
         )}
       </div>
 
-      {/* Key Insight */}
+      {/* What you should have confirmed */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          In practice, about 63% of original observations appear at least once in any given bootstrap sample (this is 1 − (1 − 1/n)^n ≈ 1 − e^−1 ≈ 0.632 as n gets large). About 37% are excluded. This creates genuine variation across bootstrap samples — some include the outliers, some don't. That variation in which observations appear is what generates the bootstrap sampling distribution. The CI stabilizes after about 1,000 resamples for most statistics; 500 is usually sufficient for rough estimates.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'Bootstrap builds a sampling distribution from your actual data — no normality assumption needed. Use it for skewed metrics like revenue and LTV where the CLT may not hold for your sample size.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Use the bootstrap whenever you're reporting a statistic for which no analytical CI formula exists. Median session duration, 95th percentile page load time, ratio of metrics, Gini coefficient of revenue distribution — all of these need uncertainty quantification and all of them get it from bootstrap. Reporting a point estimate without a CI for any of these is incomplete.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Bootstrap is the practical tool for validity-checking your A/B test results when metrics have non-normal distributions. If your primary metric is revenue per user (log-normal, heavy tail) and you're worried about the normality assumption, run a bootstrap test: the bootstrap confidence interval for the difference in medians doesn't require CLT and will give you a second opinion on whether the frequentist p-value is reliable.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Bootstrap computation is trivial in any modern language. Python: np.random.choice(data, size=n, replace=True) inside a loop. Stick this in your analysis toolkit as a standard function. The barrier to using bootstrap is not technical — it's just unfamiliarity. Remove the unfamiliarity and you have a general-purpose uncertainty quantifier for any statistic you can compute.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -293,7 +336,7 @@ export function Module28_Bootstrap({ module, onNext }) {
         <button
           className="pal-glow-pulse"
           onClick={onNext}
-          style={{ padding: '0.7rem 1.75rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
+          style={{ padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
         >
           Next concept →
         </button>

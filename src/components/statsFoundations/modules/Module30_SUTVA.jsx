@@ -12,6 +12,15 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module30_SUTVA({ module, onNext }) {
   var [interference, setInterference] = useState(0);
   var [picked, setPicked] = useState(null);
@@ -67,12 +76,36 @@ export function Module30_SUTVA({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>SUTVA</strong> (Stable Unit Treatment Value Assumption) is the foundational assumption behind every A/B test: each user\'s outcome depends only on their own assignment, not on anyone else\'s. When treatment and control users interact — sharing rides, competing for inventory, influencing each other on social feeds — SUTVA breaks and your measured effect is biased.
-      </p>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Your ride-hailing company runs an A/B test on surge pricing. Treatment users get lower surges, so they request more rides. But those rides would have gone to control users — the groups are interfering with each other. The treatment is spilling over into control, making control look worse and treatment look less effective than it really is. The experiment result is uninterpretable.
-      </p>
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Every causal inference method we've covered — A/B tests, DiD, RD, IV — rests on a shared assumption so fundamental that it's often stated once and then forgotten: the potential outcome for any unit depends only on that unit's treatment assignment, not on the treatment assigned to other units.
+        </p>
+        <p style={prose}>
+          This is the <strong style={{ color: 'var(--text)' }}>Stable Unit Treatment Value Assumption (SUTVA)</strong>. For a button color change or a font size test, this assumption seems trivially true. For referral programs, social feeds, marketplaces, recommendation engines, and shared inventory — this assumption is violated, often severely.
+        </p>
+        <p style={prose}>
+          Consider a referral program experiment. Treatment users refer their friends. Some referred friends are randomly assigned to the control group. But their presence in the product — their behavior, their word-of-mouth — is entirely a product of the treatment group's referral behavior. The control group's outcomes have been changed by the treatment group's treatment. Your comparison no longer measures "treatment vs. no treatment." It measures "treatment vs. treatment spillovers."
+        </p>
+        <p style={prose}>
+          Three product contexts where SUTVA violations are nearly guaranteed: <strong style={{ color: 'var(--text)' }}>marketplace experiments</strong> (treatment sellers attract buyers from control sellers), <strong style={{ color: 'var(--text)' }}>social and feed experiments</strong> (treatment users' content reaches control users through the shared platform), and <strong style={{ color: 'var(--text)' }}>communication experiments</strong> (users mention offers to friends in the control group through physical word-of-mouth).
+        </p>
+        <p style={prose}>
+          The fix requires raising the randomization unit above the level where interactions occur. For referrals and social networks: <strong style={{ color: 'var(--text)' }}>cluster randomization</strong> — assign whole friend groups or geographic areas. For marketplaces: <strong style={{ color: 'var(--text)' }}>two-sided randomization</strong> or holdout markets. For time-based interference: <strong style={{ color: 'var(--text)' }}>switchback designs</strong> with washout periods.
+        </p>
+      </div>
+
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You're running an A/B test on a referral feature. Treatment users can invite friends; control users can't. A referred friend of a treatment user gets randomly assigned to the control group. In what specific way does this contaminate your control group's metric?
+        </p>
+      </div>
+
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Interference Visualizer</div>
 
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Drag the interference slider from 0% to 100%. Watch how spillover between treatment and control distorts the measured effect away from the true effect. At high interference, the experiment becomes meaningless.
@@ -187,7 +220,7 @@ export function Module30_SUTVA({ module, onNext }) {
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>Framework</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text)', lineHeight: 1.7 }}>
-          SUTVA has two conditions: (1) no interference between units — one user\'s treatment does not affect another user\'s outcome, and (2) no hidden versions of treatment — every treated user receives the same treatment. When either breaks, the standard A/B test estimator is biased. Fixes include cluster randomization (randomize cities, not users), geo holdouts (treat entire regions), and switchback experiments (alternate treatment over time periods).
+          SUTVA has two conditions: (1) no interference between units — one user's treatment does not affect another user's outcome, and (2) no hidden versions of treatment — every treated user receives the same treatment. When either breaks, the standard A/B test estimator is biased. Fixes include cluster randomization (randomize cities, not users), geo holdouts (treat entire regions), and switchback experiments (alternate treatment over time periods).
         </div>
       </div>
 
@@ -223,20 +256,30 @@ export function Module30_SUTVA({ module, onNext }) {
         )}
         {revealed && (
           <div className="pal-reveal-in" style={{ marginTop: '0.75rem', padding: '0.75rem 1rem', background: picked === MCQ_ANSWER ? 'var(--green-bg)' : 'var(--red-bg)', border: '1px solid ' + (picked === MCQ_ANSWER ? 'var(--green-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            <strong>{picked === MCQ_ANSWER ? 'Correct!' : 'Not quite.'}</strong> In a ride-hailing marketplace, treatment users taking rides affects the supply available to control users. This is direct interference — one user\'s treatment changes another user\'s outcome. Games, emails, and font changes have no cross-user interaction, so user-level randomization works fine. The fix for the ride-hailing case is cluster randomization by city or a geo holdout design.
+            <strong>{picked === MCQ_ANSWER ? 'Correct!' : 'Not quite.'}</strong> In a ride-hailing marketplace, treatment users taking rides affects the supply available to control users. This is direct interference — one user's treatment changes another user's outcome. Games, emails, and font changes have no cross-user interaction, so user-level randomization works fine. The fix for the ride-hailing case is cluster randomization by city or a geo holdout design.
           </div>
         )}
       </div>
 
-      {/* Key Insight */}
+      {/* What you should have confirmed */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Referred friends of treatment users who land in the control group have unusually high conversion rates — they were referred, so they're warm leads with social trust. The control group's conversion rate goes up, but only because some control users were indirectly influenced by the treatment. The treatment effect estimate shrinks, because the gap between treatment and contaminated control is smaller than the true gap between treatment and a clean no-referral world. The slider makes the contamination path legible: you can see exactly how increasing interference erodes the measured effect.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'SUTVA requires that each unit\'s outcome depends only on its own treatment assignment. In marketplaces, social networks, and shared-resource systems, user-level randomization violates this — use cluster or geo-level randomization instead.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Before designing any experiment on a social, marketplace, or referral feature, explicitly ask: "can treatment users affect control users?" If yes, user-level randomization is invalid. Identify the unit at which interactions occur and randomize above that level. For geographically segmented products, this often means market-level holdouts.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When you see an experiment where control group metrics improved unexpectedly during the test — not because you changed anything for them — investigate spillover first. Treatment group improvements contaminating the control are the most common explanation for mysteriously rising control baselines.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> SUTVA violations don't always invalidate the experiment — they change what you can claim. If spillovers help the control, your experiment underestimates the full effect. If spillovers hurt the control, it overestimates. Knowing the direction of the violation lets you bound the true effect. An A/B test with known positive spillovers gives you a lower bound on the true treatment effect — still useful information, with the right framing.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -248,7 +291,7 @@ export function Module30_SUTVA({ module, onNext }) {
         <button
           className="pal-glow-pulse"
           onClick={onNext}
-          style={{ padding: '0.7rem 1.75rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
+          style={{ padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
         >
           Next concept →
         </button>

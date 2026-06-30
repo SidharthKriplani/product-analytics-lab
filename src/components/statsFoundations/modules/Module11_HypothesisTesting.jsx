@@ -50,6 +50,15 @@ function shadedArea(lo, hi) {
     ` L ${toSvgX(hi).toFixed(2)},${H} L ${toSvgX(lo).toFixed(2)},${H} Z`;
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module11_HypothesisTesting({ module, onNext }) {
   const [zObs, setZObs] = useState(2.1);
   const [twoTailed, setTwoTailed] = useState(true);
@@ -88,25 +97,40 @@ export function Module11_HypothesisTesting({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Engineering shipped a latency fix last week. Page load times dropped from 3.2s to 2.9s in your sample. But is that real improvement, or just random noise? If you shipped a celebration Slack message every time the metric wiggled downward, you\'d be celebrating noise half the time. Hypothesis testing gives you a framework for deciding.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          A hypothesis is a belief you haven't proven yet. In product work it sounds like: "if we simplify checkout, more users will complete their purchase." The only honest way to evaluate that belief is data — but not just any data. Comparison data. If you make the change and just watch what happens, you can't tell whether your feature moved the needle or whether a seasonal effect, a marketing campaign, or a competitor going down did.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          The p-value answers one specific question: if nothing actually changed (the null hypothesis), how surprising is the data you observed? A small p-value means your data would be very unlikely under "no effect" — which is evidence that something real happened. Drag the z-score below to see how the p-value shrinks as results become more extreme.
+        <p style={prose}>
+          So you run both versions simultaneously. Old checkout for half your users, new checkout for the other half. Same time window, same traffic mix. This simultaneous controlled comparison isolates your change from everything else moving.
+        </p>
+        <p style={prose}>
+          Say checkout has been converting at 4.2%. You run both versions for two weeks. Old flow: 4.2%. New flow: 4.6%. You're excited. But remember: last month, with no changes at all, your conversion wasn't exactly 4.2% every single day — some days 3.9%, some days 4.5%. Just from who happened to visit. That's natural variance. If natural variance can produce a 0.4pp swing when nothing changed, can a lucky random split produce that same gap in your experiment? Possibly yes.
+        </p>
+        <p style={prose}>
+          To solve it, you need to answer one precise question: if the new checkout is genuinely no better than the old one, how often would a 0.4pp gap appear just from chance? That question requires a precise definition of "no better" — this is the <strong style={{ color: 'var(--text)' }}>null hypothesis</strong>: the new checkout performs identically to the old one. You're not saying you believe this. You're assuming this world is true, and asking how consistent your data is with it.
+        </p>
+        <p style={prose}>
+          The answer is the <strong style={{ color: 'var(--text)' }}>p-value</strong>. A p-value of 0.03 means: in a world where the new checkout is no better, you'd see a gap this large only 3% of the time by chance. A p-value of 0.40 means: you'd see this gap 40% of the time even when nothing changed.
+        </p>
+        <p style={prose}>
+          What the p-value is not: it is not the probability that H₀ is true. It is not the probability your result was due to chance. It is specifically this — the probability of observing your result, or something more extreme, given that H₀ is true. Before running, you must pre-commit to a threshold α. Convention is 0.05. If you look at p = 0.06 and then decide to use α = 0.10, you've broken the framework — you moved the goalposts after seeing where the ball landed.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Move the Test Statistic</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Why does the same 0.4pp lift become more significant as sample size increases? Work it through using the framework above — what changes in the null world's ability to explain your result when you have more data?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        The <strong>p-value</strong> is the probability of observing a test statistic as extreme as yours — or more extreme — if the null hypothesis were actually true.
-        It's the red shaded area in the tail(s) of the null distribution. Smaller p = more surprising under H₀ = stronger evidence against it.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Move the Test Statistic</div>
 
-      {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Drag the z-score slider from 0 toward 4 and watch the red shaded area (the p-value) shrink. Toggle between two-tailed and one-tailed tests to see how the tails change. Notice where the decision flips from "fail to reject" to "reject" as you cross z = 1.96.
       </div>
@@ -268,15 +292,25 @@ export function Module11_HypothesisTesting({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          With more data, natural variance in your metric shrinks. The null world becomes less capable of producing a 0.4pp gap by chance. The same effect carries more evidence against H₀. Significance is about the effect relative to the noise — not the effect alone.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'Drag the slider from z=0 to z=4 and watch the red p-value area shrink from 50% to nearly 0. The p-value doesn\'t tell you the probability that H₀ is true — it tells you how often you\'d see results this extreme if H₀ WERE true. A tiny p is surprising under the null.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Set α before you run, not after. The moment you look at your result and then decide your threshold, you've invalidated everything. If your company has no standard, 0.05 is defensible. But pick it first.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> p &gt; 0.05 is not "no effect." It's "not enough evidence to reject the null." Your experiment might have been under-powered — too few users, too short a run — to detect a real effect that exists. This is why you calculate required sample size before running. Under-powered experiments systematically miss real improvements and waste everyone's time.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> p &lt; 0.05 is not "this matters." A 0.01pp lift is statistically significant with 50 million users. That doesn't mean you should spend a sprint shipping it. Always pair your p-value with effect size — the magnitude in terms that mean something to the business. Significance tells you the effect is real. Effect size tells you whether it's worth caring about.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>

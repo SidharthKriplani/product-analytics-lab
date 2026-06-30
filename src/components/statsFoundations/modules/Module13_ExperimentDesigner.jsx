@@ -63,6 +63,15 @@ function ToggleBtn({ value, active, label, color, onClick }) {
   );
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 // ── Main component ────────────────────────────────────────────────────────────
 export function Module13_ExperimentDesigner({ module, onNext }) {
   const [baseline, setBaseline] = useState(10);      // % e.g. 10 = 10%
@@ -139,27 +148,36 @@ export function Module13_ExperimentDesigner({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your PM wants to run an experiment on the checkout flow. She asks: how long should it run? The answer depends on four things locked together — your baseline rate, the minimum effect you care about, how much false-positive risk you\'ll tolerate, and how much power you want. Change any three and the fourth is determined.
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You know how hypothesis testing works. You know about power, sample size, and randomization. But knowing each piece doesn't automatically tell you how to design an experiment that produces a trustworthy answer. The pieces have to fit together in a specific sequence — and getting the sequence wrong produces results that look valid but aren't.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Most experiment failures happen before the experiment starts — teams don\'t size correctly, chase effects too small to detect, or stop early when they see a promising p-value. This calculator builds the intuition you need to push back on unrealistic experiment plans.
+        <p style={prose}>
+          An experiment is a commitment to a question. Before you run it, you have to know exactly what question you're asking. The question must be answerable by a specific metric change in a specific population over a specific time window. If you can't write it that precisely, the experiment isn't ready.
+        </p>
+        <p style={prose}>
+          The design decision sequence: <strong style={{ color: 'var(--text)' }}>hypothesis</strong> first — a direction-specific prediction about a mechanism, not "let's see what happens." Then <strong style={{ color: 'var(--text)' }}>one primary metric</strong> — the single number your go/no-go decision depends on. Then <strong style={{ color: 'var(--text)' }}>MDE</strong> — the minimum lift you'd actually ship based on. Then <strong style={{ color: 'var(--text)' }}>sample size</strong> — run the calculation before anything else. Then <strong style={{ color: 'var(--text)' }}>randomization unit</strong> — the stable identity that persists across the experience being tested. Then <strong style={{ color: 'var(--text)' }}>run duration</strong> — at minimum one full business cycle; your stopping rule is the sample size calculation, not impatience. Then <strong style={{ color: 'var(--text)' }}>guardrail metrics</strong> — things that must not degrade regardless of what the primary metric says.
+        </p>
+        <p style={prose}>
+          Before enrolling the first user — write all of this down and have the PM sign off on it. This is pre-registration. It prevents the single most common experiment failure: designing the analysis after seeing the results.
+        </p>
+        <p style={prose}>
+          Design failure modes to know: <strong style={{ color: 'var(--text)' }}>peeking</strong> (checking results repeatedly and stopping when significant — inflates your effective false positive rate far above α = 0.05); <strong style={{ color: 'var(--text)' }}>novelty effect</strong> (users behave differently with anything new — a "lift" in week 1 may disappear in week 3); <strong style={{ color: 'var(--text)' }}>network effects</strong> (if users influence each other, user-level randomization contaminates your groups); <strong style={{ color: 'var(--text)' }}>metric manipulation</strong> (if the experiment changes who reaches the metric, not just how they respond to it).
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Size an Experiment</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          A team runs an experiment and peeks at results daily. On day 8, they see p = 0.04 and stop. Why is this p-value not interpretable at α = 0.05? Think through what repeated testing does to the actual false positive rate.
+        </p>
+      </div>
 
-      {/* Intro paragraph */}
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Before running any A/B test you must answer: <em>can I actually detect the effect I care about?</em>{' '}
-        Four parameters are locked together — adjust any three and the fourth is determined.
-        Use this calculator to build the intuition.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Size an Experiment</div>
 
-      {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Set your baseline conversion rate, the minimum lift you care about (MDE), significance level, and desired power. Watch the required sample size update instantly. Then try halving the MDE and observe roughly how much more data you need — this builds intuition for the cost of chasing smaller effects.
       </div>
@@ -428,40 +446,43 @@ export function Module13_ExperimentDesigner({ module, onNext }) {
         Halving the MDE requires ~4× the sample size.
       </div>
 
-      {/* ── Key insight callout ─────────────────────────────────────────────── */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Peeking inflates Type I error because each check is an independent chance to cross the significance threshold by chance. With 20 daily checks, the effective false positive rate can exceed 30% even though each check is nominally at α = 0.05. The experiment's guarantee only holds if you commit to the stopping rule before looking. Sequential testing methods exist that allow valid early stopping — but standard hypothesis testing doesn't.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{
         background: 'var(--yellow-bg)',
         border: '1.5px solid var(--yellow-border)',
         borderRadius: '10px',
         padding: '1rem 1.25rem',
       }}>
-        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
-          Key Insight
-        </div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.65 }}>
-          The 4 parameters are linked. Fix 3 and the 4th is determined. Most teams target 80% power at α=0.05.
-          {module?.keyInsight && (
-            <span> {module.keyInsight}</span>
-          )}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Build the experiment design document before any code is written. It takes 30 minutes. It prevents weeks of post-hoc debate about what the results mean. The design doc is not bureaucracy — it's the commitment that makes the result trustworthy.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a stakeholder asks "can we just peek at results now?" — explain what that does to the p-value guarantee, and offer a specific answer: "We're at 40% of our target sample. The CI right now is [X, Y]. It'll tighten to [A, B] by the end. If we're seeing a big lift right now, it's worth monitoring, but we shouldn't ship based on it."</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone shows you an "A/B test result" without being able to tell you the pre-specified hypothesis, the sample size calculation, and the stopping rule — treat the result as exploratory, not confirmatory. A result from an improperly designed experiment is directional signal at best. That's the difference between a number and an answer.</p>
         </div>
       </div>
 
       {/* Connects to Experiments */}
-      {module?.connection && (
-        <div style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: '10px',
-          padding: '1rem 1.25rem',
-        }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
-            Connects to Experiments
-          </div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.65 }}>
-            {module.connection}
-          </div>
+      <div style={{
+        background: 'var(--accent-bg)',
+        border: '1.5px solid var(--accent-border)',
+        borderRadius: '10px',
+        padding: '1rem 1.25rem',
+      }}>
+        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
+          Connects to Experiments
         </div>
-      )}
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.65 }}>
+          {module?.connection || 'The 4 design parameters are locked together. Fix 3 and the 4th is determined. Most teams target 80% power at α=0.05 with a business-motivated MDE — this calculator is the tool you run before any experiment ticket is written.'}
+        </div>
+      </div>
 
       {/* Next button */}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

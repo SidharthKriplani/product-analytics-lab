@@ -33,6 +33,15 @@ var MCQ_OPTIONS = [
 ];
 var MCQ_ANSWER = 'b';
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module29_ChiSquare({ module, onNext }) {
   var [cellA, setCellA] = useState(120);
   var [cellB, setCellB] = useState(80);
@@ -100,15 +109,39 @@ export function Module29_ChiSquare({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        The <strong>chi-square test</strong> checks whether two categorical variables are independent. It compares what you observed to what you would expect if there were no relationship. The bigger the gap between observed and expected counts, the stronger the evidence that the variables are related.
-      </p>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        In product analytics, the most common use is <strong>Sample Ratio Mismatch (SRM) detection</strong>. If you designed a 50/50 A/B test but observed 5,100 vs 4,900, is that random noise or a bug in randomization? Chi-square gives you the answer. Every major experimentation platform runs this check automatically.
-      </p>
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          The statistical tools we've built — t-tests, confidence intervals, SE, the CLT — are built around comparing means: numerical outcomes where averages make sense. Many product outcomes are categorical. A user converts or doesn't. They choose free, basic, or pro. Their session ends in purchase, save-for-later, or abandonment. For these, you can't compute a mean. You can only count proportions in each category.
+        </p>
+        <p style={prose}>
+          The question is: do those proportions differ between groups in a way that's unlikely to be chance? If your treatment and control groups show 32% mobile vs. 30% mobile — is that a real difference or sampling noise? If plan choice is (free: 60%, basic: 30%, pro: 10%) in control and (free: 52%, basic: 33%, pro: 15%) in treatment — is the entire distribution shifted?
+        </p>
+        <p style={prose}>
+          The chi-square test answers this for categorical data. Under H₀ (no association), you can compute the expected counts in each cell if the two categorical variables were truly independent. The chi-square statistic measures how far the observed counts are from these expected counts: <strong style={{ color: 'var(--text)' }}>χ² = Σ (observed − expected)² / expected</strong>. If observed counts are close to expected, χ² is small. If they diverge substantially, χ² is large.
+        </p>
+        <p style={prose}>
+          Two common uses: <strong style={{ color: 'var(--text)' }}>test of independence</strong> (does one categorical variable depend on another? — build a contingency table and compute χ²) and <strong style={{ color: 'var(--text)' }}>goodness of fit</strong> (does the observed distribution match a known expected distribution?). One assumption: expected cell counts should be ≥ 5 in most cells. If categories are sparse, use Fisher's exact test instead.
+        </p>
+        <p style={prose}>
+          Chi-square tells you there's an association but not how strong. Report <strong style={{ color: 'var(--text)' }}>Cramér's V</strong> alongside: V = √(χ²/n × min(rows-1, cols-1)). V ranges 0–1. Small: V less than 0.1. Medium: 0.3. Large: 0.5+.
+        </p>
+      </div>
+
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Your chi-square test comes back p = 0.02 for the association between device type and conversion. You know device type and conversion are associated. What three follow-up questions would you ask before reporting this as a finding?
+        </p>
+      </div>
+
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Chi-Square Calculator</div>
 
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-        <strong>What to do:</strong> Enter observed counts in the 2x2 table (e.g., clicked/didn\'t click by variant A/B). Watch the expected values, chi-square statistic, and p-value update live. Try entering counts that are clearly imbalanced (like 150/50/50/150) vs balanced (100/100/100/100) to see the difference.
+        <strong>What to do:</strong> Enter observed counts in the 2x2 table (e.g., clicked/didn't click by variant A/B). Watch the expected values, chi-square statistic, and p-value update live. Try entering counts that are clearly imbalanced (like 150/50/50/150) vs balanced (100/100/100/100) to see the difference.
       </div>
 
       {/* 2x2 input table */}
@@ -291,15 +324,25 @@ export function Module29_ChiSquare({ module, onNext }) {
         )}
       </div>
 
-      {/* Key Insight */}
+      {/* What you should have confirmed */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Three questions — (1) What's the effect size? (Cramér's V — is this a weak or strong association?) (2) Which cells drive it? (Standardized residuals — is it specifically mobile-non-conversion, or spread across all cells?) (3) Is this causal or confounded? (Device type might correlate with intent, market, or acquisition channel — all confounders. The association doesn't mean device type causes lower conversion.) Chi-square gives you statistical evidence; interpretation requires all three.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'Chi-square tests whether categorical variables are independent by comparing observed vs expected counts. In experimentation, this is the test behind SRM detection — the first check you run before trusting any A/B test result.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Use chi-square to test whether an experiment changed the distribution of a categorical outcome, not just a binary conversion. If you're testing a pricing page, look at the full plan choice distribution — not just "did free-to-paid conversion change?" The distribution shift might show the lift is coming from free→basic rather than free→pro, which is a different business story.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When running chi-square on small samples, check expected cell counts. If any cell has an expected count below 5, report Fisher's exact test instead. This happens more often than you'd expect for multi-level categorical outcomes (5 device types × 3 plan choices = 15 cells; with n = 300, some cells will be sparse).</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Chi-square significance is not the same as marketing significance. A significant shift in device type distribution between two cohorts might tell you your ad targeting changed — not that your product changed. Always build the interpretation from the chi-square result, not just the p-value. What mechanism would cause this categorical pattern? Does that mechanism match the intervention you ran?</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -311,7 +354,7 @@ export function Module29_ChiSquare({ module, onNext }) {
         <button
           className="pal-glow-pulse"
           onClick={onNext}
-          style={{ padding: '0.7rem 1.75rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
+          style={{ padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
         >
           Next concept →
         </button>

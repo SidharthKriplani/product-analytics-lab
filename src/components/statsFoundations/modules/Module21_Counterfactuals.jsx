@@ -51,6 +51,15 @@ const SCENARIOS = [
   },
 ];
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module21_Counterfactuals({ module, onNext }) {
   var _saved = loadSFState('sf21');
   const [answers, setAnswers] = useState(function() { return _saved ? (_saved.answers || {}) : {}; });
@@ -80,26 +89,42 @@ export function Module21_Counterfactuals({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your team shipped a new recommendation engine and revenue went up 12% this quarter. The PM credits the feature. But would revenue have grown anyway due to seasonal trends, marketing spend, or organic growth? You can\'t rewind time and observe the same quarter without the feature. That\'s the fundamental problem of causal inference.
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          We have established that correlation is not causation. But that raises a harder question: what does causation require, and how do you establish it?
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          A/B tests solve this by creating a control group that acts as the counterfactual — the parallel universe where the feature doesn\'t exist. But not every comparison has a valid counterfactual. Classify each scenario below to sharpen your ability to spot confounded claims.
+        <p style={prose}>
+          The causal question has a precise formulation. The effect of a treatment on a unit is: the outcome if the unit received the treatment, minus the outcome if the unit did not receive the treatment — both at the same time, in the same conditions.
+        </p>
+        <p style={prose}>
+          The problem is immediate: you can never observe both. A user either gets your new feature or they do not. A market either receives your intervention or it does not. You can only observe one outcome per unit. The other — what would have happened without the treatment — is unobserved. That unobserved outcome is the <strong style={{ color: 'var(--text)' }}>counterfactual</strong>.
+        </p>
+        <p style={prose}>
+          Causal inference is the discipline of constructing a credible counterfactual from available data. Every causal method — experiment, DiD, regression discontinuity, synthetic control, instrumental variables — is solving the same problem: finding a valid proxy for what would have happened in the world where the intervention did not occur.
+        </p>
+        <p style={prose}>
+          The randomized experiment solves this directly. Random assignment makes the treatment and control groups identical in expectation — same average engagement, same average risk factors, same average everything. The control group's outcome after treatment becomes the proxy for what the treatment group would have experienced without treatment. The counterfactual is the control group. This is why A/B testing is the gold standard. The randomization is doing all the work.
+        </p>
+        <p style={prose}>
+          In many situations, you cannot randomize. You observe the treatment happening in the world, without control over who receives it. This is the observational setting. Here, systematic differences between treated and untreated units — <strong style={{ color: 'var(--text)' }}>confounders</strong> — create spurious correlations between the treatment and the outcome that have nothing to do with the treatment's actual effect. A confounder is a variable that affects both who receives the treatment and what the outcome is.
+        </p>
+        <p style={prose}>
+          The four causal inference methods in the following modules — Difference-in-Differences, Regression Discontinuity, Synthetic Control, and Instrumental Variables — each construct the counterfactual using a different mechanism, all trying to answer the same question: given that I cannot observe the counterfactual directly, what is the best proxy I can construct?
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Classify Causal vs. Confounded</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Users who use your mobile app's "favourites" feature have 2x higher 90-day retention. You are considering making the feature more prominent to drive adoption. What is missing from the statement "favourites usage causes retention" before you can justify that product decision?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        The <strong>fundamental problem of causal inference</strong>: you can never observe what would have
-        happened to the same unit in a different condition. A/B tests solve this by randomly assigning
-        users to conditions — creating a group that IS the counterfactual. Below, classify each comparison.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Classify Causal vs. Confounded</div>
 
-      {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Read each scenario description and classify it as either "Causal" (a valid counterfactual comparison) or "Confounded" (a biased comparison). After each pick, you will see the explanation. Try to identify the confound before it is revealed.
       </div>
@@ -211,19 +236,31 @@ export function Module21_Counterfactuals({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      {allDone && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            "Favourites usage causes retention" conflates correlation with causation. Higher-intent users both adopt favourites and retain better — engagement is a confounder. Making favourites more visible might drive adoption by lower-intent users who would not retain regardless. To establish the causal claim, you would need to randomize: show some users a prominent favourites prompt and others the current experience, then measure retention. Without randomization, the favourites-retention correlation is evidence, not causation.
+          </p>
+        </div>
+      )}
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When a metric correlation is presented as a product decision rationale, draw the causal diagram — even on a napkin. Who does this treatment? Who does not? Why the difference? What else affects the outcome? Any path that affects both treatment assignment and outcome is a confounder. Name it before accepting the causal claim.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Before proposing an observational analysis to measure a product change, ask: can this be an experiment? Even if you cannot randomize the primary treatment, you may be able to run a partial test, a holdout, or a regression discontinuity around a natural threshold. The gold standard is always available if the team is willing to design for it.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Be precise about the causal claim you are making. "Users who do X have higher LTV" is a correlation statement — valid to report as-is. "Driving X behavior will increase LTV" is a causal claim that requires a counterfactual argument. Do not let PMs or slide decks collapse the two. The gap between them is where bad product decisions live.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection}
+          {module?.connection || 'A/B testing is the only method that directly observes the counterfactual. Random assignment means the control group is, on average, the treated group in a world without the treatment. Every observational method is an attempt to approximate what the experiment does directly. When an experiment is feasible, it is always preferable — the counterfactual is not approximated, it is constructed.'}
         </div>
       </div>
 

@@ -76,6 +76,15 @@ function genDensity(hasBunching) {
   return bars;
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module23_RD({ module, onNext }) {
   var _saved = loadSFState('sf23');
   const [showManipulation, setShowManipulation] = useState(function() { return _saved ? !!_saved.showManipulation : false; });
@@ -100,25 +109,38 @@ export function Module23_RD({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Users with a credit score above 680 get approved for a premium rewards card. Users at 679 don\'t. Does the rewards card change spending behavior? You can\'t run a randomized experiment — credit policy is fixed. But users at 679 and 681 are nearly identical in every way except whether they got the card. That tiny gap around the threshold is your natural experiment.
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Your product has a loyalty tier system: users who accumulate 500 or more points in a month get upgraded to the Gold tier, which unlocks a set of premium benefits. You want to know if reaching Gold tier causes users to purchase more.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Regression Discontinuity exploits sharp threshold rules to estimate causal effects. The key assumption: users just above and just below the cutoff would have behaved identically without the treatment. If users can manipulate their score to land on the right side, the design breaks. Explore the outcome jump and density check below.
+        <p style={prose}>
+          You cannot just compare Gold users to non-Gold users. Gold users earned 500+ points — they are already more active and engaged. Their higher purchase rate almost certainly predates the Gold status. You cannot run an experiment — the Gold tier threshold is a business rule you are not going to randomize.
+        </p>
+        <p style={prose}>
+          What you have, though, is something more useful than it might appear: a sharp cutoff that determines who gets treated. And right at the cutoff, the comparison becomes nearly as good as random. A user with 499 points and a user with 501 points are essentially the same user. By a small margin — one point — one person qualifies for Gold and the other does not. The only systematic difference between the groups right at the boundary is treatment assignment.
+        </p>
+        <p style={prose}>
+          This is the logic of <strong style={{ color: 'var(--text)' }}>Regression Discontinuity</strong>. You compare outcomes for units just below the threshold to units just above it, where the assignment is approximately random in the narrow band around the cutoff. The RD estimate is the jump in the outcome exactly at the threshold.
+        </p>
+        <p style={prose}>
+          Two assumptions must hold. The first is <strong style={{ color: 'var(--text)' }}>no manipulation of the assignment variable</strong>. If users know about the 500-point threshold and can game their points to just barely qualify, users just above 500 are self-selected — they are not like users just below 500 who did not bother. You check this by looking at the density of the assignment variable: if there is an unusual spike just above the threshold and a dip just below, manipulation is occurring and the design is invalid.
+        </p>
+        <p style={prose}>
+          The key limitation of RD: it is a <strong style={{ color: 'var(--text)' }}>local estimate</strong>. It tells you the causal effect for users near the threshold. Users far from the threshold may respond differently to the Gold tier. The estimate does not generalize to them automatically.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Examine the Threshold Jump</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You run an RD analysis on exam scores and scholarship assignment (cutoff: 70/100). You find a jump in long-term earnings at the cutoff. But someone suggests students who barely passed might have studied harder afterward due to relief. How would this confound your RD estimate?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Regression Discontinuity (RD) exploits a <strong>sharp threshold rule</strong>: units just
-        above vs. just below the cutoff are near-identical except for treatment assignment. This
-        near-random assignment around the threshold makes the comparison almost as credible as a
-        randomized experiment — but only if units cannot control which side they land on.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Examine the Threshold Jump</div>
 
       {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
@@ -265,16 +287,30 @@ export function Module23_RD({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>{module?.keyInsight}</div>
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          If students who barely passed (just above 70) respond to their success by studying harder — a behavioral response to crossing the threshold that is separate from the scholarship treatment — then the RD estimate conflates the scholarship effect with the study-harder effect. This violates the continuity assumption: there is a mechanism other than treatment that changes at exactly the threshold. In practice, you would look for evidence of this by checking whether other behaviors (study hours, tutoring use) also jump at the threshold. If they do, the estimate is suspect.
+        </p>
       </div>
 
-      {/* Connection */}
+      {/* ── Analyst Move ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Before using RD, check the density plot of your running variable around the threshold. Spikes just above the cutoff signal manipulation — users gaming the system. If you see this, the design is invalid. A uniform distribution near the threshold is evidence (not proof) that no manipulation is occurring.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When reporting RD results, show the scatter plot of the outcome vs. running variable across the full range, with the fitted curves on each side and the jump at the threshold visible. This makes the evidence legible: the audience can see whether there is a plausible discontinuity or whether you are fitting noise. A jump that looks visually obvious is far more convincing than a coefficient in a table.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Consider whether the estimate is local enough to generalize to your actual decision. If the business question is "should we keep the Gold tier at 500 points?" — the RD estimate, which describes behavior at exactly 500 points, is directly relevant. If the question is "should we launch a loyalty program at all?" — the estimate for the 500-point threshold users tells you little about what a loyalty program would do for your average user. Be precise about the population the estimate applies to.</p>
+        </div>
+      </div>
+
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{module?.connection}</div>
+        <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          {module?.connection || 'RD is the observational method that most closely mimics a randomized experiment — local randomization near the threshold produces identification that is nearly as credible as random assignment. Unlike DiD, it does not require a parallel-trends assumption. Unlike synthetic control, it does not require a long pre-treatment period. The cost is generalizability: the estimate applies only to units near the threshold.'}
+        </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

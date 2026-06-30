@@ -17,6 +17,15 @@ function deviationColor(d, maxD) {
   return 'var(--red)';
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module03_Spread({ module, onNext }) {
   const [multiplier, setMultiplier] = useState(1);
 
@@ -47,22 +56,44 @@ export function Module03_Spread({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Two experiments both show a +5% mean lift in conversion. Your PM is ready to ship either one. But when you plot the distributions, Experiment A\'s users are tightly clustered around the mean while Experiment B\'s users are all over the map — some gained 40%, others lost 20%. Same average, wildly different risk profiles.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Two product teams each report the same average session duration: 5 minutes. One team's users are clustered tightly — nearly everyone is between 4 and 6 minutes. The other team's users are scattered wildly — some users drop off in 20 seconds, some stay for 40 minutes. Same mean. Completely different product.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Variance and standard deviation quantify that spread. Without them, you\'re flying blind — you know the center but not how much individual outcomes scatter around it. Drag the slider below to stretch or compress the data and see how variance responds.
+        <p style={prose}>
+          The mean can't distinguish these two situations. And if you're making decisions based only on the mean, you're blind to a dimension of your data that matters enormously. What you need is a measure of spread — something that captures how much your data varies around its center.
+        </p>
+        <p style={prose}>
+          The first instinct is the range: take the highest value, subtract the lowest. Simple, captures extremes. But range breaks immediately when you think about it. One outlier — a single power user who spent 3 hours — expands the range dramatically, even if every other user is tightly clustered. Range is determined entirely by two data points, no matter how many you have.
+        </p>
+        <p style={prose}>
+          What you actually need is a spread measure that uses every data point, not just the two most extreme ones. The natural path: measure how far each data point sits from the mean. Sum those distances up — except you can't, because positive and negative deviations cancel out exactly. The mean is, by definition, the balancing point of the data. The sum of deviations from the mean is always zero.
+        </p>
+        <p style={prose}>
+          So you need to make all deviations positive before summing. The natural fix: square each deviation. Squaring eliminates negative signs and gives more weight to larger deviations. Sum the squared deviations, divide by the count — that's the <strong style={{ color: 'var(--text)' }}>variance</strong>. To get back to the original units, take the square root of the variance. That square root is the <strong style={{ color: 'var(--text)' }}>standard deviation</strong>.
+        </p>
+        <p style={prose}>
+          Standard deviation represents, roughly, the average distance a typical data point sits from the mean — in the original units. SD = 3 minutes means a typical user is about 3 minutes away from the mean session duration. Two cohorts with the same mean but SD 0.7 versus SD 3.4 are telling you very different things about who your users are.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Stretch the Spread</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          If you added 50 new users — all of them with exactly the mean session duration — what happens to the standard deviation? Think through what each of those users contributes to the calculation before exploring.
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Each deviation line below represents how far a single point sits from the mean. Variance averages the squared deviations — squaring penalizes large outliers more.
-      </p>
+      {/* ── Interactive label ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Stretch the Spread</div>
+
+      {/* ── Instructions box ── */}
+      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+        <strong>What to do:</strong> Drag the spread multiplier slider left and right. Watch how the deviation lines and the variance and standard deviation values change. Notice that squaring the deviations means outliers contribute disproportionately to variance.
+      </div>
 
       {/* Visualization */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', overflowX: 'auto' }}>
@@ -125,11 +156,6 @@ export function Module03_Spread({ module, onNext }) {
             })}
           </svg>
         </div>
-      </div>
-
-      {/* Instruction */}
-      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-        <strong>What to do:</strong> Drag the spread multiplier slider left and right. Watch how the deviation lines and the variance and standard deviation values change. Notice that squaring the deviations means outliers contribute disproportionately to variance.
       </div>
 
       {/* Spread multiplier slider */}
@@ -226,19 +252,29 @@ export function Module03_Spread({ module, onNext }) {
         ))}
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Users at exactly the mean contribute 0 to the variance (their deviation is zero, squared is still zero). Adding them increases n but not the sum of squared deviations, so the mean of squared deviations — and therefore the SD — decreases. More users clustered at the mean pull spread down. This is why a heavily engaged core user base can mask poor onboarding performance if you only look at SD without segmenting.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'Variance squares the deviations — so a point twice as far from the mean contributes four times as much to variance. Standard deviation brings it back to the original units. SD = 5 minutes means a typical user is ~5 minutes away from average session time.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Never report a mean in isolation for a skewed or wide-spread metric. Pair it with SD. Mean £47, SD £83 tells a completely different story than Mean £47, SD £4. The first suggests a few large orders dominate; the second suggests tight, predictable purchase behavior. Same mean, opposite implications.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Large SD relative to the mean is a flag to segment before analyzing. When SD exceeds 50% of the mean, your "average user" may not exist — you may have two or more distinct behavioral groups pulling in opposite directions. Run the analysis separately on each segment before reporting any aggregate.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> SD is the denominator of most statistical tests. When someone asks "is this difference significant?" — what they're really asking is "is this difference large relative to the natural spread?" Every significance test eventually divides by some form of spread. If you understand SD, you understand why larger samples give more power.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'Standard deviation is the input to sample size formulas. Higher variance in your metric requires a larger experiment to detect the same effect size. A noisy metric is expensive to test.'}
+          {module?.connection || 'Standard deviation is the input to sample size formulas. Higher variance in your metric requires a larger experiment to detect the same effect size. A noisy metric is expensive to test — the same true lift requires far more users to reach significance when SD is high.'}
         </div>
       </div>
 

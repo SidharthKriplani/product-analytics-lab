@@ -47,6 +47,15 @@ function WinnerBadge({ winner }) {
   );
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module15_SimpsonsParadox({ module, onNext }) {
   const [view, setView] = useState('aggregated');
 
@@ -67,23 +76,36 @@ export function Module15_SimpsonsParadox({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Every region improved its conversion rate this quarter, but the national conversion rate went down. Your VP is confused and thinks someone made a data error. They didn\'t — this is Simpson\'s Paradox, and it happens when the mix of subgroups shifts between periods.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Aggregation feels like a safe thing to do. More data, clearer picture. The summary tells you what the details add up to. But there is a specific, documented way that aggregation can reverse the truth — where a pattern present in every subgroup disappears or flips when the subgroups are combined. It appears in hiring data, clinical trials, A/B test results, and school performance comparisons with regularity. Missing it leads directly to wrong decisions.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          It\'s one of the most dangerous traps in A/B testing and metric reporting. A treatment can win in every segment but lose overall because the segments have different sizes and different baseline rates. The example below shows exactly how this happens with a checkout flow experiment.
+        <p style={prose}>
+          The phenomenon is Simpson's Paradox. The classic case: UC Berkeley graduate admissions in the 1970s. Men had an overall acceptance rate of 44%. Women had 35%. Apparent finding: gender bias. But when researchers looked at individual departments, women had equal or higher acceptance rates in most departments. Women disproportionately applied to competitive departments with low acceptance rates. The aggregate acceptance rate mixed within-department rate and the department composition of applicants.
+        </p>
+        <p style={prose}>
+          In product, the exact same structure appears. You run an A/B test. Overall results: control 4.2% conversion, treatment 4.0%. Treatment looks worse. But when you segment by device: on mobile, treatment wins. On desktop, treatment wins again. In both segments, treatment outperforms. Yet in aggregate, it appears worse — because treatment had 70% mobile users while control had 50% mobile, and mobile converts at a much lower rate than desktop.
+        </p>
+        <p style={prose}>
+          The mechanism in both cases is the same. When you aggregate, you implicitly weight each subgroup by its size in each comparison group. If those proportions differ, you're no longer comparing like with like. The signal you care about — how does the treatment perform relative to control? — is within-group. The composition difference is noise that the aggregate carries along.
+        </p>
+        <p style={prose}>
+          How to spot it: whenever your primary metric varies significantly across a segmentation variable, and whenever the groups you're comparing might have different distributions of that variable — run the comparison within each segment before trusting the aggregate. The fix is stratification: analyze within subgroups, use regression to control for the confounding variable, or ensure covariate balance at randomization.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Unpack the Paradox</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You're comparing two onboarding flows. Flow A converts at 6.1% overall; Flow B at 5.8%. Flow A looks like the winner. But you notice that Flow B was tested more heavily on mobile. What would you do before concluding Flow A wins?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>Simpson's Paradox</strong> occurs when a trend present in each subgroup of data disappears — or
-        reverses — when those groups are combined. It's one of the most dangerous traps in A/B test analysis.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Unpack the Paradox</div>
 
       {/* Scenario card */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
@@ -219,19 +241,29 @@ export function Module15_SimpsonsParadox({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          If mobile converts at 4% and desktop at 8%, and Flow B had 60% mobile vs Flow A's 40%, the aggregate rates can flip even if Flow B outperforms in both segments. The interaction is composition × rate. The correct answer: segment by device, compare Flow A vs B within mobile and within desktop separately, before making any call on overall winner.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || "Always segment before concluding. When groups differ in both the treatment assignment and the outcome baseline, aggregated comparisons lie."}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> After any experiment, check covariate balance. Did treatment and control get similar proportions of mobile vs desktop, new vs returning, high vs low value users? If any key variable is significantly imbalanced, your aggregate result is suspect. The balance check takes five minutes and prevents the paradox from invalidating weeks of experiment run time.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a product comparison shows "X performs better than Y overall," immediately ask: is X used by a different mix of users than Y? If yes, you cannot conclude X is better — you can only conclude that the users of X convert better, and their mix is different. The policy question is then: if we changed who uses X, would the advantage persist?</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When stakeholders argue from aggregate numbers, segment before responding. The aggregate might be confounded by acquisition channel, time of day, or device capability. "Mobile users are worse" might actually be "low-intent paid acquisition users are worse, and they're disproportionately on mobile." These have different product implications.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || "Critical for A/B test analysis: if randomization creates unequal segment distributions (e.g., more mobile users in treatment), aggregated conversion rates will be confounded."}
+          {module?.connection || 'Critical for A/B test analysis: if randomization creates unequal segment distributions (e.g., more mobile users in treatment), aggregated conversion rates will be confounded. This is why randomization balance checks are a required step in every experiment post-analysis.'}
         </div>
       </div>
 

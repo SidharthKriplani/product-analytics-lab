@@ -38,6 +38,15 @@ function toSvgX(rank, total) {
   return PAD_L + ((rank) / (total - 1)) * (SVG_W - PAD_L - PAD_R);
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module18_RegressionToMean({ module, onNext }) {
   const [seed, setSeed] = useState(42);
   const [step, setStep] = useState(0); // 0=initial, 1=measurement1, 2=measurement2
@@ -70,32 +79,43 @@ export function Module18_RegressionToMean({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your top 10 sales reps crushed it last quarter. This quarter, their numbers dropped. The VP blames the new compensation plan. But you pull the data and notice something: the bottom 10 reps from last quarter improved too — without any intervention. Both groups moved toward the average. That\'s regression to the mean, not a management failure.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Your checkout conversion drops to its lowest level in a year. Engineering pushes three bug fixes. Next month, conversion bounces back strongly. The PM credits the fixes.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Any time you select a group based on an extreme measurement, their next measurement will tend to be less extreme — because the first measurement contained random noise that happened to push them up (or down). Without a control group, you cannot distinguish regression from a real effect. Watch it happen below.
+        <p style={prose}>
+          Were the fixes responsible? Maybe. But there is a second explanation that has nothing to do with anything the team did.
+        </p>
+        <p style={prose}>
+          Every metric value has two components: the true underlying state of the system, and random noise — the day-to-day variation from traffic mix, seasonal patterns, minor unexplained factors. When you observe an extreme value, it is often because both the true state and the noise happened to push in the same direction. A genuinely bad month, but also a noisier-than-usual month.
+        </p>
+        <p style={prose}>
+          Random noise, by definition, does not sustain extreme conditions. The next period, noise pushes randomly again — independent of last period's noise. Most likely, it contributes less to the extreme in either direction. The observed value drifts back toward what the true state alone produces — the mean.
+        </p>
+        <p style={prose}>
+          This is <strong style={{ color: 'var(--text)' }}>regression to the mean</strong>. No intervention required. No recovery mechanism. Just the natural behavior of noisy measurements around a stable underlying level.
+        </p>
+        <p style={prose}>
+          In product analytics, this creates a specific trap. You identify your ten worst-performing markets — the ones where conversion was lowest last quarter. You launch a targeted intervention. Next quarter, those markets improve. You attribute the improvement to the intervention. But you selected those markets because they were at their worst point. Some of that "worst point" was true underlying underperformance, and some was noise pushing them to an extreme low. In the following quarter, the noise component regresses — and the markets improve regardless of what you did.
+        </p>
+        <p style={prose}>
+          This is precisely why experiments require control groups. Without a control group, you have measured: (improvement from intervention) + (regression to mean). You cannot separate them.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Watch Extreme Performers Regress</div>
-
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>Regression to the mean</strong>: when you select extreme performers based on a noisy first measurement,
-        their second measurement tends to be less extreme — not because anything changed, but because the first measurement
-        contained random noise that pushed them to the top.
-      </p>
-
-      {/* Product framing */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-        <strong style={{ color: 'var(--text)' }}>Classic product trap:</strong> You run an onboarding intervention on your worst-performing sales reps.
-        They improve next quarter. Was it the training — or regression to the mean? Without a control group, you can't tell.
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You identify the 20 lowest-engagement users in your cohort and run a re-engagement campaign. Engagement improves. How do you know whether the campaign worked or whether this is regression to the mean?
+        </p>
       </div>
 
-      {/* Instruction */}
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Watch Extreme Performers Regress</div>
+
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Click "Run simulation" to take a first measurement of 20 users. The top 5 scorers are highlighted in yellow. Then click "Take second measurement" and watch those highlighted users regress toward the group mean — their scores drop on average, not because they got worse, but because random noise inflated them the first time.
       </div>
@@ -241,19 +261,31 @@ export function Module18_RegressionToMean({ module, onNext }) {
         </div>
       )}
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      {step === 2 && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            Without a control group, you cannot know whether the campaign worked. The simulation shows that even with no intervention, the extreme-low units improve on average in the next period — because their initial extreme values were partly noise. The improvement from RTM and the improvement from the campaign are confounded. The only fix is a control group of equivalently low-engagement users who receive no campaign — then compare improvement rates.
+          </p>
+        </div>
+      )}
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Any time you hear "we focused on our worst performers and they improved" — ask immediately: who is the control group? If there is not one, the claim of intervention effectiveness is unsupported. RTM is a fully sufficient alternative explanation that requires no intervention at all.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Before-after comparisons on selected extreme groups are almost never valid causal claims. You need: a pre-period measurement, an intervention, a post-period measurement, and an equivalent group that did not receive the intervention. Without the last element, all you can say is "the metric changed" — not "the intervention changed it."</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Regression to the mean also operates in the positive direction. Your best-performing cohort last month will probably be slightly less impressive this month, not because anything degraded but because their exceptional performance included a favorable noise component. If leadership sets targets based on peak performance, they are setting targets against noise — the team will appear to "slip" even when the underlying product is stable.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection}
+          {module?.connection || 'Regression to the mean is why experiments require pre-specified control groups, not post-hoc comparisons. A/B tests avoid RTM contamination because both groups experience the same noise environment simultaneously — the control group's regression in the same period is subtracted from the treatment group's regression, leaving only the genuine treatment effect.'}
         </div>
       </div>
 

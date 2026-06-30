@@ -67,6 +67,15 @@ function powerLabel(p) {
   return 'Very low';
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module12_Power({ module, onNext }) {
   const [effectSize, setEffectSize] = useState(0.5);
   const [n, setN] = useState(500);
@@ -150,26 +159,40 @@ export function Module12_Power({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your A/B test ran for 4 weeks. The treatment group showed +2% conversion lift, but p = 0.18 — not significant. The PM says the experiment failed. But did it? Maybe the effect is real and you just didn\'t have enough users to detect it. That\'s a power problem, not a results problem.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Hypothesis testing has two ways to go wrong, and you've only been guarding against one of them.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Statistical power is the probability of correctly detecting a real effect. An underpowered test is like trying to read a street sign from a mile away — the sign exists, you just can\'t see it. Adjust the sliders below to see how effect size, sample size, and alpha all control whether you\'ll catch a real improvement.
+        <p style={prose}>
+          The first error: you reject H₀ when it's actually true — a false positive, Type I error. You control it with α. Set α = 0.05 and you accept a 5% chance of this.
+        </p>
+        <p style={prose}>
+          The second error: you fail to reject H₀ when it's actually false. A real effect exists — your treatment genuinely works — but your experiment doesn't detect it. You conclude "no significant result" and the feature gets killed. This is a false negative, a Type II error, and most people have never thought carefully about what controls it.
+        </p>
+        <p style={prose}>
+          The probability of correctly detecting a true effect is called <strong style={{ color: 'var(--text)' }}>statistical power</strong>: Power = 1 − P(Type II error). A study with 80% power means: if the treatment truly has the effect you're testing for, you'll detect it 80% of the time. You'll miss it 20% of the time — not because your analysis is wrong, but because chance gave you a sample that didn't show the effect strongly enough.
+        </p>
+        <p style={prose}>
+          Power is jointly determined by three things. <strong style={{ color: 'var(--text)' }}>Effect size</strong>: how large is the true difference? A 10pp lift is easier to detect than a 0.1pp lift. <strong style={{ color: 'var(--text)' }}>Sample size</strong>: larger samples reduce SE, making it easier to distinguish signal from noise. <strong style={{ color: 'var(--text)' }}>Alpha</strong>: stricter false positive control requires a higher bar to reject H₀, so you'll more often fail to reject even when the effect is real.
+        </p>
+        <p style={prose}>
+          Before running an experiment, you specify the <strong style={{ color: 'var(--text)' }}>Minimum Detectable Effect (MDE)</strong> — the smallest effect size you'd actually act on — plus target power (typically 80%) and α (0.05). From these three, you compute required n. Running an underpowered study is a specific kind of waste: you spend the time and traffic, then can't interpret the result.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Tune the Power Dial</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          If you run an experiment at 20% power (common when people don't calculate sample sizes), and your result is not significant, what can you actually conclude? Think through what "not significant" means when power is low.
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>Statistical power</strong> is the probability of detecting a real effect when one truly exists.
-        It's the green area under the alternative hypothesis curve beyond the critical value.
-        Low power means you'll run experiments that miss real improvements — wasting time and opportunity.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Tune the Power Dial</div>
 
-      {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Adjust the effect size, sample size, and alpha threshold. Watch the green power region grow or shrink as you move each slider. Try setting effect size to 0.1 sigma to see how underpowered tiny-effect experiments are, then increase n until you hit 80% power. Read the required sample size formula at the bottom.
       </div>
@@ -409,15 +432,25 @@ export function Module12_Power({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          At 20% power, a non-significant result tells you almost nothing. You had an 80% chance of missing a real effect, so "not significant" is the expected outcome even when the treatment works. An underpowered non-significant result doesn't say "no effect" — it says "we looked with the wrong instrument." The visualization shows the two distributions: power is the area of the alternative distribution to the right of the critical cutoff.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'Power is the experiment\'s sensitivity. At 80% power, you\'ll catch the effect 4 out of 5 times — and miss it 1 in 5. Drag the effect size slider to 0.1σ and watch the distributions overlap almost completely. At that point, you\'d need thousands of users just to have a fighting chance of seeing anything.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Never run an experiment without calculating required sample size first. Use a power calculator with your real baseline metric, a realistic MDE, and 80% power. If the required n exceeds what you can collect in a reasonable time, the experiment is not feasible — that's an important finding too.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When interpreting non-significant results, always report the minimum detectable effect of your study. "Not significant (MDE for this study was 1.2pp at 80% power)" is honest — it tells the reader that effects smaller than 1.2pp are not ruled out. "Not significant" alone implies no effect exists, which you cannot conclude from an underpowered study.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Effect size and statistical significance are independent. A tiny effect can be statistically significant with a massive sample. A large effect can be non-significant with a tiny sample. Always pair p-values with effect magnitude in business-relevant units — power and effect size together determine whether an experiment's conclusion is worth trusting.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>

@@ -20,6 +20,15 @@ const DOT_COLORS = [
   'var(--yellow)', 'var(--red)', 'var(--accent-light)',
 ];
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module02_CentralTendency({ module, onNext }) {
   const [data, setData] = useState(INITIAL_DATA);
   const [hovered, setHovered] = useState(null);
@@ -72,22 +81,47 @@ export function Module02_CentralTendency({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your PM shares a slide that says average revenue per user is $12 and the business is healthy. But when you pull the raw data, the median is only $3. Most users spend almost nothing — a handful of whales are dragging the average up. The PM\'s story is technically true but deeply misleading.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You have data on a thousand users. Session durations ranging from 4 seconds to 47 minutes. You need to describe this to your PM in one number. What do you say?
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          This is the classic mean vs. median trap. Understanding when each measure tells the real story — and when it hides it — is the foundation of every metric you\'ll ever report. Add an outlier below and watch the mean chase it while the median barely moves.
+        <p style={prose}>
+          This is the problem of central tendency — finding the single value that best represents where your data lives. The question sounds simple. It isn't. Because "best represents" depends entirely on what your data looks like and what decision that number is going to inform.
+        </p>
+        <p style={prose}>
+          The first instinct is the average: add everything up, divide by the count. The <strong style={{ color: 'var(--text)' }}>mean</strong>. It feels mathematically satisfying — every data point contributes. But here's where it breaks. Say nine users spend 2 minutes in your product. One power user spends 92 minutes. Mean session duration: 11 minutes. Does that represent your typical user? No. Your typical user spent 2 minutes. The one outlier dragged the mean far above the experience of 90% of your users.
+        </p>
+        <p style={prose}>
+          This isn't a flaw in the mean — it's a feature. The mean is sensitive to every value, including extreme ones. That sensitivity is exactly what you need in some situations and exactly what misleads you in others. What you need, when outliers are distorting the picture, is a measure that describes the middle of your data regardless of what's happening at the extremes.
+        </p>
+        <p style={prose}>
+          That's the <strong style={{ color: 'var(--text)' }}>median</strong>: the value where exactly half your data sits above and half sits below. In the session duration example, the median is 2 minutes — which accurately represents the typical user, unmoved by the one person who spent 92 minutes.
+        </p>
+        <p style={prose}>
+          The mean and median tell you the same thing when data is symmetric. They diverge when data is skewed — and most product metrics are skewed. Revenue per user, session length, purchase frequency — they all have a long right tail of power users dragging the mean upward. When you see mean and median diverge significantly, that divergence is itself information: your distribution is skewed and your mean is not a reliable description of the typical experience.
+        </p>
+        <p style={prose}>
+          The <strong style={{ color: 'var(--text)' }}>mode</strong> is the most frequently occurring value. It's most useful for categorical data (the most common device type, the most common subscription plan) or discrete numerical data with clear peaks. For continuous data, mode is rarely informative. Neither mean, median, nor mode is wrong — they're answering different questions.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Add Points and Watch the Measures Shift</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          If you add one extreme outlier to a dataset, which of the three measures changes the most? Which changes the least? Think about why before exploring.
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        The mean weighs every value equally — so one extreme outlier can drag it far from the rest. The median only cares about rank order, making it robust to extremes.
-      </p>
+      {/* ── Interactive label ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Add Points and Watch the Measures Shift</div>
+
+      {/* ── Instructions box ── */}
+      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', marginBottom: '0.25rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+        <strong>What to do:</strong> Click the buttons to add data points to the distribution. Watch how the mean (blue dashed) and median (green dashed) lines move. Notice what happens when you add the outlier — which measure shifts more dramatically?
+      </div>
 
       {/* Visualization */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', overflowX: 'auto' }}>
@@ -186,11 +220,6 @@ export function Module02_CentralTendency({ module, onNext }) {
         </div>
       </div>
 
-      {/* Instruction */}
-      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', marginBottom: '0.25rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-        <strong>What to do:</strong> Click the buttons to add data points to the distribution. Watch how the mean (blue dashed) and median (green dashed) lines move. Notice what happens when you add the outlier — which measure shifts more dramatically?
-      </div>
-
       {/* Controls */}
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <button
@@ -219,19 +248,29 @@ export function Module02_CentralTendency({ module, onNext }) {
         </div>
       )}
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          The mean moves substantially with each outlier because every value enters the calculation. The median barely moves — it only cares about rank order, not magnitude. The mode is unaffected unless the outlier happens to be the most frequent value. This is why robust statistics prefer median over mean when outliers are likely.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'One power user spending $10,000 inflates average revenue per user for everyone. The median user may only spend $20. Always ask which measure of center your experiment metric uses — and whether it can be gamed by extremes.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Every time you report an average, ask yourself: is this metric likely to be skewed? Revenue, session length, LTV, order value — almost certainly yes. Default to reporting both mean and median together. A PM who sees mean £47, median £23 immediately understands the distribution shape without needing a histogram.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When mean and median diverge by more than ~20%, flag it explicitly. Don't just report the mean and move on. That divergence is telling you the distribution is skewed, which changes which statistical tests are valid and which summary is honest.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Mode is underused for product decisions. If you're trying to understand the most common user journey, the most common session count, or the most common upgrade path — mode answers that directly where mean and median don't.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || "When you report A/B test results, choosing mean vs median changes what you're claiming improved. For revenue metrics with heavy tails, the median may better represent the typical user experience."}
+          {module?.connection || 'When you report A/B test results, choosing mean vs median changes what you\'re claiming improved. For revenue metrics with heavy tails, the median may better represent the typical user experience. The mean is what drives the total, but the median is what most users actually see.'}
         </div>
       </div>
 

@@ -109,6 +109,15 @@ function buildPath(pts, minY, maxY) {
     .join(' ');
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module24_SyntheticControl({ module, onNext }) {
   var _saved = loadSFState('sf24');
   const [selected, setSelected] = useState(function() { return _saved ? (_saved.selected || null) : null; });
@@ -159,25 +168,38 @@ export function Module24_SyntheticControl({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          You launched a new delivery program in Denver but nowhere else. Revenue in Denver went up 15% post-launch. But you can\'t compare Denver to "Denver without the program" — that world doesn\'t exist. And picking one comparison city is arbitrary. What if you could build a weighted blend of untreated cities that tracks Denver\'s pre-launch trajectory perfectly?
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          DiD requires a comparison group whose pre-treatment trend matches the treated group. RD requires a threshold. But sometimes you have neither.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          That\'s synthetic control: you construct a counterfactual from donor units that match the treated unit\'s pre-period behavior. The gap between the actual and synthetic trend post-treatment is your estimated causal effect. But the donor pool matters — pick the right one below and see why.
+        <p style={prose}>
+          You want to evaluate the effect of launching your product in Japan — one market, treated at a specific point in time. No other market had a comparable trajectory to Japan's user growth before the launch. No DiD comparison is clean. There is no threshold to exploit. What do you do?
+        </p>
+        <p style={prose}>
+          The naive answer is to pick the most similar market and run DiD anyway. But if no single market truly matches Japan's pre-launch trajectory, the DiD estimate is biased — the comparison group's post-launch trend diverges from Japan's counterfactual for reasons that have nothing to do with your product.
+        </p>
+        <p style={prose}>
+          The key insight: even if no single market matches Japan, a weighted combination of markets might. Maybe 40% South Korea, 35% Taiwan, 25% Singapore, together, have a trajectory that closely tracks Japan's pre-launch user growth, engagement metrics, and product adoption curve. If so, that weighted combination is a better counterfactual than any single market. This is <strong style={{ color: 'var(--text)' }}>synthetic control</strong>.
+        </p>
+        <p style={prose}>
+          You construct a "synthetic" version of the treated unit — a data-driven weighted composite of untreated units — optimised to match the treated unit's pre-treatment characteristics as closely as possible. Then, in the post-treatment period, you compare the actual treated unit's outcome to where the synthetic control goes. The treatment effect is: actual outcome minus synthetic control outcome, in every post-treatment period.
+        </p>
+        <p style={prose}>
+          The plausibility of the method rests entirely on <strong style={{ color: 'var(--text)' }}>pre-treatment fit</strong>. If the synthetic control closely tracks the actual treated unit for the entire pre-treatment period, it is a credible proxy for what the treated unit would have done without treatment. If the pre-treatment fit is poor, the synthetic control is not a reliable counterfactual. Inference uses placebo tests: run the same synthetic control optimisation on every untreated market — if the Japanese gap is much larger than the distribution of placebo gaps, you have statistical evidence that the gap is not explained by noise.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Choose the Right Donor</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You have 20 months of pre-treatment data and 5 candidate control units. The best synthetic control you can construct leaves a consistent 10% gap below the treated unit's pre-treatment trajectory. Is this counterfactual usable? What does that pre-treatment gap imply for your post-treatment estimate?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Synthetic Control builds a <strong>weighted combination of untreated units</strong> that best
-        matches the treated unit's pre-period trajectory. The counterfactual is the synthetic trend
-        post-treatment. The key validity check: the donor must <em>not</em> itself be treated, and
-        must track the target closely before the intervention.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Choose the Right Donor</div>
 
       {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
@@ -366,16 +388,30 @@ export function Module24_SyntheticControl({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>{module?.keyInsight}</div>
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          A consistent 10% pre-treatment gap means your synthetic control is not tracking the treated unit's actual trajectory — it is systematically undershooting. Even if the 10% gap stays constant post-treatment, you cannot tell whether the constant gap reflects the treatment effect or just your imperfect fit. A reliable estimate requires close pre-treatment fit. With a persistent gap, any post-treatment comparison is contaminated. The right response: expand the donor pool, adjust predictor variables, or acknowledge that synthetic control may not be feasible here.
+        </p>
       </div>
 
-      {/* Connection */}
+      {/* ── Analyst Move ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Always plot the pre-treatment fit prominently in any synthetic control analysis. The quality of the counterfactual lives or dies on this chart. A synthetic control that tracks the treated unit closely for 18 months before treatment is credible evidence of a valid counterfactual. A synthetic control that diverges in the pre-period is not, regardless of what happens post-treatment.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use placebo tests and report them. Do not just show the Japan gap — show the distribution of gaps from all 15 placebo markets and where Japan's gap falls in that distribution. If Japan's post-treatment gap is larger than 95% of the placebo gaps, that is your significance statement. It is transparent and auditable in a way that a single p-value often is not.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Synthetic control is overkill for many product questions and essential for a few. Use it when: you have one treated entity (market, channel, user segment), the treatment is a discrete event, you have a long pre-period, and no single comparison unit is adequate. Do not use it when you can randomize, or when the pre-treatment period is too short to build a reliable synthetic composite.</p>
+        </div>
+      </div>
+
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{module?.connection}</div>
+        <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          {module?.connection || 'Synthetic control is most useful when you are evaluating a major product change in a single geography, channel, or segment where a randomized experiment was not run. It is the highest-quality non-experimental method for single-unit treatment — but it is not a substitute for randomization when randomization was possible. If the team chose not to A/B test, synthetic control is what you reach for afterward to try to recover causal estimates.'}
+        </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

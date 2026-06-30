@@ -40,6 +40,15 @@ const EXAMPLES = [
   },
 ];
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module19_SelectionBias({ module, onNext }) {
   const [showAll, setShowAll] = useState(true);
 
@@ -48,26 +57,40 @@ export function Module19_SelectionBias({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          You\'re running a "power users" study to understand what makes users successful. You pull everyone who\'s been active for 6+ months and analyze their behavior. The engagement metrics look fantastic. But you\'re only looking at users who stayed — what about the ones who churned in month 2? They\'re invisible in your data, and they\'re systematically different.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Every dataset is a filtered view of reality. Not all observations make it into your data. Some users opt out of tracking. Some sessions do not complete. Some churned users stop generating events entirely. The question is never whether your data is filtered — it always is. The question is whether that filter is correlated with what you are trying to measure.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Selection bias means your sample is not representative of the population you care about. Every dashboard that only shows active users is biased. Every survey that only reaches respondents who bother to reply is biased. Toggle the filter below to see how excluding churned users inflates your metrics.
+        <p style={prose}>
+          When it is, your conclusions are systematically wrong in a predictable direction. This is <strong style={{ color: 'var(--text)' }}>selection bias</strong>.
+        </p>
+        <p style={prose}>
+          <strong style={{ color: 'var(--text)' }}>Survivorship bias</strong> is the most dramatic form: you can only observe outcomes for units that survived some filtering process, and the filter is correlated with success. The most famous case is from World War II. Engineers analyzed bullet damage on aircraft returning from missions and proposed reinforcing the most-damaged areas. Statistician Abraham Wald stopped them: you are only seeing planes that came back. The damaged areas on returning planes are areas where planes can be hit and still return. The areas with no damage are where planes were hit and did not return — because hits there were fatal. Reinforce the undamaged areas. The engineers had access only to survivors and were missing everything the dead planes could tell them.
+        </p>
+        <p style={prose}>
+          This structure appears constantly in product analytics. You analyze the behavior of your active users to understand what drives retention. You study their session frequency, feature adoption, support interaction. The problem: you are studying survivors. Users who churned stopped generating data before you analyzed them. Their early behavior — the signals that preceded their departure — is systematically underrepresented in your dataset.
+        </p>
+        <p style={prose}>
+          You survey users about product satisfaction. You get a 12% response rate. You report the satisfaction score from respondents. The problem: users who are very unhappy are disproportionately likely to either respond angrily or disengage completely (including not responding to surveys). Your 12% may be both the loudest advocates and the most vocal critics — not the silent majority.
+        </p>
+        <p style={prose}>
+          In every case, the filter (completing the experiment, responding to the survey, completing checkout) is correlated with the outcome. The missing observations are not missing randomly — they are missing because they are on the wrong side of a process related to your question.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Toggle the Survivorship Filter</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You are studying what predicts long-term customer value (LTV) by analyzing your top 20% of customers. What are you systematically missing, and how does it bias your conclusions?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>Selection bias</strong> occurs when the data you analyze isn't a random sample of the population you care about.
-        The missing data is not random — it's <em>systematically different</em>. In product analytics, churned users are
-        almost always missing from dashboards, which inflates every quality metric you see.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Toggle the Survivorship Filter</div>
 
-      {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Start with "Show All Users" to see the full population including churned users. Then switch to "Show Only Active Users" to replicate what most dashboards show. Watch the engagement metric jump upward and notice the inflation factor — that is selection bias inflating every quality metric you report.
       </div>
@@ -202,19 +225,29 @@ export function Module19_SelectionBias({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          By studying only the top 20%, you have already filtered for the outcome you are trying to predict. Any feature that appears in the top 20% at a high rate might be equally common in churned users — but you cannot see that. When the churned cohort is revealed, features you thought were "predictors of LTV" turn out to be present in churned users too. They are not predictors of success; they are predictors of engagement level generally. The real predictors emerge only when you can compare successful vs. unsuccessful users.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> In every cohort or funnel analysis, your starting population is the denominator — not the survivors. Users who entered the funnel but did not convert belong in your analysis. Cohort members who churned in month 1 belong in your retention analysis. The moment you drop them from the analysis, you are studying a biased subset.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When someone proposes "studying our power users to understand what drives success" — reframe: study what distinguishes future power users from future churners, using behavior from their first week when both groups looked similar. You need a comparison group. Without one, you are doing survivorship analysis.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Whenever data is missing, ask: is this missing randomly or for a reason? Missing at random means your analysis on the observed data is still valid. Missing for a reason correlated with your outcome means your analysis is biased. "I don't know why it's missing" is not the same as "it's missing randomly." Default to skepticism, not assumption.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection}
+          {module?.connection || 'Experiments avoid survivorship bias by randomizing before any filtering occurs — every user assigned to a variant is counted in the denominator, whether they converted or not. When you analyze only converters, you re-introduce selection bias into an otherwise valid experiment. Intent-to-treat analysis is the fix: analyze by assignment, not by completion.'}
         </div>
       </div>
 

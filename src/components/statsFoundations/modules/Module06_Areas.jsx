@@ -31,6 +31,15 @@ const PRESETS = [
   { label: 'Right tail z=1.96', z1: 1.96, z2: 4 },
 ];
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module06_Areas({ module, onNext }) {
   const [z1, setZ1] = useState(-1);
   const [z2, setZ2] = useState(1);
@@ -93,24 +102,41 @@ export function Module06_Areas({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your PM asks: what percentage of users complete onboarding in under 5 minutes? The onboarding time is normally distributed with a known mean and standard deviation. The answer is literally the area under the curve to the left of 5 minutes — and once you convert to z-scores, you can read it straight off the standard normal.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You know where an observation sits on a distribution — its Z-score tells you that. But there's a natural next question that Z-scores alone can't answer: what fraction of all observations fall below this point?
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          This is the same math behind every p-value and confidence interval you\'ll ever compute. The shaded area IS the probability. Drag the bounds below to shade different regions and watch the probability update in real time.
+        <p style={prose}>
+          If your API response time has a Z-score of 1.5, you know it's 1.5 standard deviations above the mean. But what percentage of requests are faster than this? What percentage are slower? That's the question your PM actually needs answered when they ask "what fraction of users are getting a good experience?"
+        </p>
+        <p style={prose}>
+          The answer lives in the area under the distribution curve. The normal distribution is a curve. Its height at any point represents density — how many observations cluster at that value. The fraction of observations that fall in any range is proportional to the area under the curve across that range. The total area under the normal curve equals 1 — which makes sense, because 100% of observations must fall somewhere. This means any sub-area between two points is a fraction between 0 and 1, directly interpretable as a probability.
+        </p>
+        <p style={prose}>
+          The area to the left of a specific point is the cumulative probability — the proportion of observations at or below that value. This is also the percentile. Area to the left of your Z = 1.5 response time: 93.3%. That means 93.3% of requests are faster than this one, and 6.7% are slower.
+        </p>
+        <p style={prose}>
+          Let's take an example. Your SLA states that 95% of page loads must complete under 3 seconds. Your load times are normally distributed with mean 2.1s and SD 0.6s. Z = (3.0 − 2.1) / 0.6 = 1.5. Area to the left of Z = 1.5: approximately 93.3%. You're below the 95% SLA threshold. Engineering needs to act. And you can tell them exactly how much the mean needs to shift to hit 95%.
+        </p>
+        <p style={prose}>
+          Now connect this to everything you'll encounter later: a p-value is an area under a probability distribution. When hypothesis testing says p = 0.03, it means the area in the tails beyond your observed test statistic is 3% of the total area. You've seen bell curves producing probability statements from areas — p-values are exactly that, applied to test statistics.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Shade Regions and Read Probabilities</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          If you move a threshold from 3 seconds to 2.5 seconds in the SLA example (mean 2.1s, SD 0.6s), does the compliant fraction drop by more or less than you'd expect? Think about where 2.5s sits on the curve relative to where 3s sits.
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Drag the bounds to shade different regions. The shaded area is exactly P(z₁ &lt; Z &lt; z₂) — the probability that a randomly drawn value falls in that range.
-      </p>
+      {/* ── Interactive label ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Shade Regions and Read Probabilities</div>
 
-      {/* Instruction */}
+      {/* ── Instructions box ── */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Click a preset or drag the z-bound sliders to shade different regions of the curve. Read the central probability and the tail probabilities — remember that the tails together are the two-sided p-value. Try "Left tail z=−1.96" and confirm both tails sum to 5%.
       </div>
@@ -265,19 +291,29 @@ export function Module06_Areas({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          2.5s corresponds to Z = (2.5 − 2.1) / 0.6 = 0.67, area approximately 74.9%. Moving the threshold from 3s (93.3%) to 2.5s (74.9%) drops compliance by ~18pp — disproportionately large, because you're moving into the denser part of the distribution near the mean. Equal threshold movements don't produce equal changes in area. The curve is steepest near the center, so small changes there affect far more users than the same-sized change in the tails.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'Area = probability. The total area under the curve is exactly 1.0 (100%). A p-value is just the area in the tails beyond your test statistic — the probability of seeing your result (or more extreme) by chance alone.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When you set a performance threshold, you can immediately translate it into "what fraction of users experience worse than this" — without needing raw log data, just mean and SD. Use this for quick stakeholder conversations about SLAs, percentile targets, and quality benchmarks.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> p-values stop being magic numbers. When someone reports p = 0.04, you now know exactly what they're saying: the area in the distribution's tails beyond the observed test statistic is 4%. This makes every significance test result a shaded area you can picture — not an arbitrary threshold.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a metric's distribution is non-normal, areas under that curve are still meaningful — you just can't use Z-tables. You'd use empirical percentiles or the specific distribution's CDF. This is what people mean when they say "use the empirical distribution" — they're computing areas without assuming normality.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'When your A/B test returns z=2.1, you look up the area in both tails beyond ±2.1. That area is your p-value (~3.6%). This is why the threshold z=±1.96 corresponds exactly to p=0.05.'}
+          {module?.connection || 'When your A/B test returns z=2.1, you look up the area in both tails beyond ±2.1. That area is your p-value (~3.6%). This is why the threshold z=±1.96 corresponds exactly to p=0.05 — you can see it directly as a shaded area on this curve.'}
         </div>
       </div>
 

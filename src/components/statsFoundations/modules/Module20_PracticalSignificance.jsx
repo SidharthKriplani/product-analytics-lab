@@ -69,6 +69,15 @@ const QUADRANTS = [
   { label: 'Keep running', x: MAT_PAD + MAT_INNER_W * 0.25, y: MAT_PAD + MAT_INNER_H * 0.75, anchor: 'middle', color: 'var(--yellow-text)' },
 ];
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module20_PracticalSignificance({ module, onNext }) {
   const [liftPct, setLiftPct] = useState(0.5); // 0.1% to 5.0%
   const [nStep, setNStep] = useState(3);       // index into SAMPLE_STEPS, default=100k
@@ -102,26 +111,43 @@ export function Module20_PracticalSignificance({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your experiment returns p = 0.001. The PM is thrilled — highly significant! But the actual lift is 0.3% on a conversion rate of 4.2%. With 10 million monthly users, that translates to maybe $8,000 in annual revenue. The engineering cost to ship the feature is $50,000. Statistically significant does not mean worth building.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Statistical significance is a binary threshold: the effect either clears alpha or it does not. If it does, you are told the effect is probably real — not explainable by chance alone.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Large sample sizes can make trivially small effects reach statistical significance. Conversely, a genuinely large effect might not reach significance if your sample is too small. You need both statistical and practical significance to make a ship decision. Explore the matrix below to build intuition for when each applies.
+        <p style={prose}>
+          That tells you nothing about whether the effect matters.
+        </p>
+        <p style={prose}>
+          With a large enough sample, any nonzero effect becomes statistically significant. This is a mathematical guarantee: as n increases, the standard error approaches zero, and any effect, no matter how tiny, will eventually produce a test statistic large enough to clear any threshold. The significance guarantee is entirely about the sample size and the non-zero-ness of the effect. It says nothing about size.
+        </p>
+        <p style={prose}>
+          Consider a pricing page redesign on a product with 50 million monthly active users. The test runs for two weeks with enormous statistical power. Primary metric: checkout initiation rate. Result: +0.04pp. p &lt; 0.0001. Highly significant. Do you ship?
+        </p>
+        <p style={prose}>
+          0.04pp lift means 4 additional initiations per 10,000 visitors. On 50 million MAU, that is 20,000 additional checkout initiations per month. At your conversion rate and AOV, that might be $800k ARR — or it might be noise in your AOV estimates. The significance tells you the lift is real. It does not tell you whether it is worth the opportunity cost of engineering time, the risk of regressions, and the maintenance burden.
+        </p>
+        <p style={prose}>
+          The question statistical significance cannot answer is: is this effect large enough to justify acting on it? This is <strong style={{ color: 'var(--text)' }}>practical significance</strong> — the business judgment about whether the effect is large enough to matter for a decision. Statistical significance and practical significance are orthogonal. An effect can be any combination: real and large enough to act on, real but too small to act on, undetected but meaningful if real, or undetected and irrelevant anyway.
+        </p>
+        <p style={prose}>
+          The tool for articulating practical significance is the <strong style={{ color: 'var(--text)' }}>Minimum Detectable Effect</strong> — defined before the experiment. The MDE is your practical significance threshold: effects below it are not worth detecting. Effects above it are worth acting on. If your statistically significant result is below your MDE, you detected something real but below your actionability threshold.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Navigate the Significance Matrix</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You observe a 0.1pp conversion lift with p = 0.001 on a study with 2 million users. You observe a 3pp conversion lift with p = 0.12 on a study with 400 users. Which is more actionable? What would you do with each result?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        A result can be <strong>statistically significant but practically negligible</strong> (large N amplifies tiny effects),
-        or <strong>practically large but not yet significant</strong> (small N can't confirm a real effect).
-        Effect size and business impact calculation must accompany every p-value.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Navigate the Significance Matrix</div>
 
-      {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Set the effect size to a tiny lift like 0.1% and then drag the sample size up to 5M — watch the result go statistically significant while the Cohen's h stays in the "small" zone and the annual revenue impact stays negligible. Then set a 2% lift with a small sample to see the reverse. Find the quadrant in the matrix where both are strong.
       </div>
@@ -231,19 +257,29 @@ export function Module20_PracticalSignificance({ module, onNext }) {
         </svg>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          The 0.1pp lift is statistically certain but needs a business impact calculation before deciding. The 3pp lift is a large effect that was not detected — the study was underpowered. Both need more analysis than the p-value alone provides. The 3pp lift warrants a follow-up study with sufficient sample size; if confirmed, it is a significant business outcome. The 0.1pp lift might not be worth the cost of shipping even though it is real.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Every experiment report should include: effect size in statistical units (p-value, CI), effect size in business units (revenue impact, additional completions per day, reduction in churn), and whether the effect exceeds your pre-stated MDE. The business decision should be made from the business units, not the p-value.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> "Statistically significant" in a slide does not mean "we should ship this." Challenge the implicit leap. The burden is on the PM or analyst to also show: this effect, if real, changes the business in a meaningful way. Before significance was established, you defined your MDE. Now compare the detected effect to it.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Large samples are dangerous for decision quality if teams interpret statistical significance as decision significance. An experiment on 50M users that detects a 0.01pp lift will almost always come back significant — and teams that do not have a pre-committed MDE will default to "significant = ship." This is how products accumulate small, technically real, practically worthless changes that do not move any needle the business cares about.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection}
+          {module?.connection || 'Experiment design requires committing to an MDE before the study runs. The MDE is your operationalisation of practical significance — the smallest effect you would act on. Sizing your experiment to detect the MDE ensures that if the effect is practically significant, you will also achieve statistical significance. Without a pre-committed MDE, there is no standard against which to evaluate a significant result.'}
         </div>
       </div>
 

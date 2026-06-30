@@ -30,6 +30,15 @@ function rLabel(r) {
   return 'No linear relationship';
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module14_Correlation({ module, onNext }) {
   const [r, setR] = useState(0.7);
 
@@ -40,26 +49,34 @@ export function Module14_Correlation({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your data shows that users who watch more tutorial videos also make more purchases. The PM concludes you should push more videos on every user. But correlation is not causation — maybe engaged users both watch videos and buy more because they\'re already motivated. Recommending more videos might do nothing for passive users.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          We've built tools for understanding a single variable. But product decisions rarely involve one variable in isolation. You want to know: do users who spend more time on the product retain better? Does page load time affect conversion? Does early feature adoption predict long-term value? These are questions about the relationship between two variables — whether they move together, in what direction, and how strongly.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Before you can even think about causation, you need to understand what correlation actually measures and what it misses. Drag the slider below to see how the scatter plot tightens as correlation approaches +1 or -1, and how it dissolves into noise at r = 0.
+        <p style={prose}>
+          The starting point is covariance. For each data point, take how far X is from its mean and multiply it by how far Y is from its mean. If X tends to be above its mean when Y is above its mean — both positive deviations at the same time — the product is positive. Average those products across all data points and you have the covariance. But covariance has a unit problem: if X is session duration in minutes and Y is revenue in pounds, covariance is in minute-pounds. That's not interpretable.
+        </p>
+        <p style={prose}>
+          The fix: divide the covariance by the product of the two standard deviations. That's the <strong style={{ color: 'var(--text)' }}>Pearson correlation coefficient</strong>, r = Cov(X, Y) / (σ_X × σ_Y). The result is always between -1 and 1. r = 1 is perfect positive linear relationship. r = -1 is perfect negative. r = 0 means no linear relationship.
+        </p>
+        <p style={prose}>
+          Three critical limitations. First: correlation captures linear relationships only. If X and Y have a U-shaped relationship, correlation can be near zero even though the relationship is strong and systematic — always look at the scatter plot. Second: correlation is not causation. A third variable may cause both. Before acting on a correlation, you need a causal argument. Third: with large samples, tiny correlations become statistically significant. Report r² — the fraction of variance in Y explained by X. r = 0.05 means r² = 0.0025. Statistically real, practically irrelevant.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Reshape the Scatter Plot</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You compute r = 0.3 between weekly active sessions and 90-day retention. Is this a strong relationship? How much of retention variance is this relationship explaining?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>Correlation</strong> measures the strength and direction of the linear relationship between two variables.
-        The Pearson correlation coefficient <em>r</em> ranges from −1 (perfect negative) through 0 (no relationship) to +1 (perfect positive).
-        Covariance is the un-normalized version — it captures direction but not strength on a standardized scale.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Reshape the Scatter Plot</div>
 
-      {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Drag the correlation slider from -1.0 to +1.0 and watch the scatter plot reshape. Notice how the cloud tightens into a line at the extremes and scatters randomly at r=0. Check the r-squared value to understand what fraction of variance in Y is explained by X.
       </div>
@@ -209,19 +226,29 @@ export function Module14_Correlation({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          r = 0.3 means r² = 0.09 — the relationship with sessions explains 9% of retention variance. That's a real relationship (not noise, assuming reasonable n), but 91% of retention variation is explained by something else. The scatter plot at extreme r shows what a truly tight relationship looks like — and how much noise remains even at r = 0.7.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'r measures linear relationship strength. r=0.7 means 49% of variance in Y is explained by X (r²=0.49). But correlation says nothing about which variable causes which.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Always plot the scatter before trusting r. A correlation of 0.5 from a clean linear relationship and a correlation of 0.5 from a noisy nonlinear one with outliers need completely different interpretations. The number alone doesn't tell you.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Report r² alongside r in any analysis that involves prediction or variance explanation. r = 0.4 sounds substantial. r² = 0.16 (16% of variance explained) sounds modest. Both are true. Use the one that communicates the explanatory power honestly.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a PM points to a correlation as justification for a feature decision ("users who do X have higher LTV, so we should drive more X behavior"), challenge the causal story explicitly. The correlation might be real. The mechanism they're assuming — that driving X will cause LTV to increase — requires a causal argument, not just correlation. This is the foundation of why experiments exist.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'Before running experiments, you need correlation to identify candidate features. After experiments, correlation in residuals signals confounding.'}
+          {module?.connection || 'Before running experiments, you need correlation to identify candidate features. After experiments, correlation in residuals signals confounding. An experiment is the tool you use when correlation alone isn\'t enough to determine whether an effect is causal.'}
         </div>
       </div>
 

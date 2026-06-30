@@ -34,6 +34,15 @@ const PRESETS = [
 
 function clamp(v) { return Math.max(0, Math.min(100, Number(v) || 0)); }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module22_DiD({ module, onNext }) {
   const [tPre, setTPre] = useState(64);
   const [tPost, setTPost] = useState(71);
@@ -72,25 +81,38 @@ export function Module22_DiD({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          A new pricing policy rolled out in one market but not another. Revenue in the treated market went up 8%. But the untreated market also went up 5% over the same period — there was an industry-wide tailwind. The naive before-after comparison overstates the policy\'s impact by 5 percentage points. You need a method that subtracts out the shared trend.
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You have launched a new feature in Germany. You did not randomize — the launch happened because of a business decision, not a coin flip. Six weeks later, retention in Germany has improved by 5pp. Was it the feature?
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Difference-in-Differences does exactly that: it compares the change in the treatment group to the change in the control group. The difference of the two differences isolates the causal effect. Adjust the values below to see how DiD separates treatment impact from background trends.
+        <p style={prose}>
+          Maybe. But retention was probably already improving in Germany as the product matured. And retention might have improved across all markets due to a seasonal effect, or a global product update, or simply time. You cannot separate the feature's effect from everything else that was moving in the same direction.
+        </p>
+        <p style={prose}>
+          The naive comparison — Germany before vs. Germany after — captures the feature's effect plus all those other trends. You need something that tells you how Germany would have changed over those six weeks if the feature had never launched. A counterfactual for Germany-over-time.
+        </p>
+        <p style={prose}>
+          You have it: other markets that did not receive the feature. If Germany and France had similar retention trends before the launch, then France's post-launch retention trajectory is a credible proxy for what Germany's would have been without the feature. This is the logic of <strong style={{ color: 'var(--text)' }}>Difference-in-Differences</strong>.
+        </p>
+        <p style={prose}>
+          The DiD estimator computes two differences and subtracts them: (Germany's post-launch retention − Germany's pre-launch retention) − (France's post-launch retention − France's pre-launch retention). The first difference removes Germany's starting level. The second difference removes France's starting level and captures its over-time change — your estimate of the trend that would have applied to Germany anyway. Subtracting the two strips the shared trend and leaves only the treatment effect.
+        </p>
+        <p style={prose}>
+          The entire method stands or falls on one assumption: <strong style={{ color: 'var(--text)' }}>parallel trends</strong>. Germany and France would have followed the same retention trend in the absence of the feature. You cannot prove this is true after treatment — you can only check it in the pre-period. If Germany and France moved in parallel before launch (similar week-over-week changes, similar responsiveness to shared events), that is evidence — not proof — that parallel trends would have continued.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Compute the Double Difference</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You want to use DiD to evaluate a feature launched in the UK. You are considering using the US as the control group. What would you check in the pre-period data before deciding the US is a valid control?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Difference-in-Differences (DiD) compares the <strong>change</strong> in the treatment group
-        against the <strong>change</strong> in the control group over the same period.
-        The control group tells you what would have happened to the treatment group without the intervention.
-        DiD = (T after − T before) − (C after − C before).
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Compute the Double Difference</div>
 
       {/* Presets */}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -221,16 +243,30 @@ export function Module22_DiD({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>{module?.keyInsight}</div>
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You would check whether UK and US retention move in parallel before the UK launch — similar week-over-week patterns, similar responses to product updates that affected both. If the UK was already diverging from the US before treatment, you cannot use the US as a control — the divergence would continue post-treatment for reasons unrelated to the feature. Non-parallel pre-trends mean the DiD estimate is biased by exactly the pre-existing divergence.
+        </p>
       </div>
 
-      {/* Connection */}
+      {/* ── Analyst Move ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Always plot the pre-period trends for treated and comparison groups before running DiD. If the trends are not parallel — similar direction, similar magnitude of changes — find a better comparison group or choose a different method. Showing the parallel pre-trends in your report is not optional: it is the primary evidence that the method is valid.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> The quality of the comparison group is the entire game in DiD. Other markets, other user segments, other time periods — whatever you use, it needs to be genuinely comparable. Similar acquisition channels, similar product usage patterns, similar response to external events. One good comparison group beats five bad ones.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When presenting DiD results to stakeholders, show all four numbers explicitly: treated pre, treated post, control pre, control post. Then show the two first differences, then the DiD estimate. This transparency makes the method auditable — any PM or executive can follow the logic and spot if something looks off. "Our feature drove 3pp retention in Germany, controlling for a 2pp trend we observed in France over the same period" is a sentence anyone can evaluate.</p>
+        </div>
+      </div>
+
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{module?.connection}</div>
+        <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          {module?.connection || 'DiD is often used when a feature rolls out to one market before others — a staged launch creates a natural treatment/control structure. Unlike an A/B test, the groups are not randomly assigned, so the parallel trends assumption must be verified. DiD is the most common method for evaluating geo-experiments and policy rollouts where full randomization is not feasible.'}
+        </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

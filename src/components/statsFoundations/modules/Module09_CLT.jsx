@@ -97,6 +97,15 @@ function normalityScore(bins, mu, sigma) {
   return Math.min(100, Math.round(rawScore * 100));
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module09_CLT({ module, onNext }) {
   const [distKey, setDistKey] = useState('rightskewed');
   const [nIdx, setNIdx] = useState(3); // default 30
@@ -160,26 +169,41 @@ export function Module09_CLT({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your revenue-per-user data is heavily right-skewed — most users pay nothing, a few pay a lot. Your colleague asks: how can we use z-tests and normal-based confidence intervals when the underlying data is clearly not normal? The answer is the Central Limit Theorem.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You know that the standard error tells you how much sample means vary. And you know that Z-scores and normal distribution tools are built for normally distributed data. But here's something that hasn't been explained yet: most product metrics — session duration, revenue per user, time to convert — are not normally distributed. They're heavily right-skewed, bounded at zero, with long tails of outliers.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          The CLT guarantees that the distribution of sample means approaches a normal shape as sample size grows — regardless of what the population looks like. This is why most of classical statistics works even on messy real-world data. Choose a skewed population below and simulate to watch it happen.
+        <p style={prose}>
+          Yet every standard statistical test you'll encounter — t-tests, confidence intervals, significance calculations — is built on the normal distribution. We apply normal tools to skewed data routinely. How is this not wrong?
+        </p>
+        <p style={prose}>
+          The answer is the <strong style={{ color: 'var(--text)' }}>Central Limit Theorem</strong>. The theorem says: regardless of the shape of the underlying distribution, as sample size increases, the distribution of sample means approaches a normal distribution. Not the distribution of individual data points — those can be as skewed as they want. The distribution of sample means.
+        </p>
+        <p style={prose}>
+          Why does this happen? The sample mean is a sum divided by n. When you sum a large number of independent random variables — regardless of their individual distributions — the sum's distribution converges to normal. This isn't a property of any one distribution. It's a mathematical fact about what happens to sums of many independent things.
+        </p>
+        <p style={prose}>
+          Let's make this concrete. Your revenue per user distribution: heavily right-skewed. Most users generate £0. A small fraction generate £10–50. A tiny fraction generate £200+. That distribution looks nothing like a bell curve. Now take samples of n = 30. Compute the mean for each sample. Plot those means. The distribution of those sample means is already noticeably bell-shaped, even though the underlying data wasn't. At n = 100, even more bell-shaped, tighter. That's the CLT at work.
+        </p>
+        <p style={prose}>
+          How large does n need to be? It depends on how skewed the original distribution is. A mildly non-normal distribution might only need n = 15–20. A heavily skewed distribution might need n = 50–100 before the approximation is reliable. The commonly cited threshold of n ≥ 30 is a rule of thumb, not a law — check your specific distribution. And some distributions with very heavy tails may not converge even at large n — a reason to be cautious with viral or network metrics.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Watch Skewed Data Become Normal</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          If you draw samples from a very skewed distribution (say, exponential — shaped like a decay curve), how many samples of size n=5 do you need to average before the distribution of sample means starts looking normal? How about with n=30?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        The <strong>Central Limit Theorem</strong> says: no matter how weird your population distribution looks,
-        if you take large enough samples and compute the mean, those sample means will be approximately
-        normally distributed. This is the mathematical foundation that makes statistical inference possible.
-      </p>
+      {/* ── Interactive label ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Watch Skewed Data Become Normal</div>
 
-      {/* Instruction */}
+      {/* ── Instructions box ── */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Choose a population shape (try "Heavily skewed") then click "Simulate 1000 samples". Change the sample size from 5 to 30 and simulate again. Watch the sampling distribution shift from matching the skewed population shape to becoming approximately normal — that is the Central Limit Theorem in action.
       </div>
@@ -319,19 +343,29 @@ export function Module09_CLT({ module, onNext }) {
         ))}
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Even from a very skewed exponential distribution, sample means at n=30 are already approximately normal. The underlying individual data remains skewed — the CLT applies to means, not to the raw data. Switching to bimodal shows the same effect: two-humped individual data, bell-shaped means. The population shape becomes irrelevant as n grows.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'Try "Heavily skewed" with n=5 — the sampling distribution looks skewed too. Switch to n=30 — it becomes approximately normal. This is CLT: the magic that lets us use z-tests and t-tests regardless of what the underlying metric distribution looks like.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When someone tells you "we can't use a t-test because our revenue distribution isn't normal" — they're applying the wrong condition. The t-test requires the sampling distribution of the mean to be approximately normal, not the raw data. With n ≥ 30–50 in each group, CLT covers you for most product metrics. Correct the misconception with this explanation.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> CLT doesn't save you from everything. If your metric has extreme outliers — a handful of users driving 80% of revenue — those outliers cause high variance in your mean estimates, which means you need a much larger n before CLT approximation is reliable. The fix: Winsorize or cap outliers before analysis, or use a log transformation, or move to median-based statistics.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> CLT is why sample size matters more than sample fraction. As n grows, the SE shrinks (tighter estimates) and the approximation improves (CLT kicks in more strongly). These two benefits compound. Increasing n from 30 to 300 doesn't just give you 10x more data — it gives you tighter estimates and more reliable normal-based inference simultaneously.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'Revenue per user is heavily right-skewed (a few big spenders). But if you have n≥30 per variant, CLT guarantees your sample mean differences are approximately normal — justifying your t-test and z-test p-values.'}
+          {module?.connection || 'Revenue per user is heavily right-skewed. But if you have n ≥ 30 per variant, CLT guarantees your sample mean differences are approximately normal — justifying your t-test and z-test p-values. This is the theorem that makes A/B testing on real-world product data valid.'}
         </div>
       </div>
 

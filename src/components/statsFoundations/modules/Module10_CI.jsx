@@ -58,6 +58,15 @@ const CI_ROW_H = 18;
 const CI_GAP = 2;
 const CI_AREA_TOP = 30;
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module10_CI({ module, onNext }) {
   const [confIdx, setConfIdx] = useState(2); // 95%
   const [n, setN] = useState(100);
@@ -96,26 +105,40 @@ export function Module10_CI({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your PM asks "what\'s the conversion rate?" You say 4.2%. But that\'s a point estimate from one sample — it could easily be 3.8% or 4.6% if you measured again tomorrow. Giving a single number without a range is misleading because it hides uncertainty. A confidence interval fixes this.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You've computed a sample mean and a standard error. The mean is your point estimate — say, 4.8 minutes. But a point estimate is a single number presented with false precision. The true population mean could be 4.8, or 4.2, or 5.3. Your sample doesn't pin it down exactly. It restricts a range of plausible values.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          A 95% CI means: if you repeated this experiment 100 times, about 95 of those intervals would contain the true value. It does NOT mean there\'s a 95% chance the true value is in this specific interval. Simulate below to see how many intervals actually capture the truth.
+        <p style={prose}>
+          What you need is a way to express not just your best guess, but how wide a range of guesses the data supports. You need a confidence interval.
+        </p>
+        <p style={prose}>
+          We know from the CLT that the sample mean follows a normal distribution centered on the true population mean, with spread equal to SE. From the empirical rule: ±1.96 SE around the sample mean captures about 95% of where the true mean plausibly lives. This is the 95% confidence interval: <strong style={{ color: 'var(--text)' }}>CI = x̄ ± 1.96 × SE</strong>.
+        </p>
+        <p style={prose}>
+          Now the interpretation — this is where most people go wrong. "95% confidence" does not mean "there is a 95% probability the true mean is in this interval." The true mean is a fixed, unknown number. It either is or isn't in your interval.
+        </p>
+        <p style={prose}>
+          What 95% confidence means: if you repeated this process — sample users, compute the CI using this exact procedure — 95% of the intervals you'd produce would contain the true mean. The 5% that don't are the unlucky samples where the sample mean happened to land far from the truth. Your specific interval is either one of the 95% or one of the 5%. You can't know which. But you built it with a procedure that's right 95% of the time.
+        </p>
+        <p style={prose}>
+          One more critical use: CI and hypothesis testing are duals. If your 95% CI is [4.51, 5.09] and you test H₀: mean = 5.5, then 5.5 is outside the CI — you'd reject H₀. If the null value falls inside your CI, you'd fail to reject it. The CI tells you the entire set of null values you'd fail to reject simultaneously.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Simulate Confidence Intervals</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          If you want a narrower confidence interval without lowering your confidence level, you have two options. What are they, and which is in your control as an analyst?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        A <strong>confidence interval</strong> gives a range that — if you repeated the experiment many times —
-        would contain the true parameter in X% of those repetitions. The width depends on your confidence level
-        and sample size. Wider confidence = wider interval = higher chance of capturing the truth.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Simulate Confidence Intervals</div>
 
-      {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Select a confidence level and set a sample size, then click "Simulate 20 samples" to generate 20 confidence intervals. Count how many green bars capture the true mean versus how many red bars miss it. The hit rate should match the confidence level you chose over repeated simulations.
       </div>
@@ -274,15 +297,27 @@ export function Module10_CI({ module, onNext }) {
         </div>
       )}
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      {intervals.length > 0 && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            To narrow the CI without lowering confidence level, you can either increase n (more data lowers SE, tightening the interval) or find a metric with less inherent variability (lower SD). Sample size is the lever you control. The simulation reveals that even with correct procedure, some intervals miss — those are the unlucky 5%. This makes the frequentist definition concrete: 95% is about the procedure across repetitions, not certainty about any single interval.
+          </p>
+        </div>
+      )}
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'A 95% CI does NOT mean there\'s a 95% chance the true mean is inside THIS interval. It means: if you built 100 such intervals from 100 different samples, about 95 of them would contain the true mean. Confidence is a property of the procedure, not a specific interval.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Report CIs, not just means. "Conversion rate: 4.2%" is a point estimate. "Conversion rate: 4.2% [95% CI: 3.8%–4.6%]" is an estimate with its uncertainty quantified. The first looks more precise. The second is more honest. Stakeholders who make decisions on point estimates without knowing the uncertainty are flying blind.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use CI width to communicate study reliability. A CI of [4.51, 5.09] says you've pinned down the mean to within ±0.3 minutes — tight. A CI of [2.0, 7.6] says you have almost no information. When a study result is reported without a CI, ask for it — then judge whether the study was precise enough to support the conclusion being drawn.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Overlapping confidence intervals do not mean "no significant difference." Two 95% CIs can overlap and still produce a statistically significant difference in a two-sample test — because the test directly computes the distribution of the difference, which has its own SE. If you're comparing two estimates, compute the CI of the difference, not the overlap of the two individual CIs.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -291,11 +326,7 @@ export function Module10_CI({ module, onNext }) {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button
-          className="pal-glow-pulse"
-          onClick={onNext}
-          style={{ padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
-        >
+        <button className="pal-glow-pulse" onClick={onNext} style={{ padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}>
           Next concept →
         </button>
       </div>

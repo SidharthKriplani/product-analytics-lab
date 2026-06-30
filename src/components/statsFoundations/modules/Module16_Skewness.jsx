@@ -39,6 +39,15 @@ function buildFill(pts, xMin, xMax, yMax) {
 
 const N_PTS = 200;
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module16_Skewness({ module, onNext }) {
   const [distType, setDistType] = useState('lognormal');
   // topContrib: what fraction of total "revenue" the top 10% contribute
@@ -98,26 +107,37 @@ export function Module16_Skewness({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Your revenue data has a long right tail — the top 1% of users generate 30% of total revenue. The mean revenue per user is $15 but the median is $2. When your PM reports "average revenue is $15," most stakeholders picture a typical user spending around $15. That\'s wildly wrong.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Throughout these modules, the normal distribution has been our baseline: symmetric, bell-shaped, defined by mean and SD. But almost every product metric you'll encounter is not symmetric. Revenue per user, session length, time to convert, LTV, number of sessions per month — they're all right-skewed. The distribution leans hard to the left with a long tail extending to the right.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Most product metrics — revenue, session length, LTV, order value — are right-skewed, not normal. Knowing this changes which summary stats you report, which tests you run, and whether you should log-transform before analysis. Toggle between distributions below to see skewness in action.
+        <p style={prose}>
+          This isn't a data quality problem to fix. It's the true shape of the data. <strong style={{ color: 'var(--text)' }}>Skewness</strong> is the asymmetry of a distribution. A right-skewed distribution has most values clustered toward the low end, with a long tail of large values pulling the mean upward. The characteristic pattern: median revenue per user is £12. Mean revenue per user is £47. The difference isn't measurement error — it's a small number of high-spending users dragging the mean far above the typical experience.
+        </p>
+        <p style={prose}>
+          Why is product data almost always right-skewed? Because many product quantities are multiplicative rather than additive. User lifetime value is roughly (sessions per week) × (revenue per session) × (weeks retained). Quantities built from multiplying other quantities naturally produce right-skewed distributions. The normal distribution emerges from sums of many small effects. <strong style={{ color: 'var(--text)' }}>Log-normal distributions emerge from products of many small effects.</strong>
+        </p>
+        <p style={prose}>
+          A variable is log-normally distributed if taking its logarithm produces a normal distribution. The log transform compresses the right tail and spreads the left — what was a skewed distribution becomes approximately bell-shaped. This matters practically because normal statistical tools work on the transformed variable. Instead of running a t-test on revenue directly — where the distribution violates the tool's assumptions — you run it on log(revenue). The result is a comparison of log-means, which is a comparison of geometric means on the original scale.
+        </p>
+        <p style={prose}>
+          The <strong style={{ color: 'var(--text)' }}>geometric mean</strong> is the natural center for log-normal data: it's the exponential of the mean log. For right-skewed data it sits between the median and the mean, representing the "typical multiplicative value." The log transformation is not a trick — it's matching your analysis tool to the generating process of your data.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Compare Normal vs. Log-Normal</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You have revenue per user data with median £8 and mean £31. If you add one enterprise user who spent £10,000, what happens to the mean? What happens to the median? What happens to the geometric mean?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>Skewness</strong> describes asymmetry in a distribution. Most product metrics — revenue per user,
-        session length, LTV — are <em>right-skewed</em> (log-normal), not symmetric. A small number of power users
-        drag the mean far above the median, making averages misleading.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Compare Normal vs. Log-Normal</div>
 
-      {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Toggle between Normal and Log-Normal, then drag the "top 10% contribution" slider for the log-normal case. Watch the mean pull further from the median as skewness increases. Notice the mean/median ratio — when that ratio is high, the mean is not a good description of the typical user.
       </div>
@@ -309,19 +329,29 @@ export function Module16_Skewness({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          The mean moves dramatically with a single extreme outlier. The median barely moves. The geometric mean moves modestly — it's more resistant than the mean because log(10,000) is only about 4× larger than log(100), even though 10,000 is 100× larger. For multiplicative data, the geometric mean is the most stable and representative central tendency. The toggle shows that what looked like a skewed mess is actually a well-behaved distribution in log-space.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'Revenue, session length, and LTV are right-skewed. The mean is dragged by the top 1%. When your metric is log-normal, median is more honest than mean, and log-transforming before A/B testing gives cleaner results.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> For any revenue, LTV, or engagement-intensity metric, check whether log-transformation improves normality before running statistical tests. The quick check: does log(metric + 1) look approximately normal in a histogram? If yes, run your analysis on the transformed variable and back-transform results. Report the multiplicative effect on the original scale.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Report median and geometric mean alongside the arithmetic mean for right-skewed product metrics. "Revenue per user: mean £47, median £12, geometric mean £18" tells a stakeholder that the typical user generates £12–18, while the mean is elevated by a power-user tail. Each number tells a different true story. None is wrong — they answer different questions.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When an A/B test on a revenue metric comes back non-significant despite a visible lift in the mean, check whether the high-variance right tail is killing your power. Winsorize outliers (cap extreme values at the 95th or 99th percentile), or analyze log-transformed revenue. Either reduces variance, increases effective signal-to-noise, and often reveals a significant lift that was buried in tail noise.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'This directly affects how you run and interpret A/B tests on revenue metrics. A significant mean lift might be driven by 3 whale users. A non-significant result might mask a real median lift.'}
+          {module?.connection || 'This directly affects how you run and interpret A/B tests on revenue metrics. A significant mean lift might be driven by 3 whale users. A non-significant result might mask a real median lift. Always specify in advance whether you\'re testing the mean or the median — and use the right transformation for each.'}
         </div>
       </div>
 

@@ -26,6 +26,15 @@ var MCQ_OPTIONS = [
 ];
 var MCQ_ANSWER = 'b';
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module26_BayesianThinking({ module, onNext }) {
   var [prior, setPrior] = useState(50);
   var [picked, setPicked] = useState(null);
@@ -77,12 +86,36 @@ export function Module26_BayesianThinking({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        <strong>Bayesian thinking</strong> starts with what you already believe (a prior), then updates that belief as new data arrives to form a posterior. In product analytics, this is how you think about feature impact before and after running small tests. Unlike frequentist methods that treat parameters as fixed unknowns, Bayesian inference gives you a full distribution of plausible values.
-      </p>
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        The key formula is Bayes\' theorem: <em>P(hypothesis | data) is proportional to P(data | hypothesis) times P(hypothesis)</em>. Your prior belief gets multiplied by the likelihood of the observed data, then normalized. With weak evidence, the prior dominates. With strong evidence, the data overwhelms any prior.
-      </p>
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          Every statistical method we've covered so far operates within the frequentist framework: probabilities are long-run frequencies, parameters are fixed unknowns, and p-values measure how often you'd see your data in a world where H₀ is true. There's a different way to think about probability entirely.
+        </p>
+        <p style={prose}>
+          In the Bayesian framework, probability is a degree of belief. A probability of 0.8 means "I'm 80% confident in this, given what I know." The Bayesian question is: given everything I've observed so far, what should I believe?
+        </p>
+        <p style={prose}>
+          The mechanism for updating beliefs is Bayes' theorem: <strong style={{ color: 'var(--text)' }}>P(hypothesis | data) = P(data | hypothesis) × P(hypothesis) / P(data)</strong>. Your updated belief (posterior) is proportional to how well the data fits your hypothesis (likelihood) multiplied by your prior belief (prior).
+        </p>
+        <p style={prose}>
+          The prior is what you believed before the data. If you've run 60 experiments on your checkout flow and the average lift has been between -0.2pp and +0.5pp, your prior reflects that history — you'd be surprised by a claimed 5pp lift. The likelihood is how consistent the data is with each possible hypothesis value. Multiplying prior by likelihood and normalizing gives the posterior — your updated belief distribution.
+        </p>
+        <p style={prose}>
+          Two features change the workflow. <strong style={{ color: 'var(--text)' }}>Continuous updating</strong>: you can update your beliefs every day as new data arrives, without inflating false positive rates. <strong style={{ color: 'var(--text)' }}>Credible intervals</strong>: a Bayesian 95% credible interval [a, b] means "I'm 95% confident the parameter lies in this range" — the intuitive interpretation most people mistakenly apply to frequentist confidence intervals. In Bayesian analysis, it's actually true.
+        </p>
+      </div>
+
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You've run 5 previous experiments on the same checkout button and the average lift has been +0.2pp. A new experiment shows a 2pp lift in early data. Should you be more or less confident in the 2pp claim than you would be without prior knowledge? What happens to the posterior estimate?
+        </p>
+      </div>
+
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Prior vs Posterior</div>
 
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Drag the prior slider to set your initial belief about whether a feature improves retention. Evidence is fixed: 3 out of 5 small tests showed improvement. Watch how your posterior shifts — notice that with only 5 data points, your prior still matters a lot.
@@ -231,15 +264,25 @@ export function Module26_BayesianThinking({ module, onNext }) {
         )}
       </div>
 
-      {/* Key Insight */}
+      {/* What you should have confirmed */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          With an informative prior centered at +0.2pp, the posterior estimate of the 2pp lift gets shrunk toward the prior — the posterior might land at +1pp. This is Bayesian shrinkage: extreme estimates get pulled toward prior expectations. With a large experiment, the data dominates and the posterior converges on the observed 2pp. With a small experiment, the prior matters substantially. The shrinkage is not a bug — it's a feature that prevents individual noisy experiments from producing wildly misleading estimates.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'Your prior belief matters enormously when evidence is weak. With strong evidence, any reasonable prior washes out. Bayesian credible intervals have the direct probability interpretation that frequentist confidence intervals do not.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When a stakeholder asks "what's the probability the new feature is better?" — Bayesian A/B testing answers that directly. Frequentist testing doesn't. If your team is making decisions based on probability-of-superiority estimates, Bayesian output is more natural than p-values. Several platforms (Optimizely, VWO, in-house) offer Bayesian experiment analysis. Know when to use it.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use the prior as a mechanism for encoding historical knowledge, not as a way to force a conclusion. Before a high-stakes experiment, write down what your historical experiment results imply about the plausible range of effects. This prior is legitimate scientific knowledge. Using it reduces variance in your estimates and decreases the rate of improbable-but-statistically-significant false discoveries.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> The value of Bayesian thinking extends beyond formal inference. "What did we believe before? What does the new data imply? What should we believe now?" is the right structure for any evidence update. When a single experiment shows a surprising result, the Bayesian question — how likely is a result this extreme given our prior knowledge? — is exactly the right check on overreacting to noise.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -251,7 +294,7 @@ export function Module26_BayesianThinking({ module, onNext }) {
         <button
           className="pal-glow-pulse"
           onClick={onNext}
-          style={{ padding: '0.7rem 1.75rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
+          style={{ padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}
         >
           Next concept →
         </button>

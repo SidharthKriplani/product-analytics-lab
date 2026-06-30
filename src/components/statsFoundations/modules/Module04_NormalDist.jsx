@@ -25,6 +25,15 @@ const N_POINTS = 220;
 // narrow σ → tall bell, wide σ → short flat bell.
 const REF_PDF = 1 / (0.5 * Math.sqrt(2 * Math.PI));
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module04_NormalDist({ module, onNext }) {
   const [mu, setMu] = useState(0);
   const [sigma, setSigma] = useState(1);
@@ -79,23 +88,44 @@ export function Module04_NormalDist({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          You plot your experiment\'s primary metric — time-to-checkout in seconds — and it forms a clean bell shape. Your stats lead says that\'s good news: a normal distribution means you can use z-tests, build confidence intervals, and run power calculations with well-understood formulas.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You now have two numbers that summarize a dataset: where it's centered (mean) and how spread out it is (standard deviation). But two numbers don't tell you everything. You still don't know the shape.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          But what exactly defines that bell? Just two numbers: the mean (where the peak sits) and the standard deviation (how wide the bell spreads). Move the sliders below to see how these two parameters completely control the shape.
+        <p style={prose}>
+          The shape matters because shape determines what's possible. A skewed distribution means extreme values on one side are far more common than the mean suggests. A bimodal distribution means you probably have two distinct groups masquerading as one. Two datasets can share the same mean and SD and look completely different.
+        </p>
+        <p style={prose}>
+          One shape appears so consistently — across so many different domains — that it has been studied for over two centuries. Heights of people. Measurement errors in physics experiments. Test scores in large populations. They all cluster around a center, thin out symmetrically toward the extremes, and produce a characteristic bell curve. Why? Because most of these quantities are the sum of many small, independent factors. When you sum many small independent influences, the result tends toward this bell shape regardless of what the individual factors look like.
+        </p>
+        <p style={prose}>
+          This bell shape is the <strong style={{ color: 'var(--text)' }}>normal distribution</strong>. It is defined entirely by two parameters: the mean μ (where the center sits) and the standard deviation σ (how wide the bell is). Change the mean and the whole curve shifts left or right. Change the SD and it becomes taller and narrow, or flatter and wide. The shape is always the same bell — only position and width vary.
+        </p>
+        <p style={prose}>
+          Because the shape is mathematically fixed, you can make precise probability statements from just these two numbers. Specifically: approximately 68% of data falls within 1 SD of the mean. Approximately 95% falls within 2 SD. Approximately 99.7% falls within 3 SD. This is the empirical rule — memorize it once and use it constantly.
+        </p>
+        <p style={prose}>
+          Now the critical caveat. Not everything is normally distributed. Revenue per user is typically right-skewed. Session duration: same. If you assume normality where it doesn't hold and use the empirical rule, you'll systematically underestimate the probability of extreme values. The normal distribution is a model — useful, precise, powerful — but an assumption that has to be checked, not a default that's always safe.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Shape the Bell Curve</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          If you have a normally distributed metric with mean 50 and SD 10, what fraction of values would you expect to be above 70? Work through the empirical rule before checking.
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        The normal distribution is a symmetric bell curve defined entirely by its mean μ and standard deviation σ.
-        Use the sliders to shift and reshape the curve. Notice that changing σ widens the bell (more spread) while μ slides it left or right.
-      </p>
+      {/* ── Interactive label ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Shape the Bell Curve</div>
+
+      {/* ── Instructions box ── */}
+      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+        <strong>What to do:</strong> Drag both sliders and watch the curve reshape. Notice that changing the mean (mu) slides the whole curve left or right, while changing sigma widens or narrows it — but the 68-95-99.7 percentages stay constant.
+      </div>
 
       {/* SVG Curve */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem', overflowX: 'auto' }}>
@@ -165,11 +195,6 @@ export function Module04_NormalDist({ module, onNext }) {
         </svg>
       </div>
 
-      {/* Instruction */}
-      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-        <strong>What to do:</strong> Drag both sliders and watch the curve reshape. Notice that changing the mean (mu) slides the whole curve left or right, while changing sigma widens or narrows it — but the 68-95-99.7 percentages stay constant.
-      </div>
-
       {/* Sliders */}
       <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 220, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.1rem' }}>
@@ -220,19 +245,29 @@ export function Module04_NormalDist({ module, onNext }) {
         ))}
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          70 is exactly 2 SD above the mean (50 + 2×10). The empirical rule says 95% falls within ±2σ, meaning 2.5% falls above the upper bound. So about 2.5% of values exceed 70. If you estimated "very few" but couldn't be precise — that's exactly the gap the normal distribution closes. With shape information, gut feel becomes a number.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'The 68-95-99.7 rule is constant for every normal distribution, regardless of μ and σ. This is why experiment results (which are approximately normal by the Central Limit Theorem) can always be compared to a standard scale.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Before applying any statistical test that assumes normality, plot your data. A histogram takes 30 seconds. If the distribution is clearly right-skewed — and most product metrics are — you've just saved yourself from a fundamentally wrong analysis. Use the median instead of the mean, and non-parametric tests when normality doesn't hold.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use the empirical rule for fast back-of-envelope probability estimates. If a stakeholder asks "how often will this metric exceed X?" and you know the distribution is roughly normal, you can answer from mean and SD alone — in the meeting, without a spreadsheet. That speed has real value.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a colleague or vendor claims "this metric is normally distributed," ask to see the distribution. Many metrics that feel like they "should" be normal — conversion rates near 0% or 100%, any metric bounded at zero — aren't. Misapplied normality assumptions are one of the most common sources of wrong conclusions in product analytics.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'By the Central Limit Theorem, your A/B test sample means will be normally distributed even if individual user behavior is skewed. This is the mathematical foundation that makes p-values and confidence intervals valid.'}
+          {module?.connection || 'By the Central Limit Theorem, your A/B test sample means will be normally distributed even if individual user behavior is skewed. This is the mathematical foundation that makes p-values and confidence intervals valid — not the raw data being normal, but the sampling distribution of the mean.'}
         </div>
       </div>
 

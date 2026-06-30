@@ -47,6 +47,15 @@ const CONDITIONS = [
   },
 ];
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module25_IV({ module, onNext }) {
   var _saved = loadSFState('sf25');
   const [answers, setAnswers] = useState(function() { return _saved ? (_saved.answers || {}) : {}; });
@@ -71,25 +80,39 @@ export function Module25_IV({ module, onNext }) {
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          Users who opt into your premium coaching feature have 30% higher retention. But they self-selected — maybe they were already more motivated. You can\'t randomize access for ethical and business reasons. So you look for an instrument: something that nudged users toward the feature but couldn\'t directly affect retention.
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You want to know whether being contacted by your sales team causes users to convert. Simple comparison: contacted users convert at 18%; non-contacted at 6%. Is that 12pp gap causal? Almost certainly not all of it. Sales teams contact engaged users — people who have already shown intent signals. Those users were probably going to convert at higher rates even without the call.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Instrumental Variables isolates the variation in treatment that\'s essentially random — like being shown a promotional banner due to a random UI experiment. The banner affects whether users adopt the feature but has no direct path to retention. If the instrument is valid, you can estimate the true causal effect despite self-selection. Match the three IV conditions below.
+        <p style={prose}>
+          You can't randomize sales contact, can't run an RD, and DiD doesn't apply directly. What you need is a source of variation in sales contact that is not correlated with user intent.
+        </p>
+        <p style={prose}>
+          Imagine salespeople have territories, and whether a user's company is in a high-density territory determines their probability of being contacted. This geographic variation is as good as random with respect to user intent. This is an <strong style={{ color: 'var(--text)' }}>instrumental variable (IV)</strong> — a variable that affects the treatment (sales contact) without directly affecting the outcome (conversion) except through the treatment.
+        </p>
+        <p style={prose}>
+          The method is two-stage least squares (2SLS). Stage 1: regress sales contact on territory density to get predicted contact probability. Stage 2: regress conversion on the predicted contact probability from stage 1. The coefficient from stage 2 is the IV estimate. It works because the predicted contact probability contains only the clean, geography-driven variation — the confounded part driven by intent is not in the predicted values.
+        </p>
+        <p style={prose}>
+          Three assumptions must hold. <strong style={{ color: 'var(--text)' }}>Relevance</strong>: the instrument must actually affect the treatment (testable — F-stat below ~10 means weak instrument). <strong style={{ color: 'var(--text)' }}>Exclusion restriction</strong>: the instrument must not affect the outcome except through the treatment (not testable — requires domain argument). <strong style={{ color: 'var(--text)' }}>Independence</strong>: the instrument must not be correlated with confounders. The IV estimate is always a Local Average Treatment Effect — the causal effect for compliers only.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Match the IV Conditions</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You're evaluating an IV for estimating the effect of app notifications on daily active use. Your proposed instrument is whether the user's device was manufactured before a certain date (older devices don't support rich notifications). What would you check to evaluate whether this is a valid instrument?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Instrumental Variables (IV) uses a third variable — the <strong>instrument</strong> — that causes
-        the treatment but has no direct effect on the outcome. This isolates the variation in treatment
-        that is essentially random. IV is valid only when all three conditions below hold. Select the
-        correct description for each.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Match the IV Conditions</div>
+
+      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
+        <strong>What to do:</strong> For each of the three IV conditions, read the description and the example, then select the option that correctly satisfies that condition. You will see immediate feedback with the testability note. Try to distinguish which conditions can actually be tested versus which require theoretical justification.
+      </div>
 
       {/* Diagram */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem', overflowX: 'auto' }}>
@@ -127,11 +150,6 @@ export function Module25_IV({ module, onNext }) {
             </marker>
           </defs>
         </svg>
-      </div>
-
-      {/* Instruction */}
-      <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
-        <strong>What to do:</strong> For each of the three IV conditions, read the description and the example, then select the option that correctly satisfies that condition. You will see immediate feedback with the testability note. Try to distinguish which conditions can actually be tested versus which require theoretical justification.
       </div>
 
       {/* Condition cards */}
@@ -211,21 +229,37 @@ export function Module25_IV({ module, onNext }) {
         </div>
       )}
 
-      {/* Key Insight */}
+      {/* What you should have confirmed */}
+      {allDone && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            You'd check relevance (do older devices have meaningfully lower notification engagement? First-stage F-stat), exclusion restriction (do older devices affect DAU through any mechanism other than notifications? Possibly — older devices might have worse performance overall, affecting DAU directly, violating the exclusion restriction), and independence (are older-device users systematically different in ways that affect DAU?). This instrument likely fails the exclusion restriction. The condition cards show how the confounded path makes the IV estimate inconsistent.
+          </p>
+        </div>
+      )}
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>{module?.keyInsight}</div>
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When a proposed instrument is on the table, immediately test its first stage. If the F-statistic is below 10, stop. A weak instrument produces IV estimates that are worse than the biased OLS estimate you started with — biased in the same direction and with much more variance. Strong first stage is a prerequisite, not a check.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> The exclusion restriction is always the hard part. It can't be tested statistically — it requires an argument about causal mechanisms. Build that argument explicitly: why can't Z affect Y except through X? What are the ways Z could affect Y directly? If any plausible direct pathway exists, the instrument is invalid. This argument belongs in the analysis writeup, not just in your head.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone cites an IV study as evidence, ask: what's the instrument, what's the first stage strength, and what's the argument for the exclusion restriction? These three questions cover the three assumptions. If any are unanswered, the study's causal claim isn't established. IV results are often presented with more certainty than the underlying assumptions warrant.</p>
+        </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{module?.connection}</div>
+        <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          {module?.connection || 'IV is a tool for causal estimation when randomization is impossible. In experiment design, when you can\'t randomly assign the treatment itself, look for a variable that shifts assignment probability cleanly — that variable is your instrument, and 2SLS recovers the causal effect.'}
+        </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button className="pal-glow-pulse" onClick={onNext} style={{ padding: '0.7rem 1.75rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--green)', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', boxShadow: 'var(--shadow)', letterSpacing: '0.02em' }}>
-          Complete <Icon name='check' size={15} color='currentColor' />
+        <button className="pal-glow-pulse" onClick={onNext} style={{ padding: '0.6rem 1.5rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--yellow)', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}>
+          Next concept →
         </button>
       </div>
     </div>

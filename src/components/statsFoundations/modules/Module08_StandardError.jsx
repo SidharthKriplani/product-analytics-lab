@@ -42,6 +42,15 @@ function buildCurvePath(sigma) {
   return 'M ' + pts.join(' L ');
 }
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module08_StandardError({ module, onNext }) {
   const [n, setN] = useState(100);
 
@@ -71,26 +80,41 @@ export function Module08_StandardError({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          You pull the average session duration and it says 8.2 minutes. You refresh the query an hour later and it says 7.9. Tomorrow it says 8.5. Your PM asks why the number keeps bouncing. The answer is standard error — every sample mean has built-in wobble, and the SE tells you exactly how much wobble to expect.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You sample 500 users and measure their session duration. The sample mean is 4.8 minutes. That's your estimate of the true population mean. But if you'd sampled a different 500 users — same product, same time period, just different people drawn by chance — the mean would be slightly different. Maybe 5.1 minutes. Maybe 4.5 minutes.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          The critical insight: SE shrinks with the square root of sample size, not linearly. That means you need 4x the users to cut the wobble in half. Drag the slider below and watch the sampling distribution narrow as n grows — but notice the diminishing returns.
+        <p style={prose}>
+          The sample mean varies from sample to sample, even when nothing about the product or population has changed. This is sampling variability — it's not error, it's an unavoidable property of working with samples. The question is: how much does the sample mean vary? Is 4.8 a tight estimate of the true mean, or could the true mean plausibly be 6.0 or 3.0? The mean itself doesn't tell you. You need a separate measure — a measure of the precision of your estimate.
+        </p>
+        <p style={prose}>
+          Standard deviation tells you how individual data points spread around the mean. But individual spread is not what you need here. You need to know how much the mean estimate itself varies from one sample of n users to another. These are different things.
+        </p>
+        <p style={prose}>
+          Imagine drawing thousands of different samples of size n from the population, computing the mean of each. Those sample means form their own distribution — a distribution of estimates. The standard deviation of that distribution of means is the <strong style={{ color: 'var(--text)' }}>standard error</strong>. The formula is: SE = σ / √n — where σ is the population standard deviation and n is your sample size.
+        </p>
+        <p style={prose}>
+          Why √n? Because the variance of the mean of n independent observations is σ²/n — each observation's variance contributes equally, and they're independent, so variances add and you divide by n. Then take the square root to get standard deviation. The square root is fundamental — it means you need four times the data to halve the SE.
+        </p>
+        <p style={prose}>
+          Standard deviation describes your data. Standard error describes your estimate's reliability. Conflating them — and it happens constantly in presentations — leads directly to overconfidence in noisy estimates and underconfidence in precise ones. A study reports "mean = 4.8, SD = 3.0." Another reports "mean = 5.2, SD = 3.2." Are these different? The answer depends entirely on the sample sizes — a fact the SD alone cannot tell you.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Watch Precision Scale with Sample Size</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          If you double your sample size, by how much does your SE shrink? By half? By more? By less? Work through the formula before exploring.
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        The <strong>Standard Error (SE)</strong> measures how much your sample mean varies from sample to sample.
-        It equals the population standard deviation divided by the square root of n — so larger samples produce smaller (more precise) SEs.
-        Critically, you need <em>4× more users</em> to halve the standard error.
-      </p>
+      {/* ── Interactive label ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Watch Precision Scale with Sample Size</div>
 
-      {/* Instruction */}
+      {/* ── Instructions box ── */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Drag the sample size slider and watch the SE formula update in real time. Notice that you need to quadruple n to halve the SE — the square-root relationship. Compare how the current curve (solid blue) compares against the reference curves for n=25, 100, and 400.
       </div>
@@ -219,19 +243,29 @@ export function Module08_StandardError({ module, onNext }) {
         </table>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Doubling n reduces SE by a factor of 1/√2 ≈ 0.71 — about 29% reduction, not 50%. To halve SE, you need 4x the sample size. This non-linearity is why collecting more data has steeply diminishing returns: the first 1,000 users dramatically reduce your SE; the next 4,000 give you the same improvement again.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'SE shrinks with the square root of n — not linearly. Going from n=100 to n=400 (4× users) only halves the SE from 1.5 to 0.75. This square-root relationship is why collecting more data has diminishing returns on precision.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Never present a mean estimate without its SE or confidence interval. A mean without precision information is not informative — it's a single point estimate that could be anywhere. "Session duration is 4.8 minutes (SE: 0.4)" is a statement with meaning. "Session duration is 4.8 minutes" is a number without context.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When comparing two estimates ("team A's mean is 4.8, team B's is 5.2"), your first question is whether the difference-to-SE ratio is large enough to be meaningful. If each estimate has SE ≈ 0.5, a 0.4 difference is within one SE — almost certainly noise. If SE ≈ 0.05, a 0.4 difference is 8 SEs — not noise.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone proposes cutting a study short to save time, you can calculate exactly what they're giving up. Halving the run time roughly halves n, which increases SE by √2 ≈ 41%. Ask them: are they comfortable with 41% wider confidence intervals? This makes the tradeoff concrete rather than abstract.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'Your confidence interval width is 2 × 1.96 × SE. To get a CI half as wide — and detect effects half as large — you need 4× more users per variant. This is the core tradeoff in A/B test sample size planning.'}
+          {module?.connection || 'Your confidence interval width is 2 × 1.96 × SE. To get a CI half as wide — and detect effects half as large — you need 4× more users per variant. This is the core tradeoff in A/B test sample size planning. SE is what you're managing when you size an experiment.'}
         </div>
       </div>
 

@@ -27,6 +27,15 @@ const ANCHORS = [
   { z: -1, label: 'z = −1', desc: 'Bottom ~16% — one SD below mean', color: 'var(--yellow)' },
 ];
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module05_ZScores({ module, onNext }) {
   const [popMu, setPopMu] = useState(50);
   const [popSigma, setPopSigma] = useState(10);
@@ -79,24 +88,41 @@ export function Module05_ZScores({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          A user\'s session time is 47 minutes. Your average session is 20 minutes with a standard deviation of 9. Is this person a power user, a confused user stuck on a broken flow, or just slightly above normal? Without a z-score, you have no way to answer — 47 minutes means nothing until you know how far it is from the mean in standard-deviation units.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          You're looking at two users. One has a session duration of 8 minutes. The other spent £85 in a single order. Your typical user sessions are around 5 minutes; your typical order is around £30. Which of these two observations is more unusual?
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          Z-scores convert raw values to a universal scale so you can compare across different metrics. A z-score of +2 means the same degree of unusualness whether you\'re measuring session time, revenue, or page views. Set your population parameters below and move the value slider to see where it lands.
+        <p style={prose}>
+          You can't compare them directly. They're measured in different units, from distributions with different means and different spreads. 8 minutes might be mildly above average if session duration has wide variance. £85 might be extremely unusual if orders are tightly clustered near £30. Or vice versa. The raw number tells you nothing about how unusual it is relative to typical behavior.
+        </p>
+        <p style={prose}>
+          What you need is a common scale — a way to express any observation, in any metric, in terms of one thing: how far it sits from its own mean, measured in units of its own spread.
+        </p>
+        <p style={prose}>
+          That one thing is the <strong style={{ color: 'var(--text)' }}>Z-score</strong>. The calculation is two steps. First, subtract the mean — this centers the distribution so the mean becomes zero. Second, divide by the standard deviation — this scales the distribution so one unit of SD becomes one unit on the new scale. Z = (x − μ) / σ. A Z-score of 0 means the observation is exactly at the mean. A Z-score of 1 means it's one SD above. A Z-score of −2 means it's two SDs below. The scale is the same regardless of what metric you started with.
+        </p>
+        <p style={prose}>
+          Let's take the example. Session duration: mean 5 min, SD 2 min. The user with 8 minutes has Z = (8 − 5) / 2 = 1.5. Order value: mean £30, SD 8. The user with £85 has Z = (85 − 30) / 8 = 6.9. Now you can compare: 8 minutes is mildly elevated. £85 is an extreme outlier — nearly 7 SDs from the center. That's not a high spender; that needs investigation.
+        </p>
+        <p style={prose}>
+          Because Z-scores are on the standard normal scale (mean 0, SD 1), every Z-score maps directly to a percentile. Z = 1.0 is roughly the 84th percentile. Z = 1.96 is the 97.5th percentile. Z = 3.0 is the 99.87th percentile — often used as an anomaly threshold. One constraint: Z-scores only make interpretive sense for data that is approximately normally distributed. For skewed metrics, transform first or use percentile rank instead.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Locate a Value on the Curve</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Two users both have a Z-score of 2.0 — one in session duration, one in revenue. What can you say with confidence about their relative unusualness? What can't you say?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        It converts any normally distributed measurement to a universal scale — so you can compare values from different distributions.
-      </p>
+      {/* ── Interactive label ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Locate a Value on the Curve</div>
 
-      {/* Instruction */}
+      {/* ── Instructions box ── */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Adjust the three sliders to set your population mean, standard deviation, and the specific value you want to locate. Watch where the dot lands on the standard normal curve and read the z-score formula. Try pushing x well above or below the mean to see extreme tail positions.
       </div>
@@ -197,19 +223,29 @@ export function Module05_ZScores({ module, onNext }) {
         </div>
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Z-scores make the two users' unusualness directly comparable — Z = 2.0 in both means both are at the same percentile (~97.7th) in their respective distributions. What you can't say: which metric matters more to the business, or whether the distributions were actually normal. Comparability in Z-score space is a mathematical statement, not a business one. You still have to interpret what the Z means in context.
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight || 'Z-scores standardize values so you can compare across different metrics and populations. A conversion rate 1.5 SDs above average and a revenue value 1.5 SDs above average are equally "unusual" in their respective distributions.'}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Use Z-scores for anomaly flagging in monitoring dashboards. Set a threshold — typically |Z| greater than 3 — and flag automatically. This is far more reliable than percentage-change thresholds, which are sensitive to baseline level. A 10% change on a metric with 5% natural daily variance is noise; on a metric with 1% variance it's a fire.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When comparing performance across teams, cohorts, or markets that measure different underlying distributions, standardize first. Revenue per user in the UK versus India are not directly comparable in raw currency — they operate in different distributions. Z-scores let you ask "which market is performing above its own normal?" — a meaningful question the raw number can't answer.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a stakeholder says "that's a big number," ask "big relative to what?" The Z-score forces that question to be answered precisely. An outlier is only an outlier relative to a distribution — and defining that distribution is always the analyst's job, not the metric's.</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection || 'The z-score is the test statistic in a z-test. When you see "z = 2.0, p = 0.046", the z-score is exactly what you calculated here — how many standard errors the observed difference is from zero (the null hypothesis).'}
+          {module?.connection || 'The z-score is the test statistic in a z-test. When you see "z = 2.0, p = 0.046", the z-score is exactly what you calculated here — how many standard errors the observed difference is from zero (the null hypothesis). The p-value is the area in the tails beyond that z.'}
         </div>
       </div>
 

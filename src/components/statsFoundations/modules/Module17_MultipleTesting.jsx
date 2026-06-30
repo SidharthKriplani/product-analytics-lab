@@ -1,5 +1,14 @@
 import { useState, useMemo } from 'react';
 
+const prose = {
+  color: 'var(--text-secondary)',
+  lineHeight: 1.75,
+  margin: 0,
+  fontSize: '0.92rem',
+};
+
+const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
+
 export function Module17_MultipleTesting({ module, onNext }) {
   const [n, setN] = useState(5);
   const [bonferroni, setBonferroni] = useState(false);
@@ -37,25 +46,37 @@ export function Module17_MultipleTesting({ module, onNext }) {
 
   return (
     <div className="pal-page-enter" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Scenario */}
-      <div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>The Scenario</div>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
-          You tested 12 metrics in your A/B experiment and found 2 statistically significant. The PM is excited — two wins from one experiment! But at alpha = 0.05, you\'d expect about 0.6 false positives from 12 tests even if there\'s no real effect. Those 2 "wins" might just be noise.
+
+      {/* ── Causal chain prose ── */}
+      <div style={sectionGap}>
+        <p style={prose}>
+          The significance threshold α = 0.05 means: if H₀ is true, there's a 5% chance of seeing a result this extreme by chance. That guarantee is per test. It only holds for a single hypothesis, tested once, with the decision threshold set before looking at the data.
         </p>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0.6rem 0 0', fontSize: '0.9rem' }}>
-          This is the multiple testing problem. Every additional metric you test gives randomness another chance to fool you. The Bonferroni correction tightens the threshold — but at a cost. Drag the slider below to see how the false positive rate explodes as you add more tests, and what correction does about it.
+        <p style={prose}>
+          What happens when you run 20 tests? If you test 20 independent hypotheses — 20 metrics, 20 subgroups, 20 product variants — and none of the true effects exist, the probability of at least one coming back p &lt; 0.05 by chance is 1 − 0.95^20 ≈ 64%. You're more likely than not to find a "significant" result that's actually noise.
+        </p>
+        <p style={prose}>
+          In product analytics this pattern appears constantly, but quietly. An experiment dashboard shows 40 metrics. Three come back significant at p &lt; 0.05. The team highlights those three. But how many would have come back significant by chance if none of the effects were real? Roughly 40 × 0.05 = 2. At least two of those three "discoveries" could be noise.
+        </p>
+        <p style={prose}>
+          Subgroup hunting is the same problem. After an experiment, someone looks at the result in 15 subgroups. One subgroup shows a significant positive effect — and gets presented as the target audience. But 15 comparisons at α = 0.05 expects at least one false positive. This is p-hacking — not necessarily with deliberate intent to deceive. The search for significance across many comparisons produces the same statistical failure as running a single test with a broken threshold.
+        </p>
+        <p style={prose}>
+          Three solutions in order of application: <strong style={{ color: 'var(--text)' }}>Pre-specification</strong> — commit to your hypotheses before looking at data. One primary metric. Subgroup analyses planned in advance. <strong style={{ color: 'var(--text)' }}>Bonferroni correction</strong> — divide α by the number of tests. For 20 tests, each must clear α = 0.0025 instead of 0.05. Conservative and power-costly for large k. <strong style={{ color: 'var(--text)' }}>Benjamini-Hochberg (FDR control)</strong> — instead of controlling the probability of any false positive, controls the fraction of discoveries that are false. Better-suited for exploratory analysis where you expect many effects to be real.
         </p>
       </div>
 
-      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>Try It: Scale Up the Tests</div>
+      {/* ── Hold this question ── */}
+      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          You test 50 metrics in your experiment and find 4 with p &lt; 0.05. Under the null that none have real effects, how many would you expect to be significant by chance? Given that, how do you interpret the 4 findings?
+        </p>
+      </div>
 
-      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, fontSize: '0.95rem' }}>
-        Every hypothesis test carries a 5% false positive rate at α=0.05. Run multiple tests and those errors <em>accumulate</em>.
-        The <strong>family-wise error rate (FWER)</strong> is the probability of getting at least one false positive across all tests — even if every null hypothesis is true.
-      </p>
+      {/* ── Interactive ── */}
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Try It: Scale Up the Tests</div>
 
-      {/* Instruction */}
       <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.84rem', color: 'var(--teal)', lineHeight: 1.5 }}>
         <strong>What to do:</strong> Drag the slider to increase the number of metrics tested and watch the false positive bar fill up. Then toggle on the Bonferroni correction to see how it controls the error rate — and note the cost note showing how much more data you need to maintain power. Click the reference grid to jump to common n values.
       </div>
@@ -184,19 +205,29 @@ export function Module17_MultipleTesting({ module, onNext }) {
         BH procedure: sort p-values, compare each to (i/n) × α threshold.
       </div>
 
-      {/* Key Insight */}
+      {/* ── What you should have confirmed ── */}
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          50 tests × 0.05 = 2.5 expected false positives under the null. Finding 4 significant doesn't necessarily mean 4 real effects — it might mean 2.5 noise discoveries plus 1.5 real effects. Bonferroni corrects α to 0.001, and probably 0 of the 4 survive. BH at 10% FDR might retain 2. The right tool depends on whether you're making a decision (Bonferroni, be conservative) or generating hypotheses to test further (BH, preserve power).
+        </p>
+      </div>
+
+      {/* ── Analyst Move ── */}
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow-text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Key Insight</div>
-        <div style={{ fontSize: '0.88rem', color: 'var(--yellow-text)', lineHeight: 1.6 }}>
-          {module?.keyInsight}
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Distinguish primary from secondary metrics in every experiment before launch. The primary metric gets the full α = 0.05 guarantee — it was your pre-specified decision criterion. Secondary metrics are exploratory; report them with FDR correction or explicitly label them as hypothesis-generating, not decision-making.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When presenting post-hoc subgroup analyses, always state: "these are exploratory and require replication." An exciting subgroup result that wasn't pre-specified is a hypothesis, not a finding. The subgroup that "showed the effect" was selected from many — it's the winner of a noisy lottery.</p>
+          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone runs an experiment, looks at 30 metrics, finds 3 significant, and presents them as the results — ask which were pre-specified before the experiment ran. If none were pre-specified, the entire analysis has inflated false positive risk. The question isn't "which metrics moved" — it's "which metrics were we committed to testing before we looked at the data."</p>
         </div>
       </div>
 
-      {/* Connection */}
+      {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>Connects to Experiments</div>
         <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          {module?.connection}
+          {module?.connection || 'In an experiment with one primary metric and 15 secondary exploratory metrics, the primary gets the full α = 0.05 guarantee. Secondary metrics get Benjamini-Hochberg at 10% FDR. Any "significant" secondary findings are flagged as exploratory hypotheses requiring dedicated experiments — not decisions in themselves.'}
         </div>
       </div>
 
