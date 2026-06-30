@@ -1548,6 +1548,60 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                 })}
               </div>
 
+              {/* Interview Readiness Score */}
+              {totalSqlSolved >= 1 && (() => {
+                var diffWeights = { Easy: 1, Medium: 2, Hard: 3, Master: 4, Forensic: 5 };
+                var maxPts = sqlLabProblems.reduce(function(sum, p) { return sum + (diffWeights[p.difficulty] || 1); }, 0);
+                var rawPts = sqlLabProblems.reduce(function(sum, p) { return sqlSolved.has(p.id) ? sum + (diffWeights[p.difficulty] || 1) : sum; }, 0);
+                var recencyFactor = 1;
+                var daysSince = null;
+                try {
+                  var dDiary = JSON.parse(localStorage.getItem('pal-sql-lab-dates-v1') || '{}');
+                  var latestD = Object.keys(dDiary).sort().pop();
+                  if (latestD) {
+                    daysSince = Math.floor((Date.now() - new Date(latestD).getTime()) / 86400000);
+                    if (daysSince > 60) recencyFactor = 0.7;
+                  }
+                } catch {}
+                var irs = Math.round((rawPts / maxPts) * 100 * recencyFactor);
+                var irsLabel = irs < 25 ? 'Not Ready' : irs < 50 ? 'Building' : irs < 75 ? 'Nearly Ready' : 'Interview Ready';
+                var irsColor = irs < 25 ? 'var(--red)' : irs < 50 ? 'var(--yellow)' : irs < 75 ? 'var(--teal)' : 'var(--green)';
+                var circR = 28;
+                var circC = 2 * Math.PI * circR;
+                return (
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.9rem' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.75rem' }}>Interview Readiness</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ position: 'relative', flexShrink: 0, width: 72, height: 72 }}>
+                        <svg width="72" height="72" viewBox="0 0 72 72">
+                          <circle cx="36" cy="36" r={circR} fill="none" stroke="var(--border)" strokeWidth="6" />
+                          <circle cx="36" cy="36" r={circR} fill="none" stroke={irsColor} strokeWidth="6"
+                            strokeDasharray={circC}
+                            strokeDashoffset={circC * (1 - irs / 100)}
+                            strokeLinecap="round"
+                            transform="rotate(-90 36 36)" />
+                        </svg>
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: '1.15rem', fontWeight: 800, color: irsColor, lineHeight: 1 }}>{irs}</span>
+                        </div>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: irsColor, marginBottom: '0.2rem' }}>{irsLabel}</div>
+                        <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                          {rawPts} / {maxPts} weighted pts
+                          {recencyFactor < 1 && daysSince !== null && (
+                            <span style={{ display: 'block', color: 'var(--yellow)' }}>Score reduced — last practice {daysSince}d ago</span>
+                          )}
+                          {recencyFactor === 1 && daysSince !== null && daysSince <= 60 && (
+                            <span style={{ display: 'block', color: 'var(--teal)' }}>Active in last 60 days</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Weak Topics — only when user has enough solves to show meaningful gaps */}
               {totalSqlSolved >= 5 && (() => {
                 const tagStats = {};
