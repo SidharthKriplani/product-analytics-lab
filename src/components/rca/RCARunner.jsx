@@ -6,7 +6,7 @@ import { RCADebriefPanel } from './RCADebriefPanel.jsx';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
 import { Icon } from '../shared/Icon.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
-import { saveRCAAttempt, saveRCADraft, loadRCADraft, clearRCADraft } from '../../utils/rcaProgress.js';
+import { saveRCAAttempt, saveRCADraft, loadRCADraft, clearRCADraft, getAllRCAProgress } from '../../utils/rcaProgress.js';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { Breadcrumb } from '../shared/Breadcrumb.jsx';
@@ -137,7 +137,14 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
   const _rcaDraft = !savedProgress ? loadRCADraft(caseId) : null;
   const startView = savedProgress ? 'debrief' : 'diagnosis';
   const [view, setView] = useState(startView);
-  const [answerMode, setAnswerMode] = useState(loadAnswerMode());
+
+  // Progressive mode unlock: first 3 completed cases → force Guided (options);
+  // case 4+ → default to Interview (describe) if user has no saved preference.
+  const _rcaCompletedCount = Object.keys(getAllRCAProgress()).length;
+  const isModeLocked = _rcaCompletedCount < 3;
+  const [answerMode, setAnswerMode] = useState(
+    isModeLocked ? 'options' : loadAnswerMode('describe')
+  );
   function handleAnswerModeChange(mode) { setAnswerMode(mode); saveAnswerMode(mode); }
   function handleRCADescribeContinue() {
     track('case_completed', { room: 'rca', id: rcaCase.id, mode: 'describe' });
@@ -300,7 +307,7 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
       {view === 'diagnosis' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
 
-          <AnswerModeToggle value={answerMode} onChange={handleAnswerModeChange} accent="yellow" />
+          <AnswerModeToggle value={answerMode} onChange={handleAnswerModeChange} accent="yellow" locked={isModeLocked} />
 
           {/* Describe mode — write your full diagnosis first, then reveal + self-assess */}
           {answerMode === 'describe' && (
