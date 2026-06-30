@@ -4,10 +4,32 @@ const LEVEL_STYLE = {
   wrong:   { border: 'var(--red)',    bg: 'var(--red-bg)',    label: 'Incorrect' },
 };
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+
+// Deterministic shuffle so the same step always shows the same option order,
+// but the correct answer is not always first. Seed = step.id string.
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+  return h >>> 0;
+}
+function seededShuffle(arr, seed) {
+  const result = [...arr];
+  let s = hashStr(seed);
+  for (let i = result.length - 1; i > 0; i--) {
+    s = (s ^ (s << 13)) >>> 0;
+    s = (s ^ (s >> 17)) >>> 0;
+    s = (s ^ (s << 5)) >>> 0;
+    const j = s % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
 
 export function RCAStepPanel({ step, selectedId, onSelect, submitted, stepNumber, totalSteps }) {
   const [hoveredId, setHoveredId] = useState(null);
+  // Shuffle options deterministically so correct answer is not always first
+  const shuffledOptions = useMemo(() => seededShuffle(step.options, step.id), [step.id, step.options]);
   const selectedOption = submitted && selectedId
     ? step.options.find(o => o.id === selectedId)
     : null;
@@ -42,7 +64,7 @@ export function RCAStepPanel({ step, selectedId, onSelect, submitted, stepNumber
 
       {/* Options */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        {step.options.map((opt) => {
+        {shuffledOptions.map((opt) => {
           const isSelected = selectedId === opt.id;
           const isSubmittedChosen = submitted && isSelected;
           const optLevelStyle = isSubmittedChosen ? (LEVEL_STYLE[opt.level] || LEVEL_STYLE.wrong) : null;

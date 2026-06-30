@@ -14,6 +14,8 @@ import { GateOverlay } from '../shared/GateOverlay.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 import { DescribePanel } from '../shared/DescribePanel.jsx';
 import { AnswerModeToggle, loadAnswerMode, saveAnswerMode } from '../shared/AnswerModeToggle.jsx';
+import { RCAMetricChart } from './RCAMetricChart.jsx';
+import { RCAProgressMap } from './RCAProgressMap.jsx';
 
 const ROOM_KEY = 'rca';
 
@@ -300,7 +302,7 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
 
       {/* Context panel (always visible in diagnosis) */}
       {(view === 'diagnosis') && (
-        <ContextPanel context={rcaCase.context} />
+        <ContextPanel context={rcaCase.context} caseId={rcaCase.id} />
       )}
 
       {/* ─── Diagnosis View ─────────────────────────────────────────── */}
@@ -333,9 +335,17 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
             </>
           )}
 
-          {/* Options mode — existing scaffolded step-by-step flow (untouched) */}
+          {/* Options mode — existing scaffolded step-by-step flow */}
           {answerMode === 'options' && (
           <>
+          {/* Investigation progress map */}
+          <RCAProgressMap
+            steps={steps}
+            currentStepIndex={currentStepIndex}
+            stepChoices={stepChoices}
+            submittedSteps={submittedSteps}
+          />
+
           {/* Completed steps (collapsed) */}
           {steps.slice(0, currentStepIndex).map((step, i) => {
             const chosenId = stepChoices[step.id];
@@ -582,7 +592,7 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
 }
 
 // ─── Context Panel ────────────────────────────────────────────────────────────
-function ContextPanel({ context }) {
+function ContextPanel({ context, caseId }) {
   return (
     <div style={{
       background: 'var(--surface-2)',
@@ -594,6 +604,9 @@ function ContextPanel({ context }) {
       <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
         Case Context
       </div>
+
+      {/* Metric anomaly chart */}
+      <RCAMetricChart caseId={caseId} />
 
       {/* Metric movement */}
       <div style={{

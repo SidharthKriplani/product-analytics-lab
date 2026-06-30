@@ -705,6 +705,12 @@ table { border-collapse: collapse; }
   50%       { box-shadow: 0 0 0 5px rgba(36,87,214,0.22), var(--shadow-md); }
 }
 
+/* RCA progress map active node pulse */
+@keyframes pal-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%       { opacity: 0.65; transform: scale(1.15); }
+}
+
 /* Modal / panel entrance */
 @keyframes palSlideUp {
   from { opacity: 0; transform: translateY(22px) scale(0.97); }
