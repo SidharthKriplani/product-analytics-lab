@@ -1786,7 +1786,9 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange, user }) 
           {/* Title */}
           <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.55rem', color: 'var(--text)', lineHeight: 1.3 }}>{problem.title}</h2>
           {/* Prompt */}
-          <p style={{ fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--text-muted)', margin: 0 }}>{problem.prompt}</p>
+          {(problem.prompt || '').split('\n\n').map((para, i) => (
+            <p key={i} style={{ fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--text-muted)', margin: i === 0 ? 0 : '0.55rem 0 0' }}>{para}</p>
+          ))}
           {/* Easy: the deliverable spelled out (withheld at Medium+, where you infer it) */}
           {isEasy && <RequirementsBlock req={easyRequirements} />}
           {/* Judgment prompt — Hard / Master problems only */}
