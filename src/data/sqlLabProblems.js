@@ -5282,7 +5282,7 @@ export const sqlLabProblems = [
     priority: 1,
     estimatedMin: 16,
     datamartId: 'health',
-    prompt: 'The care coordination team at Teladoc wants to identify patients who no-showed an appointment and never returned for a completed visit afterward. A patient qualifies if they have at least one no-show appointment (no_show = 1) and have no completed appointment (no_show = 0 and a completed_at timestamp) scheduled later than that no-show. Your query should return patient_id and last_no_show_date (the most recent no-show date) for each qualifying patient. ',
+    prompt: 'The care coordination team at Teladoc wants to identify patients who no-showed an appointment and never came back for a completed visit afterward.\n\nA no-show appointment: no_show = 1.\nA completed appointment: no_show = 0 AND completed_at IS NOT NULL.\n\nA patient qualifies if they have at least one no-show appointment with no completed appointment whose scheduled_at is later than that specific no-show\'s scheduled_at. In other words: a patient is excluded only if every one of their no-shows was followed by a completed visit. If even their most recent no-show was never followed up, they qualify.\n\nReturn patient_id and last_no_show_date (the scheduled_at of their most recent no-show that had no completed follow-up). Order by patient_id ascending.',
     expectedColumns: ['patient_id', 'last_no_show_date'],
     expectedRowCount: 3,
     hintSteps: [
