@@ -5047,7 +5047,7 @@ export const sqlLabProblems = [
     priority: 1,
     estimatedMin: 18,
     datamartId: 'ecomm',
-    prompt: 'The growth team at Shopify wants to analyze the monthly revenue mix between new customers and returning customers. For each month, return order_month, new_revenue, returning_revenue, new_buyers, and returning_buyers.',
+    prompt: 'The growth team at Shopify wants to analyze the monthly revenue mix between new customers and returning customers.\n\nDefinitions: A customer is "new" for their very first order ever — all orders after that first one are "returning," even if placed on the same day. Revenue = subtotal (not adjusted for discount or shipping). new_buyers and returning_buyers should count distinct users, not orders.\n\nFor each calendar month (YYYY-MM format), return order_month, new_revenue, returning_revenue, new_buyers, and returning_buyers. Order by order_month ascending.',
     expectedColumns: ['order_month', 'new_revenue', 'returning_revenue', 'new_buyers', 'returning_buyers'],
     expectedRowCount: 15,
     hintSteps: [
