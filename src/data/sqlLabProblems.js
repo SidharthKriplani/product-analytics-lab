@@ -4684,7 +4684,7 @@ export const sqlLabProblems = [
     priority: 1,
     estimatedMin: 18,
     datamartId: 'saas',
-    prompt: 'The product team wants to analyze user retention month over month. Specifically, they need the percentage of users who had at least one event in January 2024 and also had at least one event in February 2024. Return a single row with the total January-active users, the count who were also active in February, and the retention percentage rounded to one decimal place.',
+    prompt: 'The product team wants to analyze user retention month over month.\n\nDefinition: a user is "active" in a month if they have at least one row in the events table during that month. A user is "retained" if they were active in January 2024 and also active in February 2024.\n\nReturn a single row with three columns: total January-active users (jan_active), the count of those who were also active in February (retained_in_feb), and the retention percentage rounded to one decimal place (retention_pct).',
     expectedColumns: ['jan_active', 'retained_in_feb', 'retention_pct'],
     expectedRowCount: 1,
     hintSteps: [
@@ -4861,7 +4861,7 @@ export const sqlLabProblems = [
     priority: 1,
     estimatedMin: 18,
     datamartId: 'ecomm',
-    prompt: 'The retention team at Shopify wants to evaluate the quality of their earliest customer cohort. Identify users whose very first order (across all time) was placed in Q1 2023 (January–March 2023). A repeat buyer is any such user who placed at least one additional order after their first order date, regardless of how much later. Return a single row with the cohort size, the number of repeat buyers, and the repeat purchase rate as a percentage rounded to one decimal place. Note: in this dataset all Q1 2023 cohort users happen to be repeat buyers, so a 100% repeat rate is the correct answer.',
+    prompt: 'The retention team at Shopify wants to evaluate the quality of their earliest customer cohort.\n\nCohort: users whose very first order ever was placed in Q1 2023 (January–March 2023). "First order" means the earliest order_id by created_at for that user across all time — not just any order placed in Q1.\n\nRepeat buyer: a cohort member who placed at least one additional order after their first order date, regardless of how much time passed.\n\nReturn a single row: cohort_size, repeat_buyers, and repeat_rate as a percentage rounded to one decimal place. Note: in this dataset all four Q1 2023 cohort members happen to be repeat buyers, so 100.0 is the correct repeat_rate.',
     expectedColumns: ['cohort_size', 'repeat_buyers', 'repeat_rate'],
     expectedRowCount: 1,
     hintSteps: [
@@ -5142,7 +5142,7 @@ export const sqlLabProblems = [
     priority: 1,
     estimatedMin: 14,
     datamartId: 'ecomm',
-    prompt: 'The regional team at Amazon needs to identify the highest-value customers in each country to send personalized retention offers. Total spending = sum of subtotal across all of a user\'s orders, regardless of order status. Return the top spender per country (country, user_id, email, total_spent). If two users tie on total_spent, pick the one with the lower user_id. Order by country alphabetically.',
+    prompt: 'The regional team at Amazon needs to identify the highest-value customer in each country to send personalized retention offers.\n\nTotal spending = SUM(subtotal) across all of a user\'s orders, regardless of order status.\n\nReturn one row per country with: country, user_id, email, total_spent. If two users in the same country tie on total_spent, return the one with the lower user_id. Order by country alphabetically.',
     expectedColumns: ['country', 'user_id', 'email', 'total_spent'],
     expectedRowCount: 5,
     hintSteps: [
