@@ -90,7 +90,7 @@ export function Module_EF09({ onComplete }) {
       {/* ── Hold this question ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.5rem' }}>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>If the correlation between pre-experiment session duration and experiment-period session duration is 0.7, by what fraction does CUPED reduce the variance of the adjusted metric? Work through the relationship before checking.</p>
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>Before toggling &mdash; predict: which distribution will be narrower, the raw metric or the CUPED residuals? And why would a narrower distribution help your experiment?</p>
       </div>
 
       <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>Try It: Toggle CUPED on and watch what happens to variance</div>
@@ -298,7 +298,7 @@ export function Module_EF09({ onComplete }) {
           {/* ── What you should have confirmed ── */}
           <div className="pal-reveal-in" style={{ marginTop: '1rem', background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-            <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>Variance reduction is proportional to R² (the square of the correlation). A correlation of 0.7 means R² = 0.49 — CUPED reduces variance by approximately 49%, nearly halving the required sample. A correlation of 0.9 gives R² = 0.81 — an 81% variance reduction, cutting sample requirements to about a fifth. The higher the predictability of the outcome from pre-experiment data, the larger the benefit.</p>
+            <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>CUPED residuals are narrower. The pre-experiment metric explains some of the variance in the outcome metric &mdash; CUPED removes that explained portion, leaving only the unexplained variance. Less variance means less noise, which means the same treatment effect is easier to detect. The magnitude of the reduction follows R&sup2;: if the correlation between pre- and post-experiment metric is 0.7, R&sup2; = 0.49, so CUPED removes roughly half the variance. A correlation of 0.9 gives R&sup2; = 0.81 &mdash; an 81% reduction. The higher the pre-experiment predictability, the more CUPED helps.</p>
           </div>
 
           {/* ── Analyst Move ── */}

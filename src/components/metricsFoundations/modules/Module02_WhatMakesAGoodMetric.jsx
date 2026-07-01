@@ -148,7 +148,7 @@ export function Module_MF02({ module, onNext }) {
       {/* ── Hold this question ── */}
       <div style={{ background: 'var(--green-bg)', border: '1.5px solid var(--green-border)', borderRadius: 'var(--radius)', padding: '1rem 1.2rem' }}>
         <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 0.45rem 0' }}>Hold this question</p>
-        <p style={{ ...prose, color: 'var(--text)' }}>&quot;Monthly active users&quot; is one of the most common product metrics. Walk it through all four tests. Where does it pass? Where might it fail?</p>
+        <p style={{ ...prose, color: 'var(--text)' }}>Before working through the scorecard &mdash; of the five metrics below, which do you predict will fail the most tests? Specifically, which ones do you expect to fail the gaming resistance test? Hold your read before you check.</p>
       </div>
 
       {/* ── Try It label ── */}
@@ -254,7 +254,7 @@ export function Module_MF02({ module, onNext }) {
       {(checked || answered) && (
         <div style={sectionGap}>
           <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>What you should have confirmed</p>
-          <p style={prose}>MAU is measurable (yes), movable (yes &mdash; acquisition campaigns move it directly), predictive (partial &mdash; active doesn&apos;t mean engaged or retained, so MAU can grow while the product degrades if you&apos;re acquiring users who churn quickly), gameable (yes &mdash; loosening the definition of &quot;active&quot; from &quot;30+ min session&quot; to &quot;any event&quot; dramatically changes the number without any product improvement). The gaming resistance failure is what makes MAU a dangerous primary metric without a retention backstop.</p>
+          <p style={prose}>Of the five scorecard metrics, only <strong>Daily signups</strong> fails the gaming resistance test. It can be inflated by bot signups, incentivised campaigns, or lowering signup friction without improving activation &mdash; none of which require genuine product improvement. The remaining four either can&apos;t be gamed meaningfully (P50 page load time requires actually making the page faster; 7-day retained users requires bringing people back) or are structured in ways that limit gaming (Total registered users is a cumulative count that&apos;s hard to inflate, and NPS requires genuinely improving sentiment). The metric most likely to fail the most tests overall is <strong>Total registered users</strong>, which fails movability (cumulative counter that barely shifts with any single change) and predictiveness (includes churned users from years ago, telling you nothing about current value delivery).</p>
         </div>
       )}
 

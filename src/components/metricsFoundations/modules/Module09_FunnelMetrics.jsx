@@ -75,7 +75,7 @@ export function Module_MF09({ module, onNext }) {
       {/* ── Hold this question ── */}
       <div style={{ background: 'var(--green-bg)', border: '1.5px solid var(--green-border)', borderRadius: 'var(--radius)', padding: '1rem 1.2rem' }}>
         <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 0.45rem 0' }}>Hold this question</p>
-        <p style={{ ...prose, color: 'var(--text)' }}>If the cart-to-payment step dropped from 18% to 15%, but total payment entries are higher in absolute terms because total traffic doubled, what should you prioritize &mdash; fixing the rate or capitalizing on the volume?</p>
+        <p style={{ ...prose, color: 'var(--text)' }}>Before toggling through the scenarios &mdash; in a funnel, is the step with the worst conversion rate always the step with the biggest absolute user loss? Or can they be different steps?</p>
       </div>
 
       {/* ── Try It label ── */}
@@ -228,7 +228,7 @@ export function Module_MF09({ module, onNext }) {
       {revealed && (
         <div style={sectionGap}>
           <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>What you should have confirmed</p>
-          <p style={prose}>Even with a rate decline, higher absolute volume can still produce more completions at the bottom. The decision depends on whether the rate decline is fixable and whether the volume increase will sustain. A 3pp step-rate decline can be offset by a 20% traffic increase &mdash; but the offset is fragile if traffic growth slows. Fixing the rate is typically more durable than relying on volume to compensate.</p>
+          <p style={prose}>They can be different. A step early in the funnel with a moderate rate drop can produce a larger absolute user loss than a later step with a worse rate, simply because more users are exposed to it. The interactive shows this directly &mdash; the highlighted &apos;biggest drop&apos; step is often not the step with the lowest conversion rate. This is why funnel analysis requires both views: step rates tell you where the experience is broken; absolute loss tells you where fixing it would have the most impact.</p>
         </div>
       )}
 

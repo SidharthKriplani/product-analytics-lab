@@ -77,7 +77,7 @@ export function Module_EF04({ onComplete }) {
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hold this question</span>
         <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          If you run the same experiment on twice as many users but observe the same 0.4pp gap, what happens to the p-value and what happens to the confidence interval? Work through the logic from the prose above before checking.
+          Before checking each statement &mdash; which of these three common p-value interpretations do you believe are true? Form your initial read before the exercise forces you to commit.
         </p>
       </div>
 
@@ -166,7 +166,7 @@ export function Module_EF04({ onComplete }) {
         <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
           <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
           <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            A larger sample reduces natural variance, making the null world less capable of producing the observed gap by chance — so the p-value falls. The confidence interval narrows, because you have more information about where the true effect sits. The same 0.4pp gap carries more evidence against the null with more data, not because the gap changed, but because the noise floor fell.
+            Only one of the three statements is true: &quot;p &gt; 0.05 means the experiment is inconclusive, not proof of no effect.&quot; The most common mistake is statement one &mdash; treating the p-value as the probability that the null hypothesis is true. It is not. The p-value is the probability of observing data this extreme or more extreme assuming the null is already true. These are different questions. Statement two is the second most common error: statistical significance (CI excludes zero) only means the effect is distinguishable from zero given the sample size &mdash; a +0.001pp lift can be statistically significant with millions of users. Practical significance requires looking at the effect size, not just the p-value.
           </p>
         </div>
       )}

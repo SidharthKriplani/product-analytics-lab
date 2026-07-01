@@ -76,7 +76,7 @@ export function Module_RF09({ onComplete }) {
       {/* === HOLD THIS QUESTION BOX === */}
       <div style={{ background: 'var(--teal-bg)', border: '1.5px solid var(--teal-border)', borderRadius: 'var(--radius)', padding: '1rem 1.2rem' }}>
         <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 0.45rem 0' }}>Hold this question</p>
-        <p style={{ ...prose, color: 'var(--text)' }}>DAU is down 15% WoW. Prior three years for this calendar week show: -14%, -16%, -13%. Is there a residual signal? What would the drop have to be to clearly exceed the seasonal band?</p>
+        <p style={{ ...prose, color: 'var(--text)' }}>Looking at the year-over-year chart below &mdash; if this week&apos;s pattern closely mirrors last year&apos;s same-week movement, what does that tell you about the cause? What if this week diverges significantly from last year&apos;s pattern?</p>
       </div>
 
       {/* === TRY IT LABEL === */}
@@ -201,7 +201,7 @@ export function Module_RF09({ onComplete }) {
       {mcqRevealed && (
         <div style={sectionGap}>
           <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>What you should have confirmed</p>
-          <p style={prose}>The current -15% falls within the band of -13% to -16% from prior years. No residual — the drop is explained by seasonality. The current value would need to reach approximately -20% or more before it clearly exceeds the band and requires a non-seasonal explanation. A drop is seasonal when it falls within the historical seasonal band for that calendar period. A drop that exceeds the band contains a non-seasonal component that requires a cause.</p>
+          <p style={prose}>A close match to last year&apos;s same-week pattern means the drop is likely seasonal &mdash; the same calendar forces (user behavior, holidays, school cycles) are repeating. That&apos;s not a signal to investigate; it&apos;s a baseline expectation. A divergence from last year&apos;s pattern is where the residual investigation begins &mdash; the seasonal component no longer explains the full drop, so something changed. One year of comparison raises a hypothesis; two or three consecutive matching years establish a pattern strong enough to close the investigation without a product cause.</p>
         </div>
       )}
 
