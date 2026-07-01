@@ -344,22 +344,26 @@ export function Module09_CLT({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          Even from a very skewed exponential distribution, sample means at n=30 are already approximately normal. The underlying individual data remains skewed — the CLT applies to means, not to the raw data. Switching to bimodal shows the same effect: two-humped individual data, bell-shaped means. The population shape becomes irrelevant as n grows.
-        </p>
-      </div>
+      {simulated && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            Even from a very skewed exponential distribution, sample means at n=30 are already approximately normal. The underlying individual data remains skewed — the CLT applies to means, not to the raw data. Switching to bimodal shows the same effect: two-humped individual data, bell-shaped means. The population shape becomes irrelevant as n grows.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When someone tells you "we can't use a t-test because our revenue distribution isn't normal" — they're applying the wrong condition. The t-test requires the sampling distribution of the mean to be approximately normal, not the raw data. With n ≥ 30–50 in each group, CLT covers you for most product metrics. Correct the misconception with this explanation.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> CLT doesn't save you from everything. If your metric has extreme outliers — a handful of users driving 80% of revenue — those outliers cause high variance in your mean estimates, which means you need a much larger n before CLT approximation is reliable. The fix: Winsorize or cap outliers before analysis, or use a log transformation, or move to median-based statistics.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> CLT is why sample size matters more than sample fraction. As n grows, the SE shrinks (tighter estimates) and the approximation improves (CLT kicks in more strongly). These two benefits compound. Increasing n from 30 to 300 doesn't just give you 10x more data — it gives you tighter estimates and more reliable normal-based inference simultaneously.</p>
+      {simulated && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When someone tells you "we can't use a t-test because our revenue distribution isn't normal" — they're applying the wrong condition. The t-test requires the sampling distribution of the mean to be approximately normal, not the raw data. With n ≥ 30–50 in each group, CLT covers you for most product metrics. Correct the misconception with this explanation.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> CLT doesn't save you from everything. If your metric has extreme outliers — a handful of users driving 80% of revenue — those outliers cause high variance in your mean estimates, which means you need a much larger n before CLT approximation is reliable. The fix: Winsorize or cap outliers before analysis, or use a log transformation, or move to median-based statistics.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> CLT is why sample size matters more than sample fraction. As n grows, the SE shrinks (tighter estimates) and the approximation improves (CLT kicks in more strongly). These two benefits compound. Increasing n from 30 to 300 doesn't just give you 10x more data — it gives you tighter estimates and more reliable normal-based inference simultaneously.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

@@ -37,6 +37,7 @@ const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
 export function Module04_NormalDist({ module, onNext }) {
   const [mu, setMu] = useState(0);
   const [sigma, setSigma] = useState(1);
+  const [explored, setExplored] = useState(false);
 
   const { curvePath, fillPath, xMin, xMax, maxPDF, toSvgX, toSvgY, peakSvgY } = useMemo(() => {
     const xMin = mu - 4.5 * sigma;
@@ -205,7 +206,7 @@ export function Module04_NormalDist({ module, onNext }) {
           <input
             type="range" min={-3} max={3} step={0.1}
             value={mu}
-            onChange={e => setMu(parseFloat(e.target.value))}
+            onChange={e => { setMu(parseFloat(e.target.value)); setExplored(true); }}
             style={{ width: '100%', accentColor: 'var(--accent)' }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
@@ -221,7 +222,7 @@ export function Module04_NormalDist({ module, onNext }) {
           <input
             type="range" min={0.5} max={3} step={0.05}
             value={sigma}
-            onChange={e => setSigma(parseFloat(e.target.value))}
+            onChange={e => { setSigma(parseFloat(e.target.value)); setExplored(true); }}
             style={{ width: '100%', accentColor: 'var(--teal)' }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
@@ -246,22 +247,26 @@ export function Module04_NormalDist({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          70 is exactly 2 SD above the mean (50 + 2×10). The empirical rule says 95% falls within ±2σ, meaning 2.5% falls above the upper bound. So about 2.5% of values exceed 70. If you estimated "very few" but couldn't be precise — that's exactly the gap the normal distribution closes. With shape information, gut feel becomes a number.
-        </p>
-      </div>
+      {explored && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            70 is exactly 2 SD above the mean (50 + 2×10). The empirical rule says 95% falls within ±2σ, meaning 2.5% falls above the upper bound. So about 2.5% of values exceed 70. If you estimated "very few" but couldn't be precise — that's exactly the gap the normal distribution closes. With shape information, gut feel becomes a number.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Before applying any statistical test that assumes normality, plot your data. A histogram takes 30 seconds. If the distribution is clearly right-skewed — and most product metrics are — you've just saved yourself from a fundamentally wrong analysis. Use the median instead of the mean, and non-parametric tests when normality doesn't hold.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use the empirical rule for fast back-of-envelope probability estimates. If a stakeholder asks "how often will this metric exceed X?" and you know the distribution is roughly normal, you can answer from mean and SD alone — in the meeting, without a spreadsheet. That speed has real value.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a colleague or vendor claims "this metric is normally distributed," ask to see the distribution. Many metrics that feel like they "should" be normal — conversion rates near 0% or 100%, any metric bounded at zero — aren't. Misapplied normality assumptions are one of the most common sources of wrong conclusions in product analytics.</p>
+      {explored && (
+        <div className="pal-reveal-in" style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Before applying any statistical test that assumes normality, plot your data. A histogram takes 30 seconds. If the distribution is clearly right-skewed — and most product metrics are — you've just saved yourself from a fundamentally wrong analysis. Use the median instead of the mean, and non-parametric tests when normality doesn't hold.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use the empirical rule for fast back-of-envelope probability estimates. If a stakeholder asks "how often will this metric exceed X?" and you know the distribution is roughly normal, you can answer from mean and SD alone — in the meeting, without a spreadsheet. That speed has real value.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a colleague or vendor claims "this metric is normally distributed," ask to see the distribution. Many metrics that feel like they "should" be normal — conversion rates near 0% or 100%, any metric bounded at zero — aren't. Misapplied normality assumptions are one of the most common sources of wrong conclusions in product analytics.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

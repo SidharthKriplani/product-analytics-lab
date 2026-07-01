@@ -320,14 +320,17 @@ export function Module31_ANOVA({ module, onNext }) {
       </div>
 
       {/* What you should have confirmed */}
+      {revealed && (
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
         <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           ANOVA significant means at least one pair differs — not that D is significantly better than all others. You'd run Tukey's HSD to determine which pairs actually differ. D might be significantly better than A and C, but not significantly better than B. Or D might be the best but not significantly better than any individual variant — just far from the average of all four combined. The post-hoc tests are the analysis; the ANOVA is the gate.
         </p>
       </div>
+      )}
 
       {/* ── Analyst Move ── */}
+      {revealed && (
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -336,6 +339,7 @@ export function Module31_ANOVA({ module, onNext }) {
           <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When ANOVA comes back non-significant, report this as "no evidence that variants differ" — not "all variants are equal." Non-significance is not evidence of equivalence, especially in underpowered studies. Report the power of the ANOVA test alongside the result: what minimum mean difference would this study have detected at 80% power? If that minimum is 5pp but the variants differ by 2pp, the test was too weak to detect a real and meaningful difference.</p>
         </div>
       </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

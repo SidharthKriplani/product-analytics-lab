@@ -53,6 +53,7 @@ const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
 
 export function Module08_StandardError({ module, onNext }) {
   const [n, setN] = useState(100);
+  const [explored, setExplored] = useState(false);
 
   const se = SIGMA / Math.sqrt(n);
   const ciWidth = (2 * 1.96 * se).toFixed(2);
@@ -145,7 +146,7 @@ export function Module08_StandardError({ module, onNext }) {
             <input
               type="range" min={0} max={100} step={1}
               value={nToSlider(n)}
-              onChange={e => setN(sliderToN(parseInt(e.target.value)))}
+              onChange={e => { setN(sliderToN(parseInt(e.target.value))); setExplored(true); }}
               style={{ width: '100%', accentColor: 'var(--accent)' }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -244,22 +245,26 @@ export function Module08_StandardError({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          Doubling n reduces SE by a factor of 1/√2 ≈ 0.71 — about 29% reduction, not 50%. To halve SE, you need 4x the sample size. This non-linearity is why collecting more data has steeply diminishing returns: the first 1,000 users dramatically reduce your SE; the next 4,000 give you the same improvement again.
-        </p>
-      </div>
+      {explored && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            Doubling n reduces SE by a factor of 1/√2 ≈ 0.71 — about 29% reduction, not 50%. To halve SE, you need 4x the sample size. This non-linearity is why collecting more data has steeply diminishing returns: the first 1,000 users dramatically reduce your SE; the next 4,000 give you the same improvement again.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Never present a mean estimate without its SE or confidence interval. A mean without precision information is not informative — it's a single point estimate that could be anywhere. "Session duration is 4.8 minutes (SE: 0.4)" is a statement with meaning. "Session duration is 4.8 minutes" is a number without context.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When comparing two estimates ("team A's mean is 4.8, team B's is 5.2"), your first question is whether the difference-to-SE ratio is large enough to be meaningful. If each estimate has SE ≈ 0.5, a 0.4 difference is within one SE — almost certainly noise. If SE ≈ 0.05, a 0.4 difference is 8 SEs — not noise.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone proposes cutting a study short to save time, you can calculate exactly what they're giving up. Halving the run time roughly halves n, which increases SE by √2 ≈ 41%. Ask them: are they comfortable with 41% wider confidence intervals? This makes the tradeoff concrete rather than abstract.</p>
+      {explored && (
+        <div className="pal-reveal-in" style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Never present a mean estimate without its SE or confidence interval. A mean without precision information is not informative — it's a single point estimate that could be anywhere. "Session duration is 4.8 minutes (SE: 0.4)" is a statement with meaning. "Session duration is 4.8 minutes" is a number without context.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When comparing two estimates ("team A's mean is 4.8, team B's is 5.2"), your first question is whether the difference-to-SE ratio is large enough to be meaningful. If each estimate has SE ≈ 0.5, a 0.4 difference is within one SE — almost certainly noise. If SE ≈ 0.05, a 0.4 difference is 8 SEs — not noise.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone proposes cutting a study short to save time, you can calculate exactly what they're giving up. Halving the run time roughly halves n, which increases SE by √2 ≈ 41%. Ask them: are they comfortable with 41% wider confidence intervals? This makes the tradeoff concrete rather than abstract.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

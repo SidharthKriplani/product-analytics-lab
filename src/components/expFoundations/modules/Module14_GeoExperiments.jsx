@@ -213,6 +213,7 @@ export function Module_EF14({ onComplete }) {
                   Geo experiments solve the spillover problem that makes user-level testing invalid for marketplace pricing, TV advertising, and social graph interventions. The power limitation is real but manageable with matched-market design, synthetic control methods, and longer measurement windows.
                 </InsightBox>
               </div>
+              <NextBtn onClick={onComplete} />
             </div>
           )}
         </div>

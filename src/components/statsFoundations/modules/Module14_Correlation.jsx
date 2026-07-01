@@ -41,6 +41,7 @@ const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
 
 export function Module14_Correlation({ module, onNext }) {
   const [r, setR] = useState(0.7);
+  const [explored, setExplored] = useState(false);
 
   const points = useMemo(() => generateCorrelatedPoints(r), [r]);
 
@@ -97,7 +98,7 @@ export function Module14_Correlation({ module, onNext }) {
         <input
           type="range" min={-1.0} max={1.0} step={0.1}
           value={r}
-          onChange={e => setR(parseFloat(e.target.value))}
+          onChange={e => { setR(parseFloat(e.target.value)); setExplored(true); }}
           style={{ width: '100%', accentColor: r > 0.1 ? 'var(--green)' : r < -0.1 ? 'var(--red)' : 'var(--text-muted)' }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -227,22 +228,26 @@ export function Module14_Correlation({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          r = 0.3 means r² = 0.09 — the relationship with sessions explains 9% of retention variance. That's a real relationship (not noise, assuming reasonable n), but 91% of retention variation is explained by something else. The scatter plot at extreme r shows what a truly tight relationship looks like — and how much noise remains even at r = 0.7.
-        </p>
-      </div>
+      {explored && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            r = 0.3 means r² = 0.09 — the relationship with sessions explains 9% of retention variance. That's a real relationship (not noise, assuming reasonable n), but 91% of retention variation is explained by something else. The scatter plot at extreme r shows what a truly tight relationship looks like — and how much noise remains even at r = 0.7.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Always plot the scatter before trusting r. A correlation of 0.5 from a clean linear relationship and a correlation of 0.5 from a noisy nonlinear one with outliers need completely different interpretations. The number alone doesn't tell you.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Report r² alongside r in any analysis that involves prediction or variance explanation. r = 0.4 sounds substantial. r² = 0.16 (16% of variance explained) sounds modest. Both are true. Use the one that communicates the explanatory power honestly.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a PM points to a correlation as justification for a feature decision ("users who do X have higher LTV, so we should drive more X behavior"), challenge the causal story explicitly. The correlation might be real. The mechanism they're assuming — that driving X will cause LTV to increase — requires a causal argument, not just correlation. This is the foundation of why experiments exist.</p>
+      {explored && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Always plot the scatter before trusting r. A correlation of 0.5 from a clean linear relationship and a correlation of 0.5 from a noisy nonlinear one with outliers need completely different interpretations. The number alone doesn't tell you.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Report r² alongside r in any analysis that involves prediction or variance explanation. r = 0.4 sounds substantial. r² = 0.16 (16% of variance explained) sounds modest. Both are true. Use the one that communicates the explanatory power honestly.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a PM points to a correlation as justification for a feature decision ("users who do X have higher LTV, so we should drive more X behavior"), challenge the causal story explicitly. The correlation might be real. The mechanism they're assuming — that driving X will cause LTV to increase — requires a causal argument, not just correlation. This is the foundation of why experiments exist.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

@@ -12,7 +12,7 @@ function loadEFState(id) { try { var raw = localStorage.getItem('pal-ef-' + id +
 function shuffleEF(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = a[i]; a[i] = a[j]; a[j] = tmp; } return a; }
 
 // ── Module EF07: Multiple Testing and Guardrails ────────────────────────────
-export default function Module07_MultipleTesting({ onComplete }) {
+export function Module_EF07({ onComplete }) {
   var saved07 = useMemo(function() { return loadEFState('ef07'); }, []);
   var [numMetrics, setNumMetrics] = useState(function() { return saved07 && saved07.numMetrics !== undefined ? saved07.numMetrics : 1; });
   var [mcqAnswer, setMcqAnswer] = useState(function() { return saved07 ? saved07.mcqAnswer : null; });

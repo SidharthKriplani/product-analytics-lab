@@ -40,6 +40,7 @@ export function Module05_ZScores({ module, onNext }) {
   const [popMu, setPopMu] = useState(50);
   const [popSigma, setPopSigma] = useState(10);
   const [xVal, setXVal] = useState(65);
+  const [explored, setExplored] = useState(false);
 
   const z = (xVal - popMu) / popSigma;
   const clampedZ = Math.max(-4, Math.min(4, z));
@@ -142,7 +143,7 @@ export function Module05_ZScores({ module, onNext }) {
             <input
               type="range" min={min} max={max} step={step}
               value={val}
-              onChange={e => set(parseFloat(e.target.value))}
+              onChange={e => { set(parseFloat(e.target.value)); setExplored(true); }}
               style={{ width: '100%', accentColor: color }}
             />
           </div>
@@ -224,22 +225,26 @@ export function Module05_ZScores({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          Z-scores make the two users' unusualness directly comparable — Z = 2.0 in both means both are at the same percentile (~97.7th) in their respective distributions. What you can't say: which metric matters more to the business, or whether the distributions were actually normal. Comparability in Z-score space is a mathematical statement, not a business one. You still have to interpret what the Z means in context.
-        </p>
-      </div>
+      {explored && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            Z-scores make the two users' unusualness directly comparable — Z = 2.0 in both means both are at the same percentile (~97.7th) in their respective distributions. What you can't say: which metric matters more to the business, or whether the distributions were actually normal. Comparability in Z-score space is a mathematical statement, not a business one. You still have to interpret what the Z means in context.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Use Z-scores for anomaly flagging in monitoring dashboards. Set a threshold — typically |Z| greater than 3 — and flag automatically. This is far more reliable than percentage-change thresholds, which are sensitive to baseline level. A 10% change on a metric with 5% natural daily variance is noise; on a metric with 1% variance it's a fire.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When comparing performance across teams, cohorts, or markets that measure different underlying distributions, standardize first. Revenue per user in the UK versus India are not directly comparable in raw currency — they operate in different distributions. Z-scores let you ask "which market is performing above its own normal?" — a meaningful question the raw number can't answer.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a stakeholder says "that's a big number," ask "big relative to what?" The Z-score forces that question to be answered precisely. An outlier is only an outlier relative to a distribution — and defining that distribution is always the analyst's job, not the metric's.</p>
+      {explored && (
+        <div className="pal-reveal-in" style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Use Z-scores for anomaly flagging in monitoring dashboards. Set a threshold — typically |Z| greater than 3 — and flag automatically. This is far more reliable than percentage-change thresholds, which are sensitive to baseline level. A 10% change on a metric with 5% natural daily variance is noise; on a metric with 1% variance it's a fire.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When comparing performance across teams, cohorts, or markets that measure different underlying distributions, standardize first. Revenue per user in the UK versus India are not directly comparable in raw currency — they operate in different distributions. Z-scores let you ask "which market is performing above its own normal?" — a meaningful question the raw number can't answer.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a stakeholder says "that's a big number," ask "big relative to what?" The Z-score forces that question to be answered precisely. An outlier is only an outlier relative to a distribution — and defining that distribution is always the analyst's job, not the metric's.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

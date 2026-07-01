@@ -195,6 +195,7 @@ export function Module_EF15({ onComplete }) {
           <InsightBox>
             Switchback experiments are the canonical design for ride-sharing, food delivery, and logistics platforms where supply and demand interact at the market level. The key concepts interviewers probe: SUTVA violation in two-sided marketplaces, temporal autocorrelation modeling, and why neither user-level nor geo splits solve the problem.
           </InsightBox>
+          <NextBtn onClick={onComplete} />
         </div>
       )}
     </div>

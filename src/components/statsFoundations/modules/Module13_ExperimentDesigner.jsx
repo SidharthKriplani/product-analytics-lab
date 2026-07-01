@@ -78,6 +78,7 @@ export function Module13_ExperimentDesigner({ module, onNext }) {
   const [relMDE, setRelMDE]     = useState(20);      // relative % e.g. 20 = 20%
   const [alpha, setAlpha]       = useState(0.05);
   const [power, setPower]       = useState(0.80);
+  const [explored, setExplored] = useState(false);
 
   const p = baseline / 100;
   const n = useMemo(
@@ -207,7 +208,7 @@ export function Module13_ExperimentDesigner({ module, onNext }) {
           <input
             type="range" min={1} max={30} step={0.5}
             value={baseline}
-            onChange={e => setBaseline(parseFloat(e.target.value))}
+            onChange={e => { setBaseline(parseFloat(e.target.value)); setExplored(true); }}
             style={sliderStyle}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -233,7 +234,7 @@ export function Module13_ExperimentDesigner({ module, onNext }) {
           <input
             type="range" min={5} max={50} step={1}
             value={relMDE}
-            onChange={e => setRelMDE(parseInt(e.target.value))}
+            onChange={e => { setRelMDE(parseInt(e.target.value)); setExplored(true); }}
             style={sliderStyle}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -263,7 +264,7 @@ export function Module13_ExperimentDesigner({ module, onNext }) {
                 active={alpha === a}
                 label={`α=${a}`}
                 color="var(--yellow-border)"
-                onClick={setAlpha}
+                onClick={(v) => { setAlpha(v); setExplored(true); }}
               />
             ))}
           </div>
@@ -290,7 +291,7 @@ export function Module13_ExperimentDesigner({ module, onNext }) {
                 active={power === pw}
                 label={`${(pw * 100).toFixed(0)}%`}
                 color="var(--yellow-border)"
-                onClick={setPower}
+                onClick={(v) => { setPower(v); setExplored(true); }}
               />
             ))}
           </div>
@@ -447,27 +448,31 @@ export function Module13_ExperimentDesigner({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          Peeking inflates Type I error because each check is an independent chance to cross the significance threshold by chance. With 20 daily checks, the effective false positive rate can exceed 30% even though each check is nominally at α = 0.05. The experiment's guarantee only holds if you commit to the stopping rule before looking. Sequential testing methods exist that allow valid early stopping — but standard hypothesis testing doesn't.
-        </p>
-      </div>
+      {explored && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            Peeking inflates Type I error because each check is an independent chance to cross the significance threshold by chance. With 20 daily checks, the effective false positive rate can exceed 30% even though each check is nominally at α = 0.05. The experiment's guarantee only holds if you commit to the stopping rule before looking. Sequential testing methods exist that allow valid early stopping — but standard hypothesis testing doesn't.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{
-        background: 'var(--yellow-bg)',
-        border: '1.5px solid var(--yellow-border)',
-        borderRadius: '10px',
-        padding: '1rem 1.25rem',
-      }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Build the experiment design document before any code is written. It takes 30 minutes. It prevents weeks of post-hoc debate about what the results mean. The design doc is not bureaucracy — it's the commitment that makes the result trustworthy.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a stakeholder asks "can we just peek at results now?" — explain what that does to the p-value guarantee, and offer a specific answer: "We're at 40% of our target sample. The CI right now is [X, Y]. It'll tighten to [A, B] by the end. If we're seeing a big lift right now, it's worth monitoring, but we shouldn't ship based on it."</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone shows you an "A/B test result" without being able to tell you the pre-specified hypothesis, the sample size calculation, and the stopping rule — treat the result as exploratory, not confirmatory. A result from an improperly designed experiment is directional signal at best. That's the difference between a number and an answer.</p>
+      {explored && (
+        <div style={{
+          background: 'var(--yellow-bg)',
+          border: '1.5px solid var(--yellow-border)',
+          borderRadius: '10px',
+          padding: '1rem 1.25rem',
+        }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Build the experiment design document before any code is written. It takes 30 minutes. It prevents weeks of post-hoc debate about what the results mean. The design doc is not bureaucracy — it's the commitment that makes the result trustworthy.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a stakeholder asks "can we just peek at results now?" — explain what that does to the p-value guarantee, and offer a specific answer: "We're at 40% of our target sample. The CI right now is [X, Y]. It'll tighten to [A, B] by the end. If we're seeing a big lift right now, it's worth monitoring, but we shouldn't ship based on it."</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone shows you an "A/B test result" without being able to tell you the pre-specified hypothesis, the sample size calculation, and the stopping rule — treat the result as exploratory, not confirmatory. A result from an improperly designed experiment is directional signal at best. That's the difference between a number and an answer.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Connects to Experiments */}
       <div style={{

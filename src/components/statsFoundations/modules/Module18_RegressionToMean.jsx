@@ -272,14 +272,16 @@ export function Module18_RegressionToMean({ module, onNext }) {
       )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Any time you hear "we focused on our worst performers and they improved" — ask immediately: who is the control group? If there is not one, the claim of intervention effectiveness is unsupported. RTM is a fully sufficient alternative explanation that requires no intervention at all.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Before-after comparisons on selected extreme groups are almost never valid causal claims. You need: a pre-period measurement, an intervention, a post-period measurement, and an equivalent group that did not receive the intervention. Without the last element, all you can say is "the metric changed" — not "the intervention changed it."</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Regression to the mean also operates in the positive direction. Your best-performing cohort last month will probably be slightly less impressive this month, not because anything degraded but because their exceptional performance included a favorable noise component. If leadership sets targets based on peak performance, they are setting targets against noise — the team will appear to "slip" even when the underlying product is stable.</p>
+      {step === 2 && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Any time you hear "we focused on our worst performers and they improved" — ask immediately: who is the control group? If there is not one, the claim of intervention effectiveness is unsupported. RTM is a fully sufficient alternative explanation that requires no intervention at all.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Before-after comparisons on selected extreme groups are almost never valid causal claims. You need: a pre-period measurement, an intervention, a post-period measurement, and an equivalent group that did not receive the intervention. Without the last element, all you can say is "the metric changed" — not "the intervention changed it."</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Regression to the mean also operates in the positive direction. Your best-performing cohort last month will probably be slightly less impressive this month, not because anything degraded but because their exceptional performance included a favorable noise component. If leadership sets targets based on peak performance, they are setting targets against noise — the team will appear to "slip" even when the underlying product is stable.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

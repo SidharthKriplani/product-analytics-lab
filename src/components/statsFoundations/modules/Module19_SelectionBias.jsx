@@ -226,22 +226,26 @@ export function Module19_SelectionBias({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          By studying only the top 20%, you have already filtered for the outcome you are trying to predict. Any feature that appears in the top 20% at a high rate might be equally common in churned users — but you cannot see that. When the churned cohort is revealed, features you thought were "predictors of LTV" turn out to be present in churned users too. They are not predictors of success; they are predictors of engagement level generally. The real predictors emerge only when you can compare successful vs. unsuccessful users.
-        </p>
-      </div>
+      {!showAll && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            By studying only the top 20%, you have already filtered for the outcome you are trying to predict. Any feature that appears in the top 20% at a high rate might be equally common in churned users — but you cannot see that. When the churned cohort is revealed, features you thought were "predictors of LTV" turn out to be present in churned users too. They are not predictors of success; they are predictors of engagement level generally. The real predictors emerge only when you can compare successful vs. unsuccessful users.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> In every cohort or funnel analysis, your starting population is the denominator — not the survivors. Users who entered the funnel but did not convert belong in your analysis. Cohort members who churned in month 1 belong in your retention analysis. The moment you drop them from the analysis, you are studying a biased subset.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When someone proposes "studying our power users to understand what drives success" — reframe: study what distinguishes future power users from future churners, using behavior from their first week when both groups looked similar. You need a comparison group. Without one, you are doing survivorship analysis.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Whenever data is missing, ask: is this missing randomly or for a reason? Missing at random means your analysis on the observed data is still valid. Missing for a reason correlated with your outcome means your analysis is biased. "I don't know why it's missing" is not the same as "it's missing randomly." Default to skepticism, not assumption.</p>
+      {!showAll && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> In every cohort or funnel analysis, your starting population is the denominator — not the survivors. Users who entered the funnel but did not convert belong in your analysis. Cohort members who churned in month 1 belong in your retention analysis. The moment you drop them from the analysis, you are studying a biased subset.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When someone proposes "studying our power users to understand what drives success" — reframe: study what distinguishes future power users from future churners, using behavior from their first week when both groups looked similar. You need a comparison group. Without one, you are doing survivorship analysis.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Whenever data is missing, ask: is this missing randomly or for a reason? Missing at random means your analysis on the observed data is still valid. Missing for a reason correlated with your outcome means your analysis is biased. "I don't know why it's missing" is not the same as "it's missing randomly." Default to skepticism, not assumption.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

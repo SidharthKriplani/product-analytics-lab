@@ -12,7 +12,7 @@ function loadEFState(id) { try { var raw = localStorage.getItem('pal-ef-' + id +
 function shuffleEF(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = a[i]; a[i] = a[j]; a[j] = tmp; } return a; }
 
 // ── Module EF09: CUPED / Variance Reduction ─────────────────────────────────
-export default function Module09_CUPED({ onComplete }) {
+export function Module_EF09({ onComplete }) {
   const _saved09 = useMemo(function() { return loadEFState('ef09'); }, []);
   const [cupedOn, setCupedOn] = useState(_saved09 ? _saved09.cupedOn : false);
   const [answer, setAnswer] = useState(_saved09 ? _saved09.answer : null);

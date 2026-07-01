@@ -244,22 +244,26 @@ export function Module22_DiD({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          You would check whether UK and US retention move in parallel before the UK launch — similar week-over-week patterns, similar responses to product updates that affected both. If the UK was already diverging from the US before treatment, you cannot use the US as a control — the divergence would continue post-treatment for reasons unrelated to the feature. Non-parallel pre-trends mean the DiD estimate is biased by exactly the pre-existing divergence.
-        </p>
-      </div>
+      {mcqRevealed && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            You would check whether UK and US retention move in parallel before the UK launch — similar week-over-week patterns, similar responses to product updates that affected both. If the UK was already diverging from the US before treatment, you cannot use the US as a control — the divergence would continue post-treatment for reasons unrelated to the feature. Non-parallel pre-trends mean the DiD estimate is biased by exactly the pre-existing divergence.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Always plot the pre-period trends for treated and comparison groups before running DiD. If the trends are not parallel — similar direction, similar magnitude of changes — find a better comparison group or choose a different method. Showing the parallel pre-trends in your report is not optional: it is the primary evidence that the method is valid.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> The quality of the comparison group is the entire game in DiD. Other markets, other user segments, other time periods — whatever you use, it needs to be genuinely comparable. Similar acquisition channels, similar product usage patterns, similar response to external events. One good comparison group beats five bad ones.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When presenting DiD results to stakeholders, show all four numbers explicitly: treated pre, treated post, control pre, control post. Then show the two first differences, then the DiD estimate. This transparency makes the method auditable — any PM or executive can follow the logic and spot if something looks off. "Our feature drove 3pp retention in Germany, controlling for a 2pp trend we observed in France over the same period" is a sentence anyone can evaluate.</p>
+      {mcqRevealed && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Always plot the pre-period trends for treated and comparison groups before running DiD. If the trends are not parallel — similar direction, similar magnitude of changes — find a better comparison group or choose a different method. Showing the parallel pre-trends in your report is not optional: it is the primary evidence that the method is valid.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> The quality of the comparison group is the entire game in DiD. Other markets, other user segments, other time periods — whatever you use, it needs to be genuinely comparable. Similar acquisition channels, similar product usage patterns, similar response to external events. One good comparison group beats five bad ones.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When presenting DiD results to stakeholders, show all four numbers explicitly: treated pre, treated post, control pre, control post. Then show the two first differences, then the DiD estimate. This transparency makes the method auditable — any PM or executive can follow the logic and spot if something looks off. "Our feature drove 3pp retention in Germany, controlling for a 2pp trend we observed in France over the same period" is a sentence anyone can evaluate.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

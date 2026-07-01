@@ -247,14 +247,16 @@ export function Module21_Counterfactuals({ module, onNext }) {
       )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When a metric correlation is presented as a product decision rationale, draw the causal diagram — even on a napkin. Who does this treatment? Who does not? Why the difference? What else affects the outcome? Any path that affects both treatment assignment and outcome is a confounder. Name it before accepting the causal claim.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Before proposing an observational analysis to measure a product change, ask: can this be an experiment? Even if you cannot randomize the primary treatment, you may be able to run a partial test, a holdout, or a regression discontinuity around a natural threshold. The gold standard is always available if the team is willing to design for it.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Be precise about the causal claim you are making. "Users who do X have higher LTV" is a correlation statement — valid to report as-is. "Driving X behavior will increase LTV" is a causal claim that requires a counterfactual argument. Do not let PMs or slide decks collapse the two. The gap between them is where bad product decisions live.</p>
+      {allDone && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When a metric correlation is presented as a product decision rationale, draw the causal diagram — even on a napkin. Who does this treatment? Who does not? Why the difference? What else affects the outcome? Any path that affects both treatment assignment and outcome is a confounder. Name it before accepting the causal claim.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Before proposing an observational analysis to measure a product change, ask: can this be an experiment? Even if you cannot randomize the primary treatment, you may be able to run a partial test, a holdout, or a regression discontinuity around a natural threshold. The gold standard is always available if the team is willing to design for it.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Be precise about the causal claim you are making. "Users who do X have higher LTV" is a correlation statement — valid to report as-is. "Driving X behavior will increase LTV" is a causal claim that requires a counterfactual argument. Do not let PMs or slide decks collapse the two. The gap between them is where bad product decisions live.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

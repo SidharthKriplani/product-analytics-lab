@@ -308,22 +308,26 @@ export function Module07_Sampling({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          Sampling from purchasers gives you average revenue per purchasing user, not average revenue per user. These differ by the conversion rate — if 20% of users purchase, your estimate is roughly 5x higher than the true per-user figure. This is sample selection bias: your sampling rule excluded a population segment in a way that directly correlates with the outcome you're measuring.
-        </p>
-      </div>
+      {sampleMeans.length > 0 && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            Sampling from purchasers gives you average revenue per purchasing user, not average revenue per user. These differ by the conversion rate — if 20% of users purchase, your estimate is roughly 5x higher than the true per-user figure. This is sample selection bias: your sampling rule excluded a population segment in a way that directly correlates with the outcome you're measuring.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Every time you pull a sample, ask: who is excluded by my sampling rule, and does their exclusion correlate with what I'm measuring? If users who opted out of tracking aren't in your data, and opt-out correlates with privacy concern (which correlates with trust, which correlates with engagement) — your sample is biased and you should say so.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a PM asks "we surveyed 200 users and 80% liked it" — ask how those 200 were selected before treating it as representative. Survey respondents, by definition, opted in. Opt-in correlates with having strong opinions. Depending on what the survey was about, you may be systematically hearing from the happy or the unhappy.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> The randomization in A/B tests is random sampling applied to treatment assignment. When you randomize 50/50, you're ensuring neither group's composition is biased toward one type of user. Understanding sampling makes this obvious — and helps you spot when someone's "A/B test" is actually a non-random assignment that makes the comparison meaningless.</p>
+      {sampleMeans.length > 0 && (
+        <div className="pal-reveal-in" style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Every time you pull a sample, ask: who is excluded by my sampling rule, and does their exclusion correlate with what I'm measuring? If users who opted out of tracking aren't in your data, and opt-out correlates with privacy concern (which correlates with trust, which correlates with engagement) — your sample is biased and you should say so.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a PM asks "we surveyed 200 users and 80% liked it" — ask how those 200 were selected before treating it as representative. Survey respondents, by definition, opted in. Opt-in correlates with having strong opinions. Depending on what the survey was about, you may be systematically hearing from the happy or the unhappy.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> The randomization in A/B tests is random sampling applied to treatment assignment. When you randomize 50/50, you're ensuring neither group's composition is biased toward one type of user. Understanding sampling makes this obvious — and helps you spot when someone's "A/B test" is actually a non-random assignment that makes the comparison meaningless.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

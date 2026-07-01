@@ -194,14 +194,16 @@ export function Module01_WhatIsData({ module, onNext }) {
       </div>
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Before any analysis, classify every column. Categorical or numerical. Nominal/ordinal or discrete/continuous. Two minutes. Prevents you from computing a mean on a rating scale and reporting it as if the number means something precise.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a PM asks "what's the average satisfaction score?" — that question assumes ordinal data is continuous. Sometimes that's a fine approximation. Often it isn't. Know which situation you're in.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Data type determines your visualisation choice. Bar chart for categorical. Histogram for continuous numerical. If you're reaching for the wrong chart, it's usually because you haven't classified the variable first.</p>
+      {checked && (
+        <div className="pal-reveal-in" style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Before any analysis, classify every column. Categorical or numerical. Nominal/ordinal or discrete/continuous. Two minutes. Prevents you from computing a mean on a rating scale and reporting it as if the number means something precise.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a PM asks "what's the average satisfaction score?" — that question assumes ordinal data is continuous. Sometimes that's a fine approximation. Often it isn't. Know which situation you're in.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Data type determines your visualisation choice. Bar chart for categorical. Histogram for continuous numerical. If you're reaching for the wrong chart, it's usually because you haven't classified the variable first.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

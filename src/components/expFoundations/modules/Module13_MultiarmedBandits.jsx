@@ -200,6 +200,7 @@ export function Module_EF13({ onComplete }) {
             <InsightBox>
               The explore-exploit tradeoff is the core concept: exploration (equal traffic) maximizes information quality; exploitation (shift to winner) minimizes opportunity cost. Bandits find the middle ground dynamically, but they never fully solve either goal — interviewers test this distinction at senior PM and DS levels.
             </InsightBox>
+            <NextBtn onClick={onComplete} />
           </div>
         </div>
       )}

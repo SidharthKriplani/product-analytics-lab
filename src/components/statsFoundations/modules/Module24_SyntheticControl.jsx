@@ -389,22 +389,26 @@ export function Module24_SyntheticControl({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          A consistent 10% pre-treatment gap means your synthetic control is not tracking the treated unit's actual trajectory — it is systematically undershooting. Even if the 10% gap stays constant post-treatment, you cannot tell whether the constant gap reflects the treatment effect or just your imperfect fit. A reliable estimate requires close pre-treatment fit. With a persistent gap, any post-treatment comparison is contaminated. The right response: expand the donor pool, adjust predictor variables, or acknowledge that synthetic control may not be feasible here.
-        </p>
-      </div>
+      {revealed && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            A consistent 10% pre-treatment gap means your synthetic control is not tracking the treated unit's actual trajectory — it is systematically undershooting. Even if the 10% gap stays constant post-treatment, you cannot tell whether the constant gap reflects the treatment effect or just your imperfect fit. A reliable estimate requires close pre-treatment fit. With a persistent gap, any post-treatment comparison is contaminated. The right response: expand the donor pool, adjust predictor variables, or acknowledge that synthetic control may not be feasible here.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Always plot the pre-treatment fit prominently in any synthetic control analysis. The quality of the counterfactual lives or dies on this chart. A synthetic control that tracks the treated unit closely for 18 months before treatment is credible evidence of a valid counterfactual. A synthetic control that diverges in the pre-period is not, regardless of what happens post-treatment.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use placebo tests and report them. Do not just show the Japan gap — show the distribution of gaps from all 15 placebo markets and where Japan's gap falls in that distribution. If Japan's post-treatment gap is larger than 95% of the placebo gaps, that is your significance statement. It is transparent and auditable in a way that a single p-value often is not.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Synthetic control is overkill for many product questions and essential for a few. Use it when: you have one treated entity (market, channel, user segment), the treatment is a discrete event, you have a long pre-period, and no single comparison unit is adequate. Do not use it when you can randomize, or when the pre-treatment period is too short to build a reliable synthetic composite.</p>
+      {revealed && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Always plot the pre-treatment fit prominently in any synthetic control analysis. The quality of the counterfactual lives or dies on this chart. A synthetic control that tracks the treated unit closely for 18 months before treatment is credible evidence of a valid counterfactual. A synthetic control that diverges in the pre-period is not, regardless of what happens post-treatment.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use placebo tests and report them. Do not just show the Japan gap — show the distribution of gaps from all 15 placebo markets and where Japan's gap falls in that distribution. If Japan's post-treatment gap is larger than 95% of the placebo gaps, that is your significance statement. It is transparent and auditable in a way that a single p-value often is not.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Synthetic control is overkill for many product questions and essential for a few. Use it when: you have one treated entity (market, channel, user segment), the treatment is a discrete event, you have a long pre-period, and no single comparison unit is adequate. Do not use it when you can randomize, or when the pre-treatment period is too short to build a reliable synthetic composite.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

@@ -265,14 +265,17 @@ export function Module26_BayesianThinking({ module, onNext }) {
       </div>
 
       {/* What you should have confirmed */}
+      {revealed && (
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
         <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           With an informative prior centered at +0.2pp, the posterior estimate of the 2pp lift gets shrunk toward the prior — the posterior might land at +1pp. This is Bayesian shrinkage: extreme estimates get pulled toward prior expectations. With a large experiment, the data dominates and the posterior converges on the observed 2pp. With a small experiment, the prior matters substantially. The shrinkage is not a bug — it's a feature that prevents individual noisy experiments from producing wildly misleading estimates.
         </p>
       </div>
+      )}
 
       {/* ── Analyst Move ── */}
+      {revealed && (
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -281,6 +284,7 @@ export function Module26_BayesianThinking({ module, onNext }) {
           <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> The value of Bayesian thinking extends beyond formal inference. "What did we believe before? What does the new data imply? What should we believe now?" is the right structure for any evidence update. When a single experiment shows a surprising result, the Bayesian question — how likely is a result this extreme given our prior knowledge? — is exactly the right check on overreacting to noise.</p>
         </div>
       </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

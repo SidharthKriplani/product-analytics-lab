@@ -240,6 +240,7 @@ export function Module25_IV({ module, onNext }) {
       )}
 
       {/* ── Analyst Move ── */}
+      {allDone && (
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -248,6 +249,7 @@ export function Module25_IV({ module, onNext }) {
           <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone cites an IV study as evidence, ask: what's the instrument, what's the first stage strength, and what's the argument for the exclusion restriction? These three questions cover the three assumptions. If any are unanswered, the study's causal claim isn't established. IV results are often presented with more certainty than the underlying assumptions warrant.</p>
         </div>
       </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

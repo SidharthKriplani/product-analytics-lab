@@ -12,7 +12,7 @@ function loadEFState(id) { try { var raw = localStorage.getItem('pal-ef-' + id +
 function shuffleEF(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = a[i]; a[i] = a[j]; a[j] = tmp; } return a; }
 
 // ── Module EF10: Sequential Testing ─────────────────────────────────────────
-export default function Module10_SequentialTesting({ onComplete }) {
+export function Module_EF10({ onComplete }) {
   const _saved10 = useMemo(function() { return loadEFState('ef10'); }, []);
   const [answer, setAnswer] = useState(_saved10 ? _saved10.answer : null);
   const [revealed, setRevealed] = useState(_saved10 ? _saved10.revealed : false);

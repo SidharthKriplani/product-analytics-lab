@@ -43,6 +43,7 @@ const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
 export function Module06_Areas({ module, onNext }) {
   const [z1, setZ1] = useState(-1);
   const [z2, setZ2] = useState(1);
+  const [explored, setExplored] = useState(false);
 
   // Ensure z1 <= z2
   const lo = Math.min(z1, z2);
@@ -96,6 +97,7 @@ export function Module06_Areas({ module, onNext }) {
   function handlePreset(preset) {
     setZ1(preset.z1);
     setZ2(preset.z2);
+    setExplored(true);
   }
 
   const pctLabel = (v) => `${(v * 100).toFixed(2)}%`;
@@ -237,7 +239,7 @@ export function Module06_Areas({ module, onNext }) {
           <input
             type="range" min={-4} max={4} step={0.05}
             value={z1}
-            onChange={e => setZ1(parseFloat(e.target.value))}
+            onChange={e => { setZ1(parseFloat(e.target.value)); setExplored(true); }}
             style={{ width: '100%', accentColor: 'var(--red)' }}
           />
         </div>
@@ -249,7 +251,7 @@ export function Module06_Areas({ module, onNext }) {
           <input
             type="range" min={-4} max={4} step={0.05}
             value={z2}
-            onChange={e => setZ2(parseFloat(e.target.value))}
+            onChange={e => { setZ2(parseFloat(e.target.value)); setExplored(true); }}
             style={{ width: '100%', accentColor: 'var(--teal)' }}
           />
         </div>
@@ -292,22 +294,26 @@ export function Module06_Areas({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          2.5s corresponds to Z = (2.5 − 2.1) / 0.6 = 0.67, area approximately 74.9%. Moving the threshold from 3s (93.3%) to 2.5s (74.9%) drops compliance by ~18pp — disproportionately large, because you're moving into the denser part of the distribution near the mean. Equal threshold movements don't produce equal changes in area. The curve is steepest near the center, so small changes there affect far more users than the same-sized change in the tails.
-        </p>
-      </div>
+      {explored && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            2.5s corresponds to Z = (2.5 − 2.1) / 0.6 = 0.67, area approximately 74.9%. Moving the threshold from 3s (93.3%) to 2.5s (74.9%) drops compliance by ~18pp — disproportionately large, because you're moving into the denser part of the distribution near the mean. Equal threshold movements don't produce equal changes in area. The curve is steepest near the center, so small changes there affect far more users than the same-sized change in the tails.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When you set a performance threshold, you can immediately translate it into "what fraction of users experience worse than this" — without needing raw log data, just mean and SD. Use this for quick stakeholder conversations about SLAs, percentile targets, and quality benchmarks.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> p-values stop being magic numbers. When someone reports p = 0.04, you now know exactly what they're saying: the area in the distribution's tails beyond the observed test statistic is 4%. This makes every significance test result a shaded area you can picture — not an arbitrary threshold.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a metric's distribution is non-normal, areas under that curve are still meaningful — you just can't use Z-tables. You'd use empirical percentiles or the specific distribution's CDF. This is what people mean when they say "use the empirical distribution" — they're computing areas without assuming normality.</p>
+      {explored && (
+        <div className="pal-reveal-in" style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> When you set a performance threshold, you can immediately translate it into "what fraction of users experience worse than this" — without needing raw log data, just mean and SD. Use this for quick stakeholder conversations about SLAs, percentile targets, and quality benchmarks.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> p-values stop being magic numbers. When someone reports p = 0.04, you now know exactly what they're saying: the area in the distribution's tails beyond the observed test statistic is 4%. This makes every significance test result a shaded area you can picture — not an arbitrary threshold.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When a metric's distribution is non-normal, areas under that curve are still meaningful — you just can't use Z-tables. You'd use empirical percentiles or the specific distribution's CDF. This is what people mean when they say "use the empirical distribution" — they're computing areas without assuming normality.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

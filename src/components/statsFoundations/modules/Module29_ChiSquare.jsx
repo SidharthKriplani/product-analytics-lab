@@ -325,14 +325,17 @@ export function Module29_ChiSquare({ module, onNext }) {
       </div>
 
       {/* What you should have confirmed */}
+      {revealed && (
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
         <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           Three questions — (1) What's the effect size? (Cramér's V — is this a weak or strong association?) (2) Which cells drive it? (Standardized residuals — is it specifically mobile-non-conversion, or spread across all cells?) (3) Is this causal or confounded? (Device type might correlate with intent, market, or acquisition channel — all confounders. The association doesn't mean device type causes lower conversion.) Chi-square gives you statistical evidence; interpretation requires all three.
         </p>
       </div>
+      )}
 
       {/* ── Analyst Move ── */}
+      {revealed && (
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -341,6 +344,7 @@ export function Module29_ChiSquare({ module, onNext }) {
           <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Chi-square significance is not the same as marketing significance. A significant shift in device type distribution between two cohorts might tell you your ad targeting changed — not that your product changed. Always build the interpretation from the chi-square result, not just the p-value. What mechanism would cause this categorical pattern? Does that mechanism match the intervention you ran?</p>
         </div>
       </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

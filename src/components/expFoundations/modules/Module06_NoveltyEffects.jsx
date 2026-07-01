@@ -12,7 +12,7 @@ function loadEFState(id) { try { var raw = localStorage.getItem('pal-ef-' + id +
 function shuffleEF(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = a[i]; a[i] = a[j]; a[j] = tmp; } return a; }
 
 // ── Module EF06: Novelty Effects and Long-Run Validity ─────────────────────
-export default function Module06_NoveltyEffects({ onComplete }) {
+export function Module_EF06({ onComplete }) {
   var saved06 = useMemo(function() { return loadEFState('ef06'); }, []);
   var [obsWeek, setObsWeek] = useState(function() { return saved06 && saved06.obsWeek !== undefined ? saved06.obsWeek : 1; });
   var [mcqAnswer, setMcqAnswer] = useState(function() { return saved06 ? saved06.mcqAnswer : null; });

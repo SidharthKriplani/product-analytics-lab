@@ -243,14 +243,17 @@ export function Module27_EffectSize({ module, onNext }) {
       </div>
 
       {/* What you should have confirmed */}
+      {revealed && (
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
         <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           Both studies report the same effect size magnitude (d = 0.5), but the n = 100 study has very wide confidence intervals around that estimate — the true effect could be anywhere from 0.1 to 0.9. The n = 5,000 study has tight confidence intervals — d ≈ 0.5 with high precision. The point estimate is the same; the certainty around it differs dramatically. Effect size tells you the magnitude; SE around the effect size tells you how reliably that magnitude was estimated.
         </p>
       </div>
+      )}
 
       {/* ── Analyst Move ── */}
+      {revealed && (
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -259,6 +262,7 @@ export function Module27_EffectSize({ module, onNext }) {
           <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Report the confidence interval around your effect size estimate, not just the point estimate. "d = 0.5 [95% CI: 0.1–0.9]" is very different from "d = 0.5 [95% CI: 0.45–0.55]." The first is an uncertain estimate from a small study; the second is a precisely characterised effect from a large one. The CI around the effect size tells you how much to trust the magnitude you observed.</p>
         </div>
       </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

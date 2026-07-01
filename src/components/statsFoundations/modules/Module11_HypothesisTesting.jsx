@@ -62,6 +62,7 @@ const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
 export function Module11_HypothesisTesting({ module, onNext }) {
   const [zObs, setZObs] = useState(2.1);
   const [twoTailed, setTwoTailed] = useState(true);
+  const [explored, setExplored] = useState(false);
 
   const absZ = Math.abs(zObs);
 
@@ -145,7 +146,7 @@ export function Module11_HypothesisTesting({ module, onNext }) {
           <input
             type="range" min={-4} max={4} step={0.05}
             value={zObs}
-            onChange={e => setZObs(parseFloat(e.target.value))}
+            onChange={e => { setZObs(parseFloat(e.target.value)); setExplored(true); }}
             style={{ width: '100%', accentColor: 'var(--accent)' }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -157,7 +158,7 @@ export function Module11_HypothesisTesting({ module, onNext }) {
           <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.5rem' }}>Test type</div>
           <div style={{ display: 'flex', gap: '0.4rem' }}>
             {[{ label: 'Two-tailed', val: true }, { label: 'One-tailed', val: false }].map(opt => (
-              <button key={String(opt.val)} onClick={() => setTwoTailed(opt.val)} style={{
+              <button key={String(opt.val)} onClick={() => { setTwoTailed(opt.val); setExplored(true); }} style={{
                 padding: '0.4rem 0.9rem', borderRadius: 'var(--radius-sm)',
                 border: `1.5px solid ${twoTailed === opt.val ? 'var(--accent)' : 'var(--border)'}`,
                 background: twoTailed === opt.val ? 'var(--accent-bg)' : 'var(--surface)',
@@ -293,22 +294,26 @@ export function Module11_HypothesisTesting({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          With more data, natural variance in your metric shrinks. The null world becomes less capable of producing a 0.4pp gap by chance. The same effect carries more evidence against H₀. Significance is about the effect relative to the noise — not the effect alone.
-        </p>
-      </div>
+      {explored && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            With more data, natural variance in your metric shrinks. The null world becomes less capable of producing a 0.4pp gap by chance. The same effect carries more evidence against H₀. Significance is about the effect relative to the noise — not the effect alone.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Set α before you run, not after. The moment you look at your result and then decide your threshold, you've invalidated everything. If your company has no standard, 0.05 is defensible. But pick it first.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> p &gt; 0.05 is not "no effect." It's "not enough evidence to reject the null." Your experiment might have been under-powered — too few users, too short a run — to detect a real effect that exists. This is why you calculate required sample size before running. Under-powered experiments systematically miss real improvements and waste everyone's time.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> p &lt; 0.05 is not "this matters." A 0.01pp lift is statistically significant with 50 million users. That doesn't mean you should spend a sprint shipping it. Always pair your p-value with effect size — the magnitude in terms that mean something to the business. Significance tells you the effect is real. Effect size tells you whether it's worth caring about.</p>
+      {explored && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Set α before you run, not after. The moment you look at your result and then decide your threshold, you've invalidated everything. If your company has no standard, 0.05 is defensible. But pick it first.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> p &gt; 0.05 is not "no effect." It's "not enough evidence to reject the null." Your experiment might have been under-powered — too few users, too short a run — to detect a real effect that exists. This is why you calculate required sample size before running. Under-powered experiments systematically miss real improvements and waste everyone's time.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> p &lt; 0.05 is not "this matters." A 0.01pp lift is statistically significant with 50 million users. That doesn't mean you should spend a sprint shipping it. Always pair your p-value with effect size — the magnitude in terms that mean something to the business. Significance tells you the effect is real. Effect size tells you whether it's worth caring about.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

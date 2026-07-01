@@ -288,22 +288,26 @@ export function Module23_RD({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          If students who barely passed (just above 70) respond to their success by studying harder — a behavioral response to crossing the threshold that is separate from the scholarship treatment — then the RD estimate conflates the scholarship effect with the study-harder effect. This violates the continuity assumption: there is a mechanism other than treatment that changes at exactly the threshold. In practice, you would look for evidence of this by checking whether other behaviors (study hours, tutoring use) also jump at the threshold. If they do, the estimate is suspect.
-        </p>
-      </div>
+      {mcqRevealed && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            If students who barely passed (just above 70) respond to their success by studying harder — a behavioral response to crossing the threshold that is separate from the scholarship treatment — then the RD estimate conflates the scholarship effect with the study-harder effect. This violates the continuity assumption: there is a mechanism other than treatment that changes at exactly the threshold. In practice, you would look for evidence of this by checking whether other behaviors (study hours, tutoring use) also jump at the threshold. If they do, the estimate is suspect.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Before using RD, check the density plot of your running variable around the threshold. Spikes just above the cutoff signal manipulation — users gaming the system. If you see this, the design is invalid. A uniform distribution near the threshold is evidence (not proof) that no manipulation is occurring.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When reporting RD results, show the scatter plot of the outcome vs. running variable across the full range, with the fitted curves on each side and the jump at the threshold visible. This makes the evidence legible: the audience can see whether there is a plausible discontinuity or whether you are fitting noise. A jump that looks visually obvious is far more convincing than a coefficient in a table.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Consider whether the estimate is local enough to generalize to your actual decision. If the business question is "should we keep the Gold tier at 500 points?" — the RD estimate, which describes behavior at exactly 500 points, is directly relevant. If the question is "should we launch a loyalty program at all?" — the estimate for the 500-point threshold users tells you little about what a loyalty program would do for your average user. Be precise about the population the estimate applies to.</p>
+      {mcqRevealed && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Before using RD, check the density plot of your running variable around the threshold. Spikes just above the cutoff signal manipulation — users gaming the system. If you see this, the design is invalid. A uniform distribution near the threshold is evidence (not proof) that no manipulation is occurring.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When reporting RD results, show the scatter plot of the outcome vs. running variable across the full range, with the fitted curves on each side and the jump at the threshold visible. This makes the evidence legible: the audience can see whether there is a plausible discontinuity or whether you are fitting noise. A jump that looks visually obvious is far more convincing than a coefficient in a table.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Consider whether the estimate is local enough to generalize to your actual decision. If the business question is "should we keep the Gold tier at 500 points?" — the RD estimate, which describes behavior at exactly 500 points, is directly relevant. If the question is "should we launch a loyalty program at all?" — the estimate for the 500-point threshold users tells you little about what a loyalty program would do for your average user. Be precise about the population the estimate applies to.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

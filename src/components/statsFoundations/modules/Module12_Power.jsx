@@ -80,6 +80,7 @@ export function Module12_Power({ module, onNext }) {
   const [effectSize, setEffectSize] = useState(0.5);
   const [n, setN] = useState(500);
   const [alpha, setAlpha] = useState(0.05);
+  const [explored, setExplored] = useState(false);
 
   // SE of the difference between two means (two-sample), in SD units.
   // SE = sqrt(σ²/n + σ²/n) = sqrt(2/n) with σ=1 per group. This matches the
@@ -208,7 +209,7 @@ export function Module12_Power({ module, onNext }) {
           <input
             type="range" min={0.1} max={2.0} step={0.05}
             value={effectSize}
-            onChange={e => setEffectSize(parseFloat(e.target.value))}
+            onChange={e => { setEffectSize(parseFloat(e.target.value)); setExplored(true); }}
             style={{ width: '100%', accentColor: 'var(--teal)' }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -225,7 +226,7 @@ export function Module12_Power({ module, onNext }) {
           <input
             type="range" min={50} max={5000} step={50}
             value={n}
-            onChange={e => setN(parseInt(e.target.value))}
+            onChange={e => { setN(parseInt(e.target.value)); setExplored(true); }}
             style={{ width: '100%', accentColor: 'var(--accent)' }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -238,7 +239,7 @@ export function Module12_Power({ module, onNext }) {
           <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.5rem' }}>Significance threshold α</div>
           <div style={{ display: 'flex', gap: '0.4rem' }}>
             {ALPHA_OPTIONS.map(a => (
-              <button key={a} onClick={() => setAlpha(a)} style={{
+              <button key={a} onClick={() => { setAlpha(a); setExplored(true); }} style={{
                 padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-sm)',
                 border: `1.5px solid ${alpha === a ? 'var(--red)' : 'var(--border)'}`,
                 background: alpha === a ? 'var(--red-bg)' : 'var(--surface)',
@@ -433,22 +434,26 @@ export function Module12_Power({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          At 20% power, a non-significant result tells you almost nothing. You had an 80% chance of missing a real effect, so "not significant" is the expected outcome even when the treatment works. An underpowered non-significant result doesn't say "no effect" — it says "we looked with the wrong instrument." The visualization shows the two distributions: power is the area of the alternative distribution to the right of the critical cutoff.
-        </p>
-      </div>
+      {explored && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            At 20% power, a non-significant result tells you almost nothing. You had an 80% chance of missing a real effect, so "not significant" is the expected outcome even when the treatment works. An underpowered non-significant result doesn't say "no effect" — it says "we looked with the wrong instrument." The visualization shows the two distributions: power is the area of the alternative distribution to the right of the critical cutoff.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Never run an experiment without calculating required sample size first. Use a power calculator with your real baseline metric, a realistic MDE, and 80% power. If the required n exceeds what you can collect in a reasonable time, the experiment is not feasible — that's an important finding too.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When interpreting non-significant results, always report the minimum detectable effect of your study. "Not significant (MDE for this study was 1.2pp at 80% power)" is honest — it tells the reader that effects smaller than 1.2pp are not ruled out. "Not significant" alone implies no effect exists, which you cannot conclude from an underpowered study.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Effect size and statistical significance are independent. A tiny effect can be statistically significant with a massive sample. A large effect can be non-significant with a tiny sample. Always pair p-values with effect magnitude in business-relevant units — power and effect size together determine whether an experiment's conclusion is worth trusting.</p>
+      {explored && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Never run an experiment without calculating required sample size first. Use a power calculator with your real baseline metric, a realistic MDE, and 80% power. If the required n exceeds what you can collect in a reasonable time, the experiment is not feasible — that's an important finding too.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When interpreting non-significant results, always report the minimum detectable effect of your study. "Not significant (MDE for this study was 1.2pp at 80% power)" is honest — it tells the reader that effects smaller than 1.2pp are not ruled out. "Not significant" alone implies no effect exists, which you cannot conclude from an underpowered study.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Effect size and statistical significance are independent. A tiny effect can be statistically significant with a massive sample. A large effect can be non-significant with a tiny sample. Always pair p-values with effect magnitude in business-relevant units — power and effect size together determine whether an experiment's conclusion is worth trusting.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

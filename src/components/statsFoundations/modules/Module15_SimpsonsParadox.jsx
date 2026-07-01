@@ -242,22 +242,26 @@ export function Module15_SimpsonsParadox({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          If mobile converts at 4% and desktop at 8%, and Flow B had 60% mobile vs Flow A's 40%, the aggregate rates can flip even if Flow B outperforms in both segments. The interaction is composition × rate. The correct answer: segment by device, compare Flow A vs B within mobile and within desktop separately, before making any call on overall winner.
-        </p>
-      </div>
+      {view === 'segment' && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            If mobile converts at 4% and desktop at 8%, and Flow B had 60% mobile vs Flow A's 40%, the aggregate rates can flip even if Flow B outperforms in both segments. The interaction is composition × rate. The correct answer: segment by device, compare Flow A vs B within mobile and within desktop separately, before making any call on overall winner.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> After any experiment, check covariate balance. Did treatment and control get similar proportions of mobile vs desktop, new vs returning, high vs low value users? If any key variable is significantly imbalanced, your aggregate result is suspect. The balance check takes five minutes and prevents the paradox from invalidating weeks of experiment run time.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a product comparison shows "X performs better than Y overall," immediately ask: is X used by a different mix of users than Y? If yes, you cannot conclude X is better — you can only conclude that the users of X convert better, and their mix is different. The policy question is then: if we changed who uses X, would the advantage persist?</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When stakeholders argue from aggregate numbers, segment before responding. The aggregate might be confounded by acquisition channel, time of day, or device capability. "Mobile users are worse" might actually be "low-intent paid acquisition users are worse, and they're disproportionately on mobile." These have different product implications.</p>
+      {view === 'segment' && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> After any experiment, check covariate balance. Did treatment and control get similar proportions of mobile vs desktop, new vs returning, high vs low value users? If any key variable is significantly imbalanced, your aggregate result is suspect. The balance check takes five minutes and prevents the paradox from invalidating weeks of experiment run time.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When a product comparison shows "X performs better than Y overall," immediately ask: is X used by a different mix of users than Y? If yes, you cannot conclude X is better — you can only conclude that the users of X convert better, and their mix is different. The policy question is then: if we changed who uses X, would the advantage persist?</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When stakeholders argue from aggregate numbers, segment before responding. The aggregate might be confounded by acquisition channel, time of day, or device capability. "Mobile users are worse" might actually be "low-intent paid acquisition users are worse, and they're disproportionately on mobile." These have different product implications.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

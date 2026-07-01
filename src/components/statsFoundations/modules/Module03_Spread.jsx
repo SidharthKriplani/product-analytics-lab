@@ -28,6 +28,7 @@ const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
 
 export function Module03_Spread({ module, onNext }) {
   const [multiplier, setMultiplier] = useState(1);
+  const [explored, setExplored] = useState(false);
 
   const scaledPoints = useMemo(() => {
     const mean = BASE_POINTS.reduce((s, v) => s + v, 0) / BASE_POINTS.length;
@@ -171,7 +172,7 @@ export function Module03_Spread({ module, onNext }) {
         <input
           type="range" min={0.5} max={3} step={0.05}
           value={multiplier}
-          onChange={e => setMultiplier(parseFloat(e.target.value))}
+          onChange={e => { setMultiplier(parseFloat(e.target.value)); setExplored(true); }}
           style={{ width: '100%', accentColor: 'var(--accent)' }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
@@ -253,22 +254,26 @@ export function Module03_Spread({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          Users at exactly the mean contribute 0 to the variance (their deviation is zero, squared is still zero). Adding them increases n but not the sum of squared deviations, so the mean of squared deviations — and therefore the SD — decreases. More users clustered at the mean pull spread down. This is why a heavily engaged core user base can mask poor onboarding performance if you only look at SD without segmenting.
-        </p>
-      </div>
+      {explored && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            Users at exactly the mean contribute 0 to the variance (their deviation is zero, squared is still zero). Adding them increases n but not the sum of squared deviations, so the mean of squared deviations — and therefore the SD — decreases. More users clustered at the mean pull spread down. This is why a heavily engaged core user base can mask poor onboarding performance if you only look at SD without segmenting.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Never report a mean in isolation for a skewed or wide-spread metric. Pair it with SD. Mean £47, SD £83 tells a completely different story than Mean £47, SD £4. The first suggests a few large orders dominate; the second suggests tight, predictable purchase behavior. Same mean, opposite implications.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Large SD relative to the mean is a flag to segment before analyzing. When SD exceeds 50% of the mean, your "average user" may not exist — you may have two or more distinct behavioral groups pulling in opposite directions. Run the analysis separately on each segment before reporting any aggregate.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> SD is the denominator of most statistical tests. When someone asks "is this difference significant?" — what they're really asking is "is this difference large relative to the natural spread?" Every significance test eventually divides by some form of spread. If you understand SD, you understand why larger samples give more power.</p>
+      {explored && (
+        <div className="pal-reveal-in" style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Never report a mean in isolation for a skewed or wide-spread metric. Pair it with SD. Mean £47, SD £83 tells a completely different story than Mean £47, SD £4. The first suggests a few large orders dominate; the second suggests tight, predictable purchase behavior. Same mean, opposite implications.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Large SD relative to the mean is a flag to segment before analyzing. When SD exceeds 50% of the mean, your "average user" may not exist — you may have two or more distinct behavioral groups pulling in opposite directions. Run the analysis separately on each segment before reporting any aggregate.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> SD is the denominator of most statistical tests. When someone asks "is this difference significant?" — what they're really asking is "is this difference large relative to the natural spread?" Every significance test eventually divides by some form of spread. If you understand SD, you understand why larger samples give more power.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

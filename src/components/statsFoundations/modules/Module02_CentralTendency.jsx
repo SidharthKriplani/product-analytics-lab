@@ -249,22 +249,26 @@ export function Module02_CentralTendency({ module, onNext }) {
       )}
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          The mean moves substantially with each outlier because every value enters the calculation. The median barely moves — it only cares about rank order, not magnitude. The mode is unaffected unless the outlier happens to be the most frequent value. This is why robust statistics prefer median over mean when outliers are likely.
-        </p>
-      </div>
+      {hasOutlier && (
+        <div className="pal-reveal-in" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            The mean moves substantially with each outlier because every value enters the calculation. The median barely moves — it only cares about rank order, not magnitude. The mode is unaffected unless the outlier happens to be the most frequent value. This is why robust statistics prefer median over mean when outliers are likely.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Every time you report an average, ask yourself: is this metric likely to be skewed? Revenue, session length, LTV, order value — almost certainly yes. Default to reporting both mean and median together. A PM who sees mean £47, median £23 immediately understands the distribution shape without needing a histogram.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When mean and median diverge by more than ~20%, flag it explicitly. Don't just report the mean and move on. That divergence is telling you the distribution is skewed, which changes which statistical tests are valid and which summary is honest.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Mode is underused for product decisions. If you're trying to understand the most common user journey, the most common session count, or the most common upgrade path — mode answers that directly where mean and median don't.</p>
+      {hasOutlier && (
+        <div className="pal-reveal-in" style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Every time you report an average, ask yourself: is this metric likely to be skewed? Revenue, session length, LTV, order value — almost certainly yes. Default to reporting both mean and median together. A PM who sees mean £47, median £23 immediately understands the distribution shape without needing a histogram.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When mean and median diverge by more than ~20%, flag it explicitly. Don't just report the mean and move on. That divergence is telling you the distribution is skewed, which changes which statistical tests are valid and which summary is honest.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Mode is underused for product decisions. If you're trying to understand the most common user journey, the most common session count, or the most common upgrade path — mode answers that directly where mean and median don't.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

@@ -262,14 +262,17 @@ export function Module30_SUTVA({ module, onNext }) {
       </div>
 
       {/* What you should have confirmed */}
+      {revealed && (
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
         <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           Referred friends of treatment users who land in the control group have unusually high conversion rates — they were referred, so they're warm leads with social trust. The control group's conversion rate goes up, but only because some control users were indirectly influenced by the treatment. The treatment effect estimate shrinks, because the gap between treatment and contaminated control is smaller than the true gap between treatment and a clean no-referral world. The slider makes the contamination path legible: you can see exactly how increasing interference erodes the measured effect.
         </p>
       </div>
+      )}
 
       {/* ── Analyst Move ── */}
+      {revealed && (
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -278,6 +281,7 @@ export function Module30_SUTVA({ module, onNext }) {
           <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> SUTVA violations don't always invalidate the experiment — they change what you can claim. If spillovers help the control, your experiment underestimates the full effect. If spillovers hurt the control, it overestimates. Knowing the direction of the violation lets you bound the true effect. An A/B test with known positive spillovers gives you a lower bound on the true treatment effect — still useful information, with the right framing.</p>
         </div>
       </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

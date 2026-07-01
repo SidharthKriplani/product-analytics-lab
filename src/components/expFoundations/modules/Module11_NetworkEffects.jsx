@@ -204,6 +204,7 @@ export function Module_EF11({ onComplete }) {
               </ul>
             </InsightBox>
           </div>
+          <NextBtn onClick={onComplete} />
         </>
       )}
     </div>

@@ -81,6 +81,7 @@ const sectionGap = { display: 'flex', flexDirection: 'column', gap: '0.85rem' };
 export function Module20_PracticalSignificance({ module, onNext }) {
   const [liftPct, setLiftPct] = useState(0.5); // 0.1% to 5.0%
   const [nStep, setNStep] = useState(3);       // index into SAMPLE_STEPS, default=100k
+  const [explored, setExplored] = useState(false);
 
   const n = stepToN(nStep);
 
@@ -163,7 +164,7 @@ export function Module20_PracticalSignificance({ module, onNext }) {
           <input
             type="range" min={0.1} max={5.0} step={0.1}
             value={liftPct}
-            onChange={e => setLiftPct(parseFloat(e.target.value))}
+            onChange={e => { setLiftPct(parseFloat(e.target.value)); setExplored(true); }}
             style={{ width: '100%', accentColor: 'var(--accent)' }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -180,7 +181,7 @@ export function Module20_PracticalSignificance({ module, onNext }) {
           <input
             type="range" min={0} max={SAMPLE_STEPS.length - 1} step={1}
             value={nStep}
-            onChange={e => setNStep(parseInt(e.target.value))}
+            onChange={e => { setNStep(parseInt(e.target.value)); setExplored(true); }}
             style={{ width: '100%', accentColor: 'var(--accent)' }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -258,22 +259,26 @@ export function Module20_PracticalSignificance({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          The 0.1pp lift is statistically certain but needs a business impact calculation before deciding. The 3pp lift is a large effect that was not detected — the study was underpowered. Both need more analysis than the p-value alone provides. The 3pp lift warrants a follow-up study with sufficient sample size; if confirmed, it is a significant business outcome. The 0.1pp lift might not be worth the cost of shipping even though it is real.
-        </p>
-      </div>
+      {explored && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            The 0.1pp lift is statistically certain but needs a business impact calculation before deciding. The 3pp lift is a large effect that was not detected — the study was underpowered. Both need more analysis than the p-value alone provides. The 3pp lift warrants a follow-up study with sufficient sample size; if confirmed, it is a significant business outcome. The 0.1pp lift might not be worth the cost of shipping even though it is real.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Every experiment report should include: effect size in statistical units (p-value, CI), effect size in business units (revenue impact, additional completions per day, reduction in churn), and whether the effect exceeds your pre-stated MDE. The business decision should be made from the business units, not the p-value.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> "Statistically significant" in a slide does not mean "we should ship this." Challenge the implicit leap. The burden is on the PM or analyst to also show: this effect, if real, changes the business in a meaningful way. Before significance was established, you defined your MDE. Now compare the detected effect to it.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Large samples are dangerous for decision quality if teams interpret statistical significance as decision significance. An experiment on 50M users that detects a 0.01pp lift will almost always come back significant — and teams that do not have a pre-committed MDE will default to "significant = ship." This is how products accumulate small, technically real, practically worthless changes that do not move any needle the business cares about.</p>
+      {explored && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Every experiment report should include: effect size in statistical units (p-value, CI), effect size in business units (revenue impact, additional completions per day, reduction in churn), and whether the effect exceeds your pre-stated MDE. The business decision should be made from the business units, not the p-value.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> "Statistically significant" in a slide does not mean "we should ship this." Challenge the implicit leap. The burden is on the PM or analyst to also show: this effect, if real, changes the business in a meaningful way. Before significance was established, you defined your MDE. Now compare the detected effect to it.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Large samples are dangerous for decision quality if teams interpret statistical significance as decision significance. An experiment on 50M users that detects a 0.01pp lift will almost always come back significant — and teams that do not have a pre-committed MDE will default to "significant = ship." This is how products accumulate small, technically real, practically worthless changes that do not move any needle the business cares about.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

@@ -12,7 +12,7 @@ function loadEFState(id) { try { var raw = localStorage.getItem('pal-ef-' + id +
 function shuffleEF(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = a[i]; a[i] = a[j]; a[j] = tmp; } return a; }
 
 // ── Module EF08: A/A Testing ────────────────────────────────────────────────
-export default function Module08_AATesting({ onComplete }) {
+export function Module_EF08({ onComplete }) {
   const _saved08 = useMemo(function() { return loadEFState('ef08'); }, []);
   const [answer, setAnswer] = useState(_saved08 ? _saved08.answer : null);
   const [revealed, setRevealed] = useState(_saved08 ? _saved08.revealed : false);

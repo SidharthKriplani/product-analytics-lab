@@ -206,22 +206,26 @@ export function Module17_MultipleTesting({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          50 tests × 0.05 = 2.5 expected false positives under the null. Finding 4 significant doesn't necessarily mean 4 real effects — it might mean 2.5 noise discoveries plus 1.5 real effects. Bonferroni corrects α to 0.001, and probably 0 of the 4 survive. BH at 10% FDR might retain 2. The right tool depends on whether you're making a decision (Bonferroni, be conservative) or generating hypotheses to test further (BH, preserve power).
-        </p>
-      </div>
+      {bonferroni && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            50 tests × 0.05 = 2.5 expected false positives under the null. Finding 4 significant doesn't necessarily mean 4 real effects — it might mean 2.5 noise discoveries plus 1.5 real effects. Bonferroni corrects α to 0.001, and probably 0 of the 4 survive. BH at 10% FDR might retain 2. The right tool depends on whether you're making a decision (Bonferroni, be conservative) or generating hypotheses to test further (BH, preserve power).
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Distinguish primary from secondary metrics in every experiment before launch. The primary metric gets the full α = 0.05 guarantee — it was your pre-specified decision criterion. Secondary metrics are exploratory; report them with FDR correction or explicitly label them as hypothesis-generating, not decision-making.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When presenting post-hoc subgroup analyses, always state: "these are exploratory and require replication." An exciting subgroup result that wasn't pre-specified is a hypothesis, not a finding. The subgroup that "showed the effect" was selected from many — it's the winner of a noisy lottery.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone runs an experiment, looks at 30 metrics, finds 3 significant, and presents them as the results — ask which were pre-specified before the experiment ran. If none were pre-specified, the entire analysis has inflated false positive risk. The question isn't "which metrics moved" — it's "which metrics were we committed to testing before we looked at the data."</p>
+      {bonferroni && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Distinguish primary from secondary metrics in every experiment before launch. The primary metric gets the full α = 0.05 guarantee — it was your pre-specified decision criterion. Secondary metrics are exploratory; report them with FDR correction or explicitly label them as hypothesis-generating, not decision-making.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When presenting post-hoc subgroup analyses, always state: "these are exploratory and require replication." An exciting subgroup result that wasn't pre-specified is a hypothesis, not a finding. The subgroup that "showed the effect" was selected from many — it's the winner of a noisy lottery.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When someone runs an experiment, looks at 30 metrics, finds 3 significant, and presents them as the results — ask which were pre-specified before the experiment ran. If none were pre-specified, the entire analysis has inflated false positive risk. The question isn't "which metrics moved" — it's "which metrics were we committed to testing before we looked at the data."</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

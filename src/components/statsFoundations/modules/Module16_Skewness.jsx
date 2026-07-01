@@ -52,6 +52,7 @@ export function Module16_Skewness({ module, onNext }) {
   const [distType, setDistType] = useState('lognormal');
   // topContrib: what fraction of total "revenue" the top 10% contribute
   const [topContrib, setTopContrib] = useState(50);
+  const [explored, setExplored] = useState(false);
 
   const isNormal = distType === 'normal';
 
@@ -144,10 +145,10 @@ export function Module16_Skewness({ module, onNext }) {
 
       {/* Toggle */}
       <div style={{ display: 'flex', gap: '0.5rem' }}>
-        <button style={distType === 'normal' ? activeBtn : inactiveBtn} onClick={() => setDistType('normal')}>
+        <button style={distType === 'normal' ? activeBtn : inactiveBtn} onClick={() => { setDistType('normal'); setExplored(true); }}>
           Normal
         </button>
-        <button style={distType === 'lognormal' ? activeBtn : inactiveBtn} onClick={() => setDistType('lognormal')}>
+        <button style={distType === 'lognormal' ? activeBtn : inactiveBtn} onClick={() => { setDistType('lognormal'); setExplored(true); }}>
           Log-Normal (Product Reality)
         </button>
       </div>
@@ -166,7 +167,7 @@ export function Module16_Skewness({ module, onNext }) {
           <input
             type="range" min={10} max={80} step={5}
             value={topContrib}
-            onChange={e => setTopContrib(parseInt(e.target.value))}
+            onChange={e => { setTopContrib(parseInt(e.target.value)); setExplored(true); }}
             style={{ width: '100%', accentColor: 'var(--red)' }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -330,22 +331,26 @@ export function Module16_Skewness({ module, onNext }) {
       </div>
 
       {/* ── What you should have confirmed ── */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          The mean moves dramatically with a single extreme outlier. The median barely moves. The geometric mean moves modestly — it's more resistant than the mean because log(10,000) is only about 4× larger than log(100), even though 10,000 is 100× larger. For multiplicative data, the geometric mean is the most stable and representative central tendency. The toggle shows that what looked like a skewed mess is actually a well-behaved distribution in log-space.
-        </p>
-      </div>
+      {explored && (
+        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
+          <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            The mean moves dramatically with a single extreme outlier. The median barely moves. The geometric mean moves modestly — it's more resistant than the mean because log(10,000) is only about 4× larger than log(100), even though 10,000 is 100× larger. For multiplicative data, the geometric mean is the most stable and representative central tendency. The toggle shows that what looked like a skewed mess is actually a well-behaved distribution in log-space.
+          </p>
+        </div>
+      )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> For any revenue, LTV, or engagement-intensity metric, check whether log-transformation improves normality before running statistical tests. The quick check: does log(metric + 1) look approximately normal in a histogram? If yes, run your analysis on the transformed variable and back-transform results. Report the multiplicative effect on the original scale.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Report median and geometric mean alongside the arithmetic mean for right-skewed product metrics. "Revenue per user: mean £47, median £12, geometric mean £18" tells a stakeholder that the typical user generates £12–18, while the mean is elevated by a power-user tail. Each number tells a different true story. None is wrong — they answer different questions.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When an A/B test on a revenue metric comes back non-significant despite a visible lift in the mean, check whether the high-variance right tail is killing your power. Winsorize outliers (cap extreme values at the 95th or 99th percentile), or analyze log-transformed revenue. Either reduces variance, increases effective signal-to-noise, and often reveals a significant lift that was buried in tail noise.</p>
+      {explored && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> For any revenue, LTV, or engagement-intensity metric, check whether log-transformation improves normality before running statistical tests. The quick check: does log(metric + 1) look approximately normal in a histogram? If yes, run your analysis on the transformed variable and back-transform results. Report the multiplicative effect on the original scale.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Report median and geometric mean alongside the arithmetic mean for right-skewed product metrics. "Revenue per user: mean £47, median £12, geometric mean £18" tells a stakeholder that the typical user generates £12–18, while the mean is elevated by a power-user tail. Each number tells a different true story. None is wrong — they answer different questions.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> When an A/B test on a revenue metric comes back non-significant despite a visible lift in the mean, check whether the high-variance right tail is killing your power. Winsorize outliers (cap extreme values at the 95th or 99th percentile), or analyze log-transformed revenue. Either reduces variance, increases effective signal-to-noise, and often reveals a significant lift that was buried in tail noise.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

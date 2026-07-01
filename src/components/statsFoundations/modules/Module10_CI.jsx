@@ -308,14 +308,16 @@ export function Module10_CI({ module, onNext }) {
       )}
 
       {/* ── Analyst Move ── */}
-      <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Report CIs, not just means. "Conversion rate: 4.2%" is a point estimate. "Conversion rate: 4.2% [95% CI: 3.8%–4.6%]" is an estimate with its uncertainty quantified. The first looks more precise. The second is more honest. Stakeholders who make decisions on point estimates without knowing the uncertainty are flying blind.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use CI width to communicate study reliability. A CI of [4.51, 5.09] says you've pinned down the mean to within ±0.3 minutes — tight. A CI of [2.0, 7.6] says you have almost no information. When a study result is reported without a CI, ask for it — then judge whether the study was precise enough to support the conclusion being drawn.</p>
-          <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Overlapping confidence intervals do not mean "no significant difference." Two 95% CIs can overlap and still produce a statistically significant difference in a two-sample test — because the test directly computes the distribution of the difference, which has its own SE. If you're comparing two estimates, compute the CI of the difference, not the overlap of the two individual CIs.</p>
+      {intervals.length > 0 && (
+        <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Report CIs, not just means. "Conversion rate: 4.2%" is a point estimate. "Conversion rate: 4.2% [95% CI: 3.8%–4.6%]" is an estimate with its uncertainty quantified. The first looks more precise. The second is more honest. Stakeholders who make decisions on point estimates without knowing the uncertainty are flying blind.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> Use CI width to communicate study reliability. A CI of [4.51, 5.09] says you've pinned down the mean to within ±0.3 minutes — tight. A CI of [2.0, 7.6] says you have almost no information. When a study result is reported without a CI, ask for it — then judge whether the study was precise enough to support the conclusion being drawn.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Overlapping confidence intervals do not mean "no significant difference." Two 95% CIs can overlap and still produce a statistically significant difference in a two-sample test — because the test directly computes the distribution of the difference, which has its own SE. If you're comparing two estimates, compute the CI of the difference, not the overlap of the two individual CIs.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

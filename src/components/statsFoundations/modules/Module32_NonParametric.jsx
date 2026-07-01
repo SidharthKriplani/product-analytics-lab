@@ -288,14 +288,17 @@ export function Module32_NonParametric({ module, onNext }) {
       </div>
 
       {/* What you should have confirmed */}
+      {revealed && (
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What you should have confirmed</span>
         <p style={{ margin: '0.35rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           Two problems — (1) n = 15 is small, CLT may not apply, so the normal approximation underlying the t-test is unreliable; (2) a 1–5 Likert scale is ordinal, meaning the differences between scale points aren't guaranteed to be equal (the gap between "dissatisfied" and "neutral" may not be the same as "satisfied" and "very satisfied"). Mann-Whitney U handles both: it ranks the 30 scores from both cohorts combined and tests whether cohort A scores tend to rank higher than cohort B. The interactive shows that when an outlier is introduced, the t-test p-value shifts dramatically while Mann-Whitney's barely moves.
         </p>
       </div>
+      )}
 
       {/* ── Analyst Move ── */}
+      {revealed && (
       <div style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--yellow)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>The Analyst Move</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -304,6 +307,7 @@ export function Module32_NonParametric({ module, onNext }) {
           <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Use Spearman correlation instead of Pearson whenever you suspect the relationship is monotonic but not linear, or when you have outliers that would distort Pearson. The correlation between number of features used and LTV is likely monotonic — but possibly not linear (there may be diminishing returns at high feature adoption). Spearman captures the monotonic relationship robustly; Pearson might understate it due to curvature and overstate it if outliers drag the regression line.</p>
         </div>
       </div>
+      )}
 
       {/* ── Connection ── */}
       <div style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>

@@ -194,6 +194,7 @@ export function Module_EF12({ onComplete }) {
             <InsightBox>
               The sum of individual experiment lifts (e.g. +4%) rarely equals the holdout gap (e.g. +11%) because features interact, compound, and change user behavior in ways individual tests cannot capture. Holdouts catch both positive compounding and negative interference between features.
             </InsightBox>
+            <NextBtn onClick={onComplete} />
           </div>
         </div>
       )}
