@@ -84,6 +84,7 @@ const NAV_FRAMES = [
 // EXTRAS — quiet bottom catch-all (not a frame). Parked / leftover surfaces.
 const EXTRAS_ITEMS = [
   { id: 'bookmarks',   label: 'Saved' },
+  { id: 'my-tracks',  label: 'My Tracks' },
   { id: 'leaderboard', label: 'Leaderboard' },
   { id: 'about',       label: 'About' },
 ];

@@ -93,6 +93,7 @@ const InterviewSimulator      = lazy(() => import('./pages/InterviewSimulator.js
 const ABTestInterpreter       = lazy(() => import('./pages/ABTestInterpreter.jsx').then(m => ({ default: m.ABTestInterpreter })));
 const SearchPage              = lazy(() => import('./pages/SearchPage.jsx').then(m => ({ default: m.SearchPage })));
 const BookmarksBrowser        = lazy(() => import('./pages/BookmarksBrowser.jsx').then(m => ({ default: m.BookmarksBrowser })));
+const MyTracksPage            = lazy(() => import('./pages/MyTracksPage.jsx').then(m => ({ default: m.MyTracksPage })));
 const ConsultationSpace = lazy(() => import('./pages/ConsultationSpace.jsx').then(m => ({ default: m.ConsultationSpace })));
 const Trainer           = lazy(() => import('./pages/Trainer.jsx').then(m => ({ default: m.Trainer })));
 const ReviewQueue       = lazy(() => import('./pages/ReviewQueue.jsx').then(m => ({ default: m.ReviewQueue })));
@@ -434,6 +435,7 @@ export default function App() {
       'ab-interpreter': 'A/B Test Interpreter — Product Analytics Lab',
       'search':    'Search — Analytics Lab',
       'bookmarks': 'Bookmarks — Product Analytics Lab',
+      'my-tracks': 'My Tracks — Product Analytics Lab',
       'consult':        'Consultation Space — Product Analytics Lab',
       'trainer':        'Trainer — Product Analytics Lab',
       'company-tracks': 'Company Tracks — Product Analytics Lab',
@@ -1896,6 +1898,13 @@ export default function App() {
                 ))}
               </div>
             }>
+        {page === 'my-tracks' && (
+          <MyTracksPage
+            onNavigate={navigate}
+            onOpenSqlProblem={id => { setActiveSqlProblemId(id); setPage('sql-lab'); }}
+          />
+        )}
+
             <BookmarksBrowser
               onBack={() => setPage('home')}
               onNavigate={(targetPage, itemId) => {
@@ -1924,7 +1933,7 @@ export default function App() {
 
         {/* ── SQL Lab (internal preview — hidden from nav) ── */}
         {page === 'sql-lab' && (
-          <SqlLabPage onBack={() => navigate('home')} initialProblemId={activeSqlProblemId} onProblemChange={setActiveSqlProblemId} />
+          <SqlLabPage onBack={() => navigate('home')} initialProblemId={activeSqlProblemId} onProblemChange={setActiveSqlProblemId} user={user} onNavigate={navigate} />
         )}
 
         {page === 'qa' && (

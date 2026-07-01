@@ -7,6 +7,8 @@ import { upsertLeaderboardRow } from '../utils/leaderboard.js';
 import { ShareLinkButton } from '../components/shared/ShareLinkButton.jsx';
 import { SqlEditor } from '../components/shared/SqlEditor.jsx';
 import { Icon } from '../components/shared/Icon.jsx';
+import { AddToTrackPopover } from '../components/tracks/AddToTrackPopover.jsx';
+import { getTracksForProblem } from '../utils/tracks.js';
 import { SqlLabBeginnerPage } from './SqlLabBeginnerPage.jsx';
 import { CHEAT_SECTIONS } from './CheatSheet.jsx';
 
@@ -1306,8 +1308,10 @@ function JudgmentLayer({ problem }) {
   );
 }
 
-export function SqlLabPage({ onBack, initialProblemId, onProblemChange, user }) {
+export function SqlLabPage({ onBack, initialProblemId, onProblemChange, user, onNavigate }) {
   const [mode, setMode] = useState(initialProblemId ? 'solve' : 'browse');
+  const [trackPopoverOpen, setTrackPopoverOpen] = useState(false);
+  const trackBtnRef = useRef(null);
   const [problemIdx, setProblemIdx] = useState(function () {
     if (initialProblemId) {
       var idx = SORTED_PROBLEMS.findIndex(function (p) { return p.id === initialProblemId; });
@@ -1321,7 +1325,7 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange, user }) 
   useEffect(function () {
     if (!initialProblemId) return;
     var idx = SORTED_PROBLEMS.findIndex(function (p) { return p.id === initialProblemId; });
-    if (idx >= 0) { setProblemIdx(idx); setMode('solve'); }
+    if (idx >= 0) { setProblemIdx(idx); setMode('solve'); setTrackPopoverOpen(false); }
   }, [initialProblemId]);
   const [db, setDb] = useState(null);
   const [sqlLoading, setSqlLoading] = useState(true);
@@ -1729,13 +1733,13 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange, user }) 
           <ShareLinkButton room="sql-lab" />
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <button
-              onClick={() => { if (problemIdx > 0) setProblemIdx(problemIdx - 1); }}
+              onClick={() => { if (problemIdx > 0) { setProblemIdx(problemIdx - 1); setTrackPopoverOpen(false); } }}
               disabled={problemIdx === 0}
               style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '4px', width: 26, height: 26, cursor: problemIdx > 0 ? 'pointer' : 'not-allowed', color: 'var(--text-muted)', opacity: problemIdx > 0 ? 1 : 0.35, fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >‹</button>
             <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', minWidth: 38, textAlign: 'center' }}>{problemIdx + 1}/{SORTED_PROBLEMS.length}</span>
             <button
-              onClick={() => { if (problemIdx < SORTED_PROBLEMS.length - 1) setProblemIdx(problemIdx + 1); }}
+              onClick={() => { if (problemIdx < SORTED_PROBLEMS.length - 1) { setProblemIdx(problemIdx + 1); setTrackPopoverOpen(false); } }}
               disabled={problemIdx === SORTED_PROBLEMS.length - 1}
               style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '4px', width: 26, height: 26, cursor: problemIdx < SORTED_PROBLEMS.length - 1 ? 'pointer' : 'not-allowed', color: 'var(--text-muted)', opacity: problemIdx < SORTED_PROBLEMS.length - 1 ? 1 : 0.35, fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >›</button>
@@ -1781,6 +1785,33 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange, user }) 
               {problem.roles.map(r => (
                 <span key={r} style={{ fontSize: '0.62rem', color: 'var(--text-muted)', background: 'var(--surface-2)', border: '1px solid var(--border)', padding: '1px 6px', borderRadius: '4px' }}>{r}</span>
               ))}
+              {/* Add to Track */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  ref={trackBtnRef}
+                  onClick={() => setTrackPopoverOpen(o => !o)}
+                  title="Add to Track"
+                  style={{
+                    background: getTracksForProblem(problem.id).length > 0 ? 'var(--accent)' : 'var(--surface-2)',
+                    color: getTracksForProblem(problem.id).length > 0 ? '#fff' : 'var(--text-muted)',
+                    border: '1px solid var(--border)', borderRadius: '4px',
+                    width: 22, height: 22, cursor: 'pointer', fontSize: '0.8rem', lineHeight: 1,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0, transition: 'background 0.15s',
+                  }}
+                >
+                  {getTracksForProblem(problem.id).length > 0 ? '✓' : '+'}
+                </button>
+                {trackPopoverOpen && (
+                  <AddToTrackPopover
+                    problemId={problem.id}
+                    title={problem.title}
+                    difficulty={problem.difficulty}
+                    onClose={() => setTrackPopoverOpen(false)}
+                    anchorRef={trackBtnRef}
+                  />
+                )}
+              </div>
             </div>
           </div>
           {/* Title */}
