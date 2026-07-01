@@ -5142,7 +5142,7 @@ export const sqlLabProblems = [
     priority: 1,
     estimatedMin: 14,
     datamartId: 'ecomm',
-    prompt: 'The regional team at Amazon needs to identify the highest-value customers in each country to send personalized retention offers. The query should return the user_id, email, and total spending (sum of subtotal) for the top spender in each country. Filter results to include only active customers and order by country alphabetically. ',
+    prompt: 'The regional team at Amazon needs to identify the highest-value customers in each country to send personalized retention offers. Total spending = sum of subtotal across all of a user\'s orders, regardless of order status. Return the top spender per country (country, user_id, email, total_spent). If two users tie on total_spent, pick the one with the lower user_id. Order by country alphabetically.',
     expectedColumns: ['country', 'user_id', 'email', 'total_spent'],
     expectedRowCount: 5,
     hintSteps: [
