@@ -4684,7 +4684,7 @@ export const sqlLabProblems = [
     priority: 1,
     estimatedMin: 18,
     datamartId: 'saas',
-    prompt: 'The product team wants to analyze user retention month over month. Specifically, they need the percentage of users who were active in January 2024 and remained active in February 2024. The query should return the retention percentage for each cohort. ',
+    prompt: 'The product team wants to analyze user retention month over month. Specifically, they need the percentage of users who had at least one event in January 2024 and also had at least one event in February 2024. Return a single row with the total January-active users, the count who were also active in February, and the retention percentage rounded to one decimal place.',
     expectedColumns: ['jan_active', 'retained_in_feb', 'retention_pct'],
     expectedRowCount: 1,
     hintSteps: [
