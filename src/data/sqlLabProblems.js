@@ -4954,7 +4954,7 @@ export const sqlLabProblems = [
     priority: 2,
     estimatedMin: 20,
     datamartId: 'health',
-    prompt: 'Operations at Teladoc wants to identify providers who are underperforming in appointment completion rates compared to their peers. Completion rate is the percentage of a provider\'s appointments that were attended (not a no-show). Return each flagged provider\'s name, total appointments, attended count, their completion rate, and the practice-wide average completion rate (the simple average of the per-provider completion rates). Flag only providers whose completion rate is more than 10 percentage points below the practice average, and order them by completion rate ascending. ',
+    prompt: 'Operations at Teladoc wants to identify providers who are underperforming in appointment completion rates compared to their peers. A completed appointment is one where no_show = 0. Each provider\'s completion rate = (appointments where no_show = 0) ÷ total appointments × 100.\n\nThe practice-wide average is the unweighted mean of per-provider completion rates — not total attended ÷ total appointments across everyone. For example, if Provider A has a 60% completion rate and Provider B has 100%, the practice average is (60 + 100) / 2 = 80%, not (attended_A + attended_B) / (total_A + total_B).\n\nFlag providers whose completion rate is more than 10 percentage points below the practice average. Return name, total_appts, attended, completion_rate (rounded to 1 decimal), and practice_avg (rounded to 1 decimal). Order by completion_rate ascending.',
     expectedColumns: ['name', 'total_appts', 'attended', 'completion_rate', 'practice_avg'],
     expectedRowCount: 2,
     hintSteps: [
