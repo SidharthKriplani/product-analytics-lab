@@ -4861,7 +4861,7 @@ export const sqlLabProblems = [
     priority: 1,
     estimatedMin: 18,
     datamartId: 'ecomm',
-    prompt: 'The retention team at Shopify wants to evaluate the quality of their earliest customer cohort. Identify users who placed their first order in Q1 2023 and then made a repeat purchase. Return the count of such users. ',
+    prompt: 'The retention team at Shopify wants to evaluate the quality of their earliest customer cohort. Identify users whose very first order (across all time) was placed in Q1 2023 (January–March 2023). A repeat buyer is any such user who placed at least one additional order after their first order date, regardless of how much later. Return a single row with the cohort size, the number of repeat buyers, and the repeat purchase rate as a percentage rounded to one decimal place. Note: in this dataset all Q1 2023 cohort users happen to be repeat buyers, so a 100% repeat rate is the correct answer.',
     expectedColumns: ['cohort_size', 'repeat_buyers', 'repeat_rate'],
     expectedRowCount: 1,
     hintSteps: [
