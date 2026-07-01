@@ -5647,7 +5647,7 @@ export const sqlLabProblems = [
     priority: 1,
     estimatedMin: 30,
     datamartId: 'health',
-    prompt: 'The clinical quality team at Epic Systems needs to identify patients with a confirmed hypertension diagnosis (ICD-10 code I10) who are not prescribed any antihypertensive medications such as Lisinopril, Amlodipine, or Furosemide. This helps in identifying potential care gaps. Return patient_id, dob, gender, and zip_code, ordered by patient_id.',
+    prompt: 'The clinical quality team at Epic Systems needs to identify patients with a hypertension diagnosis who have no antihypertensive prescription on record. This helps surface potential care gaps.\n\nHypertension diagnosis: diagnoses.icd_code = \'I10\' (exact match). Antihypertensive drugs to check: exactly Lisinopril, Amlodipine, and Furosemide (match prescriptions.drug_name exactly, title case — no other drugs are in scope).\n\nReturn patient_id, dob, gender, and zip_code, ordered by patient_id.',
     expectedColumns: ['patient_id', 'dob', 'gender', 'zip_code'],
     expectedRowCount: 2,
     hintSteps: [
@@ -6571,7 +6571,7 @@ export const sqlLabProblems = [
     priority: 1,
     estimatedMin: 20,
     datamartId: 'gaming',
-    prompt: 'The game analytics team wants to smooth out score volatility by computing a rolling 3-attempt average for each player. For each level attempt, return user_id, attempt_id, attempt_date, score, and rolling_avg_score — the average of the current attempt and the 2 preceding attempts for the same player, rounded to 1 decimal. Order by user_id, attempt_date, attempt_id. ',
+    prompt: 'The game analytics team wants to smooth out score volatility by computing a rolling 3-attempt average for each player.\n\nFor each level attempt, return user_id, attempt_id, attempt_date, score, and rolling_avg_score — the average of the current attempt and up to 2 preceding attempts for the same player, where "preceding" means earlier rows when ordered by attempt_date then attempt_id within each player. When fewer than 2 prior attempts exist, average only the available ones. Round rolling_avg_score to 1 decimal place.\n\nOrder by user_id, attempt_date, attempt_id.',
     expectedColumns: ['user_id', 'attempt_id', 'attempt_date', 'score', 'rolling_avg_score'],
     expectedRowCount: 20,
     hintSteps: [
@@ -9855,7 +9855,7 @@ export const sqlLabProblems = [
     priority: 2,
     estimatedMin: 12,
     datamartId: 'marketplace',
-    prompt: 'Product analysts at Meesho need to track monthly growth metrics to understand buyer acquisition and retention. For each month (format YYYY-MM), return the total number of unique buyers with completed transactions, the number of new buyers (first-ever completed transaction in that month), and the number of repeat buyers (had a completed transaction in a previous month). Order by month. ',
+    prompt: 'Product analysts at Meesho need to track monthly growth metrics to understand buyer acquisition and retention.\n\nCompleted transaction: a row in the transactions table where status = \'completed\'.\n\nFor each month (format YYYY-MM), return total_buyers (distinct buyers with at least one completed transaction that month), new_buyers (buyers whose first-ever completed transaction was in that month), and repeat_buyers (buyers who had a completed transaction in any earlier month). Order by month.',
     expectedColumns: ['month', 'total_buyers', 'new_buyers', 'repeat_buyers'],
     expectedRowCount: 13,
     hintSteps: [
@@ -10696,7 +10696,7 @@ export const sqlLabProblems = [
     estimatedMin: 20,
     datamartId: 'ecomm',
     beforeWriting: 'A streak is a run of back-to-back calendar days with an order. Before writing anything, separate two things people conflate: how many days a customer ordered on in total, and how many of those days were consecutive. The question asks for the longest unbroken run — two days with a week between them is a streak of 1, not 2. Decide how you will tell consecutive days apart from merely frequent ones.',
-    prompt: 'The loyalty team at Wayfair is designing a streak reward and needs to know, for every customer who has ever ordered, the length of their single longest run of back-to-back calendar days with at least one order. A customer who ordered three days in a row has a streak of 3; a customer who ordered twenty times but never on consecutive days has a streak of 1. Return user_id, email, and that longest streak length, one row per customer, ordered from longest streak to shortest and then by user_id. Count each calendar day once even if the customer placed several orders that day.',
+    prompt: 'The loyalty team at Wayfair is designing a streak reward and needs to know, for every customer who has ever ordered, the length of their single longest run of back-to-back calendar days with at least one order.\n\nA customer who ordered three days in a row has a streak of 3; a customer who ordered twenty times but never on consecutive days has a streak of 1. Include all orders regardless of status. Use the date portion of created_at as the calendar day — multiple orders on the same day count as one active day.\n\nReturn user_id, email, and longest_streak, one row per customer, ordered from longest streak to shortest then by user_id.',
     expectedColumns: ['user_id', 'email', 'longest_streak'],
     expectedRowCount: 12,
     hintSteps: [
@@ -10784,7 +10784,7 @@ export const sqlLabProblems = [
     estimatedMin: 22,
     datamartId: 'swiggy',
     beforeWriting: 'Pin down what \'p90 delivery time\' means before you write anything. It is the time that 90% of completed deliveries come in under — the slow end of the experience, not the typical one. So it should land at or above the average, never below it. If your number comes out near the middle of a city\'s times, you have computed the wrong thing. Also decide how you locate that point when a city has only a handful of deliveries: with three or four orders there is no exact 90th-percentile row, so you need a rule for which order to pick.',
-    prompt: 'The operations team at Swiggy is setting per-city delivery-time SLAs and the average minutes-to-deliver hides their real problem: the unlucky tail of customers who wait far longer than typical. They want the 90th-percentile delivery time per city — the minute mark that 90% of completed deliveries beat — so they can set an SLA the slow tail actually feels. For each city, using only delivered orders (cancelled orders never arrived, so they have no delivery time), compute delivery time as the whole minutes from when the order was placed to when it was delivered, then return the city, its number of delivered orders, and that 90th-percentile delivery minute. Use the nearest-rank rule: order a city\'s delivery times from fastest to slowest and take the time at position ceil(0.9 * n). Order the result from highest p90 to lowest, then by city.',
+    prompt: 'The operations team at Swiggy is setting per-city delivery-time SLAs and the average minutes-to-deliver hides their real problem: the unlucky tail of customers who wait far longer than typical.\n\nDelivered orders: orders where status = \'delivered\'. City: use the restaurant\'s city (join orders to restaurants via restaurant_id). Delivery time: integer minutes from placed_at to delivered_at — truncate any fractional part.\n\nFor each city, return city, delivered_orders (count), and p90_delivery_min using the nearest-rank rule: sort delivery times ascending, take the value at position ceil(0.9 × n). Order by p90_delivery_min descending, then by city.',
     expectedColumns: ['city', 'delivered_orders', 'p90_delivery_min'],
     expectedRowCount: 5,
     hintSteps: [
@@ -10966,7 +10966,7 @@ export const sqlLabProblems = [
     estimatedMin: 24,
     datamartId: 'saas',
     beforeWriting: 'A health probe writes one row every five minutes per service. An outage is not a single \'down\' ping — it is a run of back-to-back \'down\' pings with no \'up\' in between. The instant an \'up\' appears, that outage has ended; a later \'down\' is a new, separate outage. Before writing anything, decide how you will tell one continuous down-run apart from two down-runs that happen to belong to the same service, because the \'up\' rows that separate them are the whole signal and they get filtered out of the final answer.',
-    prompt: 'Reliability at Datadog stores a status feed where a probe records each service as up or down every five minutes. They need this collapsed into outages: each maximal run of consecutive down pings for a service becomes one outage window. For every outage, return the service, the timestamp of its first down ping (window_start), the timestamp of its last down ping (window_end), and the duration in whole minutes from first to last down ping. A run of a single down ping is a real but zero-minute-span outage. One \'up\' ping between two down runs splits them into two separate outages. Order the result by service, then by window_start.',
+    prompt: 'Reliability at Datadog stores a status feed where a probe records each service as up or down every five minutes. They need this collapsed into outages: each maximal run of consecutive down pings for a service becomes one outage window.\n\nFor every outage, return the service, the timestamp of its first down ping (window_start), the timestamp of its last down ping (window_end), and duration_min — the minutes between window_start and window_end computed as epoch difference / 60 (leave as decimal; no rounding needed). A run of a single down ping is a real but zero-minute-span outage. One \'up\' ping between two down runs splits them into two separate outages.\n\nOrder by service, then by window_start.',
     expectedColumns: ['service', 'window_start', 'window_end', 'duration_min'],
     expectedRowCount: 5,
     hintSteps: [
@@ -11444,7 +11444,7 @@ export const sqlLabProblems = [
     priority: 2,
     estimatedMin: 15,
     datamartId: 'social_network',
-    prompt: 'The growth team at LinkedIn uses viral referrals as a key acquisition channel. User 1 was the first to join. Using a recursive CTE, find all users who are direct or indirect referrals originating from user 1 — that is, user 1 referred them, or referred someone who referred them, and so on. Return a single row with total_referred_users (total count of users in user 1\'s referral network) and max_depth (the deepest referral level, where direct referrals of user 1 are depth 1).',
+    prompt: 'The growth team at LinkedIn uses viral referrals as a key acquisition channel. User 1 seeded the entire referral tree.\n\nUsing the referred_by_user_id column in the users table, traverse the full referral chain outward from user 1. User 1 themselves is not counted — only those they referred, or those referred by their referrals, and so on transitively.\n\nReturn a single row: total_referred_users (count of all users in user 1\'s referral network, not including user 1) and max_depth (the deepest level reached, where direct referrals of user 1 are depth 1).',
     expectedColumns: ['total_referred_users', 'max_depth'],
     expectedRowCount: 1,
     hintSteps: [
