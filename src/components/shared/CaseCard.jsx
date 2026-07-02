@@ -93,9 +93,14 @@ export function CaseCard({
         e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
-      {/* Optional top-right badge (e.g. "Next") */}
-      {badge && (
-        <span style={{ position: 'absolute', top: '0.6rem', right: '0.7rem' }}>
+      {/* Optional top-right cluster: addBtn + badge */}
+      {(badge || addBtn) && (
+        <span style={{ position: 'absolute', top: '0.6rem', right: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          {addBtn && (
+            <span onClick={e => e.stopPropagation()} style={{ display: 'inline-flex' }}>
+              {addBtn}
+            </span>
+          )}
           {badge}
         </span>
       )}
@@ -131,11 +136,6 @@ export function CaseCard({
           {solved && (
             <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--green)' }}>
               <Icon name='check' size={14} color='currentColor' />
-            </span>
-          )}
-          {addBtn && (
-            <span onClick={e => e.stopPropagation()} style={{ display: 'inline-flex' }}>
-              {addBtn}
             </span>
           )}
         </span>
