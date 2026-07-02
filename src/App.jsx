@@ -95,6 +95,7 @@ const ABTestInterpreter       = lazy(() => import('./pages/ABTestInterpreter.jsx
 const SearchPage              = lazy(() => import('./pages/SearchPage.jsx').then(m => ({ default: m.SearchPage })));
 const BookmarksBrowser        = lazy(() => import('./pages/BookmarksBrowser.jsx').then(m => ({ default: m.BookmarksBrowser })));
 const MyTracksPage            = lazy(() => import('./pages/MyTracksPage.jsx').then(m => ({ default: m.MyTracksPage })));
+const SharedTrackPage         = lazy(() => import('./pages/SharedTrackPage.jsx').then(m => ({ default: m.SharedTrackPage })));
 const ConsultationSpace = lazy(() => import('./pages/ConsultationSpace.jsx').then(m => ({ default: m.ConsultationSpace })));
 const Trainer           = lazy(() => import('./pages/Trainer.jsx').then(m => ({ default: m.Trainer })));
 const ReviewQueue       = lazy(() => import('./pages/ReviewQueue.jsx').then(m => ({ default: m.ReviewQueue })));
@@ -165,6 +166,7 @@ export default function App() {
   const [activeRCAFoundationId, setActiveRCAFoundationId] = useState(null);
   const [activeExpFoundationId, setActiveExpFoundationId] = useState(null);
   const [publicProfileUserId, setPublicProfileUserId] = useState(null);
+  const [activeSharedTrackId, setActiveSharedTrackId] = useState(null);
   const [playbookInitialArticle, setPlaybookInitialArticle] = useState(null);
   const [unlocked, setUnlocked] = useState(() => isUnlocked());
   const [progressSnapshot, setProgressSnapshot] = useState(() => ({ ...getAllProgress(), challengesProgress: getAllChallengesProgress(), biProgress: getAllBIProgress(), stfProgress: getAllSTFProgress(), takehomeProgress: getAllTakehomeProgress(), instrumentationProgress: getAllInstrumentationProgress() }));
@@ -437,6 +439,7 @@ export default function App() {
       'search':    'Search — Analytics Lab',
       'bookmarks': 'Bookmarks — Product Analytics Lab',
       'my-tracks': 'My Tracks — Product Analytics Lab',
+      'shared-track': 'Shared Track — Product Analytics Lab',
       'consult':        'Consultation Space — Product Analytics Lab',
       'trainer':        'Trainer — Product Analytics Lab',
       'company-tracks': 'Company Tracks — Product Analytics Lab',
@@ -504,6 +507,13 @@ export default function App() {
     setPublicProfileUserId(userId);
     setPage('public-profile');
     setSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function openSharedTrack(shareId) {
+    if (!shareId) return;
+    setActiveSharedTrackId(shareId);
+    setPage('shared-track');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -968,6 +978,7 @@ export default function App() {
     openRCAFoundationModule,
     openExpFoundationModule,
     openPublicProfile,
+    openSharedTrack,
   };
 
   // State → hash sync: whenever page or an active ID changes, update the URL hash.
@@ -1003,6 +1014,7 @@ export default function App() {
       activeRCAFoundationId,
       activeExpFoundationId,
       publicProfileUserId,
+      activeSharedTrackId,
     };
     const newHash = '#' + stateToHash(page, activeIds);
     if (window.location.hash !== newHash) {
@@ -1014,7 +1026,7 @@ export default function App() {
     activeStatFoundationsId, activeGrowthAnalyticsId, activeChallengeId,
     activeBICaseId, activeSTFCaseId, activeTakehomeCaseId, activeInstrumentationCaseId,
     activeSqlProblemId, activeMetricsFoundationId, activeRCAFoundationId, activeExpFoundationId,
-    publicProfileUserId]);
+    publicProfileUserId, activeSharedTrackId]);
 
   // Hash → state sync: on hashchange (browser back/forward), parse hash and drive state.
   useEffect(() => {
@@ -1901,6 +1913,16 @@ export default function App() {
             <MyTracksPage
               onNavigate={navigate}
               onOpenSqlProblem={id => { setActiveSqlProblemId(id); setPage('sql-lab'); }}
+              user={user}
+            />
+          </Suspense>
+        )}
+
+        {page === 'shared-track' && (
+          <Suspense fallback={null}>
+            <SharedTrackPage
+              shareId={activeSharedTrackId}
+              onNavigate={navigate}
             />
           </Suspense>
         )}

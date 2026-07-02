@@ -84,6 +84,9 @@ const PAGE_TO_HASH = {
   'study': 'study',
   'cheatsheet': 'cheatsheet',
 
+  // Shared track (read-only public view)
+  'shared-track': 'shared',
+
   // Track / misc
   'company-tracks': 'company-tracks',
   'defense-doc': 'defense-doc',
@@ -93,6 +96,7 @@ const PAGE_TO_HASH = {
   'bank': 'bank',
   'blog': 'blog',
   'qa': 'qa',
+  'shared': 'shared-track',
 };
 
 // Runner pages → which activeId state they use
@@ -121,6 +125,7 @@ const RUNNER_ACTIVE_ID_KEY = {
   'rca-foundations-runner': 'activeRCAFoundationId',
   'exp-foundations-runner': 'activeExpFoundationId',
   'code-runner': 'activeCodeModuleId',
+  'shared-track': 'activeSharedTrackId',
 };
 
 // Hash segment → browser page value (no runner suffix)
@@ -140,6 +145,7 @@ const HASH_TO_BROWSER_PAGE = {
   'metrics-foundations': 'metrics-foundations',
   'rca-foundations': 'rca-foundations',
   'exp-foundations': 'exp-foundations',
+  'shared': 'shared-track',
   'review': 'browser',
   'design': 'design',
   'stats': 'stats',
@@ -206,6 +212,7 @@ const HASH_TO_RUNNER_PAGE = {
   'rca-foundations': 'rca-foundations-runner',
   'exp-foundations': 'exp-foundations-runner',
   'code-lab': 'code-runner',
+  'shared': 'shared-track',
 };
 
 // Runner page → the open function name to call (used by hashchange handler)
@@ -234,6 +241,7 @@ const RUNNER_OPEN_FN = {
   'rca-foundations-runner': 'openRCAFoundationModule',
   'exp-foundations-runner': 'openExpFoundationModule',
   'code-runner': 'openCodeModule',
+  'shared-track': 'openSharedTrack',
 };
 
 /**

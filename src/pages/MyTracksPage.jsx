@@ -3,6 +3,7 @@ import {
   getTracks, createTrack, deleteTrack, renameTrack,
   removeItem, reorderItems, addNote,
 } from '../utils/tracks.js';
+import { shareTrack } from '../utils/sharedTracks.js';
 import { Icon } from '../components/shared/Icon.jsx';
 
 // ── Difficulty badge ────────────────────────────────────────────────────────
@@ -144,11 +145,13 @@ function TrackList({ tracks, selectedId, onSelect, onNew, onDelete }) {
 }
 
 // ── Track detail (right pane) ───────────────────────────────────────────────
-function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate }) {
+function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sharedUrl, onShare }) {
   const [editingName, setEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(track.name);
   const [addingNote, setAddingNote] = useState(false);
   const [noteVal, setNoteVal] = useState('');
+  const [sharing, setSharing] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [dragIdx, setDragIdx] = useState(null);
   const [overIdx, setOverIdx] = useState(null);
 
@@ -213,13 +216,34 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate }) {
             {' · '}Created {new Date(track.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
         </div>
-        <button
-          onClick={() => setAddingNote(a => !a)}
-          style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.78rem', cursor: 'pointer', color: 'var(--text-muted)', fontWeight: 500, whiteSpace: 'nowrap', flexShrink: 0 }}
-        >
-          + Note
-        </button>
+        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexShrink: 0 }}>
+          <button
+            onClick={() => setAddingNote(a => !a)}
+            style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.78rem', cursor: 'pointer', color: 'var(--text-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}
+          >+ Note</button>
+          <button
+            disabled={sharing || !user}
+            title={user ? 'Share this track (anyone with the link can view)' : 'Sign in to share tracks'}
+            onClick={async () => {
+              if (!user || sharing) return;
+              setSharing(true);
+              try { await onShare(track); } finally { setSharing(false); }
+            }}
+            style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.78rem', cursor: user ? 'pointer' : 'not-allowed', color: user ? 'var(--text-muted)' : 'var(--text-muted)', fontWeight: 500, whiteSpace: 'nowrap', opacity: user ? 1 : 0.5 }}
+          >{sharing ? '…' : sharedUrl ? 'Update link' : 'Share'}</button>
+        </div>
       </div>
+
+      {/* Share URL banner */}
+      {sharedUrl && (
+        <div style={{ margin: '0 1.25rem 0.5rem', padding: '0.5rem 0.75rem', background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', borderRadius: '7px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ flex: 1, fontSize: '0.74rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>{sharedUrl}</span>
+          <button
+            onClick={() => { navigator.clipboard.writeText(sharedUrl); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+            style={{ flexShrink: 0, fontSize: '0.72rem', padding: '0.2rem 0.55rem', borderRadius: '5px', border: '1px solid var(--accent-border)', background: copied ? 'var(--accent)' : 'none', color: copied ? '#fff' : 'var(--accent)', cursor: 'pointer', fontWeight: 600, transition: 'all 0.15s' }}
+          >{copied ? 'Copied!' : 'Copy'}</button>
+        </div>
+      )}
 
       {/* Add note form */}
       {addingNote && (
@@ -358,9 +382,10 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate }) {
 }
 
 // ── Page root ───────────────────────────────────────────────────────────────
-export function MyTracksPage({ onNavigate, onOpenSqlProblem }) {
+export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
   const [tracks, setTracks] = useState(() => getTracks());
   const [selectedId, setSelectedId] = useState(() => getTracks()[0]?.id || null);
+  const [sharedUrls, setSharedUrls] = useState({});
 
   const refresh = useCallback(() => {
     const updated = getTracks();
@@ -388,6 +413,11 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem }) {
     const updated = getTracks();
     setTracks(updated);
     if (selectedId === trackId) setSelectedId(updated[0]?.id || null);
+  }
+
+  async function handleShare(track) {
+    const { shareUrl } = await shareTrack(track, user.id);
+    setSharedUrls(prev => ({ ...prev, [track.id]: shareUrl }));
   }
 
   const selectedTrack = tracks.find(t => t.id === selectedId) || null;
@@ -427,6 +457,9 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem }) {
             onChanged={refresh}
             onOpenSqlProblem={onOpenSqlProblem}
             onNavigate={onNavigate}
+            user={user}
+            sharedUrl={sharedUrls[selectedTrack.id] || null}
+            onShare={handleShare}
           />
         ) : (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
