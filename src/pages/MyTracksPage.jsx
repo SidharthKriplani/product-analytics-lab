@@ -162,6 +162,7 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sha
   }
 
   function handleRemove(idx) {
+    if (track.items[idx]?.type === 'note' && !window.confirm('Delete this note? This cannot be undone.')) return;
     removeItem(track.id, idx);
     onChanged();
   }
