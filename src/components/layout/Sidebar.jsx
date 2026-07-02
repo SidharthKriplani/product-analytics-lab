@@ -420,6 +420,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                   <Icon name="user" size={13} color="currentColor" style={{ opacity: 0.7, flexShrink: 0 }} />
                   <span>Sign In</span>
                 </button>
+                <NavItem id="start-here" label="Start Here" currentPage={currentPage} onNav={handleNav} />
                 <NavItem id="plans" label="Plans" currentPage={currentPage} onNav={handleNav} />
                 <NavItem id="progress" label="Progress" currentPage={currentPage} onNav={handleNav} />
               </>
@@ -468,6 +469,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                     </button>
                   );
                 })()}
+                <NavItem id="start-here" label="Start Here" currentPage={currentPage} onNav={handleNav} />
                 <NavItem id="progress" label="Progress" currentPage={currentPage} onNav={handleNav} />
                 <NavItem id="plans" label="Plans" currentPage={currentPage} onNav={handleNav} />
               </>

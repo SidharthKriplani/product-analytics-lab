@@ -70,6 +70,7 @@ const JudgmentBank          = lazy(() => import('./pages/JudgmentBank.jsx').then
 const QADashboard           = lazy(() => import('./pages/QADashboard.jsx').then(m => ({ default: m.QADashboard })));
 const Pricing               = lazy(() => import('./pages/Pricing.jsx').then(m => ({ default: m.Pricing })));
 const Plans                 = lazy(() => import('./pages/Plans.jsx').then(m => ({ default: m.Plans })));
+const StartHerePage         = lazy(() => import('./pages/StartHerePage.jsx').then(m => ({ default: m.StartHerePage })));
 
 // Runners — lazy-loaded
 const ScenarioRunner        = lazy(() => import('./components/scenario/ScenarioRunner.jsx').then(m => ({ default: m.ScenarioRunner })));
@@ -1612,6 +1613,11 @@ export default function App() {
           </Suspense>
         )}
         {page === 'pricing' && <Pricing onShowUnlock={() => setPage('plans')} onBack={() => setPage('home')} />}
+        {page === 'start-here' && (
+          <Suspense fallback={null}>
+            <StartHerePage onNavigate={navigate} />
+          </Suspense>
+        )}
         {page === 'profile' && (
           <ProfilePage
             user={user}
