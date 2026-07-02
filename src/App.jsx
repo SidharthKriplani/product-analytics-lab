@@ -1896,6 +1896,15 @@ export default function App() {
           </Suspense>
         )}
 
+        {page === 'my-tracks' && (
+          <Suspense fallback={null}>
+            <MyTracksPage
+              onNavigate={navigate}
+              onOpenSqlProblem={id => { setActiveSqlProblemId(id); setPage('sql-lab'); }}
+            />
+          </Suspense>
+        )}
+
         {page === 'bookmarks' && (
           <Suspense fallback={
               <div style={{ padding: '2rem 2rem 0' }}>
@@ -1904,13 +1913,6 @@ export default function App() {
                 ))}
               </div>
             }>
-        {page === 'my-tracks' && (
-          <MyTracksPage
-            onNavigate={navigate}
-            onOpenSqlProblem={id => { setActiveSqlProblemId(id); setPage('sql-lab'); }}
-          />
-        )}
-
             <BookmarksBrowser
               onBack={() => setPage('home')}
               onNavigate={(targetPage, itemId) => {
