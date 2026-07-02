@@ -5,6 +5,7 @@ import { getAllSTFProgress } from '../utils/spotTheFlawProgress.js';
 import { RoomHeader } from '../components/shared/RoomHeader.jsx';
 import { FilterBar } from '../components/shared/FilterBar.jsx';
 import { CaseCard } from '../components/shared/CaseCard.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const FLAW_TYPE_LABEL = {
   'srm':               'SRM',
@@ -204,6 +205,7 @@ export function SpotTheFlawBrowser({ onSelectCase, unlocked, onNavigate }) {
               meta={meta}
               badge={nextBadge}
               onClick={() => onSelectCase(c.id)}
+              addBtn={<AddTrackBtn itemType='flaw' itemId={String(c.id)} label={c.title} itemMeta={{ difficulty: c.difficulty }} />}
             />
           );
         })}

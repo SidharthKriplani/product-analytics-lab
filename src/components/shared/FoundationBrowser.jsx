@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { RoomHeader } from './RoomHeader.jsx';
 import { FilterBar } from './FilterBar.jsx';
 import { CaseCard } from './CaseCard.jsx';
+import { AddTrackBtn } from '../tracks/AddToTrackPopover.jsx';
 
 // Difficulty ordering for the dropdown.
 var DIFF_ORDER = { Beginner: 0, Intermediate: 1, Advanced: 2 };
@@ -30,6 +31,7 @@ export function FoundationBrowser({
   unlocked,       // boolean
   practiceLinks,  // array of { label, onClick } for bottom CTA
   description,    // one-sentence room purpose shown below header
+  itemType,       // track item type, e.g. 'mf_module', 'sf_module', etc.
 }) {
   var [diffFilter, setDiffFilter] = useState('all');
 
@@ -142,6 +144,14 @@ export function FoundationBrowser({
               locked={locked}
               badge={nextBadge}
               onClick={function () { if (!locked) onStart(mod.id); }}
+              addBtn={itemType ? (
+                <AddTrackBtn
+                  itemType={itemType}
+                  itemId={String(mod.id)}
+                  label={mod.title}
+                  itemMeta={{ difficulty: mod.difficulty }}
+                />
+              ) : undefined}
             />
           );
         })}

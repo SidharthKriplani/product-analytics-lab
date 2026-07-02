@@ -4,6 +4,7 @@ import { getAllEstimationProgress } from '../utils/estimationProgress.js';
 import { RoomHeader } from '../components/shared/RoomHeader.jsx';
 import { FilterBar } from '../components/shared/FilterBar.jsx';
 import { CaseCard } from '../components/shared/CaseCard.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const CATEGORY_LABEL = {
   'market-sizing':   'Market Sizing',
@@ -211,6 +212,7 @@ export function EstimationBrowser({ onStart, unlocked }) {
               meta={problem.isFree ? 'Free' : undefined}
               badge={nextBadge}
               onClick={() => onStart(problem.id)}
+              addBtn={<AddTrackBtn itemType='estimation' itemId={String(problem.id)} label={problem.title} itemMeta={{ difficulty: problem.difficulty }} />}
             />
           );
         })}

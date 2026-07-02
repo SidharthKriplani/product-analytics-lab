@@ -26,6 +26,7 @@ function load() {
 function save(data) {
   try {
     localStorage.setItem(KEY, JSON.stringify(data));
+    window.dispatchEvent(new CustomEvent('pal_tracks'));
   } catch {
     // silently fail if storage unavailable
   }
@@ -104,4 +105,22 @@ export function getTracksForProblem(problemId) {
   return load()
     .filter(t => t.items.some(i => i.type === 'sql' && i.problemId === problemId))
     .map(t => t.id);
+}
+
+// Generic item — { type, itemId, label, meta, addedAt }
+export function addItem(trackId, type, itemId, label, meta) {
+  var tracks = load();
+  var t = tracks.find(function(t) { return t.id === trackId; });
+  if (!t) return;
+  var already = t.items.some(function(i) { return i.type === type && i.itemId === String(itemId); });
+  if (already) return;
+  t.items.push({ type: type, itemId: String(itemId), label: label || '', meta: meta || {}, addedAt: new Date().toISOString() });
+  save(tracks);
+}
+
+// Returns array of track IDs containing a generic item
+export function getTracksForItem(type, itemId) {
+  return load()
+    .filter(function(t) { return t.items.some(function(i) { return i.type === type && i.itemId === String(itemId); }); })
+    .map(function(t) { return t.id; });
 }

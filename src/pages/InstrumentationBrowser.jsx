@@ -5,6 +5,7 @@ import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { RoomHeader } from '../components/shared/RoomHeader.jsx';
 import { FilterBar } from '../components/shared/FilterBar.jsx';
 import { CaseCard } from '../components/shared/CaseCard.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const DOMAIN_LABEL = {
   'measurement-plan':        'Measurement Plan',
@@ -169,6 +170,7 @@ export function InstrumentationBrowser({ onSelectCase, unlocked, onOpenArticle }
               meta={meta}
               badge={nextBadge}
               onClick={() => onSelectCase(c.id)}
+              addBtn={<AddTrackBtn itemType='instrumentation' itemId={String(c.id)} label={c.title} itemMeta={{ difficulty: c.difficulty }} />}
             />
           );
         })}

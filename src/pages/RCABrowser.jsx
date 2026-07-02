@@ -6,6 +6,7 @@ import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.js
 import { RoomHeader } from '../components/shared/RoomHeader.jsx';
 import { FilterBar } from '../components/shared/FilterBar.jsx';
 import { CaseCard } from '../components/shared/CaseCard.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const DOMAIN_LABEL = {
   growth: 'Growth', search: 'Search', engagement: 'Engagement',
@@ -206,6 +207,7 @@ export function RCABrowser({ onSelectCase, unlocked, onUnlock, onOpenArticle, on
               meta={meta}
               badge={nextBadge}
               onClick={() => (isLocked ? onUnlock && onUnlock() : onSelectCase(c.id))}
+              addBtn={<AddTrackBtn itemType='rca' itemId={String(c.id)} label={c.title} itemMeta={{ difficulty: c.difficulty }} />}
             />
           );
         })}

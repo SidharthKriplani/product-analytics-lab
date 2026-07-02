@@ -4,6 +4,7 @@ import { statsModules } from '../data/statsModules.js';
 import { getAllStatsProgress } from '../utils/statsProgress.js';
 import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { getRoomConfig } from '../data/roomConfig.js';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const DIFF_CFG = {
   foundational: { label: 'Foundational', color: 'var(--blue-text)', bg: 'var(--blue-bg)',    border: 'var(--blue-border)' },
@@ -322,6 +323,9 @@ function ModuleCard({ module, index, allProgress, firstUnstartedId, onSelectModu
       </div>
 
       {/* Arrow */}
+      <span onClick={e => e.stopPropagation()} style={{ display: 'inline-flex', flexShrink: 0 }}>
+        <AddTrackBtn itemType='stats' itemId={String(module.id)} label={module.title} itemMeta={{ difficulty: module.difficulty }} />
+      </span>
       <span style={{ color: 'var(--text-dim)', fontSize: '0.82rem', flexShrink: 0, paddingTop: '0.2rem' }}>→</span>
     </div>
   );

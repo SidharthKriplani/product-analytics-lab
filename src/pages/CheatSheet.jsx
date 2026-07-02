@@ -5,6 +5,7 @@
 // Casefile mode. No auth gate. Free for all.
 
 import { useState } from 'react';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 // ─── Data ─────────────────────────────────────────────────────────────────
 
@@ -738,6 +739,9 @@ function QuickReference() {
               <div style={S.cheatHeaderLeft}>
                 <div style={S.cheatDot(section.color)} />
                 <span style={S.cheatLabel}>{section.label}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={e => e.stopPropagation()}>
+                <AddTrackBtn itemType='cheatsheet' itemId={section.id} label={section.label} />
               </div>
               <span style={S.cheatChevron(open)}>▼</span>
             </div>

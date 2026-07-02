@@ -5,6 +5,7 @@ import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.js
 import { RoomHeader } from '../components/shared/RoomHeader.jsx';
 import { FilterBar } from '../components/shared/FilterBar.jsx';
 import { CaseCard } from '../components/shared/CaseCard.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const DIFF_ORDER = { analyst: 0, senior: 1, staff: 2 };
 
@@ -183,6 +184,7 @@ export function CasesBrowser({ onSelectCase, unlocked, onUnlock, onNavigate }) {
               meta={meta}
               badge={nextBadge}
               onClick={() => (isLocked ? onUnlock && onUnlock() : onSelectCase(bc.id))}
+              addBtn={<AddTrackBtn itemType='cases' itemId={String(bc.id)} label={bc.title} itemMeta={{ difficulty: bc.difficulty }} />}
             />
           );
         })}

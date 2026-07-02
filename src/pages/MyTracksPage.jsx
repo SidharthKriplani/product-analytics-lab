@@ -1,19 +1,33 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   getTracks, createTrack, deleteTrack, renameTrack,
   removeItem, reorderItems, addNote,
 } from '../utils/tracks.js';
 import { Icon } from '../components/shared/Icon.jsx';
 
+// ── Difficulty badge ────────────────────────────────────────────────────────
+// Covers both SQL Lab difficulties and PAL room difficulties.
 const DIFF_COLORS = {
-  Easy:     { bg: 'rgba(34,197,94,0.1)',  color: '#16a34a', border: 'rgba(34,197,94,0.25)' },
-  Medium:   { bg: 'rgba(245,158,11,0.1)', color: '#d97706', border: 'rgba(245,158,11,0.25)' },
-  Hard:     { bg: 'rgba(239,68,68,0.1)',  color: '#dc2626', border: 'rgba(239,68,68,0.25)' },
-  Master:   { bg: 'rgba(139,92,246,0.1)', color: '#7c3aed', border: 'rgba(139,92,246,0.25)' },
-  Forensic: { bg: 'rgba(234,88,12,0.1)',  color: '#ea580c', border: 'rgba(234,88,12,0.25)' },
+  // SQL Lab
+  Easy:         { bg: 'rgba(34,197,94,0.1)',  color: '#16a34a', border: 'rgba(34,197,94,0.25)' },
+  Medium:       { bg: 'rgba(245,158,11,0.1)', color: '#d97706', border: 'rgba(245,158,11,0.25)' },
+  Hard:         { bg: 'rgba(239,68,68,0.1)',  color: '#dc2626', border: 'rgba(239,68,68,0.25)' },
+  Master:       { bg: 'rgba(139,92,246,0.1)', color: '#7c3aed', border: 'rgba(139,92,246,0.25)' },
+  Forensic:     { bg: 'rgba(234,88,12,0.1)',  color: '#ea580c', border: 'rgba(234,88,12,0.25)' },
+  // PAL room difficulties
+  foundational: { bg: 'var(--accent-bg)',  color: 'var(--accent)',  border: 'var(--accent-border)' },
+  analyst:      { bg: 'var(--accent-bg)',  color: 'var(--accent)',  border: 'var(--accent-border)' },
+  Beginner:     { bg: 'var(--accent-bg)',  color: 'var(--accent)',  border: 'var(--accent-border)' },
+  intermediate: { bg: 'var(--teal-bg)',    color: 'var(--teal)',    border: 'var(--teal-border)' },
+  Intermediate: { bg: 'var(--teal-bg)',    color: 'var(--teal)',    border: 'var(--teal-border)' },
+  senior:       { bg: 'var(--teal-bg)',    color: 'var(--teal)',    border: 'var(--teal-border)' },
+  advanced:     { bg: 'var(--yellow-bg)',  color: 'var(--yellow)',  border: 'var(--yellow-border)' },
+  Advanced:     { bg: 'var(--yellow-bg)',  color: 'var(--yellow)',  border: 'var(--yellow-border)' },
+  staff:        { bg: 'var(--yellow-bg)',  color: 'var(--yellow)',  border: 'var(--yellow-border)' },
 };
 
 function DiffBadge({ diff }) {
+  if (!diff) return null;
   const s = DIFF_COLORS[diff] || { bg: 'var(--surface-2)', color: 'var(--text-muted)', border: 'var(--border)' };
   return (
     <span style={{
@@ -23,6 +37,54 @@ function DiffBadge({ diff }) {
     }}>{diff}</span>
   );
 }
+
+// ── Type label + navigate-to room mapping ───────────────────────────────────
+const TYPE_LABEL = {
+  sql:           'SQL Problem',
+  sf_module:     'Stats Foundation',
+  mf_module:     'Metrics Foundation',
+  ef_module:     'A/B Foundation',
+  rca_module:    'RCA Foundation',
+  cases:         'Cases Room',
+  rca:           'RCA Room',
+  estimation:    'Estimation',
+  metrics:       'Metrics Room',
+  growth:        'Growth Analytics',
+  prioritization:'Prioritization',
+  scenario:      'A/B Review',
+  flaw:          'Spot the Flaw',
+  design:        'A/B Design',
+  instrumentation:'Instrumentation',
+  product_design:'PM Design',
+  stats:         'Stats Room',
+  behavioral:    'Behavioral',
+  company_case:  'Company Track',
+  cheatsheet:    'Cheat Sheet',
+  note:          'Note',
+};
+
+// Maps item type to the PAL onNavigate room key
+const TYPE_ROOM = {
+  sf_module:      'stat-foundations',
+  mf_module:      'metrics-foundations',
+  ef_module:      'exp-foundations',
+  rca_module:     'rca-foundations',
+  cases:          'cases',
+  rca:            'rca',
+  estimation:     'estimation',
+  metrics:        'metrics',
+  growth:         'growth-analytics',
+  prioritization: 'prioritization',
+  scenario:       'browser',
+  flaw:           'spot-the-flaw',
+  design:         'design',
+  instrumentation:'instrumentation',
+  product_design: 'product-design',
+  stats:          'stats',
+  behavioral:     'behavioral',
+  company_case:   'cases',
+  cheatsheet:     'cheatsheet',
+};
 
 // ── Track list (left pane) ──────────────────────────────────────────────────
 function TrackList({ tracks, selectedId, onSelect, onNew, onDelete }) {
@@ -41,7 +103,7 @@ function TrackList({ tracks, selectedId, onSelect, onNew, onDelete }) {
 
       {tracks.length === 0 && (
         <div style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: 1.5 }}>
-          No tracks yet. Hit + to create your first one.
+          No tracks yet. Hit + to create your first one, then use the + buttons across the app to add content.
         </div>
       )}
 
@@ -82,7 +144,7 @@ function TrackList({ tracks, selectedId, onSelect, onNew, onDelete }) {
 }
 
 // ── Track detail (right pane) ───────────────────────────────────────────────
-function TrackDetail({ track, onChanged, onOpenSqlProblem }) {
+function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate }) {
   const [editingName, setEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(track.name);
   const [addingNote, setAddingNote] = useState(false);
@@ -120,8 +182,9 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem }) {
     onChanged();
   }
 
-  const sqlItems = track.items.filter(i => i.type === 'sql').length;
-  const noteItems = track.items.filter(i => i.type === 'note').length;
+  const totalItems = track.items.length;
+  const noteCount  = track.items.filter(i => i.type === 'note').length;
+  const otherCount = totalItems - noteCount;
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', minWidth: 0 }}>
@@ -146,7 +209,7 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem }) {
             </div>
           )}
           <div style={{ marginTop: '0.3rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            {sqlItems} problem{sqlItems !== 1 ? 's' : ''}{noteItems > 0 ? ` · ${noteItems} note${noteItems !== 1 ? 's' : ''}` : ''}
+            {otherCount} item{otherCount !== 1 ? 's' : ''}{noteCount > 0 ? ` · ${noteCount} note${noteCount !== 1 ? 's' : ''}` : ''}
             {' · '}Created {new Date(track.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
         </div>
@@ -181,7 +244,8 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem }) {
       <div style={{ padding: '0.75rem 1.25rem', flex: 1 }}>
         {track.items.length === 0 && (
           <div style={{ color: 'var(--text-muted)', fontSize: '0.83rem', padding: '1.5rem 0', textAlign: 'center', lineHeight: 1.6 }}>
-            This track is empty.<br/>Add problems by hitting the bookmark icon on any SQL Lab problem.
+            This track is empty.<br/>
+            Use the + button on any problem, module, or cheat sheet section to add it here.
           </div>
         )}
 
@@ -206,6 +270,7 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem }) {
             {/* Drag handle */}
             <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'grab', flexShrink: 0, lineHeight: 1, paddingTop: item.type === 'note' ? '2px' : 0 }}>⠿</span>
 
+            {/* SQL problem */}
             {item.type === 'sql' && (
               <>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -213,7 +278,7 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem }) {
                     <DiffBadge diff={item.difficulty} />
                     <button
                       onClick={() => onOpenSqlProblem(item.problemId)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', textAlign: 'left', textDecoration: 'none' }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', textAlign: 'left' }}
                       title="Open in SQL Lab"
                     >
                       {item.title}
@@ -231,12 +296,55 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem }) {
               </>
             )}
 
+            {/* Inline note */}
             {item.type === 'note' && (
               <p style={{ flex: 1, margin: 0, fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                 {item.content}
               </p>
             )}
 
+            {/* Generic PAL items (all other types) */}
+            {item.type !== 'sql' && item.type !== 'note' && (
+              <>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
+                    {/* Type label chip */}
+                    <span style={{
+                      fontSize: '0.62rem', fontWeight: 700,
+                      color: 'var(--accent)', background: 'var(--accent-bg)',
+                      border: '1px solid var(--accent-border)',
+                      borderRadius: '4px', padding: '0.05rem 0.35rem',
+                      textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap',
+                    }}>
+                      {TYPE_LABEL[item.type] || item.type}
+                    </span>
+                    {/* Difficulty badge */}
+                    {item.meta?.difficulty && <DiffBadge diff={item.meta.difficulty} />}
+                    {/* Room tag for company_case */}
+                    {item.meta?.room && item.type === 'company_case' && (
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
+                        {item.meta.room}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.label || item.itemId}
+                  </div>
+                </div>
+                {/* Navigate button */}
+                {TYPE_ROOM[item.type] && (
+                  <button
+                    onClick={() => onNavigate(TYPE_ROOM[item.type])}
+                    title={`Go to ${TYPE_LABEL[item.type] || item.type}`}
+                    style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '5px', padding: '3px 8px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-muted)', flexShrink: 0, whiteSpace: 'nowrap' }}
+                  >
+                    Go →
+                  </button>
+                )}
+              </>
+            )}
+
+            {/* Remove button */}
             <button
               onClick={() => handleRemove(idx)}
               title="Remove"
@@ -257,11 +365,16 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem }) {
   const refresh = useCallback(() => {
     const updated = getTracks();
     setTracks(updated);
-    // If selected track was deleted, fall back to first
     if (selectedId && !updated.find(t => t.id === selectedId)) {
       setSelectedId(updated[0]?.id || null);
     }
   }, [selectedId]);
+
+  // Listen for cross-component track changes
+  useEffect(() => {
+    window.addEventListener('pal_tracks', refresh);
+    return () => window.removeEventListener('pal_tracks', refresh);
+  }, [refresh]);
 
   function handleNew() {
     const t = createTrack('New Track');
@@ -313,6 +426,7 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem }) {
             track={selectedTrack}
             onChanged={refresh}
             onOpenSqlProblem={onOpenSqlProblem}
+            onNavigate={onNavigate}
           />
         ) : (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>

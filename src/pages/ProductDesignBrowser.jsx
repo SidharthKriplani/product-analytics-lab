@@ -5,6 +5,7 @@ import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { RoomHeader } from '../components/shared/RoomHeader.jsx';
 import { FilterBar } from '../components/shared/FilterBar.jsx';
 import { CaseCard } from '../components/shared/CaseCard.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const DIFF_ORDER = { medium: 0, analyst: 0, senior: 1, hard: 1, staff: 2 };
 
@@ -190,6 +191,7 @@ export function ProductDesignBrowser({ onSelectScenario, unlocked, onUnlock, onO
                 meta={meta}
                 badge={nextBadge}
                 onClick={() => (isLocked ? onUnlock?.() : onSelectScenario(scenario.id))}
+                addBtn={<AddTrackBtn itemType='product_design' itemId={String(scenario.id)} label={scenario.title} itemMeta={{ difficulty: scenario.difficulty }} />}
               />
             );
           })}

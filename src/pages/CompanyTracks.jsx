@@ -3,6 +3,7 @@ import { GateOverlay } from '../components/shared/GateOverlay.jsx';
 import { companyTracks, articleTitleMap } from '../data/companyTracks.js';
 import { caseTitleMap } from '../data/caseIndex.js';
 import { Icon } from '../components/shared/Icon.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const ROOM_LABELS = {
   'stat-foundations': 'Foundations',
@@ -894,38 +895,56 @@ function TrackDetail({ track, onBack, onNavigate }) {
                 const done = isCaseCompleted(ref.room, caseId);
                 const isLast = idx === ref.ids.length - 1;
                 return (
-                  <button
+                  <div
                     key={caseId}
-                    onClick={() => onNavigate(ref.room, caseId)}
                     style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem',
-                      padding: '0.7rem 1rem', background: 'none', border: 'none',
+                      width: '100%', display: 'flex', alignItems: 'center',
                       borderBottom: isLast ? 'none' : '1px solid var(--border-subtle)',
-                      cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s ease',
+                      transition: 'background 0.12s ease',
                     }}
                     onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
                   >
-                    <span style={{
-                      width: '18px', height: '18px', borderRadius: '50%',
-                      background: done ? 'var(--green-bg)' : 'var(--border-subtle)',
-                      border: '1.5px solid ' + (done ? 'var(--green)' : 'var(--border)'),
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '0.68rem', color: 'var(--green)', flexShrink: 0,
-                    }}>
-                      {done ? <Icon name='check' size={11} color='currentColor' /> : ''}
+                    <button
+                      onClick={() => onNavigate(ref.room, caseId)}
+                      style={{
+                        flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem',
+                        padding: '0.7rem 0 0.7rem 1rem', background: 'none', border: 'none',
+                        cursor: 'pointer', textAlign: 'left', minWidth: 0,
+                      }}
+                    >
+                      <span style={{
+                        width: '18px', height: '18px', borderRadius: '50%',
+                        background: done ? 'var(--green-bg)' : 'var(--border-subtle)',
+                        border: '1.5px solid ' + (done ? 'var(--green)' : 'var(--border)'),
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.68rem', color: 'var(--green)', flexShrink: 0,
+                      }}>
+                        {done ? <Icon name='check' size={11} color='currentColor' /> : ''}
+                      </span>
+                      <span style={{
+                        fontSize: '0.85rem', fontWeight: 500,
+                        color: done ? 'var(--text-muted)' : 'var(--text)',
+                        flex: 1, lineHeight: 1.4,
+                      }}>
+                        {caseTitleMap[caseId] || caseId}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', flexShrink: 0 }}>
+                        Practice →
+                      </span>
+                    </button>
+                    <span
+                      onClick={e => e.stopPropagation()}
+                      style={{ display: 'inline-flex', alignItems: 'center', padding: '0 0.75rem 0 0.4rem', flexShrink: 0 }}
+                    >
+                      <AddTrackBtn
+                        itemType='company_case'
+                        itemId={String(caseId)}
+                        label={caseTitleMap[caseId] || caseId}
+                        itemMeta={{ room: ref.room }}
+                      />
                     </span>
-                    <span style={{
-                      fontSize: '0.85rem', fontWeight: 500,
-                      color: done ? 'var(--text-muted)' : 'var(--text)',
-                      flex: 1, lineHeight: 1.4,
-                    }}>
-                      {caseTitleMap[caseId] || caseId}
-                    </span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', flexShrink: 0 }}>
-                      Practice →
-                    </span>
-                  </button>
+                  </div>
                 );
               })}
             </div>

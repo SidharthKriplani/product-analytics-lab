@@ -1,60 +1,84 @@
 import { useState, useEffect, useRef } from 'react';
-import { getTracks, createTrack, addSqlProblem, getTracksForProblem } from '../../utils/tracks.js';
+import { createPortal } from 'react-dom';
+import {
+  getTracks, createTrack,
+  addSqlProblem, getTracksForProblem,
+  addItem, getTracksForItem,
+} from '../../utils/tracks.js';
 
 /**
- * Small popover for adding a SQL problem to a track.
+ * Popover for adding content to a track.
  *
- * Props:
- *   problemId   string
- *   title       string
- *   difficulty  string
- *   onClose     fn
- *   anchorRef   ref to the trigger element (for positioning)
+ * SQL mode (existing):   pass problemId, title, difficulty
+ * Generic mode (new):    pass itemType, itemId, label, itemMeta
+ *
+ * fixedPos: { top, right } — uses position:fixed (portal mode)
+ * Without fixedPos: position:absolute relative to nearest positioned ancestor.
  */
-export function AddToTrackPopover({ problemId, title, difficulty, onClose, anchorRef }) {
-  const [tracks, setTracks] = useState(() => getTracks());
-  const [inTracks, setInTracks] = useState(() => getTracksForProblem(problemId));
-  const [newName, setNewName] = useState('');
-  const [creating, setCreating] = useState(false);
-  const popoverRef = useRef(null);
-  const inputRef = useRef(null);
+export function AddToTrackPopover({
+  // sql props
+  problemId, title, difficulty,
+  // generic props
+  itemType, itemId, label, itemMeta,
+  // shared
+  onClose, anchorRef, fixedPos,
+}) {
+  var isGeneric = !!itemType;
 
-  // Close on click outside
-  useEffect(() => {
+  var [tracks, setTracks] = useState(function() { return getTracks(); });
+  var [inTracks, setInTracks] = useState(function() {
+    return isGeneric ? getTracksForItem(itemType, itemId) : getTracksForProblem(problemId);
+  });
+  var [newName, setNewName] = useState('');
+  var [creating, setCreating] = useState(false);
+  var popoverRef = useRef(null);
+  var inputRef = useRef(null);
+
+  var posStyle = fixedPos
+    ? { position: 'fixed', top: fixedPos.top, right: fixedPos.right, marginTop: 0 }
+    : { position: 'absolute', top: '100%', right: 0, marginTop: '6px' };
+
+  useEffect(function() {
     function handle(e) {
       if (
         popoverRef.current && !popoverRef.current.contains(e.target) &&
-        anchorRef?.current && !anchorRef.current.contains(e.target)
+        (!anchorRef?.current || !anchorRef.current.contains(e.target))
       ) { onClose(); }
     }
     document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
+    return function() { document.removeEventListener('mousedown', handle); };
   }, [onClose, anchorRef]);
 
-  // Focus input when creating
-  useEffect(() => {
+  useEffect(function() {
     if (creating && inputRef.current) inputRef.current.focus();
   }, [creating]);
 
   function refresh() {
     setTracks(getTracks());
-    setInTracks(getTracksForProblem(problemId));
+    setInTracks(isGeneric ? getTracksForItem(itemType, itemId) : getTracksForProblem(problemId));
   }
 
   function handleToggle(trackId) {
-    const already = inTracks.includes(trackId);
+    var already = inTracks.includes(trackId);
     if (!already) {
-      addSqlProblem(trackId, problemId, title, difficulty);
+      if (isGeneric) {
+        addItem(trackId, itemType, itemId, label || '', itemMeta || {});
+      } else {
+        addSqlProblem(trackId, problemId, title, difficulty);
+      }
     }
-    // We intentionally don't support remove-from-here — user can remove from My Tracks page
     refresh();
   }
 
   function handleCreate(e) {
     e.preventDefault();
     if (!newName.trim()) return;
-    const t = createTrack(newName.trim());
-    addSqlProblem(t.id, problemId, title, difficulty);
+    var t = createTrack(newName.trim());
+    if (isGeneric) {
+      addItem(t.id, itemType, itemId, label || '', itemMeta || {});
+    } else {
+      addSqlProblem(t.id, problemId, title, difficulty);
+    }
     setNewName('');
     setCreating(false);
     refresh();
@@ -64,11 +88,8 @@ export function AddToTrackPopover({ problemId, title, difficulty, onClose, ancho
     <div
       ref={popoverRef}
       style={{
-        position: 'absolute',
+        ...posStyle,
         zIndex: 9999,
-        top: '100%',
-        right: 0,
-        marginTop: '6px',
         background: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: '10px',
@@ -78,7 +99,7 @@ export function AddToTrackPopover({ problemId, title, difficulty, onClose, ancho
         padding: '0.6rem 0',
         fontSize: '0.82rem',
       }}
-      onClick={e => e.stopPropagation()}
+      onClick={function(e) { e.stopPropagation(); }}
     >
       <div style={{ padding: '0.25rem 0.85rem 0.5rem', fontWeight: 700, fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
         Add to Track
@@ -90,12 +111,12 @@ export function AddToTrackPopover({ problemId, title, difficulty, onClose, ancho
         </div>
       )}
 
-      {tracks.map(t => {
-        const added = inTracks.includes(t.id);
+      {tracks.map(function(t) {
+        var added = inTracks.includes(t.id);
         return (
           <button
             key={t.id}
-            onClick={() => handleToggle(t.id)}
+            onClick={function() { handleToggle(t.id); }}
             style={{
               display: 'flex', alignItems: 'center', gap: '0.55rem',
               width: '100%', textAlign: 'left', background: 'none',
@@ -106,8 +127,8 @@ export function AddToTrackPopover({ problemId, title, difficulty, onClose, ancho
               fontSize: '0.83rem',
               transition: 'background 0.12s',
             }}
-            onMouseEnter={e => { if (!added) e.currentTarget.style.background = 'var(--surface-2)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+            onMouseEnter={function(e) { if (!added) e.currentTarget.style.background = 'var(--surface-2)'; }}
+            onMouseLeave={function(e) { e.currentTarget.style.background = 'none'; }}
           >
             <span style={{
               width: 16, height: 16, borderRadius: 4,
@@ -126,15 +147,15 @@ export function AddToTrackPopover({ problemId, title, difficulty, onClose, ancho
       <div style={{ borderTop: '1px solid var(--border)', marginTop: '0.4rem', paddingTop: '0.4rem' }}>
         {!creating ? (
           <button
-            onClick={() => setCreating(true)}
+            onClick={function() { setCreating(true); }}
             style={{
               display: 'flex', alignItems: 'center', gap: '0.5rem',
               width: '100%', textAlign: 'left', background: 'none',
               border: 'none', cursor: 'pointer', padding: '0.45rem 0.85rem',
               color: 'var(--accent)', fontSize: '0.83rem', fontWeight: 600,
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+            onMouseEnter={function(e) { e.currentTarget.style.background = 'var(--surface-2)'; }}
+            onMouseLeave={function(e) { e.currentTarget.style.background = 'none'; }}
           >
             <span style={{ fontSize: '1rem', lineHeight: 1 }}>+</span> New track
           </button>
@@ -143,14 +164,14 @@ export function AddToTrackPopover({ problemId, title, difficulty, onClose, ancho
             <input
               ref={inputRef}
               value={newName}
-              onChange={e => setNewName(e.target.value)}
+              onChange={function(e) { setNewName(e.target.value); }}
               placeholder="Track name…"
               style={{
                 flex: 1, fontSize: '0.8rem', padding: '0.3rem 0.5rem',
                 background: 'var(--surface-2)', border: '1px solid var(--border)',
                 borderRadius: '5px', color: 'var(--text)', outline: 'none',
               }}
-              onKeyDown={e => { if (e.key === 'Escape') { setCreating(false); setNewName(''); } }}
+              onKeyDown={function(e) { if (e.key === 'Escape') { setCreating(false); setNewName(''); } }}
             />
             <button
               type="submit"
@@ -167,5 +188,58 @@ export function AddToTrackPopover({ problemId, title, difficulty, onClose, ancho
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Self-contained + button that opens a portal-based AddToTrackPopover.
+ * Escapes overflow:hidden containers via createPortal + getBoundingClientRect.
+ */
+export function AddTrackBtn({ itemType, itemId, label, itemMeta }) {
+  var [open, setOpen] = useState(false);
+  var btnRef = useRef(null);
+  var [pos, setPos] = useState({ top: 0, right: 0 });
+
+  function toggle(e) {
+    e.stopPropagation();
+    if (!open && btnRef.current) {
+      var r = btnRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom + 6, right: window.innerWidth - r.right });
+    }
+    setOpen(function(o) { return !o; });
+  }
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        onClick={toggle}
+        title="Add to track"
+        style={{
+          background: 'none',
+          border: '1px solid var(--border)',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          padding: '2px 7px',
+          fontSize: '13px',
+          color: 'var(--accent)',
+          flexShrink: 0,
+          lineHeight: 1,
+          fontWeight: 700,
+        }}
+      >+</button>
+      {open && createPortal(
+        <AddToTrackPopover
+          itemType={itemType}
+          itemId={itemId}
+          label={label}
+          itemMeta={itemMeta || {}}
+          onClose={function() { setOpen(false); }}
+          anchorRef={btnRef}
+          fixedPos={pos}
+        />,
+        document.body
+      )}
+    </>
   );
 }

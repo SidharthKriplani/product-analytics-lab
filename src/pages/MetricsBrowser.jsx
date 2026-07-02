@@ -290,6 +290,7 @@ import { FoundationNudgeCard } from '../components/shared/FoundationNudgeCard.js
 import { RoomHeader } from '../components/shared/RoomHeader.jsx';
 import { FilterBar } from '../components/shared/FilterBar.jsx';
 import { CaseCard } from '../components/shared/CaseCard.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const LEVEL_CFG = {
   staff:   { label: 'Staff-level',   color: 'var(--purple)',    bg: 'var(--purple-bg)',  border: 'var(--purple-border)' },
@@ -543,6 +544,7 @@ export function MetricsBrowser({ onSelectCase, onSelectGrowth, unlocked, onUnloc
               meta={meta}
               badge={nextBadge}
               onClick={() => (isLocked ? (onUnlock && onUnlock()) : onSelectCase(mc.id))}
+              addBtn={<AddTrackBtn itemType='metrics' itemId={String(mc.id)} label={mc.title} itemMeta={{ difficulty: mc.difficulty }} />}
             />
           );
         })}

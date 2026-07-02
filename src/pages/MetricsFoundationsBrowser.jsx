@@ -15,6 +15,7 @@ export function MetricsFoundationsBrowser({ onStart, unlocked, onNavigate }) {
       iconName='bar-chart'
       onStart={onStart}
       unlocked={unlocked}
+      itemType='mf_module'
       description='Learn to define metrics that actually measure what you care about. Covers north star metrics, guardrail and diagnostic decomposition, and the traps that make metrics misleading — so you can design measurement before you run the experiment.'
       practiceLinks={[
         { label: 'Metrics Room', onClick: function () { onNavigate('metrics'); } },

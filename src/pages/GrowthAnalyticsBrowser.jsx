@@ -7,6 +7,7 @@ import { Icon } from '../components/shared/Icon.jsx';
 import { RoomHeader } from '../components/shared/RoomHeader.jsx';
 import { FilterBar } from '../components/shared/FilterBar.jsx';
 import { CaseCard } from '../components/shared/CaseCard.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const DOMAIN_LABEL = {
   'growth-accounting': 'Growth Accounting',
@@ -181,6 +182,7 @@ export function GrowthAnalyticsBrowser({ onSelectCase, unlocked, onOpenArticle, 
               meta={meta}
               badge={badge}
               onClick={() => onSelectCase(c.id)}
+              addBtn={<AddTrackBtn itemType='growth' itemId={String(c.id)} label={c.title} itemMeta={{ difficulty: c.difficulty }} />}
             />
           );
         })}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Icon } from '../components/shared/Icon.jsx';
 import { behavioralQuestions } from '../data/behavioralQuestions.js';
 import { getAllBehavioralProgress } from '../utils/behavioralProgress.js';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const DIFFICULTY_COLOR = {
   'analyst': { color: 'var(--accent)',  bg: 'var(--accent-bg)',  border: 'var(--accent-border)' },
@@ -354,6 +355,10 @@ export function BehavioralBrowser({ onStart, unlocked }) {
                   </div>
                 </div>
 
+                {/* Add to track */}
+                <span onClick={e => e.stopPropagation()} style={{ display: 'inline-flex', flexShrink: 0 }}>
+                  <AddTrackBtn itemType='behavioral' itemId={String(question.id)} label={question.title} itemMeta={{ difficulty: question.difficulty }} />
+                </span>
                 {/* Completion indicator */}
                 {prog && (
                   <div style={{

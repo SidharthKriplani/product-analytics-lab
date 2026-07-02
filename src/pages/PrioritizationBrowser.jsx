@@ -5,6 +5,7 @@ import { FOUNDATION_DOMAINS } from '../data/foundationMeta.js';
 import { RoomHeader } from '../components/shared/RoomHeader.jsx';
 import { FilterBar } from '../components/shared/FilterBar.jsx';
 import { CaseCard } from '../components/shared/CaseCard.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const TAGS = ['All', 'RICE', 'effort-impact', 'technical debt', 'stakeholder conflict', 'OKRs', 'platform vs. feature'];
 
@@ -169,6 +170,7 @@ export function PrioritizationBrowser({ onStart, unlocked, onUnlock, onOpenArtic
                 meta={meta}
                 badge={nextBadge}
                 onClick={() => onStart(scenario.id)}
+                addBtn={<AddTrackBtn itemType='prioritization' itemId={String(scenario.id)} label={scenario.title} itemMeta={{ difficulty: scenario.difficulty }} />}
               />
             );
           })}

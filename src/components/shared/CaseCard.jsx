@@ -43,7 +43,7 @@ const DIFF_PILL = {
 
 export function CaseCard({
   id, title, subtitle, tags = [], difficulty, accent = 'accent',
-  status, onClick, meta, locked = false, badge,
+  status, onClick, meta, locked = false, badge, addBtn,
 }) {
   const accentBorder = `var(--${accent}-border)`;
   const solved = status === 'solved';
@@ -120,7 +120,7 @@ export function CaseCard({
           </span>
         )}
 
-        {/* Right-aligned cluster: meta text, lock, status tick */}
+        {/* Right-aligned cluster: meta text, lock, status tick, add-to-track btn */}
         <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
           {meta && (
             <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
@@ -131,6 +131,11 @@ export function CaseCard({
           {solved && (
             <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--green)' }}>
               <Icon name='check' size={14} color='currentColor' />
+            </span>
+          )}
+          {addBtn && (
+            <span onClick={e => e.stopPropagation()} style={{ display: 'inline-flex' }}>
+              {addBtn}
             </span>
           )}
         </span>

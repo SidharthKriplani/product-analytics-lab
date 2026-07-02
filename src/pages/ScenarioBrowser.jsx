@@ -9,6 +9,7 @@ import { SegmentedTabs } from '../components/shared/SegmentedTabs.jsx';
 import { RoomHeader } from '../components/shared/RoomHeader.jsx';
 import { FilterBar } from '../components/shared/FilterBar.jsx';
 import { CaseCard } from '../components/shared/CaseCard.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 // Stats "claim check" cases — judge a stakeholder's claim about an experiment
 // result. Folded into the Review room as a tagged section because both formats
@@ -168,6 +169,7 @@ export function ScenarioBrowser({ allProgress, onSelect, onSelectStats, unlocked
               meta={scenario.isFree ? 'Free' : undefined}
               badge={nextBadge}
               onClick={() => onSelect(scenario.id)}
+              addBtn={<AddTrackBtn itemType='scenario' itemId={String(scenario.id)} label={scenario.title} itemMeta={{ difficulty: scenario.difficulty }} />}
             />
           );
         })}
