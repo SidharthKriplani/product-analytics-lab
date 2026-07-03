@@ -53,6 +53,9 @@ tag_companies.py built. Adds 0-3 secondary companies per SQL problem from 69-com
 ### DEC-004 — Email capture timing (2026-06-21) [LNK→PAL]
 LinkedIn launch proceeds without email capture. Not a launch blocker. Must be live by 2026-06-30. Minimum viable: Beehiiv or Substack signup page. Drive to it via native CTA in post body. Do NOT brand PAL as "free forever" — monetisation liability.
 
+### DEC-005 — Shared Supabase identity: PAL ⇄ PL (2026-07-03) [PAL,PL→ALL]
+PL points at **PAL's Supabase project** for *identity* (same `VITE_SUPABASE_URL` + anon key on PL's Vercel) — **one login across labs**, the first concrete step of the shared BreakLabs ecosystem. **Scores isolated per lab:** PL writes a separate `pl_leaderboard` table; PAL's `leaderboard` (keyed by user_id, single `total_solved`) is untouched — a shared scores table would clobber cross-lab. **Entitlements stay per-lab — shared identity ≠ shared paygate** (Sidharth's explicit concern; resolved at the entitlement layer, not auth, so PL can be free/bundled/paid independently). MSL + GSL already have their *own* Supabase projects with their own schemas — folding them into the shared project later is a bounded auth-consolidation migration (name-collision handling + one canonical `auth.users`), do it only when the ecosystem payoff is worth it. Infra to make PL's board live: PL Vercel env = PAL's values · `pl_leaderboard` SQL in PAL's project · PL domain in PAL Auth redirect URLs. Ref: PL `DECISIONS.md` D-PL-31.
+
 ---
 
 ## MESSAGE THREAD

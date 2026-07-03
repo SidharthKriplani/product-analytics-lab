@@ -4,6 +4,23 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## [7.3.0] — 2026-07-03 [FEATURES — recap toggle · framework deep-dives + Frameworks→Deep-Dives bifurcation · item-level deep linking · Tracks quick-add + full coverage · PL-leaderboard ecosystem]
+
+A multi-feature session (code-complete + esbuild-validated; pushed via the `/tmp` clone workflow).
+
+**(1) Quick-Recap toggle on all 79 foundation modules.** A "Full module / ⚡ Quick recap" switch in the shared `FoundationRunnerShell.jsx`, driven by an optional `recap:[...]` data field so **no module component was touched**. Recaps authored for SF (32) / MF (17) / EF (15) / RCA (15) from each module's `keyInsight`. Mirrors MSL's per-module recap.
+
+**(2) Mined-framework deep-dives + bifurcation.** 4 new Deep-Dive posts written in PAL's teaching voice from Sidharth's field frameworks — EDA 4-layer (`eda-four-layers`), Profitability Rev−Cost tree (`profitability-tree`), the RCA "case spine" with routing/sanity gates + BLUF close (`case-spine-gates`), Guesstimate demand/supply engines (`guesstimate-engines`) — each linked to a practice room. The standalone **Frameworks (Playbook) page is folded into Deep Dives as an "All deep dives / Frameworks" filter** (19 posts tagged `framework:true`); its Library card + Header nav item removed (`PlaybookBrowser` route left intact/reversible). `DEEP_DIVE_COUNT` 81→85. (Answers Jatin's "why does the framework page exist if you can just bifurcate the deep dives.")
+
+**(3) Item-level deep linking** — extended the existing `hashRouting.js` (which already covered every room + practice runner) to the content-reading surfaces: `#/blog/<id>`, `#/interview-qa/<id>`, `#/failures/<id>`, `#/cheatsheet/<section>`, `#/company-tracks/<id>`. Each surface got an `active<X>Id` state + `open<X>` fn (registered in `openFnsRef` + the state→hash effect) and passes `initial<X>Id`/`onOpen<X>` to its component. Dropped CompanyTracks' `sessionStorage` restore — the hash is now the source of truth (also fixes a Back-button bug).
+
+**(4) Tracks quick-add + full coverage.** A "quick-add to last track" checkbox in `AddToTrackPopover` — plain **+** drops straight into the most-recently-used track with a ✓ flash; Alt/right-click still opens the picker (`tracks.js` gains `pal-tracks-last-v1`/`pal-tracks-quickadd-v1` + `getLastTrack`/`getQuickAdd`/`setQuickAdd`/`quickAddItem`). And `AddTrackBtn` added to the **3 remaining surfaces** (Deep Dives, Interview Q&A, Failures — the two `<button>` cards restructured to `<div role=button>`), so **every item is now track-addable**; `MyTracksPage` renders the 3 new types (`blog`/`interview_qa`/`failure`) and opens them via the new deep links.
+
+**(5) Ecosystem:** PL's new leaderboard points at **PAL's Supabase project** for identity (separate `pl_leaderboard` table) — one login across labs, entitlements stay per-lab (see `ECOSYSTEM_LEDGER.md`). Quick-add also ported to MSL + GSL.
+
+### Files touched
+`src/components/shared/FoundationRunnerShell.jsx`, `src/data/rcaFoundationModules.js`, `src/data/metricsFoundationModules.js`, `src/data/expFoundationModules.js`, `src/data/statsFoundationsModules.js`, `src/pages/BlogBrowser.jsx`, `src/pages/Library.jsx`, `src/components/layout/Header.jsx`, `src/utils/hashRouting.js`, `src/App.jsx`, `src/pages/InterviewQABrowser.jsx`, `src/pages/FailuresCatalog.jsx`, `src/pages/CheatSheet.jsx`, `src/pages/CompanyTracks.jsx`, `src/pages/MyTracksPage.jsx`, `src/utils/tracks.js`, `src/components/tracks/AddToTrackPopover.jsx`.
+
 ## [7.2.4] — 2026-06-26 [DOCS — foundation curriculum rubric (Tier 0) + two sharpened standards]
 
 Added a **Tier-0 curriculum-level review layer** to the Foundation-rooms rubric in `docs/EVAL_RUBRICS.md` (periodic human review, NOT a per-commit gate): topic selection/merit, depth ∝ interview importance, depth uniformity across the four rooms, room-level first-principles arc, coverage/redundancy. Plus two standards that sharpen the per-module bar: **"show the mechanism"** (the interactive must illustrate the causal mechanism, not just exist) and **"depth dial"** (every module serves both a complete beginner and an aggressive learner via a required spine + optional go-deeper layers). Insight (from an MSL foundation-rubric conversation): a good foundation rubric is really *two* rubrics — per-module quality (PAL already had it) + curriculum design (PAL was missing it). Logged the cross-lab borrow in `CROSS_LAB.md`; **pending action**: run the Tier-0 audit across PAL's 4 foundation rooms. Docs-only, no code change.

@@ -4,6 +4,17 @@ Read at the start of every build session. Max 5 items, ordered by priority. Upda
 
 ---
 
+## 🟢 V7.3.0 — this session (2026-07-03), code-complete + esbuild-validated
+
+Shipped via the `/tmp` clone workflow (iCloud git on the repo path throws `Bus error`/`mmap` — the fresh-clone is mandatory, not optional). Full detail: `CHANGELOG.md` [7.3.0]. In one line: **Quick-Recap toggle on all 79 foundation modules · 4 mined-framework Deep Dives + Frameworks-page folded into a Deep-Dives filter · item-level deep linking for blog/interview-qa/failures/cheatsheet/company-tracks · Tracks quick-add (last-track checkbox) + `+` on every remaining surface · PL leaderboard now shares PAL's Supabase identity (separate `pl_leaderboard` table).**
+
+Remaining / next:
+- **PAL foundations tone pass** (task 16, still open) — MSL-style scene-setting warmth over the existing causal structure.
+- **MSL + GSL Tracks coverage audit** — quick-add is ported to both, but a full "every last surface" `AddTrackBtn` sweep in those two labs hasn't been done.
+- Optional: migrate Playbook's `relatedItems`/`keyTakeaways`/`references` into the Blog posts, then delete `PlaybookBrowser.jsx` (currently left intact/reversible).
+
+---
+
 ## 🔴 UNPUSHED — V7.2.x may be unpushed (handoff to a fresh session, 2026-06-26)
 
 **V7.0 + V7.1 ARE pushed** (commits `97efe16` + `7064f52`). The **V7.2.x** work below is done + build-verified (**905 modules ✓**) but the user ran pushes by hand across a long session, so not all of it is confirmed on remote. Safe move: run the **combined push** below — `git add -A` only stages real diffs, so re-copying already-pushed files is harmless. Do NOT rebuild/re-port.
