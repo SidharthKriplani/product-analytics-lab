@@ -61,6 +61,9 @@ const TYPE_LABEL = {
   behavioral:    'Behavioral',
   company_case:  'Company Track',
   cheatsheet:    'Cheat Sheet',
+  blog:          'Deep Dive',
+  interview_qa:  'Interview Q&A',
+  failure:       'Failure',
   note:          'Note',
 };
 
@@ -85,7 +88,135 @@ const TYPE_ROOM = {
   behavioral:     'behavioral',
   company_case:   'cases',
   cheatsheet:     'cheatsheet',
+  blog:           'blog',
+  interview_qa:   'interview-qa',
+  failure:        'failures',
 };
+
+// ── Item grouping helper ────────────────────────────────────────────────────
+// Groups a track's items by their natural source, preserving first-appearance
+// order in the detail pane.
+function itemGroup(item) {
+  if (item.type === 'note') return { key: 'note', label: 'Notes' };
+  if (item.type === 'sql')  return { key: 'sql', label: 'SQL' };
+  // Foundation-module types + all generic types group by their type via TYPE_LABEL.
+  return { key: item.type, label: TYPE_LABEL[item.type] || item.type };
+}
+
+// ── Track item row ──────────────────────────────────────────────────────────
+function TrackItemRow({
+  item, idx, onOpenSqlProblem, onNavigate, onRemove,
+  dragIdx, overIdx, onDragStart, onDragOver, onDrop, onDragEnd,
+}) {
+  return (
+    <div
+      key={idx}
+      draggable
+      onDragStart={() => onDragStart(idx)}
+      onDragOver={e => onDragOver(e, idx)}
+      onDrop={() => onDrop(idx)}
+      onDragEnd={onDragEnd}
+      style={{
+        display: 'flex', alignItems: item.type === 'note' ? 'flex-start' : 'center',
+        gap: '0.65rem', padding: '0.55rem 0.65rem', borderRadius: '8px',
+        marginBottom: '0.4rem', cursor: 'grab',
+        background: overIdx === idx ? 'var(--accent-bg, rgba(99,102,241,0.08))' : 'var(--surface-2)',
+        border: overIdx === idx ? '1px solid var(--accent)' : '1px solid var(--border)',
+        transition: 'border 0.1s, background 0.1s',
+        opacity: dragIdx === idx ? 0.4 : 1,
+      }}
+    >
+      {/* Drag handle */}
+      <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'grab', flexShrink: 0, lineHeight: 1, paddingTop: item.type === 'note' ? '2px' : 0 }}>⠿</span>
+
+      {/* SQL problem */}
+      {item.type === 'sql' && (
+        <>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+              <DiffBadge diff={item.difficulty} />
+              <button
+                onClick={() => onOpenSqlProblem(item.problemId)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', textAlign: 'left' }}
+                title="Open in SQL Lab"
+              >
+                {item.title}
+              </button>
+            </div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>{item.problemId}</div>
+          </div>
+          <button
+            onClick={() => onOpenSqlProblem(item.problemId)}
+            title="Open problem"
+            style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '5px', padding: '3px 8px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-muted)', flexShrink: 0, whiteSpace: 'nowrap' }}
+          >
+            Open →
+          </button>
+        </>
+      )}
+
+      {/* Inline note */}
+      {item.type === 'note' && (
+        <p style={{ flex: 1, margin: 0, fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          {item.content}
+        </p>
+      )}
+
+      {/* Generic PAL items (all other types) */}
+      {item.type !== 'sql' && item.type !== 'note' && (
+        <>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
+              {/* Type label chip */}
+              <span style={{
+                fontSize: '0.62rem', fontWeight: 700,
+                color: 'var(--accent)', background: 'var(--accent-bg)',
+                border: '1px solid var(--accent-border)',
+                borderRadius: '4px', padding: '0.05rem 0.35rem',
+                textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap',
+              }}>
+                {TYPE_LABEL[item.type] || item.type}
+              </span>
+              {/* Difficulty badge */}
+              {item.meta?.difficulty && <DiffBadge diff={item.meta.difficulty} />}
+              {/* Room tag for company_case */}
+              {item.meta?.room && item.type === 'company_case' && (
+                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
+                  {item.meta.room}
+                </span>
+              )}
+            </div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {item.label || item.itemId}
+            </div>
+          </div>
+          {/* Navigate button — company_case items carry their true room in meta.room
+              (the case id in itemId resolves against that room's opener), everything
+              else uses the type→room map. */}
+          {(item.type === 'company_case' ? item.meta?.room : TYPE_ROOM[item.type]) && (
+            <button
+              onClick={() => onNavigate(
+                item.type === 'company_case' ? item.meta.room : TYPE_ROOM[item.type],
+                item.itemId || item.moduleId || item.caseId,
+              )}
+              title={`Go to ${TYPE_LABEL[item.type] || item.type}`}
+              style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '5px', padding: '3px 8px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-muted)', flexShrink: 0, whiteSpace: 'nowrap' }}
+            >
+              Go →
+            </button>
+          )}
+        </>
+      )}
+
+      {/* Remove button */}
+      <button
+        onClick={() => onRemove(idx)}
+        title="Remove"
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.75rem', padding: '2px 4px', borderRadius: 3, flexShrink: 0, lineHeight: 1 }}
+      >✕</button>
+    </div>
+  );
+}
 
 // ── Track list (left pane) ──────────────────────────────────────────────────
 function TrackList({ tracks, selectedId, onSelect, onNew, onDelete }) {
@@ -274,109 +405,47 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sha
           </div>
         )}
 
-        {track.items.map((item, idx) => (
-          <div
-            key={idx}
-            draggable
-            onDragStart={() => handleDragStart(idx)}
-            onDragOver={e => handleDragOver(e, idx)}
-            onDrop={() => handleDrop(idx)}
-            onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
-            style={{
-              display: 'flex', alignItems: item.type === 'note' ? 'flex-start' : 'center',
-              gap: '0.65rem', padding: '0.55rem 0.65rem', borderRadius: '8px',
-              marginBottom: '0.4rem', cursor: 'grab',
-              background: overIdx === idx ? 'var(--accent-bg, rgba(99,102,241,0.08))' : 'var(--surface-2)',
-              border: overIdx === idx ? '1px solid var(--accent)' : '1px solid var(--border)',
-              transition: 'border 0.1s, background 0.1s',
-              opacity: dragIdx === idx ? 0.4 : 1,
-            }}
-          >
-            {/* Drag handle */}
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'grab', flexShrink: 0, lineHeight: 1, paddingTop: item.type === 'note' ? '2px' : 0 }}>⠿</span>
-
-            {/* SQL problem */}
-            {item.type === 'sql' && (
-              <>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
-                    <DiffBadge diff={item.difficulty} />
-                    <button
-                      onClick={() => onOpenSqlProblem(item.problemId)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', textAlign: 'left' }}
-                      title="Open in SQL Lab"
-                    >
-                      {item.title}
-                    </button>
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>{item.problemId}</div>
+        {(() => {
+          // Group items by natural source, preserving first-appearance order.
+          const order = [];
+          const groups = {};
+          track.items.forEach((item, idx) => {
+            const { key, label } = itemGroup(item);
+            if (!groups[key]) { groups[key] = { label, entries: [] }; order.push(key); }
+            groups[key].entries.push({ item, idx });
+          });
+          return order.map(key => {
+            const g = groups[key];
+            return (
+              <div key={key} style={{ marginBottom: '1rem' }}>
+                {/* Group header — muted uppercase eyebrow */}
+                <div style={{
+                  fontSize: '0.66rem', fontWeight: 700, color: 'var(--text-muted)',
+                  textTransform: 'uppercase', letterSpacing: '0.06em',
+                  margin: '0 0 0.4rem 0.15rem',
+                }}>
+                  {g.label} · {g.entries.length}
                 </div>
-                <button
-                  onClick={() => onOpenSqlProblem(item.problemId)}
-                  title="Open problem"
-                  style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '5px', padding: '3px 8px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-muted)', flexShrink: 0, whiteSpace: 'nowrap' }}
-                >
-                  Open →
-                </button>
-              </>
-            )}
-
-            {/* Inline note */}
-            {item.type === 'note' && (
-              <p style={{ flex: 1, margin: 0, fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {item.content}
-              </p>
-            )}
-
-            {/* Generic PAL items (all other types) */}
-            {item.type !== 'sql' && item.type !== 'note' && (
-              <>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
-                    {/* Type label chip */}
-                    <span style={{
-                      fontSize: '0.62rem', fontWeight: 700,
-                      color: 'var(--accent)', background: 'var(--accent-bg)',
-                      border: '1px solid var(--accent-border)',
-                      borderRadius: '4px', padding: '0.05rem 0.35rem',
-                      textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap',
-                    }}>
-                      {TYPE_LABEL[item.type] || item.type}
-                    </span>
-                    {/* Difficulty badge */}
-                    {item.meta?.difficulty && <DiffBadge diff={item.meta.difficulty} />}
-                    {/* Room tag for company_case */}
-                    {item.meta?.room && item.type === 'company_case' && (
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
-                        {item.meta.room}
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {item.label || item.itemId}
-                  </div>
-                </div>
-                {/* Navigate button */}
-                {TYPE_ROOM[item.type] && (
-                  <button
-                    onClick={() => onNavigate(TYPE_ROOM[item.type])}
-                    title={`Go to ${TYPE_LABEL[item.type] || item.type}`}
-                    style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '5px', padding: '3px 8px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-muted)', flexShrink: 0, whiteSpace: 'nowrap' }}
-                  >
-                    Go →
-                  </button>
-                )}
-              </>
-            )}
-
-            {/* Remove button */}
-            <button
-              onClick={() => handleRemove(idx)}
-              title="Remove"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.75rem', padding: '2px 4px', borderRadius: 3, flexShrink: 0, lineHeight: 1 }}
-            >✕</button>
-          </div>
-        ))}
+                {g.entries.map(({ item, idx }) => (
+                  <TrackItemRow
+                    key={idx}
+                    item={item}
+                    idx={idx}
+                    onOpenSqlProblem={onOpenSqlProblem}
+                    onNavigate={onNavigate}
+                    onRemove={handleRemove}
+                    dragIdx={dragIdx}
+                    overIdx={overIdx}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
+                  />
+                ))}
+              </div>
+            );
+          });
+        })()}
       </div>
     </div>
   );

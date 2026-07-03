@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { Icon } from '../components/shared/Icon.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const POSTS = [
 
@@ -2283,6 +2284,9 @@ function PostCard({ post, cfg, onClick, index }) {
             borderRadius: 'var(--radius-sm)', padding: '0.07rem 0.32rem', marginLeft: 'auto',
           }}>Coming Soon</span>
         )}
+        <span style={{ marginLeft: hasContent ? '0.25rem' : 'auto', display: 'inline-flex' }} onClick={e => e.stopPropagation()}>
+          <AddTrackBtn itemType="blog" itemId={post.id} label={post.title} itemMeta={{ category: post.category, framework: !!post.framework }} />
+        </span>
       </div>
 
       {/* Title */}

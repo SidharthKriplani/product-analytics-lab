@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '../components/shared/Icon.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const FAILURES = [
   // ─── Measurement & Instrumentation ─────────────────────────────────────────
@@ -398,14 +399,17 @@ export function FailuresCatalog({ onNavigate, initialFailureId, onOpenFailure })
         {displayed.map((f, i) => {
           const cfg = CAT_CONFIG[f.category] || {};
           return (
-            <button key={f.id} onClick={() => selectFailure(f)} className="pal-card-hover" style={{ textAlign: 'left', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: '3px solid ' + (cfg.color || 'var(--border)'), borderRadius: 'var(--radius)', padding: '0.9rem 1rem', cursor: 'pointer', animationDelay: (i * 25) + 'ms' }}>
+            <div key={f.id} onClick={() => selectFailure(f)} role="button" className="pal-card-hover" style={{ textAlign: 'left', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: '3px solid ' + (cfg.color || 'var(--border)'), borderRadius: 'var(--radius)', padding: '0.9rem 1rem', cursor: 'pointer', animationDelay: (i * 25) + 'ms' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
                 <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: cfg.color, background: cfg.bg, border: '1px solid ' + (cfg.border || cfg.color), borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.4rem' }}>{f.category}</span>
                 <span style={{ fontSize: '0.65rem', fontWeight: 700, color: SEV_COLOR[f.severity], textTransform: 'uppercase' }}>{f.severity}</span>
+                <span style={{ marginLeft: 'auto', display: 'inline-flex' }} onClick={e => e.stopPropagation()}>
+                  <AddTrackBtn itemType="failure" itemId={f.id} label={f.name} itemMeta={{ category: f.category }} />
+                </span>
               </div>
               <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', marginBottom: '0.3rem' }}>{f.name}</div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>{f.summary}</div>
-            </button>
+            </div>
           );
         })}
       </div>

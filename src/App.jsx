@@ -1960,6 +1960,10 @@ export default function App() {
                     case 'product-design':      openPDScenario(itemId); break;
                     case 'stats':               openStatsModule(itemId); break;
                     case 'behavioral':          openBehavioralQuestion(itemId); break;
+                    case 'blog':                openBlogPost(itemId); break;
+                    case 'interview-qa':        openInterviewQA(itemId); break;
+                    case 'failures':            openFailure(itemId); break;
+                    case 'cheatsheet':          openCheatSection(itemId); break;
                     default:                    navigate(targetPage);
                   }
                 } else {

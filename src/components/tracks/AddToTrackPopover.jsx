@@ -4,6 +4,7 @@ import {
   getTracks, createTrack,
   addSqlProblem, getTracksForProblem,
   addItem, getTracksForItem,
+  getQuickAdd, setQuickAdd, getLastTrack, quickAddItem, quickAddSqlProblem,
 } from '../../utils/tracks.js';
 
 /**
@@ -31,6 +32,8 @@ export function AddToTrackPopover({
   });
   var [newName, setNewName] = useState('');
   var [creating, setCreating] = useState(false);
+  var [quick, setQuick] = useState(function() { return getQuickAdd(); });
+  var lastTrack = getLastTrack();
   var popoverRef = useRef(null);
   var inputRef = useRef(null);
 
@@ -187,6 +190,30 @@ export function AddToTrackPopover({
           </form>
         )}
       </div>
+
+      {/* Quick-add preference — when on, the + button skips this picker and adds
+          straight to the most-recently-used track. */}
+      <label
+        style={{
+          display: 'flex', alignItems: 'flex-start', gap: '0.5rem',
+          borderTop: '1px solid var(--border)', marginTop: '0.4rem',
+          padding: '0.5rem 0.85rem 0.15rem', cursor: 'pointer',
+          color: 'var(--text-muted)',
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={quick}
+          onChange={function(e) { var on = e.target.checked; setQuick(on); setQuickAdd(on); }}
+          style={{ marginTop: '2px', accentColor: 'var(--accent)', cursor: 'pointer', flexShrink: 0 }}
+        />
+        <span style={{ fontSize: '0.74rem', lineHeight: 1.4 }}>
+          Quick-add: skip this menu, drop straight into{' '}
+          <strong style={{ color: 'var(--text)' }}>{lastTrack ? lastTrack.name : 'my last track'}</strong>.
+          <br />
+          <span style={{ color: 'var(--text-dim)', fontSize: '0.68rem' }}>Alt- or right-click the + to still choose.</span>
+        </span>
+      </label>
     </div>
   );
 }
@@ -199,22 +226,58 @@ export function AddTrackBtn({ itemType, itemId, label, itemMeta }) {
   var [open, setOpen] = useState(false);
   var btnRef = useRef(null);
   var [pos, setPos] = useState({ top: 0, right: 0 });
+  var [flash, setFlash] = useState(null); // track name shown briefly after a quick-add
+  var flashTimer = useRef(null);
 
-  function toggle(e) {
-    e.stopPropagation();
-    if (!open && btnRef.current) {
+  useEffect(function() {
+    return function() { if (flashTimer.current) clearTimeout(flashTimer.current); };
+  }, []);
+
+  function computePos() {
+    if (btnRef.current) {
       var r = btnRef.current.getBoundingClientRect();
       setPos({ top: r.bottom + 6, right: window.innerWidth - r.right });
     }
-    setOpen(function(o) { return !o; });
   }
+
+  function showFlash(name) {
+    setFlash(name);
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    flashTimer.current = setTimeout(function() { setFlash(null); }, 1400);
+  }
+
+  function handleClick(e) {
+    e.stopPropagation();
+    if (open) { setOpen(false); return; }
+    computePos();
+    var forcePicker = e.altKey || e.metaKey || e.ctrlKey || e.shiftKey;
+    if (!forcePicker && getQuickAdd()) {
+      var t = isGeneric()
+        ? quickAddItem(itemType, itemId, label, itemMeta || {})
+        : null;
+      if (t) { showFlash(t.name); return; }
+      // no valid last track (or non-generic) — fall through to the picker
+    }
+    setOpen(true);
+  }
+
+  // Alt/right-click always opens the picker, even when quick-add is on.
+  function handleContext(e) {
+    e.preventDefault(); e.stopPropagation();
+    if (open) { setOpen(false); return; }
+    computePos();
+    setOpen(true);
+  }
+
+  function isGeneric() { return !!itemType; }
 
   return (
     <>
       <button
         ref={btnRef}
-        onClick={toggle}
-        title="Add to track"
+        onClick={handleClick}
+        onContextMenu={handleContext}
+        title={getQuickAdd() ? 'Quick-add to last track · Alt/right-click to choose' : 'Add to track'}
         style={{
           background: 'none',
           border: '1px solid var(--border)',
@@ -222,12 +285,25 @@ export function AddTrackBtn({ itemType, itemId, label, itemMeta }) {
           cursor: 'pointer',
           padding: '2px 7px',
           fontSize: '13px',
-          color: 'var(--accent)',
+          color: flash ? 'var(--green, #22c55e)' : 'var(--accent)',
+          borderColor: flash ? 'var(--green-border, var(--border))' : 'var(--border)',
           flexShrink: 0,
           lineHeight: 1,
           fontWeight: 700,
+          transition: 'color 0.15s, border-color 0.15s',
         }}
-      >+</button>
+      >{flash ? '✓' : '+'}</button>
+      {flash && createPortal(
+        <div style={{
+          position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999,
+          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '7px',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.18)', padding: '0.4rem 0.7rem',
+          fontSize: '0.75rem', color: 'var(--text)', whiteSpace: 'nowrap', pointerEvents: 'none',
+        }}>
+          ✓ Added to <strong>{flash}</strong>
+        </div>,
+        document.body
+      )}
       {open && createPortal(
         <AddToTrackPopover
           itemType={itemType}

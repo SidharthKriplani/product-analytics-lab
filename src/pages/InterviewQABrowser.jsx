@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { interviewQA } from '../data/interviewQA.js';
 import { Icon } from '../components/shared/Icon.jsx';
 import { DifficultyChips } from '../components/shared/DifficultyChips.jsx';
+import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
 const CAT_CONFIG = {
   'Experimentation': { color: 'var(--accent)',  bg: 'var(--accent-bg)',  border: 'var(--accent-border)' },
@@ -28,8 +29,9 @@ function QuestionCard({ qa, onSelect }) {
   const cat = CAT_CONFIG[qa.category] || CAT_CONFIG['Metrics'];
   const diff = DIFF_CONFIG[qa.difficulty] || DIFF_CONFIG.analyst;
   return (
-    <button
+    <div
       onClick={() => onSelect(qa)}
+      role="button"
       className="pal-card-hover"
       style={{
         width: '100%', textAlign: 'left', background: 'var(--surface)',
@@ -48,6 +50,9 @@ function QuestionCard({ qa, onSelect }) {
         {!qa.isFree && (
           <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginLeft: 'auto' }}>Premium</span>
         )}
+        <span style={{ marginLeft: qa.isFree ? 'auto' : '0.25rem', display: 'inline-flex' }} onClick={e => e.stopPropagation()}>
+          <AddTrackBtn itemType="interview_qa" itemId={qa.id} label={qa.question} itemMeta={{ category: qa.category, difficulty: qa.difficulty }} />
+        </span>
       </div>
       <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.5 }}>
         {qa.question}
@@ -55,7 +60,7 @@ function QuestionCard({ qa, onSelect }) {
       <p style={{ margin: '0.4rem 0 0', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
         {qa.context}
       </p>
-    </button>
+    </div>
   );
 }
 
