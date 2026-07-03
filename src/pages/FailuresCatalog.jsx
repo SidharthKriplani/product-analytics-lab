@@ -318,9 +318,11 @@ const CAT_CONFIG = {
 
 const SEV_COLOR = { critical: 'var(--red)', high: 'var(--yellow)', medium: 'var(--text-muted)' };
 
-export function FailuresCatalog({ onNavigate }) {
+export function FailuresCatalog({ onNavigate, initialFailureId, onOpenFailure }) {
   const [catFilter, setCatFilter] = useState('All');
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(() => initialFailureId ? (FAILURES.find(f => f.id === initialFailureId) || null) : null);
+  // Select a failure AND report it up so the URL hash is deep-linkable.
+  const selectFailure = (f) => { setSelected(f); if (onOpenFailure) onOpenFailure(f ? f.id : null); };
 
   const categories = ['All', ...Array.from(new Set(FAILURES.map(f => f.category)))];
   const displayed = catFilter === 'All' ? FAILURES : FAILURES.filter(f => f.category === catFilter);
@@ -330,7 +332,7 @@ export function FailuresCatalog({ onNavigate }) {
     const cfg = CAT_CONFIG[f.category] || {};
     return (
       <div className="pal-page-enter" style={{ maxWidth: '760px', margin: '0 auto', padding: '2rem 1rem' }}>
-        <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.82rem', padding: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <button onClick={() => selectFailure(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.82rem', padding: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           ← Failures Catalog
         </button>
         <div style={{ background: cfg.bg || 'var(--surface)', border: '1px solid ' + (cfg.border || 'var(--border)'), borderLeft: '4px solid ' + (cfg.color || 'var(--border)'), borderRadius: 'var(--radius)', padding: '1.25rem', marginBottom: '1.5rem' }}>
@@ -396,7 +398,7 @@ export function FailuresCatalog({ onNavigate }) {
         {displayed.map((f, i) => {
           const cfg = CAT_CONFIG[f.category] || {};
           return (
-            <button key={f.id} onClick={() => setSelected(f)} className="pal-card-hover" style={{ textAlign: 'left', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: '3px solid ' + (cfg.color || 'var(--border)'), borderRadius: 'var(--radius)', padding: '0.9rem 1rem', cursor: 'pointer', animationDelay: (i * 25) + 'ms' }}>
+            <button key={f.id} onClick={() => selectFailure(f)} className="pal-card-hover" style={{ textAlign: 'left', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: '3px solid ' + (cfg.color || 'var(--border)'), borderRadius: 'var(--radius)', padding: '0.9rem 1rem', cursor: 'pointer', animationDelay: (i * 25) + 'ms' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
                 <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: cfg.color, background: cfg.bg, border: '1px solid ' + (cfg.border || cfg.color), borderRadius: 'var(--radius-sm)', padding: '0.1rem 0.4rem' }}>{f.category}</span>
                 <span style={{ fontSize: '0.65rem', fontWeight: 700, color: SEV_COLOR[f.severity], textTransform: 'uppercase' }}>{f.severity}</span>

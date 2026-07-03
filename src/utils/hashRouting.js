@@ -126,6 +126,12 @@ const RUNNER_ACTIVE_ID_KEY = {
   'exp-foundations-runner': 'activeExpFoundationId',
   'code-runner': 'activeCodeModuleId',
   'shared-track': 'activeSharedTrackId',
+  // Content-reading surfaces — item-level deep links
+  'blog': 'activeBlogPostId',
+  'interview-qa': 'activeInterviewQAId',
+  'failures': 'activeFailureId',
+  'cheatsheet': 'activeCheatSection',
+  'company-tracks': 'activeCompanyTrackId',
 };
 
 // Hash segment → browser page value (no runner suffix)
@@ -213,6 +219,12 @@ const HASH_TO_RUNNER_PAGE = {
   'exp-foundations': 'exp-foundations-runner',
   'code-lab': 'code-runner',
   'shared': 'shared-track',
+  // Content-reading surfaces — the "runner page" is the same page value; item id is appended
+  'blog': 'blog',
+  'interview-qa': 'interview-qa',
+  'failures': 'failures',
+  'cheatsheet': 'cheatsheet',
+  'company-tracks': 'company-tracks',
 };
 
 // Runner page → the open function name to call (used by hashchange handler)
@@ -242,6 +254,12 @@ const RUNNER_OPEN_FN = {
   'exp-foundations-runner': 'openExpFoundationModule',
   'code-runner': 'openCodeModule',
   'shared-track': 'openSharedTrack',
+  // Content-reading surfaces
+  'blog': 'openBlogPost',
+  'interview-qa': 'openInterviewQA',
+  'failures': 'openFailure',
+  'cheatsheet': 'openCheatSection',
+  'company-tracks': 'openCompanyTrack',
 };
 
 /**

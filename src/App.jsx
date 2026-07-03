@@ -168,6 +168,12 @@ export default function App() {
   const [publicProfileUserId, setPublicProfileUserId] = useState(null);
   const [activeSharedTrackId, setActiveSharedTrackId] = useState(null);
   const [playbookInitialArticle, setPlaybookInitialArticle] = useState(null);
+  // Content-reading surfaces — item-level deep links
+  const [activeBlogPostId, setActiveBlogPostId] = useState(null);
+  const [activeInterviewQAId, setActiveInterviewQAId] = useState(null);
+  const [activeFailureId, setActiveFailureId] = useState(null);
+  const [activeCheatSection, setActiveCheatSection] = useState(null);
+  const [activeCompanyTrackId, setActiveCompanyTrackId] = useState(null);
   const [unlocked, setUnlocked] = useState(() => isUnlocked());
   const [progressSnapshot, setProgressSnapshot] = useState(() => ({ ...getAllProgress(), challengesProgress: getAllChallengesProgress(), biProgress: getAllBIProgress(), stfProgress: getAllSTFProgress(), takehomeProgress: getAllTakehomeProgress(), instrumentationProgress: getAllInstrumentationProgress() }));
   const [theme, setTheme] = useState(getInitialTheme);
@@ -941,6 +947,13 @@ export default function App() {
   const instrIdx = activeInstrumentationCaseId ? instrumentationIndex.findIndex(c => c.id === activeInstrumentationCaseId) : -1;
   const nextInstrumentationCaseId = instrIdx >= 0 && instrIdx < instrumentationIndex.length - 1 ? instrumentationIndex[instrIdx + 1].id : null;
 
+  // Content-reading surfaces — open functions (used by hash deep-links)
+  function openBlogPost(id) { setActiveBlogPostId(id); setPage('blog'); }
+  function openInterviewQA(id) { setActiveInterviewQAId(id); setPage('interview-qa'); }
+  function openFailure(id) { setActiveFailureId(id); setPage('failures'); }
+  function openCheatSection(id) { setActiveCheatSection(id); setPage('cheatsheet'); }
+  function openCompanyTrack(id) { setActiveCompanyTrackId(id); setPage('company-tracks'); }
+
   // ── Hash-based URL routing ──────────────────────────────────────────
   // Keeps window.location.hash in sync with page state.
   // Browser back/forward trigger hashchange which drives state.
@@ -979,6 +992,11 @@ export default function App() {
     openExpFoundationModule,
     openPublicProfile,
     openSharedTrack,
+    openBlogPost,
+    openInterviewQA,
+    openFailure,
+    openCheatSection,
+    openCompanyTrack,
   };
 
   // State → hash sync: whenever page or an active ID changes, update the URL hash.
@@ -1015,6 +1033,11 @@ export default function App() {
       activeExpFoundationId,
       publicProfileUserId,
       activeSharedTrackId,
+      activeBlogPostId,
+      activeInterviewQAId,
+      activeFailureId,
+      activeCheatSection,
+      activeCompanyTrackId,
     };
     const newHash = '#' + stateToHash(page, activeIds);
     if (window.location.hash !== newHash) {
@@ -1026,7 +1049,8 @@ export default function App() {
     activeStatFoundationsId, activeGrowthAnalyticsId, activeChallengeId,
     activeBICaseId, activeSTFCaseId, activeTakehomeCaseId, activeInstrumentationCaseId,
     activeSqlProblemId, activeMetricsFoundationId, activeRCAFoundationId, activeExpFoundationId,
-    publicProfileUserId, activeSharedTrackId]);
+    publicProfileUserId, activeSharedTrackId,
+    activeBlogPostId, activeInterviewQAId, activeFailureId, activeCheatSection, activeCompanyTrackId]);
 
   // Hash → state sync: on hashchange (browser back/forward), parse hash and drive state.
   useEffect(() => {
@@ -1660,13 +1684,13 @@ export default function App() {
           <PublicProfile userId={publicProfileUserId} onNavigate={navigate} />
         )}
         {page === 'interview-qa' && (
-          <InterviewQABrowser unlocked={unlocked} onBack={() => navigate('home')} />
+          <InterviewQABrowser key={activeInterviewQAId || 'interview-qa'} unlocked={unlocked} onBack={() => navigate('home')} initialQAId={activeInterviewQAId} onOpenQA={id => setActiveInterviewQAId(id)} />
         )}
         {/* Archived V5.81.0 — RoomMap (orphan, unlinked). */}
-        {page === 'failures' && <FailuresCatalog onNavigate={navigate} />}
+        {page === 'failures' && <FailuresCatalog key={activeFailureId || 'failures'} onNavigate={navigate} initialFailureId={activeFailureId} onOpenFailure={id => setActiveFailureId(id)} />}
         {/* Archived V5.81.0 — JudgmentBank (orphan, unlinked). */}
         {page === 'blog' && (
-          <BlogBrowser onNavigate={navigate} />
+          <BlogBrowser key={activeBlogPostId || 'blog'} onNavigate={navigate} initialPostId={activeBlogPostId} onOpenPost={id => setActiveBlogPostId(id)} />
         )}
         {page === 'playbook' && (
           <PlaybookBrowser key={playbookInitialArticle || 'playbook'} initialArticleId={playbookInitialArticle} onOpenItem={(room, id) => {
@@ -1738,7 +1762,7 @@ export default function App() {
         {/* Archived V5.82.0 — A/B Interpreter (calculator utility, low merit). */}
         {page === 'cheatsheet' && (
           <Suspense fallback={null}>
-            <CheatSheet onNavigate={navigate} />
+            <CheatSheet key={activeCheatSection || 'cheatsheet'} onNavigate={navigate} initialSection={activeCheatSection} onOpenSection={id => setActiveCheatSection(id)} />
           </Suspense>
         )}
         {page === 'library' && (
@@ -1844,8 +1868,11 @@ export default function App() {
               </div>
             }>
             <CompanyTracks
+              key={activeCompanyTrackId || 'company-tracks'}
               unlocked={unlocked}
               onBack={() => setPage('home')}
+              initialTrackId={activeCompanyTrackId}
+              onOpenTrack={id => setActiveCompanyTrackId(id)}
               onNavigate={(targetPage, itemId) => {
                 if (itemId) {
                   switch (targetPage) {
@@ -1911,7 +1938,34 @@ export default function App() {
         {page === 'my-tracks' && (
           <Suspense fallback={null}>
             <MyTracksPage
-              onNavigate={navigate}
+              onNavigate={(targetPage, itemId) => {
+                // With an itemId, deep-open the exact item via its opener.
+                // Without one, fall back to the room browser.
+                if (itemId) {
+                  switch (targetPage) {
+                    case 'stat-foundations':    openStatFoundationsModule(itemId); break;
+                    case 'metrics-foundations': openMetricsFoundationModule(itemId); break;
+                    case 'exp-foundations':     openExpFoundationModule(itemId); break;
+                    case 'rca-foundations':     openRCAFoundationModule(itemId); break;
+                    case 'cases':               openBusinessCase(itemId); break;
+                    case 'rca':                 openRCACase(itemId); break;
+                    case 'estimation':          openEstimationProblem(itemId); break;
+                    case 'metrics':             openMetricsCase(itemId); break;
+                    case 'growth-analytics':    openGrowthAnalyticsCase(itemId); break;
+                    case 'prioritization':      openPrioritizationScenario(itemId); break;
+                    case 'browser':             openScenario(itemId); break;
+                    case 'spot-the-flaw':       openSTFCase(itemId); break;
+                    case 'design':              openDesignScenario(itemId); break;
+                    case 'instrumentation':     openInstrumentationCase(itemId); break;
+                    case 'product-design':      openPDScenario(itemId); break;
+                    case 'stats':               openStatsModule(itemId); break;
+                    case 'behavioral':          openBehavioralQuestion(itemId); break;
+                    default:                    navigate(targetPage);
+                  }
+                } else {
+                  navigate(targetPage);
+                }
+              }}
               onOpenSqlProblem={id => { setActiveSqlProblemId(id); setPage('sql-lab'); }}
               user={user}
             />

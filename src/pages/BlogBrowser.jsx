@@ -2085,9 +2085,11 @@ function PostReader({ post, cfg, onBack, onNavigate, onRead }) {
 // ─────────────────────────────────────────────────────────────
 // Main browser
 // ─────────────────────────────────────────────────────────────
-export function BlogBrowser({ onNavigate }) {
-  const [selectedPost, setSelectedPost] = useState(null);
+export function BlogBrowser({ onNavigate, initialPostId, onOpenPost }) {
+  const [selectedPost, setSelectedPost] = useState(() => initialPostId ? (POSTS.find(p => p.id === initialPostId) || null) : null);
   const [filter, setFilter] = useState('all'); // 'all' | 'frameworks'
+  // Select a post AND report it up so the URL hash reflects the open post (deep-linkable).
+  const selectPost = (post) => { setSelectedPost(post); if (onOpenPost) onOpenPost(post ? post.id : null); };
   const total = POSTS.length;
   const writtenCount = POSTS.filter(p => p.content && p.content.length > 0).length;
   const pendingCount = total - writtenCount;
@@ -2100,9 +2102,9 @@ export function BlogBrowser({ onNavigate }) {
       <PostReader
         post={selectedPost}
         cfg={cfg}
-        onBack={() => setSelectedPost(null)}
+        onBack={() => selectPost(null)}
         onNavigate={onNavigate}
-        onRead={setSelectedPost}
+        onRead={selectPost}
       />
     );
   }
@@ -2220,7 +2222,7 @@ export function BlogBrowser({ onNavigate }) {
                   post={post}
                   cfg={cfg}
                   index={index}
-                  onClick={() => setSelectedPost(post)}
+                  onClick={() => selectPost(post)}
                 />
               ))}
             </div>

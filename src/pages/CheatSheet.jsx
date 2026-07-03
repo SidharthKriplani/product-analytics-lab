@@ -764,8 +764,10 @@ function QuickReference() {
 
 // ─── Main ──────────────────────────────────────────────────────────────────
 
-export function CheatSheet({ onNavigate }) {
-  const [section, setSection] = useState('plans');
+export function CheatSheet({ onNavigate, initialSection, onOpenSection }) {
+  const [section, setSection] = useState(initialSection || 'plans');
+  // Switch section AND report it up so the URL hash is deep-linkable (#/cheatsheet/<section>).
+  const selectSection = (s) => { setSection(s); if (onOpenSection) onOpenSection(s); };
 
   return (
     <div style={S.page}>
@@ -775,8 +777,8 @@ export function CheatSheet({ onNavigate }) {
       </div>
 
       <div style={S.sectionToggle}>
-        <button style={S.toggleBtn(section === 'plans')}   onClick={() => setSection('plans')}>Prep Plans</button>
-        <button style={S.toggleBtn(section === 'ref')}     onClick={() => setSection('ref')}>Quick Reference</button>
+        <button style={S.toggleBtn(section === 'plans')}   onClick={() => selectSection('plans')}>Prep Plans</button>
+        <button style={S.toggleBtn(section === 'ref')}     onClick={() => selectSection('ref')}>Quick Reference</button>
       </div>
 
       {section === 'plans' && <PrepPlans onNavigate={onNavigate} />}

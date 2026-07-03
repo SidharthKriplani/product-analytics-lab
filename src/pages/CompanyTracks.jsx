@@ -1009,16 +1009,13 @@ function TrackDetail({ track, onBack, onNavigate }) {
   );
 }
 
-export function CompanyTracks({ onNavigate, onBack, unlocked }) {
-  const [view, setView] = useState(() => {
-    try { return sessionStorage.getItem('ct-view') || 'grid'; } catch { return 'grid'; }
-  });
-  const [selectedTrack, setSelectedTrack] = useState(() => {
-    try {
-      const id = sessionStorage.getItem('ct-track-id');
-      return id ? (companyTracks.find(t => t.id === id) || null) : null;
-    } catch { return null; }
-  });
+export function CompanyTracks({ onNavigate, onBack, unlocked, initialTrackId, onOpenTrack }) {
+  // Deep-link (URL hash via initialTrackId) is the source of truth — no sessionStorage restore,
+  // so hitting Back reliably returns to the grid instead of re-restoring the last track.
+  const [view, setView] = useState(initialTrackId ? 'detail' : 'grid');
+  const [selectedTrack, setSelectedTrack] = useState(() =>
+    initialTrackId ? (companyTracks.find(t => t.id === initialTrackId) || null) : null
+  );
 
   useEffect(() => {
     try {
@@ -1030,11 +1027,13 @@ export function CompanyTracks({ onNavigate, onBack, unlocked }) {
   function handleSelectTrack(track) {
     setSelectedTrack(track);
     setView('detail');
+    if (onOpenTrack) onOpenTrack(track ? track.id : null);
   }
 
   function handleBackToGrid() {
     setView('grid');
     setSelectedTrack(null);
+    if (onOpenTrack) onOpenTrack(null);
   }
 
   return (

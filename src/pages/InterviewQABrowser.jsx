@@ -165,10 +165,12 @@ function QuestionViewer({ qa, onBack, unlocked }) {
   );
 }
 
-export function InterviewQABrowser({ unlocked, onBack }) {
+export function InterviewQABrowser({ unlocked, onBack, initialQAId, onOpenQA }) {
   const [catFilter, setCatFilter] = useState('All');
   const [diffFilter, setDiffFilter] = useState('all');
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(() => initialQAId ? (interviewQA.find(q => q.id === initialQAId) || null) : null);
+  // Select a question AND report it up so the URL hash is deep-linkable.
+  const selectQA = (qa) => { setSelected(qa); if (onOpenQA) onOpenQA(qa ? qa.id : null); };
 
   const categories = ['All', ...Array.from(new Set(interviewQA.map(q => q.category)))];
   const displayed = interviewQA.filter(q => {
@@ -178,7 +180,7 @@ export function InterviewQABrowser({ unlocked, onBack }) {
   });
 
   if (selected) {
-    return <QuestionViewer qa={selected} onBack={() => setSelected(null)} unlocked={unlocked} />;
+    return <QuestionViewer qa={selected} onBack={() => selectQA(null)} unlocked={unlocked} />;
   }
 
   return (
@@ -268,7 +270,7 @@ export function InterviewQABrowser({ unlocked, onBack }) {
       {/* Questions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
         {displayed.map(qa => (
-          <QuestionCard key={qa.id} qa={qa} onSelect={setSelected} />
+          <QuestionCard key={qa.id} qa={qa} onSelect={selectQA} />
         ))}
         {displayed.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
