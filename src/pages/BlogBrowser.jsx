@@ -44,6 +44,7 @@ const POSTS = [
   },
   {
     id: 'five-metric-types',
+    framework: true,
     category: 'Metrics',
     title: 'The 5 Metric Types Every Product Analyst Must Know Cold',
     summary: 'North star, diagnostic, guardrail, proxy, and composite. Know the role of each, when to reach for which, and how to explain the hierarchy to a PM in one sentence.',
@@ -176,6 +177,7 @@ const POSTS = [
   },
   {
     id: 'metric-trees',
+    framework: true,
     category: 'Metrics',
     title: 'How to Build a Metric Tree From Any North Star',
     summary: 'A metric tree decomposes your north star into its multiplicative or additive drivers. Build one correctly and you can find any lever. Build it wrong and your RCA will miss the real cause.',
@@ -264,6 +266,7 @@ const POSTS = [
   },
   {
     id: 'metric-ownership',
+    framework: true,
     category: 'Metrics',
     title: 'Metric Ownership: Defining Formula, Grain, Numerator, and Denominator Before You Measure Anything',
     summary: 'You cannot have a metric conversation until all four are locked. This is what metric ownership means in practice, and what weak ownership looks like in an interview.',
@@ -306,6 +309,7 @@ const POSTS = [
   // ══════════════════════════════════════════════════════════════
   {
     id: 'cdshv-framework',
+    framework: true,
     category: 'RCA',
     title: 'CDSHV: The Step-by-Step RCA Framework That Beats Guessing',
     summary: 'Context → Decompose → Segment → Hypothesize → Validate. Five stages that keep your RCA structured when pressure is high and data is ambiguous.',
@@ -324,6 +328,7 @@ const POSTS = [
   },
   {
     id: 'decompose-before-diagnose',
+    framework: true,
     category: 'RCA',
     title: 'Decompose Before You Diagnose: Why Jumping to Hypotheses Loses',
     summary: 'Listing hypotheses before decomposing is the most common RCA mistake in interviews and in real work. The order matters more than the hypotheses themselves.',
@@ -400,6 +405,7 @@ const POSTS = [
   },
   {
     id: 'rca-vs-sizing-vs-causal',
+    framework: true,
     category: 'RCA',
     title: 'RCA vs Opportunity Sizing vs Causal Validation: Three Different Tools',
     summary: 'Treating these as the same thing is a common failure mode. Each has a different structure, data requirement, output format, and business implication.',
@@ -951,6 +957,7 @@ const POSTS = [
   // ══════════════════════════════════════════════════════════════
   {
     id: 'ambiguous-10-steps',
+    framework: true,
     category: 'Ambiguous Problems',
     title: 'How to Break Down Any Ambiguous Product Question in 10 Steps',
     summary: 'Interviewers asking ambiguous questions are not looking for your metrics list. They want to see you convert a fuzzy business question into structured analysis. Here\'s the framework.',
@@ -1018,6 +1025,7 @@ const POSTS = [
   },
   {
     id: 'five-question-types',
+    framework: true,
     category: 'Ambiguous Problems',
     title: 'The 5 Question Types in Every DS Product Analytics Interview Loop',
     summary: 'Diagnose a metric movement. Measure whether something is working. Identify an opportunity. Build a decision model. ML/product modeling. Each has a different structure and opening move.',
@@ -1035,6 +1043,7 @@ const POSTS = [
   },
   {
     id: 'problem-framing',
+    framework: true,
     category: 'Ambiguous Problems',
     title: 'Problem Framing: Restating the Question Before Touching Data',
     summary: 'The first 60 seconds of an ambiguous problem answer should never include a metric. Restate the business decision, the success definition, and the scope — then start the analysis.',
@@ -1071,6 +1080,7 @@ const POSTS = [
   },
   {
     id: 'opportunity-sizing',
+    framework: true,
     category: 'Ambiguous Problems',
     title: 'Opportunity Sizing: How to Estimate Impact Before Running an Experiment',
     summary: 'Is this worth building? Sizing the opportunity with back-of-envelope math using base rates, addressable population, and realistic lift prevents teams from optimizing the wrong things.',
@@ -1097,6 +1107,7 @@ const POSTS = [
   },
   {
     id: 'build-or-not',
+    framework: true,
     category: 'Ambiguous Problems',
     title: 'Should We Build This? A Framework for Data-Backed Build/No-Build Decisions',
     summary: 'Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here\'s how to structure that conversation.',
@@ -1264,6 +1275,7 @@ const POSTS = [
   },
   {
     id: 'feature-launch-metrics',
+    framework: true,
     category: 'Product Sense',
     title: 'How to Define Success Metrics for Any Feature Launch',
     summary: 'North star → diagnostics → guardrails → decision rule. The four-layer metric structure that makes your launch measurable from day one.',
@@ -1303,6 +1315,7 @@ const POSTS = [
   },
   {
     id: 'marketplace-health',
+    framework: true,
     category: 'Product Sense',
     title: 'Marketplace Health: The 5 Signals That Matter for Two-Sided Platforms',
     summary: 'Liquidity, GMV concentration, buyer-to-seller ratio, fill rate, and supply quality. What they mean, how they interact, and what breaks when one deteriorates.',
@@ -1544,6 +1557,7 @@ const POSTS = [
   },
   {
     id: 'closing-with-recommendation',
+    framework: true,
     category: 'Career & Interview',
     title: 'How to Close Every Answer With a Recommendation (Even When You\'re Uncertain)',
     summary: '"It depends" with no direction is not a senior answer. Here\'s the structure for closing with a recommendation that includes confidence level, key assumption, and next step.',
@@ -1563,6 +1577,7 @@ const POSTS = [
   },
   {
     id: 'rapid-revision',
+    framework: true,
     category: 'Career & Interview',
     title: 'The 30-Minute Rapid Revision Sheet Before Any Analytics Interview',
     summary: 'One-page refresher covering opening moves for every question type — metric design, RCA, experimentation, ambiguous problems, and business cases. Read aloud, don\'t study new content.',
@@ -1698,6 +1713,160 @@ const POSTS = [
       { type: 'text', text: 'In product reporting, base rate neglect most commonly surfaces as the "200% improvement" headline. A feature that moves the premium upgrade rate from 0.3% to 0.9% is technically a 200% lift. In absolute terms, it moved 0.6 percentage points. At 500,000 monthly users, that is 3,000 additional premium conversions. Whether that is meaningful depends entirely on the business context — but leading with "200% improvement" without the base rate or absolute numbers is designed to obscure rather than inform. Senior analysts always pair relative changes with absolute changes and base rates. "Upgrade rate improved from 0.3% to 0.9% — a 200% relative lift and 3,000 additional conversions per month at current volume."' },
       { type: 'callout', label: 'The practical implications', text: 'Pre-register experiments so you cannot cherry-pick significant results after running multiple metrics. Replicate important results before shipping based on a single borderline p-value — especially for high-stakes, hard-to-reverse features. Report absolute changes alongside relative changes. And when evaluating a "significant" result, ask: given the prior probability that this hypothesis is true (based on similar past experiments), what is the posterior probability that this result is a real effect rather than a false positive?' },
       { type: 'cta', room: 'stats', label: 'Practice this in the Stats Room →' },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // ANALYST FRAMEWORKS (mined from field-tested prep frameworks)
+  // ══════════════════════════════════════════════════════════════
+  {
+    id: 'eda-four-layers',
+    framework: true,
+    category: 'SQL & Data',
+    title: 'The 4 Layers of EDA: How to Open a Dataset You\'ve Never Seen',
+    summary: 'A raw table lands in your inbox with no question attached. The layered EDA protocol — system, profiling, univariate, then relationships — is how you go from "I have no idea what this is" to a defensible set of findings without flailing.',
+    readMin: 9,
+    room: 'cases',
+    roomLabel: 'Business Cases',
+    related: ['profitability-tree', 'denominator-discipline', 'simpsons-paradox'],
+    content: [
+      { type: 'text', text: 'Here is a situation that feels harder than it is. A take-home lands, or a stakeholder drops a CSV in your channel, and there is no crisp question — just "see what you can find." Most people react in one of two ways: they either freeze, or they start plotting things at random and hope a chart looks interesting. Neither builds trust. What separates a consultant-grade analysis from a student one is that the consultant follows the same calm protocol every single time, no matter the dataset. You are going to learn that protocol here, and once it is a habit you will never stare at a blank query editor again.' },
+      { type: 'callout', label: 'Before any layer — the mental model', text: 'Classify every column into one of two buckets. Ask: (1) is it numeric, and (2) does it make sense to aggregate it? If YES to both, it is a Measure (revenue, quantity, age) — the "how much / how many" columns. If NO to either, it is a Dimension (category, date, customer_id) — the columns you slice and group by. A customer ID is numeric but you would never average it, so it is a Dimension. Getting this right up front tells you which columns get summed and which ones get grouped by.' },
+      { type: 'heading', text: 'Layer 0 — System Profiling' },
+      { type: 'text', text: 'You do not start at the table. You start at the system. Before writing a single join, map the building before you search the rooms: how many tables exist, what the naming conventions are, and which columns live where. Query the metadata (information_schema.tables and information_schema.columns). Three tables and 150 tables are very different problems, and knowing which one you are in stops you from writing complex joins blindly.' },
+      { type: 'heading', text: 'Layer 1 — Data Profiling: is it even clean?' },
+      { type: 'text', text: 'This is the audit layer — no analysis yet, just checking that the raw material is usable. A chef inspects the ingredients before cooking. The habit to build is running the same checklist on any new table, and writing down what you find.' },
+      { type: 'list', items: [
+        'Shape and grain — how many rows and columns, and what does one row actually represent? One order? One customer? One order-line? Everything downstream depends on knowing the grain.',
+        'Data types — is the date a real date or a string? Is revenue a number or text? Wrong types silently break every calculation.',
+        'Time span — MIN and MAX on the date columns, then the difference. Two months of data and ten years are different analyses.',
+        'Missing values — which columns have nulls, how many, what percent — and crucially, why. A discount column empty only for premium customers is not random; it is a business rule.',
+        'Duplicates — repeated keys. Two identical order IDs mean either a collection bug or a genuine repeat — you have to decide which.',
+        'Impossible values — negative quantity, delivery date before order date, margin above 100%. Data entry errors or system bugs. Flag and investigate.',
+        'Inconsistent categories — "Mumbai", "mumbai", "MUM" look like three cities but are one. Standardise before you group.',
+      ]},
+      { type: 'callout', label: 'One honest note: resolve like an analyst, not a model-trainer', text: 'Never overwrite a raw column — if you fix revenue, create revenue_cleaned and keep the paper trail. And resist the urge to fill missing numbers with the average. Data scientists impute to train models; analysts surface the truth. If you do not know the real number, leave it null or label it "Unknown" rather than inventing bias. The magnitude rule: if an issue touches under ~20% of the data, document it and move on (do not delete a fifth of your rows); if it compromises over ~70% of a column, drop the column.' },
+      { type: 'heading', text: 'Layer 2 — Univariate: one column at a time' },
+      { type: 'text', text: 'Now you build intuition about each variable in isolation — its personality — before you look at relationships. A useful warm-up is the "super report": stack your top-line measures (total sales, total orders, average price, median revenue) into one query with UNION ALL so you have the baseline heartbeat of the business to compare everything against.' },
+      { type: 'list', items: [
+        'Numeric columns: central tendency (mean vs median — if they diverge, you are skewed), spread (standard deviation, range, IQR), distribution shape (histogram — normal, skewed, bimodal, uniform), outliers (box plot, points beyond 1.5×IQR), and percentiles (P25 through P99 — the P99 customer may spend 50× the median).',
+        'Categorical columns: frequency (which category dominates), cardinality (how many unique values — a 50,000-value name column cannot be grouped, and high-cardinality dimensions crash dashboards), and rare categories (appear once or twice — keep, bucket into "Other", or investigate).',
+      ]},
+      { type: 'heading', text: 'Layer 3 — Bivariate and Multivariate: the story' },
+      { type: 'text', text: 'Only now do you ask business questions — how things relate. Bivariate is two variables at a time: slice a Measure by a Dimension (revenue by region, delivery time by supplier), rank the top and bottom performers, and check numeric-vs-numeric relationships with a scatter. The key discipline is the noise filter: once ranking shows that 3 of 20 categories drive 80% of the movement, ruthlessly filter out the bottom 80% before you plot anything else. Multivariate adds a third variable — and this is where the buried insight usually lives.' },
+      { type: 'example', label: 'A flat relationship hiding a real one', text: 'Bivariate view:\n  Discount level vs sales  →  basically flat. "Discounts do not move sales." Case closed?\n\nAdd a third variable (region):\n  South region:  discount > 20%  →  sales +40%   (huge effect)\n  North region:  discount > 20%  →  sales  0%    (no effect)\n\nThe overall flat line was two opposite stories cancelling out.\nThat is a multivariate insight — and it changes the recommendation\nfrom "stop discounting" to "discount in the South, not the North."' },
+      { type: 'example', label: 'The Layer 3 queries you actually run', text: '-- Magnitude: a measure sliced by a dimension\nSELECT region, COUNT(*) AS orders, SUM(revenue) AS rev, AVG(revenue) AS aov\nFROM orders GROUP BY region ORDER BY rev DESC;\n\n-- Ranking: top 5 and bottom 5 by revenue\nWITH ranked AS (\n  SELECT product_name, SUM(revenue) AS rev,\n         ROW_NUMBER() OVER (ORDER BY SUM(revenue) DESC) AS top_rank,\n         ROW_NUMBER() OVER (ORDER BY SUM(revenue) ASC)  AS bot_rank\n  FROM orders GROUP BY product_name)\nSELECT product_name, rev FROM ranked\nWHERE top_rank <= 5 OR bot_rank <= 5 ORDER BY rev DESC;\n\n-- Multivariate: revenue by region AND category at once\nSELECT region, category, SUM(revenue) AS rev, COUNT(*) AS orders\nFROM orders GROUP BY region, category ORDER BY region, rev DESC;' },
+      { type: 'callout', label: 'The habit that makes this transferable', text: 'Deconstruct the top-line metric into its components before you analyse it. Revenue = Order Count × Average Order Value — so if revenue drops, you immediately know to ask whether it was a volume problem or a price problem. Carrying that decomposition instinct from EDA straight into an RCA is what makes the two feel like one skill.' },
+      { type: 'cta', room: 'cases', label: 'Practice EDA on real datasets in Business Cases →' },
+    ],
+  },
+  {
+    id: 'profitability-tree',
+    framework: true,
+    category: 'RCA',
+    title: 'Profitability Cases: The Revenue − Cost Tree and How to Walk It',
+    summary: 'Not every case is a root-cause hunt. "How do we improve profit?" is a different animal from "why did conversion drop?" — and treating them the same is why smart candidates flail. Here is the equation tree that keeps you structured.',
+    readMin: 7,
+    room: 'cases',
+    roomLabel: 'Business Cases',
+    related: ['case-spine-gates', 'gmv-vs-revenue', 'eda-four-layers'],
+    content: [
+      { type: 'text', text: 'There is a fork at the top of every analyst case, and missing it is one of the most common ways an otherwise strong candidate loses the room. Some cases ask why something broke — that is a root-cause investigation. Others ask how to improve or grow something — that is a profitability or optimization case. They look similar but they run differently, and the very first thing you should do is decide which one you are in.' },
+      { type: 'callout', label: 'The fork', text: 'Is the question asking WHY something broke (conversion fell, retention dropped)? → RCA path. Is it asking HOW to improve or increase something (grow profit, raise margin)? → Profitability path. Profitability cases skip the sudden-vs-gradual routing entirely and go straight to the equation tree.' },
+      { type: 'heading', text: 'The equation tree' },
+      { type: 'text', text: 'Profitability cases have a clean mathematical spine, and speaking it out loud instantly signals structure. Profit = Revenue − Cost. Revenue = Volume × Price. Cost = Fixed Cost + Variable Cost. For a marketplace or platform, expand it: Orders = Demand × Fulfillment Rate, and Revenue = Orders × Take Rate × AOV. You are not solving anything yet — you are laying out the map so that when a number moves, you know exactly which branch it lives on.' },
+      { type: 'heading', text: 'Find the whale, then prune' },
+      { type: 'text', text: 'Pull each component of the tree against the prior period. The one that actually moved is the whale. Once you have it, ignore every other branch completely — this is the discipline most people skip. Scattered investigation across all branches is the primary failure mode of smart analysts; the senior move is to decompose, find the mover, and hard-stop everything else.' },
+      { type: 'example', label: 'Revenue is the whale — now, volume or price?', text: 'If Revenue moved, split it before going deeper:\n\nVOLUME lever (demand-side)\n  Acquisition   → fewer new users converting? which channel broke?\n  Retention     → existing users buying less often? cohort drop-off?\n  Frequency     → same users, fewer transactions? habit loop broken?\n  Fulfillment   → demand healthy but fulfillment falling? → supply side\n\nPRICE lever\n  ASP decline   → mix shift to cheaper SKUs, discounting cannibalising full price\n  Competitor    → pricing vs rivals in this specific region/segment\n  Promo         → promotional pricing becoming the baseline expectation' },
+      { type: 'heading', text: 'If cost is the whale, walk the value chain' },
+      { type: 'text', text: 'When the mover is on the cost side, do not guess — walk the chain in order and find where the spike lives.' },
+      { type: 'list', items: [
+        'Inbound — procurement, raw materials, supplier contracts',
+        'Operations — manufacturing, processing, QC, yield loss',
+        'Outbound — distribution, logistics, last-mile, warehousing',
+        'Sales & Marketing — CAC, campaign spend, creative, headcount',
+        'Customer Service — support volume, returns, refunds, warranty claims',
+      ]},
+      { type: 'text', text: 'Then ask one structural question: is the increase fixed (overhead expansion) or variable (cost per unit rising with volume)? That single distinction changes the recommendation entirely.' },
+      { type: 'callout', label: 'Interrogate the healthy-looking numbers too', text: 'If revenue looks healthy — even growing — during a profitability case, do not just move on. Ask why it grew. Revenue growth driven by aggressive discounting or promo spend simultaneously inflates marketing cost and compresses margin. The growth itself can be the cause of the profit problem. When you prioritize the levers you found, rank by revenue-uplift or cost-reduction potential — not by what is easiest to build — and assign ownership only after you have identified the cause, never before.' },
+      { type: 'cta', room: 'cases', label: 'Practice profitability cases in Business Cases →' },
+    ],
+  },
+  {
+    id: 'case-spine-gates',
+    framework: true,
+    category: 'RCA',
+    title: 'The Case Spine: Routing Gate, Sanity Gate, the Whale, and a BLUF Close',
+    summary: 'The difference between a rambling case and a crisp one is two gates and a closing structure. Route the investigation by the time signature, confirm the data is real, prune to the whale, and land the answer like a decision-maker.',
+    readMin: 8,
+    room: 'rca',
+    roomLabel: 'RCA Room',
+    related: ['profitability-tree', 'decompose-before-diagnose', 'segment-before-aggregate'],
+    content: [
+      { type: 'text', text: 'Most people think a case interview rewards knowing the most causes. It does not — it rewards structure. Two candidates can name the same root cause, and the one who moved through a visible spine wins, because the interviewer is watching how you think, not whether you eventually land on the answer. This is that spine: clarify and route, check the data is real, prune to the one thing that moved, then close cleanly. Take it slowly the first few times; it becomes automatic faster than you would expect.' },
+      { type: 'heading', text: 'Clarify → the EDQ and the routing gate' },
+      { type: 'text', text: 'Before anything, lock the problem into one sentence — the Exact Diagnostic Question: "Why did [metric] change by [X% and absolute] for [segment] in [timeframe], and what action should follow?" Every later step must answer to that sentence. The most important thing you clarify is one word: sudden or gradual? That single answer routes the whole investigation.' },
+      { type: 'list', items: [
+        'Sudden drop (hours to ~2 days) → start with internal tech and deploys.',
+        'Gradual decline (weeks) → start with external and market factors.',
+        'Cyclical pattern → start with seasonality.',
+        'One segment only → start in that segment\'s sub-tree; all segments equally → suspect a global trigger (infra, policy).',
+        'Marketplace override: on two-sided platforms (Uber, Swiggy, Airbnb), check the supply side before external — vendor and rider churn moves faster than any market factor.',
+      ]},
+      { type: 'heading', text: 'The sanity gate: is the data even real?' },
+      { type: 'text', text: 'Before you assume the business is broken, confirm the data is not. This is the single cheapest step with the highest payoff — running a root-cause analysis on broken data is wasted effort, and catching a tracking bug in the first two minutes is a senior reflex.' },
+      { type: 'list', items: [
+        'Instrumentation — event not firing, double-counting, a property renamed.',
+        'Pipeline / schema — table missing, column dropped, a backfill gap.',
+        'ETL / timezone — orders not synced, timestamp drift across regions.',
+        'Denominator shift — more sessions initiated makes a rate look worse even when absolutes are flat.',
+        'Behavioral-metric trap — did we just make the action easier (surfaced the refund button, relaxed a policy)? The metric may be up because access improved, not because anything worsened.',
+      ]},
+      { type: 'callout', label: 'The fast check', text: 'Pull raw event counts by hour for the last 72 hours. A vertical cliff at a specific timestamp points to a pipeline or deploy issue — flag it and stop. A smooth declining curve points to real behavior — proceed. That one query resolves the gate.' },
+      { type: 'heading', text: 'The whale and the hard-stop prune' },
+      { type: 'text', text: 'Decompose the metric into its formula (Revenue = Users × CVR × AOV; DAU = New + Retained + Resurrected − Churned; and so on), pull each component against the prior period, and find the one that moved — the whale. Then prune every other branch completely. If CVR is flat but AOV fell 18%, acquisition and onboarding are irrelevant to this case. Announce it out loud: "AOV is the whale; I am ignoring the rest." Never open more than three buckets — two is cleaner, four is the ceiling.' },
+      { type: 'heading', text: 'Rank, validate, then close with BLUF' },
+      { type: 'text', text: 'Rank your surviving hypotheses into three tiers — Sprint Now (high impact, high ease: one query today), Deep Dive (high impact, low ease: schedule it), and Drop (low impact: delete). For each top hypothesis, define four fields before you run anything: the confirming signal, the falsifying signal, the time alignment (the cause must precede the drop, or discard it), and the exact query. Never say "I would look at the data" — name the table, the dimension, the window, and what the query checks.' },
+      { type: 'callout', label: 'The BLUF close — five parts, always in order', text: 'Lead with the answer, not the journey. (1) Root cause: "The primary cause is X, driven by [segment/event]." (2) Evidence: "This explains X% of the impact, confirmed by [signal]." (3) Action: short-term fix (what, who, when) plus long-term systemic fix. (4) Confidence: "Medium, based on [signal] — it becomes high if [next data point] confirms." (5) Open risk: "This changes if [alternative cause] turns out to explain the segment behavior." Skipping confidence and open risk is what makes a close feel junior.' },
+      { type: 'cta', room: 'rca', label: 'Practice the full case spine in the RCA Room →' },
+    ],
+  },
+  {
+    id: 'guesstimate-engines',
+    framework: true,
+    category: 'Ambiguous Problems',
+    title: 'Guesstimates: Demand vs Supply Engines and the 3-Part Gut Check',
+    summary: '"How many cups of tea are consumed in India daily?" The answer is not a number — it is a structure. Pick the right engine, build the tree before touching any digit, round without apology, and never stop before the gut check.',
+    readMin: 7,
+    room: 'estimation',
+    roomLabel: 'Estimation Room',
+    related: ['case-spine-gates', 'eda-four-layers'],
+    content: [
+      { type: 'text', text: 'Guesstimates feel like they are testing arithmetic. They are not — they are testing whether you can impose structure on an open-ended question and stay transparent while you do it. The interviewer does not care whether your final number is exactly right (nobody knows the true answer anyway). They care whether your tree is sound, your assumptions are named, and your reasoning is followable. Once you internalise the spine — clarify, pick an engine, segment, calculate, gut-check — these stop being scary and start being almost fun.' },
+      { type: 'heading', text: 'Clarify, then pick the engine before any number' },
+      { type: 'text', text: 'First, lock what you are measuring: cups or revenue, daily or annual, which geography, which segments. State assumptions as closed confirmations — "I\'ll assume annual revenue in INR, is that right?" — not open questions. Then choose one of two engines, and this choice is the whole game.' },
+      { type: 'list', items: [
+        'Demand engine (population proxy) — for "how many people / cups / units / revenue". Total Volume = Base Population × Relevant Segment % × Penetration % × Frequency per period × (Price, if revenue).',
+        'Supply engine (bottleneck proxy) — for "how many shops / hospitals / drivers / flights". Total Output = Number of Resources × Capacity per Resource × Operating Days × Utilization %.',
+        'Ambiguous prompt — build both and triangulate.',
+        'Workforce override — for riders/drivers/staff, estimate demand first and divide by per-unit capacity. Workers needed = daily demand ÷ output per worker per day. Faster and more defensible than counting resources directly.',
+      ]},
+      { type: 'callout', label: 'Announce the tree first', text: 'The single biggest failure mode is jumping to numbers. Say the whole tree out loud before you touch a digit: "I\'ll start with India\'s population, filter to urban adults, apply a tea-drinking penetration rate, and multiply by daily frequency. Let me build that out." Structure before arithmetic, every time.' },
+      { type: 'heading', text: 'Segment with standard cuts' },
+      { type: 'text', text: 'You do not need perfect demographics — you need defensible, memorized anchors you can apply instantly.' },
+      { type: 'list', items: [
+        'Age: 0–14 (~25%) | 15–60 (~60%) | 60+ (~15%).',
+        'Urban/rural — India ~35% urban / 65% rural; GCC ~85%+ urban.',
+        'Penetration — mass-market 60–80%, mainstream 30–50%, premium 5–20%, luxury 1–5%.',
+        'Frequency — daily habit 1–3×/day, weekly 1–3×/week, monthly 1–4×/month, annual purchase 0.2–0.5×/year.',
+      ]},
+      { type: 'heading', text: 'Calculate — round without apology' },
+      { type: 'text', text: 'Round every number to one significant figure, and never do complex multiplication in your head — round first. Use fractions where they are easier (1/5, not 20%). Talk aloud at every step so the interviewer can follow and correct you early. "18% × 840M" becomes "20% × 800M = 160M" — precision theater (0.18 × 840 = 151.2M) is slower and buys you nothing.' },
+      { type: 'example', label: 'Worked example — cups of tea in India, daily', text: 'Engine: demand.\n  India population           1.4B\n  Adults (~65%)              ~900M\n  Tea drinkers (~70% adults) ~630M\n  Cups per drinker per day   ~2\n  → 630M × 2 = ~1.26B  →  round to ~1.2B cups/day\n\nGut check:\n  Absolute:   1.2B cups for 1.4B people = ~0.9 cups/person/day. Feels right.\n  Per-capita: not everyone drinks tea; those who do drink 2. Plausible.\n  Benchmark:  India is the world\'s largest tea consumer — billions/day fits.\n  Weakest assumption: % of adults who drink tea (could be 60% or 80%).' },
+      { type: 'heading', text: 'The 3-part gut check — never stop at the number' },
+      { type: 'text', text: 'A bare number is an incomplete answer. Run three checks: does the magnitude feel right (orders of magnitude)? does the per-capita implication (divide by population) feel realistic? and does it sit sensibly next to a benchmark you know (India smartphone market ~$10B, global iPhone ~$200B)?' },
+      { type: 'callout', label: 'Close by naming your weakest assumption', text: 'End every guesstimate the same way: "My estimate is X. That implies Y per person per period, which feels reasonable because Z. My weakest assumption is W — if it is off by 2×, the answer moves from A to B." Naming the fragile link and its sensitivity is what turns a lucky guess into a credible one.' },
+      { type: 'cta', room: 'estimation', label: 'Practice guesstimates in the Estimation Room →' },
     ],
   },
 ];
@@ -1918,9 +2087,11 @@ function PostReader({ post, cfg, onBack, onNavigate, onRead }) {
 // ─────────────────────────────────────────────────────────────
 export function BlogBrowser({ onNavigate }) {
   const [selectedPost, setSelectedPost] = useState(null);
+  const [filter, setFilter] = useState('all'); // 'all' | 'frameworks'
   const total = POSTS.length;
   const writtenCount = POSTS.filter(p => p.content && p.content.length > 0).length;
   const pendingCount = total - writtenCount;
+  const frameworkCount = POSTS.filter(p => p.framework && p.content && p.content.length > 0).length;
 
   // If a post is selected, render the reader view
   if (selectedPost) {
@@ -1974,10 +2145,48 @@ export function BlogBrowser({ onNavigate }) {
         </div>
       </div>
 
+      {/* Filter: All vs Frameworks — folds the old standalone Frameworks page in as a bifurcation of Deep Dives */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.75rem', flexWrap: 'wrap' }}>
+        {[
+          { key: 'all', label: 'All deep dives', count: writtenCount },
+          { key: 'frameworks', label: 'Frameworks', count: frameworkCount },
+        ].map(tab => {
+          const active = filter === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setFilter(tab.key)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                fontSize: '0.82rem', fontWeight: active ? 800 : 600,
+                padding: '0.4rem 0.85rem', borderRadius: '999px', cursor: 'pointer',
+                background: active ? 'var(--surface-2)' : 'var(--surface)',
+                color: active ? 'var(--accent)' : 'var(--text-muted)',
+                border: '1px solid ' + (active ? 'var(--accent)' : 'var(--border)'),
+                fontFamily: 'inherit',
+              }}
+            >
+              {tab.key === 'frameworks' && <Icon name='layers' size={13} color='currentColor' />}
+              {tab.label}
+              <span style={{
+                fontSize: '0.7rem', fontWeight: 700,
+                color: active ? 'var(--accent)' : 'var(--text-dim)',
+              }}>{tab.count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {filter === 'frameworks' && (
+        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: '-0.75rem 0 1.75rem', maxWidth: '580px' }}>
+          Reusable structures you can grab mid-case — metric trees, the RCA case spine, profitability and guesstimate engines, EDA layers. Each still links straight to the room where it shows up live.
+        </p>
+      )}
+
       {/* Category sections — only surface posts that are actually written */}
       {CATEGORIES.map(cat => {
         const cfg = CATEGORY_CONFIG[cat];
-        const posts = POSTS.filter(p => p.category === cat && p.content && p.content.length > 0);
+        const posts = POSTS.filter(p => p.category === cat && p.content && p.content.length > 0 && (filter === 'all' || p.framework));
         if (!posts.length) return null;
         return (
           <div key={cat} style={{ marginBottom: '2.5rem' }}>

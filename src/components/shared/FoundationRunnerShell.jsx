@@ -3,8 +3,30 @@
 // Provides: back button, progress counter, module header, content slot,
 // and a right-side module index for quick navigation.
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Icon } from './Icon.jsx';
+
+// Recap toggle button style (MSL-style) — active = coloured text + border on surface-2.
+function recapBtnStyle(active, color) {
+  return {
+    fontSize: '0.78rem', fontWeight: active ? 800 : 600, padding: '0.4rem 0.9rem',
+    borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+    background: active ? 'var(--surface-2)' : 'var(--surface)',
+    color: active ? color : 'var(--text-muted)',
+    border: '1px solid ' + (active ? color : 'var(--border)'),
+  };
+}
+
+// Minimal **bold** rendering for recap bullets (no markdown dependency).
+function renderRecapLine(s) {
+  var parts = String(s).split(/(\*\*[^*]+\*\*)/g);
+  return parts.map(function (p, i) {
+    if (p.length > 4 && p.slice(0, 2) === '**' && p.slice(-2) === '**') {
+      return <strong key={i} style={{ color: 'var(--text)' }}>{p.slice(2, -2)}</strong>;
+    }
+    return <span key={i}>{p}</span>;
+  });
+}
 
 export function FoundationRunnerShell({
   module,           // current module object
@@ -21,6 +43,9 @@ export function FoundationRunnerShell({
   progress,         // object { [moduleId]: truthy } for completion dots
 }) {
   var [indexOpen, setIndexOpen] = useState(false);
+  var [recapMode, setRecapMode] = useState(false);
+  // Reset to full-module view whenever the module changes (MSL behaviour).
+  useEffect(function () { setRecapMode(false); }, [module ? module.id : null]);
 
   if (!module) {
     return (
@@ -123,8 +148,30 @@ export function FoundationRunnerShell({
           </div>
         </div>
 
-        {/* Module content (slot) */}
-        {children}
+        {/* Recap toggle (MSL-style) — only when the module provides a recap */}
+        {module.recap && module.recap.length > 0 && (
+          <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.25rem' }}>
+            <button onClick={function () { setRecapMode(false); }} style={recapBtnStyle(!recapMode, color)}>Full module</button>
+            <button onClick={function () { setRecapMode(true); }} style={recapBtnStyle(recapMode, color)}>⚡ Quick recap</button>
+          </div>
+        )}
+
+        {/* Module content (slot) — or the quick recap when toggled */}
+        {recapMode && module.recap && module.recap.length > 0 ? (
+          <div style={{ background: 'var(--surface)', border: '1px solid ' + color, borderRadius: 'var(--radius)', padding: '1.1rem 1.25rem' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.9rem' }}>
+              Quick recap · {module.title}
+            </div>
+            {module.recap.map(function (pt, i) {
+              return (
+                <div key={i} style={{ display: 'flex', gap: '0.55rem', marginBottom: '0.7rem', alignItems: 'flex-start' }}>
+                  <span style={{ color: color, fontWeight: 800, flexShrink: 0, lineHeight: 1.5 }}>›</span>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{renderRecapLine(pt)}</div>
+                </div>
+              );
+            })}
+          </div>
+        ) : children}
 
         {/* Playbook links */}
         {playbookLinks && playbookLinks.length > 0 && (

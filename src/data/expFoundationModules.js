@@ -4,6 +4,11 @@
 export const expFoundationModules = [
   {
     id: 'ef01',
+    recap: [
+      'Observational data conflates **treatment with selection** — feature-users differ in ways you cannot measure.',
+      'Power users would retain better regardless, so their higher retention proves nothing causal.',
+      '**Random assignment** is the only mechanism that breaks the confound and makes causal claims valid.',
+    ],
     index: 1,
     title: 'Why We Experiment',
     subtitle: 'Causality, correlation, and why A/B tests beat intuition',
@@ -19,6 +24,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef02',
+    recap: [
+      'The randomization unit must **match the unit of analysis** — randomize by user when you analyze users.',
+      'Session-level splits make one user\'s repeated sessions look like **independent observations** when they are not.',
+      'Correlated sessions understate variance and **overstate significance** — you ship a fake winner.',
+    ],
     index: 2,
     title: 'The Unit of Randomization',
     subtitle: 'User-level vs session-level vs page-level — and when each breaks',
@@ -35,6 +45,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef03',
+    recap: [
+      'Required sample size scales with **1/MDE²** — halving the detectable effect quadruples runtime.',
+      'Ambitious targets set without checking traffic quietly underpower the experiment.',
+      'Run the power calculation **before** committing to a timeline, not after launch.',
+    ],
     index: 3,
     title: 'Statistical Power and MDE',
     subtitle: 'How to size an experiment before you run it',
@@ -51,6 +66,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef04',
+    recap: [
+      'A p-value is **P(data this extreme | null true)** — not the probability that the null is true.',
+      '**Statistical ≠ practical significance**: with enough users a 0.01% lift becomes significant.',
+      'Always report the **confidence interval** alongside the p-value so people see the plausible range.',
+    ],
     index: 4,
     title: 'p-values, Confidence Intervals, and What They Actually Mean',
     subtitle: 'The most misunderstood statistics in experimentation',
@@ -63,6 +83,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef05',
+    recap: [
+      'A 52/48 split that a chi-square rejects is a **Sample Ratio Mismatch** — the groups are no longer comparable.',
+      'Causes: bot filters firing differently, assignment bugs. Either way the results are uninterpretable.',
+      'Pause, diagnose, relaunch — an SRM-compromised test is **worse than no test at all**.',
+    ],
     index: 5,
     title: 'Sample Ratio Mismatch',
     subtitle: 'Detecting and diagnosing broken experiment assignment',
@@ -79,6 +104,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef06',
+    recap: [
+      'The first days of a new UI measure **curiosity, not value** — early lift often decays to baseline or below.',
+      'Novelty decay is the temporal cousin of the mix shift: segment by **time**, not just cohort.',
+      'Run at least one full weekly cycle (usually 2–4 weeks) to capture stable behaviour.',
+    ],
     index: 6,
     title: 'Novelty Effects and Long-Run Validity',
     subtitle: 'Why week-one results can lie and how to detect it',
@@ -95,6 +125,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef07',
+    recap: [
+      'Test 20 metrics at α=0.05 and you **expect ~1 false positive** by chance.',
+      'The more metrics you test, the more likely a "win" that is really noise.',
+      '**Bonferroni** divides α by the number of tests — conservative, but it kills phantom results.',
+    ],
     index: 7,
     title: 'Multiple Testing and Experiment Guardrails',
     subtitle: 'Why running 20 metrics breaks your false positive rate',
@@ -111,6 +146,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef08',
+    recap: [
+      '~5% of A/A tests show p<0.05 by chance, so **one significant A/A is expected**, not a bug.',
+      'Validate a platform by running **many** A/A tests and checking the p-value distribution is ~uniform.',
+      'The alarm is a **pattern** — too many significant results, or a distribution skewed toward 0.',
+    ],
     index: 8,
     title: 'A/A Testing',
     subtitle: 'Validating your experimentation platform before you trust it',
@@ -127,6 +167,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef09',
+    recap: [
+      'Pre-experiment behaviour predicts a chunk of the outcome — that predictable part is **noise**.',
+      '**CUPED** subtracts it, reducing variance so smaller effects are detectable with the same sample.',
+      'Same MDE, much less runtime — a lever to shift the power curve without adding traffic.',
+    ],
     index: 9,
     title: 'CUPED / Variance Reduction',
     subtitle: 'Using pre-experiment data to detect smaller effects faster',
@@ -143,6 +188,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef10',
+    recap: [
+      'Peeking and stopping the moment you hit significance is **p-hacking** — the true FPR can exceed 20%.',
+      '**Alpha spending / always-valid inference** let you decide early with valid error control.',
+      'They require planning the **stopping rule before launch**, not discovering it mid-run.',
+    ],
     index: 10,
     title: 'Sequential Testing',
     subtitle: 'How to peek at results early without inflating your false positive rate',
@@ -159,6 +209,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef11',
+    recap: [
+      'Standard tests assume one user\'s outcome is **unaffected by another\'s assignment** (SUTVA).',
+      'Social networks, marketplaces, and referrals **spill treatment across users** — control gets contaminated.',
+      'The bias runs in directions you cannot predict; **cluster randomization** is the structural fix.',
+    ],
     index: 11,
     title: 'Network Effects in Experiments',
     subtitle: 'Why standard A/B tests break when users interact with each other',
@@ -175,6 +230,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef12',
+    recap: [
+      'The sum of individual experiment lifts **rarely equals** the true compound effect (interactions, cannibalisation, decay).',
+      'A **permanent holdout** — users excluded from all new features — measures true cumulative impact.',
+      'Comparing untouched vs fully-treated is the only honest read of a whole launch programme.',
+    ],
     index: 12,
     title: 'Holdout Groups',
     subtitle: 'Measuring the cumulative effect of many simultaneous changes',
@@ -191,6 +251,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef13',
+    recap: [
+      'A/B tests **fix traffic** to maximise measurement quality; bandits **shift traffic** toward winners in real time.',
+      'The tradeoff is **inference quality vs the opportunity cost** of running losers.',
+      'Knowing when that tradeoff favours a bandit — and when it does not — is a real design judgment.',
+    ],
     index: 13,
     title: 'Multi-Armed Bandits',
     subtitle: 'When to stop A/B testing and start optimizing dynamically',
@@ -207,6 +272,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef14',
+    recap: [
+      'When you cannot randomize users (e.g. a TV ad), randomize **cities / DMAs / countries**.',
+      'Geo designs sidestep user-level spillover and make **offline channel testing** possible.',
+      'Cost: ~30 units instead of millions → far less power; **careful market matching** is the only compensation.',
+    ],
     index: 14,
     title: 'Geo Experiments',
     subtitle: 'Testing when you can\'t randomize at the user level',
@@ -223,6 +293,11 @@ export const expFoundationModules = [
   },
   {
     id: 'ef15',
+    recap: [
+      'In dense marketplaces, treatment and control drivers **interfere immediately** — user splits are meaningless.',
+      '**Switchbacks randomize over time**: treatment hour, control hour, alternating within one market.',
+      'Adjacent windows are **autocorrelated** — model it explicitly or your variance estimates are wrong.',
+    ],
     index: 15,
     title: 'Switchback Experiments',
     subtitle: 'Time-based randomization for marketplace and operational interventions',

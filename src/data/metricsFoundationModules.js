@@ -4,6 +4,11 @@
 export const metricsFoundationModules = [
   {
     id: 'mf01',
+    recap: [
+      'Every metric answers a different question: **North Star** ("are we winning?"), **L1** ("why?"), **L2** ("where?"), **guardrails** ("what are we breaking?").',
+      'Without the hierarchy every metric looks equally important — so nothing gets acted on.',
+      'The North Star is what you ultimately care about, but too slow to use as a test\'s primary metric.',
+    ],
     index: 1,
     title: 'The Metrics Hierarchy',
     subtitle: 'North Star, L1, L2, and Guardrails — how metrics nest',
@@ -21,6 +26,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf02',
+    recap: [
+      'Four tests: **measurable**, **movable**, **predictive** (moving it means real value), and **hard to game**.',
+      'A metric can be measurable but not movable, movable but not predictive, predictive but gameable.',
+      '**All four must pass** — a bad primary metric is experimentation\'s most expensive mistake.',
+    ],
     index: 2,
     title: 'What Makes a Good Metric?',
     subtitle: 'Four properties every sound metric must have',
@@ -37,6 +47,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf03',
+    recap: [
+      'Any ratio can rise in aggregate while falling in **every segment** — a **mix shift** did it.',
+      'Always decompose a ratio into **numerator, denominator, and mix** before concluding anything.',
+      'If treatment changes who enters the funnel, CVR can inflate with no real gain — check absolute counts too.',
+    ],
     index: 3,
     title: 'Ratio Metrics and Their Traps',
     subtitle: 'Why rates and percentages mislead — and how to fix them',
@@ -53,6 +68,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf04',
+    recap: [
+      '**DAU = New + Retained + Resurrected** — three problems with different owners, timelines, and fixes.',
+      'Decompose before diagnosing, or you cannot tell acquisition from retention from re-engagement.',
+      'In experiments, decompose to pick the **most sensitive sub-metric** as your primary.',
+    ],
     index: 4,
     title: 'Metric Decomposition',
     subtitle: 'Breaking a top-line number into its structural drivers',
@@ -69,6 +89,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf05',
+    recap: [
+      'Almost every primary metric has a partner it can be **inflated at the expense of**.',
+      'Push CTR → crush satisfaction; push checkout speed → hide fraud; push sessions → grow rage-quits.',
+      'A counter metric names that partner, so a quality tradeoff shows as a **win on one number, loss on the other**.',
+    ],
     index: 5,
     title: 'Counter Metrics and Guardrails',
     subtitle: 'What to protect when optimising for a primary metric',
@@ -85,6 +110,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf06',
+    recap: [
+      'A leading indicator is trustworthy only if you have **measured** its link to the outcome on past cohorts.',
+      'For a brand-new flow that link is **assumed, not proven** — you are betting an old relationship still holds.',
+      'Lagging metrics confirm the past; leading metrics predict the future **only if the link is real**.',
+    ],
     index: 6,
     title: 'Leading vs Lagging Indicators',
     subtitle: 'Proxies for future health vs confirmation of past outcomes',
@@ -101,6 +131,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf07',
+    recap: [
+      'A North Star captures **value delivered to users**, not value extracted by the company.',
+      '"Messages sent" predicts user value; revenue is a **lagging extraction metric**, not a North Star.',
+      'Too stable week-over-week for experiments — use it for long-run holdouts and validating L1/L2 links.',
+    ],
     index: 7,
     title: 'Designing a North Star Metric',
     subtitle: 'What a North Star must do — and the traps to avoid',
@@ -117,6 +152,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf08',
+    recap: [
+      'Sensitivity is **signal-to-noise**: high-variance metrics (revenue/user) need enormous samples.',
+      'Low-variance proxies (add-to-cart rate) are detectable with far less data — **if** they predict the outcome you care about.',
+      'A high-variance primary metric is a business risk, not just a statistical nuisance.',
+    ],
     index: 8,
     title: 'Metric Sensitivity and Trade-offs',
     subtitle: 'Why some metrics are hard to move and how to pick better ones',
@@ -133,6 +173,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf09',
+    recap: [
+      'The aggregate rate tells you nothing — the **relative drop between adjacent steps** points to the surface.',
+      'Break checkout step by step; an 18% cart→payment drop is the target, not acquisition.',
+      'Test at the **step level** and roll up; testing the whole funnel blurs the signal.',
+    ],
     index: 9,
     title: 'Funnel Metrics',
     subtitle: 'Measuring where users drop off and why it matters',
@@ -149,6 +194,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf10',
+    recap: [
+      'A ratio can sit **perfectly still while numerator and denominator both collapse** together.',
+      'A stable rate is not evidence of a stable system — it can rest on two failing businesses.',
+      'Whenever a ratio refuses to move, pull the **raw numerator and denominator counts separately**.',
+    ],
     index: 10,
     title: 'When a Flat Rate Is the Lie',
     subtitle: 'A ratio that doesn\'t move can hide a numerator and denominator both collapsing',
@@ -165,6 +215,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf11',
+    recap: [
+      'Composites make tradeoffs explicit via **weights** — but the weights are almost always arbitrary.',
+      'A composite can rise while a **critical component collapses** (frequency masking sharing).',
+      'Always **decompose any composite win** before shipping.',
+    ],
     index: 11,
     title: 'Composite Metrics',
     subtitle: 'Combining signals into a single score — and the traps',
@@ -181,6 +236,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf12',
+    recap: [
+      'A guardrail\'s value comes **entirely from pre-commitment** — set thresholds in writing before launch.',
+      'Setting thresholds after seeing results is rationalising, not analysing.',
+      'A breach is a **hard block**, not a "ship and monitor" discussion.',
+    ],
     index: 12,
     title: 'Guardrail Metrics',
     subtitle: 'Pre-committing to what you will not sacrifice',
@@ -197,6 +257,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf13',
+    recap: [
+      '**"Not significant" means "could not rule out zero"** — not "the true effect is zero."',
+      'Read the **confidence interval and MDE**: a CI of -1% to +6% cannot tell a 5% win from a loss.',
+      'Underpowered tests systematically discard small wins by labelling them null.',
+    ],
     index: 13,
     title: 'A Null Result Is Not "No Effect"',
     subtitle: 'Why "we couldn\'t detect it" gets misread as "there\'s nothing there"',
@@ -213,6 +278,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf14',
+    recap: [
+      'A flat aggregate D7 can hide a **larger old cohort masking a newer cohort\'s decline**.',
+      'Retention tables show which cohort, acquired when, retains at what rate over time.',
+      '+2% D7 can be -1% D30 — choose your cohort and measurement windows deliberately.',
+    ],
     index: 14,
     title: 'Cohort Metrics and Retention Curves',
     subtitle: 'Reading retention tables and spotting cohort-level shifts',
@@ -229,6 +299,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf15',
+    recap: [
+      'Rising DAU with a **DAU/MAU of 0.12** means a base of weekly visitors, not habit formation.',
+      'Depth metrics — stickiness, Lness curves, power-user concentration — reveal habit vs vanity.',
+      'After a DAU lift, ask: **breadth (new light users) or depth (existing users returning more)?**',
+    ],
     index: 15,
     title: 'Engagement Depth',
     subtitle: 'DAU/MAU, L7, stickiness — measuring how deeply users engage',
@@ -245,6 +320,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf16',
+    recap: [
+      '**LTV, CAC, payback, contribution margin** decide whether growth builds value or burns cash.',
+      'CAC of $18 against LTV of $11 means paying $7 to **lose** each customer.',
+      'Rapid user growth can still destroy value if acquisition cost exceeds what users generate.',
+    ],
     index: 16,
     title: 'Unit Economics',
     subtitle: 'LTV, CAC, payback period — the metrics that determine sustainability',
@@ -261,6 +341,11 @@ export const metricsFoundationModules = [
   },
   {
     id: 'mf17',
+    recap: [
+      'Active users split into four flows: **new, retained, resurrected, churned**.',
+      'The **quick ratio = (new + resurrected) / churned**; below 1 means the product is shrinking.',
+      'Aggressive acquisition with rising churn is a **leaky bucket** — the decomposition points the roadmap.',
+    ],
     index: 17,
     title: 'Growth Accounting',
     subtitle: 'New, retained, resurrected, churned — the four components of active users',

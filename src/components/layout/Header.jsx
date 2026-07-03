@@ -52,7 +52,6 @@ export function Header({ currentPage, onNavigate, unlockedStatus, theme, onToggl
       label: 'LEARN',
       items: [
         { id: 'blog', label: 'Learn' },
-        { id: 'playbook', label: 'Playbook' },
       ],
     },
     {

@@ -4,6 +4,11 @@
 export const statsFoundationsModules = [
   {
     id: 'sf01',
+    recap: [
+      'Every metric is a **variable**, and its **type** decides which test you run.',
+      'A/B tests measure **numerical** variables (revenue, session length) and **categorical** ones (converted?, clicked?) as proportions.',
+      'Get the type right first — everything downstream depends on it.',
+    ],
     index: 1,
     title: 'What is Data?',
     subtitle: 'Variables, types, and the measurement foundation',
@@ -17,6 +22,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf02',
+    recap: [
+      'When a number contradicts what the business feels, it is usually a **mean-vs-median** gap.',
+      '**Median** is your friend in skewed data — revenue, session length, and spend are almost always right-skewed.',
+      'Reported experiment results are means, and **outlier users inflate them**.',
+    ],
     index: 2,
     title: 'Mean, Median, Mode',
     subtitle: 'Summarizing where data lives',
@@ -30,6 +40,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf03',
+    recap: [
+      '**Standard deviation = typical distance from the mean** — the denominator of almost every significance test.',
+      'Two identical lifts can differ in significance purely because of **spread**.',
+      'More spread = more noise = more data needed to trust the signal.',
+    ],
     index: 3,
     title: 'Variance & Standard Deviation',
     subtitle: 'Measuring how spread out data is',
@@ -43,6 +58,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf04',
+    recap: [
+      'The normal distribution is fully described by just two numbers: **mean and SD**.',
+      'Sums of many independent effects converge to it — which is why it shows up everywhere.',
+      'Under the **CLT**, sample means are normal even when the raw data is not.',
+    ],
     index: 4,
     title: 'The Normal Distribution',
     subtitle: 'Why the bell curve shows up everywhere',
@@ -56,6 +76,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf05',
+    recap: [
+      'A z-score answers **"how many SDs from the mean?"** — putting different-scale values on common footing.',
+      'Caveat: a z standardizes scale, but the **percentile depends on distribution shape** (z=2 ≈ 98th only under a normal).',
+      'A t-test statistic is essentially a z-score: (effect − null) / standard error.',
+    ],
     index: 5,
     title: 'Z-Scores',
     subtitle: 'Standardizing — where does a value sit?',
@@ -69,6 +94,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf06',
+    recap: [
+      'Area under the curve between two z-scores = the **probability** a draw falls between them.',
+      '**p-values are tail area** beyond your test statistic.',
+      '**Two-sided** counts both tails (±|z|); **one-tailed** counts a single tail in the hypothesized direction.',
+    ],
     index: 6,
     title: 'Areas Under the Curve',
     subtitle: 'Turning z-scores into probabilities',
@@ -82,6 +112,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf07',
+    recap: [
+      'Every sample gives a **slightly different mean** — that is sampling variation, not error.',
+      'Re-running a query on different dates and getting different means is expected behaviour.',
+      'An observed A/B lift is an **estimate, not truth**.',
+    ],
     index: 7,
     title: 'Sampling',
     subtitle: 'Why every experiment is an estimate',
@@ -95,6 +130,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf08',
+    recap: [
+      '**SE = σ/√n** — precision improves only with the square root of sample size.',
+      'To **halve** the CI width you need **4× the data** — "one more week" rarely delivers.',
+      'MDE is directly proportional to SE.',
+    ],
     index: 8,
     title: 'Standard Error',
     subtitle: 'How much does the sample mean vary?',
@@ -108,6 +148,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf09',
+    recap: [
+      'The distribution of **sample means approaches normal as n grows**, whatever the raw shape.',
+      'That is why z/t-tests work on skewed revenue and count metrics at scale.',
+      'Exception: **heavy tails (whale revenue)** converge slowly — use log-transform, bootstrap, or non-parametrics.',
+    ],
     index: 9,
     title: 'Central Limit Theorem',
     subtitle: 'The magic that makes statistics work',
@@ -121,6 +166,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf10',
+    recap: [
+      'A 95% CI does **not** mean a 95% chance the true value is in this specific interval.',
+      'It means: repeat the experiment 100×, **~95 of the intervals** would contain the true value.',
+      'This interval is already right or wrong; the 95% describes the **long-run procedure**.',
+    ],
     index: 10,
     title: 'Confidence Intervals',
     subtitle: 'Quantifying uncertainty in your estimate',
@@ -134,6 +184,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf11',
+    recap: [
+      'A p-value = **"if there were no effect, how likely is data this extreme?"** — not the probability the feature works.',
+      'Small p means the data is **hard to explain under the null**.',
+      'Decisions hinge on **p < α**; misreading p is the classic experiment mistake.',
+    ],
     index: 11,
     title: 'Hypothesis Testing',
     subtitle: 'Making decisions under uncertainty',
@@ -147,6 +202,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf12',
+    recap: [
+      '**Power = probability of detecting a real effect** — 80% power means a 20% miss rate.',
+      'A flat result on 5,000 users may be **underpowered, not a true null**.',
+      'Underpowered tests are the #1 cause of **false negatives** in product analytics.',
+    ],
     index: 12,
     title: 'Power & Effect Size',
     subtitle: 'How to design experiments that find real effects',
@@ -160,6 +220,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf13',
+    recap: [
+      '**Sample size, MDE, α, and power are locked** — fix three and the fourth is determined.',
+      'Halving the MDE needs roughly **4× the sample**.',
+      'Check whether the effect is detectable with the traffic you can get **before** running.',
+    ],
     index: 13,
     title: 'Experiment Design Lab',
     subtitle: 'Sample size, MDE, power — the four-parameter lock',
@@ -172,7 +237,13 @@ export const statsFoundationsModules = [
     playbookLinks: [{ id: 'experiment-design-primary-metric', label: 'Pre-Committing Primary Metric' }, { id: 'decision-rule', label: 'Pre-Committed Decision Rule' }, { id: 'power-mde', label: 'Power & MDE' }, { id: 'end-to-end-experiment', label: 'End-to-End Experiment' }],
   },
   {
-    id: 'sf14', index: 14, title: 'Correlation & Covariance',
+    id: 'sf14',
+    recap: [
+      'Correlation measures **linear co-movement** (r from −1 to +1); r² is the variance explained.',
+      'Correlation **never tells you which variable causes which**.',
+      'Help-center visits and retention may both be driven by a third factor — check before building.',
+    ],
+    index: 14, title: 'Correlation & Covariance',
     subtitle: 'How two variables move together — and why that\'s not causation',
     difficulty: 'Intermediate',
     tags: ['correlation', 'covariance', 'r value', 'scatter plot', 'causation'],
@@ -182,7 +253,13 @@ export const statsFoundationsModules = [
     playbookLinks: [{ id: 'simpsons-paradox', label: "Simpson's Paradox" }],
   },
   {
-    id: 'sf15', index: 15, title: "Simpson's Paradox",
+    id: 'sf15',
+    recap: [
+      'A treatment can **win in every segment yet lose in aggregate** if assignment correlates with a segment baseline.',
+      'Nothing is broken — this is **Simpson\'s Paradox**.',
+      '**Always segment before concluding.**',
+    ],
+    index: 15, title: "Simpson's Paradox",
     subtitle: 'When segment-level truth reverses at the aggregate level',
     difficulty: 'Advanced',
     tags: ["simpson's paradox", 'aggregation', 'confounding', 'segmentation', 'A/B testing'],
@@ -196,7 +273,13 @@ export const statsFoundationsModules = [
     ],
   },
   {
-    id: 'sf16', index: 16, title: 'Skewness & Log-Normal Distributions',
+    id: 'sf16',
+    recap: [
+      'Revenue, session length, and LTV are **right-skewed** — the mean is dragged by the top 1%.',
+      'A "significant" mean lift can be **three whale users**; median is more honest.',
+      'Log-transform gives cleaner tests, but it tests the **geometric mean** — confirm that is the KPI leadership wants.',
+    ],
+    index: 16, title: 'Skewness & Log-Normal Distributions',
     subtitle: 'Why product metrics lie when you assume normality',
     difficulty: 'Intermediate',
     tags: ['skewness', 'log-normal', 'right-skewed', 'mean vs median', 'outliers', 'revenue'],
@@ -209,7 +292,13 @@ export const statsFoundationsModules = [
     ],
   },
   {
-    id: 'sf17', index: 17, title: 'Multiple Testing & Corrections',
+    id: 'sf17',
+    recap: [
+      '20 metrics at α=0.05 → **~1 false positive expected** even if nothing is real.',
+      '**Bonferroni** corrects but kills power; **FDR (Benjamini-Hochberg)** is the practical middle ground.',
+      'The real fix is **pre-committing your primary metric** before launch.',
+    ],
+    index: 17, title: 'Multiple Testing & Corrections',
     subtitle: 'Why more metrics means more false positives — and how to fix it',
     difficulty: 'Advanced',
     tags: ['multiple testing', 'bonferroni', 'FDR', 'family-wise error rate', 'false positives'],
@@ -219,7 +308,13 @@ export const statsFoundationsModules = [
     playbookLinks: [{ id: 'multiple-testing', label: 'Multiple Testing' }, { id: 'p-values', label: 'p-values' }],
   },
   {
-    id: 'sf18', index: 18, title: 'Regression to the Mean',
+    id: 'sf18',
+    recap: [
+      '**Extreme first measurements drift toward average** on the second — no intervention required.',
+      'Your worst performers "improving" after a program may be pure noise averaging out.',
+      '**Always use a control group** to separate the intervention from the reversion.',
+    ],
+    index: 18, title: 'Regression to the Mean',
     subtitle: 'Why your worst performers almost always improve — with or without intervention',
     difficulty: 'Intermediate',
     tags: ['regression to the mean', 'random variation', 'noise', 'intervention', 'measurement'],
@@ -229,7 +324,13 @@ export const statsFoundationsModules = [
     playbookLinks: [{ id: 'novelty-effect', label: 'Novelty Effect' }, { id: 'practical-vs-statistical', label: 'Practical vs Statistical Significance' }],
   },
   {
-    id: 'sf19', index: 19, title: 'Selection Bias & Survivorship',
+    id: 'sf19',
+    recap: [
+      'You analyze only **survivors** — churned users are missing and systematically different.',
+      'A 4.3/5 satisfaction score reflects only users **still active enough to respond**.',
+      'Measuring only survivors **inflates every quality metric**.',
+    ],
+    index: 19, title: 'Selection Bias & Survivorship',
     subtitle: 'The data you never see is the data that matters most',
     difficulty: 'Advanced',
     tags: ['selection bias', 'survivorship bias', 'missing data', 'churned users', 'denominator'],
@@ -239,7 +340,13 @@ export const statsFoundationsModules = [
     playbookLinks: [{ id: 'srm', label: 'SRM' }, { id: 'hte', label: 'Heterogeneous Treatment Effects' }],
   },
   {
-    id: 'sf20', index: 20, title: 'Practical vs Statistical Significance',
+    id: 'sf20',
+    recap: [
+      'With 10M users a **0.001% lift is significant but worth almost nothing**; with 1,000 a real 5% may not reach significance.',
+      'A p-value tells you an effect **exists**; effect size tells you it **matters**.',
+      'Attach **effect size and business impact** to every p-value.',
+    ],
+    index: 20, title: 'Practical vs Statistical Significance',
     subtitle: 'When significant is real but too small to matter — and the reverse',
     difficulty: 'Advanced',
     tags: ['practical significance', 'statistical significance', 'effect size', "cohen's h", 'business impact', 'MDE'],
@@ -249,7 +356,13 @@ export const statsFoundationsModules = [
     playbookLinks: [{ id: 'practical-vs-statistical', label: 'Practical vs Statistical Significance' }, { id: 'power-mde', label: 'Power & MDE' }, { id: 'p-values', label: 'p-values' }],
   },
   {
-    id: 'sf21', index: 21, title: 'Counterfactuals & Causal Inference',
+    id: 'sf21',
+    recap: [
+      'The fundamental problem: you can **never observe both outcomes** for the same unit.',
+      'Mobile users retaining better than desktop users could be **who they are**, not the platform.',
+      'A/B tests create a group that **is the counterfactual** via random assignment.',
+    ],
+    index: 21, title: 'Counterfactuals & Causal Inference',
     subtitle: 'Why you can\'t infer causation from correlation — and what makes an A/B test different',
     difficulty: 'Advanced',
     tags: ['causal inference', 'counterfactual', 'confounding', 'randomization', 'before-after'],
@@ -259,7 +372,13 @@ export const statsFoundationsModules = [
     playbookLinks: [{ id: 'srm', label: 'SRM' }, { id: 'hte', label: 'Heterogeneous Treatment Effects' }],
   },
   {
-    id: 'sf22', index: 22, title: 'Difference-in-Differences',
+    id: 'sf22',
+    recap: [
+      'The control group is **not a comparison — it is a trend-adjuster**.',
+      'DiD removes time trends (seasonality) that would have happened regardless.',
+      'Validity hinges entirely on the **parallel-trends assumption**.',
+    ],
+    index: 22, title: 'Difference-in-Differences',
     subtitle: 'Stripping out the trend to isolate the causal effect',
     difficulty: 'Advanced',
     tags: ['diff-in-diff', 'DiD', 'parallel trends', 'quasi-experiment', 'causal inference'],
@@ -269,7 +388,13 @@ export const statsFoundationsModules = [
     playbookLinks: [{ id: 'diff-in-diff', label: 'Difference-in-Differences' }],
   },
   {
-    id: 'sf23', index: 23, title: 'Regression Discontinuity',
+    id: 'sf23',
+    recap: [
+      'Units just above and just below a threshold are **nearly identical except for treatment**.',
+      'Valid only when units **cannot precisely control** which side they land on.',
+      'The **McCrary test** checks for density bunching at the cutoff; the estimate is **local to the cutoff**.',
+    ],
+    index: 23, title: 'Regression Discontinuity',
     subtitle: 'Exploiting a threshold to create near-random assignment',
     difficulty: 'Advanced',
     tags: ['regression discontinuity', 'RD', 'threshold', 'McCrary test', 'manipulation'],
@@ -279,7 +404,13 @@ export const statsFoundationsModules = [
     playbookLinks: [{ id: 'regression-discontinuity', label: 'Regression Discontinuity' }],
   },
   {
-    id: 'sf24', index: 24, title: 'Synthetic Control',
+    id: 'sf24',
+    recap: [
+      'Build a counterfactual as a **weighted blend of donor units** that tracks the treated unit pre-launch.',
+      'Only as good as its **pre-period fit** — a poor fit makes the post-period gap uninterpretable.',
+      'Donor units must themselves be **untreated**.',
+    ],
+    index: 24, title: 'Synthetic Control',
     subtitle: 'Building a data-driven counterfactual from donor units',
     difficulty: 'Advanced',
     tags: ['synthetic control', 'counterfactual', 'donor pool', 'pre-period fit', 'quasi-experiment'],
@@ -289,7 +420,13 @@ export const statsFoundationsModules = [
     playbookLinks: [{ id: 'synthetic-control', label: 'Synthetic Control' }],
   },
   {
-    id: 'sf25', index: 25, title: 'Instrumental Variables',
+    id: 'sf25',
+    recap: [
+      'An **instrument** nudges treatment adoption without directly affecting the outcome.',
+      'IV isolates the causal effect using **only the variation driven by the instrument** (a LATE).',
+      '**Weak instruments** inflate standard errors; **exclusion-restriction** violations bias silently and cannot be tested.',
+    ],
+    index: 25, title: 'Instrumental Variables',
     subtitle: 'Finding clean causal variation when treatment is endogenous',
     difficulty: 'Advanced',
     tags: ['instrumental variables', 'IV', 'LATE', 'exclusion restriction', 'endogeneity'],
@@ -300,6 +437,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf26',
+    recap: [
+      'Bayesian inference starts with a **prior** and updates it with data into a **posterior**.',
+      'It can answer **"P(variant B is better)"** — which frequentist testing cannot.',
+      'A credible interval\'s direct probability statement is **conditional on the prior** — so the prior must be stated and defensible.',
+    ],
     index: 26,
     title: 'Bayesian Thinking',
     subtitle: 'Priors, posteriors, and what it means to update beliefs with data',
@@ -313,6 +455,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf27',
+    recap: [
+      'Effect size measures magnitude in **standardized units, independent of sample size**.',
+      'p tells you an effect **exists**; effect size tells you whether it **matters**.',
+      '**Cohen\'s d = (mean₁ − mean₂) / pooled SD**; 0.2 small, 0.5 medium, 0.8 large.',
+    ],
     index: 27,
     title: 'Effect Size',
     subtitle: 'Cohen\'s d, MDE, and why magnitude matters more than p-values',
@@ -326,6 +473,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf28',
+    recap: [
+      'Bootstrap builds a sampling distribution by **resampling with replacement** — no normality assumption.',
+      'Run 1000+ resamples, compute the statistic each time, read off the distribution.',
+      'Honest limit: with **heavy tails and small n**, the tail may be absent from the data — bootstrap cannot invent it.',
+    ],
     index: 28,
     title: 'Bootstrap Resampling',
     subtitle: 'Simulation-based inference when parametric assumptions break down',
@@ -339,6 +491,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf29',
+    recap: [
+      'Two distinct tests: **goodness-of-fit** (observed vs a fixed expected ratio) and **independence** (are two variables related?).',
+      'A 52/48 **SRM check is goodness-of-fit** — one variable against 50/50, not two variables against each other.',
+      'Naming the right one is half the skill.',
+    ],
     index: 29,
     title: 'Chi-Square Test',
     subtitle: 'Testing independence between categorical variables',
@@ -352,6 +509,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf30',
+    recap: [
+      'SUTVA requires one user\'s outcome **not depend on another user\'s assignment**.',
+      'Referral, social, and marketplace experiments **contaminate control** when users interact.',
+      'Fixes — **cluster randomization, geo holdouts, switchbacks** — all enforce SUTVA by design.',
+    ],
     index: 30,
     title: 'SUTVA',
     subtitle: 'Stable Unit Treatment Value Assumption — when experiments contaminate themselves',
@@ -365,6 +527,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf31',
+    recap: [
+      'Three t-tests on three variants inflate the false positive rate to **~14%**.',
+      '**ANOVA\'s F-test** asks "is there any difference?" while controlling family-wise error.',
+      '**Post-hoc tests (Tukey, Bonferroni)** then identify which specific pairs differ.',
+    ],
     index: 31,
     title: 'ANOVA',
     subtitle: 'Comparing means across three or more groups simultaneously',
@@ -378,6 +545,11 @@ export const statsFoundationsModules = [
   },
   {
     id: 'sf32',
+    recap: [
+      'Non-parametric tests make **no distributional assumption** — they rank rather than use raw values.',
+      '**Mann-Whitney U** fits small, ordinal, or heavily skewed samples.',
+      'Its null is **equal distributions, not equal medians** — read it as a median difference only under a location-shift assumption, and it does **not** test the mean.',
+    ],
     index: 32,
     title: 'Non-Parametric Tests',
     subtitle: 'When the data breaks normality assumptions',

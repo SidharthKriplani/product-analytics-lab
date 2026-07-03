@@ -4,6 +4,11 @@
 export const rcaFoundationModules = [
   {
     id: 'rf01',
+    recap: [
+      'When a metric drops, the way through is a **repeatable four-layer sequence**, not panic or a guess.',
+      'Work the layers **top-to-bottom**: data quality → external factors → product changes → user behaviour.',
+      'Each layer is **cheaper to rule out** than the one below, so ruling out is the whole game.',
+    ],
     index: 1,
     title: 'The RCA Framework',
     subtitle: 'A repeatable structure for any metric drop investigation',
@@ -20,6 +25,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf02',
+    recap: [
+      'One aggregate drop can hide **three unrelated causes**: new-user acquisition, retention, or resurrection.',
+      '**Decompose first, diagnose second** — break the metric apart before you name a cause.',
+      'Jumping to a cause before decomposing is the **single most common RCA mistake**.',
+    ],
     index: 2,
     title: 'Decompose Before You Diagnose',
     subtitle: 'Why the first step is always breaking the metric apart',
@@ -36,6 +46,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf03',
+    recap: [
+      'Before blaming product, ask four questions: did **tracking change**, did a **pipeline fail**, is it **one platform** (SDK), is it **one event type** (logging bug)?',
+      'Nine times out of ten the answer lives in one of those four — none require a product change.',
+      'Rule out instrumentation **before** you page the on-call engineer.',
+    ],
     index: 3,
     title: 'Data Quality First',
     subtitle: 'Ruling out tracking failures before blaming product',
@@ -52,6 +67,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf04',
+    recap: [
+      'Calendar and market effects are your **null hypothesis** — check them before any war-room.',
+      'Day-of-week, holidays, **competitor launches**, and paused marketing spend all move metrics with no product cause.',
+      'If you cannot rule these out, you have not started RCA — you are just guessing.',
+    ],
     index: 4,
     title: 'Seasonality and External Factors',
     subtitle: 'The null hypothesis of RCA — non-product causes first',
@@ -68,6 +88,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf05',
+    recap: [
+      'A **mix shift** moves the aggregate even when every segment is flat — the weights changed, not the segments.',
+      'Its extreme form is **Simpson\'s Paradox**: the aggregate moves opposite to every segment.',
+      'Always **break the aggregate by segment** before concluding the product got worse.',
+    ],
     index: 5,
     title: 'When the Aggregate Lies',
     subtitle: 'Mix shifts, composition effects, and segment-level diagnosis',
@@ -84,6 +109,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf06',
+    recap: [
+      'Finding the cause is only halfway — a complete RCA answers **five questions**.',
+      'What dropped and by how much, the **confirmed cause + evidence**, the **fix and owner**, how you will measure the fix, and what you will **monitor** for recurrence.',
+      'Skip the last two and the same incident returns in six weeks.',
+    ],
     index: 6,
     title: 'From Diagnosis to Recommendation',
     subtitle: 'How to land an RCA finding and make it actionable',
@@ -100,6 +130,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf07',
+    recap: [
+      'Build the **identity** before theorizing: revenue = users × sessions/user × conversion × AOV, each term per-unit so the factors multiply back.',
+      'The tree tells you **which node(s)** to investigate first — a drop can live in more than one.',
+      'Build the tree before the debate, not after it.',
+    ],
     index: 7,
     title: 'Metric Tree Construction',
     subtitle: 'Breaking a metric into its constituent drivers for systematic diagnosis',
@@ -116,6 +151,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf08',
+    recap: [
+      'Start with **three simple queries**, not a complex multi-table join.',
+      'Daily event counts over ~2 weeks, a **break by platform/region**, and a **compare to the same window last year**.',
+      'Under ten minutes to either confirm the signal is real or kill the investigation.',
+    ],
     index: 8,
     title: 'SQL Diagnosis Patterns',
     subtitle: 'The queries every analyst runs in the first 30 minutes of an investigation',
@@ -132,6 +172,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf09',
+    recap: [
+      '**Same-week-last-year** is the first sanity check, not the last — one matching year could itself be a fluke.',
+      'Confirm the seasonality hypothesis against **two or three prior years** or a seasonally-adjusted baseline before closing.',
+      'WoW changes read without a seasonal baseline generate false alarms every quarter.',
+    ],
     index: 9,
     title: 'Seasonality and Trend Separation',
     subtitle: 'Decomposing a time series into trend, seasonality, and residual signal',
@@ -148,6 +193,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf10',
+    recap: [
+      'Three recognizable patterns: **iOS-only** (SDK), **one event type** (logging bug), **everything down** (pipeline).',
+      'Treat them as **overlapping heuristics**, not exclusive boxes — an iOS-only single-event drop fits two at once.',
+      'Recognizable in under five minutes; missing them sends engineers chasing a bug that does not exist.',
+    ],
     index: 10,
     title: 'Instrumentation Failure Patterns',
     subtitle: 'Recognizing iOS-only, event-level, and pipeline failures before they waste engineering time',
@@ -164,6 +214,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf11',
+    recap: [
+      'Keep a **live log** of competitor moves, platform policy changes, macro events, and marketing spend shifts.',
+      'Without it, **external causes look like product problems** and engineers optimize code for weeks.',
+      'The real fix may sit with pricing or marketing — not engineering.',
+    ],
     index: 11,
     title: 'External Factor Identification',
     subtitle: 'Building the habit of checking market and platform signals before blaming the product',
@@ -180,6 +235,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf12',
+    recap: [
+      'Real incidents often stack **two or three interacting causes** on top of each other.',
+      'A data-quality issue can **obscure a real regression** underneath — a partial recovery after the fix is the tell.',
+      'Test each cause: **remove it individually — would the full drop still exist?**',
+    ],
     index: 12,
     title: 'Multi-Level RCA',
     subtitle: 'Navigating investigations where multiple root causes interact across layers',
@@ -196,6 +256,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf13',
+    recap: [
+      'The first question is **"how did it break?"**, not "what broke?" — read the **time signature** first.',
+      '**Cliffs** → instrumentation or deploys; **gradual declines** → product erosion or mix shift; **cyclical** → seasonality.',
+      'Read the signature before the fault tree, or you start in the wrong branch every time.',
+    ],
     index: 13,
     title: 'The Routing Gate',
     subtitle: 'How the time signature of a drop determines where you start',
@@ -212,6 +277,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf14',
+    recap: [
+      'Decompose, find the **one component that actually moved**, then **prune every unrelated branch**.',
+      'If CVR is flat but AOV dropped 18%, acquisition funnels and checkout UX are **irrelevant** — not the dominant lever.',
+      'Scattered investigation is the primary failure mode of smart analysts.',
+    ],
     index: 14,
     title: 'Dominant Lever and Pruning',
     subtitle: 'Focus the fault tree on what actually moved — ignore everything else',
@@ -228,6 +298,11 @@ export const rcaFoundationModules = [
   },
   {
     id: 'rf15',
+    recap: [
+      'After pruning, rank surviving hypotheses by **Impact × Likelihood × Ease** — not gut feel.',
+      'Test first the one that **explains the most and costs the least** to validate.',
+      '**High-Ease** hypotheses are worth an early check even at moderate Impact — ruling them out is cheap.',
+    ],
     index: 15,
     title: 'Hypothesis Ranking',
     subtitle: 'Sequence your investigation by Impact × Likelihood × Ease — not gut feel',

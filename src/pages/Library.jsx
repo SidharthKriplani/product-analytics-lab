@@ -11,7 +11,7 @@
 import { Icon } from '../components/shared/Icon.jsx';
 import { interviewQA } from '../data/interviewQA.js';
 
-const DEEP_DIVE_COUNT = 81;   // written long-form essays (all posts are written; no stubs)
+const DEEP_DIVE_COUNT = 85;   // written long-form essays (all posts are written; no stubs)
 const FAILURE_COUNT = 25;     // dissected real-world failures
 
 // Monochrome shelf: no per-card rainbow accent. Each destination is icon +
@@ -22,14 +22,7 @@ const LIBRARY_CARDS = [
     label: 'Deep Dives',
     icon: 'book-open',
     meta: DEEP_DIVE_COUNT + ' essays',
-    description: 'Long-form essays unpacking the concepts behind the cases — the why under the what.',
-  },
-  {
-    id: 'playbook',
-    label: 'Frameworks',
-    icon: 'layers',
-    meta: 'Every room',
-    description: 'Reusable structures for metrics, RCA, experiments, and product sense — grab one mid-case.',
+    description: 'Long-form essays unpacking the concepts behind the cases — the why under the what. Flip the Frameworks filter for the reusable structures you grab mid-case (metric trees, the RCA case spine, profitability and guesstimate engines).',
   },
   {
     id: 'interview-qa',
@@ -77,7 +70,7 @@ export function Library({ onNavigate }) {
             fontSize: '0.96rem', color: 'var(--text-muted)', margin: 0,
             lineHeight: 1.6, maxWidth: '600px',
           }}>
-            Everything to read between reps — deep dives, frameworks, interview Q&amp;A, prep
+            Everything to read between reps — deep dives and frameworks, interview Q&amp;A, prep
             cheatsheets, and analytics failures, all in one place.
           </p>
         </div>
