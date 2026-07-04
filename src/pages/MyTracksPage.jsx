@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
   getTracks, createTrack, deleteTrack, renameTrack,
-  removeItem, reorderItems, addNote,
+  removeItem, reorderItems, addNote, moveItem,
 } from '../utils/tracks.js';
 import { shareTrack } from '../utils/sharedTracks.js';
 import { Icon } from '../components/shared/Icon.jsx';
@@ -105,14 +105,23 @@ function itemGroup(item) {
 
 // ── Track item row ──────────────────────────────────────────────────────────
 function TrackItemRow({
-  item, idx, onOpenSqlProblem, onNavigate, onRemove,
+  item, idx, trackId, onOpenSqlProblem, onNavigate, onRemove,
   dragIdx, overIdx, onDragStart, onDragOver, onDrop, onDragEnd,
 }) {
   return (
     <div
       key={idx}
       draggable
-      onDragStart={() => onDragStart(idx)}
+      onDragStart={e => {
+        // Additive: carry source track + index so a drop on a different
+        // sidebar track can MOVE the item cross-track. Intra-track reorder
+        // still runs off the local dragIdx state below.
+        try {
+          e.dataTransfer.setData('application/x-track-item', JSON.stringify({ fromTrackId: trackId, index: idx }));
+          e.dataTransfer.effectAllowed = 'move';
+        } catch (err) {}
+        onDragStart(idx);
+      }}
       onDragOver={e => onDragOver(e, idx)}
       onDrop={() => onDrop(idx)}
       onDragEnd={onDragEnd}
@@ -219,8 +228,21 @@ function TrackItemRow({
 }
 
 // ── Track list (left pane) ──────────────────────────────────────────────────
-function TrackList({ tracks, selectedId, onSelect, onNew, onDelete }) {
+function TrackList({ tracks, selectedId, onSelect, onNew, onDelete, onMoved }) {
   const [hovered, setHovered] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null); // track id currently drag-hovered
+
+  function handleTrackDrop(e, thisTrackId) {
+    e.preventDefault();
+    setDropTarget(null);
+    try {
+      const d = JSON.parse(e.dataTransfer.getData('application/x-track-item'));
+      if (d && d.fromTrackId && d.fromTrackId !== thisTrackId && Number.isInteger(d.index)) {
+        moveItem(d.fromTrackId, thisTrackId, d.index);
+        onMoved && onMoved();
+      }
+    } catch (err) {}
+  }
 
   return (
     <div style={{ width: '240px', flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -245,13 +267,17 @@ function TrackList({ tracks, selectedId, onSelect, onNew, onDelete }) {
             key={t.id}
             onMouseEnter={() => setHovered(t.id)}
             onMouseLeave={() => setHovered(null)}
+            onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDropTarget(t.id); }}
+            onDragLeave={() => setDropTarget(d => (d === t.id ? null : d))}
+            onDrop={e => handleTrackDrop(e, t.id)}
             style={{
               display: 'flex', alignItems: 'center', gap: '0.4rem',
               padding: '0.55rem 0.75rem 0.55rem 1rem',
               cursor: 'pointer',
-              background: selectedId === t.id ? 'var(--accent-bg, rgba(99,102,241,0.08))' : hovered === t.id ? 'var(--surface-2)' : 'transparent',
-              borderLeft: selectedId === t.id ? '3px solid var(--accent)' : '3px solid transparent',
-              transition: 'background 0.1s',
+              background: dropTarget === t.id ? 'var(--accent-bg, rgba(99,102,241,0.14))' : selectedId === t.id ? 'var(--accent-bg, rgba(99,102,241,0.08))' : hovered === t.id ? 'var(--surface-2)' : 'transparent',
+              borderLeft: (dropTarget === t.id || selectedId === t.id) ? '3px solid var(--accent)' : '3px solid transparent',
+              boxShadow: dropTarget === t.id ? 'inset 0 0 0 1px var(--accent)' : 'none',
+              transition: 'background 0.1s, box-shadow 0.1s',
             }}
             onClick={() => onSelect(t.id)}
           >
@@ -431,6 +457,7 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sha
                     key={idx}
                     item={item}
                     idx={idx}
+                    trackId={track.id}
                     onOpenSqlProblem={onOpenSqlProblem}
                     onNavigate={onNavigate}
                     onRemove={handleRemove}
@@ -518,6 +545,7 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
           onSelect={id => setSelectedId(id)}
           onNew={handleNew}
           onDelete={handleDelete}
+          onMoved={refresh}
         />
 
         {selectedTrack ? (

@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { Icon } from '../components/shared/Icon.jsx';
 import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
-const POSTS = [
+export const POSTS = [
 
   // ══════════════════════════════════════════════════════════════
   // METRICS & KPIs

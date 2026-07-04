@@ -33,7 +33,7 @@ const NAV_FRAMES = [
     id: 'do', label: 'DO', icon: 'terminal',
     items: [
       { id: 'sql-lab',              label: 'SQL Lab' },
-      { id: 'python-lab',           label: 'Programming Lab', href: 'https://programming-lab.vercel.app/' },
+      { id: 'python-lab',           label: 'Programming Lab', href: 'https://programming-lab.vercel.app/#/pylab' },
     ],
   },
   {
@@ -272,7 +272,7 @@ function GroupHeader({ icon, label, open, hasActive, onClick }) {
   );
 }
 
-export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onToggleTheme, isTerminal, isOpen, onClose, user, onShowAuth }) {
+export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onToggleTheme, isTerminal, isOpen, onClose, user, onShowAuth, onOpenSearch }) {
   const initial = findFrameAndSub(pageToTab(currentPage));
   const [openFrame, setOpenFrame] = useState(initial.frame || 'know');
 
@@ -561,7 +561,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
           flexShrink: 0,
         }}>
           <button
-            onClick={() => handleNav('search')}
+            onClick={() => { if (onOpenSearch) { onOpenSearch(); onClose(); } else { handleNav('search'); } }}
             style={{
               display: 'flex', alignItems: 'center', gap: '0.5rem',
               width: '100%', textAlign: 'left',
@@ -593,7 +593,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
               background: 'var(--surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-sm)', color: 'var(--text-muted)',
               fontFamily: 'inherit',
-            }}>/</kbd>
+            }}>⌘K</kbd>
           </button>
         </div>
 

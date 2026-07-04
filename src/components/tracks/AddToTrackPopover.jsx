@@ -4,6 +4,7 @@ import {
   getTracks, createTrack,
   addSqlProblem, getTracksForProblem,
   addItem, getTracksForItem,
+  removeGenericFromTrack, removeSqlFromTrack,
   getQuickAdd, setQuickAdd, getLastTrack, quickAddItem, quickAddSqlProblem,
 } from '../../utils/tracks.js';
 
@@ -63,7 +64,14 @@ export function AddToTrackPopover({
 
   function handleToggle(trackId) {
     var already = inTracks.includes(trackId);
-    if (!already) {
+    if (already) {
+      // Already in this track — clicking removes it.
+      if (isGeneric) {
+        removeGenericFromTrack(trackId, itemType, itemId);
+      } else {
+        removeSqlFromTrack(trackId, problemId);
+      }
+    } else {
       if (isGeneric) {
         addItem(trackId, itemType, itemId, label || '', itemMeta || {});
       } else {
@@ -120,17 +128,18 @@ export function AddToTrackPopover({
           <button
             key={t.id}
             onClick={function() { handleToggle(t.id); }}
+            title={added ? 'In this track — click to remove' : 'Add to this track'}
             style={{
               display: 'flex', alignItems: 'center', gap: '0.55rem',
               width: '100%', textAlign: 'left', background: 'none',
-              border: 'none', cursor: added ? 'default' : 'pointer',
+              border: 'none', cursor: 'pointer',
               padding: '0.45rem 0.85rem',
               color: added ? 'var(--accent)' : 'var(--text)',
               fontWeight: added ? 600 : 400,
               fontSize: '0.83rem',
               transition: 'background 0.12s',
             }}
-            onMouseEnter={function(e) { if (!added) e.currentTarget.style.background = 'var(--surface-2)'; }}
+            onMouseEnter={function(e) { e.currentTarget.style.background = 'var(--surface-2)'; }}
             onMouseLeave={function(e) { e.currentTarget.style.background = 'none'; }}
           >
             <span style={{

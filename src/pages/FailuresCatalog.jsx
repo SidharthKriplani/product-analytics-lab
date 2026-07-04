@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Icon } from '../components/shared/Icon.jsx';
 import { AddTrackBtn } from '../components/tracks/AddToTrackPopover.jsx';
 
-const FAILURES = [
+export const FAILURES = [
   // ─── Measurement & Instrumentation ─────────────────────────────────────────
   {
     id: 'f01',

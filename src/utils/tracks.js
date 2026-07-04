@@ -104,6 +104,32 @@ export function reorderItems(trackId, fromIndex, toIndex) {
   save(tracks);
 }
 
+// Move an item from one track to another (drag-and-drop across tracks).
+export function moveItem(fromTrackId, toTrackId, index) {
+  if (fromTrackId === toTrackId) return;
+  const tracks = load();
+  const from = tracks.find(t => t.id === fromTrackId);
+  const to = tracks.find(t => t.id === toTrackId);
+  if (!from || !to || index < 0 || index >= from.items.length) return;
+  const [item] = from.items.splice(index, 1);
+  to.items.push(item);
+  save(tracks);
+}
+
+// Remove the first item matching `pred` (untick/remove from the popover).
+export function removeItemRef(trackId, pred) {
+  const t = load().find(x => x.id === trackId);
+  if (!t) return;
+  const idx = t.items.findIndex(pred);
+  if (idx >= 0) removeItem(trackId, idx);
+}
+export function removeGenericFromTrack(trackId, type, itemId) {
+  removeItemRef(trackId, i => i.type === type && String(i.itemId) === String(itemId));
+}
+export function removeSqlFromTrack(trackId, problemId) {
+  removeItemRef(trackId, i => i.type === 'sql' && String(i.problemId) === String(problemId));
+}
+
 // Returns array of track ids that contain a given SQL problem
 export function getTracksForProblem(problemId) {
   return load()

@@ -93,6 +93,7 @@ const GrowthAnalyticsRunner   = lazy(() => import('./components/growthAnalytics/
 const InterviewSimulator      = lazy(() => import('./pages/InterviewSimulator.jsx').then(m => ({ default: m.InterviewSimulator })));
 const ABTestInterpreter       = lazy(() => import('./pages/ABTestInterpreter.jsx').then(m => ({ default: m.ABTestInterpreter })));
 const SearchPage              = lazy(() => import('./pages/SearchPage.jsx').then(m => ({ default: m.SearchPage })));
+const SearchModal             = lazy(() => import('./components/SearchModal.jsx').then(m => ({ default: m.SearchModal })));
 const BookmarksBrowser        = lazy(() => import('./pages/BookmarksBrowser.jsx').then(m => ({ default: m.BookmarksBrowser })));
 const MyTracksPage            = lazy(() => import('./pages/MyTracksPage.jsx').then(m => ({ default: m.MyTracksPage })));
 const SharedTrackPage         = lazy(() => import('./pages/SharedTrackPage.jsx').then(m => ({ default: m.SharedTrackPage })));
@@ -174,6 +175,7 @@ export default function App() {
   const [activeFailureId, setActiveFailureId] = useState(null);
   const [activeCheatSection, setActiveCheatSection] = useState(null);
   const [activeCompanyTrackId, setActiveCompanyTrackId] = useState(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [unlocked, setUnlocked] = useState(() => isUnlocked());
   const [progressSnapshot, setProgressSnapshot] = useState(() => ({ ...getAllProgress(), challengesProgress: getAllChallengesProgress(), biProgress: getAllBIProgress(), stfProgress: getAllSTFProgress(), takehomeProgress: getAllTakehomeProgress(), instrumentationProgress: getAllInstrumentationProgress() }));
   const [theme, setTheme] = useState(getInitialTheme);
@@ -954,6 +956,36 @@ export default function App() {
   function openCheatSection(id) { setActiveCheatSection(id); setPage('cheatsheet'); }
   function openCompanyTrack(id) { setActiveCompanyTrackId(id); setPage('company-tracks'); }
 
+  // Global search modal — Cmd/Ctrl+K toggles it from anywhere.
+  useEffect(() => {
+    function onKey(e) {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setSearchOpen(o => !o);
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Dispatch a chosen search result via the existing open/navigate mechanism.
+  function handleSearchSelect(entry) {
+    setSearchOpen(false);
+    if (!entry || !entry.route) return;
+    try {
+      const r = entry.route;
+      if (r.openFn) {
+        const fn = openFnsRef.current[r.openFn];
+        if (fn) fn(r.id);
+        else if (r.navigate) navigate(r.navigate);
+      } else if (r.navigate) {
+        navigate(r.navigate);
+      }
+    } catch (err) {
+      // Never let a routing error break the app.
+    }
+  }
+
   // ── Hash-based URL routing ──────────────────────────────────────────
   // Keeps window.location.hash in sync with page state.
   // Browser back/forward trigger hashchange which drives state.
@@ -1122,6 +1154,7 @@ export default function App() {
         onClose={() => setSidebarOpen(false)}
         user={user}
         onShowAuth={() => setShowAuth(true)}
+        onOpenSearch={() => setSearchOpen(true)}
       />
       <div className="app-main-wrapper">
         {/* Mobile top bar */}
@@ -2074,6 +2107,15 @@ export default function App() {
         <AuthModal
           onClose={() => setShowAuth(false)}
           onSuccess={() => setShowAuth(false)}
+        />
+      </Suspense>
+    )}
+
+    {searchOpen && (
+      <Suspense fallback={null}>
+        <SearchModal
+          onSelect={handleSearchSelect}
+          onClose={() => setSearchOpen(false)}
         />
       </Suspense>
     )}
