@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { signOut } from '../utils/auth.js';
 import { getBookmarks } from '../utils/bookmarks.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from '../utils/syncProgress.js';
-import { updateMyLinkedin, updateMyEmployment, fetchPublicProfile } from '../utils/leaderboard.js';
+import { updateMyLinkedin, updateMyEmployment, fetchPublicProfile, computeWeightedScore, fetchLeaderboard, fetchLeaderboardAgg } from '../utils/leaderboard.js';
 import { getMyPoints } from '../utils/feed.js';
 import { setMyResumeLink, removeMyResume, getLocalResumeUrl } from '../utils/resume.js';
 import { COMPANIES, PROFILE_ROLES } from '../data/companyList.js';
 import { CompanyLogo } from '../components/shared/CompanyLogo.jsx';
+import { computeReadiness } from '../components/shared/ReadinessWidget.jsx';
+import { supabase } from '../utils/supabase.js';
 
 const LINKEDIN_LS_KEY = 'pal-linkedin-url-v1';
 const COMPANY_LS_KEY  = 'pal-company-v1';
@@ -84,6 +86,115 @@ function computeStats() {
   } catch { /* skip */ }
 
   return { totalCases, roomsActive, breakdown };
+}
+
+// ── Readiness (Card 1) ──────────────────────────────────────────────────────────
+// computeReadiness (shared ReadinessWidget) expects a per-room array of
+// { label, completed, total }. We build it from the same ROOM_CONFIGS scan used
+// above; totals come from the same predicate over every stored id. Rooms with
+// many items surface `total: 999` so the readiness cap (min(8, total)) applies —
+// this matches the widget's formula without importing every case dataset.
+const READINESS_ROOMS = [
+  { key: 'pal-stats-progress-v1',            label: 'Stats',           type: 'attempts_num' },
+  { key: 'pal-metrics-progress-v2',          label: 'Metrics',         type: 'attempts_num' },
+  { key: 'pal-rca-progress-v2',              label: 'RCA',             type: 'attempts_num' },
+  { key: 'pal-cases-progress-v2',            label: 'Cases',           type: 'attempts_num' },
+  { key: 'pal-growth-analytics-progress-v1', label: 'Growth Analytics',type: 'rating' },
+  { key: 'pal-bi-progress-v1',               label: 'BI',              type: 'rating' },
+  { key: 'pal-stf-progress-v1',              label: 'Spot the Flaw',   type: 'completedAt' },
+  { key: 'pal-instrumentation-progress-v1',  label: 'Instrumentation', type: 'completedAt' },
+  { key: 'pal-behavioral-progress-v1',       label: 'Behavioral',      type: 'rating' },
+  { key: 'pal-estimation-progress-v1',       label: 'Estimation',      type: 'rating' },
+  { key: 'pal-metrics-foundation-progress-v1', label: 'Metrics Foundations', type: 'completedAt' },
+  { key: 'pal-rca-foundation-progress-v1',     label: 'RCA Foundations',     type: 'completedAt' },
+  { key: 'pal-exp-foundation-progress-v1',     label: 'Exp Foundations',     type: 'completedAt' },
+  { key: 'pal-stat-foundations-progress-v1',   label: 'Stat Foundations',    type: 'completedAt' },
+];
+
+function buildRoomProgress() {
+  const rooms = READINESS_ROOMS.map(cfg => {
+    let done = 0;
+    try {
+      const raw = localStorage.getItem(cfg.key);
+      if (raw) done = countDone(JSON.parse(raw), cfg.type);
+    } catch { /* skip */ }
+    return { label: cfg.label, completed: done, total: 999 };
+  });
+  // SQL Lab — solved is an array of problem ids.
+  let sqlDone = 0;
+  try {
+    const raw = localStorage.getItem('pal-sql-lab-solved-v1');
+    if (raw) { const d = JSON.parse(raw); sqlDone = Array.isArray(d) ? d.length : Object.keys(d).length; }
+  } catch { /* skip */ }
+  rooms.push({ label: 'SQL Lab', completed: sqlDone, total: 999 });
+  return rooms;
+}
+
+function readinessBand(score) {
+  if (score >= 90) return { label: 'Sharp', color: 'var(--green)' };
+  if (score >= 70) return { label: 'Interview-ready soon', color: 'var(--teal)' };
+  if (score >= 40) return { label: 'Building', color: 'var(--yellow)' };
+  return { label: 'Just starting', color: 'var(--text-muted)' };
+}
+
+// ── Company target + countdown (Card 2) ─────────────────────────────────────────
+const TARGET_DATE_KEY = 'pal-target-date-v1';
+const TARGET_COMPANY_KEY = 'pal-target-company-v1';
+function daysUntil(isoDate) {
+  if (!isoDate) return null;
+  const target = new Date(isoDate + 'T00:00:00');
+  if (isNaN(target.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - today.getTime()) / 86400000);
+}
+
+// ── Streak + recent activity (Card 3) ───────────────────────────────────────────
+const STREAK_STORES = [
+  'pal-stats-progress-v1', 'pal-metrics-progress-v2', 'pal-rca-progress-v2',
+  'pal-cases-progress-v2', 'pal-fullloop-progress-v1', 'pal-behavioral-progress-v1',
+  'pal-estimation-progress-v1', 'pal-stat-foundations-progress-v1',
+  'pal-growth-analytics-progress-v1', 'pal-challenges-progress-v1', 'pal-bi-progress-v1',
+  'pal-stf-progress-v1', 'pal-takehome-progress-v1', 'pal-metrics-foundation-progress-v1',
+  'pal-rca-foundation-progress-v1', 'pal-exp-foundation-progress-v1',
+  'pal-instrumentation-progress-v1', 'pal-pri-progress-v1',
+];
+
+function getPracticeDates() {
+  const dates = new Set();
+  STREAK_STORES.forEach(key => {
+    try {
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      Object.values(data).forEach(entry => {
+        const ts = entry.completedAt || entry.lastCompletedAt;
+        if (ts) dates.add(new Date(ts).toISOString().slice(0, 10));
+      });
+    } catch { /* skip */ }
+  });
+  try {
+    const sqlDates = JSON.parse(localStorage.getItem('pal-sql-lab-dates-v1') || '{}');
+    Object.keys(sqlDates).forEach(d => dates.add(d));
+  } catch { /* skip */ }
+  return dates;
+}
+
+function computeStreak() {
+  const dates = getPracticeDates();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  let streak = 0, activeDays = 0;
+  for (let i = 0; i < 364; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const ds = d.toISOString().slice(0, 10);
+    if (dates.has(ds)) { streak++; } else break;
+  }
+  for (let i = 0; i < 28; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    if (dates.has(d.toISOString().slice(0, 10))) activeDays++;
+  }
+  return { streak, activeDays, totalActive: dates.size };
 }
 
 // ── User helpers ──────────────────────────────────────────────────────────────
@@ -170,6 +281,31 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
 
   // ── Community feed points (guarded — 0 if no backend / migration pending) ──
   const [feedPoints, setFeedPoints] = useState(0);
+
+  // ── Card 2 — company target state ──
+  const [targetDate, setTargetDate] = useState(() => { try { return localStorage.getItem(TARGET_DATE_KEY) || ''; } catch { return ''; } });
+  const [targetCompany, setTargetCompany] = useState(() => { try { return localStorage.getItem(TARGET_COMPANY_KEY) || ''; } catch { return ''; } });
+  function saveTargetDate(v) {
+    setTargetDate(v);
+    try { if (v) localStorage.setItem(TARGET_DATE_KEY, v); else localStorage.removeItem(TARGET_DATE_KEY); } catch {}
+  }
+  function saveTargetCompany(v) {
+    setTargetCompany(v);
+    try { if (v) localStorage.setItem(TARGET_COMPANY_KEY, v); else localStorage.removeItem(TARGET_COMPANY_KEY); } catch {}
+  }
+
+  // ── Card 4 — leaderboard rank + vs-average ──
+  const [board, setBoard] = useState(null); // { rows, agg, myScore } | null
+  useEffect(() => {
+    let cancelled = false;
+    if (!supabase || !user) return;
+    (async () => {
+      const [rows, agg] = await Promise.all([fetchLeaderboard(200), fetchLeaderboardAgg()]);
+      if (cancelled) return;
+      setBoard({ rows: rows || [], agg: agg || null, myScore: computeWeightedScore() });
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   // Hydrate from the server profile when signed in — this is the source of truth
   // once the migration has run; falls back silently to the local values otherwise.
@@ -298,6 +434,44 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
   // ── Derived data (only when signed in) ───────────────────────────────────────
   const stats       = computeStats();
   const bookmarks   = getBookmarks().slice(-4).reverse();
+
+  // ── Card 1 — readiness ──
+  const roomProgress = buildRoomProgress();
+  const readiness    = computeReadiness(roomProgress);
+  const rBand        = readinessBand(readiness.score);
+
+  // ── Card 2 — company target derived ──
+  const days = daysUntil(targetDate);
+  const companyLabel = targetCompany && targetCompany !== 'Other / Not listed' ? targetCompany : null;
+  let countdownText;
+  if (days == null)      countdownText = 'No target set';
+  else if (days < 0)     countdownText = 'Interview date passed';
+  else if (days === 0)   countdownText = 'Interview is today';
+  else                   countdownText = days + ' day' + (days === 1 ? '' : 's') + ' to go';
+
+  // ── Card 3 — streak derived ──
+  const { streak, activeDays } = computeStreak();
+
+  // ── Card 4 — rank + vs-average derived ──
+  let rank = null, cohortSize = 0, avgScore = 0, myScore = 0;
+  if (board) {
+    myScore = board.myScore;
+    const rows = board.rows;
+    cohortSize = board.agg?.count || rows.length;
+    avgScore = board.agg?.avgTotal != null
+      ? board.agg.avgTotal
+      : (rows.length ? Math.round(rows.reduce((s, r) => s + (r.total_solved || 0), 0) / rows.length) : 0);
+    if (rows.length) {
+      const mine = rows.filter(r => r.user_id === user.id);
+      if (mine.length) rank = rows.findIndex(r => r.user_id === user.id) + 1;
+      else rank = rows.filter(r => (r.total_solved || 0) > myScore).length + 1; // provisional if not yet synced
+    }
+  }
+
+  // ── Card 5 — completion by area (rooms with progress, by %) ──
+  const areaRows = stats.breakdown
+    .map(r => ({ ...r }))
+    .sort((a, b) => b.done - a.done);
   const defensePlan = readJson('pal-defense-plan-v1');
   const sqlPlan     = readJson('pal-sql-lab-plan-v1');
   const displayName = getDisplayName(user);
@@ -634,6 +808,166 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
               </div>
             ) : null}
           </div>
+        </Card>
+
+        {/* ── Card 1 — Readiness score ── */}
+        <Card>
+          <SectionLabel>Readiness score</SectionLabel>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginBottom: '0.6rem' }}>
+            <span style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.03em', color: rBand.color, lineHeight: 1 }}>{readiness.score}%</span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: rBand.color }}>{rBand.label}</span>
+          </div>
+          <div style={{ width: '100%', height: '6px', background: 'var(--border)', borderRadius: '3px', overflow: 'hidden', marginBottom: '0.7rem' }}>
+            <div style={{ width: `${readiness.score}%`, height: '100%', background: rBand.color, transition: 'width 0.5s' }} />
+          </div>
+          <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+            Capped-mean coverage across your core judgment and foundation rooms, so breadth — not grinding one room — moves the score.
+          </p>
+          {readiness.weakest && (
+            <button
+              onClick={() => onNavigate(readiness.weakest.nav)}
+              style={{ marginTop: '0.7rem', background: 'none', border: 'none', padding: 0, fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 700, cursor: 'pointer' }}
+            >
+              Work next: {readiness.weakest.label} &rarr;
+            </button>
+          )}
+        </Card>
+
+        {/* ── Card 2 — Company target + countdown ── */}
+        <Card>
+          <SectionLabel>Company target</SectionLabel>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+            {companyLabel && <CompanyLogo company={companyLabel} size={30} />}
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {companyLabel || 'Set a target company'}
+              </div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: days != null && days >= 0 ? 'var(--accent)' : 'var(--text-muted)' }}>
+                {countdownText}{days != null && days >= 0 && companyLabel ? ' · ' + companyLabel : ''}
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '0.75rem', alignItems: 'flex-end' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)' }}>Target interview date</span>
+              <input
+                type="date" value={targetDate} onChange={e => saveTargetDate(e.target.value)}
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.4rem 0.6rem', fontSize: '0.82rem', color: 'var(--text)' }}
+              />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)' }}>Target company</span>
+              <select
+                value={targetCompany} onChange={e => saveTargetCompany(e.target.value)}
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.4rem 0.6rem', fontSize: '0.82rem', color: 'var(--text)' }}
+              >
+                <option value="">No company set</option>
+                {COMPANIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+          </div>
+          {(targetDate || targetCompany) ? (
+            <button
+              onClick={() => { saveTargetDate(''); saveTargetCompany(''); }}
+              style={{ marginTop: '0.7rem', background: 'none', border: 'none', padding: 0, fontSize: '0.74rem', color: 'var(--text-muted)', cursor: 'pointer' }}
+            >
+              Clear target
+            </button>
+          ) : (
+            <p style={{ marginTop: '0.7rem', fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: '0.7rem 0 0' }}>
+              Set a target company and interview date to turn prep into a countdown. PAL works best as a cram-to-a-date plan.
+            </p>
+          )}
+        </Card>
+
+        {/* ── Card 3 — Streak + activity ── */}
+        <Card>
+          <SectionLabel>Streak &amp; activity</SectionLabel>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(160px, 100%), 1fr))', gap: '0.65rem', marginBottom: '0.75rem' }}>
+            {[
+              { label: 'Day streak', value: streak },
+              { label: 'Active days / 28', value: activeDays },
+              { label: 'Cases done', value: stats.totalCases },
+            ].map(s => (
+              <div key={s.label} style={{ textAlign: 'center', padding: '0.7rem 0.4rem', background: 'var(--surface-2)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '1.55rem', fontWeight: 800, color: 'var(--accent)', lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.28rem' }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+            {streak > 0
+              ? `You are on a ${streak}-day streak across ${stats.roomsActive} active room${stats.roomsActive === 1 ? '' : 's'}. Keep it going.`
+              : 'Practice a case today to start a streak.'}
+          </p>
+        </Card>
+
+        {/* ── Card 4 — Leaderboard / vs-average ── */}
+        <Card>
+          <SectionLabel>Leaderboard</SectionLabel>
+          {!supabase ? (
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>Leaderboard needs a backend connection. Not configured in this build.</p>
+          ) : board == null ? (
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Loading your rank…</p>
+          ) : cohortSize === 0 ? (
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>No ranked players yet. Practice cases and sync to appear on the board.</p>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(160px, 100%), 1fr))', gap: '0.65rem', marginBottom: '0.75rem' }}>
+                {[
+                  { label: 'Your rank', value: rank ? '#' + rank : '—' },
+                  { label: 'Your score', value: myScore },
+                  { label: 'Cohort', value: cohortSize },
+                ].map(s => (
+                  <div key={s.label} style={{ textAlign: 'center', padding: '0.7rem 0.4rem', background: 'var(--surface-2)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '1.55rem', fontWeight: 800, color: 'var(--accent)', lineHeight: 1 }}>{s.value}</div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.28rem' }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.6rem 0.85rem', fontSize: '0.8rem', marginBottom: '0.7rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>vs cohort average </span>
+                <span style={{ fontWeight: 800, color: 'var(--text)' }}>{avgScore}</span>
+                <span style={{ fontWeight: 700, marginLeft: '0.5rem', color: myScore >= avgScore ? 'var(--green)' : 'var(--yellow)' }}>
+                  {myScore >= avgScore ? '+' : ''}{myScore - avgScore} pts {myScore >= avgScore ? 'above' : 'below'} average
+                </span>
+              </div>
+              <button
+                onClick={() => onNavigate('leaderboard')}
+                style={{ background: 'none', border: 'none', padding: 0, fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 700, cursor: 'pointer' }}
+              >
+                View full leaderboard &rarr;
+              </button>
+            </>
+          )}
+        </Card>
+
+        {/* ── Card 5 — Completion by area ── */}
+        <Card>
+          <SectionLabel>Completion by area</SectionLabel>
+          {areaRows.length === 0 ? (
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              No rooms started yet. Practice cases and your coverage by area will appear here.
+            </p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+              {areaRows.map(a => (
+                <div key={a.name} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', minWidth: '120px' }}>{a.name}</span>
+                  <div style={{ flex: 1, height: '6px', background: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.min(100, a.done * 12)}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.4s' }} />
+                  </div>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', minWidth: '28px', textAlign: 'right' }}>{a.done}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => onNavigate('progress')}
+            style={{ marginTop: '0.85rem', background: 'none', border: 'none', padding: 0, fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 700, cursor: 'pointer' }}
+          >
+            View full progress &rarr;
+          </button>
         </Card>
 
         {/* ── Practice stats ── */}

@@ -799,9 +799,61 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
           }}>{totalCompleted} completed</div>
         </div>
 
+        {/* Activity Heatmap — canonical section 2 (after readiness, before completion by area) */}
+        <div style={{
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)', padding: '1.25rem 1.5rem',
+          marginBottom: '1.25rem',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.9rem' }}>
+            <div style={{
+              fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
+              letterSpacing: '0.09em', color: 'var(--text-dim)',
+            }}>Activity Heatmap</div>
+            {streak > 0 && (
+              <span style={{
+                fontSize: '0.68rem', fontWeight: 700,
+                background: 'var(--surface-2)', color: 'var(--text-secondary)',
+                border: '1px solid var(--border)',
+                borderRadius: '10px', padding: '0.1rem 0.5rem',
+              }}>{streak} day{streak !== 1 ? 's' : ''} streak</span>
+            )}
+            {streak === 0 && (
+              <span style={{
+                fontSize: '0.68rem', color: 'var(--text-dim)',
+              }}>Practice today to start a streak</span>
+            )}
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(52, 10px)',
+              gridTemplateRows: 'repeat(7, 10px)',
+              gridAutoFlow: 'column',
+              gap: '2px',
+              width: 'max-content',
+            }}>
+              {heatmapDays.map(day => (
+                <div
+                  key={day}
+                  title={day}
+                  style={{
+                    width: '10px', height: '10px', borderRadius: '2px',
+                    background: practiceDates.has(day) ? 'var(--accent)' : 'var(--surface)',
+                    border: practiceDates.has(day) ? 'none' : '1px solid var(--border)',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+          <div style={{ marginTop: '0.5rem', fontSize: '0.68rem', color: 'var(--text-dim)' }}>
+            Last year
+          </div>
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', gap: '1.25rem', alignItems: 'start' }}>
 
-          {/* Readiness Summary */}
+          {/* Completion by area — Readiness by room */}
           <div style={{
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius-lg)', padding: '1.5rem',
@@ -883,58 +935,6 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
                 onNavigate={onNavigate}
               />
             ))}
-          </div>
-        </div>
-
-        {/* Practice Streak Heatmap */}
-        <div style={{
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)', padding: '1.25rem 1.5rem',
-          marginTop: '1.25rem',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.9rem' }}>
-            <div style={{
-              fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
-              letterSpacing: '0.09em', color: 'var(--text-dim)',
-            }}>Practice Streak</div>
-            {streak > 0 && (
-              <span style={{
-                fontSize: '0.68rem', fontWeight: 700,
-                background: 'var(--surface-2)', color: 'var(--text-secondary)',
-                border: '1px solid var(--border)',
-                borderRadius: '10px', padding: '0.1rem 0.5rem',
-              }}>{streak} day{streak !== 1 ? 's' : ''}</span>
-            )}
-            {streak === 0 && (
-              <span style={{
-                fontSize: '0.68rem', color: 'var(--text-dim)',
-              }}>Practice today to start a streak</span>
-            )}
-          </div>
-          <div style={{ overflowX: 'auto' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(52, 10px)',
-              gridTemplateRows: 'repeat(7, 10px)',
-              gridAutoFlow: 'column',
-              gap: '2px',
-              width: 'max-content',
-            }}>
-              {heatmapDays.map(day => (
-                <div
-                  key={day}
-                  title={day}
-                  style={{
-                    width: '10px', height: '10px', borderRadius: '2px',
-                    background: practiceDates.has(day) ? 'var(--accent)' : 'var(--surface)',
-                    border: practiceDates.has(day) ? 'none' : '1px solid var(--border)',
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-          <div style={{ marginTop: '0.5rem', fontSize: '0.68rem', color: 'var(--text-dim)' }}>
-            Last year
           </div>
         </div>
       </SectionCard>
