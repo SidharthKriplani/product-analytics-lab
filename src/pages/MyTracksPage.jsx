@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
   getTracks, createTrack, deleteTrack, renameTrack,
-  removeItem, reorderItems, addNote, moveItem, seedTierTracks,
+  removeItem, reorderItems, addNote, updateNote, moveItem, seedTierTracks,
 } from '../utils/tracks.js';
 import { shareTrack } from '../utils/sharedTracks.js';
 import { Icon } from '../components/shared/Icon.jsx';
@@ -105,13 +105,15 @@ function itemGroup(item) {
 
 // ── Track item row ──────────────────────────────────────────────────────────
 function TrackItemRow({
-  item, idx, trackId, onOpenSqlProblem, onNavigate, onRemove,
+  item, idx, trackId, onOpenSqlProblem, onNavigate, onRemove, onUpdateNote,
   dragIdx, overIdx, onDragStart, onDragOver, onDrop, onDragEnd,
 }) {
+  const [editingNote, setEditingNote] = useState(false);
+  const [noteDraft, setNoteDraft] = useState('');
   return (
     <div
       key={idx}
-      draggable
+      draggable={!editingNote}
       onDragStart={e => {
         // Additive: carry source track + index so a drop on a different
         // sidebar track can MOVE the item cross-track. Intra-track reorder
@@ -164,11 +166,37 @@ function TrackItemRow({
         </>
       )}
 
-      {/* Inline note */}
+      {/* Inline note (editable) */}
       {item.type === 'note' && (
-        <p style={{ flex: 1, margin: 0, fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-          {item.content}
-        </p>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {editingNote ? (
+            <div>
+              <textarea
+                value={noteDraft}
+                onChange={e => setNoteDraft(e.target.value)}
+                rows={4}
+                autoFocus
+                onKeyDown={e => { if (e.key === 'Escape') setEditingNote(false); }}
+                style={{ width: '100%', fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5, padding: '0.4rem 0.5rem', borderRadius: '6px', border: '1px solid var(--accent)', background: 'var(--surface)', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
+              />
+              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.35rem' }}>
+                <button onClick={() => { onUpdateNote(idx, noteDraft.trim()); setEditingNote(false); }}
+                  style={{ background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '5px', padding: '3px 10px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600 }}>Save</button>
+                <button onClick={() => setEditingNote(false)}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.72rem' }}>Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem' }}>
+              <p style={{ flex: 1, margin: 0, fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                {item.content}
+              </p>
+              <button onClick={() => { setNoteDraft(item.content); setEditingNote(true); }}
+                title="Edit note"
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.72rem', flexShrink: 0 }}>✎</button>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Generic PAL items (all other types) */}
@@ -485,6 +513,7 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sha
                     onOpenSqlProblem={onOpenSqlProblem}
                     onNavigate={onNavigate}
                     onRemove={handleRemove}
+                    onUpdateNote={(i, content) => { updateNote(track.id, i, content); onChanged(); }}
                     dragIdx={dragIdx}
                     overIdx={overIdx}
                     onDragStart={handleDragStart}

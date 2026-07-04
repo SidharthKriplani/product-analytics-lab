@@ -130,6 +130,15 @@ export function addNote(trackId, content) {
   setLastTrackId(trackId);
 }
 
+// Edit an existing plain-text note in place (by item index)
+export function updateNote(trackId, index, content) {
+  const tracks = load();
+  const t = tracks.find(t => t.id === trackId);
+  if (!t || !t.items[index] || t.items[index].type !== 'note') return;
+  t.items[index] = { ...t.items[index], content, updatedAt: new Date().toISOString() };
+  save(tracks);
+}
+
 export function removeItem(trackId, index) {
   const tracks = load();
   const t = tracks.find(t => t.id === trackId);
