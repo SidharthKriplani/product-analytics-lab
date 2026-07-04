@@ -11,6 +11,8 @@ const PAGE_TO_HASH = {
   'profile': 'profile',
   'unlock': 'unlock',
   'about': 'about',
+  'start-here': 'start-here',
+  'resources': 'resources',
   'search': 'search',
   'bookmarks': 'bookmarks',
   'public-profile': 'u', // public profile — userId appended (e.g. #/u/<userId>)
@@ -143,6 +145,8 @@ const HASH_TO_BROWSER_PAGE = {
   'profile': 'profile',
   'unlock': 'unlock',
   'about': 'about',
+  'start-here': 'start-here',
+  'resources': 'resources',
   'search': 'search',
   'bookmarks': 'bookmarks',
   'u': 'public-profile',

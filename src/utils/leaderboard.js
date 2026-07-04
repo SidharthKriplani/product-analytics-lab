@@ -1,14 +1,17 @@
-// Leaderboard — ranks signed-in users by total problems/modules solved across ALL rooms.
+// Leaderboard — ranks signed-in users by a DIFFICULTY-WEIGHTED score across ALL rooms.
 //
-// Total is computed directly from saved progress (localStorage), using the SAME per-room
-// completion predicate the Progress page uses, so the number matches the Progress total.
+// The ranking value stored in the `total_solved` column is now computeWeightedScore()
+// (not a raw count): each solved item is weighted by its difficulty (foundational ×1,
+// intermediate ×3, senior ×5, staff ×8) so harder work ranks higher. The raw count is
+// still available via computeTotalSolved() for the Progress page's "N items completed".
+// The DB column name is unchanged (total_solved) — fetch/upsert plumbing is untouched.
 // Each user only ever writes their own row (RLS); the board is publicly readable.
 //
 // SQL schema — run once in the Supabase SQL editor:
 //   create table if not exists leaderboard (
 //     user_id uuid primary key references auth.users(id) on delete cascade,
 //     display_name text not null,
-//     total_solved int not null default 0,
+//     total_solved int not null default 0,  -- now holds the weighted score
 //     updated_at timestamptz default now()
 //   );
 //   alter table leaderboard enable row level security;
@@ -17,6 +20,138 @@
 //     for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 import { supabase } from './supabase.js';
+
+// ── Difficulty-weighted scoring ──────────────────────────────────────────────
+// PAL's leaderboard ranks by a WEIGHTED score, not a raw solved count: harder
+// items are worth more, so grinding easy rooms can't out-rank someone clearing
+// senior/staff work. Weight tiers (cross-lab-uniform):
+//   foundational (junior/beginner/easy) × 1
+//   intermediate (analyst/intermediate/medium) × 3
+//   senior (senior/advanced/hard) × 5
+//   staff (staff/master/forensic) × 8
+// A solved item with no/unknown difficulty falls back to the intermediate weight.
+//
+// The weight for a given solved item is looked up by joining the solved id back to
+// its room's data record. Data arrays carry a per-item `difficulty` string; PAL's
+// difficulty vocabulary is heterogeneous per room, so DIFF_WEIGHT normalizes all
+// known values. If an id isn't found in its data array (or has no difficulty), the
+// item still counts at the intermediate weight so the score never silently drops.
+const WEIGHT_FALLBACK = 3;
+const DIFF_WEIGHT = {
+  // × 1 — foundational
+  junior: 1, beginner: 1, easy: 1, foundational: 1,
+  // × 3 — intermediate
+  analyst: 3, intermediate: 3, medium: 3,
+  // × 5 — senior
+  senior: 5, advanced: 5, hard: 5,
+  // × 8 — staff / expert
+  staff: 8, master: 8, forensic: 8, expert: 8,
+};
+
+function weightOf(difficulty) {
+  if (!difficulty) return WEIGHT_FALLBACK;
+  return DIFF_WEIGHT[String(difficulty).toLowerCase()] || WEIGHT_FALLBACK;
+}
+
+// Build an id -> weight map from a data array of { id, difficulty } records.
+function weightMap(arr) {
+  const m = {};
+  if (Array.isArray(arr)) for (const it of arr) { if (it && it.id != null) m[it.id] = weightOf(it.difficulty); }
+  return m;
+}
+
+// Room data arrays — the per-item difficulty source for weighting. Imported here
+// so a solved id can be joined back to its difficulty. Each array is { id, difficulty }.
+import { metricCases } from '../data/metricCases.js';
+import { rcaCases } from '../data/rcaCases.js';
+import { businessCases } from '../data/businessCases.js';
+import { growthAnalyticsCases } from '../data/growthAnalyticsCases.js';
+import { biCases } from '../data/biCases.js';
+import { spotTheFlawCases } from '../data/spotTheFlawCases.js';
+import { instrumentationCases } from '../data/instrumentationCases.js';
+import { challengesCases } from '../data/challengesCases.js';
+import { estimationProblems } from '../data/estimationProblems.js';
+import { behavioralQuestions } from '../data/behavioralQuestions.js';
+import { prioritizationScenarios } from '../data/prioritizationScenarios.js';
+import { designScenarios } from '../data/designScenarios.js';
+import { productDesignScenarios } from '../data/productDesignScenarios.js';
+import { fullLoopCases } from '../data/fullLoopCases.js';
+import { statsModules } from '../data/statsModules.js';
+import { statsFoundationsModules } from '../data/statsFoundationsModules.js';
+import { metricsFoundationModules } from '../data/metricsFoundationModules.js';
+import { rcaFoundationModules } from '../data/rcaFoundationModules.js';
+import { expFoundationModules } from '../data/expFoundationModules.js';
+import { sqlLabProblems } from '../data/sqlLabProblems.js';
+import { scenarios } from '../data/scenarios.js';
+
+// Weighted per-room descriptor: progress key, the "done" predicate, and the id->weight
+// map for that room's items. Mirrors ROOM_COUNTERS exactly (same keys/predicates) but
+// adds the weight lookup so each solved item scores by difficulty instead of 1.
+const WEIGHTED_ROOMS = [
+  { key: 'pal-stats-progress-v1',              ok: v => v && v.attempts > 0,                                         weights: weightMap(statsModules) },
+  { key: 'pal-metrics-progress-v2',            ok: v => v && v.attempts > 0,                                         weights: weightMap(metricCases) },
+  { key: 'pal-rca-progress-v2',                ok: v => v && v.attempts > 0,                                         weights: weightMap(rcaCases) },
+  { key: 'pal-cases-progress-v2',              ok: v => v && v.attempts > 0,                                         weights: weightMap(businessCases) },
+  { key: 'exp-lab-progress-v1',                ok: v => v && v.attempts && v.attempts.length > 0,                    weights: weightMap(scenarios) },
+  { key: 'pal-design-progress-v1',             ok: v => v && v.submittedPhases && Object.keys(v.submittedPhases).length > 0, weights: weightMap(designScenarios) },
+  { key: 'pal-growth-analytics-progress-v1',   ok: v => v && v.rating,                                               weights: weightMap(growthAnalyticsCases) },
+  { key: 'pal-challenges-progress-v1',         ok: v => v && v.completedAt,                                          weights: weightMap(challengesCases) },
+  { key: 'pal-bi-progress-v1',                 ok: v => v && v.rating,                                               weights: weightMap(biCases) },
+  { key: 'pal-stf-progress-v1',                ok: v => v && v.completedAt,                                          weights: weightMap(spotTheFlawCases) },
+  { key: 'pal-instrumentation-progress-v1',    ok: v => v && v.completedAt,                                          weights: weightMap(instrumentationCases) },
+  { key: 'pal-behavioral-progress-v1',         ok: v => v && v.rating,                                               weights: weightMap(behavioralQuestions) },
+  { key: 'pal-fullloop-progress-v1',           ok: v => v && v.lastCompletedAt,                                      weights: weightMap(fullLoopCases) },
+  { key: 'pal-estimation-progress-v1',         ok: v => v && v.rating,                                               weights: weightMap(estimationProblems) },
+  { key: 'pal-stat-foundations-progress-v1',   ok: v => v && v.completedAt,                                          weights: weightMap(statsFoundationsModules) },
+  { key: 'pal-metrics-foundation-progress-v1', ok: v => v && v.completedAt,                                          weights: weightMap(metricsFoundationModules) },
+  { key: 'pal-rca-foundation-progress-v1',     ok: v => v && v.completedAt,                                          weights: weightMap(rcaFoundationModules) },
+  { key: 'pal-exp-foundation-progress-v1',     ok: v => v && v.completedAt,                                          weights: weightMap(expFoundationModules) },
+  { key: 'pal-pri-progress-v1',                ok: v => v && v.completedAt,                                          weights: weightMap(prioritizationScenarios) },
+  { key: 'pal-sql-lab-solved-v1',              ok: null,                                                             weights: weightMap(sqlLabProblems) },
+];
+
+// Sum difficulty-weighted score for one store: iterate solved ids, add each id's weight.
+function scoreKey(key, ok, weights) {
+  let raw;
+  try { raw = localStorage.getItem(key); } catch { return 0; }
+  if (!raw) return 0;
+  let val;
+  try { val = JSON.parse(raw); } catch { return 0; }
+  let sum = 0;
+  if (Array.isArray(val)) {
+    // Array of solved ids (e.g. sql-lab).
+    for (const id of val) sum += (weights[id] || WEIGHT_FALLBACK);
+  } else if (val && typeof val === 'object') {
+    for (const [id, v] of Object.entries(val)) {
+      if (ok && !ok(v)) continue;
+      sum += (weights[id] || WEIGHT_FALLBACK);
+    }
+  }
+  return sum;
+}
+
+// Difficulty-weighted total across all rooms. This is the value PAL ranks on:
+// harder items (senior/staff) are worth more than foundational ones. Product
+// Design (dynamic pd-progress-{id} keys) is weighted per its scenario difficulty.
+export function computeWeightedScore() {
+  let total = 0;
+  for (const { key, ok, weights } of WEIGHTED_ROOMS) total += scoreKey(key, ok, weights);
+  // Product Design — one key per scenario: pd-progress-{id}
+  const pdWeights = weightMap(productDesignScenarios);
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith(PD_PREFIX)) continue;
+      let v;
+      try { v = JSON.parse(localStorage.getItem(k)); } catch { continue; }
+      if (v && v.submittedPhases && Object.keys(v.submittedPhases).length > 0) {
+        const id = k.slice(PD_PREFIX.length);
+        total += (pdWeights[id] || WEIGHT_FALLBACK);
+      }
+    }
+  } catch {}
+  return total;
+}
 
 // Per-room progress keys + the predicate that marks one item "done".
 // Value in localStorage is either an array of solved ids, or an object keyed by id.
@@ -142,7 +277,7 @@ export async function upsertLeaderboardRow(user, extra = {}) {
   const base = {
     user_id: user.id,
     display_name: getDisplayName(user),
-    total_solved: computeTotalSolved(),
+    total_solved: computeWeightedScore(),
     updated_at: new Date().toISOString(),
   };
   const full = {
@@ -176,7 +311,7 @@ export async function touchLastActive(user) {
   const row = {
     user_id: user.id,
     display_name: getDisplayName(user),
-    total_solved: computeTotalSolved(),
+    total_solved: computeWeightedScore(),
     last_active_at: now,
     updated_at: now,
   };
@@ -205,7 +340,7 @@ export async function updateMyLinkedin(user, url) {
   const row = {
     user_id: user.id,
     display_name: getDisplayName(user),
-    total_solved: computeTotalSolved(),
+    total_solved: computeWeightedScore(),
     linkedin_url: url || null,
     updated_at: new Date().toISOString(),
   };
@@ -245,7 +380,7 @@ export async function updateMyEmployment(user, { company, role } = {}) {
   const row = {
     user_id: user.id,
     display_name: getDisplayName(user),
-    total_solved: computeTotalSolved(),
+    total_solved: computeWeightedScore(),
     current_company: company || null,
     current_role: role || null,
     company_updated_at: now,
@@ -275,7 +410,7 @@ export async function confirmMyEmployment(user) {
   const row = {
     user_id: user.id,
     display_name: getDisplayName(user),
-    total_solved: computeTotalSolved(),
+    total_solved: computeWeightedScore(),
     company_updated_at: now,
     updated_at: now,
   };

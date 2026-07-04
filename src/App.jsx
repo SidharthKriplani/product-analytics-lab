@@ -71,6 +71,7 @@ const QADashboard           = lazy(() => import('./pages/QADashboard.jsx').then(
 const Pricing               = lazy(() => import('./pages/Pricing.jsx').then(m => ({ default: m.Pricing })));
 const Plans                 = lazy(() => import('./pages/Plans.jsx').then(m => ({ default: m.Plans })));
 const StartHerePage         = lazy(() => import('./pages/StartHerePage.jsx').then(m => ({ default: m.StartHerePage })));
+const ResourcesPage         = lazy(() => import('./pages/ResourcesPage.jsx').then(m => ({ default: m.ResourcesPage })));
 
 // Runners — lazy-loaded
 const ScenarioRunner        = lazy(() => import('./components/scenario/ScenarioRunner.jsx').then(m => ({ default: m.ScenarioRunner })));
@@ -472,6 +473,8 @@ export default function App() {
       'sql-lab': 'SQL Lab — Product Analytics Lab',
       'code': 'Programming Lab — Product Analytics Lab',
       'code-runner': 'Programming Lab — Product Analytics Lab',
+      'start-here': 'Start Here — Product Analytics Lab',
+      'resources': 'Resources — Product Analytics Lab',
     };
     document.title = titles[page] || 'Product Analytics Lab';
   }, [page]);
@@ -1685,6 +1688,11 @@ export default function App() {
         {page === 'start-here' && (
           <Suspense fallback={null}>
             <StartHerePage onNavigate={navigate} />
+          </Suspense>
+        )}
+        {page === 'resources' && (
+          <Suspense fallback={null}>
+            <ResourcesPage onNavigate={navigate} />
           </Suspense>
         )}
         {page === 'profile' && (

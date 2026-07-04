@@ -473,6 +473,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
             <NavItem id="leaderboard" label="Leaderboard" currentPage={currentPage} onNav={handleNav} />
             <NavItem id="start-here" label="Start Here" currentPage={currentPage} onNav={handleNav} />
             <NavItem id="plans" label="Plans & Access" currentPage={currentPage} onNav={handleNav} />
+            <NavItem id="resources" label="Resources" currentPage={currentPage} onNav={handleNav} />
             <NavItem id="about" label="About" currentPage={currentPage} onNav={handleNav} />
           </div>
 

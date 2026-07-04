@@ -11,7 +11,7 @@
 // survives reloads before the migration runs.
 
 import { supabase } from './supabase.js';
-import { getDisplayName, computeTotalSolved } from './leaderboard.js';
+import { getDisplayName, computeWeightedScore } from './leaderboard.js';
 
 // localStorage fallback — remembers the résumé URL so the value survives reloads
 // before the migration runs.
@@ -60,7 +60,7 @@ export async function setMyResumeLink(user, url) {
   const row = {
     user_id: user.id,
     display_name: getDisplayName(user),
-    total_solved: computeTotalSolved(),
+    total_solved: computeWeightedScore(),
     resume_url: clean,
     resume_updated_at: now,
     updated_at: now,
@@ -88,7 +88,7 @@ export async function removeMyResume(user) {
   const row = {
     user_id: user.id,
     display_name: getDisplayName(user),
-    total_solved: computeTotalSolved(),
+    total_solved: computeWeightedScore(),
     resume_url: null,
     resume_updated_at: now,
     updated_at: now,
