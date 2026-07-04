@@ -1487,9 +1487,9 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
 
       {/* SQL Lab Section */}
       {(() => {
-        const diffs = ['Easy', 'Medium', 'Hard', 'Master'];
-        const totals = { Easy: 50, Medium: 40, Hard: 25, Master: 15 };
-        const diffColors = { Easy: 'var(--green)', Medium: 'var(--yellow)', Hard: 'var(--red)', Master: 'var(--purple)' };
+        const diffs = ['Easy', 'Medium', 'Hard', 'Master', 'Forensic'];
+        const totals = { Easy: 47, Medium: 73, Hard: 17, Master: 19, Forensic: 36 };
+        const diffColors = { Easy: 'var(--green)', Medium: 'var(--yellow)', Hard: 'var(--red)', Master: 'var(--purple)', Forensic: 'var(--teal)' };
         const byDiff = {};
         diffs.forEach(d => {
           byDiff[d] = sqlLabProblems.filter(p => p.difficulty === d && sqlSolved.has(p.id)).length;

@@ -2,7 +2,7 @@
 // This landing catches every internal route to 'python-lab' — sidebar uses a direct
 // external link, but RoomMap, learning paths, search, and deep links land here.
 
-const PROGRAMMING_LAB_URL = 'https://programming-lab.vercel.app/';
+const PROGRAMMING_LAB_URL = 'https://programming-lab.vercel.app/#/pylab';
 
 export function ProgrammingLabMoved() {
   return (

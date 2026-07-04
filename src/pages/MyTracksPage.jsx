@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
   getTracks, createTrack, deleteTrack, renameTrack,
-  removeItem, reorderItems, addNote, moveItem,
+  removeItem, reorderItems, addNote, moveItem, seedTierTracks,
 } from '../utils/tracks.js';
 import { shareTrack } from '../utils/sharedTracks.js';
 import { Icon } from '../components/shared/Icon.jsx';
@@ -228,7 +228,7 @@ function TrackItemRow({
 }
 
 // ── Track list (left pane) ──────────────────────────────────────────────────
-function TrackList({ tracks, selectedId, onSelect, onNew, onDelete, onMoved }) {
+function TrackList({ tracks, selectedId, onSelect, onNew, onDelete, onMoved, onBuildTiers }) {
   const [hovered, setHovered] = useState(null);
   const [dropTarget, setDropTarget] = useState(null); // track id currently drag-hovered
 
@@ -245,7 +245,9 @@ function TrackList({ tracks, selectedId, onSelect, onNew, onDelete, onMoved }) {
   }
 
   return (
-    <div style={{ width: '240px', flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', height: '100%' }}>
+    // Desktop: fixed 240px rail. Mobile: full-width; the .mt-twopane parent
+    // hides this pane when a track is selected (master–detail).
+    <div className="mt-list" style={{ flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ padding: '1rem 1rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text)', letterSpacing: '-0.02em' }}>My Tracks</span>
         <button
@@ -254,6 +256,21 @@ function TrackList({ tracks, selectedId, onSelect, onNew, onDelete, onMoved }) {
           style={{ background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '5px', width: 24, height: 24, cursor: 'pointer', fontSize: '1rem', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >+</button>
       </div>
+
+      {onBuildTiers && (
+        <button
+          onClick={onBuildTiers}
+          title="Create the S / A / B tier tracks from every Foundation module, ranked by interview frequency"
+          style={{
+            margin: '0 1rem 0.6rem', padding: '0.4rem 0.6rem',
+            background: 'var(--teal-bg)', border: '1px solid var(--teal-border)',
+            borderRadius: '6px', color: 'var(--teal)', fontSize: '0.74rem',
+            fontWeight: 700, cursor: 'pointer', textAlign: 'left', whiteSpace: 'nowrap',
+          }}
+        >
+          Build S / A / B tier tracks
+        </button>
+      )}
 
       {tracks.length === 0 && (
         <div style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: 1.5 }}>
@@ -302,7 +319,7 @@ function TrackList({ tracks, selectedId, onSelect, onNew, onDelete, onMoved }) {
 }
 
 // ── Track detail (right pane) ───────────────────────────────────────────────
-function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sharedUrl, onShare }) {
+function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sharedUrl, onShare, onMobileBack }) {
   const [editingName, setEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(track.name);
   const [addingNote, setAddingNote] = useState(false);
@@ -348,9 +365,16 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sha
   const otherCount = totalItems - noteCount;
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', minWidth: 0 }}>
+    <div className="mt-detail" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', minWidth: 0 }}>
       {/* Header */}
       <div style={{ padding: '1rem 1.25rem 0.6rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+        {/* Mobile-only back-to-list (master–detail). Hidden ≥769px via CSS. */}
+        <button
+          className="mt-back"
+          onClick={onMobileBack}
+          aria-label="Back to tracks"
+          style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.25rem 0.5rem', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1, flexShrink: 0, marginTop: '0.1rem' }}
+        >←</button>
         <div style={{ flex: 1 }}>
           {editingName ? (
             <form onSubmit={e => { e.preventDefault(); saveName(); }} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -483,6 +507,8 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
   const [tracks, setTracks] = useState(() => getTracks());
   const [selectedId, setSelectedId] = useState(() => getTracks()[0]?.id || null);
   const [sharedUrls, setSharedUrls] = useState({});
+  // Mobile master–detail: which pane is visible on phones (desktop shows both).
+  const [mobileDetail, setMobileDetail] = useState(false);
 
   const refresh = useCallback(() => {
     const updated = getTracks();
@@ -509,7 +535,10 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
     deleteTrack(trackId);
     const updated = getTracks();
     setTracks(updated);
-    if (selectedId === trackId) setSelectedId(updated[0]?.id || null);
+    if (selectedId === trackId) {
+      setSelectedId(updated[0]?.id || null);
+      setMobileDetail(false); // fall back to the list pane on mobile
+    }
   }
 
   async function handleShare(track) {
@@ -520,7 +549,7 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
   const selectedTrack = tracks.find(t => t.id === selectedId) || null;
 
   return (
-    <div style={{ padding: '1.5rem 2rem 0', maxWidth: '900px', margin: '0 auto' }}>
+    <div style={{ padding: '1.5rem 2rem 0', maxWidth: '900px', margin: '0 auto' }} className="mt-page">
       {/* Page header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
         <button
@@ -533,8 +562,9 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
         <h1 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.03em' }}>My Tracks</h1>
       </div>
 
-      {/* Two-pane layout */}
-      <div style={{
+      {/* Two-pane layout — master–detail collapse on mobile via .mt-twopane.
+          `mt-showing-detail` (mobile only) hides the list and shows the detail. */}
+      <div className={`mt-twopane${mobileDetail ? ' mt-showing-detail' : ''}`} style={{
         display: 'flex', height: 'calc(100vh - 140px)',
         border: '1px solid var(--border)', borderRadius: '10px',
         overflow: 'hidden', background: 'var(--surface)',
@@ -542,10 +572,20 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
         <TrackList
           tracks={tracks}
           selectedId={selectedId}
-          onSelect={id => setSelectedId(id)}
+          onSelect={id => { setSelectedId(id); setMobileDetail(true); }}
           onNew={handleNew}
           onDelete={handleDelete}
           onMoved={refresh}
+          onBuildTiers={() => {
+            if (!window.confirm('Build the S / A / B tier tracks? This creates (or rebuilds) three tracks — S Tier, A Tier, B Tier — from every Foundation module, ranked by interview frequency.')) return;
+            const res = seedTierTracks();
+            const updated = getTracks();
+            setTracks(updated);
+            const sTrack = updated.find(t => t.name === 'S Tier');
+            if (sTrack) setSelectedId(sTrack.id);
+            const total = res.reduce((n, r) => n + r.count, 0);
+            window.alert(`Done: S (${res.find(r => r.name === 'S Tier')?.count}), A (${res.find(r => r.name === 'A Tier')?.count}), B (${res.find(r => r.name === 'B Tier')?.count}) — ${total} modules across 3 tracks.`);
+          }}
         />
 
         {selectedTrack ? (
@@ -558,9 +598,10 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
             user={user}
             sharedUrl={sharedUrls[selectedTrack.id] || null}
             onShare={handleShare}
+            onMobileBack={() => setMobileDetail(false)}
           />
         ) : (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+          <div className="mt-detail" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
             {tracks.length === 0
               ? 'Create a track to get started.'
               : 'Select a track from the left.'}

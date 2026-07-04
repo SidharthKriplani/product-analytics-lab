@@ -10,6 +10,9 @@ const DIFF_CFG = {
   staff:   { label: 'Staff',   color: 'var(--yellow)', bg: 'var(--yellow-bg)', border: 'var(--yellow-border)' },
 };
 
+// Difficulty ordering (stable within a tier).
+const DIFF_ORDER = { analyst: 0, senior: 1, staff: 2 };
+
 const DOMAIN_COLORS = {
   'E-commerce':    { color: 'var(--accent)',  bg: 'var(--accent-bg)' },
   'SaaS':          { color: 'var(--teal)',    bg: 'var(--teal-bg)' },
@@ -48,7 +51,10 @@ export function FullLoopBrowser({ onOpen, onBack }) {
     staff: fullLoopCases.filter(c => c.difficulty === 'staff').length,
   };
 
-  const displayCases = fullLoopCases.filter(c => diffFilter === 'all' || c.difficulty === diffFilter);
+  const displayCases = fullLoopCases
+    .filter(c => diffFilter === 'all' || c.difficulty === diffFilter)
+    .slice()
+    .sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
 
   return (
     <div className="pal-page-enter" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>

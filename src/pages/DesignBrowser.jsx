@@ -22,7 +22,7 @@ export function DesignBrowser({ onSelectScenario, onOpenArticle, onNavigate }) {
   const firstUnstartedId = designScenarios.find(s => !completedIds.has(s.id))?.id;
   const industries = [...new Set(designScenarios.map(s => s.industry).filter(Boolean))];
 
-  // ── Filtering (AND semantics) ──
+  // ── Filtering (AND semantics) then stable difficulty sort ──
   const filtered = designScenarios.filter(s => {
     if (diffFilter !== 'all' && s.difficulty !== diffFilter) return false;
     if (industryFilter !== 'all' && s.industry !== industryFilter) return false;
@@ -30,7 +30,7 @@ export function DesignBrowser({ onSelectScenario, onOpenArticle, onNavigate }) {
     if (statusFilter === 'completed' && !isDone) return false;
     if (statusFilter === 'unstarted' && isDone) return false;
     return true;
-  });
+  }).sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
 
   const filters = [
     {

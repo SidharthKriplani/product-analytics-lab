@@ -58,7 +58,7 @@ export function SpotTheFlawBrowser({ onSelectCase, unlocked, onNavigate }) {
       (activeStatus === 'solved' && isDone) ||
       (activeStatus === 'unsolved' && !isDone);
     return flawMatch && diffMatch && statusMatch;
-  });
+  }).sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
 
   const firstUnstartedId = spotTheFlawCases.find(c => !completedIds.has(c.id))?.id;
 

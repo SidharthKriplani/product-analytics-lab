@@ -1322,6 +1322,26 @@ button:not(:disabled):active {
   color: #E8EDF5;
 }
 
+/* ── My Tracks — master–detail two-pane ──────────────────────────────────── */
+/* Desktop (default): 240px rail + flex detail, both visible (unchanged). */
+.mt-list { width: 240px; }
+.mt-back { display: none; }   /* mobile-only back button */
+
+@media (max-width: 768px) {
+  /* Narrow the page gutters on phones. */
+  .mt-page { padding-left: 1rem !important; padding-right: 1rem !important; }
+  /* Both panes take the full width; only one shows at a time. */
+  .mt-list,
+  .mt-detail { width: 100% !important; }
+  .mt-list { border-right: none; }
+  /* Master view: list visible, detail hidden. */
+  .mt-twopane .mt-detail { display: none !important; }
+  /* Detail view: list hidden, detail visible. */
+  .mt-twopane.mt-showing-detail .mt-list { display: none !important; }
+  .mt-twopane.mt-showing-detail .mt-detail { display: flex !important; }
+  .mt-back { display: inline-flex; align-items: center; justify-content: center; }
+}
+
 /* Confidential footer stamp */
 .cf-footer-stamp {
   font-size: 0.65rem;

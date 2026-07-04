@@ -31,6 +31,7 @@ export function PrioritizationBrowser({ onStart, unlocked, onUnlock, onOpenArtic
   const firstUnstartedId = prioritizationScenarios.find(s => !completedIds.has(s.id))?.id;
 
   // Preserve exact prior filter semantics: tag via s.tags.includes, difficulty via equality.
+  // Then stable-sort by difficulty tier (order within a tier is preserved).
   const filtered = prioritizationScenarios.filter(s => {
     const tagMatch = activeTag === 'All' || s.tags.includes(activeTag);
     const diffMatch = activeDifficulty === 'All' || s.difficulty === activeDifficulty;
@@ -40,7 +41,7 @@ export function PrioritizationBrowser({ onStart, unlocked, onUnlock, onOpenArtic
       (activeStatus === 'solved' && isDone) ||
       (activeStatus === 'unsolved' && !isDone);
     return tagMatch && diffMatch && statusMatch;
-  });
+  }).sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
 
   const filters = [
     {

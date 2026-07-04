@@ -19,6 +19,9 @@ const sortedStats = [...statsModules].sort((a, b) =>
   (STATS_DIFF_ORDER[a.difficulty] ?? 1) - (STATS_DIFF_ORDER[b.difficulty] ?? 1)
 );
 
+// Readout scenario difficulty ordering (stable within a tier).
+const DIFF_ORDER = { analyst: 0, senior: 1, staff: 2 };
+
 export function ScenarioBrowser({ allProgress, onSelect, onSelectStats, unlocked, onUnlock, onOpenArticle, onNavigate }) {
   const [section, setSection] = useState('readouts');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -30,7 +33,7 @@ export function ScenarioBrowser({ allProgress, onSelect, onSelectStats, unlocked
   const industries = [...new Set(scenarios.map(s => s.industry))];
   const firstUnstartedId = scenarios.find(s => !(allProgress[s.id]?.attempts?.length > 0))?.id;
 
-  // ── Filtering (semantics preserved) ──
+  // ── Filtering (semantics preserved) then stable difficulty sort ──
   const filteredScenarios = scenarios.filter(s => {
     if (statusFilter === 'free') return s.isFree;
     if (statusFilter === 'locked') return !s.isFree && !unlocked;
@@ -38,7 +41,7 @@ export function ScenarioBrowser({ allProgress, onSelect, onSelectStats, unlocked
     if (diffFilter !== 'all' && s.difficulty !== diffFilter) return false;
     if (industryFilter !== 'all' && s.industry !== industryFilter) return false;
     return true;
-  });
+  }).sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
 
   // ── Readout filter dropdowns ──
   const readoutFilters = [

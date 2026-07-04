@@ -9,6 +9,7 @@ import { RoomHeader } from './RoomHeader.jsx';
 import { FilterBar } from './FilterBar.jsx';
 import { CaseCard } from './CaseCard.jsx';
 import { AddTrackBtn } from '../tracks/AddToTrackPopover.jsx';
+import { tierOf, TIER_STYLE } from '../../data/moduleTiers.js';
 
 // Difficulty ordering for the dropdown.
 var DIFF_ORDER = { Beginner: 0, Intermediate: 1, Advanced: 2 };
@@ -121,16 +122,34 @@ export function FoundationBrowser({
           var tags = [mod.difficulty];
           if (mod.estimatedMin) tags.push(mod.estimatedMin + ' min');
 
-          var nextBadge = isNext ? (
-            <span style={{
-              fontSize: '0.66rem', fontWeight: 700,
-              color: color, background: 'var(--' + accent + '-bg)',
-              border: '1px solid var(--' + accent + '-border)',
-              borderRadius: 4, padding: '0.08rem 0.4rem',
+          var tier = tierOf(mod.id);
+          var tierStyle = TIER_STYLE[tier];
+          var tierBadge = (
+            <span title={tier + ' tier — interview frequency'} style={{
+              fontSize: '0.66rem', fontWeight: 800, fontFamily: 'var(--font-mono, monospace)',
+              color: tierStyle.color, background: tierStyle.bg,
+              border: '1px solid ' + tierStyle.border,
+              borderRadius: 4, padding: '0.08rem 0.4rem', lineHeight: 1.4,
             }}>
-              Next
+              {tierStyle.label}
             </span>
-          ) : null;
+          );
+
+          var badge = (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              {tierBadge}
+              {isNext ? (
+                <span style={{
+                  fontSize: '0.66rem', fontWeight: 700,
+                  color: color, background: 'var(--' + accent + '-bg)',
+                  border: '1px solid var(--' + accent + '-border)',
+                  borderRadius: 4, padding: '0.08rem 0.4rem',
+                }}>
+                  Next
+                </span>
+              ) : null}
+            </span>
+          );
 
           return (
             <CaseCard
@@ -142,7 +161,7 @@ export function FoundationBrowser({
               accent={accent}
               status={done ? 'solved' : undefined}
               locked={locked}
-              badge={nextBadge}
+              badge={badge}
               onClick={function () { if (!locked) onStart(mod.id); }}
               addBtn={itemType ? (
                 <AddTrackBtn

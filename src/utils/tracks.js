@@ -1,3 +1,9 @@
+import { tierOf } from '../data/moduleTiers.js';
+import { statsFoundationsModules } from '../data/statsFoundationsModules.js';
+import { metricsFoundationModules } from '../data/metricsFoundationModules.js';
+import { expFoundationModules } from '../data/expFoundationModules.js';
+import { rcaFoundationModules } from '../data/rcaFoundationModules.js';
+
 const KEY = 'pal-tracks-v1';
 const LAST_KEY = 'pal-tracks-last-v1';   // id of the most-recently-added-to track
 const QUICK_KEY = 'pal-tracks-quickadd-v1'; // '1' = skip the picker, add straight to last track
@@ -53,6 +59,43 @@ export function createTrack(name) {
   tracks.push(track);
   save(tracks);
   return track;
+}
+
+// Every foundation module across the 4 families, tagged with the track item
+// type PAL's foundation "+" buttons produce (sf_module / mf_module / ef_module /
+// rca_module) so seeded items render + navigate identically to hand-added ones.
+const TIER_FOUNDATION_MODULES = [
+  { type: 'sf_module', category: 'Stats Foundation',   mods: statsFoundationsModules },
+  { type: 'mf_module', category: 'Metrics Foundation', mods: metricsFoundationModules },
+  { type: 'ef_module', category: 'A/B Foundation',     mods: expFoundationModules },
+  { type: 'rca_module', category: 'RCA Foundation',    mods: rcaFoundationModules },
+];
+
+// One-click: (re)build the S / A / B tier tracks from every Foundation module,
+// tagged by interview frequency (moduleTiers.js). Rebuilds cleanly on re-run
+// (drops any prior S/A/B Tier tracks first). Returns [{ name, count }].
+export function seedTierTracks() {
+  const names = { S: 'S Tier', A: 'A Tier', B: 'B Tier' };
+  const now = new Date().toISOString();
+  const buckets = { S: [], A: [], B: [] };
+  TIER_FOUNDATION_MODULES.forEach(({ type, category, mods }) => {
+    (mods || []).forEach(m => {
+      const t = tierOf(m.id);
+      buckets[t].push({
+        type,
+        itemId: String(m.id),
+        label: m.title,
+        meta: { difficulty: m.difficulty, tier: t, category },
+        addedAt: now,
+      });
+    });
+  });
+  const kept = load().filter(t => !['S Tier', 'A Tier', 'B Tier'].includes(t.name));
+  const tierTracks = ['S', 'A', 'B'].map(t => ({
+    id: uid(), name: names[t], createdAt: now, items: buckets[t],
+  }));
+  save([...kept, ...tierTracks]);
+  return tierTracks.map(t => ({ name: t.name, count: t.items.length }));
 }
 
 export function renameTrack(trackId, name) {

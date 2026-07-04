@@ -48,7 +48,7 @@ export function ProductDesignBrowser({ onSelectScenario, unlocked, onUnlock, onO
       (activeStatus === 'solved' && isDone) ||
       (activeStatus === 'unsolved' && !isDone);
     return diffMatch && catMatch && statusMatch;
-  });
+  }).sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
 
   const filters = [
     {

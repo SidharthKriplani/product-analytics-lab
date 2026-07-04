@@ -25,6 +25,9 @@ const RATING_COLOR = {
   miss:    'var(--red)',
 };
 
+// Difficulty ordering (stable within a tier).
+const DIFF_ORDER = { analyst: 0, senior: 1, staff: 2 };
+
 // Derive unique categories and tags from actual data
 const ALL_CATEGORIES = (() => {
   const cats = new Set();
@@ -86,13 +89,13 @@ export function BehavioralBrowser({ onStart, unlocked }) {
   const [activeDifficulty, setActiveDifficulty] = useState('All');
   const progress = getAllBehavioralProgress();
 
-  // AND logic: all active filters must match
+  // AND logic: all active filters must match, then stable difficulty sort.
   const filtered = behavioralQuestions.filter(q => {
     const catMatch = activeCategory === 'All' || q.category === activeCategory;
     const tagMatch = activeTag === 'All' || (q.tags || []).includes(activeTag);
     const diffMatch = activeDifficulty === 'All' || q.difficulty === activeDifficulty;
     return catMatch && tagMatch && diffMatch;
-  });
+  }).sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
 
   const completedCount = Object.keys(progress).length;
   const completedIds = new Set(Object.keys(progress));

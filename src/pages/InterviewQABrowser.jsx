@@ -25,6 +25,9 @@ const DIFF_CONFIG = {
 const TIER_LABEL = { analyst: 'Analyst', senior: 'Senior', staff: 'Staff' };
 const TIER_COLOR = { analyst: 'var(--accent)', senior: 'var(--teal)', staff: 'var(--yellow)' };
 
+// Difficulty ordering (stable within a tier).
+const DIFF_ORDER = { analyst: 0, senior: 1, staff: 2 };
+
 function QuestionCard({ qa, onSelect }) {
   const cat = CAT_CONFIG[qa.category] || CAT_CONFIG['Metrics'];
   const diff = DIFF_CONFIG[qa.difficulty] || DIFF_CONFIG.analyst;
@@ -182,7 +185,7 @@ export function InterviewQABrowser({ unlocked, onBack, initialQAId, onOpenQA }) 
     const catMatch = catFilter === 'All' || q.category === catFilter;
     const diffMatch = diffFilter === 'all' || q.difficulty === diffFilter;
     return catMatch && diffMatch;
-  });
+  }).sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
 
   if (selected) {
     return <QuestionViewer qa={selected} onBack={() => selectQA(null)} unlocked={unlocked} />;
