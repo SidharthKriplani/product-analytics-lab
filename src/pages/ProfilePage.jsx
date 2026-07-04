@@ -6,6 +6,23 @@ import { updateMyLinkedin, updateMyEmployment, fetchPublicProfile, computeWeight
 import { getMyPoints } from '../utils/feed.js';
 import { setMyResumeLink, removeMyResume, getLocalResumeUrl } from '../utils/resume.js';
 import { COMPANIES, PROFILE_ROLES } from '../data/companyList.js';
+// Dataset lengths → true per-room totals for Card 5 "Completion by area".
+import { scenarios } from '../data/scenarios.js';
+import { statsModules } from '../data/statsModules.js';
+import { metricCases } from '../data/metricCases.js';
+import { rcaCases } from '../data/rcaCases.js';
+import { businessCases } from '../data/businessCases.js';
+import { designScenarios } from '../data/designScenarios.js';
+import { behavioralQuestions } from '../data/behavioralQuestions.js';
+import { estimationProblems } from '../data/estimationProblems.js';
+import { growthAnalyticsCases } from '../data/growthAnalyticsCases.js';
+import { biCases } from '../data/biCases.js';
+import { challengesCases } from '../data/challengesCases.js';
+import { spotTheFlawCases } from '../data/spotTheFlawCases.js';
+import { takehomeCases } from '../data/takehomeCases.js';
+import { instrumentationCases } from '../data/instrumentationCases.js';
+import { prioritizationScenarios } from '../data/prioritizationScenarios.js';
+import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { CompanyLogo } from '../components/shared/CompanyLogo.jsx';
 import { computeReadiness } from '../components/shared/ReadinessWidget.jsx';
 import { supabase } from '../utils/supabase.js';
@@ -86,6 +103,33 @@ function computeStats() {
   } catch { /* skip */ }
 
   return { totalCases, roomsActive, breakdown };
+}
+
+// True per-room item counts, keyed by the SAME `name` strings ROOM_CONFIGS /
+// computeStats use for stats.breakdown. Read straight from PAL's dataset module
+// lengths, so Card 5 can show a real done/total percentage instead of an
+// approximate bar. Rooms whose dataset isn't imported here (e.g. 'Code') are
+// simply absent from the map — the card falls back to its old approximate bar
+// for those, so nothing breaks.
+function getRoomTotals() {
+  return {
+    'Review':          scenarios.length,
+    'Stats':           statsModules.length,
+    'Metrics':         metricCases.length,
+    'RCA':             rcaCases.length,
+    'Cases':           businessCases.length,
+    'A/B Design':      designScenarios.length,
+    'Behavioral':      behavioralQuestions.length,
+    'Estimation':      estimationProblems.length,
+    'Growth':          growthAnalyticsCases.length,
+    'BI':              biCases.length,
+    'Challenges':      challengesCases.length,
+    'Spot the Flaw':   spotTheFlawCases.length,
+    'Take-Home':       takehomeCases.length,
+    'Instrumentation': instrumentationCases.length,
+    'Prioritization':  prioritizationScenarios.length,
+    'SQL Lab':         sqlLabProblems.length,
+  };
 }
 
 // ── Readiness (Card 1) ──────────────────────────────────────────────────────────
@@ -469,8 +513,16 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
   }
 
   // ── Card 5 — completion by area (rooms with progress, by %) ──
+  // Attach a true room total (from dataset lengths) so the bar shows a real
+  // done/total percentage. Rooms with no known total (e.g. Code) fall back to
+  // the old approximate width and show just the raw count.
+  const roomTotals = getRoomTotals();
   const areaRows = stats.breakdown
-    .map(r => ({ ...r }))
+    .map(r => {
+      const total = roomTotals[r.name];
+      const pct = total ? Math.min(100, Math.round((r.done / total) * 100)) : null;
+      return { ...r, total: total || null, pct };
+    })
     .sort((a, b) => b.done - a.done);
   const defensePlan = readJson('pal-defense-plan-v1');
   const sqlPlan     = readJson('pal-sql-lab-plan-v1');
@@ -955,9 +1007,11 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
                 <div key={a.name} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', minWidth: '120px' }}>{a.name}</span>
                   <div style={{ flex: 1, height: '6px', background: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{ width: `${Math.min(100, a.done * 12)}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.4s' }} />
+                    <div style={{ width: `${a.pct != null ? a.pct : Math.min(100, a.done * 12)}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.4s' }} />
                   </div>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', minWidth: '28px', textAlign: 'right' }}>{a.done}</span>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', minWidth: a.total ? '58px' : '28px', textAlign: 'right' }}>
+                    {a.total ? `${a.done}/${a.total} · ${a.pct}%` : a.done}
+                  </span>
                 </div>
               ))}
             </div>

@@ -44,6 +44,48 @@ function nextReviewISO(box, fromMs) {
   return new Date(base + days * DAY_MS).toISOString();
 }
 
+// Box a mastered item starts in when it first enters the queue via completion.
+// Box 2 = a ~3-day first interval (BOX_INTERVAL_DAYS[2]), one step above the
+// box-1 "just missed" slot, so a clean first pass returns for reinforcement soon
+// but is not treated as an urgent miss.
+const LEARNED_START_BOX = 2;
+
+/**
+ * Enroll a freshly-COMPLETED/mastered item into the review queue at a "learned"
+ * starting interval — the mastery-rotation entry point (as opposed to the
+ * miss-remediation entry point in recordSrOutcome's wrong branch).
+ *
+ * ADDITIVE + non-disruptive: if the item is ALREADY tracked (a prior miss or an
+ * earlier enrollment), this is a no-op — it never resets an existing box or
+ * next-review, so wrong-answer remediation and in-flight intervals behave exactly
+ * as before. Only brand-new, never-seen items get enrolled here.
+ *
+ * @param {string} itemId  case / module / question id
+ * @param {object} [meta]
+ * @param {string} [meta.room]   room id (defaults to 'review')
+ * @param {string} [meta.title]  human-readable title for the review list
+ */
+export function enrollOnComplete(itemId, meta) {
+  if (!itemId) return;
+  const room = (meta && meta.room) || 'review';
+  const title = (meta && meta.title) || itemId;
+  const store = readStore();
+  const key = makeKey(room, itemId);
+  // Already tracked → do not touch its schedule (non-disruptive).
+  if (store[key]) return;
+  const now = Date.now();
+  store[key] = {
+    room,
+    caseId: itemId,
+    title,
+    box: LEARNED_START_BOX,
+    nextReview: nextReviewISO(LEARNED_START_BOX, now),
+    lastResult: 'mastered',
+    addedAt: now,
+  };
+  writeStore(store);
+}
+
 /**
  * Record the outcome of a graded item.
  *  - Wrong / weak  → add the item, or reset an existing one, to box 1 (due ~1 day).
@@ -80,8 +122,13 @@ export function recordSrOutcome({ room, caseId, title, correct }) {
 
   // Correct.
   if (!existing) {
-    // First-ever encounter and it was correct → nothing to remediate.
-    // Don't pollute the queue with items the learner already knows.
+    // First-ever encounter and it was correct → the learner has MASTERED this
+    // item, not missed it. Enroll it into the queue at a "learned" interval so
+    // mastered content rotates back on a spaced schedule (true mastery rotation),
+    // rather than only weak spots coming back. Starts at box 2 (~3 days) — a step
+    // above the box-1 "just missed" slot, so a clean first pass is treated as
+    // recall-worthy but not urgent.
+    enrollOnComplete(caseId, { room, title });
     return;
   }
 
