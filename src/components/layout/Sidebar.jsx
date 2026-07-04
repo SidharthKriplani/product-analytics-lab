@@ -72,7 +72,7 @@ const NAV_FRAMES = [
   {
     id: 'live', label: 'LIVE', icon: 'mic',
     items: [
-      { id: 'review-queue',   label: 'Review' },
+      // Review (review-queue) now lives in the top TRACK cluster (MSL-uniform).
       { id: 'simulator',      label: 'Mock Interview' },
       // { id: 'defense-doc',    label: 'Defense Strategy' }, // ARCHIVED — feature parked; route still at #/defense-doc
       { id: 'company-tracks', label: 'Company Tracks' },
@@ -82,11 +82,9 @@ const NAV_FRAMES = [
 ];
 
 // EXTRAS — quiet bottom catch-all (not a frame). Parked / leftover surfaces.
+// (my-tracks, leaderboard, about moved up into the top TRACK cluster for MSL uniformity.)
 const EXTRAS_ITEMS = [
   { id: 'bookmarks',   label: 'Saved' },
-  { id: 'my-tracks',  label: 'My Tracks' },
-  { id: 'leaderboard', label: 'Leaderboard' },
-  { id: 'about',       label: 'About' },
 ];
 
 // External community (WhatsApp) — opens in a new tab, not an in-app page.
@@ -396,84 +394,86 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
         {/* ── Nav ── */}
         <nav style={{ flex: 1, overflowY: 'auto', padding: '0.1rem 0.5rem 0.75rem', scrollbarWidth: 'none' }}>
 
-          {/* TRACK — flat, always-visible (auth-conditional) */}
+          {/* TRACK — flat personal/account cluster at the top (MSL-uniform order:
+              Home · Profile · My Progress · Review · My Tracks · Leaderboard ·
+              Start Here · Plans & Access · About). Rendered as plain nav rows,
+              not inside a collapsible frame. Profile row is auth-conditional
+              (Profile when signed in, Sign In when signed out). */}
           <div style={{ marginBottom: '0.1rem' }}>
             <SectionLabel label="TRACK" />
+            <NavItem id="home" label="Home" currentPage={currentPage} onNav={handleNav} />
             {!user ? (
-              <>
-                <button
-                  onClick={() => { onShowAuth(); onClose(); }}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '0.45rem',
-                    width: '100%', textAlign: 'left',
-                    padding: '0.34rem 0.65rem',
-                    borderRadius: 'var(--radius-sm)',
-                    border: 'none', background: 'transparent',
-                    color: 'var(--text-muted)', fontWeight: 400,
-                    fontSize: '0.825rem', cursor: 'pointer',
-                    transition: 'background var(--transition-fast), color var(--transition-fast)',
-                    letterSpacing: '-0.005em',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
-                >
-                  <Icon name="user" size={13} color="currentColor" style={{ opacity: 0.7, flexShrink: 0 }} />
-                  <span>Sign In</span>
-                </button>
-                <NavItem id="start-here" label="Start Here" currentPage={currentPage} onNav={handleNav} />
-                <NavItem id="plans" label="Plans" currentPage={currentPage} onNav={handleNav} />
-                <NavItem id="progress" label="Progress" currentPage={currentPage} onNav={handleNav} />
-              </>
+              <button
+                onClick={() => { onShowAuth(); onClose(); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.45rem',
+                  width: '100%', textAlign: 'left',
+                  padding: '0.34rem 0.65rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none', background: 'transparent',
+                  color: 'var(--text-muted)', fontWeight: 400,
+                  fontSize: '0.825rem', cursor: 'pointer',
+                  transition: 'background var(--transition-fast), color var(--transition-fast)',
+                  letterSpacing: '-0.005em',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+              >
+                <Icon name="user" size={13} color="currentColor" style={{ opacity: 0.7, flexShrink: 0 }} />
+                <span>Sign In</span>
+              </button>
             ) : (
-              <>
-                {(() => {
-                  const isActive = activeTab === 'profile';
-                  return (
-                    <button
-                      onClick={() => handleNav('profile')}
-                      aria-current={isActive ? 'page' : undefined}
-                      className={isActive ? 'sidebar-nav-active' : ''}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '0.45rem',
-                        width: '100%', textAlign: 'left',
-                        padding: '0.34rem 0.65rem',
-                        borderRadius: 'var(--radius-sm)',
-                        border: 'none',
-                        background: isActive ? undefined : 'transparent',
-                        color: isActive ? undefined : 'var(--text-muted)',
-                        fontWeight: isActive ? undefined : 400,
-                        fontSize: '0.825rem', cursor: 'pointer',
-                        transition: 'background var(--transition-fast), color var(--transition-fast)',
-                        letterSpacing: '-0.005em',
-                      }}
-                      onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
-                      onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
-                    >
-                      {user.user_metadata?.avatar_url ? (
-                        <img
-                          src={user.user_metadata.avatar_url}
-                          alt=""
-                          style={{ width: 15, height: 15, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, opacity: isActive ? 1 : 0.8 }}
-                        />
-                      ) : (
-                        <div style={{
-                          width: 15, height: 15, borderRadius: '50%', flexShrink: 0,
-                          background: 'var(--accent-bg, var(--surface-2))',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '0.52rem', fontWeight: 800, color: 'var(--accent)',
-                        }}>
-                          {user.email?.[0]?.toUpperCase()}
-                        </div>
-                      )}
-                      <span>Profile</span>
-                    </button>
-                  );
-                })()}
-                <NavItem id="start-here" label="Start Here" currentPage={currentPage} onNav={handleNav} />
-                <NavItem id="progress" label="Progress" currentPage={currentPage} onNav={handleNav} />
-                <NavItem id="plans" label="Plans" currentPage={currentPage} onNav={handleNav} />
-              </>
+              (() => {
+                const isActive = activeTab === 'profile';
+                return (
+                  <button
+                    onClick={() => handleNav('profile')}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={isActive ? 'sidebar-nav-active' : ''}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.45rem',
+                      width: '100%', textAlign: 'left',
+                      padding: '0.34rem 0.65rem',
+                      borderRadius: 'var(--radius-sm)',
+                      border: 'none',
+                      background: isActive ? undefined : 'transparent',
+                      color: isActive ? undefined : 'var(--text-muted)',
+                      fontWeight: isActive ? undefined : 400,
+                      fontSize: '0.825rem', cursor: 'pointer',
+                      transition: 'background var(--transition-fast), color var(--transition-fast)',
+                      letterSpacing: '-0.005em',
+                    }}
+                    onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
+                    onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
+                  >
+                    {user.user_metadata?.avatar_url ? (
+                      <img
+                        src={user.user_metadata.avatar_url}
+                        alt=""
+                        style={{ width: 15, height: 15, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, opacity: isActive ? 1 : 0.8 }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: 15, height: 15, borderRadius: '50%', flexShrink: 0,
+                        background: 'var(--accent-bg, var(--surface-2))',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.52rem', fontWeight: 800, color: 'var(--accent)',
+                      }}>
+                        {user.email?.[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <span>Profile</span>
+                  </button>
+                );
+              })()
             )}
+            <NavItem id="progress" label="My Progress" currentPage={currentPage} onNav={handleNav} />
+            <NavItem id="review-queue" label="Review" currentPage={currentPage} onNav={handleNav} badge={srDue} />
+            <NavItem id="my-tracks" label="My Tracks" currentPage={currentPage} onNav={handleNav} />
+            <NavItem id="leaderboard" label="Leaderboard" currentPage={currentPage} onNav={handleNav} />
+            <NavItem id="start-here" label="Start Here" currentPage={currentPage} onNav={handleNav} />
+            <NavItem id="plans" label="Plans & Access" currentPage={currentPage} onNav={handleNav} />
+            <NavItem id="about" label="About" currentPage={currentPage} onNav={handleNav} />
           </div>
 
           {/* FRAMES — KNOW · DO · BUILD · JUDGE · LIVE (accordion, one open per level) */}
