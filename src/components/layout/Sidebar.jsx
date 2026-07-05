@@ -401,7 +401,12 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
               (Profile when signed in, Sign In when signed out). */}
           <div style={{ marginBottom: '0.1rem' }}>
             <SectionLabel label="TRACK" />
-            <NavItem id="home" label="Home" currentPage={currentPage} onNav={handleNav} />
+            {/* Home is only a real destination signed out — App.jsx redirects any
+                signed-in visit to 'home' straight to 'progress' (landing page
+                doesn't make sense once you're already using the product). Signed
+                in, this nav row and "My Progress" below it pointed at the exact
+                same page — a duplicate, dead-click nav item. Only show it signed out. */}
+            {!user && <NavItem id="home" label="Home" currentPage={currentPage} onNav={handleNav} />}
             {!user ? (
               <button
                 onClick={() => { onShowAuth(); onClose(); }}
