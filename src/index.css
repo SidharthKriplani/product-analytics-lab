@@ -458,12 +458,23 @@ table { border-collapse: collapse; }
   background: var(--bg);
 }
 
-/* Focus mode: sidebar hidden, full-width content */
-.focus-mode .app-sidebar { display: none; }
+/* Focus mode: sidebar hidden, full-width content — DESKTOP ONLY. On mobile
+   the sidebar is a drawer opened via the hamburger (translateX toggle in the
+   max-width:768px block below), not a permanent rail; unconditionally
+   display:none-ing it here would beat that toggle (the overlay backdrop in
+   Sidebar.jsx isn't gated by this class, so it'd show while the drawer
+   never appears — the "blur but no nav" bug). */
+@media (min-width: 769px) {
+  .focus-mode .app-sidebar { display: none; }
+}
 .focus-mode .app-main-wrapper { margin-left: 0; }
 
-/* SQL Lab — hide sidebar entirely; panels own the full viewport */
-.sql-lab-mode .app-sidebar { display: none; }
+/* SQL Lab — hide sidebar entirely on desktop; panels own the full viewport.
+   Mobile keeps its topbar + hamburger (see sql-lab-browse-panel/solve-*
+   top offsets below), so the drawer must stay toggleable there too. */
+@media (min-width: 769px) {
+  .sql-lab-mode .app-sidebar { display: none; }
+}
 .sql-lab-mode .app-main-wrapper {
   margin-left: 0;
   height: 100vh;
