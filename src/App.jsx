@@ -382,26 +382,46 @@ export default function App() {
   useEffect(() => {
     const { data } = onAuthStateChange((event, session) => {
       if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && session?.user) {
+        // Resolve "is someone signed in" (and the home->progress redirect)
+        // immediately from the restored session — don't wait on a full
+        // user_progress fetch just to know that. This whole block used to be
+        // chained inside pullProgressFromSupabase(...).then(...), so a
+        // returning signed-in user rendered the full marketing/signed-out
+        // Home page (no sidebar, different layout) for however long that
+        // network round-trip took before flipping over to their real
+        // Progress page — the "different theme page flashes first" bug.
+        setUser(session.user);
+        setAuthSettled(true);
+        if (event === 'SIGNED_IN') {
+          track('user_signed_in', {});
+          if (pendingGateConversionRef.current) {
+            track('gate_converted', { room: gateRoomRef.current || 'unknown' });
+            pendingGateConversionRef.current = false;
+          }
+        }
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && !pendingDeepLinkRef.current) {
+          setPage(p => p === 'home' ? 'progress' : p);
+        }
+        // Progress sync can still take a moment — run it in the background
+        // without blocking the auth/redirect decision above. Same pull-then-push
+        // order as before (merge remote in, then push the merged local state).
         pullProgressFromSupabase(session.user).then(() => {
-          setUser(session.user);
-          setAuthSettled(true);
           refreshProgress();
           upsertLeaderboardRow(session.user);
           touchLastActive(session.user);
-          if (event === 'SIGNED_IN') {
-            track('user_signed_in', {});
-            if (pendingGateConversionRef.current) {
-              track('gate_converted', { room: gateRoomRef.current || 'unknown' });
-              pendingGateConversionRef.current = false;
-            }
-            pushProgressToSupabase(session.user);
-            if (!pendingDeepLinkRef.current) setPage(p => p === 'home' ? 'progress' : p);
-          }
-          if (event === 'INITIAL_SESSION') {
-            if (!pendingDeepLinkRef.current) setPage(p => p === 'home' ? 'progress' : p);
-          }
+          if (event === 'SIGNED_IN') pushProgressToSupabase(session.user);
         });
-      } else if (event === 'SIGNED_OUT') {
+      } else {
+        // Covers SIGNED_OUT, and — critically — INITIAL_SESSION firing with
+        // session === null for a guest who has never signed in. Supabase fires
+        // INITIAL_SESSION exactly once on load regardless of session state, but
+        // the branch above only matches when session.user is truthy, so a
+        // guest's INITIAL_SESSION previously matched neither branch here and
+        // authSettled was NEVER set to true for guests. That was harmless before
+        // (nothing blocked rendering on it), but the new `if (!authSettled)
+        // return <splash>` gate above the main return would otherwise leave
+        // every first-time guest stuck on that splash forever. This else
+        // guarantees authSettled always resolves, signed in or not.
         setUser(null);
         setAuthSettled(true);
       }
@@ -422,6 +442,17 @@ export default function App() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Safety net for the `if (!authSettled) return <splash>` gate below: if
+  // Supabase is unreachable/misconfigured (e.g. onAuthStateChange never fires
+  // at all when the client failed to initialize — see utils/auth.js), don't
+  // leave the whole app stuck on the splash forever. Unconditional (unlike the
+  // deep-link-only fallback above), since every page load needs this guarantee,
+  // not just deep links.
+  useEffect(() => {
+    const t = setTimeout(() => setAuthSettled(true), 3000);
+    return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {
@@ -1143,6 +1174,19 @@ export default function App() {
   // ── End hash routing ───────────────────────────────────────────────
 
   const isFocusMode = page === 'runner' || page.endsWith('-runner');
+
+  // While we don't yet know if there's a signed-in session, render a neutral
+  // splash on the resolved theme's own background instead of the full app —
+  // otherwise a returning signed-in user would briefly see the marketing
+  // "signed-out" Home layout (no sidebar) before flipping to their real page.
+  // pendingDeepLinkRef gets its own 2s fallback above, so this never hangs.
+  if (!authSettled) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+        <BrandMark variant="monogram" size={44} />
+      </div>
+    );
+  }
 
   return (
     <div className={`app-layout mode-${TERMINAL_PAGES.has(page) ? 'terminal' : 'casefile'} theme-${theme}${isFocusMode ? ' focus-mode' : ''}${page === 'sql-lab' ? ' sql-lab-mode' : ''}${!user && page === 'home' ? ' signed-out' : ''}`} style={{ color: 'var(--text)' }}>
