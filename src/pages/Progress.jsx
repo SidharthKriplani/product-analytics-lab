@@ -7,8 +7,8 @@ import { getDueReviews } from '../utils/srQueue.js';
 // Set to false to soft-hide the Universe view toggle without removing code
 const SHOW_UNIVERSE_TOGGLE = true;
 import { clearProgress } from '../utils/progress.js';
-import { deleteProgressKeys } from '../utils/syncProgress.js';
-import { fetchLeaderboardAgg } from '../utils/leaderboard.js';
+import { deleteProgressKeys, PROGRESS_KEYS, DYNAMIC_PREFIXES } from '../utils/syncProgress.js';
+import { fetchLeaderboardAgg, upsertLeaderboardRow } from '../utils/leaderboard.js';
 import { getAllStatsProgress } from '../utils/statsProgress.js';
 import { getAllMetricsProgress } from '../utils/metricsProgress.js';
 import { getAllRCAProgress } from '../utils/rcaProgress.js';
@@ -170,7 +170,7 @@ function SectionCard({ icon, title, open, onToggle, badge, children }) {
   );
 }
 
-export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked }) {
+export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked, user }) {
   const [universeView, setUniverseView] = useState(false);
   const [lbAgg, setLbAgg] = useState(null);
   useEffect(function() {
@@ -228,6 +228,11 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
     return () => {
       keys.forEach(k => { try { localStorage.removeItem(k); } catch {} });
       deleteProgressKeys(keys);   // clear the server copy too — else the next sync/reload restores it
+      // A reset changes computeWeightedScore()'s inputs but nothing previously told the
+      // leaderboard — the server row kept the pre-reset score until some unrelated trigger
+      // (next sign-in, periodic sync, an SQL Lab solve) happened to fire an upsert. Recompute
+      // and push immediately so the reset is reflected everywhere the score is shown.
+      if (user) upsertLeaderboardRow(user);
       if (onClear) onClear();     // refresh the page in place — no reload
     };
   }
@@ -284,6 +289,7 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
           toRemove.forEach(k => localStorage.removeItem(k));
         } catch {}
         deleteProgressKeys(toRemove);   // clear the server copies too
+        if (user) upsertLeaderboardRow(user); // keep the weighted score in sync with the reset
         if (onClear) onClear();         // refresh in place — no reload
       } },
     { label: 'SQL Lab', completed: sqlLabProblems.filter(p => sqlSolved.has(p.id)).length, total: sqlLabProblems.length,
@@ -296,8 +302,16 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
   const stfCompleted = spotTheFlawCases.filter(c => stfProgress[c.id]?.completedAt).length;
   const takehomeCompleted = takehomeCases.filter(c => takehomeProgress[c.id]?.completedAt).length;
   const instrCompleted = instrumentationCases.filter(c => instrProgress[c.id]?.completedAt).length;
-  const totalCompleted = statsCompleted.length + metricsCompleted.length + designCompleted.length + completed.length + rcaCompleted.length + casesCompleted.length + gaCompleted + challengesCompleted + biCompleted + stfCompleted + takehomeCompleted + instrCompleted;
-  const grandTotal = statsModules.length + metricCases.length + designScenarios.length + scenarios.length + rcaCases.length + businessCases.length + growthAnalyticsCases.length + challengesCases.length + biCases.length + spotTheFlawCases.length + takehomeCases.length + instrumentationCases.length;
+  // Previously hand-maintained sums over only ~12 of the ~20 rooms (missing all 4
+  // Foundations rooms, SQL Lab, Behavioral, Full Loop, Estimation, Prioritization,
+  // Product Design) — drifted out of sync as rooms were added over time. That made
+  // totalCompleted go to exactly 0 for a user with real progress concentrated in the
+  // missing rooms, which in turn flipped the "Readiness by room" panel's grid `order`
+  // (below) to the empty-state position — the layout jump reported after a reset.
+  // Derive both from allRoomProgress, the single source of truth that already covers
+  // every room, so this can't drift again when a new room is added.
+  const totalCompleted = allRoomProgress.reduce((sum, r) => sum + r.completed, 0);
+  const grandTotal = allRoomProgress.reduce((sum, r) => sum + r.total, 0);
 
   // Strongest/weakest room (by completion %)
   const roomsWithData = allRoomProgress.filter(r => r.completed > 0);
@@ -503,10 +517,23 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked 
 
   function handleClear() {
     if (window.confirm('Clear all progress across all rooms? This cannot be undone.')) {
-      ['exp-lab-progress-v1', 'pal-design-progress-v1', 'pal-stats-progress-v1',
-       'pal-metrics-progress-v2', 'pal-rca-progress-v2', 'pal-cases-progress-v2',
-      ].forEach(k => { try { localStorage.removeItem(k); } catch {} });
+      // Previously only cleared 6 hardcoded keys (Review/Design/Stats/Metrics/RCA/Cases) —
+      // silently left every other room (Foundations, SQL Lab, Growth Analytics, Behavioral,
+      // Estimation, Prioritization, Product Design, etc.) untouched despite the "all rooms"
+      // label, never told the server so a later sync could restore the "cleared" rooms, and
+      // never recomputed the leaderboard score. Use the same full key list syncProgress.js
+      // already maintains so this button actually does what it says.
+      const toRemove = [...PROGRESS_KEYS];
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && DYNAMIC_PREFIXES.some(prefix => k.startsWith(prefix))) toRemove.push(k);
+        }
+      } catch {}
+      toRemove.forEach(k => { try { localStorage.removeItem(k); } catch {} });
+      deleteProgressKeys(toRemove);   // clear the server copies too — else the next sync restores them
       clearProgress();
+      if (user) upsertLeaderboardRow(user); // keep the weighted score in sync with the reset
       onClear();
     }
   }

@@ -56,7 +56,7 @@ export const PROGRESS_KEYS = [
 // ─── Dynamic key prefixes ─────────────────────────────────────────────────────
 // Product Design uses one key per scenario: pd-progress-{scenarioId}
 // We scan localStorage at push time rather than maintaining a static list.
-const DYNAMIC_PREFIXES = ['pd-progress-'];
+export const DYNAMIC_PREFIXES = ['pd-progress-'];
 
 // ─── Push: localStorage → Supabase ───────────────────────────────────────────
 

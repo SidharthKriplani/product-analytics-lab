@@ -1711,6 +1711,7 @@ export default function App() {
             onClear={refreshProgress}
             onNavigate={navigate}
             unlocked={unlocked}
+            user={user}
           />
         )}
         {page === 'unlock' && (
