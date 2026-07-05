@@ -148,6 +148,13 @@ function Profile({ profile, standing }) {
     ? Object.entries(profile.room_breakdown).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1])
     : [];
   const maxCount = breakdown.length ? Math.max(...breakdown.map(([, n]) => n)) : 0;
+  // profile.total_solved is actually computeWeightedScore() (see utils/leaderboard.js
+  // header comment) — a difficulty-weighted ranking value, NOT a raw item count. It
+  // was previously mislabeled "Solved / problems + modules" here, which never matched
+  // the room breakdown's raw per-room counts below (e.g. 205 shown vs. an ~96 sum).
+  // Show the true raw count (sum of the breakdown, which is unweighted) as "Solved",
+  // and the weighted ranking value as its own "Score" tile.
+  const rawTotal = breakdown.length ? breakdown.reduce((sum, [, n]) => sum + n, 0) : (profile.total_solved ?? 0);
 
   const rank = standing?.rank;
   const total = standing?.total;
@@ -267,7 +274,8 @@ function Profile({ profile, standing }) {
 
       {/* Stat tiles */}
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        <StatTile value={profile.total_solved ?? 0} label="Solved" sub="problems + modules" color="var(--accent)" />
+        <StatTile value={rawTotal} label="Solved" sub="problems + modules" color="var(--accent)" />
+        <StatTile value={profile.total_solved ?? 0} label="Score" sub="difficulty-weighted" color="var(--text)" />
         {rank && <StatTile value={'#' + rank} label="Rank" sub={total ? 'of ' + total + ' analysts' : null} color={medal ? medal.color : 'var(--text)'} />}
         {gapValue !== null && <StatTile value={gapValue} label="Standing" sub={gapLabel} />}
       </div>

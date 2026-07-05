@@ -100,7 +100,9 @@ export function Leaderboard({ user, onOpenProfile }) {
               </div>
               {/* Marker bar — You vs Avg vs Top-10% along the field's 0..max range */}
               {bench.max > 0 && (() => {
-                const clamp = v => Math.max(0, Math.min(100, (v / bench.max) * 100));
+                // Cap at 92% (not 100%) so the "you" dot never sits directly on top of
+                // the end-of-axis max label — collides when the viewer is the top scorer.
+                const clamp = v => Math.max(0, Math.min(92, (v / bench.max) * 100));
                 const youPct = clamp(myScore), avgPct = clamp(bench.avg), p90Pct = clamp(bench.p90);
                 return (
                   <div style={{ position: 'relative', height: '30px' }}>

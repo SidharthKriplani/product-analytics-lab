@@ -111,11 +111,38 @@ export async function pullProgressFromSupabase(user) {
 
   for (const row of data) {
     try {
-      localStorage.setItem(row.key, JSON.stringify(row.value));
+      const merged = mergeProgressValue(localStorage.getItem(row.key), row.value);
+      localStorage.setItem(row.key, JSON.stringify(merged));
     } catch (e) {
       // Ignore storage quota errors — localStorage is best-effort
     }
   }
+}
+
+// Merge a pulled Supabase value into the existing local value WITHOUT ever losing
+// local progress. Previously this blind-overwrote localStorage on every sign-in /
+// token-refresh, so a solve that hadn't been pushed yet (push only fires on
+// visibilitychange→hidden or explicit sign-in/sync — not on every solve) would get
+// silently reverted by the next pull, e.g. a just-solved SQL Lab problem id
+// disappearing from `pal-sql-lab-solved-v1` on the next visit. Rule, by shape:
+//   - both arrays        -> union (dedupe), so solved-id lists only ever grow here
+//   - both plain objects -> { ...remote, ...local } — local wins per key (so a
+//                            local edit newer than the last push survives), remote
+//                            fills in anything this device hasn't seen yet
+//   - anything else       -> keep local if it already has a value; otherwise adopt
+//                            remote (first sync on a fresh device)
+function mergeProgressValue(rawLocal, remoteValue) {
+  let local;
+  try { local = rawLocal === null ? undefined : JSON.parse(rawLocal); } catch { local = undefined; }
+  if (local === undefined) return remoteValue;
+  if (Array.isArray(local) && Array.isArray(remoteValue)) {
+    return [...new Set([...local, ...remoteValue])];
+  }
+  if (local && remoteValue && typeof local === 'object' && typeof remoteValue === 'object'
+      && !Array.isArray(local) && !Array.isArray(remoteValue)) {
+    return { ...remoteValue, ...local };
+  }
+  return local;
 }
 
 // ─── Delete: clear specific keys server-side ─────────────────────────────────
