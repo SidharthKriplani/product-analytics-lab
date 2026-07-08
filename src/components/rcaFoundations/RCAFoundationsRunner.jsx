@@ -70,6 +70,7 @@ export function RCAFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSel
       completed={completed}
       color='var(--teal)'
       roomLabel='RCA Foundations'
+      itemType='rca_module'
       onBack={onBack}
       playbookLinks={module.playbookLinks}
       modules={rcaFoundationModules}

@@ -74,6 +74,7 @@ export function MetricsFoundationsRunner({ moduleId, onBack, onNext, unlocked, o
       completed={completed}
       color='var(--green)'
       roomLabel='Metrics Foundations'
+      itemType='mf_module'
       onBack={onBack}
       playbookLinks={module.playbookLinks}
       modules={metricsFoundationModules}

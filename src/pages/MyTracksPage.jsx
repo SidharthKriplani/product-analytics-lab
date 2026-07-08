@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
   getTracks, createTrack, deleteTrack, renameTrack,
-  removeItem, reorderItems, addNote, updateNote, moveItem, seedTierTracks,
+  removeItem, reorderItems, addNote, updateNote, updateHighlightNote, moveItem, seedTierTracks,
 } from '../utils/tracks.js';
 import { shareTrack } from '../utils/sharedTracks.js';
 import { Icon } from '../components/shared/Icon.jsx';
@@ -65,6 +65,16 @@ const TYPE_LABEL = {
   interview_qa:  'Interview Q&A',
   failure:       'Failure',
   note:          'Note',
+  highlight:     'Highlight',
+};
+
+// Highlight color key -> CSS var. Matches the 4 swatches in HighlightPopover
+// (which deliberately reuses each Foundations family's own accent color).
+const HIGHLIGHT_COLOR_VAR = {
+  yellow: 'var(--yellow)',
+  green:  'var(--green)',
+  accent: 'var(--accent)',
+  teal:   'var(--teal)',
 };
 
 // Maps item type to the PAL onNavigate room key
@@ -105,7 +115,7 @@ function itemGroup(item) {
 
 // ── Track item row ──────────────────────────────────────────────────────────
 function TrackItemRow({
-  item, idx, trackId, onOpenSqlProblem, onNavigate, onRemove, onUpdateNote,
+  item, idx, trackId, onOpenSqlProblem, onNavigate, onRemove, onUpdateNote, onUpdateHighlightNote,
   dragIdx, overIdx, onDragStart, onDragOver, onDrop, onDragEnd,
 }) {
   const [editingNote, setEditingNote] = useState(false);
@@ -128,7 +138,7 @@ function TrackItemRow({
       onDrop={() => onDrop(idx)}
       onDragEnd={onDragEnd}
       style={{
-        display: 'flex', alignItems: item.type === 'note' ? 'flex-start' : 'center',
+        display: 'flex', alignItems: (item.type === 'note' || item.type === 'highlight') ? 'flex-start' : 'center',
         gap: '0.65rem', padding: '0.55rem 0.65rem', borderRadius: '8px',
         marginBottom: '0.4rem', cursor: 'grab',
         background: overIdx === idx ? 'var(--accent-bg, rgba(99,102,241,0.08))' : 'var(--surface-2)',
@@ -199,8 +209,75 @@ function TrackItemRow({
         </div>
       )}
 
+      {/* Saved highlight (text selection captured from a Foundations module) —
+          v1 snapshot only: excerpt + color + editable note + jump-to-source.
+          Does NOT repaint on the original module page. */}
+      {item.type === 'highlight' && (
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            borderLeft: `3px solid ${HIGHLIGHT_COLOR_VAR[item.meta?.color] || 'var(--border)'}`,
+            paddingLeft: '0.65rem', marginBottom: '0.5rem',
+          }}>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.55, fontStyle: 'italic', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              “{item.meta?.text || item.label}”
+            </p>
+            {item.meta?.sourceLabel && (
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                from {item.meta.sourceLabel}
+              </div>
+            )}
+          </div>
+
+          {/* Editable note — mirrors the plain-note editing pattern above */}
+          {editingNote ? (
+            <div>
+              <textarea
+                value={noteDraft}
+                onChange={e => setNoteDraft(e.target.value)}
+                rows={3}
+                autoFocus
+                placeholder="Add a note about this highlight…"
+                onKeyDown={e => { if (e.key === 'Escape') setEditingNote(false); }}
+                style={{ width: '100%', fontSize: '0.8rem', color: 'var(--text)', lineHeight: 1.5, padding: '0.4rem 0.5rem', borderRadius: '6px', border: '1px solid var(--accent)', background: 'var(--surface)', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
+              />
+              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.35rem' }}>
+                <button onClick={() => { onUpdateHighlightNote(idx, noteDraft.trim()); setEditingNote(false); }}
+                  style={{ background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '5px', padding: '3px 10px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600 }}>Save</button>
+                <button onClick={() => setEditingNote(false)}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.72rem' }}>Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem', marginBottom: '0.3rem' }}>
+              {item.meta?.note ? (
+                <p style={{ flex: 1, margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                  {item.meta.note}
+                </p>
+              ) : (
+                <span style={{ flex: 1, fontSize: '0.76rem', color: 'var(--text-muted)', opacity: 0.7 }}>No note</span>
+              )}
+              <button onClick={() => { setNoteDraft(item.meta?.note || ''); setEditingNote(true); }}
+                title="Edit note"
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.72rem', flexShrink: 0 }}>✎</button>
+            </div>
+          )}
+
+          {/* Jump to source — resolves the family room from meta.itemType via
+              the same TYPE_ROOM map every other generic item uses, so it goes
+              through PAL's existing item-level deep-linking (openXModule). */}
+          {item.meta?.itemType && item.meta?.moduleId && TYPE_ROOM[item.meta.itemType] && (
+            <button
+              onClick={() => onNavigate(TYPE_ROOM[item.meta.itemType], item.meta.moduleId)}
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600 }}
+            >
+              Jump to source →
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Generic PAL items (all other types) */}
-      {item.type !== 'sql' && item.type !== 'note' && (
+      {item.type !== 'sql' && item.type !== 'note' && item.type !== 'highlight' && (
         <>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
@@ -514,6 +591,7 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sha
                     onNavigate={onNavigate}
                     onRemove={handleRemove}
                     onUpdateNote={(i, content) => { updateNote(track.id, i, content); onChanged(); }}
+                    onUpdateHighlightNote={(i, content) => { updateHighlightNote(track.id, i, content); onChanged(); }}
                     dragIdx={dragIdx}
                     overIdx={overIdx}
                     onDragStart={handleDragStart}

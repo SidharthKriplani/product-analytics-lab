@@ -99,6 +99,7 @@ export function ExpFoundationsRunner({ moduleId, onBack, onNext, unlocked, onSel
       completed={completed}
       color='var(--accent)'
       roomLabel='A/B Foundations'
+      itemType='ef_module'
       onBack={onBack}
       playbookLinks={module.playbookLinks}
       modules={expFoundationModules}

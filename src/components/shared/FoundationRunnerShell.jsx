@@ -3,8 +3,9 @@
 // Provides: back button, progress counter, module header, content slot,
 // and a right-side module index for quick navigation.
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Icon } from './Icon.jsx';
+import { HighlightPopover } from './HighlightPopover.jsx';
 
 // Recap toggle button style (MSL-style) — active = coloured text + border on surface-2.
 function recapBtnStyle(active, color) {
@@ -41,9 +42,11 @@ export function FoundationRunnerShell({
   currentModuleId,  // current module id for highlighting
   onSelectModule,   // (moduleId) => void — navigate to a module
   progress,         // object { [moduleId]: truthy } for completion dots
+  itemType,         // track item type for this family, e.g. 'sf_module' — powers highlight-to-track
 }) {
   var [indexOpen, setIndexOpen] = useState(false);
   var [recapMode, setRecapMode] = useState(false);
+  var contentRef = useRef(null);
   // Reset to full-module view whenever the module changes (MSL behaviour).
   useEffect(function () { setRecapMode(false); }, [module ? module.id : null]);
 
@@ -156,22 +159,37 @@ export function FoundationRunnerShell({
           </div>
         )}
 
-        {/* Module content (slot) — or the quick recap when toggled */}
-        {recapMode && module.recap && module.recap.length > 0 ? (
-          <div style={{ background: 'var(--surface)', border: '1px solid ' + color, borderRadius: 'var(--radius)', padding: '1.1rem 1.25rem' }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.9rem' }}>
-              Quick recap · {module.title}
+        {/* Module content (slot) — or the quick recap when toggled.
+            Wrapped in a ref'd div so the highlight-to-track toolbar can scope
+            its selection listener to just this content area (not the whole
+            page — selecting text in the sidebar/nav/module index is exempt). */}
+        <div ref={contentRef}>
+          {recapMode && module.recap && module.recap.length > 0 ? (
+            <div style={{ background: 'var(--surface)', border: '1px solid ' + color, borderRadius: 'var(--radius)', padding: '1.1rem 1.25rem' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.9rem' }}>
+                Quick recap · {module.title}
+              </div>
+              {module.recap.map(function (pt, i) {
+                return (
+                  <div key={i} style={{ display: 'flex', gap: '0.55rem', marginBottom: '0.7rem', alignItems: 'flex-start' }}>
+                    <span style={{ color: color, fontWeight: 800, flexShrink: 0, lineHeight: 1.5 }}>›</span>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{renderRecapLine(pt)}</div>
+                  </div>
+                );
+              })}
             </div>
-            {module.recap.map(function (pt, i) {
-              return (
-                <div key={i} style={{ display: 'flex', gap: '0.55rem', marginBottom: '0.7rem', alignItems: 'flex-start' }}>
-                  <span style={{ color: color, fontWeight: 800, flexShrink: 0, lineHeight: 1.5 }}>›</span>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{renderRecapLine(pt)}</div>
-                </div>
-              );
-            })}
-          </div>
-        ) : children}
+          ) : children}
+        </div>
+
+        {/* Highlight-to-track toolbar — appears on any text selection inside
+            the content area above. v1: saves a snapshot (text/color/note/
+            source link) to Tracks; does NOT repaint the highlight on revisit. */}
+        <HighlightPopover
+          containerRef={contentRef}
+          sourceLabel={module.title}
+          itemType={itemType}
+          moduleId={module.id}
+        />
 
         {/* Playbook links */}
         {playbookLinks && playbookLinks.length > 0 && (

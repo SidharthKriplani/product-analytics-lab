@@ -118,6 +118,7 @@ export function StatsFoundationsRunner({ moduleId, onBack, onNext, unlocked, onN
       completed={completed}
       color='var(--yellow)'
       roomLabel='Stat Foundations'
+      itemType='sf_module'
       onBack={onBack}
       playbookLinks={module.playbookLinks}
       modules={statsFoundationsModules}

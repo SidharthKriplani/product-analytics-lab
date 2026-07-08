@@ -139,6 +139,17 @@ export function updateNote(trackId, index, content) {
   save(tracks);
 }
 
+// Edit the note attached to a saved highlight (by item index) — mirrors
+// updateNote() above but writes into item.meta.note since a highlight item
+// carries its own note field alongside the captured text/color/source.
+export function updateHighlightNote(trackId, index, note) {
+  const tracks = load();
+  const t = tracks.find(t => t.id === trackId);
+  if (!t || !t.items[index] || t.items[index].type !== 'highlight') return;
+  t.items[index] = { ...t.items[index], meta: { ...(t.items[index].meta || {}), note }, updatedAt: new Date().toISOString() };
+  save(tracks);
+}
+
 export function removeItem(trackId, index) {
   const tracks = load();
   const t = tracks.find(t => t.id === trackId);
