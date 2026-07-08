@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Should We Build This? A Framework for Data-Backed Build/No-Build Decisions | Product Analytics Lab</title>
   <meta name="description" content="Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here's how to structure t…">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/build-or-not">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/build-or-not">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/build-or-not">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/build-or-not">
   <meta property="og:title"       content="Should We Build This? A Framework for Data-Backed Build/No-Build Decisions | Product Analytics Lab">
   <meta property="og:description" content="Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here's how to structure t…">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Should We Build This? A Framework for Data-Backed Build/No-Build Decisions">
   <meta name="twitter:description" content="Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here's how to structure t…">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Should We Build This? A Framework for Data-Backed Build/No-Build Decisions","description":"Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here's how to structure t…","url":"https://experimentation-systems-lab.vercel.app/posts/build-or-not","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Should We Build This? A Framework for Data-Backed Build/No-Build Decisions","description":"Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here's how to structure t…","url":"https://product-analytics-lab.vercel.app/posts/build-or-not","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/build-or-not" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/build-or-not" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -197,17 +197,17 @@
     <p>Question 1: Is this core or context (the Geoffrey Moore distinction)? Core capabilities are what differentiate your product — they should be built, because building them creates proprietary advantage. Context capabilities are table stakes every competitor has — these are buy or partner candidates, because building them produces no differentiation at significant cost. Question 2: What's the build cost vs buy cost over a 3-year horizon? Include maintenance, not just initial development. Question 3: What's the opportunity cost? Every engineering sprint spent on this is not spent on something else — what is that something else worth? Question 4: Does this create or consume strategic leverage? Does building this capability unlock future capabilities (multiplier), or is it a one-time feature that doesn't compound?</p>
     <blockquote class="example"><strong>Crafted marketplace: build vs buy an AI recommendation engine:</strong> Decision: Should Crafted build a proprietary AI recommendation engine for product discovery, or buy an off-the-shelf solution?<br><br>Core vs context: Product recommendation on a handmade goods marketplace requires understanding artisan-specific attributes (material, technique, regional style) that no generic engine understands well. This is arguably core — a proprietary engine could be a meaningful differentiator.<br><br>Build cost: 2 ML engineers × 6 months = ~$300K fully loaded. Ongoing: 0.5 FTE/year = ~$75K/year maintenance.<br>Buy cost: Best-in-class vendor = $8K/month = $96K/year. No maintenance FTE needed.<br>3-year total build: $300K + $225K = $525K. 3-year total buy: $288K.<br><br>Strategic leverage: Proprietary data flywheel — a custom engine learns from Crafted-specific buyer-seller interactions in ways a vendor engine doesn't. At scale, this compounds.<br><br>Recommendation: Build, but phase it — start with a vendor for the first 6 months to ship faster, then migrate to a proprietary engine as the data flywheel develops. The 3-year cost differential ($237K) is acceptable if the custom engine produces measurable improvement in discovery CVR by year 2.</blockquote>
     <blockquote class="callout"><strong>The most common mistake: evaluating on cost alone:</strong> Teams that evaluate build/buy on 12-month cost almost always buy. Teams that evaluate on 3-year strategic leverage often build the core capability. The question to ask is not &quot;what does this cost this quarter?&quot; but &quot;what does owning vs renting this capability mean for what we can do in year 3?&quot; That time horizon shift changes most build/buy decisions.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice build-or-not decisions in the Cases Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/cases">Practice build-or-not decisions in the Cases Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/build-or-not">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/build-or-not">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

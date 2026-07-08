@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CDSHV: The Step-by-Step RCA Framework That Beats Guessing | Product Analytics Lab</title>
   <meta name="description" content="Context → Decompose → Segment → Hypothesize → Validate. Five stages that keep your RCA structured when pressure is high and data is ambiguous.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/cdshv-framework">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/cdshv-framework">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/cdshv-framework">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/cdshv-framework">
   <meta property="og:title"       content="CDSHV: The Step-by-Step RCA Framework That Beats Guessing | Product Analytics Lab">
   <meta property="og:description" content="Context → Decompose → Segment → Hypothesize → Validate. Five stages that keep your RCA structured when pressure is high and data is ambiguous.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="CDSHV: The Step-by-Step RCA Framework That Beats Guessing">
   <meta name="twitter:description" content="Context → Decompose → Segment → Hypothesize → Validate. Five stages that keep your RCA structured when pressure is high and data is ambiguous.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"CDSHV: The Step-by-Step RCA Framework That Beats Guessing","description":"Context → Decompose → Segment → Hypothesize → Validate. Five stages that keep your RCA structured when pressure is high and data is ambiguous.","url":"https://experimentation-systems-lab.vercel.app/posts/cdshv-framework","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"CDSHV: The Step-by-Step RCA Framework That Beats Guessing","description":"Context → Decompose → Segment → Hypothesize → Validate. Five stages that keep your RCA structured when pressure is high and data is ambiguous.","url":"https://product-analytics-lab.vercel.app/posts/cdshv-framework","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/cdshv-framework" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/cdshv-framework" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -198,17 +198,17 @@
     <blockquote class="example"><strong>CDSHV applied: checkout CVR drops 8%:</strong> Context: Crafted marketplace checkout CVR dropped from 71% to 65% (-8% relative). Started Monday at 11am. A frontend deployment shipped Monday at 10:45am.<br><br>Decompose: Checkout attempts (denominator) flat. Completed checkouts (numerator) down -8%. Movement is in completions, not attempts — the problem is in the checkout flow itself, not in what drives users to start checkout.<br><br>Segment: iOS flat. Android down -19%. Desktop flat. The drop is entirely on Android.<br><br>Hypothesize: (1) Monday's deployment introduced an Android-specific rendering bug on the payment step. (2) A third-party payment SDK update broke on Android. (3) Android deep link routing changed and is dropping users at the payment confirmation screen.<br><br>Validate: Pull Android checkout funnel step-by-step. If drop is at the payment confirmation step, hypothesis 1 or 2. Query Sentry for Android JS errors introduced after 10:45am — if payment-related errors spike, it's the deployment.</blockquote>
     <blockquote class="callout"><strong>The most common shortcut — and why it loses:</strong> The step most analysts skip is Decompose. They go Context → Segment → Hypothesize, cutting by platform and user type before understanding whether the rate movement is in the numerator or denominator. This produces hypotheses that explain the wrong thing. A denominator-driven rate drop (more users entering checkout) has different root causes than a numerator-driven drop (fewer completing). Decomposing first takes 60 seconds and eliminates half the hypothesis space.</blockquote>
     <p>In a 10-minute interview setting, CDSHV compresses naturally. Context takes 60 seconds — &quot;checkout CVR dropped 8%, started Monday, deployment shipped Monday morning.&quot; Decompose takes 30 seconds — &quot;numerator or denominator, I'd check both.&quot; Segment takes 2 minutes — &quot;platform, device, new vs returning.&quot; Hypothesize takes 2 minutes — two or three specific hypotheses grounded in what segmentation showed. Validate takes 2 minutes — name the exact query or dashboard that confirms each. That's a structured, complete RCA in under 10 minutes.</p>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/cdshv-framework">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/cdshv-framework">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Variance Reduction in Experiments: Why It Matters and What to Do About It | Product Analytics Lab</title>
   <meta name="description" content="High variance in your outcome metric means you need longer experiments or more users. CUPED, stratification, and better metric selection all reduce variance.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/variance-reduction">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/variance-reduction">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/variance-reduction">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/variance-reduction">
   <meta property="og:title"       content="Variance Reduction in Experiments: Why It Matters and What to Do About It | Product Analytics Lab">
   <meta property="og:description" content="High variance in your outcome metric means you need longer experiments or more users. CUPED, stratification, and better metric selection all reduce variance.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Variance Reduction in Experiments: Why It Matters and What to Do About It">
   <meta name="twitter:description" content="High variance in your outcome metric means you need longer experiments or more users. CUPED, stratification, and better metric selection all reduce variance.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Variance Reduction in Experiments: Why It Matters and What to Do About It","description":"High variance in your outcome metric means you need longer experiments or more users. CUPED, stratification, and better metric selection all reduce variance.","url":"https://experimentation-systems-lab.vercel.app/posts/variance-reduction","articleSection":"Statistics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Variance Reduction in Experiments: Why It Matters and What to Do About It","description":"High variance in your outcome metric means you need longer experiments or more users. CUPED, stratification, and better metric selection all reduce variance.","url":"https://product-analytics-lab.vercel.app/posts/variance-reduction","articleSection":"Statistics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/variance-reduction" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/variance-reduction" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -199,17 +199,17 @@
     <h2>When CUPED Works Best</h2>
     <p>CUPED works best when two conditions hold: the pre-experiment period is stable (not itself affected by a major product change or seasonal event), and the covariate is highly correlated with the outcome metric. The correlation coefficient between X and Y is the key driver of variance reduction — the higher the correlation, the more variance you can remove. For session-level engagement metrics, using the prior 2-4 weeks of the same metric as the covariate typically achieves 20-50% variance reduction. For rarer events (purchases, subscription conversions), using the same metric over a longer lookback window (8-12 weeks) may be needed to achieve meaningful correlation.</p>
     <blockquote class="callout"><strong>Key insight:</strong> Variance reduction is equivalent power without additional users. A 40% variance reduction means you can run an experiment with 40% fewer users (or for 40% less time) and achieve the same statistical power as the original design. In high-traffic environments where experiments run quickly, the benefit is modest. In lower-traffic products where experiments run for 3-4 weeks to reach the required sample, variance reduction can cut runtimes nearly in half — a significant operational improvement.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/variance-reduction">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/variance-reduction">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

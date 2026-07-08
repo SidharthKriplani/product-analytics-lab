@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Metric Grain: The Most Underrated Concept in Product Analytics | Product Analytics Lab</title>
   <meta name="description" content="Grain defines what one row in your analysis represents. Getting it wrong means your aggregations are silently wrong. Most analysts never explicitly state it.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/metric-grain">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/metric-grain">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/metric-grain">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/metric-grain">
   <meta property="og:title"       content="Metric Grain: The Most Underrated Concept in Product Analytics | Product Analytics Lab">
   <meta property="og:description" content="Grain defines what one row in your analysis represents. Getting it wrong means your aggregations are silently wrong. Most analysts never explicitly state it.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Metric Grain: The Most Underrated Concept in Product Analytics">
   <meta name="twitter:description" content="Grain defines what one row in your analysis represents. Getting it wrong means your aggregations are silently wrong. Most analysts never explicitly state it.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Metric Grain: The Most Underrated Concept in Product Analytics","description":"Grain defines what one row in your analysis represents. Getting it wrong means your aggregations are silently wrong. Most analysts never explicitly state it.","url":"https://experimentation-systems-lab.vercel.app/posts/metric-grain","articleSection":"Metrics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Metric Grain: The Most Underrated Concept in Product Analytics","description":"Grain defines what one row in your analysis represents. Getting it wrong means your aggregations are silently wrong. Most analysts never explicitly state it.","url":"https://product-analytics-lab.vercel.app/posts/metric-grain","articleSection":"Metrics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/metric-grain" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/metric-grain" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -200,17 +200,17 @@
     <p>The habit is to write the grain declaration at the top of every analysis: &quot;This analysis is at user-day grain. One row = one user on one calendar day. Sessions, orders, and events have been aggregated to this grain before any metrics are computed.&quot; This declaration forces you to think through the aggregation logic before writing any SQL or pandas code, and it makes the analysis self-documenting for reviewers.</p>
     <p>In interviews, stating grain sounds like: &quot;Before I compute conversion rate, I want to clarify the grain. Are we measuring at session grain, user grain, or some other unit? The denominator changes based on the grain, and the denominators give us different answers to different questions.&quot; That sentence shows you understand that analysis is a design choice, not just arithmetic.</p>
     <blockquote class="callout"><strong>Key insight:</strong> If your analysis involves a join, check whether the join is one-to-one or one-to-many. A one-to-many join changes the grain of the result. Always aggregate the many-side to the one-side grain before joining, not after. Post-join aggregation on a fan-out table produces wrong answers that look right.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice this in the Metrics Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/metrics">Practice this in the Metrics Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/metric-grain">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/metric-grain">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

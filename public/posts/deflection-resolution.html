@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Deflection ≠ Resolution: The Proxy Trap in AI Support Metrics | Product Analytics Lab</title>
   <meta name="description" content="A bot that deflects 80% of support tickets looks great. Until you track what happened to those users downstream. This is the most common GenAI metric mistake.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/deflection-resolution">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/deflection-resolution">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/deflection-resolution">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/deflection-resolution">
   <meta property="og:title"       content="Deflection ≠ Resolution: The Proxy Trap in AI Support Metrics | Product Analytics Lab">
   <meta property="og:description" content="A bot that deflects 80% of support tickets looks great. Until you track what happened to those users downstream. This is the most common GenAI metric mistake.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Deflection ≠ Resolution: The Proxy Trap in AI Support Metrics">
   <meta name="twitter:description" content="A bot that deflects 80% of support tickets looks great. Until you track what happened to those users downstream. This is the most common GenAI metric mistake.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Deflection ≠ Resolution: The Proxy Trap in AI Support Metrics","description":"A bot that deflects 80% of support tickets looks great. Until you track what happened to those users downstream. This is the most common GenAI metric mistake.","url":"https://experimentation-systems-lab.vercel.app/posts/deflection-resolution","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Deflection ≠ Resolution: The Proxy Trap in AI Support Metrics","description":"A bot that deflects 80% of support tickets looks great. Until you track what happened to those users downstream. This is the most common GenAI metric mistake.","url":"https://product-analytics-lab.vercel.app/posts/deflection-resolution","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/deflection-resolution" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/deflection-resolution" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -198,17 +198,17 @@
     <blockquote class="example"><strong>Prism support bot: deflection 68%, same-issue re-contact 34%:</strong> Prism launched an AI support bot in Q3. Key metrics at month 1:<br><br>Deflection rate: 68% (of tickets opened, 68% were closed without human agent involvement)<br>User satisfaction (CSAT) post-bot: 3.1 / 5.0<br>Same-issue re-contact rate (opened a second ticket for the same issue within 7 days): 34%<br>Escalation-to-human rate: 11% (but only when users actively requested a human)<br><br>Interpretation: The bot is deflecting 68% of tickets, but 34% of deflected users are coming back with the same issue — their problem wasn't solved the first time. True resolution rate: approximately 68% × (1 − 0.34) = ~45%. The remaining 55% either escalated, re-contacted, or gave up. The 68% deflection headline significantly overstates the bot's effectiveness.</blockquote>
     <p>How to measure resolution when there's no explicit &quot;problem solved&quot; signal: use follow-up contact rate (did the user open another ticket for the same issue within 7 days?), re-open rate (did they reopen the same ticket?), post-chat satisfaction signal (CSAT or thumbs up/down immediately after the bot interaction), and long-run behavioral signal (did users who contacted support retain at the same rate as users who didn't?). None of these is perfect. Together, they triangulate resolution much better than deflection alone.</p>
     <blockquote class="callout"><strong>Key insight:</strong> Deflection is a cost metric disguised as a quality metric. When an AI support system is optimized for deflection without guardrails on resolution, it will find the cheapest path to deflection — which is often making it hard for users to get real help. The right guardrail: same-issue re-contact rate. If deflection goes up but re-contact also goes up, the bot is not solving problems — it's creating the appearance of solving them.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice GenAI metric design in the Metrics Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/metrics">Practice GenAI metric design in the Metrics Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/deflection-resolution">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/deflection-resolution">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

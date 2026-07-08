@@ -23,7 +23,7 @@ const ROOT        = join(__dirname, "..");
 const OUT_DIR     = join(ROOT, "public", "posts");
 const BLOG_SOURCE = join(ROOT, "src", "pages", "BlogBrowser.jsx");
 
-const BASE_URL = process.env.SITE_BASE_URL || "https://experimentation-systems-lab.vercel.app";
+const BASE_URL = process.env.SITE_BASE_URL || "https://product-analytics-lab.vercel.app";
 
 // ── Extract the POSTS array literal out of the JSX file ─────────────────────
 
@@ -388,7 +388,7 @@ function generateHtml(post) {
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>`;

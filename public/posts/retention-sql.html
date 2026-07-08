@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Retention Curves in SQL: D1, D7, D30 and What They Tell You | Product Analytics Lab</title>
   <meta name="description" content="How to compute retention at each horizon, how to visualize cohort curves, and what shape of curve tells you what about your product's stickiness.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/retention-sql">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/retention-sql">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/retention-sql">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/retention-sql">
   <meta property="og:title"       content="Retention Curves in SQL: D1, D7, D30 and What They Tell You | Product Analytics Lab">
   <meta property="og:description" content="How to compute retention at each horizon, how to visualize cohort curves, and what shape of curve tells you what about your product's stickiness.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Retention Curves in SQL: D1, D7, D30 and What They Tell You">
   <meta name="twitter:description" content="How to compute retention at each horizon, how to visualize cohort curves, and what shape of curve tells you what about your product's stickiness.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Retention Curves in SQL: D1, D7, D30 and What They Tell You","description":"How to compute retention at each horizon, how to visualize cohort curves, and what shape of curve tells you what about your product's stickiness.","url":"https://experimentation-systems-lab.vercel.app/posts/retention-sql","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Retention Curves in SQL: D1, D7, D30 and What They Tell You","description":"How to compute retention at each horizon, how to visualize cohort curves, and what shape of curve tells you what about your product's stickiness.","url":"https://product-analytics-lab.vercel.app/posts/retention-sql","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/retention-sql" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/retention-sql" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -199,17 +199,17 @@
     <h2>How to Read the Retention Table</h2>
     <p>The retention table has cohort weeks as rows and weeks-since-start as columns. Each cell shows the retention rate for that cohort at that time horizon. Reading diagonally gives you the same calendar week across different cohorts — a useful check for seasonal effects. Reading across a row shows the decay curve for a single cohort. Reading down a column shows whether newer cohorts are retaining better or worse than older ones at the same time horizon. If column 4 (4-week retention) is declining across the rows as you move to newer cohorts, your product is losing its grip on newer users.</p>
     <blockquote class="callout"><strong>The shape of the curve tells you what's wrong:</strong> A retention curve that drops sharply in week 1 then flattens points to an onboarding problem: users who survive the first week tend to stay. A curve that drops gradually over many weeks points to a long-term engagement problem: users are slowly disengaging even after finding initial value. A curve with a &quot;smile&quot; (drops then rises) is extremely rare and usually indicates a product with both casual and power-user use cases. Most products should target flattening the decay curve as quickly as possible after the initial drop.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/code">Practice this in Programming Lab →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/code">Practice this in Programming Lab →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/retention-sql">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/retention-sql">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

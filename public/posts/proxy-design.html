@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proxy Design: What to Do When You Don't Have the Exact Data | Product Analytics Lab</title>
   <meta name="description" content="&quot;We don't have that data&quot; is never a complete answer. Senior analysts propose proxies with stated limitations. Here's how to do it under interview pressure.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/proxy-design">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/proxy-design">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/proxy-design">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/proxy-design">
   <meta property="og:title"       content="Proxy Design: What to Do When You Don't Have the Exact Data | Product Analytics Lab">
   <meta property="og:description" content="&quot;We don't have that data&quot; is never a complete answer. Senior analysts propose proxies with stated limitations. Here's how to do it under interview pressure.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Proxy Design: What to Do When You Don't Have the Exact Data">
   <meta name="twitter:description" content="&quot;We don't have that data&quot; is never a complete answer. Senior analysts propose proxies with stated limitations. Here's how to do it under interview pressure.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Proxy Design: What to Do When You Don't Have the Exact Data","description":"\"We don't have that data\" is never a complete answer. Senior analysts propose proxies with stated limitations. Here's how to do it under interview pressure.","url":"https://experimentation-systems-lab.vercel.app/posts/proxy-design","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Proxy Design: What to Do When You Don't Have the Exact Data","description":"\"We don't have that data\" is never a complete answer. Senior analysts propose proxies with stated limitations. Here's how to do it under interview pressure.","url":"https://product-analytics-lab.vercel.app/posts/proxy-design","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/proxy-design" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/proxy-design" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -198,17 +198,17 @@
     <blockquote class="example"><strong>Designing a proxy for 12-month LTV using D30 behavior on Crafted:</strong> True outcome: 12-month LTV (total buyer GMV over first year).<br>Problem: Only observable for cohorts that are 12+ months old.<br><br>Leading indicators tested on 6 historical cohorts:<br>- D30 purchase count → correlation with 12-month LTV: r = 0.71<br>- D30 unique seller interactions → r = 0.68<br>- D30 save-to-wishlist count → r = 0.43 (weaker signal)<br>- Whether user left a review in first 30 days → r = 0.61<br><br>Best proxy: D30 purchase count (fastest + strongest signal).<br>Proxy label: "D30 purchase count is used as a proxy for 12-month LTV. Historical correlation: r = 0.71 across 6 cohorts (n=3,200 users/cohort). We will validate against actual 12-month LTV for the Jan cohort in Q4."<br><br>This proxy lets the team run experiments with 30-day readouts rather than 12-month wait times.</blockquote>
     <blockquote class="callout"><strong>Key insight:</strong> Proxy metrics decouple when the product changes significantly. A D30 purchase count proxy trained on Crafted's pre-recommendation-engine behavior may not hold after you ship a personalization algorithm that changes how users discover products. Re-validate proxy correlations after major product changes — don't assume the historical relationship persists.</blockquote>
     <p>In interviews, the proxy design question often sounds like: &quot;We want to improve user quality — how would you measure that?&quot; The trap is answering with a vague metric like &quot;engagement score.&quot; The strong answer names the true outcome (long-term retention or revenue), explains why it's not directly observable in the interview timeframe, then designs a specific proxy with a stated validation plan. The validation plan — &quot;I'd back-test this proxy on 6 historical cohorts and check whether the correlation holds&quot; — is the detail that separates a strong answer from a vague one.</p>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice proxy design in the Cases Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/cases">Practice proxy design in the Cases Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/proxy-design">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/proxy-design">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Marketplace Cancellations Are Spiking: A Seller Quality RCA | Product Analytics Lab</title>
   <meta name="description" content="When buyer-facing metrics deteriorate, the root cause is often supply-side. Walk through a seller quality diagnosis with segment cuts and validation steps.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/rca-seller-quality">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/rca-seller-quality">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/rca-seller-quality">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/rca-seller-quality">
   <meta property="og:title"       content="Marketplace Cancellations Are Spiking: A Seller Quality RCA | Product Analytics Lab">
   <meta property="og:description" content="When buyer-facing metrics deteriorate, the root cause is often supply-side. Walk through a seller quality diagnosis with segment cuts and validation steps.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Marketplace Cancellations Are Spiking: A Seller Quality RCA">
   <meta name="twitter:description" content="When buyer-facing metrics deteriorate, the root cause is often supply-side. Walk through a seller quality diagnosis with segment cuts and validation steps.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Marketplace Cancellations Are Spiking: A Seller Quality RCA","description":"When buyer-facing metrics deteriorate, the root cause is often supply-side. Walk through a seller quality diagnosis with segment cuts and validation steps.","url":"https://experimentation-systems-lab.vercel.app/posts/rca-seller-quality","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Marketplace Cancellations Are Spiking: A Seller Quality RCA","description":"When buyer-facing metrics deteriorate, the root cause is often supply-side. Walk through a seller quality diagnosis with segment cuts and validation steps.","url":"https://product-analytics-lab.vercel.app/posts/rca-seller-quality","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/rca-seller-quality" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/rca-seller-quality" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -199,17 +199,17 @@
     <h2>Hypothesize and Validate</h2>
     <p>With the segment identified, the hypothesis space is narrow: why would new sellers — specifically those with fewer than 10 orders — suddenly be cancelling at much higher rates? The most plausible hypotheses: (1) the onboarding flow doesn't set inventory expectations, so new sellers list items they don't have in stock; (2) a recent onboarding change brought in a cohort of lower-commitment sellers; (3) the new seller interface shows how to accept an order but not how to update inventory or pause listings. To validate: pull the timing of cancellations — do they cluster immediately after order acceptance (suggesting confusion) or days later (suggesting stock-out discovery)? Also check whether the spike correlates with the date of any onboarding flow change.</p>
     <blockquote class="callout"><strong>The supply-side RCA pattern:</strong> Buyer-facing metric degradations in marketplaces frequently trace to supply-side quality issues. Whenever a buyer-facing metric moves (cancellation rate, delivery time, rating), decompose by who is the actor in the broken step. If it's the seller, segment by seller cohort, tenure, and tier. New seller cohorts are the most common source of quality spikes, because onboarding typically under-invests in operational expectation-setting relative to acquisition incentives.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/rca-seller-quality">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/rca-seller-quality">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

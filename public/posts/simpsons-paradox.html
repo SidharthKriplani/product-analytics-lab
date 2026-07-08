@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simpson's Paradox: When the Aggregate Points the Wrong Direction | Product Analytics Lab</title>
   <meta name="description" content="A treatment can appear to help in every subgroup while hurting in the aggregate — or vice versa. Real product examples and the segmentation habit that catches…">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/simpsons-paradox">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/simpsons-paradox">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/simpsons-paradox">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/simpsons-paradox">
   <meta property="og:title"       content="Simpson's Paradox: When the Aggregate Points the Wrong Direction | Product Analytics Lab">
   <meta property="og:description" content="A treatment can appear to help in every subgroup while hurting in the aggregate — or vice versa. Real product examples and the segmentation habit that catches…">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Simpson's Paradox: When the Aggregate Points the Wrong Direction">
   <meta name="twitter:description" content="A treatment can appear to help in every subgroup while hurting in the aggregate — or vice versa. Real product examples and the segmentation habit that catches…">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Simpson's Paradox: When the Aggregate Points the Wrong Direction","description":"A treatment can appear to help in every subgroup while hurting in the aggregate — or vice versa. Real product examples and the segmentation habit that catches…","url":"https://experimentation-systems-lab.vercel.app/posts/simpsons-paradox","articleSection":"Mental Models","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Simpson's Paradox: When the Aggregate Points the Wrong Direction","description":"A treatment can appear to help in every subgroup while hurting in the aggregate — or vice versa. Real product examples and the segmentation habit that catches…","url":"https://product-analytics-lab.vercel.app/posts/simpsons-paradox","articleSection":"Mental Models","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/simpsons-paradox" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/simpsons-paradox" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -199,17 +199,17 @@
     <h2>Why It Matters for Experiments</h2>
     <p>Simpson's Paradox is especially dangerous in A/B test readouts. If treatment and control groups have different compositions — for instance, treatment reached a disproportionate share of mobile users, who convert at lower rates — the aggregate CVR comparison between treatment and control will be misleading. Treatment can appear worse than control in aggregate even if it performed better on every individual device type, simply because the device mix was different between the groups. This is a form of confounding, and it is why segmenting A/B test results by platform, user type, and other compositional dimensions is not optional — it is required for an honest readout.</p>
     <blockquote class="callout"><strong>The segmentation habit that catches it:</strong> Before concluding anything from an aggregate metric, run at least two segment cuts: by platform (mobile vs desktop vs app) and by user type (new vs returning). If the aggregate moved, check whether each segment moved in the same direction. If segments moved in opposite directions, you have a mix-shift story, not a behavioral one. The fix is to analyze within segments and report the aggregate separately — always labeling the aggregate as a weighted average that may not reflect any individual segment's truth.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/simpsons-paradox">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/simpsons-paradox">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

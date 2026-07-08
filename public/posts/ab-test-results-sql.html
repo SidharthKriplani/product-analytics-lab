@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Computing A/B Test Results in SQL: Means, Variances, and t-stats From Scratch | Product Analytics Lab</title>
   <meta name="description" content="Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches e…">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/ab-test-results-sql">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/ab-test-results-sql">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/ab-test-results-sql">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/ab-test-results-sql">
   <meta property="og:title"       content="Computing A/B Test Results in SQL: Means, Variances, and t-stats From Scratch | Product Analytics Lab">
   <meta property="og:description" content="Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches e…">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Computing A/B Test Results in SQL: Means, Variances, and t-stats From Scratch">
   <meta name="twitter:description" content="Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches e…">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Computing A/B Test Results in SQL: Means, Variances, and t-stats From Scratch","description":"Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches e…","url":"https://experimentation-systems-lab.vercel.app/posts/ab-test-results-sql","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Computing A/B Test Results in SQL: Means, Variances, and t-stats From Scratch","description":"Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches e…","url":"https://product-analytics-lab.vercel.app/posts/ab-test-results-sql","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/ab-test-results-sql" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/ab-test-results-sql" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -203,17 +203,17 @@ se = sqrt(p_T*(1-p_T)/n_T + p_C*(1-p_C)/n_C)
 t = (p_T - p_C) / se
 
 In SQL: replace AVG(revenue) with AVG(converted::int) and VAR_SAMP(revenue) with AVG(converted::int) * (1 - AVG(converted::int)) — or just let VAR_SAMP handle it on the 0/1 column.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/code">Practice A/B test SQL in Programming Lab →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/code">Practice A/B test SQL in Programming Lab →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/ab-test-results-sql">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/ab-test-results-sql">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

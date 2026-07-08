@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confidence Intervals: What They Actually Tell You (And What They Don't) | Product Analytics Lab</title>
   <meta name="description" content="A CI that barely excludes zero is not the same as one centered far from zero. Most analysts report CIs but don't read them. Here's the difference.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/confidence-intervals">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/confidence-intervals">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/confidence-intervals">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/confidence-intervals">
   <meta property="og:title"       content="Confidence Intervals: What They Actually Tell You (And What They Don't) | Product Analytics Lab">
   <meta property="og:description" content="A CI that barely excludes zero is not the same as one centered far from zero. Most analysts report CIs but don't read them. Here's the difference.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Confidence Intervals: What They Actually Tell You (And What They Don't)">
   <meta name="twitter:description" content="A CI that barely excludes zero is not the same as one centered far from zero. Most analysts report CIs but don't read them. Here's the difference.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Confidence Intervals: What They Actually Tell You (And What They Don't)","description":"A CI that barely excludes zero is not the same as one centered far from zero. Most analysts report CIs but don't read them. Here's the difference.","url":"https://experimentation-systems-lab.vercel.app/posts/confidence-intervals","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Confidence Intervals: What They Actually Tell You (And What They Don't)","description":"A CI that barely excludes zero is not the same as one centered far from zero. Most analysts report CIs but don't read them. Here's the difference.","url":"https://product-analytics-lab.vercel.app/posts/confidence-intervals","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/confidence-intervals" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/confidence-intervals" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -199,17 +199,17 @@
     <h2>Width Tells You Something Important</h2>
     <p>A wide CI — for example, &quot;+2.3% (95% CI: −1.2% to +5.8%)&quot; — tells you that even though the point estimate looks positive, the data is consistent with both a meaningful positive effect and a small negative effect. This interval crosses zero, which means you cannot reject the null. But even a non-significant result is informative: you now know that if there is an effect, it's somewhere in the range −1.2% to +5.8%. That range might be too wide to make a confident ship decision, which means you need more data — a longer runtime or more users, not just a rerun.</p>
     <blockquote class="callout"><strong>Key insight:</strong> A CI that excludes zero = statistically significant at the corresponding alpha level. A CI centered far from zero = a large, confidently estimated effect. A narrow CI = a precise estimate. These three properties are independent. An experiment can have a statistically significant but imprecise result (CI excludes zero but is very wide), or a precise but non-significant result (narrow CI that straddles zero). Always read all three properties.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/confidence-intervals">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/confidence-intervals">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

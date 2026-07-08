@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Window Functions for Product Analytics: LAG, LEAD, RANK, and Running Totals | Product Analytics Lab</title>
   <meta name="description" content="The four window function patterns that appear in almost every product analytics SQL problem — with worked examples for session analysis, ranking, and time-seri…">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/window-functions">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/window-functions">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/window-functions">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/window-functions">
   <meta property="og:title"       content="Window Functions for Product Analytics: LAG, LEAD, RANK, and Running Totals | Product Analytics Lab">
   <meta property="og:description" content="The four window function patterns that appear in almost every product analytics SQL problem — with worked examples for session analysis, ranking, and time-seri…">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Window Functions for Product Analytics: LAG, LEAD, RANK, and Running Totals">
   <meta name="twitter:description" content="The four window function patterns that appear in almost every product analytics SQL problem — with worked examples for session analysis, ranking, and time-seri…">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Window Functions for Product Analytics: LAG, LEAD, RANK, and Running Totals","description":"The four window function patterns that appear in almost every product analytics SQL problem — with worked examples for session analysis, ranking, and time-seri…","url":"https://experimentation-systems-lab.vercel.app/posts/window-functions","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Window Functions for Product Analytics: LAG, LEAD, RANK, and Running Totals","description":"The four window function patterns that appear in almost every product analytics SQL problem — with worked examples for session analysis, ranking, and time-seri…","url":"https://product-analytics-lab.vercel.app/posts/window-functions","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/window-functions" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/window-functions" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -202,17 +202,17 @@
     <h2>SUM OVER: Running Totals and Moving Averages</h2>
     <p>SUM(column) OVER (ORDER BY date_column ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) computes a 7-day rolling sum — the sum of the current row plus the 6 rows before it, in date order. For a rolling 7-day DAU, use COUNT(DISTINCT user_id) as the inner metric and wrap it in the window. The frame clause (ROWS BETWEEN N PRECEDING AND CURRENT ROW) controls the rolling window size. Use ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW for a cumulative sum that grows from the beginning of the partition to the current row.</p>
     <blockquote class="callout"><strong>When to use window functions vs GROUP BY:</strong> Use GROUP BY when the output should be one row per group (no row-level detail needed). Use window functions when you need both the aggregate value AND the individual row's data in the same result set. If you find yourself joining a GROUP BY subquery back to the original table to get row-level detail alongside an aggregate, replace the join with a window function — the query will be simpler and faster.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/code">Practice window function queries in Programming Lab →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/code">Practice window function queries in Programming Lab →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/window-functions">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/window-functions">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

@@ -22,7 +22,7 @@ const OUT_DIR   = join(ROOT, "public", "modules");
 // sitemap.xml, but index.html's own <link rel="canonical"> declares the
 // Vercel domain as the live app's identity — that's the one the app itself
 // treats as authoritative, so it's what we mirror here.
-const BASE_URL = process.env.SITE_BASE_URL || "https://experimentation-systems-lab.vercel.app";
+const BASE_URL = process.env.SITE_BASE_URL || "https://product-analytics-lab.vercel.app";
 
 // ── Load source data via vm (avoids JSX/Vite transform dependency) ──────────
 
@@ -354,7 +354,7 @@ function generateHtml(mod, family) {
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>`;

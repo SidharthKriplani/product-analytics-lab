@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multiple Testing: Why Running More Metrics Inflates Your False Positive Rate | Product Analytics Lab</title>
   <meta name="description" content="Test 20 metrics at p &lt; 0.05 and you expect one spurious positive by chance. Bonferroni, FDR, and pre-registration — the tools that keep you honest.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/multiple-testing">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/multiple-testing">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/multiple-testing">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/multiple-testing">
   <meta property="og:title"       content="Multiple Testing: Why Running More Metrics Inflates Your False Positive Rate | Product Analytics Lab">
   <meta property="og:description" content="Test 20 metrics at p &lt; 0.05 and you expect one spurious positive by chance. Bonferroni, FDR, and pre-registration — the tools that keep you honest.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Multiple Testing: Why Running More Metrics Inflates Your False Positive Rate">
   <meta name="twitter:description" content="Test 20 metrics at p &lt; 0.05 and you expect one spurious positive by chance. Bonferroni, FDR, and pre-registration — the tools that keep you honest.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Multiple Testing: Why Running More Metrics Inflates Your False Positive Rate","description":"Test 20 metrics at p < 0.05 and you expect one spurious positive by chance. Bonferroni, FDR, and pre-registration — the tools that keep you honest.","url":"https://experimentation-systems-lab.vercel.app/posts/multiple-testing","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Multiple Testing: Why Running More Metrics Inflates Your False Positive Rate","description":"Test 20 metrics at p < 0.05 and you expect one spurious positive by chance. Bonferroni, FDR, and pre-registration — the tools that keep you honest.","url":"https://product-analytics-lab.vercel.app/posts/multiple-testing","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/multiple-testing" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/multiple-testing" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -199,17 +199,17 @@
     <h2>Bonferroni vs Benjamini-Hochberg</h2>
     <p>Bonferroni correction divides α by the number of tests: adjusted α = 0.05 / k. It controls the Family-Wise Error Rate (FWER) — the probability of any false positive across all tests. It is conservative. With 20 metrics, you're requiring p &lt; 0.0025 per test, which almost nothing will pass. This is appropriate for small confirmatory test sets where any false positive is very costly. Benjamini-Hochberg (BH) controls the False Discovery Rate (FDR) — the expected proportion of significant results that are false positives. It is less conservative and better suited to exploratory dashboards with many metrics. At FDR = 0.10, you accept that 10% of your significant results may be false, but you catch more real effects.</p>
     <blockquote class="callout"><strong>Key insight:</strong> Secondary metrics are for understanding mechanism, not making decisions. When a secondary metric moves and the primary didn't, the correct response is: &quot;This is an interesting signal that suggests [mechanism]. We should design a follow-up experiment with this as the primary metric.&quot; It is never: &quot;Even though the primary metric was null, this secondary movement justifies a ship.&quot; That reasoning converts a null result into a false positive by changing the question after seeing the data.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/multiple-testing">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/multiple-testing">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

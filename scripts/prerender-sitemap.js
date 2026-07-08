@@ -14,7 +14,7 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT      = join(__dirname, "..");
 
-const BASE_URL = process.env.SITE_BASE_URL || "https://experimentation-systems-lab.vercel.app";
+const BASE_URL = process.env.SITE_BASE_URL || "https://product-analytics-lab.vercel.app";
 
 function readUrls(file) {
   const p = join(__dirname, file);

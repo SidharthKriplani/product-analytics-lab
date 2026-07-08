@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Search CVR Dropped 15%: A Full RCA Walkthrough | Product Analytics Lab</title>
   <meta name="description" content="Step by step from alert to root cause — decomposing the funnel, cutting by segment, forming hypotheses, and deciding what to validate first.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/rca-walkthrough-search">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/rca-walkthrough-search">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/rca-walkthrough-search">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/rca-walkthrough-search">
   <meta property="og:title"       content="Search CVR Dropped 15%: A Full RCA Walkthrough | Product Analytics Lab">
   <meta property="og:description" content="Step by step from alert to root cause — decomposing the funnel, cutting by segment, forming hypotheses, and deciding what to validate first.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Search CVR Dropped 15%: A Full RCA Walkthrough">
   <meta name="twitter:description" content="Step by step from alert to root cause — decomposing the funnel, cutting by segment, forming hypotheses, and deciding what to validate first.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Search CVR Dropped 15%: A Full RCA Walkthrough","description":"Step by step from alert to root cause — decomposing the funnel, cutting by segment, forming hypotheses, and deciding what to validate first.","url":"https://experimentation-systems-lab.vercel.app/posts/rca-walkthrough-search","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Search CVR Dropped 15%: A Full RCA Walkthrough","description":"Step by step from alert to root cause — decomposing the funnel, cutting by segment, forming hypotheses, and deciding what to validate first.","url":"https://product-analytics-lab.vercel.app/posts/rca-walkthrough-search","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/rca-walkthrough-search" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/rca-walkthrough-search" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -200,17 +200,17 @@
     <p>Now segment. Platform cut first: iOS zero-result rate is 10.5%, desktop is 10.7%, Android mobile app is 28.3%. The jump is concentrated entirely in Android. Specifically, you check app versions: Android app v4.2, released Monday afternoon, shows a 3× higher zero-result rate than v4.1. Every other platform and version is normal. This narrows the hypothesis space dramatically. It's not an index issue (that would affect all platforms). It's something specific to Android v4.2.</p>
     <p>You check the v4.2 release notes. One change: a new autocomplete filter that removes queries under 3 characters before sending them to the search backend, intended to reduce noise from accidental taps. The implementation detail: the filter is trimming trailing spaces, so &quot;bag &quot; (with a trailing space, which is how most mobile autocomplete selections land) becomes &quot;bag&quot; — which is fine — but it's also stripping mid-query characters in some edge cases, producing truncated queries that don't match any listings. That's the mechanism.</p>
     <blockquote class="callout"><strong>Key insight:</strong> The investigation found the answer not by looking at what queries were failing (though that would have been next), but by segmenting to find where the zero-result rate was concentrated. Platform and app version cuts immediately pointed to the Monday deployment. The story was in the segmentation, not the query content.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/rca-walkthrough-search">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/rca-walkthrough-search">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

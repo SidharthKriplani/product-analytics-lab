@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Power, MDE, and Why Most A/B Tests Are Underpowered | Product Analytics Lab</title>
   <meta name="description" content="Running an underpowered test and calling a null result &quot;no effect&quot; is a common, silent mistake. Here's how to calculate what sample size you actually need.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/power-mde">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/power-mde">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/power-mde">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/power-mde">
   <meta property="og:title"       content="Power, MDE, and Why Most A/B Tests Are Underpowered | Product Analytics Lab">
   <meta property="og:description" content="Running an underpowered test and calling a null result &quot;no effect&quot; is a common, silent mistake. Here's how to calculate what sample size you actually need.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Power, MDE, and Why Most A/B Tests Are Underpowered">
   <meta name="twitter:description" content="Running an underpowered test and calling a null result &quot;no effect&quot; is a common, silent mistake. Here's how to calculate what sample size you actually need.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Power, MDE, and Why Most A/B Tests Are Underpowered","description":"Running an underpowered test and calling a null result \"no effect\" is a common, silent mistake. Here's how to calculate what sample size you actually need.","url":"https://experimentation-systems-lab.vercel.app/posts/power-mde","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Power, MDE, and Why Most A/B Tests Are Underpowered","description":"Running an underpowered test and calling a null result \"no effect\" is a common, silent mistake. Here's how to calculate what sample size you actually need.","url":"https://product-analytics-lab.vercel.app/posts/power-mde","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/power-mde" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/power-mde" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -208,17 +208,17 @@ If your projected traffic doesn't reach that N within a reasonable timeframe, ei
     <h2>Reading Null Results Carefully</h2>
     <p>When an experiment comes back null, always check the power calculation before concluding the feature has no effect. Report it as: &quot;We did not detect a statistically significant effect. Given our sample size of N, we had 80% power to detect an effect of X or larger. Effects smaller than X remain possible.&quot; This is the honest interpretation. It distinguishes &quot;we ruled out effects larger than X&quot; from &quot;there is no effect.&quot; The former is often useful. The latter is rarely true.</p>
     <ul><li>Run a power calculation before every experiment. Don't pick runtime by convenience.</li><li>An 80% power threshold means 20% of real effects will be missed — factor this into decisions.</li><li>When you see a null result, check: what was the MDE? Could a smaller real effect be hiding?</li><li>If required N is too large to reach, consider whether the experiment is worth running at all.</li></ul>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice power calculations in the Stats Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/stats">Practice power calculations in the Stats Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/power-mde">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/power-mde">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

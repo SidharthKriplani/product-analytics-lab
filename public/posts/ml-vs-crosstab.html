@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>When to Use ML vs a Simple Crosstab | Product Analytics Lab</title>
   <meta name="description" content="Over-indexing on ML for problems solvable with a crosstab is a red flag in senior interviews. Here's the decision tree for when ML actually adds value.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/ml-vs-crosstab">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/ml-vs-crosstab">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/ml-vs-crosstab">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/ml-vs-crosstab">
   <meta property="og:title"       content="When to Use ML vs a Simple Crosstab | Product Analytics Lab">
   <meta property="og:description" content="Over-indexing on ML for problems solvable with a crosstab is a red flag in senior interviews. Here's the decision tree for when ML actually adds value.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="When to Use ML vs a Simple Crosstab">
   <meta name="twitter:description" content="Over-indexing on ML for problems solvable with a crosstab is a red flag in senior interviews. Here's the decision tree for when ML actually adds value.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"When to Use ML vs a Simple Crosstab","description":"Over-indexing on ML for problems solvable with a crosstab is a red flag in senior interviews. Here's the decision tree for when ML actually adds value.","url":"https://experimentation-systems-lab.vercel.app/posts/ml-vs-crosstab","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"When to Use ML vs a Simple Crosstab","description":"Over-indexing on ML for problems solvable with a crosstab is a red flag in senior interviews. Here's the decision tree for when ML actually adds value.","url":"https://product-analytics-lab.vercel.app/posts/ml-vs-crosstab","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/ml-vs-crosstab" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/ml-vs-crosstab" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -198,17 +198,17 @@
     <blockquote class="example"><strong>Threadline churn prediction: when ML adds value and when it doesn't:</strong> Version 1 — Crosstab approach:<br>Segment users by login frequency × feature adoption × contract tier. Label each segment as high/medium/low churn risk based on historical churn rates.<br>Result: Identifies "low login + low feature adoption + monthly contract" as 68% churn rate. Actionable, interpretable, requires zero ML.<br>Limitation: Misses interactions between account size, support ticket volume, and billing history that a crosstab can't capture.<br><br>Version 2 — ML approach:<br>Gradient boosted tree on 40+ features. AUC = 0.82 vs crosstab AUC ~0.71.<br>Additional value: The model catches a non-obvious predictor — accounts that expand seat count in month 2 but don't onboard the new seats within 14 days have 3× higher churn. The crosstab wouldn't find this without someone hypothesizing it first.<br><br>Conclusion: The ML model adds 0.11 AUC. Whether that justifies the infrastructure, retraining schedule, and interpretability cost depends on the intervention volume. For a CS team that can contact 50 accounts/week, the crosstab tiers may be sufficient. For an automated intervention system that contacts 2,000 accounts/week, the ML precision matters.</blockquote>
     <blockquote class="callout"><strong>The over-engineering trap:</strong> Teams that adopt ML because it's more impressive — not because it solves a problem the crosstab can't — burn engineering time on model infrastructure, monitoring, and retraining while the crosstab would have shipped in a week and performed almost as well. The right question before reaching for ML: &quot;What specific limitation of a simpler model am I solving?&quot; If you can't answer that precisely, start with the simpler model.</blockquote>
     <p>In interviews, the ML vs crosstab question is often implicit. &quot;How would you predict which users will churn?&quot; is not asking for an ML model — it's asking you to reason about the right tool for the problem. The strong answer is: &quot;I'd start with a segmentation approach using the two or three strongest known predictors. If that gives the business what it needs — a ranked list with good enough precision — I'd ship the simple approach. I'd use ML if the simple approach misses meaningful signal that affects the quality of the intervention.&quot;</p>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice ML vs analytics decisions in the Cases Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/cases">Practice ML vs analytics decisions in the Cases Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/ml-vs-crosstab">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/ml-vs-crosstab">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

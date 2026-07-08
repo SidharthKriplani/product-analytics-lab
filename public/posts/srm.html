@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>What Is SRM and Why It Should Stop Your Ship Decision | Product Analytics Lab</title>
   <meta name="description" content="Sample Ratio Mismatch means your experiment is broken. Shipping on an experiment with SRM is worse than not running the experiment at all.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/srm">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/srm">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/srm">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/srm">
   <meta property="og:title"       content="What Is SRM and Why It Should Stop Your Ship Decision | Product Analytics Lab">
   <meta property="og:description" content="Sample Ratio Mismatch means your experiment is broken. Shipping on an experiment with SRM is worse than not running the experiment at all.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="What Is SRM and Why It Should Stop Your Ship Decision">
   <meta name="twitter:description" content="Sample Ratio Mismatch means your experiment is broken. Shipping on an experiment with SRM is worse than not running the experiment at all.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"What Is SRM and Why It Should Stop Your Ship Decision","description":"Sample Ratio Mismatch means your experiment is broken. Shipping on an experiment with SRM is worse than not running the experiment at all.","url":"https://experimentation-systems-lab.vercel.app/posts/srm","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"What Is SRM and Why It Should Stop Your Ship Decision","description":"Sample Ratio Mismatch means your experiment is broken. Shipping on an experiment with SRM is worse than not running the experiment at all.","url":"https://product-analytics-lab.vercel.app/posts/srm","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/srm" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/srm" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -203,17 +203,17 @@
     <h2>What to Do When You Find SRM</h2>
     <p>First, don't ship. Second, investigate the assignment pipeline systematically: check logging rates by group, check whether any users experienced errors at a different rate in treatment vs control, check whether any filtering was applied asymmetrically. If you can identify the cause and it's restricted to a specific sub-population, you may be able to exclude that population and re-run the analysis — but only if the exclusion is principled and pre-registered. More often, the right answer is to fix the pipeline and re-run the experiment from scratch.</p>
     <ul><li>Run a chi-squared test on group sizes as the very first step of any experiment readout.</li><li>If p &lt; 0.01 for the ratio test, the experiment has SRM — stop the analysis.</li><li>SRM almost always indicates a systematic bias in assignment, not random fluctuation.</li><li>No metric result from an SRM experiment is trustworthy. Don't ship, don't use the data.</li></ul>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/review">Practice experiment review in the Review Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/review">Practice experiment review in the Review Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/srm">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/srm">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

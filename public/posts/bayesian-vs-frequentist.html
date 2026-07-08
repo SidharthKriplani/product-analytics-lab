@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bayesian vs Frequentist A/B Testing: What's the Real Difference? | Product Analytics Lab</title>
   <meta name="description" content="You don't need to pick a side to understand the practical tradeoffs. The choice affects how you interpret results and communicate uncertainty — both matter in…">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/bayesian-vs-frequentist">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/bayesian-vs-frequentist">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/bayesian-vs-frequentist">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/bayesian-vs-frequentist">
   <meta property="og:title"       content="Bayesian vs Frequentist A/B Testing: What's the Real Difference? | Product Analytics Lab">
   <meta property="og:description" content="You don't need to pick a side to understand the practical tradeoffs. The choice affects how you interpret results and communicate uncertainty — both matter in…">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Bayesian vs Frequentist A/B Testing: What's the Real Difference?">
   <meta name="twitter:description" content="You don't need to pick a side to understand the practical tradeoffs. The choice affects how you interpret results and communicate uncertainty — both matter in…">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Bayesian vs Frequentist A/B Testing: What's the Real Difference?","description":"You don't need to pick a side to understand the practical tradeoffs. The choice affects how you interpret results and communicate uncertainty — both matter in…","url":"https://experimentation-systems-lab.vercel.app/posts/bayesian-vs-frequentist","articleSection":"Statistics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Bayesian vs Frequentist A/B Testing: What's the Real Difference?","description":"You don't need to pick a side to understand the practical tradeoffs. The choice affects how you interpret results and communicate uncertainty — both matter in…","url":"https://product-analytics-lab.vercel.app/posts/bayesian-vs-frequentist","articleSection":"Statistics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/bayesian-vs-frequentist" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/bayesian-vs-frequentist" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -199,17 +199,17 @@
     <p>The Bayesian framework starts with a prior distribution over the treatment effect (your belief before seeing data) and updates it as data arrives, producing a posterior distribution (your updated belief after seeing data). The output is not a p-value but a probability distribution over possible effect sizes. You can say: &quot;Given the data so far, there is an 87% probability that the treatment effect is positive.&quot; This is the interpretation most people want from p-values but incorrectly apply. The Bayesian approach allows continuous monitoring without the false positive inflation that plagues frequentist peeking, because the posterior is always valid — it's just more or less precise depending on how much data you have.</p>
     <blockquote class="example"><strong>Spark social: continuous notification test:</strong> Spark social is testing a new notification ranking algorithm. The team wants to check results daily to stop early if either harm or strong benefit is apparent.<br><br>Frequentist approach: Run for 14 days, no interim reads. At day 14, apply t-test. Any daily peek requires Bonferroni correction (alpha = 0.05 / 14 reads ≈ 0.0036 per read), making detection very conservative.<br><br>Bayesian approach: Set a prior based on historical notification experiments (typical lift range: -5% to +15% on D7 retention). Update the posterior daily. Stop when the probability that the treatment effect exceeds +2% (practical significance threshold) crosses 95%, or when probability of harm exceeds 80%.<br><br>At day 8: posterior shows 91% probability of positive effect, 73% probability the effect exceeds +2%. Continue.<br>At day 11: posterior shows 95% probability of positive effect, 81% probability effect exceeds +2%. Stop — pre-specified stopping criterion met.</blockquote>
     <blockquote class="callout"><strong>The false dichotomy most teams live in:</strong> Most product teams use frequentist methods but interpret results as if they were Bayesian. They look at p = 0.03 and say &quot;there's a 97% chance the treatment works&quot; — which is a Bayesian statement, not a frequentist one. This produces overconfidence in results. The honest frequentist interpretation is narrower; the Bayesian interpretation is richer but requires explicit priors. The practical recommendation: use frequentist methods with pre-committed stopping rules when you can commit to a fixed runtime; use Bayesian methods when you genuinely need continuous monitoring or want to quantify belief rather than just binary decisions.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/bayesian-vs-frequentist">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/bayesian-vs-frequentist">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

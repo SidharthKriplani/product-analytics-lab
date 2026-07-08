@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RCA vs Opportunity Sizing vs Causal Validation: Three Different Tools | Product Analytics Lab</title>
   <meta name="description" content="Treating these as the same thing is a common failure mode. Each has a different structure, data requirement, output format, and business implication.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/rca-vs-sizing-vs-causal">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/rca-vs-sizing-vs-causal">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/rca-vs-sizing-vs-causal">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/rca-vs-sizing-vs-causal">
   <meta property="og:title"       content="RCA vs Opportunity Sizing vs Causal Validation: Three Different Tools | Product Analytics Lab">
   <meta property="og:description" content="Treating these as the same thing is a common failure mode. Each has a different structure, data requirement, output format, and business implication.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="RCA vs Opportunity Sizing vs Causal Validation: Three Different Tools">
   <meta name="twitter:description" content="Treating these as the same thing is a common failure mode. Each has a different structure, data requirement, output format, and business implication.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"RCA vs Opportunity Sizing vs Causal Validation: Three Different Tools","description":"Treating these as the same thing is a common failure mode. Each has a different structure, data requirement, output format, and business implication.","url":"https://experimentation-systems-lab.vercel.app/posts/rca-vs-sizing-vs-causal","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"RCA vs Opportunity Sizing vs Causal Validation: Three Different Tools","description":"Treating these as the same thing is a common failure mode. Each has a different structure, data requirement, output format, and business implication.","url":"https://product-analytics-lab.vercel.app/posts/rca-vs-sizing-vs-causal","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/rca-vs-sizing-vs-causal" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/rca-vs-sizing-vs-causal" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -199,17 +199,17 @@
     <p>Sizing answers a forward-looking question: how much value is there to capture if we solve this problem or ship this feature? The method is estimation with explicit assumptions. The output is a range (not a point estimate). The data requirement is baseline rates, addressable populations, and comparable benchmarks. Sizing is prospective — you're estimating future impact, not explaining past behavior. It's appropriate before an experiment is designed, to decide whether the experiment is worth running at all.</p>
     <blockquote class="example"><strong>Same situation — three different tools:</strong> Threadline SaaS: trial-to-paid conversion rate drops from 22% to 17% over two months.<br><br>RCA question: "Why did it drop?" → Decompose by cohort, segment by acquisition source, segment by feature usage. Find that users acquired from a specific paid channel convert at 8% vs 28% for organic. The channel mix shifted. That's the root cause.<br><br>Sizing question: "How much would we gain if we fixed onboarding for the low-converting cohort?" → Addressable group: 340 users/month from the underperforming channel. Realistic CVR recovery: 8% → 15%. Incremental conversions: 340 × 0.07 = ~24/month. ACV: $1,200. Annual impact: 24 × $1,200 = ~$29K/year. Worth a small sprint, not a major initiative.<br><br>Causal question: "Does our in-app onboarding checklist cause conversion?" → Run an A/B test. Neither RCA nor sizing can answer this.</blockquote>
     <blockquote class="callout"><strong>The diagnostic question to ask first:</strong> Before starting any analysis, ask: &quot;Am I explaining a past anomaly (RCA), estimating future potential (sizing), or establishing causation (experiment)?&quot; The answer determines your method. Using a regression analysis when you need an RCA will produce a correlation where you need a mechanism. Running an RCA when you need a causal claim will give you a plausible story without the evidence to act on it.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/rca-vs-sizing-vs-causal">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/rca-vs-sizing-vs-causal">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

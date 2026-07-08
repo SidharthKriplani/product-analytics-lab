@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Funnel Analysis in SQL: From Session Start to Conversion | Product Analytics Lab</title>
   <meta name="description" content="Step-level conversion rates, drop-off diagnosis, and cohort-level funnel comparison — all in SQL. The query patterns every product analyst needs in their toolk…">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/sql-funnel-analysis">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/sql-funnel-analysis">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/sql-funnel-analysis">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/sql-funnel-analysis">
   <meta property="og:title"       content="Funnel Analysis in SQL: From Session Start to Conversion | Product Analytics Lab">
   <meta property="og:description" content="Step-level conversion rates, drop-off diagnosis, and cohort-level funnel comparison — all in SQL. The query patterns every product analyst needs in their toolk…">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Funnel Analysis in SQL: From Session Start to Conversion">
   <meta name="twitter:description" content="Step-level conversion rates, drop-off diagnosis, and cohort-level funnel comparison — all in SQL. The query patterns every product analyst needs in their toolk…">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Funnel Analysis in SQL: From Session Start to Conversion","description":"Step-level conversion rates, drop-off diagnosis, and cohort-level funnel comparison — all in SQL. The query patterns every product analyst needs in their toolk…","url":"https://experimentation-systems-lab.vercel.app/posts/sql-funnel-analysis","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Funnel Analysis in SQL: From Session Start to Conversion","description":"Step-level conversion rates, drop-off diagnosis, and cohort-level funnel comparison — all in SQL. The query patterns every product analyst needs in their toolk…","url":"https://product-analytics-lab.vercel.app/posts/sql-funnel-analysis","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/sql-funnel-analysis" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/sql-funnel-analysis" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -199,17 +199,17 @@
     <h2>Segmentation: Finding Where a Specific Cohort Drops</h2>
     <p>The funnel query becomes a diagnostic tool when you add a segmentation dimension. Run the same query with a GROUP BY platform or GROUP BY cohort_week to find where a specific segment drops off. If iOS and Android users have similar cart-to-checkout rates but Android users have a 20pp lower checkout-to-purchase rate, the problem is in the Android checkout flow. The funnel query with segmentation identifies this instantly — without segmentation, the blended rate hides the Android problem.</p>
     <blockquote class="callout"><strong>Window functions vs self-joins for funnel ordering:</strong> For strict ordering requirements — user must complete step N before step N+1 — the MAX(CASE WHEN) pattern doesn't enforce sequence. Use a self-join or window function approach: assign a step rank to each event using ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_timestamp), then filter for step N+1 events that occur after step N events. This is more complex but correctly handles cases where you need to verify that the funnel was traversed in order.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/code">Practice this in Programming Lab →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/code">Practice this in Programming Lab →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/sql-funnel-analysis">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/sql-funnel-analysis">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Choosing Your Primary Metric: The Decision You Make Before the Experiment Starts | Product Analytics Lab</title>
   <meta name="description" content="Pre-committing to a primary metric is not bureaucracy — it's what keeps you from p-hacking your way to a ship decision. Here's how to choose the right one.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/experiment-design-primary-metric">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/experiment-design-primary-metric">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/experiment-design-primary-metric">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/experiment-design-primary-metric">
   <meta property="og:title"       content="Choosing Your Primary Metric: The Decision You Make Before the Experiment Starts | Product Analytics Lab">
   <meta property="og:description" content="Pre-committing to a primary metric is not bureaucracy — it's what keeps you from p-hacking your way to a ship decision. Here's how to choose the right one.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Choosing Your Primary Metric: The Decision You Make Before the Experiment Starts">
   <meta name="twitter:description" content="Pre-committing to a primary metric is not bureaucracy — it's what keeps you from p-hacking your way to a ship decision. Here's how to choose the right one.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Choosing Your Primary Metric: The Decision You Make Before the Experiment Starts","description":"Pre-committing to a primary metric is not bureaucracy — it's what keeps you from p-hacking your way to a ship decision. Here's how to choose the right one.","url":"https://experimentation-systems-lab.vercel.app/posts/experiment-design-primary-metric","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Choosing Your Primary Metric: The Decision You Make Before the Experiment Starts","description":"Pre-committing to a primary metric is not bureaucracy — it's what keeps you from p-hacking your way to a ship decision. Here's how to choose the right one.","url":"https://product-analytics-lab.vercel.app/posts/experiment-design-primary-metric","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/experiment-design-primary-metric" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/experiment-design-primary-metric" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -199,17 +199,17 @@
     <h2>Sensitivity: The Often-Skipped Check</h2>
     <p>Before finalizing the primary metric, run a quick power check: can you detect the expected effect size at your expected traffic in a reasonable runtime? If the metric requires 90 days of runtime at 80% power for your MDE, it is not a viable primary metric for a 14-day experiment. This is the most common mistake in primary metric selection: choosing the north star because it's important, without checking whether it's sensitive enough to move in the time window you have. A metric that can't be detected isn't providing information — it's providing noise dressed up as a null result.</p>
     <blockquote class="callout"><strong>Key insight:</strong> The primary metric is closest to the hypothesis, not closest to the business outcome. A sequence: feature → primary metric → secondary metrics → north star. The primary metric is one step away from the feature. The north star is several steps away. If you try to skip straight to the north star, you'll run underpowered experiments and misinterpret null results as evidence the feature doesn't work, when it actually means your metric was too insensitive to detect the effect in your timeframe.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/design">Practice this in the Design Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/design">Practice this in the Design Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/experiment-design-primary-metric">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/experiment-design-primary-metric">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

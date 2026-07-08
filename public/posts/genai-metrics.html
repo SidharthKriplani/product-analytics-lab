@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Measuring GenAI Products: Edit Rate, Hallucination Rate, Task Completion, and Satisfaction | Product Analytics Lab</title>
   <meta name="description" content="LLM outputs don't fit neatly into traditional engagement metrics. Here's a framework for defining what success looks like for AI-generated features.">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/genai-metrics">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/genai-metrics">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/genai-metrics">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/genai-metrics">
   <meta property="og:title"       content="Measuring GenAI Products: Edit Rate, Hallucination Rate, Task Completion, and Satisfaction | Product Analytics Lab">
   <meta property="og:description" content="LLM outputs don't fit neatly into traditional engagement metrics. Here's a framework for defining what success looks like for AI-generated features.">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Measuring GenAI Products: Edit Rate, Hallucination Rate, Task Completion, and Satisfaction">
   <meta name="twitter:description" content="LLM outputs don't fit neatly into traditional engagement metrics. Here's a framework for defining what success looks like for AI-generated features.">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Measuring GenAI Products: Edit Rate, Hallucination Rate, Task Completion, and Satisfaction","description":"LLM outputs don't fit neatly into traditional engagement metrics. Here's a framework for defining what success looks like for AI-generated features.","url":"https://experimentation-systems-lab.vercel.app/posts/genai-metrics","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Measuring GenAI Products: Edit Rate, Hallucination Rate, Task Completion, and Satisfaction","description":"LLM outputs don't fit neatly into traditional engagement metrics. Here's a framework for defining what success looks like for AI-generated features.","url":"https://product-analytics-lab.vercel.app/posts/genai-metrics","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/genai-metrics" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/genai-metrics" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -197,17 +197,17 @@
     <p>The hierarchy: (1) Task completion rate — did the user accomplish the goal they came to the feature with? This is the top-level outcome metric. (2) Acceptance rate — did the user use the AI output at all, or dismiss it immediately? Low acceptance is an early failure signal. (3) Edit rate — of users who accepted the output, how much did they change it? High edit rate means the output was close but not good enough. Zero edit rate could mean perfect output or total copy-paste behavior. (4) Re-generation rate — how often did users click &quot;try again&quot;? High re-generation signals low first-pass quality. (5) Task time — did the AI save the user time on the task compared to doing it manually?</p>
     <blockquote class="example"><strong>AI recipe suggestions feature on Crafted — full metric stack:</strong> Feature: AI-generated recipe suggestions using ingredients from a user's recent purchases.<br><br>Task completion rate: 71% (user opened a recipe and bookmarked it or started shopping)<br>Acceptance rate: 58% (of suggestions shown, user expanded to read full recipe)<br>Edit rate: N/A for recipe viewing — tracked as "add to shopping list" modifications: 34% added at least one ingredient substitution<br>Re-generation rate: 22% (clicked "show me different recipes")<br>Task time: Not directly measurable — proxy: "returned to AI recipe feature within 7 days" = 44% (D7 re-engagement)<br><br>Guardrails:<br>Hallucination rate (recipe uses ingredients user didn't buy or haven't purchased recently): 4.1% of accepted recipes — elevated, needs work<br>Safety violation rate (allergen-related errors): 0.0% (monitored closely)<br>Latency (time to first suggestion): p50 = 1.8s, p95 = 4.3s (p95 is on the edge of acceptable)</blockquote>
     <blockquote class="callout"><strong>Key insight:</strong> Edit rate is a two-sided signal. Very high edit rate (&gt;60%) means the AI output needed substantial work — users are correcting, not accepting. Very low edit rate (&lt;5%) means either the AI is excellent or users are copy-pasting without reading. Neither extreme is clearly good. The target zone for most AI writing features is 15–40% edit rate: users are accepting the output as a useful starting point but customizing it to their needs, which signals both quality and genuine engagement.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice GenAI metric design in the Metrics Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/metrics">Practice GenAI metric design in the Metrics Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/genai-metrics">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/genai-metrics">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>

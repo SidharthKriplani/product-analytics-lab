@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A/B Testing LLM Features: What's Different and What's Not | Product Analytics Lab</title>
   <meta name="description" content="Experimentation fundamentals still apply — but LLM outputs have high variance, latency effects, and user adaptation patterns that complicate standard experimen…">
-  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/ab-testing-llm">
+  <link rel="canonical" href="https://product-analytics-lab.vercel.app/posts/ab-testing-llm">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="article">
-  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/ab-testing-llm">
+  <meta property="og:url"         content="https://product-analytics-lab.vercel.app/posts/ab-testing-llm">
   <meta property="og:title"       content="A/B Testing LLM Features: What's Different and What's Not | Product Analytics Lab">
   <meta property="og:description" content="Experimentation fundamentals still apply — but LLM outputs have high variance, latency effects, and user adaptation patterns that complicate standard experimen…">
-  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
   <meta property="og:site_name"   content="Product Analytics Lab">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="A/B Testing LLM Features: What's Different and What's Not">
   <meta name="twitter:description" content="Experimentation fundamentals still apply — but LLM outputs have high variance, latency effects, and user adaptation patterns that complicate standard experimen…">
-  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta name="twitter:image"       content="https://product-analytics-lab.vercel.app/og-image.png">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"A/B Testing LLM Features: What's Different and What's Not","description":"Experimentation fundamentals still apply — but LLM outputs have high variance, latency effects, and user adaptation patterns that complicate standard experimen…","url":"https://experimentation-systems-lab.vercel.app/posts/ab-testing-llm","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"A/B Testing LLM Features: What's Different and What's Not","description":"Experimentation fundamentals still apply — but LLM outputs have high variance, latency effects, and user adaptation patterns that complicate standard experimen…","url":"https://product-analytics-lab.vercel.app/posts/ab-testing-llm","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,8 +179,8 @@
 </head>
 <body>
   <div class="top-bar">
-    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
-    <a href="https://experimentation-systems-lab.vercel.app/#/blog/ab-testing-llm" class="open-btn">Open interactive version →</a>
+    <a href="https://product-analytics-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://product-analytics-lab.vercel.app/#/blog/ab-testing-llm" class="open-btn">Open interactive version →</a>
   </div>
   <div class="accent-bar"></div>
 
@@ -197,17 +197,17 @@
     <p>Challenge 1: Longer stabilization window. User trust in AI builds over weeks, not days. Experiments should run 3–4 weeks minimum, with the primary metric readout weighted toward the last 2 weeks rather than the full run. Challenge 2: Metric selection. &quot;Better&quot; for an AI feature is not obvious. Higher CTR doesn't mean better if users are clicking to see and immediately dismissing. Task completion rate, edit rate, and re-generation rate are more diagnostic. Challenge 3: Output variability. The same user, same prompt, different response — LLM outputs vary across runs. This adds variance to your metrics that has nothing to do with the treatment effect. Address this by using larger sample sizes than a comparable non-LLM experiment would require.</p>
     <blockquote class="example"><strong>Prism AI episode recap feature — experiment design:</strong> Feature: AI-generated episode recaps shown after a user completes a streaming session on Prism.<br>Hypothesis: Recaps that surface narrative continuity cues ("in the next episode...") increase next-session click-through by helping users remember where they left off.<br><br>Experiment design decisions:<br>- Primary metric: Next-session start rate within 48 hours of watching a recap (not recap CTR — that's just curiosity, not the outcome we care about)<br>- Runtime: 4 weeks (not 2) — AI trust stabilization + avoid novelty effect reading<br>- Metric readout window: weeks 3 and 4 only for the primary metric; weeks 1-4 for secondary metrics as trend visualization<br>- Output variability mitigation: each user-session pair is assigned a single recap variant at the start of the session (not regenerated per view), so the LLM variability is fixed at assignment, not compounded<br>- Sample size: 20% larger than the power calc for an equivalent non-AI test, to account for additional variance from AI output quality variation<br>- Guardrail: recap generation error rate must stay below 1% (empty or truncated recaps)</blockquote>
     <blockquote class="callout"><strong>Key insight:</strong> Paired preference evaluation is an underused tool for LLM experiments. Instead of measuring behavioral outcomes only, show a random sample of treatment outputs alongside control outputs to a human rater panel (or LLM-as-judge) and ask which is better. Preference rates of 60%+ toward treatment, validated against the behavioral metric direction, give you converging evidence that the feature improvement is real rather than a noisy behavioral signal.</blockquote>
-    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice A/B testing design in the Stats Room →</a></p>
+    <p><a class="inline-cta" href="https://product-analytics-lab.vercel.app/#/stats">Practice A/B testing design in the Stats Room →</a></p>
 
     <div class="cta-card">
       <h2>Try it interactively</h2>
       <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
-      <a href="https://experimentation-systems-lab.vercel.app/#/blog/ab-testing-llm">Open Product Analytics Lab →</a>
+      <a href="https://product-analytics-lab.vercel.app/#/blog/ab-testing-llm">Open Product Analytics Lab →</a>
     </div>
   </article>
 
   <footer>
-    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+    product-analytics-lab.vercel.app · Practice analytics judgment, not just theory
   </footer>
 </body>
 </html>
