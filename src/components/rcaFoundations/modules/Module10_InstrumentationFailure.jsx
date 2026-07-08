@@ -141,7 +141,8 @@ export function Module_RF10({ onComplete }) {
                     onClick={function() { selectDiagnosis(s.id, d); }}
                     disabled={isRevealed}
                     style={{
-                      padding: '0.3rem 0.75rem', borderRadius: 'var(--radius-sm)',
+                      padding: '0.3rem 0.75rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      borderRadius: 'var(--radius-sm)',
                       border: '1.5px solid ' + border, background: bg, color,
                       fontSize: '0.8rem', fontWeight: isSelected || (isRevealed && isCorrDiag) ? 700 : 400,
                       cursor: isRevealed ? 'default' : 'pointer', transition: 'all 0.15s',
@@ -153,7 +154,7 @@ export function Module_RF10({ onComplete }) {
             {sel && !isRevealed && (
               <button
                 onClick={function() { checkSymptom(s.id); }}
-                style={{ padding: '0.35rem 0.85rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+                style={{ padding: '0.35rem 0.85rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
               >Check</button>
             )}
             {isRevealed && (
@@ -186,7 +187,7 @@ export function Module_RF10({ onComplete }) {
           {mcqSel !== null && !mcqRevealed && (
             <button
               onClick={function() { setMcqRevealed(true); }}
-              style={{ marginTop: '0.4rem', padding: '0.45rem 1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}
+              style={{ marginTop: '0.4rem', padding: '0.45rem 1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}
             >Check</button>
           )}
           {mcqRevealed && (

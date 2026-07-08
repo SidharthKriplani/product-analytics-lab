@@ -155,7 +155,7 @@ export function Module18_RegressionToMean({ module, onNext }) {
           <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
             {step === 1 ? 'Measurement 1 — top 5 highlighted in yellow' : 'Measurement 1 (circles) vs Measurement 2 (diamonds) — connecting lines show regression'}
           </div>
-          <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} width="100%">
+          <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} width="100%" style={{ maxWidth: SVG_W, display: 'block', margin: '0 auto' }}>
             {/* Y axis */}
             <line x1={PAD_L} y1={PAD_T} x2={PAD_L} y2={SVG_H - PAD_B} stroke="var(--border)" strokeWidth={1} />
             {[0, 25, 50, 75, 100].map(v => (

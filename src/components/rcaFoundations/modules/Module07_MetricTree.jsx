@@ -34,7 +34,7 @@ function MetricTree({ highlighted }) {
   nodes.forEach(n => { nodeMap[n.id] = n; });
 
   return (
-    <svg viewBox={'0 0 420 ' + H} style={{ width: '100%', display: 'block', overflow: 'visible' }}>
+    <svg viewBox={'0 0 420 ' + H} width="100%" style={{ maxWidth: 420, width: '100%', display: 'block', margin: '0 auto', overflow: 'visible' }}>
       {/* Edges */}
       {edges.map(([from, to]) => {
         const fn = nodeMap[from];

@@ -126,7 +126,7 @@ export function Module_MF14({ module, onNext }) {
         </div>
 
         <div style={{ overflowX: 'auto' }}>
-          <svg viewBox={'0 0 ' + W14 + ' ' + H14} width='100%' style={{ display: 'block', minWidth: '320px' }}>
+          <svg viewBox={'0 0 ' + W14 + ' ' + H14} width='100%' style={{ maxWidth: W14, display: 'block', margin: '0 auto', minWidth: '320px' }}>
             {periods.map(function(p, pi) {
               return <text key={'ph' + pi} x={cellW * (pi + 1) + cellW * 0.5} y={cellH * 0.65} textAnchor='middle' fontSize='9' fontWeight='700' fill='var(--text-muted)'>{p}</text>;
             })}

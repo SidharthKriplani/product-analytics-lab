@@ -126,7 +126,7 @@ export function Module02_CentralTendency({ module, onNext }) {
       {/* Visualization */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', overflowX: 'auto' }}>
         <div style={{ minWidth: 400 }}>
-          <svg viewBox={`0 0 ${W} ${H + 10}`} style={{ width: '100%', overflow: 'visible' }}>
+          <svg viewBox={`0 0 ${W} ${H + 10}`} width="100%" style={{ maxWidth: W, display: 'block', margin: '0 auto', overflow: 'visible' }}>
             {/* Axis line */}
             <line x1={0} y1={AXIS_Y} x2={W} y2={AXIS_Y} stroke="var(--border)" strokeWidth={2} />
 
@@ -168,7 +168,13 @@ export function Module02_CentralTendency({ module, onNext }) {
               const cy = AXIS_Y - DOT_R - pt.stack * (DOT_R * 2 + 2) - 2;
               const color = DOT_COLORS[i % DOT_COLORS.length];
               return (
-                <g key={i} onMouseEnter={() => setHovered(pt.val)} onMouseLeave={() => setHovered(null)}>
+                <g
+                  key={i}
+                  onMouseEnter={() => setHovered(pt.val)}
+                  onMouseLeave={() => setHovered(null)}
+                  onClick={() => setHovered(hovered === pt.val ? null : pt.val)}
+                  onTouchStart={() => setHovered(pt.val)}
+                >
                   <circle
                     cx={cx} cy={cy} r={DOT_R}
                     fill={color} opacity={0.85}

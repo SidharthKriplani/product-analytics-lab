@@ -181,7 +181,7 @@ export function Module08_StandardError({ module, onNext }) {
             ── Current n={n} (SE={se.toFixed(3)})
           </span>
         </div>
-        <svg viewBox={`0 0 ${W} ${H + 25}`} style={{ width: '100%', maxHeight: '300px', overflow: 'hidden', display: 'block' }}>
+        <svg viewBox={`0 0 ${W} ${H + 25}`} width="100%" style={{ maxWidth: W, maxHeight: '300px', overflow: 'hidden', display: 'block', margin: '0 auto' }}>
           {/* Reference curves (ghost) */}
           {refPaths.map(r => (
             <path key={r.n} d={r.path} fill="none" stroke={r.color} strokeWidth={1.5} opacity={0.35} strokeDasharray="5,3" />
@@ -209,8 +209,8 @@ export function Module08_StandardError({ module, onNext }) {
       </div>
 
       {/* Reference table */}
-      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
+      <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ width: '100%', minWidth: 440, borderCollapse: 'collapse', fontSize: '0.88rem' }}>
           <thead>
             <tr style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
               <th style={{ padding: '0.6rem 1rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sample size n</th>

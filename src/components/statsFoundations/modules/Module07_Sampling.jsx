@@ -241,7 +241,7 @@ export function Module07_Sampling({ module, onNext }) {
             True population mean: μ = <span style={{ color: 'var(--teal)' }}>{POP_MEAN.toFixed(2)}</span>
           </span>
         </div>
-        <svg viewBox="0 0 600 200" style={{ width: '100%', overflow: 'visible' }}>
+        <svg viewBox="0 0 600 200" width="100%" style={{ maxWidth: 600, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           {POPULATION.map(dot => {
             const isSelected = highlighted.has(dot.id);
             return (

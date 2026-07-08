@@ -162,7 +162,7 @@ export function Module32_NonParametric({ module, onNext }) {
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>
           Time-to-purchase distribution (n = 40)
         </div>
-        <svg viewBox="0 0 500 200" width="100%" style={{ overflow: 'visible' }}>
+        <svg viewBox="0 0 500 200" width="100%" style={{ maxWidth: 500, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           <line x1={40} y1={170} x2={460} y2={170} stroke="var(--border)" strokeWidth={1.5} />
           <line x1={40} y1={30} x2={40} y2={170} stroke="var(--border)" strokeWidth={1.5} />
 

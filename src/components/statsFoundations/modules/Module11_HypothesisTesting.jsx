@@ -175,7 +175,7 @@ export function Module11_HypothesisTesting({ module, onNext }) {
         <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
           Null Distribution H₀: N(0, 1) — red area = p-value
         </div>
-        <svg viewBox={`0 0 ${W} ${H + 30}`} style={{ width: '100%', overflow: 'visible' }}>
+        <svg viewBox={`0 0 ${W} ${H + 30}`} width="100%" style={{ maxWidth: W, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           {/* p-value shading */}
           {shadePaths.map((sp, i) => (
             sp.path && <path key={i} d={sp.path} fill={sp.fill} opacity={0.25} />

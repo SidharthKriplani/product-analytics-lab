@@ -154,7 +154,7 @@ export function Module23_RD({ module, onNext }) {
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>View:</span>
         {['outcome', 'density'].map(v => (
-          <button key={v} onClick={() => setView(v)} style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem', borderRadius: 'var(--radius-sm)', border: `1px solid ${view === v ? 'var(--accent-border)' : 'var(--border)'}`, background: view === v ? 'var(--accent-bg)' : 'var(--surface)', color: view === v ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer', fontWeight: view === v ? 700 : 400 }}>
+          <button key={v} onClick={() => setView(v)} style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', borderRadius: 'var(--radius-sm)', border: `1px solid ${view === v ? 'var(--accent-border)' : 'var(--border)'}`, background: view === v ? 'var(--accent-bg)' : 'var(--surface)', color: view === v ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer', fontWeight: view === v ? 700 : 400 }}>
             {v === 'outcome' ? 'Outcome jump' : 'Score density (McCrary)'}
           </button>
         ))}

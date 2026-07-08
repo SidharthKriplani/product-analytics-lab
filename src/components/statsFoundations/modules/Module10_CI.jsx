@@ -203,7 +203,7 @@ export function Module10_CI({ module, onNext }) {
         <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
           Your confidence interval (centered at μ=50)
         </div>
-        <svg viewBox={`0 0 ${SVG_W} 70`} style={{ width: '100%' }}>
+        <svg viewBox={`0 0 ${SVG_W} 70`} width="100%" style={{ maxWidth: SVG_W, display: 'block', margin: '0 auto' }}>
           {/* axis */}
           <line x1={40} y1={55} x2={SVG_W - 40} y2={55} stroke="var(--border)" strokeWidth={1.5} />
           {[35, 40, 45, 50, 55, 60, 65].map(v => (
@@ -260,7 +260,7 @@ export function Module10_CI({ module, onNext }) {
           <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
             20 simulated {conf.label} CIs — green = contains μ, red = misses μ
           </div>
-          <svg viewBox={`0 0 ${SVG_W} ${svgHeight}`} style={{ width: '100%' }}>
+          <svg viewBox={`0 0 ${SVG_W} ${svgHeight}`} width="100%" style={{ maxWidth: SVG_W, display: 'block', margin: '0 auto' }}>
             {/* True mean vertical line */}
             <line
               x1={toSvgX(TRUE_MU)} y1={0}

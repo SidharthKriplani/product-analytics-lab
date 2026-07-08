@@ -248,7 +248,7 @@ export function Module29_ChiSquare({ module, onNext }) {
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>
           Chi-square distribution (df = 1)
         </div>
-        <svg viewBox="0 0 470 190" width="100%" style={{ overflow: 'visible' }}>
+        <svg viewBox="0 0 470 190" width="100%" style={{ maxWidth: 470, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           <line x1={50} y1={160} x2={430} y2={160} stroke="var(--border)" strokeWidth={1.5} />
           <line x1={50} y1={20} x2={50} y2={160} stroke="var(--border)" strokeWidth={1.5} />
 

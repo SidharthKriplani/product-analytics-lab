@@ -112,9 +112,9 @@ export function Module_MF13({ module, onNext }) {
           </div>
         </div>
 
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem', overflowX: 'auto' }}>
           <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.4rem', textAlign: 'center' }}>Effect on a number line (CI bar; dashed line is zero / &quot;no effect&quot;)</div>
-          <svg viewBox={'0 0 ' + W + ' ' + H} width="100%" style={{ display: 'block' }}>
+          <svg viewBox={'0 0 ' + W + ' ' + H} width="100%" style={{ maxWidth: W, display: 'block', margin: '0 auto' }}>
             <line x1={padL} y1={axisY} x2={W - padR} y2={axisY} stroke="var(--border)" strokeWidth="1" />
             <line x1={zeroX} y1={padT - 8} x2={zeroX} y2={H - padB + 4} stroke="var(--red)" strokeWidth="1.2" strokeDasharray="3 3" />
             <text x={zeroX} y={padT - 12} textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--red)">0 (no effect)</text>

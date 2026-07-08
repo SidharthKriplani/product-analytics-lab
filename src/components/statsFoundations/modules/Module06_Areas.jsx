@@ -168,7 +168,7 @@ export function Module06_Areas({ module, onNext }) {
 
       {/* SVG */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem', overflowX: 'auto' }}>
-        <svg viewBox={`0 0 ${W} ${H + 22}`} style={{ width: '100%', overflow: 'visible' }}>
+        <svg viewBox={`0 0 ${W} ${H + 22}`} width="100%" style={{ maxWidth: W, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           {/* Left tail fill */}
           {leftShadePath && (
             <path d={leftShadePath} fill="var(--red)" opacity={0.12} />

@@ -172,7 +172,7 @@ export function Module05_ZScores({ module, onNext }) {
       {/* SVG Curve with dot */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem', overflowX: 'auto' }}>
         <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 600 }}>Standard Normal (z-scale) — dot shows where x={xVal} lands</div>
-        <svg viewBox={`0 0 ${W} ${H + 22}`} style={{ width: '100%', overflow: 'visible' }}>
+        <svg viewBox={`0 0 ${W} ${H + 22}`} width="100%" style={{ maxWidth: W, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           {/* Fill */}
           <path d={fillPath} fill="var(--accent-bg)" opacity={0.5} />
 

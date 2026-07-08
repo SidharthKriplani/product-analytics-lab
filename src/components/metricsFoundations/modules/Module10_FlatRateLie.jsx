@@ -123,9 +123,9 @@ export function Module_MF10({ module, onNext }) {
           </div>
         </div>
 
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem', overflowX: 'auto' }}>
           <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.4rem', textAlign: 'center' }}>Absolute volumes — faded bars are the baseline</div>
-          <svg viewBox={'0 0 ' + W10 + ' ' + H10} width="100%" style={{ display: 'block' }}>
+          <svg viewBox={'0 0 ' + W10 + ' ' + H10} width="100%" style={{ maxWidth: W10, display: 'block', margin: '0 auto' }}>
             <line x1={padL10} y1={padT10 + innerH10} x2={W10 - padR10} y2={padT10 + innerH10} stroke="var(--border)" strokeWidth="1" />
             <rect x={padL10 + groupW * 0.30} y={padT10 + innerH10 - sessFull} width={groupW * 0.18} height={sessFull} rx="2" fill="var(--accent)" opacity="0.2" />
             <rect x={padL10 + groupW * 0.52} y={padT10 + innerH10 - sessCur} width={groupW * 0.18} height={sessCur} rx="2" fill="var(--accent)" />

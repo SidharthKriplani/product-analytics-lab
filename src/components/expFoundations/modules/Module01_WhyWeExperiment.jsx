@@ -106,7 +106,7 @@ export function Module_EF01({ onComplete }) {
                   <button
                     onClick={function() { handleClassify(claim.id, 'causal'); }}
                     style={{
-                      padding: '0.35rem 0.85rem', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', fontWeight: 600, cursor: revealed ? 'default' : 'pointer',
+                      padding: '0.55rem 0.9rem', minHeight: '40px', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', fontWeight: 600, cursor: revealed ? 'default' : 'pointer',
                       border: '1.5px solid ' + (userChoice === 'causal' ? 'var(--accent)' : 'var(--border)'),
                       background: userChoice === 'causal' ? 'var(--accent-bg)' : 'var(--surface)',
                       color: userChoice === 'causal' ? 'var(--accent)' : 'var(--text-muted)',
@@ -115,7 +115,7 @@ export function Module_EF01({ onComplete }) {
                   <button
                     onClick={function() { handleClassify(claim.id, 'correlation'); }}
                     style={{
-                      padding: '0.35rem 0.85rem', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', fontWeight: 600, cursor: revealed ? 'default' : 'pointer',
+                      padding: '0.55rem 0.9rem', minHeight: '40px', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', fontWeight: 600, cursor: revealed ? 'default' : 'pointer',
                       border: '1.5px solid ' + (userChoice === 'correlation' ? 'var(--purple)' : 'var(--border)'),
                       background: userChoice === 'correlation' ? 'var(--purple-bg)' : 'var(--surface)',
                       color: userChoice === 'correlation' ? 'var(--purple)' : 'var(--text-muted)',

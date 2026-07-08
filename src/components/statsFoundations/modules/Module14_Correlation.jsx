@@ -141,7 +141,7 @@ export function Module14_Correlation({ module, onNext }) {
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>
           Scatter Plot — r = {r >= 0 ? '+' : ''}{r.toFixed(1)}
         </div>
-        <svg viewBox="0 0 500 300" width="100%" style={{ overflow: 'visible' }}>
+        <svg viewBox="0 0 500 300" width="100%" style={{ maxWidth: 500, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           {/* Axes */}
           <line x1={40} y1={260} x2={460} y2={260} stroke="var(--border)" strokeWidth={1.5} />
           <line x1={40} y1={40} x2={40} y2={260} stroke="var(--border)" strokeWidth={1.5} />

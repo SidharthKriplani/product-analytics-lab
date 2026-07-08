@@ -261,7 +261,7 @@ export function Module12_Power({ module, onNext }) {
           <span style={{ fontSize: '0.78rem', color: 'var(--green)', fontWeight: 600 }}>▪ Power (detect!)</span>
         </div>
 
-        <svg viewBox={`0 0 ${W} ${H + 40}`} style={{ width: '100%', overflow: 'visible' }}>
+        <svg viewBox={`0 0 ${W} ${H + 40}`} width="100%" style={{ maxWidth: W, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           {/* === SHADED REGIONS === */}
           {/* Power region (green — H1 beyond crit) */}
           {powerPath && <path d={powerPath} fill="var(--green)" opacity={0.25} />}

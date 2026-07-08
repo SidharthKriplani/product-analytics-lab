@@ -162,7 +162,8 @@ export function Module_RF03({ onComplete }) {
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button onClick={function() { classify(signal.id, 'data'); }} disabled={triageRevealed} style={{
-                    padding: '0.3rem 0.85rem', fontSize: '0.78rem', fontWeight: 600,
+                    padding: '0.3rem 0.85rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.78rem', fontWeight: 600,
                     borderRadius: 'var(--radius-sm)', cursor: triageRevealed ? 'default' : 'pointer',
                     background: userAnswer === 'data' ? 'var(--teal)' : 'var(--surface)',
                     color: userAnswer === 'data' ? '#fff' : 'var(--text-muted)',
@@ -172,7 +173,8 @@ export function Module_RF03({ onComplete }) {
                     Data Issue
                   </button>
                   <button onClick={function() { classify(signal.id, 'product'); }} disabled={triageRevealed} style={{
-                    padding: '0.3rem 0.85rem', fontSize: '0.78rem', fontWeight: 600,
+                    padding: '0.3rem 0.85rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.78rem', fontWeight: 600,
                     borderRadius: 'var(--radius-sm)', cursor: triageRevealed ? 'default' : 'pointer',
                     background: userAnswer === 'product' ? 'var(--purple)' : 'var(--surface)',
                     color: userAnswer === 'product' ? '#fff' : 'var(--text-muted)',
@@ -193,7 +195,8 @@ export function Module_RF03({ onComplete }) {
 
           {allClassified && !triageRevealed && (
             <button onClick={handleTriageCheck} style={{
-              marginTop: '0.75rem', padding: '0.5rem 1.2rem',
+              marginTop: '0.75rem', padding: '0.5rem 1.2rem', minHeight: 40,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               borderRadius: 'var(--radius-sm)', border: 'none',
               background: 'var(--teal)', color: '#fff', fontWeight: 600,
               fontSize: '0.85rem', cursor: 'pointer',
@@ -234,7 +237,7 @@ export function Module_RF03({ onComplete }) {
             })}
           </div>
           {mcqSelected && !mcqAnswered && (
-            <button onClick={handleMcqCheck} style={{ marginTop: '0.75rem', padding: '0.45rem 1.1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>Check</button>
+            <button onClick={handleMcqCheck} style={{ marginTop: '0.75rem', padding: '0.45rem 1.1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>Check</button>
           )}
           {mcqAnswered && (
             <div style={{ marginTop: '0.75rem', background: mcqSelected === MCQ.correct ? 'var(--teal-bg)' : 'var(--red-bg)', border: '1px solid ' + (mcqSelected === MCQ.correct ? 'var(--teal-border)' : 'var(--red-border)'), borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>

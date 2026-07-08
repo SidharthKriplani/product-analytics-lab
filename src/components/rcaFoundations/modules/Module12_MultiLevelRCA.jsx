@@ -188,7 +188,8 @@ export function Module_RF12({ onComplete }) {
                 <button
                   onClick={function() { toggle(c.id); }}
                   style={{
-                    padding: '0.22rem 0.65rem', borderRadius: 'var(--radius-sm)',
+                    padding: '0.22rem 0.65rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: 'var(--radius-sm)',
                     border: '1.5px solid ' + (isOn ? c.border : 'var(--border)'),
                     background: isOn ? c.color : 'var(--surface)',
                     color: isOn ? '#fff' : 'var(--text-muted)',
@@ -232,7 +233,7 @@ export function Module_RF12({ onComplete }) {
         {mcqSel !== null && !mcqRevealed && (
           <button
             onClick={function() { setMcqRevealed(true); }}
-            style={{ marginTop: '0.4rem', padding: '0.45rem 1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}
+            style={{ marginTop: '0.4rem', padding: '0.45rem 1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}
           >Check</button>
         )}
         {mcqRevealed && (

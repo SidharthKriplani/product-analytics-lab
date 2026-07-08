@@ -91,7 +91,7 @@ export function Module_EF05({ onComplete }) {
                 Control users
               </label>
               <input type='number' min={1000} max={200000} step={100} value={controlN} onChange={function(e) { setControlN(Math.max(1000, Number(e.target.value))); }} style={{
-                width: '100%', padding: '0.45rem 0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+                width: '100%', padding: '0.6rem 0.6rem', minHeight: '40px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
                 background: 'var(--surface-2)', color: 'var(--text)', fontSize: '1rem', fontWeight: 700,
               }} />
             </div>
@@ -100,7 +100,7 @@ export function Module_EF05({ onComplete }) {
                 Treatment users
               </label>
               <input type='number' min={1000} max={200000} step={100} value={treatmentN} onChange={function(e) { setTreatmentN(Math.max(1000, Number(e.target.value))); }} style={{
-                width: '100%', padding: '0.45rem 0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+                width: '100%', padding: '0.6rem 0.6rem', minHeight: '40px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
                 background: 'var(--surface-2)', color: 'var(--text)', fontSize: '1rem', fontWeight: 700,
               }} />
             </div>

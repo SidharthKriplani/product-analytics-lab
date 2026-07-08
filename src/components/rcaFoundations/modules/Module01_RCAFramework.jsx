@@ -194,7 +194,8 @@ export function Module_RF01({ onComplete }) {
                   <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
                     {LAYERS.map(layer => (
                       <button key={layer.id} onClick={() => assign(i, layer.id)} style={{
-                        fontSize: '0.72rem', padding: '0.2rem 0.55rem',
+                        fontSize: '0.72rem', padding: '0.2rem 0.55rem', minHeight: 40, minWidth: 40,
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                         background: asgn === layer.id ? layer.color : 'var(--surface)',
                         border: '1px solid ' + (asgn === layer.id ? layer.color : 'var(--border)'),
                         borderRadius: 3, color: asgn === layer.id ? '#fff' : 'var(--text-muted)',
@@ -219,8 +220,9 @@ export function Module_RF01({ onComplete }) {
 
         {!revealed && allAssigned && (
           <button onClick={() => setRevealed(true)} style={{
-            padding: '0.55rem 1.2rem', background: 'var(--teal)', color: '#fff',
+            padding: '0.55rem 1.2rem', minHeight: 40, background: 'var(--teal)', color: '#fff',
             border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700,
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '0.88rem', cursor: 'pointer',
           }}>
             Check answers

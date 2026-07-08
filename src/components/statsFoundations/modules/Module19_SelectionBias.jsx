@@ -117,7 +117,7 @@ export function Module19_SelectionBias({ module, onNext }) {
         <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
           Engagement vs Retention — {showAll ? 'all 40 users visible' : '15 churned users hidden'}
         </div>
-        <svg viewBox="0 0 500 285" width="100%">
+        <svg viewBox="0 0 500 285" width="100%" style={{ maxWidth: 500, display: 'block', margin: '0 auto' }}>
           <defs>
             <clipPath id="sb-plot-clip">
               <rect x={35} y={10} width={461} height={261} />

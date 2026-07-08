@@ -126,8 +126,8 @@ export function Module01_WhatIsData({ module, onNext }) {
               <div key={v.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.5rem 0.75rem' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text)', flex: 1 }}>{v.label}</span>
                 <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
-                  <button onClick={() => place(v.id, 'numerical')} style={{ padding: '0.28rem 0.65rem', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--accent-border)', background: 'var(--accent-bg)', color: 'var(--accent)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', minWidth: 36 }}>N</button>
-                  <button onClick={() => place(v.id, 'categorical')} style={{ padding: '0.28rem 0.65rem', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--purple-border)', background: 'var(--purple-bg)', color: 'var(--purple)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', minWidth: 36 }}>C</button>
+                  <button onClick={() => place(v.id, 'numerical')} style={{ padding: '0.28rem 0.65rem', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--accent-border)', background: 'var(--accent-bg)', color: 'var(--accent)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', minWidth: 40, minHeight: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>N</button>
+                  <button onClick={() => place(v.id, 'categorical')} style={{ padding: '0.28rem 0.65rem', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--purple-border)', background: 'var(--purple-bg)', color: 'var(--purple)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', minWidth: 40, minHeight: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>C</button>
                 </div>
               </div>
             ))}

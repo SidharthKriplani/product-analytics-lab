@@ -127,7 +127,7 @@ export function Module_EF14({ onComplete }) {
                     key={opt}
                     onClick={function() { select(s.id, opt); }}
                     style={{
-                      padding: '0.3rem 0.75rem', fontSize: '0.8rem', fontWeight: 600,
+                      padding: '0.55rem 0.9rem', minHeight: '40px', fontSize: '0.8rem', fontWeight: 600,
                       background: btnBg,
                       color: (isSelected || (checked && opt === s.correct)) ? '#fff' : 'var(--text-muted)',
                       border: '1px solid ' + (isSelected ? 'var(--accent)' : 'var(--border)'),
@@ -149,7 +149,7 @@ export function Module_EF14({ onComplete }) {
       })}
 
       {allSelected && !checked && (
-        <button onClick={function() { setChecked(true); }} style={{ padding: '0.5rem 1.2rem', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', marginBottom: '1rem' }}>
+        <button onClick={function() { setChecked(true); }} style={{ padding: '0.65rem 1.2rem', minHeight: '40px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', marginBottom: '1rem' }}>
           Check all
         </button>
       )}

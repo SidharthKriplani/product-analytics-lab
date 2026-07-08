@@ -169,7 +169,8 @@ export function Module_RF06({ onComplete }) {
                       Example: {step.example}
                     </div>
                     <button onClick={advance} style={{
-                      padding: '0.45rem 1rem',
+                      padding: '0.45rem 1rem', minHeight: 40,
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                       background: 'var(--teal)', color: '#fff', border: 'none',
                       borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer',
                     }}>
@@ -222,7 +223,8 @@ export function Module_RF06({ onComplete }) {
                               setBlufRevealed(function(prev) { var n = Object.assign({}, prev); n[fi] = true; return n; });
                             }}
                             style={{
-                              textAlign: 'left', width: '100%', padding: '0.6rem 0.8rem',
+                              textAlign: 'left', width: '100%', padding: '0.6rem 0.8rem', minHeight: 40, boxSizing: 'border-box',
+                              display: 'flex', alignItems: 'center',
                               background: bg, border: '1.5px solid ' + border,
                               borderRadius: 'var(--radius-sm)', color: color,
                               fontSize: '0.84rem', lineHeight: 1.5,

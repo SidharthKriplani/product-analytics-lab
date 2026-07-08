@@ -146,41 +146,44 @@ export function Module_MF07({ module, onNext }) {
           Four candidate North Stars for Slack are listed below. For each, decide whether it passes or fails each of the three criteria. Click to toggle: green = yes, red = no. Evaluate all candidates, then check your analysis.
         </p>
 
-        {/* Criteria headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(3, 70px)', gap: '0.25rem', marginBottom: '0.25rem' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)' }}>Candidate</div>
-          {NS_CRITERIA.map(function(cr) {
-            return <div key={cr.id} style={{ fontSize: '0.58rem', fontWeight: 700, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.2 }}>{cr.label}</div>;
-          })}
-        </div>
-
-        {/* Candidate rows */}
-        {NS_CANDIDATES.map(function(cand) {
-          return (
-            <div key={cand.id} style={{ display: 'grid', gridTemplateColumns: '1fr repeat(3, 70px)', gap: '0.25rem', marginBottom: '0.35rem', alignItems: 'center' }}>
-              <div style={{ fontSize: '0.76rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>{cand.label}</div>
+        {/* Criteria headers + candidate rows — horizontally scrollable on narrow screens so the fixed-width toggle columns never clip */}
+        <div style={{ overflowX: 'auto' }}>
+          <div style={{ minWidth: '380px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(3, 70px)', gap: '0.25rem', marginBottom: '0.25rem' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)' }}>Candidate</div>
               {NS_CRITERIA.map(function(cr) {
-                var val = evals[cand.id][cr.id];
-                var bg = val === null ? 'var(--surface-2)' : val ? 'var(--green-bg)' : 'var(--red-bg)';
-                var borderColor = val === null ? 'var(--border)' : val ? 'var(--green-border)' : 'var(--red-border)';
-                var icon = val === null ? '–' : val ? <Icon name='check' size={14} color='currentColor' /> : <Icon name='x' size={14} color='currentColor' />;
-                var iconColor = val === null ? 'var(--text-muted)' : val ? 'var(--green)' : 'var(--red)';
-
-                if (checked) {
-                  var isCorrect = val === cand.correct[cr.id];
-                  borderColor = isCorrect ? 'var(--green-border)' : 'var(--red-border)';
-                  bg = isCorrect ? 'var(--green-bg)' : 'var(--red-bg)';
-                }
-
-                return (
-                  <button key={cr.id} onClick={function() { handleToggle(cand.id, cr.id); }} style={{ background: bg, border: '1.5px solid ' + borderColor, borderRadius: 'var(--radius-sm)', padding: '0.3rem', cursor: checked ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 700, color: iconColor, textAlign: 'center', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {icon}
-                  </button>
-                );
+                return <div key={cr.id} style={{ fontSize: '0.58rem', fontWeight: 700, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.2 }}>{cr.label}</div>;
               })}
             </div>
-          );
-        })}
+
+            {NS_CANDIDATES.map(function(cand) {
+              return (
+                <div key={cand.id} style={{ display: 'grid', gridTemplateColumns: '1fr repeat(3, 70px)', gap: '0.25rem', marginBottom: '0.35rem', alignItems: 'center' }}>
+                  <div style={{ fontSize: '0.76rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>{cand.label}</div>
+                  {NS_CRITERIA.map(function(cr) {
+                    var val = evals[cand.id][cr.id];
+                    var bg = val === null ? 'var(--surface-2)' : val ? 'var(--green-bg)' : 'var(--red-bg)';
+                    var borderColor = val === null ? 'var(--border)' : val ? 'var(--green-border)' : 'var(--red-border)';
+                    var icon = val === null ? '–' : val ? <Icon name='check' size={14} color='currentColor' /> : <Icon name='x' size={14} color='currentColor' />;
+                    var iconColor = val === null ? 'var(--text-muted)' : val ? 'var(--green)' : 'var(--red)';
+
+                    if (checked) {
+                      var isCorrect = val === cand.correct[cr.id];
+                      borderColor = isCorrect ? 'var(--green-border)' : 'var(--red-border)';
+                      bg = isCorrect ? 'var(--green-bg)' : 'var(--red-bg)';
+                    }
+
+                    return (
+                      <button key={cr.id} onClick={function() { handleToggle(cand.id, cr.id); }} style={{ background: bg, border: '1.5px solid ' + borderColor, borderRadius: 'var(--radius-sm)', padding: '0.3rem', minHeight: '40px', minWidth: '40px', cursor: checked ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 700, color: iconColor, textAlign: 'center', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {icon}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Check button */}
         {allRated && !checked && (

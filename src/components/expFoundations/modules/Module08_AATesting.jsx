@@ -95,7 +95,7 @@ export function Module_EF08({ onComplete }) {
         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
           A/A Test — p-value over 30 days (both groups: identical treatment)
         </div>
-        <svg viewBox={'0 0 ' + svgW + ' ' + svgH} style={{ width: '100%', height: 'auto', display: 'block' }}>
+        <svg viewBox={'0 0 ' + svgW + ' ' + svgH} width="100%" style={{ maxWidth: svgW, height: 'auto', display: 'block', margin: '0 auto' }}>
           {/* Axis lines */}
           <line x1={padL} y1={padT} x2={padL} y2={padT + chartH} stroke="var(--border)" strokeWidth="1" />
           <line x1={padL} y1={padT + chartH} x2={padL + chartW} y2={padT + chartH} stroke="var(--border)" strokeWidth="1" />

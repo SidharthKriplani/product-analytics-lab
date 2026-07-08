@@ -127,9 +127,9 @@ export function Module_MF16({ module, onNext }) {
           </div>
         </div>
 
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem', overflowX: 'auto' }}>
           <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.3rem', textAlign: 'center' }}>Payback period vs. user lifetime</div>
-          <svg viewBox={'0 0 ' + W16 + ' ' + H16} width='100%' style={{ display: 'block' }}>
+          <svg viewBox={'0 0 ' + W16 + ' ' + H16} width='100%' style={{ maxWidth: W16, display: 'block', margin: '0 auto' }}>
             <rect x='10' y='10' width={lifetimePx} height='14' rx='3' fill='var(--accent)' opacity='0.3' />
             <text x={10 + lifetimePx / 2} y='20' textAnchor='middle' fontSize='8' fontWeight='600' fill='var(--accent)'>{'Lifetime: ' + lifetime + ' mo'}</text>
             <rect x='10' y='28' width={Math.min(paybackPx, lifetimePx + 40)} height='14' rx='3' fill={payback > lifetime ? 'var(--red)' : 'var(--green)'} opacity='0.4' />

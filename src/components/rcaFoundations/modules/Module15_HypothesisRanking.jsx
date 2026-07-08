@@ -122,11 +122,11 @@ function RF15RankBadge(props) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-      width: '1.5rem', height: '1.5rem', borderRadius: '50%',
+      width: '2.5rem', height: '2.5rem', minWidth: 40, minHeight: 40, borderRadius: '50%',
       background: props.active ? 'var(--teal)' : 'var(--surface-2)',
       border: '1.5px solid ' + (props.active ? 'var(--teal)' : 'var(--border)'),
       color: props.active ? '#fff' : 'var(--text-muted)',
-      fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', flexShrink: 0,
+      fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', flexShrink: 0,
       transition: 'all 0.1s',
     }} onClick={props.onClick}>{props.n}</span>
   );
@@ -270,7 +270,7 @@ export function Module_RF15({ onComplete }) {
               borderRadius: 'var(--radius-sm)', transition: 'all 0.15s',
             }}>
               <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
-                <div style={{ display: 'flex', gap: '0.3rem', flexShrink: 0, paddingTop: '0.1rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', width: '5.4rem', flexShrink: 0, paddingTop: '0.1rem' }}>
                   {[1,2,3,4].map(function(n) {
                     return <RF15RankBadge key={n} n={n} active={userRank === n} onClick={function() { assignRank(h.id, n); }} />;
                   })}
@@ -322,7 +322,7 @@ export function Module_RF15({ onComplete }) {
       </div>
 
       {!revealed && allRanked && (
-        <button onClick={function() { setRevealed(true); }} style={{ padding: '0.45rem 1rem', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
+        <button onClick={function() { setRevealed(true); }} style={{ padding: '0.45rem 1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
           Reveal expert ranking
         </button>
       )}
@@ -341,7 +341,7 @@ export function Module_RF15({ onComplete }) {
           <div style={{ background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.9rem', fontSize: '0.82rem', color: 'var(--teal)', lineHeight: 1.5 }}>
             <strong>Key insight:</strong> {scenario.keyInsight}
           </div>
-          <button onClick={advanceScenario} style={{ padding: '0.45rem 1.1rem', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}>
+          <button onClick={advanceScenario} style={{ padding: '0.45rem 1.1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}>
             {scenarioIdx < SCENARIOS_RF15.length - 1 ? 'Next scenario →' : 'See summary →'}
           </button>
         </div>

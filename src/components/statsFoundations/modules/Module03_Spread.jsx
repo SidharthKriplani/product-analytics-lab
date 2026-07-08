@@ -99,7 +99,7 @@ export function Module03_Spread({ module, onNext }) {
       {/* Visualization */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', overflowX: 'auto' }}>
         <div style={{ minWidth: 400 }}>
-          <svg viewBox={`0 0 ${W} ${H + 20}`} style={{ width: '100%', overflow: 'visible' }}>
+          <svg viewBox={`0 0 ${W} ${H + 20}`} width="100%" style={{ maxWidth: W, display: 'block', margin: '0 auto', overflow: 'visible' }}>
             {/* Axis */}
             <line x1={0} y1={AXIS_Y} x2={W} y2={AXIS_Y} stroke="var(--border)" strokeWidth={2} />
 

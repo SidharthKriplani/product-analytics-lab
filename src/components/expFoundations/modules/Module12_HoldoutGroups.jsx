@@ -90,7 +90,7 @@ export function Module_EF12({ onComplete }) {
         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.6rem' }}>
           28-day engagement: holdout vs. fully treated
         </div>
-        <svg viewBox={'0 0 ' + W + ' ' + H} width="100%" style={{ display: 'block' }}>
+        <svg viewBox={'0 0 ' + W + ' ' + H} width="100%" style={{ maxWidth: W, display: 'block', margin: '0 auto' }}>
           <line x1={padL} y1={padT} x2={padL} y2={padT + innerH} stroke="var(--border)" strokeWidth="1" />
           <line x1={padL} y1={padT + innerH} x2={W - padR} y2={padT + innerH} stroke="var(--border)" strokeWidth="1" />
           {[100, 105, 110, 115].map(function(v) {
@@ -112,7 +112,7 @@ export function Module_EF12({ onComplete }) {
         onClick={function() { setShowLift(true); }}
         disabled={showLift}
         style={{
-          padding: '0.5rem 1.1rem', marginBottom: '1rem',
+          padding: '0.65rem 1.1rem', marginBottom: '1rem', minHeight: '40px',
           background: showLift ? 'var(--surface-2)' : 'var(--accent)',
           color: showLift ? 'var(--text-muted)' : '#fff',
           border: '1px solid ' + (showLift ? 'var(--border)' : 'var(--accent)'),

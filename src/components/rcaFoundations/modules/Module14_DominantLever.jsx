@@ -165,7 +165,7 @@ export function Module_RF14({ onComplete }) {
                       onClick={function() { if (!leverRevealed) setLeverSel(c.id); }}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '0.75rem',
-                        padding: '0.55rem 0.85rem', textAlign: 'left', width: '100%',
+                        padding: '0.55rem 0.85rem', textAlign: 'left', width: '100%', minHeight: 40, boxSizing: 'border-box',
                         background: isCorrect ? 'var(--teal-bg)' : isWrong ? 'var(--red-bg)' : isSelected ? 'var(--surface-raised)' : 'var(--surface)',
                         border: '1.5px solid ' + (isCorrect ? 'var(--teal-border)' : isWrong ? 'var(--red-border)' : isSelected ? 'var(--border-strong)' : 'var(--border)'),
                         borderRadius: 'var(--radius-sm)', cursor: leverRevealed ? 'default' : 'pointer', transition: 'all 0.1s',
@@ -189,7 +189,7 @@ export function Module_RF14({ onComplete }) {
                   Click the component that is the dominant lever — the one whose movement explains the drop.
                 </div>
                 {leverSel && (
-                  <button onClick={function() { setLeverRevealed(true); }} style={{ padding: '0.45rem 1rem', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
+                  <button onClick={function() { setLeverRevealed(true); }} style={{ padding: '0.45rem 1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
                     Check lever
                   </button>
                 )}
@@ -209,7 +209,8 @@ export function Module_RF14({ onComplete }) {
                     var isSel = branchSels.has(b.id);
                     return (
                       <button key={b.id} onClick={function() { toggleBranch(b.id); }} style={{
-                        textAlign: 'left', padding: '0.55rem 0.8rem', width: '100%',
+                        textAlign: 'left', padding: '0.55rem 0.8rem', width: '100%', minHeight: 40, boxSizing: 'border-box',
+                        display: 'flex', alignItems: 'center',
                         background: isSel ? 'var(--accent-bg)' : 'var(--surface)',
                         border: '1.5px solid ' + (isSel ? 'var(--accent-border)' : 'var(--border)'),
                         borderRadius: 'var(--radius-sm)', color: isSel ? 'var(--accent)' : 'var(--text)',
@@ -219,7 +220,7 @@ export function Module_RF14({ onComplete }) {
                   })}
                 </div>
                 {branchSels.size > 0 && (
-                  <button onClick={function() { setBranchRevealed(true); }} style={{ padding: '0.45rem 1rem', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
+                  <button onClick={function() { setBranchRevealed(true); }} style={{ padding: '0.45rem 1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
                     Check branches
                   </button>
                 )}
@@ -246,7 +247,7 @@ export function Module_RF14({ onComplete }) {
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.55, fontStyle: 'italic', marginBottom: '0.85rem' }}>
                   {scenario.pruneNote}
                 </div>
-                <button onClick={advanceScenario} style={{ padding: '0.45rem 1.1rem', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}>
+                <button onClick={advanceScenario} style={{ padding: '0.45rem 1.1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}>
                   {scenarioIdx < SCENARIOS_RF14.length - 1 ? 'Next scenario →' : 'See summary →'}
                 </button>
               </div>

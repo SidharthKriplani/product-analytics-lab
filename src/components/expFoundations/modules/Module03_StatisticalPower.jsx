@@ -94,7 +94,7 @@ export function Module_EF03({ onComplete }) {
           {/* Preset button */}
           <div style={{ marginBottom: '1rem' }}>
             <button onClick={handlePreset} style={{
-              padding: '0.35rem 0.85rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
+              padding: '0.55rem 0.9rem', minHeight: '40px', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
               border: '1.5px solid var(--accent)', background: triedPreset ? 'var(--accent-bg)' : 'var(--surface)', color: 'var(--accent)',
             }}>
               Preset: Typical signup flow (15% baseline, 5% relative MDE)

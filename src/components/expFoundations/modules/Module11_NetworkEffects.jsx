@@ -131,7 +131,7 @@ export function Module_EF11({ onComplete }) {
                   }
                   return (
                     <button key={j} onClick={function() { pick(i, j); }} disabled={revealed} style={{
-                      textAlign: 'left', padding: '0.45rem 0.85rem',
+                      textAlign: 'left', padding: '0.6rem 0.85rem', minHeight: '40px',
                       fontSize: '0.82rem', fontWeight: 500,
                       background: bg, border: '1.5px solid ' + border, color,
                       borderRadius: 'var(--radius-sm)', cursor: revealed ? 'default' : 'pointer',
@@ -157,7 +157,7 @@ export function Module_EF11({ onComplete }) {
 
       {!revealed && allAnswered && (
         <button onClick={function() { setRevealed(true); }} style={{
-          padding: '0.55rem 1.2rem', background: 'var(--accent)', color: '#fff',
+          padding: '0.65rem 1.2rem', minHeight: '40px', background: 'var(--accent)', color: '#fff',
           border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer',
         }}>
           Check all

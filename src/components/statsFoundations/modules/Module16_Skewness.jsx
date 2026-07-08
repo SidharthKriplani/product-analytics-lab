@@ -207,7 +207,7 @@ export function Module16_Skewness({ module, onNext }) {
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>
           {isNormal ? 'Normal Distribution — Symmetric' : `Log-Normal Distribution — Right-Skewed (top 10% = ${topContrib}% of revenue)`}
         </div>
-        <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ overflow: 'visible' }}>
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ maxWidth: W, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           {/* Fill */}
           <path d={fillPath} fill={isNormal ? 'var(--accent)' : 'var(--red)'} opacity={0.13} />
           {/* Curve */}

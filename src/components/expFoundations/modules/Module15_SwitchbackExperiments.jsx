@@ -110,7 +110,7 @@ export function Module_EF15({ onComplete }) {
         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.6rem' }}>
           Switchback timeline — 2-hour windows, one market
         </div>
-        <svg viewBox={'0 0 ' + W + ' ' + H} width="100%" style={{ display: 'block' }}>
+        <svg viewBox={'0 0 ' + W + ' ' + H} width="100%" style={{ maxWidth: W, display: 'block', margin: '0 auto' }}>
           {windows.map(function(w, i) {
             var x = 10 + i * segW;
             var isT = w === 'T';

@@ -104,7 +104,8 @@ export function Module_RF04({ onComplete }) {
               <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
                 {['seasonal', 'external'].map(type => (
                   <button key={type} onClick={() => assign(i, type)} disabled={revealed} style={{
-                    padding: '0.3rem 0.65rem', fontSize: '0.75rem', fontWeight: 600,
+                    padding: '0.3rem 0.65rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.75rem', fontWeight: 600,
                     borderRadius: 'var(--radius-sm)', cursor: revealed ? 'default' : 'pointer',
                     background: sel === type ? (revealed ? (sel === correct ? 'var(--teal)' : 'var(--red)') : 'var(--teal)') : 'var(--surface)',
                     color: sel === type ? '#fff' : 'var(--text-muted)',
@@ -120,7 +121,8 @@ export function Module_RF04({ onComplete }) {
 
         {!revealed && allAssigned && (
           <button onClick={() => setRevealed(true)} style={{
-            marginTop: '0.75rem', padding: '0.55rem 1.2rem',
+            marginTop: '0.75rem', padding: '0.55rem 1.2rem', minHeight: 40,
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             background: 'var(--teal)', color: '#fff', border: 'none',
             borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer',
           }}>

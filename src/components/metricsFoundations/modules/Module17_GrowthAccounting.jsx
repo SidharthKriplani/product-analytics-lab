@@ -140,9 +140,9 @@ export function Module_MF17({ module, onNext }) {
           </div>
         </div>
 
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem', overflowX: 'auto' }}>
           <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.3rem', textAlign: 'center' }}>Growth accounting waterfall</div>
-          <svg viewBox={'0 0 ' + W17 + ' ' + H17} width='100%' style={{ display: 'block' }}>
+          <svg viewBox={'0 0 ' + W17 + ' ' + H17} width='100%' style={{ maxWidth: W17, display: 'block', margin: '0 auto' }}>
             <line x1={padL17} y1={padT17 + innerH17} x2={W17 - padR17} y2={padT17 + innerH17} stroke='var(--border)' strokeWidth='1' />
             <line x1={padL17} y1={padT17} x2={padL17} y2={padT17 + innerH17} stroke='var(--border)' strokeWidth='1' />
             {bars.map(function(bar, idx) {

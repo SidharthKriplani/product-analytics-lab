@@ -131,9 +131,9 @@ export function Module_MF15({ module, onNext }) {
           </div>
         </div>
 
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem', overflowX: 'auto' }}>
           <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.3rem', textAlign: 'center' }}>Lness distribution — days active per month</div>
-          <svg viewBox={'0 0 ' + W15 + ' ' + H15} width='100%' style={{ display: 'block' }}>
+          <svg viewBox={'0 0 ' + W15 + ' ' + H15} width='100%' style={{ maxWidth: W15, display: 'block', margin: '0 auto' }}>
             <line x1={padL15} y1={padT15 + innerH15} x2={W15 - padR15} y2={padT15 + innerH15} stroke='var(--border)' strokeWidth='1' />
             <line x1={padL15} y1={padT15} x2={padL15} y2={padT15 + innerH15} stroke='var(--border)' strokeWidth='1' />
             {lnessBars.map(function(bar, idx) {

@@ -87,7 +87,7 @@ export function Module_EF13({ onComplete }) {
         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.6rem' }}>
           Traffic allocation — Round {round} {round === allRounds.length - 1 ? '(converged)' : ''}
         </div>
-        <svg viewBox={'0 0 ' + BAR_W + ' ' + BAR_H} width="100%" style={{ display: 'block' }}>
+        <svg viewBox={'0 0 ' + BAR_W + ' ' + BAR_H} width="100%" style={{ maxWidth: BAR_W, display: 'block', margin: '0 auto' }}>
           {variantNames.map(function(name, vi) {
             var pct = current[vi];
             var y = vi * (barH + barGap);
@@ -107,7 +107,7 @@ export function Module_EF13({ onComplete }) {
             onClick={function() { if (round < allRounds.length - 1) setRound(function(r) { return r + 1; }); }}
             disabled={round >= allRounds.length - 1}
             style={{
-              padding: '0.45rem 1rem',
+              padding: '0.6rem 1rem', minHeight: '40px',
               background: round >= allRounds.length - 1 ? 'var(--surface)' : 'var(--accent)',
               color: round >= allRounds.length - 1 ? 'var(--text-muted)' : '#fff',
               border: '1px solid ' + (round >= allRounds.length - 1 ? 'var(--border)' : 'var(--accent)'),
@@ -118,7 +118,7 @@ export function Module_EF13({ onComplete }) {
             Run round
           </button>
           {round > 0 && (
-            <button onClick={function() { setRound(0); }} style={{ padding: '0.45rem 0.9rem', background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
+            <button onClick={function() { setRound(0); }} style={{ padding: '0.6rem 0.9rem', minHeight: '40px', background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
               Reset
             </button>
           )}

@@ -197,7 +197,8 @@ export function Module_RF05({ onComplete }) {
             ))}
             {mcqSel !== null && !mcqRevealed && (
               <button onClick={() => setMcqRevealed(true)} style={{
-                marginTop: '0.5rem', padding: '0.5rem 1.1rem',
+                marginTop: '0.5rem', padding: '0.5rem 1.1rem', minHeight: 40,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 background: 'var(--teal)', color: '#fff', border: 'none',
                 borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
               }}>Check</button>

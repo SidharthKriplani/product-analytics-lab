@@ -149,7 +149,7 @@ export function Module_RF13({ onComplete }) {
                     var isSelected = sel === r.id;
                     return (
                       <button key={r.id} onClick={function() { select(s.id, r.id); }} style={{
-                        fontSize: '0.73rem', padding: '0.25rem 0.6rem',
+                        fontSize: '0.73rem', padding: '0.25rem 0.6rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                         background: isSelected ? r.color : 'var(--surface)',
                         border: '1px solid ' + (isSelected ? r.color : 'var(--border)'),
                         borderRadius: 3, color: isSelected ? '#fff' : 'var(--text-muted)',
@@ -173,7 +173,8 @@ export function Module_RF13({ onComplete }) {
 
       {!revealed && allSelected && (
         <button onClick={function() { setRevealed(true); }} style={{
-          padding: '0.55rem 1.2rem', background: 'var(--teal)', color: '#fff',
+          padding: '0.55rem 1.2rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          background: 'var(--teal)', color: '#fff',
           border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700,
           fontSize: '0.88rem', cursor: 'pointer',
         }}>

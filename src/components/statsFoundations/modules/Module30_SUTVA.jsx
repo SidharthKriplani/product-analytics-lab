@@ -176,7 +176,7 @@ export function Module30_SUTVA({ module, onNext }) {
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>
           User interference map
         </div>
-        <svg viewBox="0 0 440 300" width="100%" style={{ overflow: 'visible' }}>
+        <svg viewBox="0 0 440 300" width="100%" style={{ maxWidth: 440, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           {/* Labels */}
           <text x={200} y={22} textAnchor="middle" fontSize={11} fill="var(--accent)" fontWeight={700}>Control group</text>
           <text x={200} y={175} textAnchor="middle" fontSize={11} fill="var(--green)" fontWeight={700}>Treatment group</text>

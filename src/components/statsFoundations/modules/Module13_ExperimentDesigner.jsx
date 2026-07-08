@@ -350,7 +350,7 @@ export function Module13_ExperimentDesigner({ module, onNext }) {
         <svg
           viewBox={`0 0 ${W} ${H}`}
           width="100%"
-          style={{ overflow: 'visible', display: 'block' }}
+          style={{ overflow: 'visible', display: 'block', maxWidth: W, margin: '0 auto' }}
         >
           {/* Shaded: beta region (grey, between critVal and H1 center left tail) */}
           {betaPath && (

@@ -64,6 +64,7 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
   }, [containerRef]);
 
   useEffect(function () {
+    var selChangeTimer = null;
     function onMouseUp(e) {
       if (pickerOpen) return; // the picker manages its own interactions/close
       if (toolbarRef.current && toolbarRef.current.contains(e.target)) return;
@@ -76,11 +77,35 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
       var insideContent = container && container.contains(e.target);
       if (!insideContent) setSel(null);
     }
+    function onTouchStart(e) {
+      // Touch equivalent of onMouseDown: dismiss the toolbar when tapping
+      // outside the content area (tapping the toolbar itself is exempt).
+      if (pickerOpen) return;
+      if (toolbarRef.current && toolbarRef.current.contains(e.target)) return;
+      var container = containerRef.current;
+      var insideContent = container && container.contains(e.target);
+      if (!insideContent) setSel(null);
+    }
+    function onSelectionChange() {
+      // Primary mobile path: iOS/Android text selection (long-press + drag
+      // handles) does not reliably fire `mouseup`, so `mouseup` alone misses
+      // touch-based selection entirely. `selectionchange` fires on every
+      // input method, but fires many times while handles are being dragged —
+      // debounce so we measure once the selection has settled.
+      if (pickerOpen) return;
+      if (selChangeTimer) clearTimeout(selChangeTimer);
+      selChangeTimer = setTimeout(readSelection, 300);
+    }
     document.addEventListener('mouseup', onMouseUp);
     document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('touchstart', onTouchStart, { passive: true });
+    document.addEventListener('selectionchange', onSelectionChange);
     return function () {
       document.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('selectionchange', onSelectionChange);
+      if (selChangeTimer) clearTimeout(selChangeTimer);
     };
   }, [readSelection, containerRef, pickerOpen]);
 
@@ -124,9 +149,9 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
   if (!sel) return null;
 
   var rect = sel.rect;
-  var toolbarW = 190; // approximate width, used only for centering/clamping
+  var toolbarW = 250; // approximate width (incl. 40px touch targets), used only for centering/clamping
   var left = Math.min(Math.max(rect.left + rect.width / 2, toolbarW / 2 + 8), window.innerWidth - toolbarW / 2 - 8);
-  var top = Math.max(rect.top - 52, 8);
+  var top = Math.max(rect.top - 60, 8);
 
   if (pickerOpen && pending) {
     return createPortal(
@@ -163,12 +188,17 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
               onClick={function () { setColor(c.key); }}
               title={'Highlight in ' + c.key}
               style={{
-                width: 18, height: 18, borderRadius: '50%', background: c.css,
-                border: active ? '2px solid var(--text)' : '2px solid transparent',
-                boxShadow: active ? '0 0 0 2px var(--surface)' : 'none',
-                cursor: 'pointer', padding: 0, flexShrink: 0,
+                width: 40, height: 40, minWidth: 40, minHeight: 40, borderRadius: '50%',
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
-            />
+            >
+              <span style={{
+                width: 20, height: 20, borderRadius: '50%', background: c.css,
+                border: active ? '2px solid var(--text)' : '2px solid transparent',
+                boxShadow: active ? '0 0 0 2px var(--surface)' : 'none', display: 'block',
+              }} />
+            </button>
           );
         })}
         <span style={{ width: 1, alignSelf: 'stretch', background: 'var(--border)', margin: '0 0.15rem' }} />
@@ -179,8 +209,8 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
           style={{
             background: color ? 'var(--accent)' : 'var(--surface-2)',
             color: color ? '#fff' : 'var(--text-muted)',
-            border: 'none', borderRadius: '6px', padding: '0.3rem 0.65rem',
-            fontSize: '0.76rem', fontWeight: 700, cursor: color ? 'pointer' : 'not-allowed',
+            border: 'none', borderRadius: '6px', padding: '0.3rem 0.8rem',
+            minHeight: 40, fontSize: '0.8rem', fontWeight: 700, cursor: color ? 'pointer' : 'not-allowed',
             opacity: color ? 1 : 0.6, whiteSpace: 'nowrap',
           }}
         >

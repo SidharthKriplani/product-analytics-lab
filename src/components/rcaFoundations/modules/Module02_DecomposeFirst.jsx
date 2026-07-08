@@ -103,7 +103,7 @@ export function Module_RF02({ onComplete }) {
           return (
             <div key={d.id}>
               <button onClick={() => toggle(d.id)} disabled={revealed} style={{
-                display: 'block', width: '100%', textAlign: 'left',
+                display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', minHeight: 40, boxSizing: 'border-box',
                 padding: '0.65rem 1rem', marginBottom: revealed ? 0 : '0.45rem',
                 background: bg, border: '1.5px solid ' + border,
                 borderRadius: 'var(--radius-sm)', color, fontSize: '0.88rem',
@@ -126,7 +126,8 @@ export function Module_RF02({ onComplete }) {
 
         {!revealed && selected.size > 0 && (
           <button onClick={() => setRevealed(true)} style={{
-            marginTop: '0.75rem', padding: '0.55rem 1.2rem',
+            marginTop: '0.75rem', padding: '0.55rem 1.2rem', minHeight: 40,
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             background: 'var(--teal)', color: '#fff', border: 'none',
             borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer',
           }}>

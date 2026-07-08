@@ -161,41 +161,44 @@ export function Module_MF02({ module, onNext }) {
           For each metric below, rate whether it passes or fails each property. Click a cell to toggle: green = pass, red = fail, empty = not rated. Rate all 5 metrics, then check your answers.
         </p>
 
-        {/* Property headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(4, 60px)', gap: '0.25rem', marginBottom: '0.25rem' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)' }}>Metric</div>
-          {SCORECARD_PROPERTIES.map(function(p) {
-            return <div key={p.id} style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.2 }}>{p.label}</div>;
-          })}
-        </div>
-
-        {/* Metric rows */}
-        {SCORECARD_METRICS.map(function(metric) {
-          return (
-            <div key={metric.id} style={{ display: 'grid', gridTemplateColumns: '1fr repeat(4, 60px)', gap: '0.25rem', marginBottom: '0.35rem', alignItems: 'center' }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>{metric.label}</div>
-              {SCORECARD_PROPERTIES.map(function(prop) {
-                var val = ratings[metric.id][prop.id];
-                var bg = val === null ? 'var(--surface-2)' : val ? 'var(--green-bg)' : 'var(--red-bg)';
-                var borderColor = val === null ? 'var(--border)' : val ? 'var(--green-border)' : 'var(--red-border)';
-                var icon = val === null ? '–' : val ? <Icon name='check' size={14} color='currentColor' /> : <Icon name='x' size={14} color='currentColor' />;
-                var iconColor = val === null ? 'var(--text-muted)' : val ? 'var(--green)' : 'var(--red)';
-
-                if (checked) {
-                  var isCorrect = val === metric.correct[prop.id];
-                  borderColor = isCorrect ? 'var(--green-border)' : 'var(--red-border)';
-                  bg = isCorrect ? 'var(--green-bg)' : 'var(--red-bg)';
-                }
-
-                return (
-                  <button key={prop.id} onClick={function() { handleToggle(metric.id, prop.id); }} style={{ background: bg, border: '1.5px solid ' + borderColor, borderRadius: 'var(--radius-sm)', padding: '0.3rem', cursor: checked ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 700, color: iconColor, textAlign: 'center', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {icon}
-                  </button>
-                );
+        {/* Property headers + metric rows — horizontally scrollable on narrow screens so the fixed-width toggle columns never clip */}
+        <div style={{ overflowX: 'auto' }}>
+          <div style={{ minWidth: '380px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(4, 60px)', gap: '0.25rem', marginBottom: '0.25rem' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)' }}>Metric</div>
+              {SCORECARD_PROPERTIES.map(function(p) {
+                return <div key={p.id} style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.2 }}>{p.label}</div>;
               })}
             </div>
-          );
-        })}
+
+            {SCORECARD_METRICS.map(function(metric) {
+              return (
+                <div key={metric.id} style={{ display: 'grid', gridTemplateColumns: '1fr repeat(4, 60px)', gap: '0.25rem', marginBottom: '0.35rem', alignItems: 'center' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>{metric.label}</div>
+                  {SCORECARD_PROPERTIES.map(function(prop) {
+                    var val = ratings[metric.id][prop.id];
+                    var bg = val === null ? 'var(--surface-2)' : val ? 'var(--green-bg)' : 'var(--red-bg)';
+                    var borderColor = val === null ? 'var(--border)' : val ? 'var(--green-border)' : 'var(--red-border)';
+                    var icon = val === null ? '–' : val ? <Icon name='check' size={14} color='currentColor' /> : <Icon name='x' size={14} color='currentColor' />;
+                    var iconColor = val === null ? 'var(--text-muted)' : val ? 'var(--green)' : 'var(--red)';
+
+                    if (checked) {
+                      var isCorrect = val === metric.correct[prop.id];
+                      borderColor = isCorrect ? 'var(--green-border)' : 'var(--red-border)';
+                      bg = isCorrect ? 'var(--green-bg)' : 'var(--red-bg)';
+                    }
+
+                    return (
+                      <button key={prop.id} onClick={function() { handleToggle(metric.id, prop.id); }} style={{ background: bg, border: '1.5px solid ' + borderColor, borderRadius: 'var(--radius-sm)', padding: '0.3rem', minHeight: '40px', minWidth: '40px', cursor: checked ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 700, color: iconColor, textAlign: 'center', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {icon}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Check button */}
         {allRated && !checked && (

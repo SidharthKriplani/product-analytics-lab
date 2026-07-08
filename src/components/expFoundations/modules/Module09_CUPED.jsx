@@ -114,7 +114,8 @@ export function Module_EF09({ onComplete }) {
               if (!cupedOn) setShowExplainer(true);
             }}
             style={{
-              padding: '0.3rem 0.9rem',
+              padding: '0.55rem 0.9rem',
+              minHeight: '40px',
               background: cupedOn ? 'var(--teal)' : 'var(--surface)',
               color: cupedOn ? '#fff' : 'var(--text)',
               border: '1.5px solid ' + (cupedOn ? 'var(--teal-border)' : 'var(--border)'),
@@ -127,7 +128,7 @@ export function Module_EF09({ onComplete }) {
           </button>
         </div>
 
-        <svg viewBox={'0 0 ' + svgW + ' ' + svgH} style={{ width: '100%', height: 'auto', display: 'block' }}>
+        <svg viewBox={'0 0 ' + svgW + ' ' + svgH} width="100%" style={{ maxWidth: svgW, height: 'auto', display: 'block', margin: '0 auto' }}>
           {/* Axis lines */}
           <line x1={padL} y1={padT} x2={padL} y2={padT + chartH} stroke="var(--border)" strokeWidth="1" />
           <line x1={padL} y1={padT + chartH} x2={padL + chartW} y2={padT + chartH} stroke="var(--border)" strokeWidth="1" />

@@ -122,7 +122,7 @@ export function Module_EF02({ onComplete }) {
                     }
                     return (
                       <button key={u.id} onClick={() => assign(i, u.id)} disabled={revealed} style={{
-                        padding: '0.3rem 0.75rem', fontSize: '0.78rem', fontWeight: 600,
+                        padding: '0.55rem 0.9rem', minHeight: '40px', fontSize: '0.78rem', fontWeight: 600,
                         background: bg, border: '1.5px solid ' + border, color,
                         borderRadius: 'var(--radius-sm)', cursor: revealed ? 'default' : 'pointer',
                         transition: 'all 0.15s',
@@ -152,7 +152,7 @@ export function Module_EF02({ onComplete }) {
               to that scenario.
             </InstructionBox>
             <button onClick={() => setRevealed(true)} style={{
-              padding: '0.55rem 1.2rem', background: 'var(--accent)', color: '#fff',
+              padding: '0.65rem 1.2rem', minHeight: '40px', background: 'var(--accent)', color: '#fff',
               border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer',
             }}>
               Check answers

@@ -114,7 +114,7 @@ export function Module_EF04({ onComplete }) {
                   }
                   return (
                     <button key={String(val)} onClick={() => answer(i, val)} disabled={isRevealed} style={{
-                      padding: '0.35rem 1rem', fontSize: '0.82rem', fontWeight: 700,
+                      padding: '0.55rem 1rem', minHeight: '40px', fontSize: '0.82rem', fontWeight: 700,
                       background: bg, border: '1.5px solid ' + border, color,
                       borderRadius: 'var(--radius-sm)', cursor: isRevealed ? 'default' : 'pointer',
                       transition: 'all 0.15s',
@@ -125,7 +125,7 @@ export function Module_EF04({ onComplete }) {
                 })}
                 {picked !== undefined && !isRevealed && (
                   <button onClick={() => check(i)} style={{
-                    padding: '0.35rem 0.85rem', fontSize: '0.82rem', fontWeight: 700,
+                    padding: '0.55rem 0.9rem', minHeight: '40px', fontSize: '0.82rem', fontWeight: 700,
                     background: 'var(--accent)', color: '#fff', border: 'none',
                     borderRadius: 'var(--radius-sm)', cursor: 'pointer',
                   }}>

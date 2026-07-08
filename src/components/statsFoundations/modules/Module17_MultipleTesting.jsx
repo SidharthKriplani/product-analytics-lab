@@ -121,7 +121,7 @@ export function Module17_MultipleTesting({ module, onNext }) {
         </div>
 
         {/* SVG probability bar */}
-        <svg viewBox="0 0 500 60" width="100%" style={{ display: 'block', marginBottom: '0.5rem' }}>
+        <svg viewBox="0 0 500 60" width="100%" style={{ display: 'block', marginBottom: '0.5rem', maxWidth: 500, margin: '0 auto 0.5rem' }}>
           {/* Background track */}
           <rect x={0} y={15} width={500} height={30} rx={6} fill="var(--surface)" stroke="var(--border)" strokeWidth={1} />
           {/* Fill */}

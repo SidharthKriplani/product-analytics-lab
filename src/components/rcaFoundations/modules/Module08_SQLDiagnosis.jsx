@@ -127,7 +127,8 @@ export function Module_RF08({ onComplete }) {
               key={i}
               onClick={() => setStep(i)}
               style={{
-                padding: '0.35rem 0.8rem', borderRadius: 'var(--radius-sm)',
+                padding: '0.35rem 0.8rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 'var(--radius-sm)',
                 border: '1.5px solid ' + (step === i ? 'var(--teal-border)' : (ranSteps[i] ? 'var(--teal-border)' : 'var(--border)')),
                 background: step === i ? 'var(--teal-bg)' : (ranSteps[i] ? 'var(--teal-bg)' : 'var(--surface-2)'),
                 color: step === i ? 'var(--teal)' : (ranSteps[i] ? 'var(--teal)' : 'var(--text-muted)'),
@@ -185,7 +186,8 @@ export function Module_RF08({ onComplete }) {
             <button
               onClick={() => runStep(step)}
               style={{
-                padding: '0.5rem 1.1rem', borderRadius: 'var(--radius-sm)',
+                padding: '0.5rem 1.1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 'var(--radius-sm)',
                 border: 'none', background: 'var(--teal)', color: '#fff',
                 fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
               }}
@@ -215,7 +217,7 @@ export function Module_RF08({ onComplete }) {
             {mcqSel !== null && !mcqRevealed && (
               <button
                 onClick={() => setMcqRevealed(true)}
-                style={{ marginTop: '0.4rem', padding: '0.45rem 1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}
+                style={{ marginTop: '0.4rem', padding: '0.45rem 1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}
               >Check</button>
             )}
             {mcqRevealed && (

@@ -154,7 +154,8 @@ export function Module_RF11({ onComplete }) {
                     onClick={function() { selectCat(ev.id, cat); }}
                     disabled={isRevealed}
                     style={{
-                      padding: '0.25rem 0.65rem', borderRadius: 'var(--radius-sm)',
+                      padding: '0.25rem 0.65rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      borderRadius: 'var(--radius-sm)',
                       border: '1.5px solid ' + border, background: bg, color,
                       fontSize: '0.78rem', fontWeight: isSelected || (isRevealed && isCorrCat) ? 700 : 400,
                       cursor: isRevealed ? 'default' : 'pointer', transition: 'all 0.15s',
@@ -166,7 +167,7 @@ export function Module_RF11({ onComplete }) {
             {sel && !isRevealed && (
               <button
                 onClick={function() { checkEvent(ev.id); }}
-                style={{ padding: '0.3rem 0.75rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer' }}
+                style={{ padding: '0.3rem 0.75rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer' }}
               >Check</button>
             )}
             {isRevealed && (
@@ -199,7 +200,7 @@ export function Module_RF11({ onComplete }) {
           {mcqSel !== null && !mcqRevealed && (
             <button
               onClick={function() { setMcqRevealed(true); }}
-              style={{ marginTop: '0.4rem', padding: '0.45rem 1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}
+              style={{ marginTop: '0.4rem', padding: '0.45rem 1rem', minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}
             >Check</button>
           )}
           {mcqRevealed && (

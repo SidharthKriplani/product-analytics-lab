@@ -170,7 +170,7 @@ export function Module27_EffectSize({ module, onNext }) {
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>
           Control (blue) vs Treatment (green) — Cohen's d = {cohensD.toFixed(2)}
         </div>
-        <svg viewBox="0 0 500 260" width="100%" style={{ overflow: 'visible' }}>
+        <svg viewBox="0 0 500 260" width="100%" style={{ maxWidth: 500, display: 'block', margin: '0 auto', overflow: 'visible' }}>
           <line x1={50} y1={220} x2={450} y2={220} stroke="var(--border)" strokeWidth={1.5} />
 
           <polyline points={curvePoints.control} fill="none" stroke="var(--accent)" strokeWidth={2.5} opacity={0.8} />
