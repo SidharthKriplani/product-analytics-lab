@@ -7,19 +7,19 @@ const MCQ_RD = {
   options: [
     {
       id: 'a',
-      label: 'Customers just above and just below $500 are very similar to each other, so the comparison is nearly as clean as random assignment',
+      label: 'Customers just above and just below $500 are similar to each other, so the comparison is nearly as clean as random assignment',
       correct: true,
       feedback: 'Correct. The key RD insight: near the threshold, assignment is essentially local random. A customer who spent $499 vs $501 likely differs only by chance, not by meaningful underlying differences. That near-randomness makes the comparison credible.',
     },
     {
       id: 'b',
-      label: 'Customers who hit the $500 threshold are higher-value, which makes them a better control group',
+      label: 'Customers who cross the $500 threshold are higher-value spenders overall, which structurally makes them a stronger control group',
       correct: false,
       feedback: 'This gets the logic backwards. Higher-value customers are precisely why you cannot compare them to all other customers. RD works because it compares very similar customers near the threshold, not because the treated group is better.',
     },
     {
       id: 'c',
-      label: 'The $500 threshold was set randomly by the company, so treatment assignment is random',
+      label: 'The $500 threshold was set randomly by the company policy team, so treatment assignment above and below it is fully random',
       correct: false,
       feedback: 'RD does not require that the threshold itself was set randomly. It requires that customers cannot precisely control whether they end up just above or just below the threshold. The threshold can be rule-based as long as sorting is imprecise.',
     },

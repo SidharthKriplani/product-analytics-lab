@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Computing A/B Test Results in SQL: Means, Variances, and t-stats From Scratch | Product Analytics Lab</title>
+  <meta name="description" content="Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches e…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/ab-test-results-sql">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/ab-test-results-sql">
+  <meta property="og:title"       content="Computing A/B Test Results in SQL: Means, Variances, and t-stats From Scratch | Product Analytics Lab">
+  <meta property="og:description" content="Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches e…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Computing A/B Test Results in SQL: Means, Variances, and t-stats From Scratch">
+  <meta name="twitter:description" content="Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches e…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Computing A/B Test Results in SQL: Means, Variances, and t-stats From Scratch","description":"Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches e…","url":"https://experimentation-systems-lab.vercel.app/posts/ab-test-results-sql","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/ab-test-results-sql" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">SQL &amp; Data</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>Computing A/B Test Results in SQL: Means, Variances, and t-stats From Scratch</h1>
+    <p class="desc">Most analysts use a tool to compute experiment results. Knowing how to compute them in SQL shows you understand what the tool is actually doing — and catches errors when it breaks.</p>
+
+    <p>Most product teams use an experimentation platform — Optimizely, Statsig, Eppo, or an internal tool — to compute A/B test results. These tools handle the statistics invisibly. Understanding what they're doing matters for two reasons: you can catch errors when the tool produces a suspicious result, and in interviews you'll be asked to compute results manually. The SQL pattern is straightforward: aggregate per variant, compute mean and variance per variant, apply the two-sample t-test formula.</p>
+    <h2>Step 1: The SRM Check First</h2>
+    <p>Before computing any metric results, check for Sample Ratio Mismatch (SRM). If you assigned a 50/50 split but got 53/47, the experiment assignment mechanism is broken and no result from this experiment is trustworthy. The SRM check: SELECT variant, COUNT(DISTINCT user_id) as n FROM experiment_assignments GROUP BY variant. Compare the actual counts to the expected counts using a chi-squared test. In SQL: the chi-squared statistic = SUM((observed - expected)^2 / expected) across variants. For a 50/50 split, expected = total_n / 2 for each variant. If the chi-squared p-value is below 0.01, the experiment has SRM — stop.</p>
+    <blockquote class="example"><strong>Crafted checkout experiment — full SQL from assignments to t-stat:</strong> -- Step 1: SRM check<br>SELECT<br>  variant,<br>  COUNT(DISTINCT user_id) AS n,<br>  SUM(COUNT(DISTINCT user_id)) OVER () AS total_n,<br>  SUM(COUNT(DISTINCT user_id)) OVER () / 2.0 AS expected_n<br>FROM experiment_assignments<br>WHERE experiment_id = 'checkout_redesign_2024'<br>GROUP BY variant;<br>-- Verify: |actual_n - expected_n| / expected_n < 0.01 for each variant<br><br>-- Step 2: Compute means and variances per variant<br>WITH user_metrics AS (<br>  SELECT<br>    ea.user_id,<br>    ea.variant,<br>    COALESCE(SUM(o.order_value), 0) AS revenue<br>  FROM experiment_assignments ea<br>  LEFT JOIN orders o<br>    ON ea.user_id = o.buyer_id<br>    AND o.created_at BETWEEN '2024-03-01' AND '2024-03-14'<br>  WHERE ea.experiment_id = 'checkout_redesign_2024'<br>  GROUP BY ea.user_id, ea.variant<br>),<br>stats AS (<br>  SELECT<br>    variant,<br>    COUNT(*) AS n,<br>    AVG(revenue) AS mean_revenue,<br>    VAR_SAMP(revenue) AS var_revenue<br>  FROM user_metrics<br>  GROUP BY variant<br>)<br>SELECT<br>  t.mean_revenue - c.mean_revenue AS mean_diff,<br>  SQRT(t.var_revenue / t.n + c.var_revenue / c.n) AS se,<br>  (t.mean_revenue - c.mean_revenue)<br>    / SQRT(t.var_revenue / t.n + c.var_revenue / c.n) AS t_stat<br>FROM stats t CROSS JOIN stats c<br>WHERE t.variant = 'treatment' AND c.variant = 'control';<br>-- t_stat > 1.96 → p < 0.05 (two-tailed)<br>-- t_stat > 2.58 → p < 0.01</blockquote>
+    <h2>The Formula and What Each Part Does</h2>
+    <p>The t-statistic formula is: t = (mean_T - mean_C) / sqrt(var_T/n_T + var_C/n_C). The numerator is the observed difference between groups. The denominator is the standard error — how much the observed difference could bounce around by chance given the sample sizes and variances. A large numerator relative to the denominator means the signal is strong relative to the noise. VAR_SAMP computes sample variance (divides by n-1 rather than n), which is the correct formula for statistical inference. The 95% confidence interval around the mean difference is: mean_diff ± 1.96 × standard_error.</p>
+    <blockquote class="callout"><strong>The binary metric version: CVR, not revenue:</strong> For binary metrics like conversion rate (0 or 1 per user), the variance formula simplifies. For a binary outcome with mean p, the sample variance is p × (1-p). So for checkout CVR:
+se = sqrt(p_T*(1-p_T)/n_T + p_C*(1-p_C)/n_C)
+t = (p_T - p_C) / se
+
+In SQL: replace AVG(revenue) with AVG(converted::int) and VAR_SAMP(revenue) with AVG(converted::int) * (1 - AVG(converted::int)) — or just let VAR_SAMP handle it on the 0/1 column.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/code">Practice A/B test SQL in Programming Lab →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/ab-test-results-sql">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

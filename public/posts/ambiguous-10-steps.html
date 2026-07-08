@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Break Down Any Ambiguous Product Question in 10 Steps | Product Analytics Lab</title>
+  <meta name="description" content="Interviewers asking ambiguous questions are not looking for your metrics list. They want to see you convert a fuzzy business question into structured analysis.…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/ambiguous-10-steps">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/ambiguous-10-steps">
+  <meta property="og:title"       content="How to Break Down Any Ambiguous Product Question in 10 Steps | Product Analytics Lab">
+  <meta property="og:description" content="Interviewers asking ambiguous questions are not looking for your metrics list. They want to see you convert a fuzzy business question into structured analysis.…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="How to Break Down Any Ambiguous Product Question in 10 Steps">
+  <meta name="twitter:description" content="Interviewers asking ambiguous questions are not looking for your metrics list. They want to see you convert a fuzzy business question into structured analysis.…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How to Break Down Any Ambiguous Product Question in 10 Steps","description":"Interviewers asking ambiguous questions are not looking for your metrics list. They want to see you convert a fuzzy business question into structured analysis.…","url":"https://experimentation-systems-lab.vercel.app/posts/ambiguous-10-steps","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #6B3FA0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #6B3FA0cc 30%, #6B3FA0cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #6B3FA0;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #6B3FA0; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #6B3FA0;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/ambiguous-10-steps" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Ambiguous Problems</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>How to Break Down Any Ambiguous Product Question in 10 Steps</h1>
+    <p class="desc">Interviewers asking ambiguous questions are not looking for your metrics list. They want to see you convert a fuzzy business question into structured analysis. Here's the framework.</p>
+
+    <p>Most candidates hear &quot;why is retention falling?&quot; and immediately reach for metrics. Engagement, DAU/MAU, session length — a list of things to look at. That's the wrong first move. The question is ambiguous. Retention for whom? Falling how fast? Compared to what baseline? Over what time window? Jumping to analysis before answering these questions produces analysis of the wrong problem. The 10-step framework is a forcing function that makes you think before you query.</p>
+    <h2>Steps 1–5: Understand the Problem Before Touching Data</h2>
+    <p>Step 1: Restate the problem in your own words. This forces you to surface hidden assumptions. &quot;We're seeing a decline in retention&quot; becomes &quot;we're seeing a decline in D30 retention among users acquired in the last 90 days on iOS.&quot; Step 2: Identify the decision-maker. Who asked this question and what decision are they trying to make? A PM wants to know what to build. A VP wants to know whether to escalate. The same data produces different recommendations depending on who needs to act. Step 3: Define success. What would a satisfying answer look like? What decision does it enable? Step 4: Scope the time horizon. Is this a recent spike or a multi-month trend? Recent changes suggest a launch or bug; structural trends suggest a product-market fit issue. Step 5: List what you know. What data exists? What has already been investigated?</p>
+    <blockquote class="example"><strong>&quot;Why is retention falling?&quot; walked through all 10 steps:</strong> Step 1 — Restate: D30 retention for new Threadline users dropped from 61% to 48% over the last 6 weeks.<br>Step 2 — Decision-maker: Head of Product, deciding whether to delay a scheduled feature launch and redirect engineering to onboarding.<br>Step 3 — Success definition: identify the specific user behavior or product experience driving the drop, with enough confidence to prioritize an intervention.<br>Step 4 — Time horizon: 6-week trend starting after the Jan 14 onboarding redesign. Not a spike — consistent decline.<br>Step 5 — What we know: redesign shipped Jan 14. D7 retention unchanged. D30 dropped. New users complete the onboarding checklist at the same rate.<br>Step 6 — What we don't know: whether users who completed onboarding are reaching the "aha moment" (first successful workflow). What the D30 drop looks like by acquisition channel.<br>Step 7 — Decompose: D30 retention = D7 retention × D7-to-D30 conversion. D7 is flat, so the problem is in the D7-to-D30 window — users start but don't form a habit.<br>Step 8 — Design a proxy if needed: if D30 is too slow, use "core workflow completed in first 14 days" as a leading indicator.<br>Step 9 — State assumptions: assuming the Jan 14 redesign is the primary change in the window. Assuming D7 retention is a reliable signal of short-term engagement quality.<br>Step 10 — Recommendation: investigate what the onboarding redesign changed between day 7 and day 30. Hypothesis: removed a prompt that re-engaged users in week 2. Suggested action: audit the re-engagement email sequence for users who passed day 7 before and after Jan 14.</blockquote>
+    <blockquote class="callout"><strong>Why most candidates skip steps 1–4:</strong> Steps 1–4 feel slow. The instinct under interview pressure is to demonstrate knowledge quickly — list metrics, name frameworks, show you know retention. But interviewers are watching for the opposite: do you slow down enough to understand what you're actually being asked? A candidate who spends 90 seconds on steps 1–4 and produces a precisely targeted analysis is demonstrating more seniority than a candidate who spends 90 seconds listing every possible metric.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice problem breakdown in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/ambiguous-10-steps">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

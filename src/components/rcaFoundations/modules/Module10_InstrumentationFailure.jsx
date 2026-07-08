@@ -39,9 +39,9 @@ const RF10_MCQ = {
   question: 'Why should data quality be checked before product hypotheses in an RCA?',
   options: [
     'Data quality issues are rare but catastrophic, so they should be ruled out early as a precautionary measure even if it delays the investigation',
-    'Data quality issues are cheap to rule out and are the most common source of false alarms in RCA',
-    'Product hypotheses require stakeholder alignment before investigation can begin, so data quality fills the waiting time productively',
-    'Data quality checks establish a validated baseline — without confirming the numbers are correct first, any subsequent segmentation or decomposition could be built on faulty data',
+    'Data quality issues are cheap and fast to rule out, and empirically they are the single most common source of false alarms in RCA investigations',
+    'Product hypotheses require stakeholder alignment before investigation can formally begin, so checking data quality fills the waiting time productively',
+    'Data quality checks establish a validated baseline before segmentation — without them, any decomposition could be built on faulty numbers',
   ],
   correct: 1,
   explanation: 'Data quality checks take minutes and are the most frequent cause of false RCA alarms. Option A gets the reasoning backwards — data quality issues are common, not rare. Option C confuses sequencing with stakeholder coordination. Option D sounds rigorous ("validate before you segment") but describes a benefit of data quality checks, not the reason they come first — the real reason is cost-effectiveness: they are cheap to do and eliminate the most common false alarms before expensive product investigation begins.',

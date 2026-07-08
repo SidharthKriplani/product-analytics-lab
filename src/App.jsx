@@ -518,10 +518,36 @@ export default function App() {
     setProgressSnapshot({ ...getAllProgress(), challengesProgress: getAllChallengesProgress(), biProgress: getAllBIProgress(), stfProgress: getAllSTFProgress(), takehomeProgress: getAllTakehomeProgress(), instrumentationProgress: getAllInstrumentationProgress() });
   }
 
+  // C6 fix (2026-07-08 LAB-STANDARDS audit): items opened from My Tracks or
+  // the Review Queue always had their runner's "← Back" hardcoded to the
+  // room's own browser list (e.g. cases-runner → 'cases'), never back to
+  // wherever the user actually launched it from. navOrigin is set right
+  // before dispatching to an opener from those two surfaces; every runner's
+  // onBack now calls returnFromRunner(itsNormalFallback) instead of
+  // navigate(itsNormalFallback) directly, so it returns to My Tracks/Review
+  // Queue when that's where the launch came from, and behaves exactly as
+  // before otherwise. Mirrors MSL's navOrigin pattern (2026-07-07), ported
+  // into PAL's plain-page-string navigate() idiom instead of hash origin.
+  const [navOrigin, setNavOrigin] = useState(null);
+  function returnFromRunner(fallbackPage) {
+    if (navOrigin) {
+      const target = navOrigin;
+      setNavOrigin(null);
+      navigate(target);
+    } else {
+      navigate(fallbackPage);
+    }
+  }
+
   function navigate(target) {
     // SQL Lab requires sign-in — intercept here before navigation
     if (target === 'sql-lab' && !user) { setAuthGate(true); return; }
     track('page_viewed', { page: target });
+    // A direct navigate() call (sidebar click, breadcrumb, etc.) means the
+    // user chose to leave on their own — any pending navOrigin from an
+    // earlier My Tracks/Review Queue launch is now stale and must not leak
+    // into whatever gets opened next.
+    setNavOrigin(null);
     setPage(target);
     setSidebarOpen(false);
     setActiveScenarioId(null);
@@ -1284,7 +1310,7 @@ export default function App() {
             key={activeStatsModuleId}
             caseId={activeStatsModuleId}
             savedProgress={getStatsProgress(activeStatsModuleId)}
-            onBack={() => navigate('browser')}
+            onBack={() => returnFromRunner('browser')}
             onGoToReview={id => openScenario(id)}
             onGoToDesign={id => openDesignScenario(id)}
             onNext={nextStatsModuleId ? () => { setActiveStatsModuleId(nextStatsModuleId); } : null}
@@ -1304,7 +1330,7 @@ export default function App() {
             unlocked={unlocked}
             user={user}
             onShowAuth={() => setShowAuth(true)}
-            onBack={() => navigate('metrics')}
+            onBack={() => returnFromRunner('metrics')}
             onGoToDesign={id => openDesignScenario(id)}
             onGoToReview={id => openScenario(id)}
             onNext={nextMetricsCaseId ? () => openMetricsCase(nextMetricsCaseId) : undefined}
@@ -1323,7 +1349,7 @@ export default function App() {
             savedProgress={getDesignProgress(activeDesignScenarioId)}
             user={user}
             onShowAuth={() => setShowAuth(true)}
-            onBack={() => navigate('design')}
+            onBack={() => returnFromRunner('design')}
             onGoToReview={id => openScenario(id)}
             onNext={nextDesignScenarioId ? () => openDesignScenario(nextDesignScenarioId) : undefined}
             onNavigate={navigate}
@@ -1348,7 +1374,7 @@ export default function App() {
             caseId={activeScenarioId}
             user={user}
             onShowAuth={() => setShowAuth(true)}
-            onBack={() => { navigate('browser'); refreshProgress(); }}
+            onBack={() => { returnFromRunner('browser'); refreshProgress(); }}
             onNext={nextScenarioId ? () => { openScenario(nextScenarioId); refreshProgress(); } : null}
             hasNext={!!nextScenarioId}
             onGoToDesign={openDesignScenario}
@@ -1368,7 +1394,7 @@ export default function App() {
             unlocked={unlocked}
             user={user}
             onShowAuth={() => setShowAuth(true)}
-            onBack={() => navigate('rca')}
+            onBack={() => returnFromRunner('rca')}
             onNext={nextRCACaseId ? () => openRCACase(nextRCACaseId) : undefined}
             onNavigate={navigate}
           />
@@ -1386,7 +1412,7 @@ export default function App() {
             unlocked={unlocked}
             user={user}
             onShowAuth={() => setShowAuth(true)}
-            onBack={() => navigate('cases')}
+            onBack={() => returnFromRunner('cases')}
             onNext={nextBusinessCaseId ? () => openBusinessCase(nextBusinessCaseId) : undefined}
             onNavigate={navigate}
           />
@@ -1406,7 +1432,7 @@ export default function App() {
             key={activePDScenarioId}
             caseId={activePDScenarioId}
             savedProgress={getProductDesignProgress(activePDScenarioId)}
-            onBack={() => navigate('product-design')}
+            onBack={() => returnFromRunner('product-design')}
             onNext={nextPDScenarioId ? () => openPDScenario(nextPDScenarioId) : undefined}
             onNavigate={navigate}
           />
@@ -1441,7 +1467,7 @@ export default function App() {
           <PrioritizationRunner
             key={activePrioritizationId}
             caseId={activePrioritizationId}
-            onBack={() => navigate('prioritization')}
+            onBack={() => returnFromRunner('prioritization')}
             onNext={nextPrioritizationId ? () => openPrioritizationScenario(nextPrioritizationId) : undefined}
             onNavigate={navigate}
           />
@@ -1455,7 +1481,7 @@ export default function App() {
           <BehavioralRunner
             key={activeBehavioralId}
             caseId={activeBehavioralId}
-            onBack={() => navigate('behavioral')}
+            onBack={() => returnFromRunner('behavioral')}
             onNext={nextBehavioralId ? () => openBehavioralQuestion(nextBehavioralId) : undefined}
             onNavigate={navigate}
           />
@@ -1469,7 +1495,7 @@ export default function App() {
           <EstimationRunner
             key={activeEstimationId}
             caseId={activeEstimationId}
-            onBack={() => navigate('estimation')}
+            onBack={() => returnFromRunner('estimation')}
             onNext={nextEstimationId ? () => openEstimationProblem(nextEstimationId) : undefined}
             onNavigate={navigate}
           />
@@ -1487,7 +1513,7 @@ export default function App() {
           <StatsFoundationsRunner
             key={activeStatFoundationsId}
             moduleId={activeStatFoundationsId}
-            onBack={() => setPage('stat-foundations')}
+            onBack={() => returnFromRunner('stat-foundations')}
             onNext={nextStatFoundationsId
               ? () => openStatFoundationsModule(nextStatFoundationsId)
               : () => setPage('stat-foundations')}
@@ -1511,7 +1537,7 @@ export default function App() {
             key={activeGrowthAnalyticsId}
             caseId={activeGrowthAnalyticsId}
             unlocked={unlocked}
-            onBack={() => navigate('metrics')}
+            onBack={() => returnFromRunner('metrics')}
             onNext={nextGrowthAnalyticsId ? () => openGrowthAnalyticsCase(nextGrowthAnalyticsId) : undefined}
             onNavigate={navigate}
           />
@@ -1575,7 +1601,7 @@ export default function App() {
             }>
             <BIRunner
               caseId={activeBICaseId}
-              onBack={() => setPage('bi')}
+              onBack={() => returnFromRunner('bi')}
               onNext={() => { const n = getNextBICaseId(activeBICaseId); if (n) openBICase(n); else setPage('bi'); }}
               unlocked={unlocked}
               onNavigate={navigate}
@@ -1605,7 +1631,7 @@ export default function App() {
             }>
             <SpotTheFlawRunner
               caseId={activeSTFCaseId}
-              onBack={() => setPage('spot-the-flaw')}
+              onBack={() => returnFromRunner('spot-the-flaw')}
               onNext={() => { const n = getNextSTFCaseId(activeSTFCaseId); if (n) openSTFCase(n); else setPage('spot-the-flaw'); }}
               unlocked={unlocked}
               onNavigate={navigate}
@@ -1655,7 +1681,7 @@ export default function App() {
             }>
             <InstrumentationRunner
               caseId={activeInstrumentationCaseId}
-              onBack={() => navigate('instrumentation')}
+              onBack={() => returnFromRunner('instrumentation')}
               onNext={nextInstrumentationCaseId ? () => openInstrumentationCase(nextInstrumentationCaseId) : null}
               unlocked={unlocked}
               onNavigate={navigate}
@@ -1770,7 +1796,7 @@ export default function App() {
           <PublicProfile userId={publicProfileUserId} onNavigate={navigate} />
         )}
         {page === 'interview-qa' && (
-          <InterviewQABrowser key={activeInterviewQAId || 'interview-qa'} unlocked={unlocked} onBack={() => navigate('home')} initialQAId={activeInterviewQAId} onOpenQA={id => setActiveInterviewQAId(id)} />
+          <InterviewQABrowser key={activeInterviewQAId || 'interview-qa'} unlocked={unlocked} onBack={() => returnFromRunner('home')} initialQAId={activeInterviewQAId} onOpenQA={id => setActiveInterviewQAId(id)} />
         )}
         {/* Archived V5.81.0 — RoomMap (orphan, unlinked). */}
         {page === 'failures' && <FailuresCatalog key={activeFailureId || 'failures'} onNavigate={navigate} initialFailureId={activeFailureId} onOpenFailure={id => setActiveFailureId(id)} />}
@@ -1807,7 +1833,7 @@ export default function App() {
           <RCAFoundationsRunner
             key={activeRCAFoundationId}
             moduleId={activeRCAFoundationId}
-            onBack={() => setPage('rca-foundations')}
+            onBack={() => returnFromRunner('rca-foundations')}
             onNext={(() => { const n = getNextRCAFoundationId(activeRCAFoundationId); return n ? () => openRCAFoundationModule(n) : () => setPage('rca-foundations'); })()}
             onSelectModule={openRCAFoundationModule}
             unlocked={unlocked}
@@ -1822,7 +1848,7 @@ export default function App() {
           <ExpFoundationsRunner
             key={activeExpFoundationId}
             moduleId={activeExpFoundationId}
-            onBack={() => setPage('exp-foundations')}
+            onBack={() => returnFromRunner('exp-foundations')}
             onNext={(() => { const n = getNextExpFoundationId(activeExpFoundationId); return n ? () => openExpFoundationModule(n) : () => setPage('exp-foundations'); })()}
             onSelectModule={openExpFoundationModule}
             unlocked={unlocked}
@@ -1837,7 +1863,7 @@ export default function App() {
           <MetricsFoundationsRunner
             key={activeMetricsFoundationId}
             moduleId={activeMetricsFoundationId}
-            onBack={() => setPage('metrics-foundations')}
+            onBack={() => returnFromRunner('metrics-foundations')}
             onNext={(() => { const n = getNextMetricsFoundationId(activeMetricsFoundationId); return n ? () => openMetricsFoundationModule(n) : () => setPage('metrics-foundations'); })()}
             onSelectModule={openMetricsFoundationModule}
             unlocked={unlocked}
@@ -1918,6 +1944,9 @@ export default function App() {
                 // Deep-link an SR item back into its case when an opener exists;
                 // otherwise just land on the room browser.
                 if (itemId) {
+                  // C6 fix: mark where this launch came from so the runner's
+                  // own "← Back" returns here instead of the room's list.
+                  setNavOrigin('review-queue');
                   switch (targetPage) {
                     case 'stats':                openStatsModule(itemId); break;
                     case 'spot-the-flaw':        openSTFCase(itemId); break;
@@ -2009,7 +2038,7 @@ export default function App() {
             }>
             <ChallengesRunner
               caseId={activeChallengeId}
-              onBack={() => setPage('challenges')}
+              onBack={() => returnFromRunner('challenges')}
               onNext={() => {
                 const nextId = getNextChallengeId(activeChallengeId);
                 if (nextId) openChallenge(nextId);
@@ -2028,6 +2057,9 @@ export default function App() {
                 // With an itemId, deep-open the exact item via its opener.
                 // Without one, fall back to the room browser.
                 if (itemId) {
+                  // C6 fix: mark where this launch came from so the runner's
+                  // own "← Back" returns here instead of the room's list.
+                  setNavOrigin('my-tracks');
                   switch (targetPage) {
                     case 'stat-foundations':    openStatFoundationsModule(itemId); break;
                     case 'metrics-foundations': openMetricsFoundationModule(itemId); break;

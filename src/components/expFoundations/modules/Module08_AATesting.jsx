@@ -49,10 +49,10 @@ export function Module_EF08({ onComplete }) {
   var thresholdY = yOf(0.05);
 
   var options = [
-    { label: 'A. Yes — p < 0.05 means the result is real. Stop and report it.', correct: false },
+    { label: 'A. Yes — p below 0.05 means the result is real and reproducible. Stop the test and report it as a confirmed win immediately.', correct: false },
     { label: 'B. No — a single crossing in an A/A test is exactly what random chance produces. This is why you need a pre-specified stopping rule.', correct: true },
-    { label: 'C. Yes, but only if the crossing lasts more than two consecutive days.', correct: false },
-    { label: 'D. Maybe — it depends on whether the sample size was large enough.', correct: false },
+    { label: 'C. Yes, but only count it if the crossing persists for more than two consecutive calendar days in a row before you act on it.', correct: false },
+    { label: 'D. Maybe — it depends entirely on whether the total sample size collected so far was already large enough to matter.', correct: false },
   ];
 
   return (

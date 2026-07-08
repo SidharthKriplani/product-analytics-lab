@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choosing Your Primary Metric: The Decision You Make Before the Experiment Starts | Product Analytics Lab</title>
+  <meta name="description" content="Pre-committing to a primary metric is not bureaucracy — it's what keeps you from p-hacking your way to a ship decision. Here's how to choose the right one.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/experiment-design-primary-metric">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/experiment-design-primary-metric">
+  <meta property="og:title"       content="Choosing Your Primary Metric: The Decision You Make Before the Experiment Starts | Product Analytics Lab">
+  <meta property="og:description" content="Pre-committing to a primary metric is not bureaucracy — it's what keeps you from p-hacking your way to a ship decision. Here's how to choose the right one.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Choosing Your Primary Metric: The Decision You Make Before the Experiment Starts">
+  <meta name="twitter:description" content="Pre-committing to a primary metric is not bureaucracy — it's what keeps you from p-hacking your way to a ship decision. Here's how to choose the right one.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Choosing Your Primary Metric: The Decision You Make Before the Experiment Starts","description":"Pre-committing to a primary metric is not bureaucracy — it's what keeps you from p-hacking your way to a ship decision. Here's how to choose the right one.","url":"https://experimentation-systems-lab.vercel.app/posts/experiment-design-primary-metric","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/experiment-design-primary-metric" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Choosing Your Primary Metric: The Decision You Make Before the Experiment Starts</h1>
+    <p class="desc">Pre-committing to a primary metric is not bureaucracy — it's what keeps you from p-hacking your way to a ship decision. Here's how to choose the right one.</p>
+
+    <p>The primary metric is the one and only decision metric for your experiment. Not the most interesting metric in the readout, not the one that happened to be significant, not the business north star — the one you committed to before the experiment launched. Pre-committing to a primary metric is the structural choice that makes the experiment's result interpretable. Without it, you're running 10 tests at once and selecting the winner, which inflates your false positive rate to the point where a &quot;win&quot; is often noise.</p>
+    <h2>How to Choose the Right Primary Metric</h2>
+    <p>The primary metric should be the closest measurable signal to the hypothesis being tested — not the business north star, and not what's easy to move. The test: does a causal story connect your feature change directly to this metric within your experiment window? If the feature changes checkout flow friction, the primary metric is checkout completion rate — not GMV, not 90-day retention. GMV and retention are important, but they're downstream of checkout completion, noisier in a 14-day window, and affected by many factors beyond the feature. Checkout completion is where the hypothesis lives.</p>
+    <blockquote class="example"><strong>Prism video app: wrong and right primary metric:</strong> Feature: New video thumbnail algorithm that uses engagement signals instead of recency to select thumbnails.<br>Hypothesis: Better thumbnails increase the rate at which users click into videos from the browse feed.<br><br>WRONG primary metric: Weekly Active Viewers (WAV) — the team's north star.<br>Why wrong: WAV is affected by content quality, notification strategy, external factors, and many features simultaneously. A thumbnail change will move it by <0.1% in 14 days. You'd need 90+ days to detect a real effect. This experiment would be chronically underpowered.<br><br>RIGHT primary metric: Browse feed click-through rate (CTR) — the fraction of thumbnails shown that are clicked.<br>Why right: Direct causal link. Observable within hours. Sensitive to thumbnail quality. If CTR improves, the hypothesis is supported. WAV and session depth become secondary metrics to understand downstream magnitude.</blockquote>
+    <h2>Sensitivity: The Often-Skipped Check</h2>
+    <p>Before finalizing the primary metric, run a quick power check: can you detect the expected effect size at your expected traffic in a reasonable runtime? If the metric requires 90 days of runtime at 80% power for your MDE, it is not a viable primary metric for a 14-day experiment. This is the most common mistake in primary metric selection: choosing the north star because it's important, without checking whether it's sensitive enough to move in the time window you have. A metric that can't be detected isn't providing information — it's providing noise dressed up as a null result.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> The primary metric is closest to the hypothesis, not closest to the business outcome. A sequence: feature → primary metric → secondary metrics → north star. The primary metric is one step away from the feature. The north star is several steps away. If you try to skip straight to the north star, you'll run underpowered experiments and misinterpret null results as evidence the feature doesn't work, when it actually means your metric was too insensitive to detect the effect in your timeframe.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/design">Practice this in the Design Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/experiment-design-primary-metric">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Should We Build This? A Framework for Data-Backed Build/No-Build Decisions | Product Analytics Lab</title>
+  <meta name="description" content="Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here's how to structure t…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/build-or-not">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/build-or-not">
+  <meta property="og:title"       content="Should We Build This? A Framework for Data-Backed Build/No-Build Decisions | Product Analytics Lab">
+  <meta property="og:description" content="Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here's how to structure t…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Should We Build This? A Framework for Data-Backed Build/No-Build Decisions">
+  <meta name="twitter:description" content="Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here's how to structure t…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Should We Build This? A Framework for Data-Backed Build/No-Build Decisions","description":"Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here's how to structure t…","url":"https://experimentation-systems-lab.vercel.app/posts/build-or-not","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #6B3FA0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #6B3FA0cc 30%, #6B3FA0cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #6B3FA0;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #6B3FA0; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #6B3FA0;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/build-or-not" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Ambiguous Problems</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>Should We Build This? A Framework for Data-Backed Build/No-Build Decisions</h1>
+    <p class="desc">Expected value = P(success) × uplift × ARPU × addressable users. Below a threshold, the cost of building exceeds the expected return. Here's how to structure that conversation.</p>
+
+    <p>The build-or-not decision is never binary — it's build vs buy vs partner vs delay vs abandon. Most product teams frame it as build vs no-build and evaluate it primarily on cost. The more useful frame is: what's the expected value of each option, and which one maximizes strategic leverage? Cost is one input. It's not the only one.</p>
+    <h2>The Four Questions That Drive the Decision</h2>
+    <p>Question 1: Is this core or context (the Geoffrey Moore distinction)? Core capabilities are what differentiate your product — they should be built, because building them creates proprietary advantage. Context capabilities are table stakes every competitor has — these are buy or partner candidates, because building them produces no differentiation at significant cost. Question 2: What's the build cost vs buy cost over a 3-year horizon? Include maintenance, not just initial development. Question 3: What's the opportunity cost? Every engineering sprint spent on this is not spent on something else — what is that something else worth? Question 4: Does this create or consume strategic leverage? Does building this capability unlock future capabilities (multiplier), or is it a one-time feature that doesn't compound?</p>
+    <blockquote class="example"><strong>Crafted marketplace: build vs buy an AI recommendation engine:</strong> Decision: Should Crafted build a proprietary AI recommendation engine for product discovery, or buy an off-the-shelf solution?<br><br>Core vs context: Product recommendation on a handmade goods marketplace requires understanding artisan-specific attributes (material, technique, regional style) that no generic engine understands well. This is arguably core — a proprietary engine could be a meaningful differentiator.<br><br>Build cost: 2 ML engineers × 6 months = ~$300K fully loaded. Ongoing: 0.5 FTE/year = ~$75K/year maintenance.<br>Buy cost: Best-in-class vendor = $8K/month = $96K/year. No maintenance FTE needed.<br>3-year total build: $300K + $225K = $525K. 3-year total buy: $288K.<br><br>Strategic leverage: Proprietary data flywheel — a custom engine learns from Crafted-specific buyer-seller interactions in ways a vendor engine doesn't. At scale, this compounds.<br><br>Recommendation: Build, but phase it — start with a vendor for the first 6 months to ship faster, then migrate to a proprietary engine as the data flywheel develops. The 3-year cost differential ($237K) is acceptable if the custom engine produces measurable improvement in discovery CVR by year 2.</blockquote>
+    <blockquote class="callout"><strong>The most common mistake: evaluating on cost alone:</strong> Teams that evaluate build/buy on 12-month cost almost always buy. Teams that evaluate on 3-year strategic leverage often build the core capability. The question to ask is not &quot;what does this cost this quarter?&quot; but &quot;what does owning vs renting this capability mean for what we can do in year 3?&quot; That time horizon shift changes most build/buy decisions.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice build-or-not decisions in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/build-or-not">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

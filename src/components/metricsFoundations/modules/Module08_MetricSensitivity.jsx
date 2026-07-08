@@ -47,10 +47,10 @@ export function Module_MF08({ module, onNext }) {
   var Q = {
     question: 'You have two candidate primary metrics for a checkout A/B test: "revenue per user" (CV = 375%) and "add-to-cart rate" (CV = 85%). Your MDE is 2% relative lift. Which metric should be the primary, and why?',
     options: [
-      { id: 'a', text: 'Revenue per user — it directly measures what matters. The higher variance just means you need a longer test.' },
-      { id: 'b', text: 'Add-to-cart rate — it has 20x lower required sample size at the same MDE. Use it as the primary to detect effects quickly, then validate the revenue link via a longer holdout.' },
-      { id: 'c', text: 'Both — run the test with dual primaries and apply a Bonferroni correction.' },
-      { id: 'd', text: 'Neither — use a composite metric that blends revenue and conversion into one score.' },
+      { id: 'a', text: 'Revenue per user — it directly measures what matters most; the higher variance just means a longer test.' },
+      { id: 'b', text: 'Add-to-cart rate — its far lower variance needs many fewer users to detect the same lift reliably.' },
+      { id: 'c', text: 'Both — run the test with dual primaries and apply a Bonferroni correction to control the error rate.' },
+      { id: 'd', text: 'Neither — build a composite metric that blends revenue and conversion into a single weighted score.' },
     ],
     correct: 'b',
     explanation: 'At CV=375% and MDE=2%, revenue per user needs roughly 560,000 users per arm. At CV=85% and MDE=2%, add-to-cart rate needs about 29,000 per arm — nearly a 20x reduction. The practical move: use the sensitive metric (add-to-cart rate) as the primary to ship decisions quickly, and track revenue per user as a secondary or validate via a longer holdout. Option C wastes power on correction. Option D creates an uninterpretable metric. The key insight is that sensitivity is a practical constraint, not just a statistical one — it determines whether you ship in 2 weeks or 6 months.',

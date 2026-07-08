@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The 5 Senior Thinking Habits That Separate DS From Analytics | Product Analytics Lab</title>
+  <meta name="description" content="Denominator discipline. Decompose before diagnosing. Segment before aggregating. Guardrails and counter-metrics. Business impact translation. Why these five ha…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/five-senior-habits">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/five-senior-habits">
+  <meta property="og:title"       content="The 5 Senior Thinking Habits That Separate DS From Analytics | Product Analytics Lab">
+  <meta property="og:description" content="Denominator discipline. Decompose before diagnosing. Segment before aggregating. Guardrails and counter-metrics. Business impact translation. Why these five ha…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="The 5 Senior Thinking Habits That Separate DS From Analytics">
+  <meta name="twitter:description" content="Denominator discipline. Decompose before diagnosing. Segment before aggregating. Guardrails and counter-metrics. Business impact translation. Why these five ha…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"The 5 Senior Thinking Habits That Separate DS From Analytics","description":"Denominator discipline. Decompose before diagnosing. Segment before aggregating. Guardrails and counter-metrics. Business impact translation. Why these five ha…","url":"https://experimentation-systems-lab.vercel.app/posts/five-senior-habits","articleSection":"Mental Models","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #6B3FA0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #6B3FA0cc 30%, #6B3FA0cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #6B3FA0;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #6B3FA0; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #6B3FA0;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/five-senior-habits" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Mental Models</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>The 5 Senior Thinking Habits That Separate DS From Analytics</h1>
+    <p class="desc">Denominator discipline. Decompose before diagnosing. Segment before aggregating. Guardrails and counter-metrics. Business impact translation. Why these five habits compound.</p>
+
+    <p>There is a reliable difference between how junior and senior data scientists talk about the same problem. It is not that senior DSs know more formulas. It is that they frame problems differently before they touch any data. The five habits below are structural — they change how you think before you analyze, not what you compute during analysis. Each one can be adopted immediately, and each one signals seniority to every interviewer and stakeholder who is paying attention.</p>
+    <h2>Habit 1: State the Assumption Before the Conclusion</h2>
+    <p>Junior version: &quot;Retention improved by 4pp.&quot; Senior version: &quot;Assuming we are measuring D30 retention for users acquired through organic channels — which is what I would expect to be most sensitive to our onboarding changes — retention improved by 4pp.&quot; The senior version names the scope and the assumption before claiming a result. This prevents the meeting-stopping question &quot;wait, which users are you measuring?&quot; and positions the analyst as someone who knows what their analysis can and cannot see.</p>
+    <h2>Habits 2–3: Recommendation and Failure Mode</h2>
+    <p>Habit 2: Give a recommendation, not just a finding. Finding: &quot;Checkout CVR is up 2.3% but refund rate is up 1.4pp.&quot; Recommendation: &quot;This is a no-ship given the guardrail violation on refund rate — I would recommend investigating whether the CVR lift is driven by genuinely incremental purchases or by buyers who are less certain, and refining the checkout flow before re-running.&quot; Habit 3: Name the failure mode of your own analysis. &quot;One limitation of this analysis is that it does not account for users who churned before day 30 — if the treatment group had higher early churn, the remaining users are a more engaged subset and the retention lift may be overstated.&quot; Naming your own limitations first prevents others from using them against you.</p>
+    <blockquote class="example"><strong>Junior vs senior on a Threadline retention finding:</strong> Junior DS: "90-day retention for the new onboarding cohort is 67%, up from 61% for the prior cohort."<br><br>Senior DS: "90-day retention for users who went through the redesigned onboarding is 67%, compared to 61% for the prior cohort — assuming comparable acquisition channel mix, which I have not verified yet. My recommendation: treat this as a positive signal but not a confirmed win. The key failure mode of this comparison is that the two cohorts were acquired in different months and may not be comparable on intent. To confirm, I would want to match on acquisition channel and run the comparison within the same channel. The next step is pulling the cohort split by organic vs paid for both groups."</blockquote>
+    <h2>Habits 4–5: Business Translation and the Right Question</h2>
+    <p>Habit 4: Translate metric moves to business impact. A 0.5pp CVR lift is a statistic. &quot;0.5pp CVR lift at 2M monthly sessions and $45 AOV is $450K/month in incremental revenue&quot; is a business input. Every metric movement has a dollar translation; senior DSs do the math before they present the finding, not after a stakeholder asks. Habit 5: Ask &quot;what decision does this change?&quot; before starting any analysis. If the answer is &quot;none — we are going to do this regardless,&quot; the analysis is either exploratory (fine, just label it that way) or theater (problematic). Senior DSs calibrate analysis depth to decision stakes. Light analysis for reversible decisions, rigorous analysis for irreversible ones.</p>
+    <blockquote class="callout"><strong>The compound effect:</strong> These five habits are not independent. Stating your assumption (habit 1) makes your recommendation (habit 2) more credible. Naming your failure mode (habit 3) prevents the business translation (habit 4) from being challenged on scope. Asking what decision you are enabling (habit 5) makes all four previous habits more targeted. Together, they produce a signal that says: this person thinks before they analyze, and they understand that analysis is a tool for decisions, not an end in itself.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice this in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/five-senior-habits">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

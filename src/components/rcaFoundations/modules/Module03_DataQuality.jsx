@@ -76,10 +76,10 @@ export function Module_RF03({ onComplete }) {
   var MCQ = {
     question: 'Your team\'s daily revenue dashboard shows a 15% spike overnight. Order volume is flat. Average order value is flat. Customer support tickets are at normal levels. What should you investigate first?',
     options: [
-      { id: 'a', text: 'A. A viral marketing campaign drove high-value customers to the site overnight' },
-      { id: 'b', text: 'B. A currency conversion or tax calculation change in the data pipeline inflated revenue figures' },
-      { id: 'c', text: 'C. A competitor went down, redirecting their customers to your platform' },
-      { id: 'd', text: 'D. A pricing algorithm update increased prices across the catalog' },
+      { id: 'a', text: 'A. A viral marketing campaign drove high-value customers to the site overnight, boosting revenue' },
+      { id: 'b', text: 'B. A currency conversion or tax calculation bug in the pipeline inflated revenue figures' },
+      { id: 'c', text: 'C. A competitor went down overnight, redirecting all of their customers to your platform' },
+      { id: 'd', text: 'D. A pricing algorithm update silently increased prices across the entire catalog overnight' },
     ],
     correct: 'b',
     explanation: 'When revenue spikes but order count AND average order value are both flat, the arithmetic does not add up for any real business explanation. More customers (A, C) would show in order volume. Higher prices (D) would show in AOV. The only explanation that fits flat volume + flat AOV + higher revenue is a data layer issue — currency conversion rates, tax inclusion logic, or a pipeline double-count. Data quality first, always.',

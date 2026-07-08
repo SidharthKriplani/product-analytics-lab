@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Measure RAG Quality: Retrieval vs Generation vs End Task | Product Analytics Lab</title>
+  <meta name="description" content="A RAG system has two failure modes — bad retrieval and bad generation — and they require different diagnostics. Here's how to set up the measurement layer.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/rag-quality-metrics">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/rag-quality-metrics">
+  <meta property="og:title"       content="How to Measure RAG Quality: Retrieval vs Generation vs End Task | Product Analytics Lab">
+  <meta property="og:description" content="A RAG system has two failure modes — bad retrieval and bad generation — and they require different diagnostics. Here's how to set up the measurement layer.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="How to Measure RAG Quality: Retrieval vs Generation vs End Task">
+  <meta name="twitter:description" content="A RAG system has two failure modes — bad retrieval and bad generation — and they require different diagnostics. Here's how to set up the measurement layer.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How to Measure RAG Quality: Retrieval vs Generation vs End Task","description":"A RAG system has two failure modes — bad retrieval and bad generation — and they require different diagnostics. Here's how to set up the measurement layer.","url":"https://experimentation-systems-lab.vercel.app/posts/rag-quality-metrics","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #007C89; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #007C89cc 30%, #007C89cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #007C89;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #007C89; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #007C89;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/rag-quality-metrics" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">GenAI Analytics</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>How to Measure RAG Quality: Retrieval vs Generation vs End Task</h1>
+    <p class="desc">A RAG system has two failure modes — bad retrieval and bad generation — and they require different diagnostics. Here's how to set up the measurement layer.</p>
+
+    <p>A RAG (Retrieval-Augmented Generation) system has two distinct components that can fail independently: the retrieval step that fetches relevant documents from a knowledge base, and the generation step that synthesizes those documents into an answer. A system can retrieve perfectly and generate a hallucinated answer. It can also generate fluently from retrieved documents that were irrelevant to the question. Treating RAG quality as a single metric obscures which component is breaking — which makes it impossible to fix the right thing.</p>
+    <h2>Retrieval Metrics: Did We Find the Right Documents?</h2>
+    <p>Precision@k asks: of the k documents retrieved, how many were actually relevant to the query? If k=5 and 3 of the 5 documents were relevant, precision@k = 60%. This measures retrieval noise — irrelevant documents retrieved alongside relevant ones contaminate the generation step. Recall@k asks: of all the relevant documents in the knowledge base, how many did we retrieve in the top k? If there are 8 relevant documents and the system retrieved 4 of them, recall@k = 50%. This measures retrieval coverage — missing relevant documents means the generator won't have the information it needs.</p>
+    <blockquote class="example"><strong>Threadline knowledge base RAG evaluation setup:</strong> Knowledge base: 4,200 Threadline product documentation pages.<br>Evaluation set: 180 user questions with human-labeled relevant documents (built from support ticket analysis).<br><br>Retrieval results (k=5):<br>Precision@5: 0.71 (of 5 retrieved docs, 3.5 on average are relevant)<br>Recall@5: 0.58 (of all relevant docs per question, 58% are in the top 5)<br><br>Generation results (evaluated by LLM-as-judge against human reference answers):<br>Faithfulness: 0.82 (answers stay within the retrieved context 82% of the time)<br>Answer relevance: 0.74 (answers address the question directly 74% of the time)<br><br>Diagnosis: Recall@5 at 0.58 is the weak point — the system is missing 42% of relevant documents. When relevant documents are missing, the generator either hallucinates or gives an incomplete answer. Priority fix: improve embedding quality or expand retrieval to k=8.</blockquote>
+    <p>Faithfulness and answer relevance can be evaluated two ways: reference-based evaluation compares the generated answer to a human-written reference answer using metrics like ROUGE or BLEU. LLM-as-judge evaluation uses a separate LLM (often GPT-4 or Claude) to score faithfulness and relevance on a rubric. Reference-based evaluation is cheaper but requires a large human-labeled set. LLM-as-judge scales more easily and often correlates well with human judgment on structured rubrics, but introduces its own biases.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> The end-task metric (did the user get a useful answer?) is the north star, but it hides which component failed. A low end-task score could be a retrieval problem, a generation problem, or both. Always evaluate retrieval and generation separately so you know where to invest the improvement effort. Improving generation quality when the retrieval is broken wastes resources — the generator can't produce good answers from bad context.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice RAG metric design in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/rag-quality-metrics">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

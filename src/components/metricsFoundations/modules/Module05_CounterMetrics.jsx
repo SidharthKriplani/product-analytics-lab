@@ -9,9 +9,9 @@ function loadMFState(id) { try { var raw = localStorage.getItem('pal-mf-' + id +
 function shuffleMF(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = a[i]; a[i] = a[j]; a[j] = tmp; } return a; }
 
 const MF05_PAIRS_DEFAULT = [
-  { primary: 'Push notification send volume', correct: 'notif-opt-out', options: ['notif-opt-out', 'dau', 'session-length'], labels: { 'notif-opt-out': 'Notification opt-out rate', 'dau': 'DAU', 'session-length': 'Session length' } },
-  { primary: 'Ads shown per session', correct: 'ad-hide', options: ['ad-hide', 'page-load', 'revenue'], labels: { 'ad-hide': 'Ad hide / negative feedback rate', 'page-load': 'Page load time', 'revenue': 'Ad revenue' } },
-  { primary: 'Search ranking aggressiveness (more results)', correct: 'zero-click', options: ['zero-click', 'query-count', 'ctr'], labels: { 'zero-click': 'Zero-click rate (query abandoned)', 'query-count': 'Total search queries', 'ctr': 'Result click-through rate' } },
+  { primary: 'Push notification send volume', correct: 'notif-opt-out', options: ['notif-opt-out', 'dau', 'session-length'], labels: { 'notif-opt-out': 'Notification opt-out rate', 'dau': 'Overall daily active users', 'session-length': 'Average user session length' } },
+  { primary: 'Ads shown per session', correct: 'ad-hide', options: ['ad-hide', 'page-load', 'revenue'], labels: { 'ad-hide': 'Ad hide / negative feedback rate', 'page-load': 'Page load time across all sessions', 'revenue': 'Total ad revenue generated per user' } },
+  { primary: 'Search ranking aggressiveness (more results)', correct: 'zero-click', options: ['zero-click', 'query-count', 'ctr'], labels: { 'zero-click': 'Zero-click abandonment rate', 'query-count': 'Total search queries submitted', 'ctr': 'Result click-through rate' } },
 ];
 
 export function Module_MF05({ module, onNext }) {

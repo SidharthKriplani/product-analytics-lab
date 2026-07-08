@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Availability Thinking: Map What You Have, What You're Missing, and What the Gap Means | Product Analytics Lab</title>
+  <meta name="description" content="Assuming all data exists is a red flag. Senior analysts name the table, grain, and join logic — and acknowledge gaps without using them as an excuse to stop.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/data-availability-thinking">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/data-availability-thinking">
+  <meta property="og:title"       content="Data Availability Thinking: Map What You Have, What You're Missing, and What the Gap Means | Product Analytics Lab">
+  <meta property="og:description" content="Assuming all data exists is a red flag. Senior analysts name the table, grain, and join logic — and acknowledge gaps without using them as an excuse to stop.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Data Availability Thinking: Map What You Have, What You're Missing, and What the Gap Means">
+  <meta name="twitter:description" content="Assuming all data exists is a red flag. Senior analysts name the table, grain, and join logic — and acknowledge gaps without using them as an excuse to stop.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Data Availability Thinking: Map What You Have, What You're Missing, and What the Gap Means","description":"Assuming all data exists is a red flag. Senior analysts name the table, grain, and join logic — and acknowledge gaps without using them as an excuse to stop.","url":"https://experimentation-systems-lab.vercel.app/posts/data-availability-thinking","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #C97706; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #C97706cc 30%, #C97706cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #C97706;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #C97706; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #C97706;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/data-availability-thinking" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">RCA</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Data Availability Thinking: Map What You Have, What You're Missing, and What the Gap Means</h1>
+    <p class="desc">Assuming all data exists is a red flag. Senior analysts name the table, grain, and join logic — and acknowledge gaps without using them as an excuse to stop.</p>
+
+    <p>Before running any analysis, senior analysts map the data landscape. Not just &quot;what tables exist,&quot; but: what events are tracked and what aren't, where the gaps are, what the grain of each dataset is, and how the pieces join together. Skipping this step produces analysis that quietly answers the wrong question — you measure what you can measure and present it as if it were the thing you wanted to measure, without acknowledging the gap.</p>
+    <h2>The Four Common Data Gaps</h2>
+    <p>You only see actions users take, not actions they don't take. If a user visits a product page and leaves without clicking, you have the page view event. You don't have a &quot;considered and rejected&quot; event. This means your analysis of what drives conversion is built entirely on users who converted, not on users who considered and didn't. Multi-device attribution is another gap: a user who researches on mobile and purchases on desktop appears as two separate users in most event logs unless you have a robust identity resolution layer. Offline-to-online conversion is invisible unless explicitly instrumented. And deleted or churned accounts create survivorship bias — your retention analysis excludes users who deleted their accounts, which is exactly the population you most need to understand.</p>
+    <blockquote class="example"><strong>Crafted marketplace: mapping the available data:</strong> Question: "Why are new sellers cancelling orders at higher rates?"<br><br>Available data:<br>- orders table: grain = one row per order, has status (completed/cancelled), seller_id, created_at<br>- sellers table: grain = one row per seller, has join_date, seller_tier, listing_count<br>- events table: grain = one row per event, has seller_id, event_type (listing_created, order_received, etc.)<br><br>Gaps:<br>- No seller inventory data: can't confirm whether cancellations are due to out-of-stock vs. changed mind<br>- No seller communication logs: can't see if buyers requested modifications that triggered cancellations<br>- No pre-cancellation seller activity: events table shows activity but not absence of activity (seller who received order but took no action)<br><br>Proxy for inventory issue: "In the absence of inventory data, I'd use the pattern of same-SKU cancellations within 24 hours as a proxy for stock-out driven cancellations, with the caveat that this undercounts if the seller manually cancels stock-out orders immediately."</blockquote>
+    <h2>The Proxy Formulation</h2>
+    <p>The professional phrasing when you hit a data gap is: &quot;In the absence of data on X, I'd proxy it with Y, with the caveat that Y underestimates / overestimates X in situations where Z.&quot; This formulation does three things: it acknowledges the gap honestly, it proposes a path forward, and it names the conditions under which the proxy breaks down. All three parts are required. Stopping at &quot;we don't have that data&quot; is incomplete — it describes a constraint without offering a response. Proceeding without naming the gap is worse — it hides the limitation.</p>
+    <blockquote class="callout"><strong>The data availability checklist:</strong> Before any analysis, answer:
+1. What events are tracked? What isn't tracked that I wish I had?
+2. What is the grain of each relevant table? Can I join them without changing the grain?
+3. Are there deleted/inactive records excluded from the base tables? (survivorship bias)
+4. For multi-device or multi-session users, does my analysis correctly attribute behavior to the right user?
+5. For each data gap, what is the best available proxy, and what are its limitations?</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/data-availability-thinking">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

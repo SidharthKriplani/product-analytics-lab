@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base Rate Neglect: The Mistake Behind Half of All Bad Product Decisions | Product Analytics Lab</title>
+  <meta name="description" content="A 50% lift on a 0.1% base rate is not interesting. A 5% lift on a 40% base rate is. Anchoring on relative change without anchoring on the base is a systematic…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/base-rate-neglect">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/base-rate-neglect">
+  <meta property="og:title"       content="Base Rate Neglect: The Mistake Behind Half of All Bad Product Decisions | Product Analytics Lab">
+  <meta property="og:description" content="A 50% lift on a 0.1% base rate is not interesting. A 5% lift on a 40% base rate is. Anchoring on relative change without anchoring on the base is a systematic…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Base Rate Neglect: The Mistake Behind Half of All Bad Product Decisions">
+  <meta name="twitter:description" content="A 50% lift on a 0.1% base rate is not interesting. A 5% lift on a 40% base rate is. Anchoring on relative change without anchoring on the base is a systematic…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Base Rate Neglect: The Mistake Behind Half of All Bad Product Decisions","description":"A 50% lift on a 0.1% base rate is not interesting. A 5% lift on a 40% base rate is. Anchoring on relative change without anchoring on the base is a systematic…","url":"https://experimentation-systems-lab.vercel.app/posts/base-rate-neglect","articleSection":"Mental Models","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #6B3FA0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #6B3FA0cc 30%, #6B3FA0cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #6B3FA0;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #6B3FA0; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #6B3FA0;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/base-rate-neglect" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Mental Models</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>Base Rate Neglect: The Mistake Behind Half of All Bad Product Decisions</h1>
+    <p class="desc">A 50% lift on a 0.1% base rate is not interesting. A 5% lift on a 40% base rate is. Anchoring on relative change without anchoring on the base is a systematic error.</p>
+
+    <p>Base rate neglect is the cognitive error of focusing on the change — the relative lift — while ignoring the base rate it is applied to. A 50% improvement in the rate of a very rare event may still produce almost no additional occurrences. A 5% improvement in a very common event produces many. In product analytics, base rate neglect shows up most often in two places: interpreting experiment results (celebrating a 200% lift that moves a metric from 0.1% to 0.3%) and interpreting false positive rates in A/B testing (believing a significant result is likely to be true without accounting for how many experiments test null hypotheses).</p>
+    <h2>The A/B Test False Positive Problem</h2>
+    <p>When the base rate of true effects is low — when most experiments you run are testing long-shot hypotheses — even a statistically significant result has a meaningful probability of being a false positive. The math works as follows. Suppose 10% of your experiments test effects that are truly real. You run 100 experiments at alpha = 0.05 with 80% power. Of the 10 experiments with real effects, 80% power means you detect 8 of them. Of the 90 null experiments, 5% false positive rate means you get 4.5 spurious significant results by chance. So among your total significant results (8 + 4.5 = 12.5), the fraction that are false positives is 4.5 / 12.5 ≈ 36%. You are testing at alpha = 0.05 but nearly 1 in 3 of your &quot;wins&quot; is noise.</p>
+    <blockquote class="example"><strong>Threadline SaaS: what the false positive math looks like in practice:</strong> Threadline runs 40 A/B tests per quarter, testing everything from minor copy changes to significant onboarding redesigns.<br><br>Assumptions:<br>- 15% of experiments test effects that are genuinely real (a reasonable prior for a mature product)<br>- Alpha = 0.05, power = 80%<br><br>Expected true effects detected: 40 × 0.15 × 0.80 = 4.8<br>Expected false positives: 40 × 0.85 × 0.05 = 1.7<br>Total expected significant results: 4.8 + 1.7 = 6.5<br>False positive rate among significant results: 1.7 / 6.5 = 26%<br><br>One in four "wins" in this program is likely noise. The practical implication: for high-stakes shipping decisions, a single significant result is not sufficient. Replicate important results before shipping features that are expensive to reverse. Pre-register your experiments to ensure you are not inadvertently biasing toward false positives through peeking or metric fishing.</blockquote>
+    <h2>The Relative vs Absolute Framing Mistake</h2>
+    <p>In product reporting, base rate neglect most commonly surfaces as the &quot;200% improvement&quot; headline. A feature that moves the premium upgrade rate from 0.3% to 0.9% is technically a 200% lift. In absolute terms, it moved 0.6 percentage points. At 500,000 monthly users, that is 3,000 additional premium conversions. Whether that is meaningful depends entirely on the business context — but leading with &quot;200% improvement&quot; without the base rate or absolute numbers is designed to obscure rather than inform. Senior analysts always pair relative changes with absolute changes and base rates. &quot;Upgrade rate improved from 0.3% to 0.9% — a 200% relative lift and 3,000 additional conversions per month at current volume.&quot;</p>
+    <blockquote class="callout"><strong>The practical implications:</strong> Pre-register experiments so you cannot cherry-pick significant results after running multiple metrics. Replicate important results before shipping based on a single borderline p-value — especially for high-stakes, hard-to-reverse features. Report absolute changes alongside relative changes. And when evaluating a &quot;significant&quot; result, ask: given the prior probability that this hypothesis is true (based on similar past experiments), what is the posterior probability that this result is a real effect rather than a false positive?</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/base-rate-neglect">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

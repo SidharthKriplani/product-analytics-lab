@@ -118,10 +118,10 @@ export function Module_MF02({ module, onNext }) {
   var Q = {
     question: 'Your team proposes "daily signups" as the primary metric for a new referral feature. Which failure is the most dangerous?',
     options: [
-      { id: 'a', text: 'It is not measurable — signup events are unreliable across platforms.' },
-      { id: 'b', text: 'It is not movable — referral changes cannot shift signup volume.' },
-      { id: 'c', text: 'It is not predictive — a signup does not mean the user activated or received value. You can drive thousands of signups that never convert to active users.' },
-      { id: 'd', text: 'It is not sensitive — daily signup counts are too noisy for A/B tests.' },
+      { id: 'a', text: 'It is not measurable — signup events fire inconsistently across platforms, undercounting the true volume.' },
+      { id: 'b', text: 'It is not movable — referral program changes take a full quarter to produce any measurable shift in signups.' },
+      { id: 'c', text: "It is not predictive — a signup doesn't mean the user activated or received real value from the product." },
+      { id: 'd', text: 'It is not sensitive — daily signup counts swing so much day-to-day that no experiment could detect a true effect.' },
     ],
     correct: 'c',
     explanation: 'Signups are measurable and movable (run a campaign, signups spike). But predictiveness is the fatal flaw: a signup is not a signal of value delivery. A referral program that drives low-quality signups will move the metric while delivering zero user value. The deeper insight: most bad metrics fail on predictiveness or gameability, not measurability.',

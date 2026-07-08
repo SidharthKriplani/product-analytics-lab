@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>When Your North Star Goes Up and Your Guardrail Goes Down | Product Analytics Lab</title>
+  <meta name="description" content="GMV is up 3% but refund rate is up 8%. This is the most common real-world experiment scenario. The decision framework is not obvious — here it is.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/guardrail-conflicts">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/guardrail-conflicts">
+  <meta property="og:title"       content="When Your North Star Goes Up and Your Guardrail Goes Down | Product Analytics Lab">
+  <meta property="og:description" content="GMV is up 3% but refund rate is up 8%. This is the most common real-world experiment scenario. The decision framework is not obvious — here it is.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="When Your North Star Goes Up and Your Guardrail Goes Down">
+  <meta name="twitter:description" content="GMV is up 3% but refund rate is up 8%. This is the most common real-world experiment scenario. The decision framework is not obvious — here it is.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"When Your North Star Goes Up and Your Guardrail Goes Down","description":"GMV is up 3% but refund rate is up 8%. This is the most common real-world experiment scenario. The decision framework is not obvious — here it is.","url":"https://experimentation-systems-lab.vercel.app/posts/guardrail-conflicts","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/guardrail-conflicts" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>When Your North Star Goes Up and Your Guardrail Goes Down</h1>
+    <p class="desc">GMV is up 3% but refund rate is up 8%. This is the most common real-world experiment scenario. The decision framework is not obvious — here it is.</p>
+
+    <p>The scenario every data scientist dreads: you run a two-week experiment on Crafted marketplace's discovery algorithm. Primary metric — GMV — is up 3.1% (p = 0.008). You're about to write the ship recommendation. Then you look at the guardrail. Refund rate is up 1.4 percentage points, from 6.2% to 7.6% (p = 0.031). This is the conflict that requires a framework, not instinct. And the framework starts with a question most analysts skip: is the guardrail result actually significant?</p>
+    <h2>Step 1: Verify the Guardrail Is Real</h2>
+    <p>Before treating a guardrail violation as definitive, confirm the statistical properties. Was the guardrail pre-committed — defined before the experiment launched — or noticed post-hoc while reviewing dashboards? Pre-committed guardrails carry their stated alpha. Post-hoc guardrail fires are subject to multiple testing inflation and should be treated as signals requiring investigation, not hard stops. For Crafted's refund rate: if it was pre-committed with α = 0.05 and the observed p = 0.031, this is a genuine violation. If you found it by scrolling a 20-metric dashboard, apply Bonferroni and you may not have significance at all.</p>
+    <blockquote class="example"><strong>Quantifying the tradeoff in dollars:</strong> GMV lift: +3.1% on baseline monthly GMV of $8.2M = +$254K/month incremental.<br>Crafted take rate: 12% → Revenue lift: +$30.5K/month.<br><br>Refund rate increase: +1.4pp on 50,000 monthly orders at $164 AOV.<br>Additional monthly refunds: 50,000 × 0.014 = 700 extra refunds × $164 = $114,800/month reversed GMV.<br>Revenue cost of extra refunds: $114,800 × 12% take rate = $13,800/month lost revenue.<br>Plus estimated support cost per refund: $8 × 700 = $5,600/month.<br><br>Net monthly impact: +$30,500 (GMV lift) − $13,800 (refund revenue loss) − $5,600 (support) = +$11,100.<br>On paper, net positive — but barely, and the refund rate trend may compound.</blockquote>
+    <h2>Step 2: Understand the Mechanism</h2>
+    <p>The mechanism of the guardrail violation determines the response. There are two archetypes. First: marginal-purchase returns — the discovery algorithm is surfacing products to buyers who are slightly less certain about their purchase. They buy, they regret, they return. This is a product iteration problem: the algorithm needs a quality filter or a confidence signal. The treatment concept is directionally right but needs refinement. Second: quality degradation — the algorithm is optimizing for click probability and surfacing low-quality listings that convert but deliver a bad experience. This is a rollback problem. The mechanism is fundamentally at odds with a healthy marketplace.</p>
+    <blockquote class="callout"><strong>Never make this call solo:</strong> A primary metric win with a guardrail violation is a business decision, not an analytical one. The data scientist's job is: (1) verify the guardrail is real, (2) quantify the tradeoff in the same units (dollars), (3) surface the plausible mechanisms. The ship/no-ship decision belongs to the product leader, informed by all three of those inputs. Going to that conversation with just &quot;GMV is up but refund rate is up&quot; leaves the decision-maker without the tools to decide. Going with the dollar quantification and a mechanism hypothesis gives them what they need.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/guardrail-conflicts">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

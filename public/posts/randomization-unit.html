@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choosing Your Randomization Unit: User, Session, or Device? | Product Analytics Lab</title>
+  <meta name="description" content="The wrong randomization unit inflates variance, breaks SUTVA, or leads to inconsistent user experience. The right choice depends on what you're testing.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/randomization-unit">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/randomization-unit">
+  <meta property="og:title"       content="Choosing Your Randomization Unit: User, Session, or Device? | Product Analytics Lab">
+  <meta property="og:description" content="The wrong randomization unit inflates variance, breaks SUTVA, or leads to inconsistent user experience. The right choice depends on what you're testing.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Choosing Your Randomization Unit: User, Session, or Device?">
+  <meta name="twitter:description" content="The wrong randomization unit inflates variance, breaks SUTVA, or leads to inconsistent user experience. The right choice depends on what you're testing.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Choosing Your Randomization Unit: User, Session, or Device?","description":"The wrong randomization unit inflates variance, breaks SUTVA, or leads to inconsistent user experience. The right choice depends on what you're testing.","url":"https://experimentation-systems-lab.vercel.app/posts/randomization-unit","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/randomization-unit" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>Choosing Your Randomization Unit: User, Session, or Device?</h1>
+    <p class="desc">The wrong randomization unit inflates variance, breaks SUTVA, or leads to inconsistent user experience. The right choice depends on what you're testing.</p>
+
+    <p>Choosing the randomization unit is one of the first decisions in experiment design, and it's the decision that most analysts get wrong silently — they default to user-level without examining whether it's right, or they use session-level because the data is easier to work with. The randomization unit determines your variance structure, your SUTVA exposure, and whether users get a consistent experience. Getting it wrong produces experiments whose statistics look valid but whose results are misleading.</p>
+    <h2>User-Level: The Default That's Right Most of the Time</h2>
+    <p>User-level randomization assigns each user to treatment or control once, and that assignment persists across all their sessions. This is correct for most product experiments because: (1) it provides a consistent user experience — a user in treatment sees the new feature every time, not randomly, which is what you'd ship; (2) it produces correct variance estimates, because user-level outcomes are independent across users; (3) it aligns with how deployment actually works. The rule: if the thing you're testing is a feature a user will interact with repeatedly, randomize at the user level.</p>
+    <blockquote class="example"><strong>Session-level randomization: the variance trap:</strong> Scenario: Prism video app tests a new video autoplay behavior, randomizing at the session level.<br><br>Problem: The same user may be assigned to treatment in session 1, control in session 2, treatment in session 3. User-level outcomes are correlated across sessions (a high-engagement user is high-engagement in every session). Session-level analysis treats these as independent observations, understating variance.<br><br>Effect: Apparent sample size = 200,000 sessions. True independent units = ~45,000 users (each averaging ~4.4 sessions). Understated variance inflates the t-statistic by a factor of √(4.4) ≈ 2.1. A test that should have p = 0.21 appears to have p = 0.03 — a false positive driven by incorrect variance, not a real effect.</blockquote>
+    <h2>Device-Level and the Multi-Device Problem</h2>
+    <p>Device-level randomization is acceptable when user identity is unavailable or unreliable — for example, in logged-out experiences or early funnel tests. The risk is multi-device contamination: approximately 15% of e-commerce users regularly shop on more than one device. A user assigned to treatment on mobile and control on desktop sees both experiences. Their behavior is contaminated in both cells. For most experiments, this contamination is small enough to accept as noise. For experiments testing UX consistency — navigation changes, layout redesigns, personalization — device-level randomization can mask the true effect.</p>
+    <blockquote class="callout"><strong>The rule and its SUTVA corollary:</strong> Randomize at the unit of the decision: the smallest unit at which you would deploy the feature. If the feature is a user-facing persistent change, that unit is the user. If the feature affects all users in a geographic market (a price change, a supply policy), that unit is the market — and you need geo-cluster randomization.
+
+SUTVA corollary: if users can affect each other's outcomes (social network features, marketplace supply/demand, shared resources), go higher — randomize at the cohort, household, or geo level. User-level randomization where users interact puts treatment and control in direct contact, violating SUTVA.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/design">Practice this in the Design Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/randomization-unit">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

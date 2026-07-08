@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mix Shift: The Hidden Cause Behind Half Your Metric Movements | Product Analytics Lab</title>
+  <meta name="description" content="Revenue grew but margin fell. CVR improved but GMV didn't. Mix shift causes movements that look wrong until you understand the composition change underneath.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/mix-shift">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/mix-shift">
+  <meta property="og:title"       content="Mix Shift: The Hidden Cause Behind Half Your Metric Movements | Product Analytics Lab">
+  <meta property="og:description" content="Revenue grew but margin fell. CVR improved but GMV didn't. Mix shift causes movements that look wrong until you understand the composition change underneath.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Mix Shift: The Hidden Cause Behind Half Your Metric Movements">
+  <meta name="twitter:description" content="Revenue grew but margin fell. CVR improved but GMV didn't. Mix shift causes movements that look wrong until you understand the composition change underneath.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Mix Shift: The Hidden Cause Behind Half Your Metric Movements","description":"Revenue grew but margin fell. CVR improved but GMV didn't. Mix shift causes movements that look wrong until you understand the composition change underneath.","url":"https://experimentation-systems-lab.vercel.app/posts/mix-shift","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #C97706; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #C97706cc 30%, #C97706cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #C97706;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #C97706; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #C97706;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/mix-shift" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">RCA</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>Mix Shift: The Hidden Cause Behind Half Your Metric Movements</h1>
+    <p class="desc">Revenue grew but margin fell. CVR improved but GMV didn't. Mix shift causes movements that look wrong until you understand the composition change underneath.</p>
+
+    <p>Mix shift is a change in the composition of your population, not a change in behavior. When the composition changes, aggregate metrics move — even if nothing about individual users, sellers, or products actually changed. Mix shift is responsible for roughly half of the metric movements that analysts initially misdiagnose as behavioral changes. It's not that something broke or improved. It's that who you're measuring changed.</p>
+    <h2>The Shift-Share Decomposition</h2>
+    <p>The formal way to diagnose mix shift is the shift-share decomposition. Any change in an aggregate metric equals the sum of two components: the within-segment change (did each segment's rate actually change?) and the composition change (did the mix of segments shift?). If the aggregate moved but every segment's rate held flat, the entire movement is composition — pure mix shift. If segments moved and the composition held flat, it's pure behavioral change. Most real situations are some combination of both, and the decomposition tells you how much of each.</p>
+    <blockquote class="example"><strong>Crafted marketplace: GMV per seller up 8%, but not what it looks like:</strong> Last month vs this month:<br>- Overall GMV per active seller: $1,190 → $1,285 (+8%)<br><br>First instinct: sellers are getting more productive. But decompose by segment:<br>- SMB sellers (avg $820/month): flat at $820<br>- Mid-market sellers (avg $2,400/month): flat at $2,390<br>- Enterprise sellers (avg $12,000/month): flat at $12,050<br><br>Not a single segment moved meaningfully. Now check the mix:<br>- SMB sellers: 78% of active sellers last month → 68% this month<br>- Enterprise sellers: 5% last month → 12% this month<br><br>The aggregate GMV per seller went up 8% entirely because the enterprise segment grew as a share of the base. No individual seller became more productive. This is mix shift, not improvement. The right story for the PM: "Our enterprise cohort is growing faster than SMB, which is pulling up the average. Seller productivity within each tier is flat."</blockquote>
+    <blockquote class="callout"><strong>How to identify mix shift vs real signal:</strong> Run the shift-share decomposition:
+1. Compute the metric for each segment separately for both periods.
+2. If segment rates moved: behavioral change is present.
+3. If segment rates held flat but the aggregate moved: pure mix shift.
+4. To quantify: what would the aggregate be if the mix were the same as last period? Compute this counterfactual and subtract from the actual aggregate. The difference is the mix shift contribution.</blockquote>
+    <p>Mix shift also explains why A/B test results can look different at the aggregate level vs the segment level. If your treatment disproportionately reached enterprise users (higher converters), aggregate CVR in treatment will look elevated even if the treatment had zero causal effect on anyone. This is why segmenting A/B test readouts by user type is as important as checking the aggregate result.</p>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/mix-shift">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

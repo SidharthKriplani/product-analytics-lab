@@ -60,10 +60,10 @@ export function Module_MF14({ module, onNext }) {
   var cellH = H14 / 6;
 
   var mcq14 = [
-    { label: 'A. Aggregate retention is flat — everything is fine, no action needed.', correct: false },
+    { label: 'A. Aggregate retention is flat, so the funnel is healthy across every cohort — no action or deeper digging needed.', correct: false },
     { label: 'B. The newest cohort\'s D7 is declining — investigate recent changes even though the aggregate looks stable.', correct: true },
-    { label: 'C. Focus on the oldest cohort because it has the longest retention history.', correct: false },
-    { label: 'D. Wait until aggregate retention actually drops before investigating.', correct: false },
+    { label: 'C. Focus your attention on the oldest cohort instead, since it carries the longest retention history available.', correct: false },
+    { label: 'D. Wait for the aggregate metric to actually drop before spending time investigating any individual cohort.', correct: false },
   ];
 
   const prose = { color: 'var(--text-secondary)', lineHeight: 1.75, margin: 0, fontSize: '0.92rem' };

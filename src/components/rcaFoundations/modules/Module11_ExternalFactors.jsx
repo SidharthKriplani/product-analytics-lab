@@ -53,8 +53,8 @@ const RF11_MCQ = {
   options: [
     'Discard the results and rerun the experiment from scratch — any external event during the test window invalidates the causal inference',
     'Ignore the competitor launch — both treatment and control were equally exposed, so randomization controls for it and the results remain valid',
-    'Note the confound in the experiment writeup, extend or rerun if the effect was borderline, and treat results with caution',
-    'Analyze treatment and control separately for behavioral shifts after the competitor launch date — if both groups shifted equally, the relative effect is still valid',
+    'Note the confound in the writeup, extend or rerun the test if the effect size was borderline, and treat the current result with documented caution',
+    'Analyze treatment and control separately for behavioral shifts after the launch — if both groups shifted equally, the relative effect is still valid',
   ],
   correct: 2,
   explanation: 'A competitor launch during an experiment window is a confound. Option A (discard and rerun) is too aggressive — not every external event invalidates results, and rerunning has its own cost. Option B is the classic misconception: randomization controls for pre-existing differences, not for external events that may interact differently with treatment vs. control. Option D sounds analytical but assumes you can cleanly isolate pre/post behavior within the test window — in practice, user behavior shifts are gradual and the sub-period analysis introduces its own noise. The correct response is to document the confound, assess whether the effect size was decisive enough to survive it, and flag uncertainty in the writeup.',

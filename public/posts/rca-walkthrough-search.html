@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search CVR Dropped 15%: A Full RCA Walkthrough | Product Analytics Lab</title>
+  <meta name="description" content="Step by step from alert to root cause — decomposing the funnel, cutting by segment, forming hypotheses, and deciding what to validate first.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/rca-walkthrough-search">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/rca-walkthrough-search">
+  <meta property="og:title"       content="Search CVR Dropped 15%: A Full RCA Walkthrough | Product Analytics Lab">
+  <meta property="og:description" content="Step by step from alert to root cause — decomposing the funnel, cutting by segment, forming hypotheses, and deciding what to validate first.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Search CVR Dropped 15%: A Full RCA Walkthrough">
+  <meta name="twitter:description" content="Step by step from alert to root cause — decomposing the funnel, cutting by segment, forming hypotheses, and deciding what to validate first.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Search CVR Dropped 15%: A Full RCA Walkthrough","description":"Step by step from alert to root cause — decomposing the funnel, cutting by segment, forming hypotheses, and deciding what to validate first.","url":"https://experimentation-systems-lab.vercel.app/posts/rca-walkthrough-search","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #C97706; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #C97706cc 30%, #C97706cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #C97706;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #C97706; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #C97706;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/rca-walkthrough-search" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">RCA</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>Search CVR Dropped 15%: A Full RCA Walkthrough</h1>
+    <p class="desc">Step by step from alert to root cause — decomposing the funnel, cutting by segment, forming hypotheses, and deciding what to validate first.</p>
+
+    <p>It's Tuesday morning. A Slack alert fires: &quot;Zero-result search rate up 40% over the last 24 hours.&quot; Your job is to find the root cause. This walkthrough traces the full investigation — not as a checklist, but as a story with decisions at each step, because that's how real RCA works. The path matters as much as the destination.</p>
+    <h2>Step 1: Decompose Before Anything Else</h2>
+    <p>The first instinct is to look at what queries are returning zero results. Resist it. First, decompose the metric. Zero-result rate = zero-result searches / total searches. So: is total search volume up (denominator effect), or are zero-result searches specifically up (numerator effect), or both? You pull the data. Total search volume is flat — 180,000 searches yesterday vs 182,000 the day before. Zero-result searches are up: 27,000 yesterday vs 19,000 the day before. This is a numerator story. Something is causing searches that previously returned results to return nothing.</p>
+    <blockquote class="example"><strong>Decompose: what actually moved?:</strong> Monday: 182,000 total searches, 19,000 zero-result → 10.4% zero-result rate<br>Tuesday: 180,000 total searches, 27,000 zero-result → 15.0% zero-result rate<br><br>Denominator (total searches): -1.1% — essentially flat. Not the driver.<br>Numerator (zero-result searches): +42% — the entire story is here.<br><br>Conclusion before segmenting: something changed about how searches are processed or matched, causing previously-successful queries to fail. The hypothesis space is now: (1) query processing changed, (2) index changed, (3) filter logic changed.</blockquote>
+    <h2>Step 2: Segment to Find Concentration</h2>
+    <p>Now segment. Platform cut first: iOS zero-result rate is 10.5%, desktop is 10.7%, Android mobile app is 28.3%. The jump is concentrated entirely in Android. Specifically, you check app versions: Android app v4.2, released Monday afternoon, shows a 3× higher zero-result rate than v4.1. Every other platform and version is normal. This narrows the hypothesis space dramatically. It's not an index issue (that would affect all platforms). It's something specific to Android v4.2.</p>
+    <p>You check the v4.2 release notes. One change: a new autocomplete filter that removes queries under 3 characters before sending them to the search backend, intended to reduce noise from accidental taps. The implementation detail: the filter is trimming trailing spaces, so &quot;bag &quot; (with a trailing space, which is how most mobile autocomplete selections land) becomes &quot;bag&quot; — which is fine — but it's also stripping mid-query characters in some edge cases, producing truncated queries that don't match any listings. That's the mechanism.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> The investigation found the answer not by looking at what queries were failing (though that would have been next), but by segmenting to find where the zero-result rate was concentrated. Platform and app version cuts immediately pointed to the Monday deployment. The story was in the segmentation, not the query content.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/rca">Practice this in the RCA Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/rca-walkthrough-search">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

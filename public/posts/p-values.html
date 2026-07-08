@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>p-values Don't Mean What You Think They Mean | Product Analytics Lab</title>
+  <meta name="description" content="p &lt; 0.05 does not mean 95% chance the treatment works. Understanding what it actually says — and what it doesn't — changes every experiment readout you'll ever…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/p-values">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/p-values">
+  <meta property="og:title"       content="p-values Don't Mean What You Think They Mean | Product Analytics Lab">
+  <meta property="og:description" content="p &lt; 0.05 does not mean 95% chance the treatment works. Understanding what it actually says — and what it doesn't — changes every experiment readout you'll ever…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="p-values Don't Mean What You Think They Mean">
+  <meta name="twitter:description" content="p &lt; 0.05 does not mean 95% chance the treatment works. Understanding what it actually says — and what it doesn't — changes every experiment readout you'll ever…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"p-values Don't Mean What You Think They Mean","description":"p < 0.05 does not mean 95% chance the treatment works. Understanding what it actually says — and what it doesn't — changes every experiment readout you'll ever…","url":"https://experimentation-systems-lab.vercel.app/posts/p-values","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/p-values" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>p-values Don't Mean What You Think They Mean</h1>
+    <p class="desc">p &lt; 0.05 does not mean 95% chance the treatment works. Understanding what it actually says — and what it doesn't — changes every experiment readout you'll ever do.</p>
+
+    <p>The p-value is the most misunderstood number in product analytics. It's reported in almost every experiment readout, cited in almost every ship/no-ship decision, and understood correctly by a surprisingly small fraction of the people who use it. The misconceptions aren't subtle: they lead directly to wrong ship decisions, overconfident product teams, and analyses that report statistical significance as if it were proof that something works. Getting this right changes how you read every experiment you'll ever run.</p>
+    <h2>What a p-value Actually Means</h2>
+    <p>A p-value is the probability of observing your data — or data more extreme — if the null hypothesis were true. The null hypothesis is usually &quot;the treatment has no effect.&quot; So a p-value of 0.03 means: if the treatment had no effect, we would see a result at least this large by random chance only 3% of the time. That's it. That's the whole definition. It says nothing about the probability that the treatment works. It says nothing about effect size. It says nothing about practical importance.</p>
+    <blockquote class="example"><strong>The correct and incorrect readings:</strong> Experiment result: p = 0.03, treatment CVR = 4.21%, control CVR = 4.08%<br><br>INCORRECT: "We're 97% confident the treatment works."<br>INCORRECT: "There's a 3% chance this result is due to noise."<br>INCORRECT: "The treatment has a 97% chance of being the right decision to ship."<br><br>CORRECT: "If the treatment had no effect, we'd observe a difference this large or larger about 3% of the time by random chance alone. Given our pre-set alpha of 0.05, this clears the significance threshold — but we should also look at the effect size and confidence interval before deciding to ship."</blockquote>
+    <h2>The Null Hypothesis Framework</h2>
+    <p>To interpret a p-value correctly, you need to hold the null hypothesis clearly in mind. The null is the baseline claim — the world where your treatment does nothing. When you run a test with alpha = 0.05, you're saying: &quot;I will reject the null hypothesis (and call this result significant) if I see data that would occur less than 5% of the time under the null.&quot; When you get p = 0.03, you're not proving the treatment works — you're saying the data is inconsistent enough with the null to make you doubt it, at your chosen threshold.</p>
+    <p>This framing matters because it clarifies what p-values don't do. They don't tell you the effect size is practically meaningful. They don't tell you the result will replicate. They don't account for multiple testing. A p-value of 0.049 on a 0.01% CVR lift is statistically significant and practically worthless. A p-value of 0.06 on a 2% CVR lift is technically not significant but probably worth investigating further. The number alone doesn't tell you what to do.</p>
+    <h2>What to Report Alongside p-values</h2>
+    <p>A rigorous experiment readout reports the p-value in context: alongside the effect size (how large is the observed difference?), the confidence interval (what range of effect sizes are consistent with the data?), and the practical significance threshold (what lift would actually matter for the business?). &quot;p = 0.03, effect size = 0.13% CVR lift, 95% CI: [0.02%, 0.24%]&quot; is a complete statement. &quot;p = 0.03, we should ship&quot; is not.</p>
+    <blockquote class="callout"><strong>The correct p-value sentence:</strong> &quot;A p-value of X means: if the treatment truly had no effect, we would see a result this extreme or more extreme only X% of the time by chance. It does not tell us the probability that the treatment works — that requires additional reasoning about effect size, confidence intervals, and prior probability.&quot;</blockquote>
+    <ul><li>p-value = probability of data this extreme under the null, not probability the treatment works.</li><li>Statistical significance and practical significance are different. Check both.</li><li>Report p alongside effect size and confidence interval — the number alone is incomplete.</li><li>Pre-commit your alpha threshold before running the experiment. Choosing alpha after seeing results is p-hacking.</li></ul>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice stats interpretation in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/p-values">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

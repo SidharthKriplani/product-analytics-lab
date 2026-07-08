@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Denominator Discipline: Why Every Rate Metric Is Lying to You | Product Analytics Lab</title>
+  <meta name="description" content="CVR from sessions, users, and PDP viewers are three different numbers. Interviewers notice when you don't lock the denominator first. This is the single habit…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/denominator-discipline">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/denominator-discipline">
+  <meta property="og:title"       content="Denominator Discipline: Why Every Rate Metric Is Lying to You | Product Analytics Lab">
+  <meta property="og:description" content="CVR from sessions, users, and PDP viewers are three different numbers. Interviewers notice when you don't lock the denominator first. This is the single habit…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Denominator Discipline: Why Every Rate Metric Is Lying to You">
+  <meta name="twitter:description" content="CVR from sessions, users, and PDP viewers are three different numbers. Interviewers notice when you don't lock the denominator first. This is the single habit…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Denominator Discipline: Why Every Rate Metric Is Lying to You","description":"CVR from sessions, users, and PDP viewers are three different numbers. Interviewers notice when you don't lock the denominator first. This is the single habit…","url":"https://experimentation-systems-lab.vercel.app/posts/denominator-discipline","articleSection":"Metrics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #16a34acc 30%, #16a34acc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #16a34a;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #16a34a; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #16a34a;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/denominator-discipline" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Metrics</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Denominator Discipline: Why Every Rate Metric Is Lying to You</h1>
+    <p class="desc">CVR from sessions, users, and PDP viewers are three different numbers. Interviewers notice when you don't lock the denominator first. This is the single habit that separates junior from senior metric thinking.</p>
+
+    <p>Every rate metric has a numerator and a denominator. Most analysts obsess over the numerator — purchases, clicks, sign-ups — and treat the denominator as obvious. It isn't. The denominator is a choice, and that choice changes what the metric measures, who it indicts, and what action it implies. Getting it wrong doesn't just produce a wrong number; it produces a wrong story.</p>
+    <h2>Three Denominators, Three Different Metrics</h2>
+    <p>Consider conversion rate for an e-commerce product page. You could compute it three ways: purchases divided by sessions, purchases divided by unique users, or purchases divided by product detail page (PDP) viewers. These are not interchangeable. Session-level CVR penalizes products with high browse-to-return behavior — a user who comes back four times before buying counts as four non-converting sessions plus one converting session, yielding a 20% rate. User-level CVR would give that same user a 100% rate. PDP-viewer CVR isolates purchase intent — it only includes users who actually looked at the product, stripping out people who never saw it.</p>
+    <blockquote class="example"><strong>Worked example:</strong> Baseline: 10,000 sessions, 6,000 unique users, 4,000 PDP viewers, 400 purchases.<br><br>Session CVR = 400 / 10,000 = 4.0%<br>User CVR = 400 / 6,000 = 6.7%<br>PDP Viewer CVR = 400 / 4,000 = 10.0%<br><br>Same 400 purchases. Three completely different stories. A PM looking at PDP Viewer CVR thinks the product is converting well. A PM looking at Session CVR thinks there's a major funnel problem.</blockquote>
+    <h2>How Denominator Choice Changes the Story</h2>
+    <p>Imagine you ship a new recommendation carousel on the homepage. After the launch, session CVR drops 0.3%. Your PM is alarmed. But when you look at PDP viewer CVR — which strips out the incremental browse sessions the carousel generated — it's up 1.2%. What happened? The carousel brought in more exploratory traffic. Those sessions browse without buying, diluting session CVR. But the users who did reach a PDP converted at a higher rate, probably because the carousel surfaced better product matches. Session CVR made a win look like a loss.</p>
+    <p>This isn't a cherry-picking problem — it's a specification problem. The right denominator depends on what decision you're informing. If you're measuring checkout flow efficiency, use users who entered checkout. If you're measuring the effectiveness of product discovery, use users who saw at least one product. If you're measuring top-of-funnel health, sessions or visits might be appropriate. The question to ask is: what's the population for whom the event was possible?</p>
+    <h2>The Denominator Ownership Habit</h2>
+    <p>Senior analysts lock the denominator before they compute anything. In an interview, this sounds like: &quot;Before I give you the conversion rate, I want to clarify the denominator. Are we measuring CVR among all sessions, unique users, or users who reached the product page? Each tells a different story — let me explain why.&quot; That sentence alone signals metric maturity. It shows you know that numbers without specifications are ambiguous, and that ambiguity is where bad decisions live.</p>
+    <blockquote class="callout"><strong>The rule:</strong> Before computing any rate metric, state the denominator explicitly. Ask: for whom was the event in the numerator actually possible? That's your denominator. Everything else is a measurement of something different.</blockquote>
+    <p>The most common mistake is defaulting to sessions because sessions are easy to count. Sessions are available in almost every analytics tool, they're high-volume, and they feel objective. But sessions are a behavioral artifact — they depend on how your tracking fires, what counts as a session boundary, and how often your users return. For most product questions, users or a specific funnel entry point is the right denominator. When you find yourself reaching for sessions, pause and ask whether that's actually what the question requires.</p>
+    <ul><li>State the denominator before computing any rate. &quot;CVR among users who viewed at least one product page.&quot;</li><li>Check whether the denominator changed between periods before attributing a rate movement to the numerator.</li><li>When a metric moves, decompose numerator and denominator separately — the movement might be entirely in the denominator.</li><li>In interviews, always clarify denominator choice before answering. It demonstrates precision before you've produced any analysis.</li></ul>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice denominator decisions in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/denominator-discipline">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

@@ -44,10 +44,10 @@ export function Module_EF12({ onComplete }) {
   var treatedEnd = treatedVal(days - 1);
 
   var mcqOptions = [
-    { label: 'A. To control for novelty effects in individual A/B tests.', correct: false },
-    { label: 'B. To measure the cumulative causal impact of an entire feature launch program.', correct: true },
-    { label: 'C. To replace individual A/B tests when experiment traffic is limited.', correct: false },
-    { label: 'D. To detect Hawthorne effects by permanently excluding some users.', correct: false },
+    { label: 'A. To control for novelty effects that show up in individual short-run A/B tests over the first few weeks', correct: false },
+    { label: 'B. To measure the cumulative causal impact of an entire feature launch program across many small releases.', correct: true },
+    { label: 'C. To replace individual A/B tests entirely whenever experiment traffic is limited or hard to obtain', correct: false },
+    { label: 'D. To detect Hawthorne effects by permanently excluding a fixed slice of users from every future test', correct: false },
   ];
 
   return (

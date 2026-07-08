@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bootstrap Resampling | Stats Foundations | Product Analytics Lab</title>
+  <meta name="description" content="Simulation-based inference when parametric assumptions break down">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/modules/sf28">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/modules/sf28">
+  <meta property="og:title"       content="Bootstrap Resampling | Product Analytics Lab">
+  <meta property="og:description" content="Simulation-based inference when parametric assumptions break down">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Bootstrap Resampling">
+  <meta name="twitter:description" content="Simulation-based inference when parametric assumptions break down">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Bootstrap Resampling","description":"Simulation-based inference when parametric assumptions break down","url":"https://experimentation-systems-lab.vercel.app/modules/sf28","articleSection":"Stats Foundations","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { background: rgba(36,87,214,0.07); text-decoration: none; opacity: 0.85; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .badge.muted {
+      background: #F8F1E5;
+      border: 1px solid #EDE5D5;
+      color: #756B60;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    .callout {
+      background: #F8F1E5;
+      border-left: 3px solid #2457D6;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+    }
+    .callout p { margin-bottom: 0; color: #2b2620; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+    .tag {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: #F8F1E5;
+      border: 1px solid #EDE5D5;
+      color: #756B60;
+    }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/stats-foundations/sf28" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Stats Foundations</span>
+      <span class="badge muted">Advanced</span>
+      <span class="read-time">10 min read</span>
+    </div>
+    <h1>Bootstrap Resampling</h1>
+    <p class="desc">Simulation-based inference when parametric assumptions break down</p>
+
+    <p>You're running an A/B test on revenue per user. The distribution has a long right tail, only 800 users in each group, and your data scientist says &quot;we can't use a t-test here — CLT won't save us at this sample size.&quot; Bootstrap is one tool to reach for. Bootstrap builds a sampling distribution by resampling with replacement from your observed data — no normality assumption required. Run 1000+ resamples, compute your statistic each time, and the distribution of those statistics is your bootstrap sampling distribution. But be honest about its limits: bootstrap relaxes the normality assumption, it does not invent information the sample never contained. With very heavy tails and small n — exactly the 800-user, whale-driven revenue case — the rare extreme values may simply be absent from your data, so the bootstrap can be just as unreliable as the t-test. It is a sharper tool, not a guaranteed rescue; collecting more data or capping/transforming the metric may matter more.</p>
+    <div class="callout"><p><strong>How this connects to experimentation:</strong> Bootstrap CIs are used in A/B testing when the metric distribution is skewed (revenue, LTV, session length) and the CLT approximation is unreliable. Many tech companies use bootstrap as a default for revenue metrics rather than t-tests — but with heavy tails and small samples, no resampling method can fix a sample that is too small to have captured the tail.</p></div>
+    <h2>Key takeaways</h2><ul><li>Bootstrap builds a sampling distribution by <strong>resampling with replacement</strong> — no normality assumption.</li><li>Run 1000+ resamples, compute the statistic each time, read off the distribution.</li><li>Honest limit: with <strong>heavy tails and small n</strong>, the tail may be absent from the data — bootstrap cannot invent it.</li></ul>
+    <div class="tags"><span class="tag">bootstrap</span><span class="tag">resampling</span><span class="tag">simulation</span><span class="tag">confidence interval</span><span class="tag">non-parametric</span></div>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/stats-foundations/sf28">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

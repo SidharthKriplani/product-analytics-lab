@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seller Incentive Programs: How to Measure ROI Without Getting Fooled by Selection Bias | Product Analytics Lab</title>
+  <meta name="description" content="Sellers who join an incentive program are different from those who don't. Naive before/after comparisons overestimate impact. Here's the right measurement appr…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/seller-incentives">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/seller-incentives">
+  <meta property="og:title"       content="Seller Incentive Programs: How to Measure ROI Without Getting Fooled by Selection Bias | Product Analytics Lab">
+  <meta property="og:description" content="Sellers who join an incentive program are different from those who don't. Naive before/after comparisons overestimate impact. Here's the right measurement appr…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Seller Incentive Programs: How to Measure ROI Without Getting Fooled by Selection Bias">
+  <meta name="twitter:description" content="Sellers who join an incentive program are different from those who don't. Naive before/after comparisons overestimate impact. Here's the right measurement appr…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Seller Incentive Programs: How to Measure ROI Without Getting Fooled by Selection Bias","description":"Sellers who join an incentive program are different from those who don't. Naive before/after comparisons overestimate impact. Here's the right measurement appr…","url":"https://experimentation-systems-lab.vercel.app/posts/seller-incentives","articleSection":"Product Sense","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #1d4ed8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #1d4ed8cc 30%, #1d4ed8cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #1d4ed8;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #1d4ed8; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #1d4ed8;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/seller-incentives" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Product Sense</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>Seller Incentive Programs: How to Measure ROI Without Getting Fooled by Selection Bias</h1>
+    <p class="desc">Sellers who join an incentive program are different from those who don't. Naive before/after comparisons overestimate impact. Here's the right measurement approach.</p>
+
+    <p>Seller incentive programs on Crafted marketplace are expensive. A quality-badge program that rewards sellers who maintain a sub-2% cancellation rate, respond within 4 hours, and achieve a 4.8+ star rating costs $18 per enrolled seller per month in cash bonuses and priority placement. The business question is: does the program actually cause quality improvement, or does it just reward sellers who were already performing well? The measurement answer changes everything about the ROI calculation.</p>
+    <h2>The Selection Bias Problem</h2>
+    <p>Sellers who enroll in a quality incentive program are not a random sample of sellers. They self-select: the sellers most likely to enroll are the ones who already have high ratings, low cancellation rates, and the operational capacity to maintain them. A naive analysis compares enrollees to non-enrollees and finds that enrolled sellers have 40% higher GMV. But this is mostly selection bias — you enrolled the high performers, and of course they perform well. The program may have had zero causal effect on seller behavior while absorbing significant budget. The right metric is incremental GMV: GMV attributable to the program, not GMV generated by sellers who happened to enroll.</p>
+    <blockquote class="example"><strong>Crafted seller quality program — measuring incremental GMV:</strong> Setup: Before launching the quality badge program, randomly assign eligible sellers to treatment (enrolled, receive incentive) and holdout (eligible but not enrolled, receive no incentive). Both groups meet the quality threshold at baseline.<br><br>Pre-program baseline (4 weeks before launch):<br>Treatment group avg monthly GMV: $1,340<br>Control group avg monthly GMV: $1,360 (balanced at randomization)<br><br>8 weeks post-launch:<br>Treatment group avg monthly GMV: $1,580 (+$240, +17.9%)<br>Control group avg monthly GMV: $1,410 (+$50, +3.7%)<br><br>Incremental GMV: $240 − $50 = $190/seller/month<br>Program cost: $18/seller/month in bonuses + $22/seller in placement costs = $40/seller/month<br>Net incremental GMV: $190 − $40 = $150/seller/month → program ROI is positive.<br><br>The naive analysis (total GMV of enrolled sellers = $1,580) would have overstated the program's impact by 7.8× ($240 vs $30.4 attributable to the program).</blockquote>
+    <h2>Long-Run vs Short-Run Tension</h2>
+    <p>Incentive programs that boost short-run GMV can create long-run perverse effects. If sellers learn that maintaining the quality badge requires passing through specific operational thresholds, some will manage to the threshold rather than managing to genuine quality. A seller who has a 4.8-star rating that drops to 4.75 in a bad week may be tempted to manipulate reviews or inflate order cancellations with sympathetic buyers. Monitor not just the average GMV impact but the distribution of quality metrics over time: are enrolled sellers converging toward the threshold (gaming) or improving beyond it (genuine quality lift)?</p>
+    <blockquote class="callout"><strong>The holdout group is non-negotiable:</strong> If you launch an incentive program without a holdout group, you cannot measure incremental impact. Before-after comparisons for all enrolled sellers are confounded by time (GMV was growing for everyone), seasonality (Q4 spikes affect all sellers), and platform changes (a new buyer acquisition campaign lifts all sellers simultaneously). The only clean counterfactual is a simultaneously running control group of equally eligible sellers who did not receive the incentive.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice incentive program analysis in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/seller-incentives">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

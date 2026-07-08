@@ -54,10 +54,10 @@ export function Module_EF10({ onComplete }) {
   var nc2x = xOf(11); var nc2y = yOf(naivePValues[11]);
 
   var mcqOptions = [
-    { label: 'A. The p-value calculation becomes less accurate with more data.', correct: false },
+    { label: 'A. The p-value calculation itself becomes numerically less accurate as more data accumulates over the course of the test', correct: false },
     { label: 'B. Each look is a chance to find p < 0.05 by chance. Multiple looks compound this probability above the nominal alpha.', correct: true },
-    { label: 'C. The null hypothesis changes each time you peek.', correct: false },
-    { label: 'D. Alpha spending reduces statistical power irreversibly.', correct: false },
+    { label: 'C. The null hypothesis effectively changes and gets redefined every single time an analyst peeks at the running data', correct: false },
+    { label: "D. Alpha spending irreversibly reduces the statistical power available for the remainder of the experiment's runtime", correct: false },
   ];
 
   var METHODS = [

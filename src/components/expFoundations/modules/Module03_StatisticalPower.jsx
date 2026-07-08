@@ -50,10 +50,10 @@ export function Module_EF03({ onComplete }) {
   }
 
   var mcqOptions = [
-    { label: 'A. It doubles — sample size scales linearly with 1/MDE', correct: false },
-    { label: 'B. It quadruples — sample size scales with 1/MDE squared, so halving MDE means 4x the sample', correct: true },
-    { label: 'C. It stays the same — MDE only affects the analysis, not the required sample', correct: false },
-    { label: 'D. It depends entirely on the baseline rate, not the MDE', correct: false },
+    { label: 'A. It doubles — required sample size scales linearly with the inverse of MDE, so halving MDE only doubles the sample', correct: false },
+    { label: 'B. It quadruples — required sample size scales with 1 over MDE squared, so halving MDE means roughly 4x the needed sample', correct: true },
+    { label: 'C. It stays about the same — MDE mainly shifts the analysis window, not the underlying required sample size', correct: false },
+    { label: 'D. It depends entirely on the baseline conversion rate and traffic split, not on the MDE you choose to detect', correct: false },
   ];
 
   return (

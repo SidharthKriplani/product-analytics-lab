@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peeking: Why Checking Your Experiment Mid-Run Inflates False Positives | Product Analytics Lab</title>
+  <meta name="description" content="Every time you check an in-progress test and consider stopping early, you increase your chance of a false positive. Sequential testing methods solve this — her…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/peeking">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/peeking">
+  <meta property="og:title"       content="Peeking: Why Checking Your Experiment Mid-Run Inflates False Positives | Product Analytics Lab">
+  <meta property="og:description" content="Every time you check an in-progress test and consider stopping early, you increase your chance of a false positive. Sequential testing methods solve this — her…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Peeking: Why Checking Your Experiment Mid-Run Inflates False Positives">
+  <meta name="twitter:description" content="Every time you check an in-progress test and consider stopping early, you increase your chance of a false positive. Sequential testing methods solve this — her…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Peeking: Why Checking Your Experiment Mid-Run Inflates False Positives","description":"Every time you check an in-progress test and consider stopping early, you increase your chance of a false positive. Sequential testing methods solve this — her…","url":"https://experimentation-systems-lab.vercel.app/posts/peeking","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/peeking" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Peeking: Why Checking Your Experiment Mid-Run Inflates False Positives</h1>
+    <p class="desc">Every time you check an in-progress test and consider stopping early, you increase your chance of a false positive. Sequential testing methods solve this — here's the intuition.</p>
+
+    <p>Peeking is one of the most widespread sources of false positives in product experimentation. It happens when analysts or stakeholders look at experiment results before the pre-committed runtime is complete, see a significant result, and make a ship decision — or when they check repeatedly and stop the experiment at the first moment it crosses significance. Both behaviors inflate your false positive rate beyond your stated alpha, and the inflation compounds with the number of looks.</p>
+    <h2>How Peeking Inflates False Positives</h2>
+    <p>The p &lt; 0.05 threshold assumes you look at the data exactly once, after collecting the pre-planned sample. When you look at the data multiple times and stop whenever it crosses significance, you're not running one test at 5% false positive rate — you're running multiple tests, each with an independent chance of producing a spurious significant result. The false positive rate accumulates.</p>
+    <blockquote class="example"><strong>How false positive rate compounds:</strong> Null experiment (treatment truly has no effect). Alpha = 0.05.<br><br>Looks at data: 1 → False positive rate: 5.0%<br>Looks at data: 2 → False positive rate: 8.3%<br>Looks at data: 3 → False positive rate: 10.7%<br>Looks at data: 5 → False positive rate: 14.2%<br>Looks at data: 10 → False positive rate: 19.3%<br><br>If you check your experiment every day for two weeks and stop when it's significant, your actual false positive rate is not 5% — it's closer to 20%. One in five experiments you "win" will be noise.</blockquote>
+    <h2>Pre-Committing Your Stopping Rule</h2>
+    <p>The solution is a pre-committed stopping rule: decide before the experiment starts when you will read the results. This is usually a fixed runtime (run for N days) or a fixed sample size (stop when N users per group have been exposed). Whatever the rule is, write it down. The moment you deviate from it — stopping early because &quot;the results look great&quot; — you've introduced peeking bias.</p>
+    <p>The pre-committed rule should also specify the primary metric, the alpha threshold, and whether the test is one-tailed or two-tailed. These decisions need to be made before you see data. Making them after looking at preliminary results turns data-driven experimentation into post-hoc rationalization, even if each individual decision seems reasonable.</p>
+    <h2>Sequential Testing as the Legitimate Alternative</h2>
+    <p>If you need to peek — because a safety guardrail might be moving, or because there's genuine business urgency — sequential testing methods (like the Sequential Probability Ratio Test or always-valid p-values) are designed to allow multiple looks while controlling the overall false positive rate. These methods adjust the significance threshold dynamically so that you can stop early with statistical validity. They're not free — they require larger sample sizes than fixed-horizon tests — but they're honest.</p>
+    <blockquote class="callout"><strong>The stopping rule template:</strong> Write this before every experiment:
+&quot;This experiment will run until [date] or until [N users per group] have been exposed, whichever comes first. Results will be read at that time. No interim reads will be used to make ship decisions. The primary metric is [X]. We will reject the null at alpha = 0.05 (two-tailed). If we need to check for safety guardrail violations mid-run, we will use a Bonferroni-corrected threshold.&quot;</blockquote>
+    <ul><li>Pre-commit your stopping rule before the experiment starts. Write it down.</li><li>Every extra look at in-progress results inflates your false positive rate.</li><li>If you need to peek for safety reasons, use a Bonferroni-corrected threshold for interim checks.</li><li>For genuinely flexible monitoring, use sequential testing methods — not standard t-tests.</li></ul>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice stats interpretation in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/peeking">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

@@ -48,10 +48,10 @@ export function Module_MF15({ module, onNext }) {
   var barW = innerW15 / 28 - 1;
 
   var mcq15 = [
-    { label: 'A. DAU growth proves the product is getting healthier — no concern.', correct: false },
+    { label: 'A. DAU growth proves the product is getting durably healthier overall — there is no reason for concern here.', correct: false },
     { label: 'B. DAU is rising from new user acquisition, not deeper engagement — the growth may not be durable.', correct: true },
-    { label: 'C. DAU/MAU is a vanity metric — only total DAU matters.', correct: false },
-    { label: 'D. The MAU denominator is probably wrong — recheck the tracking.', correct: false },
+    { label: 'C. DAU/MAU is just a vanity metric that leadership likes — only total DAU actually matters for the business.', correct: false },
+    { label: 'D. The MAU denominator is probably miscalculated somewhere; go recheck the underlying tracking implementation.', correct: false },
   ];
 
   const prose = { color: 'var(--text-secondary)', lineHeight: 1.75, margin: 0, fontSize: '0.92rem' };

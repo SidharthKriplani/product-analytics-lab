@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GMV vs Revenue vs ARPU vs LTV: When to Use Which | Product Analytics Lab</title>
+  <meta name="description" content="These are not interchangeable. Using GMV when you mean revenue will cost you credibility in every senior interview and stakeholder meeting.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/gmv-vs-revenue">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/gmv-vs-revenue">
+  <meta property="og:title"       content="GMV vs Revenue vs ARPU vs LTV: When to Use Which | Product Analytics Lab">
+  <meta property="og:description" content="These are not interchangeable. Using GMV when you mean revenue will cost you credibility in every senior interview and stakeholder meeting.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="GMV vs Revenue vs ARPU vs LTV: When to Use Which">
+  <meta name="twitter:description" content="These are not interchangeable. Using GMV when you mean revenue will cost you credibility in every senior interview and stakeholder meeting.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"GMV vs Revenue vs ARPU vs LTV: When to Use Which","description":"These are not interchangeable. Using GMV when you mean revenue will cost you credibility in every senior interview and stakeholder meeting.","url":"https://experimentation-systems-lab.vercel.app/posts/gmv-vs-revenue","articleSection":"Metrics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #16a34acc 30%, #16a34acc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #16a34a;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #16a34a; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #16a34a;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/gmv-vs-revenue" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Metrics</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>GMV vs Revenue vs ARPU vs LTV: When to Use Which</h1>
+    <p class="desc">These are not interchangeable. Using GMV when you mean revenue will cost you credibility in every senior interview and stakeholder meeting.</p>
+
+    <p>GMV, revenue, ARPU, and LTV are four different numbers that non-technical stakeholders often use interchangeably. Using the wrong one in an interview — or in a stakeholder meeting — signals that you don't understand the business model you're analyzing. Each metric answers a different question, and the right one depends on what decision you're informing.</p>
+    <h2>The Four Definitions</h2>
+    <p>GMV (Gross Merchandise Value) is the total value of transactions flowing through a platform. It measures volume and velocity — how much commerce happened — but it is not money the company keeps. Revenue is what flows to the company after paying out sellers, partners, or service providers. For a marketplace, Revenue = GMV × take rate. ARPU (Average Revenue Per User) is revenue divided by active users over a period. It normalizes revenue by the user base, making it useful for comparing monetization efficiency across cohorts, time periods, or product lines. LTV (Lifetime Value) is the total expected revenue from a single user over their entire relationship with the product — typically estimated as ARPU × average lifespan, or modeled directly from cohort data.</p>
+    <blockquote class="example"><strong>Crafted marketplace: all four in context:</strong> Crafted marketplace monthly snapshot:<br>- GMV: $10M (total buyer spend)<br>- Take rate: 12%<br>- Revenue: $1.2M (what Crafted keeps)<br>- Monthly active buyers: 24,000<br>- ARPU: $1,200,000 / 24,000 = $50/month<br>- Average buyer lifespan: 18 months<br>- LTV: $50 × 18 = $900<br><br>If a PM says "we grew the business 20% this month," ask which number moved 20%. GMV growing 20% while revenue grows 5% means take rate compressed — that's a pricing story, not a growth story.</blockquote>
+    <h2>Marketplace vs SaaS Context</h2>
+    <p>In marketplace contexts (Crafted, Etsy, Airbnb), GMV is the primary volume signal and revenue is the financial outcome. In SaaS contexts (Threadline), there's no GMV — revenue IS the transaction, so ARPU and LTV are the primary metrics. Mixing up the vocabulary — citing GMV in a SaaS context, or ignoring take rate compression in a marketplace context — tells interviewers and stakeholders that you're applying a template rather than thinking about the specific business.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> The question to ask before citing any of these metrics is: &quot;What decision does this number inform?&quot; GMV informs supply/demand balance and market liquidity. Revenue informs financial planning. ARPU informs pricing and segmentation. LTV informs acquisition budget and payback period. Using one when the decision calls for another produces the right-sounding number but the wrong analysis.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice this in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/gmv-vs-revenue">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

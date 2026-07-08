@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guardrails: The Metrics Nobody Asks For That You Must Track Anyway | Product Analytics Lab</title>
+  <meta name="description" content="A rising CVR with a rising refund rate is not a win. Guardrails are what separate analysts from metric-farmers. Here's how to select, defend, and explain them.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/guardrails">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/guardrails">
+  <meta property="og:title"       content="Guardrails: The Metrics Nobody Asks For That You Must Track Anyway | Product Analytics Lab">
+  <meta property="og:description" content="A rising CVR with a rising refund rate is not a win. Guardrails are what separate analysts from metric-farmers. Here's how to select, defend, and explain them.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Guardrails: The Metrics Nobody Asks For That You Must Track Anyway">
+  <meta name="twitter:description" content="A rising CVR with a rising refund rate is not a win. Guardrails are what separate analysts from metric-farmers. Here's how to select, defend, and explain them.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Guardrails: The Metrics Nobody Asks For That You Must Track Anyway","description":"A rising CVR with a rising refund rate is not a win. Guardrails are what separate analysts from metric-farmers. Here's how to select, defend, and explain them.","url":"https://experimentation-systems-lab.vercel.app/posts/guardrails","articleSection":"Metrics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #16a34acc 30%, #16a34acc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #16a34a;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #16a34a; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #16a34a;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/guardrails" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Metrics</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>Guardrails: The Metrics Nobody Asks For That You Must Track Anyway</h1>
+    <p class="desc">A rising CVR with a rising refund rate is not a win. Guardrails are what separate analysts from metric-farmers. Here's how to select, defend, and explain them.</p>
+
+    <p>North star metrics get optimized. That's the point. But optimization without constraint finds the shortest path to the target, which is rarely the path you intended. Guardrail metrics exist because every north star can be gamed, and game-playing looks like success until it doesn't. The analysts who add guardrails before the experiment runs are the ones who catch problems before they become embarrassments.</p>
+    <h2>Why Guardrails Exist</h2>
+    <p>The failure mode of any north star is the cheapest action that moves it upward without delivering real value. If the north star is conversion rate, you can raise it by removing friction at the cost of quality — show fewer products with higher click probability, simplify the checkout form so impulse buys go through faster, send heavier promotional discounts. CVR goes up. Refund rate, support ticket volume, and 30-day repurchase rate go down. Guardrails are the metrics that measure what the north star optimization is costing you.</p>
+    <p>The key principle: guardrails must be selected before the experiment runs, not discovered after. Pre-committing to guardrails prevents motivated reasoning — you can't decide post-hoc that the refund rate increase &quot;probably isn't related.&quot; If refund rate is a guardrail and it moves significantly, the experiment is not a ship regardless of what CVR did. That commitment is what makes guardrails credible.</p>
+    <blockquote class="example"><strong>CVR up, refund rate up — is it a ship?:</strong> Experiment: Simplified checkout flow for Crafted marketplace.<br>North star: Checkout CVR — Treatment: +4.2% (significant, p < 0.01)<br>Guardrail: Refund rate — Treatment: +1.8pp, from 6.1% to 7.9% (significant, p < 0.05)<br><br>On CVR alone, this ships. But refund rate rising nearly 30% relative means the simplified checkout is pushing through buyers who aren't confident in their purchase. The incremental CVR gain is partly manufactured demand, not real demand. Net revenue impact after refunds is likely negative. This is a no-ship.</blockquote>
+    <h2>How to Select and Defend Them</h2>
+    <p>To select guardrails, ask: &quot;What is the failure mode of optimizing this north star?&quot; The answer names the thing to protect. For GMV, the failure modes are low-quality transactions and seller churn — guardrails are cancellation rate and seller NPS. For session engagement, the failure mode is notification spam — guardrails are opt-out rate and next-day retention. When a guardrail fires, defend it by showing the business impact of ignoring it: if refund rate is up 1.8pp on 50,000 orders per month at $80 AOV, that's $72K/month in reversed revenue before accounting for support cost.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> A guardrail that never fires is still doing its job — it proves your optimization wasn't gaming the system. A guardrail that fires and gets overridden is worse than no guardrail. The credibility of the system depends on honoring the pre-commitment.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice this in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/guardrails">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

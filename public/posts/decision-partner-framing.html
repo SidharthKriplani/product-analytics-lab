@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You Are Not a Metrics Reporter. You Are an Analytical Decision Partner. | Product Analytics Lab</title>
+  <meta name="description" content="The mindset shift that changes how you answer every interview question and structure every analysis: the output is always a recommendation, not a dashboard.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/decision-partner-framing">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/decision-partner-framing">
+  <meta property="og:title"       content="You Are Not a Metrics Reporter. You Are an Analytical Decision Partner. | Product Analytics Lab">
+  <meta property="og:description" content="The mindset shift that changes how you answer every interview question and structure every analysis: the output is always a recommendation, not a dashboard.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="You Are Not a Metrics Reporter. You Are an Analytical Decision Partner.">
+  <meta name="twitter:description" content="The mindset shift that changes how you answer every interview question and structure every analysis: the output is always a recommendation, not a dashboard.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"You Are Not a Metrics Reporter. You Are an Analytical Decision Partner.","description":"The mindset shift that changes how you answer every interview question and structure every analysis: the output is always a recommendation, not a dashboard.","url":"https://experimentation-systems-lab.vercel.app/posts/decision-partner-framing","articleSection":"Career & Interview","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #dc2626; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #dc2626cc 30%, #dc2626cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #dc2626;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #dc2626; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #dc2626;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/decision-partner-framing" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Career &amp; Interview</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>You Are Not a Metrics Reporter. You Are an Analytical Decision Partner.</h1>
+    <p class="desc">The mindset shift that changes how you answer every interview question and structure every analysis: the output is always a recommendation, not a dashboard.</p>
+
+    <p>There are two models for what a data scientist does. In the first model, the DS answers questions: a PM or executive asks a question, the DS queries data, and produces a number or a chart. In the second model, the DS shapes questions: they proactively identify which decisions need analysis, push back when the question being asked is not the decision-relevant one, and deliver output that is formatted as a decision input rather than a data dump. The difference between these two models is not seniority — it is framing. And the framing is entirely in your control.</p>
+    <h2>What Changes When You Frame as a Decision Partner</h2>
+    <p>Three things change when you adopt decision-partner framing. First, you lead with the decision, not the data. Instead of &quot;here is what I found,&quot; you say &quot;here is what I recommend, and here is the evidence.&quot; Second, you translate findings into implications. A retention number without a business implication is a description. A retention number with &quot;this suggests we are leaking 12% of our SMB segment, which maps to $340K ARR at risk&quot; is a decision input. Third, you push back when the question is wrong. If a PM asks &quot;what is the conversion rate of users who saw Feature X?&quot; the decision-partner response is &quot;before I answer that, let me flag that this will be confounded by selection — users who saw Feature X are not randomly selected. Would a causal comparison be more useful here?&quot;</p>
+    <blockquote class="example"><strong>Threadline SaaS: reporter vs decision partner:</strong> Same finding, two framings:<br><br>Reporter framing: "Retention fell 8% in Q2. The SMB segment drove most of the decline. The pricing change in May correlates with the timing."<br><br>Decision-partner framing: "Retention fell 8% overall, but the decline is concentrated in SMB accounts — specifically, accounts with fewer than 20 seats that are on monthly contracts. The timing correlates with the May pricing change, which increased monthly plan rates by 15% for this tier. My recommendation: run a targeted re-engagement campaign for affected accounts with a rate-lock offer, and A/B test whether extending the monthly-to-annual discount window increases conversion for this segment. I estimate we can recover 30–40% of the at-risk accounts within 60 days."<br><br>The data is identical. The decision-partner version tells the business leader what to do next.</blockquote>
+    <h2>How to Frame Any DS Output as a Decision Input</h2>
+    <p>The formula is: finding → implication → recommendation → next step. Take any analytical output you have produced and add three sentences. &quot;This finding implies that [business consequence]. My recommendation is [specific action]. The next step is [one concrete thing someone can do in the next week].&quot; These three sentences transform a report into a decision input. They also change how you are perceived — from someone who describes what happened to someone who drives what happens next.</p>
+    <blockquote class="callout"><strong>The interview application:</strong> In an interview, decision-partner framing sounds like this: you close every answer with a recommendation, you frame every metric in terms of the decision it informs, and when a question is ambiguous, you ask which decision you are trying to enable before answering. Interviewers testing for seniority are specifically watching for whether you give them a dashboard (list of metrics, list of hypotheses) or a decision input (recommendation with reasoning and a next step).</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice this in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/decision-partner-framing">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

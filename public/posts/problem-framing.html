@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Problem Framing: Restating the Question Before Touching Data | Product Analytics Lab</title>
+  <meta name="description" content="The first 60 seconds of an ambiguous problem answer should never include a metric. Restate the business decision, the success definition, and the scope — then…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/problem-framing">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/problem-framing">
+  <meta property="og:title"       content="Problem Framing: Restating the Question Before Touching Data | Product Analytics Lab">
+  <meta property="og:description" content="The first 60 seconds of an ambiguous problem answer should never include a metric. Restate the business decision, the success definition, and the scope — then…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Problem Framing: Restating the Question Before Touching Data">
+  <meta name="twitter:description" content="The first 60 seconds of an ambiguous problem answer should never include a metric. Restate the business decision, the success definition, and the scope — then…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Problem Framing: Restating the Question Before Touching Data","description":"The first 60 seconds of an ambiguous problem answer should never include a metric. Restate the business decision, the success definition, and the scope — then…","url":"https://experimentation-systems-lab.vercel.app/posts/problem-framing","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #6B3FA0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #6B3FA0cc 30%, #6B3FA0cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #6B3FA0;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #6B3FA0; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #6B3FA0;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/problem-framing" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Ambiguous Problems</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Problem Framing: Restating the Question Before Touching Data</h1>
+    <p class="desc">The first 60 seconds of an ambiguous problem answer should never include a metric. Restate the business decision, the success definition, and the scope — then start the analysis.</p>
+
+    <p>The most common interview mistake is answering the question as literally asked, rather than the question being asked in spirit. &quot;Why is engagement dropping?&quot; is not asking for a list of engagement metrics. It's asking you to diagnose a business problem — and to do that, you first need to know which engagement metric, on which surface, over what time period, for which user segment. Answering before you know these things produces work that's analytically precise and directionally wrong.</p>
+    <h2>The Reframing Moves</h2>
+    <p>There are four reframing moves worth making at the start of any ambiguous question. First, clarify the decision: &quot;Before I answer, let me make sure I understand the decision we're trying to make — is this about whether to invest in fixing engagement, or diagnosing why it moved?&quot; Second, scope the metric: &quot;Which engagement metric are we focused on — session frequency, session length, feature adoption, or something else?&quot; Third, scope the time horizon: &quot;Is this a recent spike or a trend over multiple months? The answer determines whether we're looking at a product change or a structural shift.&quot; Fourth, identify the stakeholder: &quot;Who needs this analysis, and what will they decide with it?&quot; These four moves together transform a vague question into a tractable problem.</p>
+    <blockquote class="example"><strong>&quot;Why is engagement dropping?&quot; → reframed:</strong> Original question: "Why is engagement dropping on Spark?"<br><br>After reframing:<br>- Metric scoped: daily message send rate among users active in the last 30 days (not total engagement, which is too broad).<br>- Time horizon scoped: 3-week decline, started after the Jan 21 feed redesign.<br>- Surface scoped: drop concentrated on the main feed, not in DMs.<br>- Stakeholder scoped: Head of Product, deciding whether to roll back the feed redesign or iterate on it.<br><br>Reframed question: "What in the Jan 21 feed redesign reduced daily message sending among existing active users on the main feed?"<br><br>This is a question you can actually answer. The original wasn't.</blockquote>
+    <p>The reframing moves feel slow under interview pressure. They aren't. Spending 90 seconds scoping the question saves 15 minutes of analysis on the wrong problem. And interviewers are watching for the reframing — it's one of the clearest signals of analytical seniority. A junior analyst charges forward with the first interpretation of the question. A senior analyst pauses and says: &quot;Before I dive in, let me make sure I understand what we're trying to figure out.&quot;</p>
+    <blockquote class="callout"><strong>The one sentence that signals seniority:</strong> &quot;Before I answer, let me restate the problem to make sure we're aligned on what we're trying to figure out.&quot; This sentence buys you 60 seconds to think, signals analytical discipline, and almost always prompts the interviewer to add useful context. Use it every time you hear an ambiguous question.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice problem framing in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/problem-framing">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

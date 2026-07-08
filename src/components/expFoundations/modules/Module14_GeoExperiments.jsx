@@ -64,10 +64,10 @@ export function Module_EF14({ onComplete }) {
   var allSelected = scenarios14.every(function(s) { return selections[s.id]; });
 
   var mcqOptions = [
-    { label: 'A. Geo experiments require a different statistical test that is less powerful.', correct: false },
+    { label: 'A. Geo experiments require a fundamentally different statistical test that has inherently less power to begin with', correct: false },
     { label: 'B. There are far fewer geographic units (cities, DMAs) than users — fewer randomization units means lower statistical power.', correct: true },
-    { label: 'C. Geographic units have higher variance in their outcomes than individual users.', correct: false },
-    { label: 'D. Geo experiments cannot randomize at all — they always use pre-selected markets.', correct: false },
+    { label: 'C. Geographic units simply have much higher outcome variance than individual users do, regardless of sample size', correct: false },
+    { label: 'D. Geo experiments cannot randomize at all — they are always run against a fixed set of pre-selected markets', correct: false },
   ];
 
   return (

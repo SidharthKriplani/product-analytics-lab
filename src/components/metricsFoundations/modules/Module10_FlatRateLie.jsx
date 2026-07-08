@@ -11,12 +11,12 @@ function shuffleMF(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0;
 const MF10_MCQ = {
   question: 'Your conversion rate has sat at exactly 4.0% for three months, so the checkout flow gets declared "stable." Then someone pulls absolute counts: orders are down 30% and sessions are down 30% over the same period. What is actually happening?',
   options: [
-    'Nothing — a flat conversion rate proves the funnel is healthy and stable',
-    'The business is shrinking: orders and sessions both collapsed together, so the rate held flat while the numerator and denominator both cratered',
-    'Conversion improved, because holding the rate steady through a downturn is a win',
-    'There must be a tracking bug — the rate cannot stay flat if the counts are falling',
+    'Nothing is wrong — a conversion rate that holds perfectly flat for three straight months is the clearest proof a funnel is healthy',
+    'The business is shrinking: orders and sessions both collapsed together, so the rate held flat while the real volume cratered',
+    'Conversion actually improved here, since holding the rate steady through a demand downturn like this counts as a win',
+    'There is almost certainly a tracking bug — a rate cannot stay flat while the underlying counts are falling this much',
   ],
-  correct: 'The business is shrinking: orders and sessions both collapsed together, so the rate held flat while the numerator and denominator both cratered',
+  correct: 'The business is shrinking: orders and sessions both collapsed together, so the rate held flat while the real volume cratered',
   explanation: 'A ratio is two numbers in a trench coat. If orders (numerator) and sessions (denominator) fall by the same proportion, the rate does not move at all — 2,800 / 70,000 is still 4.0%, exactly like 4,000 / 100,000. The flat rate masked a 30% collapse in the business. A stable rate is never, on its own, evidence of a stable system. Always pull the raw numerator and denominator counts before concluding nothing is happening.',
 };
 

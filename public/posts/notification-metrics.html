@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification Health: Why Open Rate Is the Wrong Primary Metric | Product Analytics Lab</title>
+  <meta name="description" content="Open rate is a proxy for attention, not value. The right metric captures whether the notification drove the intended action without burning long-term engagemen…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/notification-metrics">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/notification-metrics">
+  <meta property="og:title"       content="Notification Health: Why Open Rate Is the Wrong Primary Metric | Product Analytics Lab">
+  <meta property="og:description" content="Open rate is a proxy for attention, not value. The right metric captures whether the notification drove the intended action without burning long-term engagemen…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Notification Health: Why Open Rate Is the Wrong Primary Metric">
+  <meta name="twitter:description" content="Open rate is a proxy for attention, not value. The right metric captures whether the notification drove the intended action without burning long-term engagemen…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Notification Health: Why Open Rate Is the Wrong Primary Metric","description":"Open rate is a proxy for attention, not value. The right metric captures whether the notification drove the intended action without burning long-term engagemen…","url":"https://experimentation-systems-lab.vercel.app/posts/notification-metrics","articleSection":"Product Sense","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #1d4ed8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #1d4ed8cc 30%, #1d4ed8cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #1d4ed8;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #1d4ed8; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #1d4ed8;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/notification-metrics" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Product Sense</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Notification Health: Why Open Rate Is the Wrong Primary Metric</h1>
+    <p class="desc">Open rate is a proxy for attention, not value. The right metric captures whether the notification drove the intended action without burning long-term engagement.</p>
+
+    <p>The naive metric for a notification system is CTR (click-through rate). A notification that gets clicks looks successful. The problem: CTR measures curiosity, not value. A clickbait notification subject line — &quot;You won't believe what's trending&quot; — drives clicks and immediate disappointment. Users click, see nothing relevant, and form a negative association with the app's notifications. High CTR plus high opt-out rate is the signature of a notification system that is actively destroying long-term engagement.</p>
+    <h2>The Full Metric Stack</h2>
+    <p>A healthy notification system requires metrics at every layer. Delivery rate is the hygiene check: what fraction of sent notifications actually reached the device? Low delivery rate indicates technical problems or a high uninstall rate. Open rate tracks the fraction of delivered notifications that were opened — it measures whether the subject line and timing drove attention. CTR tracks clicks from the notification into the app. Conversion rate tracks whether those clicks completed the intended action (watching a video, making a purchase, accepting a connection request). Opt-out rate is the critical guardrail: what fraction of users disabled notifications after receiving them? A rising opt-out rate means the notification system is burning the channel that enabled the engagement in the first place. Re-engagement rate answers the most important question: did the notification bring back a user who was at risk of churning?</p>
+    <blockquote class="example"><strong>Prism video app — finding the notification sweet spot:</strong> Prism runs a holdout experiment by notification volume tier to find the dose-response relationship between notification frequency and D7 retention.<br><br>Tier (avg notifications/day) → D7 retention → opt-out rate within 7 days:<br>0–1 notifications/day → D7: 38% → opt-out: 3.1%<br>2–3 notifications/day → D7: 42% → opt-out: 4.8%<br>4–6 notifications/day → D7: 39% → opt-out: 9.2%<br>7–10 notifications/day → D7: 31% → opt-out: 18.4%<br>10+ notifications/day → D7: 22% → opt-out: 34.7%<br><br>The sweet spot is 2–3 notifications/day: highest D7 retention at an acceptable opt-out rate. Above 4/day, retention declines and opt-out rises sharply. The optimal frequency is not "as many as possible" — it is calibrated to the dose-response relationship.</blockquote>
+    <h2>The Dose-Response Relationship</h2>
+    <p>The dose-response relationship between notification volume and retention is not linear. At low volumes, notifications are positive: they re-engage users who might have forgotten about the app, surface relevant content, and drive return visits that create habit. At high volumes, the relationship flips: notifications become intrusive, users opt out, and the re-engagement channel is permanently disabled for those users. The optimal volume exists in the middle, and it is product-specific — a news app whose users want breaking alerts can sustain higher volumes than a video streaming app whose users don't want to be interrupted.</p>
+    <blockquote class="callout"><strong>The opt-out rate as leading indicator:</strong> Opt-out rate is the leading indicator for long-term notification system health. A rising opt-out rate tells you users are disabling the channel — and once a user opts out of notifications, the probability they re-enable is low. Monitor opt-out rate per notification type, not just in aggregate: a rising opt-out from &quot;new content&quot; notifications vs stable opt-out from &quot;friend activity&quot; notifications tells you which type is the problem. Fix the broken type before it burns the whole channel.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice notification metric design in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/notification-metrics">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

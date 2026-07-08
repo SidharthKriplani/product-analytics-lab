@@ -41,10 +41,10 @@ export function Module_EF13({ onComplete }) {
   var labelW = 78;
 
   var mcqOptions = [
-    { label: 'A. When you need a statistically clean causal estimate of the treatment effect.', correct: false },
-    { label: 'B. When you have unlimited experiment duration and traffic.', correct: false },
-    { label: 'C. When the cost of showing users a losing variant during the experiment is high and you can tolerate less statistical precision.', correct: true },
-    { label: 'D. When your metric has high variance and low coefficient of variation.', correct: false },
+    { label: 'A. When you need a statistically clean, unbiased causal estimate of the treatment effect for a report', correct: false },
+    { label: 'B. When you have unlimited experiment duration and effectively unlimited incoming traffic to spend', correct: false },
+    { label: 'C. When the cost of showing losers is high and less statistical precision is an acceptable tradeoff', correct: true },
+    { label: 'D. When your metric has high variance and a low coefficient of variation relative to the baseline', correct: false },
   ];
 
   return (

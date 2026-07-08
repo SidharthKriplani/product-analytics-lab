@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Decision Rule: Pre-Commit or Regret | Product Analytics Lab</title>
+  <meta name="description" content="A decision rule written after seeing results is not a decision rule — it's post-hoc rationalization. Here's what a good pre-committed rule looks like.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/decision-rule">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/decision-rule">
+  <meta property="og:title"       content="Your Decision Rule: Pre-Commit or Regret | Product Analytics Lab">
+  <meta property="og:description" content="A decision rule written after seeing results is not a decision rule — it's post-hoc rationalization. Here's what a good pre-committed rule looks like.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Your Decision Rule: Pre-Commit or Regret">
+  <meta name="twitter:description" content="A decision rule written after seeing results is not a decision rule — it's post-hoc rationalization. Here's what a good pre-committed rule looks like.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Your Decision Rule: Pre-Commit or Regret","description":"A decision rule written after seeing results is not a decision rule — it's post-hoc rationalization. Here's what a good pre-committed rule looks like.","url":"https://experimentation-systems-lab.vercel.app/posts/decision-rule","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/decision-rule" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>Your Decision Rule: Pre-Commit or Regret</h1>
+    <p class="desc">A decision rule written after seeing results is not a decision rule — it's post-hoc rationalization. Here's what a good pre-committed rule looks like.</p>
+
+    <p>A decision rule is the complete specification of when and how you will make a ship/no-ship decision — written before the experiment runs. It is not a checklist you fill in after you see the results. The difference matters enormously. A decision rule written after results are visible is not a rule — it's a rationalization. The human brain is extraordinarily good at constructing post-hoc logic for whatever outcome it wants to see, and &quot;I'd always planned to use this metric&quot; is easy to believe in retrospect. The pre-commitment is what makes the rule credible.</p>
+    <h2>What a Decision Rule Includes</h2>
+    <p>A complete decision rule specifies five things. First, the primary metric — the one decision metric, pre-committed. Second, the significance threshold — typically α = 0.05 (two-tailed) for most product decisions, α = 0.01 for high-stakes irreversible changes. Third, the power target and minimum detectable effect — 80% power at the pre-specified MDE, with runtime calculated before launch. Fourth, the minimum runtime — you will not make a ship decision before this date, regardless of what the results look like (prevents peeking and novelty-effect false positives). Fifth, the guardrail conditions — if guardrail X moves by more than Y, what happens.</p>
+    <blockquote class="example"><strong>Complete decision rule: Threadline SaaS onboarding experiment:</strong> Experiment: Simplified 3-step onboarding flow (vs existing 7-step flow)<br><br>Decision rule (written on launch day):<br>- Primary metric: 14-day seat activation rate (user completes at least one core workflow within 14 days of seat assignment)<br>- α = 0.05, two-tailed<br>- Power target: 80% to detect +3pp absolute lift (MDE = +3pp from baseline 41%)<br>- Required n: 1,840 per group (power calc run 2025-04-01)<br>- Minimum runtime: 21 days (to cover novelty effect and full cohort maturation)<br>- Guardrails: (1) Support ticket rate must not increase by more than +0.5pp. (2) 30-day churn must not increase — evaluated at 6 weeks post-launch.<br>- Ship condition: primary metric p < 0.05 AND no guardrail fires. If guardrail fires, escalate to product lead before any ship decision.</blockquote>
+    <h2>What Pre-Commitment Prevents</h2>
+    <p>Pre-commitment prevents three failure modes. First, early stopping: without a minimum runtime, stakeholder pressure will push you to read the results the moment they look good. Early stopping inflates false positives and catches novelty effects that won't sustain. Second, metric fishing: without a pre-committed primary metric, you'll find significance in one of your 12 tracked metrics and call it a win. Third, post-hoc guardrail dismissal: without pre-committed guardrails, a firing guardrail becomes &quot;probably a coincidence&quot; or &quot;that metric always moves a little.&quot; Pre-commitment forces honesty because the rules were set when everyone expected a clean experiment.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> The hardest part of a pre-committed decision rule is following it when the results are inconvenient. A null result when the team wanted a win. A guardrail that fires when GMV is up. A result that's positive but came in on day 8 when the minimum runtime was day 21. Following the rule in these moments is what makes the experimentation system trustworthy. Abandoning it &quot;just this once&quot; trains the team that rules are suggestions, and suggestions aren't protection against anything.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/design">Practice this in the Design Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/decision-rule">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

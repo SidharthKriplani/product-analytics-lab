@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feature Importance vs Causality: Why Your Model's Top Feature Might Be a Confounder | Product Analytics Lab</title>
+  <meta name="description" content="SHAP values tell you what the model learned — not what caused the outcome. Mixing the two up leads to bad interventions and wrong product decisions.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/feature-importance">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/feature-importance">
+  <meta property="og:title"       content="Feature Importance vs Causality: Why Your Model's Top Feature Might Be a Confounder | Product Analytics Lab">
+  <meta property="og:description" content="SHAP values tell you what the model learned — not what caused the outcome. Mixing the two up leads to bad interventions and wrong product decisions.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Feature Importance vs Causality: Why Your Model's Top Feature Might Be a Confounder">
+  <meta name="twitter:description" content="SHAP values tell you what the model learned — not what caused the outcome. Mixing the two up leads to bad interventions and wrong product decisions.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Feature Importance vs Causality: Why Your Model's Top Feature Might Be a Confounder","description":"SHAP values tell you what the model learned — not what caused the outcome. Mixing the two up leads to bad interventions and wrong product decisions.","url":"https://experimentation-systems-lab.vercel.app/posts/feature-importance","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #007C89; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #007C89cc 30%, #007C89cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #007C89;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #007C89; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #007C89;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/feature-importance" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">GenAI Analytics</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>Feature Importance vs Causality: Why Your Model's Top Feature Might Be a Confounder</h1>
+    <p class="desc">SHAP values tell you what the model learned — not what caused the outcome. Mixing the two up leads to bad interventions and wrong product decisions.</p>
+
+    <p>Feature importance tells you which variables the model found most useful for predicting the outcome. It does not tell you which variables caused the outcome. This distinction sounds academic. Its consequences are not. A team that uses feature importance to design interventions — &quot;low login frequency is our top feature, so we'll run a campaign to increase logins&quot; — is treating a symptom as a cause. If low login frequency is a symptom of losing interest in the product, increasing login frequency through notifications doesn't address the underlying loss of interest. It creates logged-in disengaged users instead of absent disengaged users.</p>
+    <h2>Three Traps: Reverse Causality, Selection Bias, Survivorship</h2>
+    <p>Reverse causality trap: the model shows &quot;filed a support ticket in month 1&quot; as a top churn predictor. Does this mean support tickets cause churn? Or does it mean users who encountered a serious problem (which causes churn) were also more likely to file a ticket? The relationship is real — ticket filers do churn at higher rates — but the direction is backward. Contacting all ticket-filers with retention offers doesn't fix the underlying problem that caused them to file tickets. Selection bias trap: feature importance is measured on your observed user base. Users who churned before day 30 aren't in your 90-day churn model. Their behavior pattern — possibly very different from day-90 churners — is invisible to the model. Survivorship trap: the model is only trained on users who stuck around long enough to be labeled. Short-term churners teach the model nothing.</p>
+    <blockquote class="example"><strong>Threadline churn: feature importance vs causal hypothesis vs experiment:</strong> Top model feature: login frequency in days 15-30 (SHAP value: 0.41, highest in model).<br><br>Naive interpretation: "Increase logins to reduce churn."<br>Intervention: Send daily reminder notifications to low-login-frequency users.<br>Result: Logins increased 18%. Churn unchanged. (Users logged in and immediately logged out — they had nothing to do in the product.)<br><br>Causal hypothesis: Low login frequency is a symptom of low product value discovery. Users who found at least one workflow that matched their use case logged in regularly. Users who didn't, didn't.<br><br>Re-designed intervention: In-app workflow discovery prompt for users in days 15-30 who have logged in fewer than 3 times. Surface a relevant use case based on their role/industry.<br><br>Experiment result: 12pp higher 90-day retention in treatment vs control. The intervention addressed the cause (no discovered use case), not the symptom (low logins).</blockquote>
+    <blockquote class="callout"><strong>How to go from feature importance to causal hypothesis to experiment:</strong> 1. Identify a high-importance feature: &quot;low login frequency in days 15-30.&quot;
+2. Generate the causal hypothesis: &quot;What could cause both low logins AND churn? Loss of perceived product value.&quot;
+3. Design an experiment that addresses the hypothesized cause, not the feature: &quot;Show users a workflow relevant to their use case in days 15-30.&quot;
+4. Measure whether the experiment changes the feature (login frequency) AND the outcome (churn). If the feature changes but the outcome doesn't, your causal hypothesis is wrong — go back to step 2.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice causal reasoning in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/feature-importance">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

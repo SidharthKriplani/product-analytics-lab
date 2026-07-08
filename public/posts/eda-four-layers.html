@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The 4 Layers of EDA: How to Open a Dataset You've Never Seen | Product Analytics Lab</title>
+  <meta name="description" content="A raw table lands in your inbox with no question attached. The layered EDA protocol — system, profiling, univariate, then relationships — is how you go from &quot;I…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/eda-four-layers">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/eda-four-layers">
+  <meta property="og:title"       content="The 4 Layers of EDA: How to Open a Dataset You've Never Seen | Product Analytics Lab">
+  <meta property="og:description" content="A raw table lands in your inbox with no question attached. The layered EDA protocol — system, profiling, univariate, then relationships — is how you go from &quot;I…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="The 4 Layers of EDA: How to Open a Dataset You've Never Seen">
+  <meta name="twitter:description" content="A raw table lands in your inbox with no question attached. The layered EDA protocol — system, profiling, univariate, then relationships — is how you go from &quot;I…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"The 4 Layers of EDA: How to Open a Dataset You've Never Seen","description":"A raw table lands in your inbox with no question attached. The layered EDA protocol — system, profiling, univariate, then relationships — is how you go from \"I…","url":"https://experimentation-systems-lab.vercel.app/posts/eda-four-layers","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/eda-four-layers" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">SQL &amp; Data</span>
+      <span class="read-time">9 min read</span>
+    </div>
+    <h1>The 4 Layers of EDA: How to Open a Dataset You've Never Seen</h1>
+    <p class="desc">A raw table lands in your inbox with no question attached. The layered EDA protocol — system, profiling, univariate, then relationships — is how you go from &quot;I have no idea what this is&quot; to a defensible set of findings without flailing.</p>
+
+    <p>Here is a situation that feels harder than it is. A take-home lands, or a stakeholder drops a CSV in your channel, and there is no crisp question — just &quot;see what you can find.&quot; Most people react in one of two ways: they either freeze, or they start plotting things at random and hope a chart looks interesting. Neither builds trust. What separates a consultant-grade analysis from a student one is that the consultant follows the same calm protocol every single time, no matter the dataset. You are going to learn that protocol here, and once it is a habit you will never stare at a blank query editor again.</p>
+    <blockquote class="callout"><strong>Before any layer — the mental model:</strong> Classify every column into one of two buckets. Ask: (1) is it numeric, and (2) does it make sense to aggregate it? If YES to both, it is a Measure (revenue, quantity, age) — the &quot;how much / how many&quot; columns. If NO to either, it is a Dimension (category, date, customer_id) — the columns you slice and group by. A customer ID is numeric but you would never average it, so it is a Dimension. Getting this right up front tells you which columns get summed and which ones get grouped by.</blockquote>
+    <h2>Layer 0 — System Profiling</h2>
+    <p>You do not start at the table. You start at the system. Before writing a single join, map the building before you search the rooms: how many tables exist, what the naming conventions are, and which columns live where. Query the metadata (information_schema.tables and information_schema.columns). Three tables and 150 tables are very different problems, and knowing which one you are in stops you from writing complex joins blindly.</p>
+    <h2>Layer 1 — Data Profiling: is it even clean?</h2>
+    <p>This is the audit layer — no analysis yet, just checking that the raw material is usable. A chef inspects the ingredients before cooking. The habit to build is running the same checklist on any new table, and writing down what you find.</p>
+    <ul><li>Shape and grain — how many rows and columns, and what does one row actually represent? One order? One customer? One order-line? Everything downstream depends on knowing the grain.</li><li>Data types — is the date a real date or a string? Is revenue a number or text? Wrong types silently break every calculation.</li><li>Time span — MIN and MAX on the date columns, then the difference. Two months of data and ten years are different analyses.</li><li>Missing values — which columns have nulls, how many, what percent — and crucially, why. A discount column empty only for premium customers is not random; it is a business rule.</li><li>Duplicates — repeated keys. Two identical order IDs mean either a collection bug or a genuine repeat — you have to decide which.</li><li>Impossible values — negative quantity, delivery date before order date, margin above 100%. Data entry errors or system bugs. Flag and investigate.</li><li>Inconsistent categories — &quot;Mumbai&quot;, &quot;mumbai&quot;, &quot;MUM&quot; look like three cities but are one. Standardise before you group.</li></ul>
+    <blockquote class="callout"><strong>One honest note: resolve like an analyst, not a model-trainer:</strong> Never overwrite a raw column — if you fix revenue, create revenue_cleaned and keep the paper trail. And resist the urge to fill missing numbers with the average. Data scientists impute to train models; analysts surface the truth. If you do not know the real number, leave it null or label it &quot;Unknown&quot; rather than inventing bias. The magnitude rule: if an issue touches under ~20% of the data, document it and move on (do not delete a fifth of your rows); if it compromises over ~70% of a column, drop the column.</blockquote>
+    <h2>Layer 2 — Univariate: one column at a time</h2>
+    <p>Now you build intuition about each variable in isolation — its personality — before you look at relationships. A useful warm-up is the &quot;super report&quot;: stack your top-line measures (total sales, total orders, average price, median revenue) into one query with UNION ALL so you have the baseline heartbeat of the business to compare everything against.</p>
+    <ul><li>Numeric columns: central tendency (mean vs median — if they diverge, you are skewed), spread (standard deviation, range, IQR), distribution shape (histogram — normal, skewed, bimodal, uniform), outliers (box plot, points beyond 1.5×IQR), and percentiles (P25 through P99 — the P99 customer may spend 50× the median).</li><li>Categorical columns: frequency (which category dominates), cardinality (how many unique values — a 50,000-value name column cannot be grouped, and high-cardinality dimensions crash dashboards), and rare categories (appear once or twice — keep, bucket into &quot;Other&quot;, or investigate).</li></ul>
+    <h2>Layer 3 — Bivariate and Multivariate: the story</h2>
+    <p>Only now do you ask business questions — how things relate. Bivariate is two variables at a time: slice a Measure by a Dimension (revenue by region, delivery time by supplier), rank the top and bottom performers, and check numeric-vs-numeric relationships with a scatter. The key discipline is the noise filter: once ranking shows that 3 of 20 categories drive 80% of the movement, ruthlessly filter out the bottom 80% before you plot anything else. Multivariate adds a third variable — and this is where the buried insight usually lives.</p>
+    <blockquote class="example"><strong>A flat relationship hiding a real one:</strong> Bivariate view:<br>  Discount level vs sales  →  basically flat. "Discounts do not move sales." Case closed?<br><br>Add a third variable (region):<br>  South region:  discount > 20%  →  sales +40%   (huge effect)<br>  North region:  discount > 20%  →  sales  0%    (no effect)<br><br>The overall flat line was two opposite stories cancelling out.<br>That is a multivariate insight — and it changes the recommendation<br>from "stop discounting" to "discount in the South, not the North."</blockquote>
+    <blockquote class="example"><strong>The Layer 3 queries you actually run:</strong> -- Magnitude: a measure sliced by a dimension<br>SELECT region, COUNT(*) AS orders, SUM(revenue) AS rev, AVG(revenue) AS aov<br>FROM orders GROUP BY region ORDER BY rev DESC;<br><br>-- Ranking: top 5 and bottom 5 by revenue<br>WITH ranked AS (<br>  SELECT product_name, SUM(revenue) AS rev,<br>         ROW_NUMBER() OVER (ORDER BY SUM(revenue) DESC) AS top_rank,<br>         ROW_NUMBER() OVER (ORDER BY SUM(revenue) ASC)  AS bot_rank<br>  FROM orders GROUP BY product_name)<br>SELECT product_name, rev FROM ranked<br>WHERE top_rank <= 5 OR bot_rank <= 5 ORDER BY rev DESC;<br><br>-- Multivariate: revenue by region AND category at once<br>SELECT region, category, SUM(revenue) AS rev, COUNT(*) AS orders<br>FROM orders GROUP BY region, category ORDER BY region, rev DESC;</blockquote>
+    <blockquote class="callout"><strong>The habit that makes this transferable:</strong> Deconstruct the top-line metric into its components before you analyse it. Revenue = Order Count × Average Order Value — so if revenue drops, you immediately know to ask whether it was a volume problem or a price problem. Carrying that decomposition instinct from EDA straight into an RCA is what makes the two feel like one skill.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice EDA on real datasets in Business Cases →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/eda-four-layers">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CUPED: Get 40% More Statistical Power Without Running a Single Extra User | Product Analytics Lab</title>
+  <meta name="description" content="CUPED uses pre-experiment behavior to reduce variance in your outcome metric. More power, same sample size, same runtime. Here's the intuition without the math.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/cuped">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/cuped">
+  <meta property="og:title"       content="CUPED: Get 40% More Statistical Power Without Running a Single Extra User | Product Analytics Lab">
+  <meta property="og:description" content="CUPED uses pre-experiment behavior to reduce variance in your outcome metric. More power, same sample size, same runtime. Here's the intuition without the math.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="CUPED: Get 40% More Statistical Power Without Running a Single Extra User">
+  <meta name="twitter:description" content="CUPED uses pre-experiment behavior to reduce variance in your outcome metric. More power, same sample size, same runtime. Here's the intuition without the math.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"CUPED: Get 40% More Statistical Power Without Running a Single Extra User","description":"CUPED uses pre-experiment behavior to reduce variance in your outcome metric. More power, same sample size, same runtime. Here's the intuition without the math.","url":"https://experimentation-systems-lab.vercel.app/posts/cuped","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/cuped" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>CUPED: Get 40% More Statistical Power Without Running a Single Extra User</h1>
+    <p class="desc">CUPED uses pre-experiment behavior to reduce variance in your outcome metric. More power, same sample size, same runtime. Here's the intuition without the math.</p>
+
+    <p>CUPED — Controlled-experiment Using Pre-Experiment Data — is a variance reduction technique that makes your existing experiment more powerful without adding a single user or a single day of runtime. The insight is simple: a large fraction of the variance in your outcome metric is already explained by how users behaved before the experiment started. High-spenders before the experiment tend to be high-spenders during it. Low-engagement users before tend to be low-engagement during it. If you can strip out this predictable pre-experiment variance, the residual noise is smaller, the signal-to-noise ratio improves, and your experiment becomes more sensitive to the treatment effect.</p>
+    <h2>The Formula</h2>
+    <p>The CUPED-adjusted outcome is: Y_adjusted = Y − θ(X − E[X]), where Y is the outcome metric during the experiment (e.g., purchases per user), X is a pre-experiment covariate (e.g., purchases per user in the 4 weeks before experiment launch), E[X] is the mean of X across all users, and θ = Cov(X, Y) / Var(X) — the coefficient that optimally removes X's contribution to variance in Y. The adjustment is mean-preserving: E[Y_adjusted] = E[Y], so the expected treatment effect is unchanged. Only the variance shrinks. The variance reduction is 1 − ρ², where ρ is the correlation between X and Y.</p>
+    <blockquote class="example"><strong>CUPED on Crafted marketplace revenue metric:</strong> Outcome metric Y: GMV per user during experiment (2 weeks)<br>Covariate X: GMV per user in the 4 weeks before experiment<br>Correlation ρ between X and Y: 0.65 (typical for revenue in stable marketplace)<br><br>Variance reduction = 1 − ρ² = 1 − 0.4225 = 0.5775, or 58% variance reduction.<br><br>Practical effect:<br>Original required runtime to achieve 80% power: 14 days<br>With CUPED (58% variance reduction): 14 × (1 − 0.58) = 5.9 days<br><br>The same experiment reaches 80% power in 6 days instead of 14, using the same users. Alternatively, you could run for 14 days and have power equivalent to a 33-day experiment. No additional traffic, no additional cost.</blockquote>
+    <h2>When It Works and When It Doesn't</h2>
+    <p>CUPED works best when two conditions hold. First, the pre-experiment period must be stable — not affected by a major product change, a seasonal anomaly, or a prior experiment that contaminated baseline behavior. If the covariate X was measured during a Black Friday week and your experiment runs in February, the correlation between X and Y will be weaker and the variance reduction will be smaller than expected. Second, the covariate must be correlated with the outcome — the higher ρ, the more variance reduction. For revenue and engagement metrics with stable user bases, ρ is typically 0.5–0.75. For rare-event metrics like subscription conversions, ρ may be too low for CUPED to be worthwhile.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> Variance reduction is equivalent power without extra users. At ρ = 0.65 (typical for revenue): 58% variance reduction = same as running 58% longer or getting 58% more users — for free. The only requirement is a clean pre-experiment period of comparable length to your experiment. If you have that, CUPED is almost always worth implementing. The most common reason teams skip it is unfamiliarity, not a good analytical reason.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/cuped">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DAU/MAU Ratio: What It Actually Measures and When It Misleads | Product Analytics Lab</title>
+  <meta name="description" content="High DAU/MAU signals habit. But the ratio compresses cohort differences and can look healthy while retention collapses. Here's when to trust it and when to dec…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/dau-mau-ratio">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/dau-mau-ratio">
+  <meta property="og:title"       content="DAU/MAU Ratio: What It Actually Measures and When It Misleads | Product Analytics Lab">
+  <meta property="og:description" content="High DAU/MAU signals habit. But the ratio compresses cohort differences and can look healthy while retention collapses. Here's when to trust it and when to dec…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="DAU/MAU Ratio: What It Actually Measures and When It Misleads">
+  <meta name="twitter:description" content="High DAU/MAU signals habit. But the ratio compresses cohort differences and can look healthy while retention collapses. Here's when to trust it and when to dec…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"DAU/MAU Ratio: What It Actually Measures and When It Misleads","description":"High DAU/MAU signals habit. But the ratio compresses cohort differences and can look healthy while retention collapses. Here's when to trust it and when to dec…","url":"https://experimentation-systems-lab.vercel.app/posts/dau-mau-ratio","articleSection":"Metrics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #16a34acc 30%, #16a34acc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #16a34a;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #16a34a; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #16a34a;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/dau-mau-ratio" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Metrics</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>DAU/MAU Ratio: What It Actually Measures and When It Misleads</h1>
+    <p class="desc">High DAU/MAU signals habit. But the ratio compresses cohort differences and can look healthy while retention collapses. Here's when to trust it and when to decompose it.</p>
+
+    <p>DAU/MAU is the fraction of monthly active users who return on any given day. If your product has 1M MAU and 310K DAU, the ratio is 31% — meaning roughly a third of your monthly users engage daily. The ratio measures habit formation at the population level. A rising DAU/MAU means users are finding reasons to return more frequently. A falling ratio means engagement is becoming less habitual, even if raw DAU is growing because of new user acquisition.</p>
+    <h2>What Good Looks Like</h2>
+    <p>Benchmarks vary sharply by product category. Social networks targeting daily communication — Facebook, WhatsApp — can reach 60-65% DAU/MAU because the use case is inherently daily. Twitter/X sits around 25%, reflecting a more intentional check-in pattern. Most consumer apps land below 20%. Utility apps, marketplace apps, and productivity tools often run 10-15% — healthy for their categories. The mistake is applying social network benchmarks to a marketplace product and concluding engagement is low. For Prism video app, a DAU/MAU of 31% is genuinely strong for long-form or mid-form video content, where daily viewing is a real habit rather than the norm.</p>
+    <blockquote class="example"><strong>Prism video app: interpreting 31% DAU/MAU:</strong> Prism monthly snapshot:<br>- MAU: 2.4M (any user who opened the app in the last 30 days)<br>- DAU (30-day average): 744K<br>- DAU/MAU: 744K / 2.4M = 31%<br><br>Context: YouTube's DAU/MAU is estimated ~30-35%. Netflix is lower, ~20-25%, because binge patterns concentrate viewing into fewer, longer sessions. At 31%, Prism users are forming a daily viewing habit — a strong signal that content quality and personalization are working. If this number drops to 22% over 3 months while MAU grows, that's a warning: new user acquisition is outpacing habit formation.</blockquote>
+    <h2>The Denominator Problem and Cohort Compression</h2>
+    <p>DAU/MAU compresses all cohorts into a single number. A product can have a healthy-looking ratio while old cohort retention is collapsing — if new user acquisition is strong enough, the MAU stays large and the ratio stays flat. To see through this, decompose the ratio by cohort age: what is the DAU/MAU for users acquired 3 months ago? 6 months ago? 12 months ago? If older cohorts show declining ratios, the product is losing its grip on users over time, and the aggregate ratio is masking it.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> What counts as &quot;active&quot; in the denominator matters more than most teams acknowledge. If MAU includes anyone who received a push notification and opened the app for 1 second, you're measuring notification click rate, not genuine engagement. Define &quot;active&quot; as completing at least one meaningful action — a view, a message sent, a search — and the ratio becomes a true engagement signal rather than a traffic metric.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice this in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/dau-mau-ratio">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Case Spine: Routing Gate, Sanity Gate, the Whale, and a BLUF Close | Product Analytics Lab</title>
+  <meta name="description" content="The difference between a rambling case and a crisp one is two gates and a closing structure. Route the investigation by the time signature, confirm the data is…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/case-spine-gates">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/case-spine-gates">
+  <meta property="og:title"       content="The Case Spine: Routing Gate, Sanity Gate, the Whale, and a BLUF Close | Product Analytics Lab">
+  <meta property="og:description" content="The difference between a rambling case and a crisp one is two gates and a closing structure. Route the investigation by the time signature, confirm the data is…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="The Case Spine: Routing Gate, Sanity Gate, the Whale, and a BLUF Close">
+  <meta name="twitter:description" content="The difference between a rambling case and a crisp one is two gates and a closing structure. Route the investigation by the time signature, confirm the data is…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"The Case Spine: Routing Gate, Sanity Gate, the Whale, and a BLUF Close","description":"The difference between a rambling case and a crisp one is two gates and a closing structure. Route the investigation by the time signature, confirm the data is…","url":"https://experimentation-systems-lab.vercel.app/posts/case-spine-gates","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #C97706; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #C97706cc 30%, #C97706cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #C97706;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #C97706; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #C97706;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/case-spine-gates" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">RCA</span>
+      <span class="read-time">8 min read</span>
+    </div>
+    <h1>The Case Spine: Routing Gate, Sanity Gate, the Whale, and a BLUF Close</h1>
+    <p class="desc">The difference between a rambling case and a crisp one is two gates and a closing structure. Route the investigation by the time signature, confirm the data is real, prune to the whale, and land the answer like a decision-maker.</p>
+
+    <p>Most people think a case interview rewards knowing the most causes. It does not — it rewards structure. Two candidates can name the same root cause, and the one who moved through a visible spine wins, because the interviewer is watching how you think, not whether you eventually land on the answer. This is that spine: clarify and route, check the data is real, prune to the one thing that moved, then close cleanly. Take it slowly the first few times; it becomes automatic faster than you would expect.</p>
+    <h2>Clarify → the EDQ and the routing gate</h2>
+    <p>Before anything, lock the problem into one sentence — the Exact Diagnostic Question: &quot;Why did [metric] change by [X% and absolute] for [segment] in [timeframe], and what action should follow?&quot; Every later step must answer to that sentence. The most important thing you clarify is one word: sudden or gradual? That single answer routes the whole investigation.</p>
+    <ul><li>Sudden drop (hours to ~2 days) → start with internal tech and deploys.</li><li>Gradual decline (weeks) → start with external and market factors.</li><li>Cyclical pattern → start with seasonality.</li><li>One segment only → start in that segment's sub-tree; all segments equally → suspect a global trigger (infra, policy).</li><li>Marketplace override: on two-sided platforms (Uber, Swiggy, Airbnb), check the supply side before external — vendor and rider churn moves faster than any market factor.</li></ul>
+    <h2>The sanity gate: is the data even real?</h2>
+    <p>Before you assume the business is broken, confirm the data is not. This is the single cheapest step with the highest payoff — running a root-cause analysis on broken data is wasted effort, and catching a tracking bug in the first two minutes is a senior reflex.</p>
+    <ul><li>Instrumentation — event not firing, double-counting, a property renamed.</li><li>Pipeline / schema — table missing, column dropped, a backfill gap.</li><li>ETL / timezone — orders not synced, timestamp drift across regions.</li><li>Denominator shift — more sessions initiated makes a rate look worse even when absolutes are flat.</li><li>Behavioral-metric trap — did we just make the action easier (surfaced the refund button, relaxed a policy)? The metric may be up because access improved, not because anything worsened.</li></ul>
+    <blockquote class="callout"><strong>The fast check:</strong> Pull raw event counts by hour for the last 72 hours. A vertical cliff at a specific timestamp points to a pipeline or deploy issue — flag it and stop. A smooth declining curve points to real behavior — proceed. That one query resolves the gate.</blockquote>
+    <h2>The whale and the hard-stop prune</h2>
+    <p>Decompose the metric into its formula (Revenue = Users × CVR × AOV; DAU = New + Retained + Resurrected − Churned; and so on), pull each component against the prior period, and find the one that moved — the whale. Then prune every other branch completely. If CVR is flat but AOV fell 18%, acquisition and onboarding are irrelevant to this case. Announce it out loud: &quot;AOV is the whale; I am ignoring the rest.&quot; Never open more than three buckets — two is cleaner, four is the ceiling.</p>
+    <h2>Rank, validate, then close with BLUF</h2>
+    <p>Rank your surviving hypotheses into three tiers — Sprint Now (high impact, high ease: one query today), Deep Dive (high impact, low ease: schedule it), and Drop (low impact: delete). For each top hypothesis, define four fields before you run anything: the confirming signal, the falsifying signal, the time alignment (the cause must precede the drop, or discard it), and the exact query. Never say &quot;I would look at the data&quot; — name the table, the dimension, the window, and what the query checks.</p>
+    <blockquote class="callout"><strong>The BLUF close — five parts, always in order:</strong> Lead with the answer, not the journey. (1) Root cause: &quot;The primary cause is X, driven by [segment/event].&quot; (2) Evidence: &quot;This explains X% of the impact, confirmed by [signal].&quot; (3) Action: short-term fix (what, who, when) plus long-term systemic fix. (4) Confidence: &quot;Medium, based on [signal] — it becomes high if [next data point] confirms.&quot; (5) Open risk: &quot;This changes if [alternative cause] turns out to explain the segment behavior.&quot; Skipping confidence and open risk is what makes a close feel junior.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/rca">Practice the full case spine in the RCA Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/case-spine-gates">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

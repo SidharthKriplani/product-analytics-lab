@@ -59,10 +59,10 @@ export function Module_EF09({ onComplete }) {
   var regY2 = slope * regX2 + intercept;
 
   var options = [
-    { label: 'A. The treatment must have been applied before the experiment started', correct: false },
-    { label: 'B. The pre-experiment metric must be correlated with the outcome metric', correct: true },
-    { label: 'C. Users must have at least 30 days of pre-experiment history', correct: false },
-    { label: 'D. The outcome metric must be normally distributed', correct: false },
+    { label: 'A. The treatment must already have been applied to users before the experiment officially starts collecting data', correct: false },
+    { label: 'B. The chosen pre-experiment covariate must be correlated with the outcome metric you plan to analyze at the end', correct: true },
+    { label: 'C. Users must have at least 30 continuous days of pre-experiment history logged in the data warehouse', correct: false },
+    { label: 'D. The outcome metric must follow a normal distribution across the whole treatment and control population', correct: false },
   ];
 
   return (

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The 5 Question Types in Every DS Product Analytics Interview Loop | Product Analytics Lab</title>
+  <meta name="description" content="Diagnose a metric movement. Measure whether something is working. Identify an opportunity. Build a decision model. ML/product modeling. Each has a different st…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/five-question-types">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/five-question-types">
+  <meta property="og:title"       content="The 5 Question Types in Every DS Product Analytics Interview Loop | Product Analytics Lab">
+  <meta property="og:description" content="Diagnose a metric movement. Measure whether something is working. Identify an opportunity. Build a decision model. ML/product modeling. Each has a different st…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="The 5 Question Types in Every DS Product Analytics Interview Loop">
+  <meta name="twitter:description" content="Diagnose a metric movement. Measure whether something is working. Identify an opportunity. Build a decision model. ML/product modeling. Each has a different st…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"The 5 Question Types in Every DS Product Analytics Interview Loop","description":"Diagnose a metric movement. Measure whether something is working. Identify an opportunity. Build a decision model. ML/product modeling. Each has a different st…","url":"https://experimentation-systems-lab.vercel.app/posts/five-question-types","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #6B3FA0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #6B3FA0cc 30%, #6B3FA0cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #6B3FA0;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #6B3FA0; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #6B3FA0;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/five-question-types" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Ambiguous Problems</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>The 5 Question Types in Every DS Product Analytics Interview Loop</h1>
+    <p class="desc">Diagnose a metric movement. Measure whether something is working. Identify an opportunity. Build a decision model. ML/product modeling. Each has a different structure and opening move.</p>
+
+    <p>Every DS product analytics interview asks roughly the same five types of questions, dressed in different product clothing. The candidate who recognizes the type immediately can apply the right framework from the first sentence. The candidate who doesn't recognize it treats every question the same way — usually by listing metrics — and produces undifferentiated answers. Type recognition is a skill that's entirely learnable, and it's one of the highest-leverage things to internalize before a loop.</p>
+    <h2>The Five Types and Their Opening Moves</h2>
+    <p>Type 1: Metric definition — &quot;how would you measure X?&quot; The opening move is to clarify what decision the metric informs, then define numerator, denominator, and grain before naming the metric. Type 2: Experiment design — &quot;how would you test X?&quot; The opening move is to state the hypothesis, then the primary metric, then ask about the current baseline and available traffic. Type 3: Root cause analysis — &quot;a metric moved, what happened?&quot; The opening move is always decompose before hypothesize — separate numerator from denominator before generating a single hypothesis. Type 4: Business case — &quot;should we build or do X?&quot; The opening move is to size the opportunity, estimate the cost, and frame the decision as expected value. Type 5: Estimation — &quot;how many X are there?&quot; The opening move is to build a structured breakdown from observable anchors rather than guessing.</p>
+    <blockquote class="example"><strong>Recognizing the type from the question surface:</strong> "How would you measure the success of Prism's new episode recap feature?" → Type 1 (metric definition). Open with: "Before I name metrics, let me clarify what decision this is informing — are we measuring whether to ship the feature, or how to improve it post-launch?"<br><br>"Our watch time per session dropped 12% last week — what happened?" → Type 3 (RCA). Open with: "Before I generate hypotheses, I want to decompose this. Watch time per session = sessions × average watch time per session. Which component moved — session count or watch time?"<br><br>"Should we build a native search feature for Crafted marketplace?" → Type 4 (business case). Open with: "I'd want to size the opportunity first — what portion of buyers aren't finding what they're looking for, and what's the estimated revenue impact of closing that gap?"</blockquote>
+    <blockquote class="callout"><strong>The mistake: treating a metric question like an experiment question:</strong> &quot;How would you measure engagement on Spark?&quot; is a metric definition question. The wrong move is to immediately say &quot;I'd run an A/B test.&quot; No one asked you to test anything — they asked you to define engagement. Applying the experiment framework to a metric definition question shows you haven't recognized the type. The right move: define the metric (numerator, denominator, grain, what decision it informs), then mention that once defined, you'd validate it empirically.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice all five question types in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/five-question-types">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

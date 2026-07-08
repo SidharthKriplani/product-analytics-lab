@@ -37,10 +37,10 @@ export function Module_MF16({ module, onNext }) {
   var lifetimePx = (lifetime / timelineMax) * (W16 - 20);
 
   var mcq16 = [
-    { label: 'A. LTV/CAC = 0.8 with accelerating acquisition spend — you are losing money faster on every new user.', correct: true },
-    { label: 'B. LTV/CAC = 2.0 with a 6-month payback — decent but could be improved.', correct: false },
-    { label: 'C. LTV/CAC = 5.0 with slow acquisition — you might be under-investing in growth.', correct: false },
-    { label: 'D. LTV/CAC = 1.0 with flat acquisition — you are breaking even.', correct: false },
+    { label: 'A. LTV/CAC = 0.8 with accelerating acquisition spend — you lose money faster on every new user acquired.', correct: true },
+    { label: 'B. LTV/CAC = 2.0 with a comfortable 6-month payback period — decent economics but there is room to improve.', correct: false },
+    { label: 'C. LTV/CAC = 5.0 paired with slow, cautious acquisition — you might actually be under-investing in growth here.', correct: false },
+    { label: 'D. LTV/CAC = 1.0 with acquisition spend held flat — the business is roughly breaking even on each new user.', correct: false },
   ];
 
   const prose = { color: 'var(--text-secondary)', lineHeight: 1.75, margin: 0, fontSize: '0.92rem' };

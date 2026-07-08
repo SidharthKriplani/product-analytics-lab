@@ -43,10 +43,10 @@ export function Module_EF05({ onComplete }) {
   var statusBorder = srmStatus === 'red' ? 'var(--red-border)' : srmStatus === 'yellow' ? 'var(--yellow-border)' : 'var(--teal-border)';
 
   var mcqOptions = [
-    { label: 'A. Proceed with analysis — the split is close enough to 50/50 for practical purposes', correct: false },
-    { label: 'B. Re-weight the metric results by the expected 50/50 ratio to compensate for the imbalance', correct: false },
-    { label: 'C. Flag SRM, halt analysis, and investigate the assignment pipeline before trusting any results', correct: true },
-    { label: 'D. Extend the experiment until the ratios naturally balance out over time', correct: false },
+    { label: 'A. Proceed with the analysis anyway — a split this close to 50/50 is well within normal sampling noise for practical purposes', correct: false },
+    { label: 'B. Re-weight the metric results by the expected 50/50 ratio, mathematically compensating for the imbalance before comparing arms', correct: false },
+    { label: 'C. Flag the SRM, halt the analysis, and investigate the assignment and logging pipeline before trusting any of the results', correct: true },
+    { label: 'D. Extend the experiment runtime and assume the ratios will naturally balance out on their own over more time', correct: false },
   ];
 
   return (

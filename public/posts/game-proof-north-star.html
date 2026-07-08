@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Game-Proof Your North Star Metric | Product Analytics Lab</title>
+  <meta name="description" content="Every metric can be gamed. The senior move is naming exactly how — and designing the guardrail that catches it before a stakeholder does.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/game-proof-north-star">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/game-proof-north-star">
+  <meta property="og:title"       content="How to Game-Proof Your North Star Metric | Product Analytics Lab">
+  <meta property="og:description" content="Every metric can be gamed. The senior move is naming exactly how — and designing the guardrail that catches it before a stakeholder does.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="How to Game-Proof Your North Star Metric">
+  <meta name="twitter:description" content="Every metric can be gamed. The senior move is naming exactly how — and designing the guardrail that catches it before a stakeholder does.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How to Game-Proof Your North Star Metric","description":"Every metric can be gamed. The senior move is naming exactly how — and designing the guardrail that catches it before a stakeholder does.","url":"https://experimentation-systems-lab.vercel.app/posts/game-proof-north-star","articleSection":"Metrics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #16a34acc 30%, #16a34acc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #16a34a;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #16a34a; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #16a34a;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/game-proof-north-star" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Metrics</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>How to Game-Proof Your North Star Metric</h1>
+    <p class="desc">Every metric can be gamed. The senior move is naming exactly how — and designing the guardrail that catches it before a stakeholder does.</p>
+
+    <p>Every metric that becomes a target eventually gets gamed. This isn't a cynical observation — it's Goodhart's Law in action, and it applies as reliably in product analytics as anywhere else. The question isn't whether your north star metric can be gamed. It can. The question is whether you've named the failure mode before your stakeholders discover it, and whether you've built the guardrail that catches it.</p>
+    <h2>The Gaming Test</h2>
+    <p>For any north star metric, ask: &quot;What is the cheapest action that would raise this metric without improving the underlying business outcome?&quot; The answer is your primary gaming risk. If your north star is Daily Active Users, the cheapest action is usually aggressive push notification campaigns. You can flood users with badges, reminders, and alerts, and DAU will climb — because opening a push notification counts as a session. The business outcome you care about (people getting value from the product) doesn't move. But DAU does, and your dashboard looks good.</p>
+    <blockquote class="example"><strong>DAU gaming via push spam:</strong> Scenario: A social app uses DAU as its north star.<br><br>Before push campaign: DAU = 2.1M, D7 retention = 34%, push opt-out rate = 8%<br>After aggressive push campaign: DAU = 2.4M (+14%), D7 retention = 29% (-15%), push opt-out rate = 19% (+138%)<br><br>DAU looks like a win. Retention and opt-out tell you the product experience is degrading. Without the guardrails, the team ships more push campaigns.</blockquote>
+    <h2>Designing the Guardrail Before You Launch</h2>
+    <p>The right time to design the guardrail is when you choose the north star — not after you see the first gaming attempt. For DAU, the obvious guardrails are retention (D7 or D30) and notification opt-out rate. If DAU goes up but D7 retention goes down, you haven't grown — you've borrowed engagement from the future. If opt-out rate rises, you're burning the channel that created the DAU lift.</p>
+    <p>The guardrail framework has three components: the north star (the thing you're trying to move), the failure mode (the gaming vector), and the guardrail metric (what you monitor to catch gaming). Write all three before the metric goes into production. This forces you to think about what you're not measuring and what the metric can't see.</p>
+    <blockquote class="callout"><strong>The framework:</strong> North star → name the gaming vector → define the guardrail.
+
+DAU → gaming vector: push spam → guardrail: D7 retention + opt-out rate
+GMV → gaming vector: low-quality supply flooding → guardrail: cancellation rate + refund rate
+Messages sent → gaming vector: bot/spam activity → guardrail: reply rate + block rate</blockquote>
+    <h2>Multiple Gaming Vectors</h2>
+    <p>Complex north stars have multiple gaming vectors. GMV (gross merchandise value) can be inflated by adding low-quality supply that drives transactions that don't complete, by running promotional subsidies that make transactions happen at negative margin, or by allowing fraudulent orders. Each gaming vector needs its own guardrail. The skill is being comprehensive enough to catch the real risks without adding so many guardrails that your experiment readouts become unreadable.</p>
+    <p>In practice, two to three guardrail metrics per north star is the right range. More than that creates metric overload — you'll have contradictory signals and no framework for resolving them. Fewer than two and you've probably missed a real gaming vector. The guardrails should be chosen to catch the most likely and highest-impact gaming risks, not to be exhaustive.</p>
+    <ul><li>Name the north star's failure mode before it launches. What's the cheapest action that raises it without improving outcomes?</li><li>Design guardrails that directly measure what the north star can't see.</li><li>Pre-commit to a guardrail threshold: if X drops below Y while north star rises, the result is not a win.</li><li>Review gaming risks quarterly — new product surfaces create new gaming vectors.</li></ul>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice metric design in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/game-proof-north-star">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

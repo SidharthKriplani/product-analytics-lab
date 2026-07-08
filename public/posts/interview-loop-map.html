@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapping the DS / Product Analytics Interview Loop: What Each Round Is Testing | Product Analytics Lab</title>
+  <meta name="description" content="Round 1 is SQL execution. Round 2 is ambiguous problem framing and metric design. Round 3+ is experimentation, business cases, and ML. Know the map before you…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/interview-loop-map">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/interview-loop-map">
+  <meta property="og:title"       content="Mapping the DS / Product Analytics Interview Loop: What Each Round Is Testing | Product Analytics Lab">
+  <meta property="og:description" content="Round 1 is SQL execution. Round 2 is ambiguous problem framing and metric design. Round 3+ is experimentation, business cases, and ML. Know the map before you…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Mapping the DS / Product Analytics Interview Loop: What Each Round Is Testing">
+  <meta name="twitter:description" content="Round 1 is SQL execution. Round 2 is ambiguous problem framing and metric design. Round 3+ is experimentation, business cases, and ML. Know the map before you…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Mapping the DS / Product Analytics Interview Loop: What Each Round Is Testing","description":"Round 1 is SQL execution. Round 2 is ambiguous problem framing and metric design. Round 3+ is experimentation, business cases, and ML. Know the map before you…","url":"https://experimentation-systems-lab.vercel.app/posts/interview-loop-map","articleSection":"Career & Interview","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #dc2626; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #dc2626cc 30%, #dc2626cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #dc2626;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #dc2626; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #dc2626;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/interview-loop-map" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Career &amp; Interview</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Mapping the DS / Product Analytics Interview Loop: What Each Round Is Testing</h1>
+    <p class="desc">Round 1 is SQL execution. Round 2 is ambiguous problem framing and metric design. Round 3+ is experimentation, business cases, and ML. Know the map before you prepare.</p>
+
+    <p>Most DS candidates prepare as if all interview rounds test the same thing. They review SQL, practice metric definitions, memorize the Central Limit Theorem, and hope for the best. Then they get to round three — the analytics case — and realize they have been preparing for the wrong thing. Each round in a DS interview loop tests something different. Knowing what each round is actually evaluating, not what it looks like on the surface, changes how you allocate your prep time.</p>
+    <h2>Round 1: Recruiter Screen — Communication and Calibration</h2>
+    <p>The recruiter screen is not testing your technical skills. It is testing whether you can communicate clearly and whether your background is plausibly strong enough to advance. The recruiter is calibrating on three things: can you explain what you have done in plain language, do your years of experience roughly match the level the team is hiring for, and do you have the right vocabulary without drowning in jargon. The most common mistake is over-explaining technical details to a non-technical screener. Keep it to one sentence of context, one sentence of action, one sentence of result — for every project you mention.</p>
+    <h2>Rounds 2 and 3: Take-Home and Analytics Case — Fluency and Judgment</h2>
+    <p>The take-home tests SQL and coding fluency. You are expected to write clean, correct queries without hints. The analytics case round — typically one to two hours with a DS or PM — tests product judgment and metric design. This is the round most candidates under-prepare for. They memorize formulas but have not practiced framing a vague business question into a precise analytical one. The panels are looking for: do you define the denominator before computing a rate, do you identify guardrails unprompted, do you close with a recommendation rather than a list of options.</p>
+    <blockquote class="example"><strong>The common mismatch:</strong> A candidate for a senior DS role at Prism video app spent 80% of their prep time on SQL and statistics. In the analytics case, the interviewer asked: "DAU is flat but we just ran a big acquisition campaign — what is happening?" The candidate immediately listed hypotheses. They did not decompose the metric (sessions vs users, new vs returning), they did not ask about the denominator for DAU, and they did not close with a recommendation. The SQL was perfect. The case was a miss.<br><br>The mismatch: SQL fluency is tested in round 2 and is pass/fail. Product judgment in the analytics case is what separates candidates at the senior level — and it is tested in a round most candidates treat as "more SQL."</blockquote>
+    <h2>Rounds 4 and 5: Stats/Experimentation and Behavioral</h2>
+    <p>The stats and experimentation round tests depth — not breadth. Interviewers are not checking whether you can recite all of the concepts; they are checking whether you truly understand the ones you claim to know. The question &quot;what is a p-value?&quot; is a trap for the candidate who gives a fluent but slightly wrong definition. Know SRM, know power calculations, know why peeking inflates false positives, and be ready to apply these to a specific scenario rather than just defining them. The behavioral round tests influence and collaboration: can you explain a time you pushed back on a stakeholder with data, and can you articulate how you have driven decisions rather than just supported them?</p>
+    <blockquote class="callout"><strong>Where to put your prep time:</strong> If you are a mid-to-senior candidate: 20% SQL, 40% analytics case practice (metric framing, RCA structure, closing with a recommendation), 30% experimentation depth, 10% behavioral. Most candidates flip this — 60% SQL, 20% stats, 20% everything else. The case round is the one that moves the needle at senior levels, and it is almost always the most under-prepared.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice this in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/interview-loop-map">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

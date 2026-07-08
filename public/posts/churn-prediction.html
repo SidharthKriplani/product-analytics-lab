@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Churn Prediction: Label Design, Feature Engineering, and Business Actionability | Product Analytics Lab</title>
+  <meta name="description" content="A churn model nobody acts on is a wasted model. The analysis starts with label design and ends with an intervention — here's the full pipeline.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/churn-prediction">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/churn-prediction">
+  <meta property="og:title"       content="Churn Prediction: Label Design, Feature Engineering, and Business Actionability | Product Analytics Lab">
+  <meta property="og:description" content="A churn model nobody acts on is a wasted model. The analysis starts with label design and ends with an intervention — here's the full pipeline.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Churn Prediction: Label Design, Feature Engineering, and Business Actionability">
+  <meta name="twitter:description" content="A churn model nobody acts on is a wasted model. The analysis starts with label design and ends with an intervention — here's the full pipeline.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Churn Prediction: Label Design, Feature Engineering, and Business Actionability","description":"A churn model nobody acts on is a wasted model. The analysis starts with label design and ends with an intervention — here's the full pipeline.","url":"https://experimentation-systems-lab.vercel.app/posts/churn-prediction","articleSection":"GenAI Analytics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #007C89; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #007C89cc 30%, #007C89cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #007C89;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #007C89; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #007C89;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/churn-prediction" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">GenAI Analytics</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>Churn Prediction: Label Design, Feature Engineering, and Business Actionability</h1>
+    <p class="desc">A churn model nobody acts on is a wasted model. The analysis starts with label design and ends with an intervention — here's the full pipeline.</p>
+
+    <p>A churn prediction model answers one question: who is likely to leave? It does not answer why they're leaving, what would make them stay, or whether contacting them will help or hurt. Teams that forget this distinction build models with impressive AUC scores and then design interventions based on model features — &quot;low login frequency predicts churn, so let's remind users to log in&quot; — that address the symptom rather than the cause. The model is a scoring tool, not a causal explanation.</p>
+    <h2>Three Business Uses of a Churn Model</h2>
+    <p>Use 1: Early intervention targeting. Score users by churn probability and contact the highest-risk segment before they leave. This is the most common use case. The key constraint: you can only contact a fraction of high-risk users (CS capacity, email deliverability), so the model needs high enough precision in the top decile to make the targeting worth the cost. Use 2: Product prioritization. Segment churned users by the features they didn't use vs retained users. This surfaces product gaps — not causal drivers, but hypotheses worth testing. Use 3: Cohort health analysis. Plot churn probability over time for users acquired in different cohorts. Are newer cohorts healthier? Is a specific acquisition channel producing high-churn users?</p>
+    <blockquote class="example"><strong>Threadline churn model → intervention design → lift measurement:</strong> Model: Gradient boosted tree predicting 90-day churn for Threadline SaaS accounts. AUC = 0.79.<br><br>Top model features: low feature adoption score (top feature), no admin login in last 21 days, month-to-month contract, <3 team members active.<br><br>Intervention design: CS team contacts top 15% of accounts by churn score with a proactive check-in + feature adoption offer. Contacts 200 accounts/month.<br><br>Mistake to avoid: do not design the intervention around "increase login frequency" — low login is a symptom, not a cause. The CS team is trained to ask "what workflow were you hoping to solve?" and then demo the relevant feature.<br><br>Lift measurement: held-out control group (50 high-risk accounts not contacted) vs treatment (200 contacted). 90-day retention: treatment 67%, control 44%. Incremental retention: +23pp. Revenue retained: 200 accounts × 23pp lift × $480 ACV/month = $22K/month, or ~$264K ARR saved.</blockquote>
+    <blockquote class="callout"><strong>The AUC trap:</strong> Optimizing model AUC when the business question is &quot;which users to contact&quot; is a misaligned objective. What matters is precision in the top decile of your score distribution — the accounts you actually contact. A model with AUC = 0.82 that has mediocre precision@top10% is less useful than a model with AUC = 0.76 that concentrates true positives in the top decile. Evaluate the model on the metric that matches the intervention design, not the headline metric.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice churn analysis in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/churn-prediction">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

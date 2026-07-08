@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bayesian vs Frequentist A/B Testing: What's the Real Difference? | Product Analytics Lab</title>
+  <meta name="description" content="You don't need to pick a side to understand the practical tradeoffs. The choice affects how you interpret results and communicate uncertainty — both matter in…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/bayesian-vs-frequentist">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/bayesian-vs-frequentist">
+  <meta property="og:title"       content="Bayesian vs Frequentist A/B Testing: What's the Real Difference? | Product Analytics Lab">
+  <meta property="og:description" content="You don't need to pick a side to understand the practical tradeoffs. The choice affects how you interpret results and communicate uncertainty — both matter in…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Bayesian vs Frequentist A/B Testing: What's the Real Difference?">
+  <meta name="twitter:description" content="You don't need to pick a side to understand the practical tradeoffs. The choice affects how you interpret results and communicate uncertainty — both matter in…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Bayesian vs Frequentist A/B Testing: What's the Real Difference?","description":"You don't need to pick a side to understand the practical tradeoffs. The choice affects how you interpret results and communicate uncertainty — both matter in…","url":"https://experimentation-systems-lab.vercel.app/posts/bayesian-vs-frequentist","articleSection":"Statistics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #007C89; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #007C89cc 30%, #007C89cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #007C89;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #007C89; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #007C89;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/bayesian-vs-frequentist" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Statistics</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>Bayesian vs Frequentist A/B Testing: What's the Real Difference?</h1>
+    <p class="desc">You don't need to pick a side to understand the practical tradeoffs. The choice affects how you interpret results and communicate uncertainty — both matter in product work.</p>
+
+    <p>The Bayesian vs frequentist debate has consumed enormous energy in statistics. For product analytics, the practical difference is narrower than the philosophical debate suggests, but it's not zero. The choice affects how you set up the experiment, how you interpret the results, and critically, what you're allowed to do mid-experiment. Getting this distinction right changes how you communicate uncertainty to stakeholders and how you handle the common case where someone wants to peek at results before the experiment finishes.</p>
+    <h2>Frequentist: Fixed Design, Binary Decision</h2>
+    <p>The frequentist framework is what most product teams use by default. You pre-commit to a sample size (or runtime), collect data, and at the end run a hypothesis test. The output is a p-value and a confidence interval. The decision is binary: reject the null (ship) or fail to reject it (don't ship). The key constraint is that you must commit to a stopping rule before you start. Peeking at results and stopping early inflates your false positive rate — the p-value only has its stated properties if you collect the pre-planned sample.</p>
+    <h2>Bayesian: Continuous Monitoring, Probability Distribution</h2>
+    <p>The Bayesian framework starts with a prior distribution over the treatment effect (your belief before seeing data) and updates it as data arrives, producing a posterior distribution (your updated belief after seeing data). The output is not a p-value but a probability distribution over possible effect sizes. You can say: &quot;Given the data so far, there is an 87% probability that the treatment effect is positive.&quot; This is the interpretation most people want from p-values but incorrectly apply. The Bayesian approach allows continuous monitoring without the false positive inflation that plagues frequentist peeking, because the posterior is always valid — it's just more or less precise depending on how much data you have.</p>
+    <blockquote class="example"><strong>Spark social: continuous notification test:</strong> Spark social is testing a new notification ranking algorithm. The team wants to check results daily to stop early if either harm or strong benefit is apparent.<br><br>Frequentist approach: Run for 14 days, no interim reads. At day 14, apply t-test. Any daily peek requires Bonferroni correction (alpha = 0.05 / 14 reads ≈ 0.0036 per read), making detection very conservative.<br><br>Bayesian approach: Set a prior based on historical notification experiments (typical lift range: -5% to +15% on D7 retention). Update the posterior daily. Stop when the probability that the treatment effect exceeds +2% (practical significance threshold) crosses 95%, or when probability of harm exceeds 80%.<br><br>At day 8: posterior shows 91% probability of positive effect, 73% probability the effect exceeds +2%. Continue.<br>At day 11: posterior shows 95% probability of positive effect, 81% probability effect exceeds +2%. Stop — pre-specified stopping criterion met.</blockquote>
+    <blockquote class="callout"><strong>The false dichotomy most teams live in:</strong> Most product teams use frequentist methods but interpret results as if they were Bayesian. They look at p = 0.03 and say &quot;there's a 97% chance the treatment works&quot; — which is a Bayesian statement, not a frequentist one. This produces overconfidence in results. The honest frequentist interpretation is narrower; the Bayesian interpretation is richer but requires explicit priors. The practical recommendation: use frequentist methods with pre-committed stopping rules when you can commit to a fixed runtime; use Bayesian methods when you genuinely need continuous monitoring or want to quantify belief rather than just binary decisions.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/bayesian-vs-frequentist">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

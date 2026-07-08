@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multiple Testing: Why Running More Metrics Inflates Your False Positive Rate | Product Analytics Lab</title>
+  <meta name="description" content="Test 20 metrics at p &lt; 0.05 and you expect one spurious positive by chance. Bonferroni, FDR, and pre-registration — the tools that keep you honest.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/multiple-testing">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/multiple-testing">
+  <meta property="og:title"       content="Multiple Testing: Why Running More Metrics Inflates Your False Positive Rate | Product Analytics Lab">
+  <meta property="og:description" content="Test 20 metrics at p &lt; 0.05 and you expect one spurious positive by chance. Bonferroni, FDR, and pre-registration — the tools that keep you honest.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Multiple Testing: Why Running More Metrics Inflates Your False Positive Rate">
+  <meta name="twitter:description" content="Test 20 metrics at p &lt; 0.05 and you expect one spurious positive by chance. Bonferroni, FDR, and pre-registration — the tools that keep you honest.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Multiple Testing: Why Running More Metrics Inflates Your False Positive Rate","description":"Test 20 metrics at p < 0.05 and you expect one spurious positive by chance. Bonferroni, FDR, and pre-registration — the tools that keep you honest.","url":"https://experimentation-systems-lab.vercel.app/posts/multiple-testing","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/multiple-testing" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>Multiple Testing: Why Running More Metrics Inflates Your False Positive Rate</h1>
+    <p class="desc">Test 20 metrics at p &lt; 0.05 and you expect one spurious positive by chance. Bonferroni, FDR, and pre-registration — the tools that keep you honest.</p>
+
+    <p>At α = 0.05, every individual hypothesis test has a 5% chance of producing a false positive when the null is true. This seems low. But the false positive rate compounds across tests. With 14 independent tests run simultaneously on a null experiment — one where the treatment truly has no effect — the probability that at least one test produces a false positive exceeds 50%. At 20 tests, it's 64%. This is the multiple testing problem, and it means that tracking a dashboard of 16 metrics in an experiment and reporting &quot;two came back significant&quot; is not evidence of two real effects. Statistically, you'd expect exactly that from noise.</p>
+    <h2>The Pre-Committed Primary Metric</h2>
+    <p>The most important protection against multiple testing is structural: pre-commit to a single primary metric before the experiment launches. This metric — and only this metric — is the decision metric. Its p-value is evaluated at the stated α without any correction, because you're running exactly one primary test. All other metrics in the readout are secondary: they help you understand the mechanism and generate hypotheses, but they do not drive the ship decision. If a secondary metric looks interesting, it becomes a hypothesis for the next experiment, not a reason to ship the current one.</p>
+    <blockquote class="example"><strong>Threadline SaaS: 16 metrics, 2 significant, neither survives correction:</strong> Experiment: New onboarding flow for Threadline SaaS. 16 metrics tracked.<br>Observed results: 2 metrics hit p < 0.05 — "feature adoption rate" (p = 0.038) and "help center page views" (p = 0.041).<br><br>Bonferroni correction: adjusted α = 0.05 / 16 = 0.003125.<br>Both metrics: p > 0.003125 → neither survives correction.<br><br>Benjamini-Hochberg (FDR) at q = 0.10:<br>Rank metrics by p-value. Threshold: p(k) ≤ (k/16) × 0.10.<br>At rank 1: threshold = 0.006. Neither metric meets this threshold either.<br><br>Conclusion: zero metrics survive multiple-testing correction. The two "significant" results are consistent with pure chance in a null experiment. If the primary metric (90-day seat retention) was pre-committed and showed p = 0.21, this is a no-ship.</blockquote>
+    <h2>Bonferroni vs Benjamini-Hochberg</h2>
+    <p>Bonferroni correction divides α by the number of tests: adjusted α = 0.05 / k. It controls the Family-Wise Error Rate (FWER) — the probability of any false positive across all tests. It is conservative. With 20 metrics, you're requiring p &lt; 0.0025 per test, which almost nothing will pass. This is appropriate for small confirmatory test sets where any false positive is very costly. Benjamini-Hochberg (BH) controls the False Discovery Rate (FDR) — the expected proportion of significant results that are false positives. It is less conservative and better suited to exploratory dashboards with many metrics. At FDR = 0.10, you accept that 10% of your significant results may be false, but you catch more real effects.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> Secondary metrics are for understanding mechanism, not making decisions. When a secondary metric moves and the primary didn't, the correct response is: &quot;This is an interesting signal that suggests [mechanism]. We should design a follow-up experiment with this as the primary metric.&quot; It is never: &quot;Even though the primary metric was null, this secondary movement justifies a ship.&quot; That reasoning converts a null result into a false positive by changing the question after seeing the data.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/multiple-testing">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

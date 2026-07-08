@@ -7,19 +7,19 @@ const MCQ_SC = {
   options: [
     {
       id: 'a',
-      label: 'DiD using all other states as a single control group',
+      label: 'DiD using all other states pooled together as one combined control group for comparison purposes overall',
       correct: false,
       feedback: 'Simple DiD pooling all other states assumes they all share a parallel trend with the treated state. If the treated state has a unique trajectory, pooling creates a noisy or biased counterfactual. Synthetic control is better when only one unit is treated.',
     },
     {
       id: 'b',
-      label: 'Synthetic control — construct a weighted combination of donor states that best matched the treated state pre-ban',
+      label: 'Synthetic control — a weighted blend of donor states matched to the treated state pre-ban trend',
       correct: true,
       feedback: 'Correct. With a single treated unit and multiple potential controls, synthetic control finds the weighted combination that best replicates the treated state\'s pre-period trend. The post-period divergence is the causal estimate.',
     },
     {
       id: 'c',
-      label: 'Regression discontinuity using states near the ban threshold',
+      label: 'Regression discontinuity using the states located nearest to the ban threshold on the map',
       correct: false,
       feedback: 'RD requires a continuous running variable with a sharp threshold. A policy ban is a binary treatment applied to one state, not a threshold on a continuous score. There is no running variable here.',
     },

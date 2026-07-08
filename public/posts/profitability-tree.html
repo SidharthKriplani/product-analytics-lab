@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profitability Cases: The Revenue − Cost Tree and How to Walk It | Product Analytics Lab</title>
+  <meta name="description" content="Not every case is a root-cause hunt. &quot;How do we improve profit?&quot; is a different animal from &quot;why did conversion drop?&quot; — and treating them the same is why smar…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/profitability-tree">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/profitability-tree">
+  <meta property="og:title"       content="Profitability Cases: The Revenue − Cost Tree and How to Walk It | Product Analytics Lab">
+  <meta property="og:description" content="Not every case is a root-cause hunt. &quot;How do we improve profit?&quot; is a different animal from &quot;why did conversion drop?&quot; — and treating them the same is why smar…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Profitability Cases: The Revenue − Cost Tree and How to Walk It">
+  <meta name="twitter:description" content="Not every case is a root-cause hunt. &quot;How do we improve profit?&quot; is a different animal from &quot;why did conversion drop?&quot; — and treating them the same is why smar…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Profitability Cases: The Revenue − Cost Tree and How to Walk It","description":"Not every case is a root-cause hunt. \"How do we improve profit?\" is a different animal from \"why did conversion drop?\" — and treating them the same is why smar…","url":"https://experimentation-systems-lab.vercel.app/posts/profitability-tree","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #C97706; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #C97706cc 30%, #C97706cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #C97706;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #C97706; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #C97706;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/profitability-tree" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">RCA</span>
+      <span class="read-time">7 min read</span>
+    </div>
+    <h1>Profitability Cases: The Revenue − Cost Tree and How to Walk It</h1>
+    <p class="desc">Not every case is a root-cause hunt. &quot;How do we improve profit?&quot; is a different animal from &quot;why did conversion drop?&quot; — and treating them the same is why smart candidates flail. Here is the equation tree that keeps you structured.</p>
+
+    <p>There is a fork at the top of every analyst case, and missing it is one of the most common ways an otherwise strong candidate loses the room. Some cases ask why something broke — that is a root-cause investigation. Others ask how to improve or grow something — that is a profitability or optimization case. They look similar but they run differently, and the very first thing you should do is decide which one you are in.</p>
+    <blockquote class="callout"><strong>The fork:</strong> Is the question asking WHY something broke (conversion fell, retention dropped)? → RCA path. Is it asking HOW to improve or increase something (grow profit, raise margin)? → Profitability path. Profitability cases skip the sudden-vs-gradual routing entirely and go straight to the equation tree.</blockquote>
+    <h2>The equation tree</h2>
+    <p>Profitability cases have a clean mathematical spine, and speaking it out loud instantly signals structure. Profit = Revenue − Cost. Revenue = Volume × Price. Cost = Fixed Cost + Variable Cost. For a marketplace or platform, expand it: Orders = Demand × Fulfillment Rate, and Revenue = Orders × Take Rate × AOV. You are not solving anything yet — you are laying out the map so that when a number moves, you know exactly which branch it lives on.</p>
+    <h2>Find the whale, then prune</h2>
+    <p>Pull each component of the tree against the prior period. The one that actually moved is the whale. Once you have it, ignore every other branch completely — this is the discipline most people skip. Scattered investigation across all branches is the primary failure mode of smart analysts; the senior move is to decompose, find the mover, and hard-stop everything else.</p>
+    <blockquote class="example"><strong>Revenue is the whale — now, volume or price?:</strong> If Revenue moved, split it before going deeper:<br><br>VOLUME lever (demand-side)<br>  Acquisition   → fewer new users converting? which channel broke?<br>  Retention     → existing users buying less often? cohort drop-off?<br>  Frequency     → same users, fewer transactions? habit loop broken?<br>  Fulfillment   → demand healthy but fulfillment falling? → supply side<br><br>PRICE lever<br>  ASP decline   → mix shift to cheaper SKUs, discounting cannibalising full price<br>  Competitor    → pricing vs rivals in this specific region/segment<br>  Promo         → promotional pricing becoming the baseline expectation</blockquote>
+    <h2>If cost is the whale, walk the value chain</h2>
+    <p>When the mover is on the cost side, do not guess — walk the chain in order and find where the spike lives.</p>
+    <ul><li>Inbound — procurement, raw materials, supplier contracts</li><li>Operations — manufacturing, processing, QC, yield loss</li><li>Outbound — distribution, logistics, last-mile, warehousing</li><li>Sales &amp; Marketing — CAC, campaign spend, creative, headcount</li><li>Customer Service — support volume, returns, refunds, warranty claims</li></ul>
+    <p>Then ask one structural question: is the increase fixed (overhead expansion) or variable (cost per unit rising with volume)? That single distinction changes the recommendation entirely.</p>
+    <blockquote class="callout"><strong>Interrogate the healthy-looking numbers too:</strong> If revenue looks healthy — even growing — during a profitability case, do not just move on. Ask why it grew. Revenue growth driven by aggressive discounting or promo spend simultaneously inflates marketing cost and compresses margin. The growth itself can be the cause of the profit problem. When you prioritize the levers you found, rank by revenue-uplift or cost-reduction potential — not by what is easiest to build — and assign ownership only after you have identified the cause, never before.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice profitability cases in Business Cases →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/profitability-tree">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

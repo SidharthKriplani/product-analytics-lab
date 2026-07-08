@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activation Metrics: The Most Important Metric Nobody Defines Properly | Product Analytics Lab</title>
+  <meta name="description" content="When is a new user actually activated? Checklist completion isn't it. The right activation metric predicts long-term retention — here's how to find it.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/activation-metrics">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/activation-metrics">
+  <meta property="og:title"       content="Activation Metrics: The Most Important Metric Nobody Defines Properly | Product Analytics Lab">
+  <meta property="og:description" content="When is a new user actually activated? Checklist completion isn't it. The right activation metric predicts long-term retention — here's how to find it.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Activation Metrics: The Most Important Metric Nobody Defines Properly">
+  <meta name="twitter:description" content="When is a new user actually activated? Checklist completion isn't it. The right activation metric predicts long-term retention — here's how to find it.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Activation Metrics: The Most Important Metric Nobody Defines Properly","description":"When is a new user actually activated? Checklist completion isn't it. The right activation metric predicts long-term retention — here's how to find it.","url":"https://experimentation-systems-lab.vercel.app/posts/activation-metrics","articleSection":"Metrics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #16a34acc 30%, #16a34acc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #16a34a;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #16a34a; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #16a34a;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/activation-metrics" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Metrics</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Activation Metrics: The Most Important Metric Nobody Defines Properly</h1>
+    <p class="desc">When is a new user actually activated? Checklist completion isn't it. The right activation metric predicts long-term retention — here's how to find it.</p>
+
+    <p>Activation is the moment a new user first experiences the core value your product was built to deliver. Not account creation. Not email verification. Not completing an onboarding checklist. Those are steps toward activation — they are not activation itself. The difference matters enormously because optimizing checklist completion instead of genuine activation produces users who finish setup and never come back.</p>
+    <h2>How to Find the Activation Moment</h2>
+    <p>The method is cohort analysis with a behavioral lens. Take your last 6 cohorts of new users and split them into two groups: users who were retained at 30 days, and users who churned by 30 days. Then ask: what actions did retained users take in their first 7 days that churned users didn't? The action that most strongly differentiates the retained cohort from the churned cohort is your candidate activation event. This is how Slack famously identified 2,000 messages sent as the threshold that correlated with retention — not because messages cause retention, but because teams that exchanged 2,000 messages had genuinely integrated Slack into their workflow.</p>
+    <blockquote class="example"><strong>Finding activation on Spark social app:</strong> Analysis: First-7-day behavior, split by D30 retained vs churned.<br><br>Action → D30 retained users who did it → D30 churned users who did it<br>Posted first photo: 71% vs 68% (weak signal)<br>Followed 5+ accounts: 84% vs 41% (strong signal)<br>Received 3+ comments: 79% vs 28% (very strong signal)<br>Completed profile: 52% vs 49% (no signal)<br><br>Activation event: "Received 3+ comments on first post within 7 days." This is the moment Spark delivers social validation — its core value proposition. Profile completion is a setup step, not activation.</blockquote>
+    <h2>Designing an Activation Experiment</h2>
+    <p>Once you have a candidate activation event, the experiment question becomes: what can we change in the onboarding flow to increase the rate at which new users reach this event? For Spark, the implication is: get new users to post earlier, and get them into communities where they'll receive comments. Experiments might test prompting users to post before following, or surfacing them to relevant community feeds immediately after their first post. The success metric for onboarding experiments is no longer &quot;completed profile&quot; — it's &quot;received 3+ comments within 7 days.&quot;</p>
+    <blockquote class="callout"><strong>Key insight:</strong> Activation events must be re-validated when the product changes significantly. The event that predicted retention for your first 10,000 users may not predict retention for your millionth user — the user base and use cases have evolved. Run the cohort analysis annually or after any major product shift.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice this in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/activation-metrics">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

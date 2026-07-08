@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confidence Intervals: What They Actually Tell You (And What They Don't) | Product Analytics Lab</title>
+  <meta name="description" content="A CI that barely excludes zero is not the same as one centered far from zero. Most analysts report CIs but don't read them. Here's the difference.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/confidence-intervals">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/confidence-intervals">
+  <meta property="og:title"       content="Confidence Intervals: What They Actually Tell You (And What They Don't) | Product Analytics Lab">
+  <meta property="og:description" content="A CI that barely excludes zero is not the same as one centered far from zero. Most analysts report CIs but don't read them. Here's the difference.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Confidence Intervals: What They Actually Tell You (And What They Don't)">
+  <meta name="twitter:description" content="A CI that barely excludes zero is not the same as one centered far from zero. Most analysts report CIs but don't read them. Here's the difference.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Confidence Intervals: What They Actually Tell You (And What They Don't)","description":"A CI that barely excludes zero is not the same as one centered far from zero. Most analysts report CIs but don't read them. Here's the difference.","url":"https://experimentation-systems-lab.vercel.app/posts/confidence-intervals","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/confidence-intervals" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Confidence Intervals: What They Actually Tell You (And What They Don't)</h1>
+    <p class="desc">A CI that barely excludes zero is not the same as one centered far from zero. Most analysts report CIs but don't read them. Here's the difference.</p>
+
+    <p>A 95% confidence interval does not mean there is a 95% probability that the true value lies inside it. This is the most common misinterpretation in applied statistics, and it matters because the correct interpretation changes how you communicate experiment results and how much you should trust them. The correct reading: if you repeated this experiment 100 times and computed a 95% CI each time, approximately 95 of those intervals would contain the true population parameter. The interval you have is either one of the 95 that captured the truth, or one of the 5 that didn't — you cannot know which.</p>
+    <h2>How to Read a CI in Experiment Results</h2>
+    <p>In experiment readouts, CIs typically appear alongside the point estimate: &quot;+2.3% (95% CI: +0.8% to +3.8%).&quot; Read this as: the best estimate of the treatment effect is +2.3%, and this interval was constructed such that across repeated experiments, 95% of such intervals capture the true effect. The width of the interval is as important as where it sits. A wide CI means high uncertainty — you need more data before the estimate is precise enough to act on confidently. A narrow CI means the estimate is precise, and you can act on the point estimate with confidence.</p>
+    <blockquote class="example"><strong>Crafted marketplace checkout experiment:</strong> Experiment: Simplified checkout flow on Crafted marketplace.<br>Point estimate: +2.3% CVR lift<br>95% CI: [+0.8%, +3.8%]<br><br>CI width = 3.8% − 0.8% = 3.0 percentage points.<br>Formula: width ≈ 2 × z* × SE, where z* = 1.96 for 95% CI.<br>Implication: SE ≈ 3.0 / (2 × 1.96) ≈ 0.77pp.<br><br>This interval excludes zero (the lower bound is +0.8%), meaning the result is statistically significant at α = 0.05. But the practical range is +0.8% to +3.8% — at the lower end, the business impact is modest. The ship decision should account for this full range, not just the point estimate.</blockquote>
+    <h2>Width Tells You Something Important</h2>
+    <p>A wide CI — for example, &quot;+2.3% (95% CI: −1.2% to +5.8%)&quot; — tells you that even though the point estimate looks positive, the data is consistent with both a meaningful positive effect and a small negative effect. This interval crosses zero, which means you cannot reject the null. But even a non-significant result is informative: you now know that if there is an effect, it's somewhere in the range −1.2% to +5.8%. That range might be too wide to make a confident ship decision, which means you need more data — a longer runtime or more users, not just a rerun.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> A CI that excludes zero = statistically significant at the corresponding alpha level. A CI centered far from zero = a large, confidently estimated effect. A narrow CI = a precise estimate. These three properties are independent. An experiment can have a statistically significant but imprecise result (CI excludes zero but is very wide), or a precise but non-significant result (narrow CI that straddles zero). Always read all three properties.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/confidence-intervals">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

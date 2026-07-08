@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Build a Metric Tree From Any North Star | Product Analytics Lab</title>
+  <meta name="description" content="A metric tree decomposes your north star into its multiplicative or additive drivers. Build one correctly and you can find any lever. Build it wrong and your R…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/metric-trees">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/metric-trees">
+  <meta property="og:title"       content="How to Build a Metric Tree From Any North Star | Product Analytics Lab">
+  <meta property="og:description" content="A metric tree decomposes your north star into its multiplicative or additive drivers. Build one correctly and you can find any lever. Build it wrong and your R…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="How to Build a Metric Tree From Any North Star">
+  <meta name="twitter:description" content="A metric tree decomposes your north star into its multiplicative or additive drivers. Build one correctly and you can find any lever. Build it wrong and your R…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How to Build a Metric Tree From Any North Star","description":"A metric tree decomposes your north star into its multiplicative or additive drivers. Build one correctly and you can find any lever. Build it wrong and your R…","url":"https://experimentation-systems-lab.vercel.app/posts/metric-trees","articleSection":"Metrics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #16a34acc 30%, #16a34acc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #16a34a;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #16a34a; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #16a34a;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/metric-trees" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Metrics</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>How to Build a Metric Tree From Any North Star</h1>
+    <p class="desc">A metric tree decomposes your north star into its multiplicative or additive drivers. Build one correctly and you can find any lever. Build it wrong and your RCA will miss the real cause.</p>
+
+    <p>A metric tree is the single most useful diagnostic tool in product analytics. When a north star metric moves, a metric tree tells you which branch broke. When you're sizing an opportunity, it tells you which lever has the most room to move. When you're explaining a trend to a PM, it gives you a shared structure for the conversation. The problem is that most analysts build metric trees wrong — they make them too flat, or they mix additive and multiplicative relationships, or they stop one level too early.</p>
+    <h2>The Revenue Tree</h2>
+    <p>Revenue is the most common north star for product analytics teams, so it's the best tree to learn. Revenue decomposes multiplicatively into: Revenue = Sessions × Session-to-PDP CVR × PDP-to-Checkout CVR × Checkout-to-Purchase CVR × Average Order Value. Each of these factors can then decompose further. Session volume breaks into new user sessions and returning user sessions. AOV breaks into items per order multiplied by average item price. You can extend this as deep as you need.</p>
+    <blockquote class="example"><strong>Finding the broken branch:</strong> Revenue is down 12% week-over-week. You build the tree:<br><br>Sessions: flat (+0.3%)<br>Session-to-PDP CVR: flat (-0.5%, within noise)<br>PDP-to-Checkout CVR: flat (-0.8%, within noise)<br>Checkout-to-Purchase CVR: DOWN 18%<br>AOV: slightly up (+2.1%)<br><br>The broken branch is Checkout CVR. Revenue is down not because fewer people are discovering products or adding to cart — it's because people are abandoning checkout at a much higher rate. The investigation narrows immediately: look at checkout flow changes, payment failures, shipping cost display, promo code errors.</blockquote>
+    <h2>Additive vs Multiplicative Trees</h2>
+    <p>Revenue trees are multiplicative — every level multiplies into the next. But some north stars decompose additively. Total messages sent = messages from power users + messages from casual users + messages from new users. Each segment contributes independently. When you mix additive and multiplicative relationships in the same tree, your math breaks down. Before building any tree, decide which type you're dealing with: is the north star a product of its drivers, or a sum?</p>
+    <p>The test is simple: if you multiply all the branches together, do you get the north star? If yes, it's multiplicative. If you add the branches together and get the north star, it's additive. Most funnel metrics (CVR, retention rates, completion rates) are multiplicative. Most volume metrics (total events, total users, total revenue by segment) are additive.</p>
+    <h2>How Deep to Go</h2>
+    <p>The right depth is one level beyond where you have data and one level short of where the drivers become unactionable. A good rule: build the tree to four levels for RCA purposes, and to two levels for stakeholder communication. The full four-level tree is your diagnostic instrument. The two-level summary — &quot;Revenue = Sessions × Funnel CVR × AOV, and the issue is in Funnel CVR&quot; — is how you explain the finding.</p>
+    <blockquote class="callout"><strong>The process:</strong> 1. Write the north star at the top.
+2. Ask: does it decompose as a product or a sum?
+3. Write the level-1 drivers — the 2-4 factors that mathematically produce the north star.
+4. Extend to level 2 for each driver where you have data.
+5. When a north star metric moves, traverse the tree level by level, checking each branch for the movement. Stop at the branch that explains the full move.</blockquote>
+    <ul><li>Build the tree before a crisis hits — you don't want to be constructing it mid-incident.</li><li>Validate the math: branches should multiply or add to the node above them.</li><li>Keep the tree as a team artifact. Shared trees mean shared diagnosis vocabulary.</li><li>When presenting RCA findings, show the tree with the broken branch highlighted.</li></ul>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice metric trees in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/metric-trees">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

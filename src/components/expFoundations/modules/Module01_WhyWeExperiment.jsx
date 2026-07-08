@@ -47,10 +47,10 @@ export function Module_EF01({ onComplete }) {
   }
 
   var mcqOptions = [
-    { label: 'A. A strong relationship (r > 0.8) between two variables is sufficient evidence of causation', correct: false },
+    { label: 'A. A strong correlation, even with r above 0.9, still cannot rule out a third variable driving both, so it never substitutes for random assignment', correct: false },
     { label: 'B. Only controlled experiments with random assignment can establish causality — observational data shows correlation regardless of effect size', correct: true },
-    { label: 'C. Causation requires a large sample size; correlation is what you get with small samples', correct: false },
-    { label: 'D. If you control for confounders in a regression, the remaining effect is causal', correct: false },
+    { label: 'C. Causation requires a sample of at least a few thousand users; below that, any relationship you see is correlation, not causation, by definition', correct: false },
+    { label: 'D. If you control for every confounder you can name in a regression, the remaining association is automatically the true causal effect of X on Y', correct: false },
   ];
 
   return (

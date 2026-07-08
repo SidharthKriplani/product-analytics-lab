@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guesstimates: Demand vs Supply Engines and the 3-Part Gut Check | Product Analytics Lab</title>
+  <meta name="description" content="&quot;How many cups of tea are consumed in India daily?&quot; The answer is not a number — it is a structure. Pick the right engine, build the tree before touching any d…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/guesstimate-engines">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/guesstimate-engines">
+  <meta property="og:title"       content="Guesstimates: Demand vs Supply Engines and the 3-Part Gut Check | Product Analytics Lab">
+  <meta property="og:description" content="&quot;How many cups of tea are consumed in India daily?&quot; The answer is not a number — it is a structure. Pick the right engine, build the tree before touching any d…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Guesstimates: Demand vs Supply Engines and the 3-Part Gut Check">
+  <meta name="twitter:description" content="&quot;How many cups of tea are consumed in India daily?&quot; The answer is not a number — it is a structure. Pick the right engine, build the tree before touching any d…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Guesstimates: Demand vs Supply Engines and the 3-Part Gut Check","description":"\"How many cups of tea are consumed in India daily?\" The answer is not a number — it is a structure. Pick the right engine, build the tree before touching any d…","url":"https://experimentation-systems-lab.vercel.app/posts/guesstimate-engines","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #6B3FA0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #6B3FA0cc 30%, #6B3FA0cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #6B3FA0;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #6B3FA0; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #6B3FA0;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/guesstimate-engines" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Ambiguous Problems</span>
+      <span class="read-time">7 min read</span>
+    </div>
+    <h1>Guesstimates: Demand vs Supply Engines and the 3-Part Gut Check</h1>
+    <p class="desc">&quot;How many cups of tea are consumed in India daily?&quot; The answer is not a number — it is a structure. Pick the right engine, build the tree before touching any digit, round without apology, and never stop before the gut check.</p>
+
+    <p>Guesstimates feel like they are testing arithmetic. They are not — they are testing whether you can impose structure on an open-ended question and stay transparent while you do it. The interviewer does not care whether your final number is exactly right (nobody knows the true answer anyway). They care whether your tree is sound, your assumptions are named, and your reasoning is followable. Once you internalise the spine — clarify, pick an engine, segment, calculate, gut-check — these stop being scary and start being almost fun.</p>
+    <h2>Clarify, then pick the engine before any number</h2>
+    <p>First, lock what you are measuring: cups or revenue, daily or annual, which geography, which segments. State assumptions as closed confirmations — &quot;I'll assume annual revenue in INR, is that right?&quot; — not open questions. Then choose one of two engines, and this choice is the whole game.</p>
+    <ul><li>Demand engine (population proxy) — for &quot;how many people / cups / units / revenue&quot;. Total Volume = Base Population × Relevant Segment % × Penetration % × Frequency per period × (Price, if revenue).</li><li>Supply engine (bottleneck proxy) — for &quot;how many shops / hospitals / drivers / flights&quot;. Total Output = Number of Resources × Capacity per Resource × Operating Days × Utilization %.</li><li>Ambiguous prompt — build both and triangulate.</li><li>Workforce override — for riders/drivers/staff, estimate demand first and divide by per-unit capacity. Workers needed = daily demand ÷ output per worker per day. Faster and more defensible than counting resources directly.</li></ul>
+    <blockquote class="callout"><strong>Announce the tree first:</strong> The single biggest failure mode is jumping to numbers. Say the whole tree out loud before you touch a digit: &quot;I'll start with India's population, filter to urban adults, apply a tea-drinking penetration rate, and multiply by daily frequency. Let me build that out.&quot; Structure before arithmetic, every time.</blockquote>
+    <h2>Segment with standard cuts</h2>
+    <p>You do not need perfect demographics — you need defensible, memorized anchors you can apply instantly.</p>
+    <ul><li>Age: 0–14 (~25%) | 15–60 (~60%) | 60+ (~15%).</li><li>Urban/rural — India ~35% urban / 65% rural; GCC ~85%+ urban.</li><li>Penetration — mass-market 60–80%, mainstream 30–50%, premium 5–20%, luxury 1–5%.</li><li>Frequency — daily habit 1–3×/day, weekly 1–3×/week, monthly 1–4×/month, annual purchase 0.2–0.5×/year.</li></ul>
+    <h2>Calculate — round without apology</h2>
+    <p>Round every number to one significant figure, and never do complex multiplication in your head — round first. Use fractions where they are easier (1/5, not 20%). Talk aloud at every step so the interviewer can follow and correct you early. &quot;18% × 840M&quot; becomes &quot;20% × 800M = 160M&quot; — precision theater (0.18 × 840 = 151.2M) is slower and buys you nothing.</p>
+    <blockquote class="example"><strong>Worked example — cups of tea in India, daily:</strong> Engine: demand.<br>  India population           1.4B<br>  Adults (~65%)              ~900M<br>  Tea drinkers (~70% adults) ~630M<br>  Cups per drinker per day   ~2<br>  → 630M × 2 = ~1.26B  →  round to ~1.2B cups/day<br><br>Gut check:<br>  Absolute:   1.2B cups for 1.4B people = ~0.9 cups/person/day. Feels right.<br>  Per-capita: not everyone drinks tea; those who do drink 2. Plausible.<br>  Benchmark:  India is the world's largest tea consumer — billions/day fits.<br>  Weakest assumption: % of adults who drink tea (could be 60% or 80%).</blockquote>
+    <h2>The 3-part gut check — never stop at the number</h2>
+    <p>A bare number is an incomplete answer. Run three checks: does the magnitude feel right (orders of magnitude)? does the per-capita implication (divide by population) feel realistic? and does it sit sensibly next to a benchmark you know (India smartphone market ~$10B, global iPhone ~$200B)?</p>
+    <blockquote class="callout"><strong>Close by naming your weakest assumption:</strong> End every guesstimate the same way: &quot;My estimate is X. That implies Y per person per period, which feels reasonable because Z. My weakest assumption is W — if it is off by 2×, the answer moves from A to B.&quot; Naming the fragile link and its sensitivity is what turns a lucky guess into a credible one.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/estimation">Practice guesstimates in the Estimation Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/guesstimate-engines">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

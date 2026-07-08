@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goodhart's Law and Why Every Metric Becomes a Bad Metric When It Becomes a Target | Product Analytics Lab</title>
+  <meta name="description" content="When a measure becomes a target, it ceases to be a good measure. Product analytics history is full of metrics that were gamed the moment teams were held accoun…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/goodharts-law">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/goodharts-law">
+  <meta property="og:title"       content="Goodhart's Law and Why Every Metric Becomes a Bad Metric When It Becomes a Target | Product Analytics Lab">
+  <meta property="og:description" content="When a measure becomes a target, it ceases to be a good measure. Product analytics history is full of metrics that were gamed the moment teams were held accoun…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Goodhart's Law and Why Every Metric Becomes a Bad Metric When It Becomes a Target">
+  <meta name="twitter:description" content="When a measure becomes a target, it ceases to be a good measure. Product analytics history is full of metrics that were gamed the moment teams were held accoun…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Goodhart's Law and Why Every Metric Becomes a Bad Metric When It Becomes a Target","description":"When a measure becomes a target, it ceases to be a good measure. Product analytics history is full of metrics that were gamed the moment teams were held accoun…","url":"https://experimentation-systems-lab.vercel.app/posts/goodharts-law","articleSection":"Mental Models","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #6B3FA0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #6B3FA0cc 30%, #6B3FA0cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #6B3FA0;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #6B3FA0; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #6B3FA0;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/goodharts-law" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Mental Models</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Goodhart's Law and Why Every Metric Becomes a Bad Metric When It Becomes a Target</h1>
+    <p class="desc">When a measure becomes a target, it ceases to be a good measure. Product analytics history is full of metrics that were gamed the moment teams were held accountable to them.</p>
+
+    <p>Goodhart's Law: when a measure becomes a target, it ceases to be a good measure. In product analytics, this is not a theoretical warning — it is a predictable failure mode that plays out on a regular schedule. The moment a team is held accountable to a specific metric, they find ways to move it that do not reflect the underlying value the metric was designed to capture. The metric goes up. The product outcome stays flat or declines. Leadership celebrates. Users churn.</p>
+    <h2>Three Product Examples</h2>
+    <p>Optimizing click-through rate: a content platform holds its editorial team accountable to CTR. The team learns that curiosity-gap headlines — &quot;You will not believe what happened to engagement in Q3&quot; — drive significantly higher CTR than accurate, descriptive ones. CTR goes up. Time on page collapses. Users who click and immediately leave develop a low-quality association with the platform. Optimizing session count on Spark social: the growth team is measured on sessions per day. They find that push notification volume is the fastest way to move it. Users open the app in response to a notification, spend 8 seconds, and close it. Session count goes up. Session quality collapses. Daily active users start opting out of notifications. Optimizing DAU on Prism video app by requiring daily login to unlock recommendations: DAU goes up because users who want personalized recommendations must log in. A meaningful fraction log in, see nothing they want to watch, and leave. Retention falls. The team interprets the DAU increase as success until the monthly churn numbers come in.</p>
+    <blockquote class="example"><strong>The guardrail system as the fix:</strong> The guardrail system is the designed response to Goodhart's Law. For every primary metric, you name the gaming vector — the cheapest action that moves the metric without delivering value — and you add a guardrail metric that catches the gaming.<br><br>Primary metric: session count (Spark social)<br>Gaming vector: push notification spam drives low-quality sessions<br>Guardrail: D7 retention + push opt-out rate<br><br>Primary metric: CTR (content platform)<br>Gaming vector: clickbait headlines drive clicks that do not convert to engagement<br>Guardrail: time-on-page and 7-day return rate<br><br>Primary metric: DAU (Prism video app)<br>Gaming vector: mandatory daily login requirements<br>Guardrail: session completion rate (how many sessions involve meaningful content consumption)<br><br>The guardrail fires when the gaming starts. The team must address the guardrail violation before continuing to optimize the primary metric.</blockquote>
+    <h2>Why the Guardrail Must Be Pre-Committed</h2>
+    <p>A guardrail that is defined after the gaming starts is not a guardrail — it is a post-hoc rationalization. The moment a team has incentives to hit the primary metric, they also have incentives to explain away guardrail violations. &quot;The retention dip is probably seasonal.&quot; &quot;The opt-out rate always fluctuates a bit.&quot; Pre-committing to the guardrail and its threshold before the optimization begins creates an objective standard that is resistant to motivated reasoning. This is the same principle as pre-committing decision rules in A/B tests — the commitment is what makes the system credible.</p>
+    <blockquote class="callout"><strong>Goodhart's Law in interviews:</strong> A strong interview answer to &quot;what is the risk of optimizing for this metric?&quot; will name Goodhart's Law directly: &quot;Any metric that becomes a team-level accountability target will get gamed. The specific gaming vector for this metric is [X]. I would add [guardrail] to catch it before it does real damage.&quot; This demonstrates that you think about the second-order effects of measurement, not just the first-order measurement itself.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice this in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/goodharts-law">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

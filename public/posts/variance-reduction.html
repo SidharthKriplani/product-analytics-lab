@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Variance Reduction in Experiments: Why It Matters and What to Do About It | Product Analytics Lab</title>
+  <meta name="description" content="High variance in your outcome metric means you need longer experiments or more users. CUPED, stratification, and better metric selection all reduce variance.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/variance-reduction">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/variance-reduction">
+  <meta property="og:title"       content="Variance Reduction in Experiments: Why It Matters and What to Do About It | Product Analytics Lab">
+  <meta property="og:description" content="High variance in your outcome metric means you need longer experiments or more users. CUPED, stratification, and better metric selection all reduce variance.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Variance Reduction in Experiments: Why It Matters and What to Do About It">
+  <meta name="twitter:description" content="High variance in your outcome metric means you need longer experiments or more users. CUPED, stratification, and better metric selection all reduce variance.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Variance Reduction in Experiments: Why It Matters and What to Do About It","description":"High variance in your outcome metric means you need longer experiments or more users. CUPED, stratification, and better metric selection all reduce variance.","url":"https://experimentation-systems-lab.vercel.app/posts/variance-reduction","articleSection":"Statistics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #007C89; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #007C89cc 30%, #007C89cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #007C89;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #007C89; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      color: #007C89;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(0,124,137,0.07);
+      border: 1px solid rgba(0,124,137,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #007C89;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/variance-reduction" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Statistics</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Variance Reduction in Experiments: Why It Matters and What to Do About It</h1>
+    <p class="desc">High variance in your outcome metric means you need longer experiments or more users. CUPED, stratification, and better metric selection all reduce variance.</p>
+
+    <p>Variance is the noise in your outcome metric. It's how much the metric bounces around between users, independent of any treatment effect. High variance means the signal you're trying to detect — the treatment effect — is hard to separate from the background noise. The standard response to high variance is running longer experiments or recruiting more users. Both cost time and traffic. Variance reduction techniques give you the same statistical power at lower cost — effectively letting you run shorter experiments without sacrificing rigor.</p>
+    <h2>The Core Idea: Control for Pre-Experiment Behavior</h2>
+    <p>CUPED (Controlled-experiment Using Pre-Experiment Data) is the dominant variance reduction technique in product experimentation. The insight behind it: a large fraction of the variance in your outcome metric is predictable from users' behavior before the experiment started. Users who purchased frequently before the experiment will purchase frequently during it. Users who were inactive before will be inactive during it. If you can explain and remove the pre-experiment contribution to variance, the residual variance — the part the experiment needs to detect a treatment effect against — is much smaller.</p>
+    <blockquote class="example"><strong>CUPED formula and expected reduction:</strong> CUPED adjustment:<br>Y_adjusted = Y - θ(X - E[X])<br><br>Where:<br>- Y = outcome metric during experiment (e.g., purchases per user)<br>- X = pre-experiment covariate (e.g., purchases per user in the 4 weeks before experiment)<br>- E[X] = mean of X across all users<br>- θ = Cov(Y, X) / Var(X) — the coefficient that optimally removes X's contribution to variance in Y<br><br>Typical result:<br>Original metric variance: 0.142<br>Adjusted metric variance: 0.084<br>Variance reduction: 41%<br><br>Effect of 41% variance reduction: equivalent to running the experiment with 41% more users, or reducing required runtime from 14 days to 8 days for the same power. No additional traffic needed.</blockquote>
+    <h2>When CUPED Works Best</h2>
+    <p>CUPED works best when two conditions hold: the pre-experiment period is stable (not itself affected by a major product change or seasonal event), and the covariate is highly correlated with the outcome metric. The correlation coefficient between X and Y is the key driver of variance reduction — the higher the correlation, the more variance you can remove. For session-level engagement metrics, using the prior 2-4 weeks of the same metric as the covariate typically achieves 20-50% variance reduction. For rarer events (purchases, subscription conversions), using the same metric over a longer lookback window (8-12 weeks) may be needed to achieve meaningful correlation.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> Variance reduction is equivalent power without additional users. A 40% variance reduction means you can run an experiment with 40% fewer users (or for 40% less time) and achieve the same statistical power as the original design. In high-traffic environments where experiments run quickly, the benefit is modest. In lower-traffic products where experiments run for 3-4 weeks to reach the required sample, variance reduction can cut runtimes nearly in half — a significant operational improvement.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/variance-reduction">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

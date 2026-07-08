@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Decompose Before You Diagnose: Why Jumping to Hypotheses Loses | Product Analytics Lab</title>
+  <meta name="description" content="Listing hypotheses before decomposing is the most common RCA mistake in interviews and in real work. The order matters more than the hypotheses themselves.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/decompose-before-diagnose">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/decompose-before-diagnose">
+  <meta property="og:title"       content="Decompose Before You Diagnose: Why Jumping to Hypotheses Loses | Product Analytics Lab">
+  <meta property="og:description" content="Listing hypotheses before decomposing is the most common RCA mistake in interviews and in real work. The order matters more than the hypotheses themselves.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Decompose Before You Diagnose: Why Jumping to Hypotheses Loses">
+  <meta name="twitter:description" content="Listing hypotheses before decomposing is the most common RCA mistake in interviews and in real work. The order matters more than the hypotheses themselves.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Decompose Before You Diagnose: Why Jumping to Hypotheses Loses","description":"Listing hypotheses before decomposing is the most common RCA mistake in interviews and in real work. The order matters more than the hypotheses themselves.","url":"https://experimentation-systems-lab.vercel.app/posts/decompose-before-diagnose","articleSection":"RCA","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #C97706; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #C97706cc 30%, #C97706cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #C97706;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #C97706; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      color: #C97706;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(201,119,6,0.08);
+      border: 1px solid rgba(201,119,6,0.25);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #C97706;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/decompose-before-diagnose" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">RCA</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Decompose Before You Diagnose: Why Jumping to Hypotheses Loses</h1>
+    <p class="desc">Listing hypotheses before decomposing is the most common RCA mistake in interviews and in real work. The order matters more than the hypotheses themselves.</p>
+
+    <p>The single most common mistake in root cause analysis — in interviews and in real work — is jumping to hypotheses before decomposing the metric. Someone tells you &quot;checkout completion rate dropped 15%&quot; and immediately you hear: &quot;probably a bug in the payment flow,&quot; &quot;maybe a mobile UI issue,&quot; &quot;could be a promo code problem.&quot; These might all be valid hypotheses. But you don't know which to investigate first, whether the metric moved for structural reasons unrelated to any of them, or whether your hypotheses are even in the right ballpark — because you haven't looked at the data yet.</p>
+    <h2>Why Decomposition Comes First</h2>
+    <p>Decomposition answers a question that hypotheses can't: is the metric movement in the numerator, the denominator, or both? This distinction matters enormously. If checkout completion rate dropped because checkout attempts increased (denominator) while completions held flat, the problem isn't in the checkout flow — it's in whatever is driving more low-intent users into checkout. If completions dropped while attempts held flat, then yes, the checkout flow is the right place to look. Hypotheses about payment bugs and UI issues only apply to the second case. Generating them before decomposing wastes investigation time on the wrong branch.</p>
+    <blockquote class="example"><strong>Checkout drop: decompose first:</strong> Alert: Checkout completion rate dropped from 72% to 61% (-15%).<br><br>Decompose before hypothesizing:<br>- Checkout attempts (denominator): 14,200 → 15,800 (+11%)<br>- Completed checkouts (numerator): 10,224 → 9,638 (-5.7%)<br><br>The rate dropped because BOTH the numerator fell AND the denominator rose. This isn't one problem — it's two. Completions are slightly down (investigate checkout flow), but attempts are way up (investigate what drove more users to checkout — a campaign? a landing page change? a navigation change?).<br><br>Hypothesizing about payment bugs before decomposing would have missed the denominator story entirely.</blockquote>
+    <h2>The Decomposition Discipline</h2>
+    <p>For any rate metric (CVR, completion rate, click-through rate, retention), the first move is always to separate numerator from denominator and check each independently. This takes 60 seconds in most analytics tools and eliminates half of all RCA rabbit holes before they start. It's the equivalent of checking whether the patient has a pulse before diagnosing the specific illness.</p>
+    <p>For volume metrics (total purchases, total sessions, total messages), the decomposition is different: break the total into its constituent parts. Total purchases = mobile purchases + desktop purchases. Is the drop in both platforms, or concentrated in one? Total sessions = new user sessions + returning user sessions. Did new acquisition dry up, or did returning users stop coming back? Decomposing by additive component tells you the scope and likely source of the problem before you generate a single hypothesis.</p>
+    <blockquote class="callout"><strong>The order that works:</strong> 1. Get context: what exactly moved, when did it start, what changed recently?
+2. Decompose: numerator vs denominator (for rate metrics), or by additive component (for volume metrics).
+3. Segment: platform, device, geography, user cohort, new vs returning.
+4. Only then: hypothesize based on what decomposition and segmentation revealed.
+5. Validate: pick the highest-probability hypothesis and identify the data that would confirm or rule it out.</blockquote>
+    <h2>The Interview Implication</h2>
+    <p>In an interview, when you hear &quot;metric X dropped Y%,&quot; the panel is watching to see whether you decompose before diagnosing. If you immediately say &quot;here are five hypotheses,&quot; you've skipped the most important step. Instead, say: &quot;Before I generate hypotheses, I want to decompose the metric to understand where the movement is. For a rate metric like this, I want to check the numerator and denominator separately, because a drop in the rate could come from a numerator problem, a denominator problem, or both — and those have different root causes.&quot; That sentence alone demonstrates more analytical maturity than a list of five hypotheses.</p>
+    <ul><li>For rate metrics: check numerator and denominator independently before generating any hypotheses.</li><li>For volume metrics: decompose into additive components (platform, user type, product category) before explaining the aggregate.</li><li>The decomposition tells you which hypotheses are plausible. Generate hypotheses after you see the decomposition, not before.</li><li>In interviews: explicitly narrate the decomposition step. The panel rewards the process, not just the answer.</li></ul>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/rca">Practice RCA decomposition in the RCA Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/decompose-before-diagnose">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

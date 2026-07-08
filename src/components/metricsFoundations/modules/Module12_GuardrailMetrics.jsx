@@ -67,10 +67,10 @@ export function Module_MF12({ module, onNext }) {
   }
 
   var mcqOptions = [
-    { label: 'A. So the team has time to instrument the guardrail metric before running the experiment.', correct: false },
-    { label: 'B. Because pre-commitment removes the ability to renegotiate the threshold after seeing results — preventing p-hacking the guardrail.', correct: true },
-    { label: 'C. Legal compliance requires pre-registration of all experiment metrics.', correct: false },
-    { label: 'D. Post-hoc guardrails are more accurate because they account for the actual experiment data.', correct: false },
+    { label: 'A. So the team has enough runway to properly instrument the guardrail metric before the experiment even begins running its course.', correct: false },
+    { label: 'B. Pre-commitment removes the ability to renegotiate the threshold after seeing results — it prevents p-hacking the guardrail.', correct: true },
+    { label: 'C. Legal and compliance policy requires every single experiment metric to be formally pre-registered before the launch date arrives.', correct: false },
+    { label: 'D. Post-hoc guardrails are actually more accurate, since they account for the real experiment data instead of a rough advance guess.', correct: false },
   ];
 
   const prose = { color: 'var(--text-secondary)', lineHeight: 1.75, margin: 0, fontSize: '0.92rem' };

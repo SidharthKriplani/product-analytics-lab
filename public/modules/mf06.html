@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leading vs Lagging Indicators | Metrics Foundations | Product Analytics Lab</title>
+  <meta name="description" content="Proxies for future health vs confirmation of past outcomes">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/modules/mf06">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/modules/mf06">
+  <meta property="og:title"       content="Leading vs Lagging Indicators | Product Analytics Lab">
+  <meta property="og:description" content="Proxies for future health vs confirmation of past outcomes">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Leading vs Lagging Indicators">
+  <meta name="twitter:description" content="Proxies for future health vs confirmation of past outcomes">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Leading vs Lagging Indicators","description":"Proxies for future health vs confirmation of past outcomes","url":"https://experimentation-systems-lab.vercel.app/modules/mf06","articleSection":"Metrics Foundations","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { background: #f0fdf4; text-decoration: none; opacity: 0.85; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #16a34acc 30%, #16a34acc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+    }
+    .badge.muted {
+      background: #F8F1E5;
+      border: 1px solid #EDE5D5;
+      color: #756B60;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    .callout {
+      background: #F8F1E5;
+      border-left: 3px solid #16a34a;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+    }
+    .callout p { margin-bottom: 0; color: #2b2620; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+    .tag {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: #F8F1E5;
+      border: 1px solid #EDE5D5;
+      color: #756B60;
+    }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #16a34a;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/metrics-foundations/mf06" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Metrics Foundations</span>
+      <span class="badge muted">Intermediate</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>Leading vs Lagging Indicators</h1>
+    <p class="desc">Proxies for future health vs confirmation of past outcomes</p>
+
+    <p>Your CEO wants to know if the new onboarding flow is working. Revenue won't tell you for 90 days, so you reach for D7 retention as the early read. But pause on the leap everyone makes here: D7 retention is only a trustworthy proxy if you have actually measured, on historical cohorts, that D7 retention moves LTV and churn. For a brand-new flow that link is assumed, not proven — you are betting that a relationship which held for the old experience also holds for the new one. Revenue confirms what already happened; a leading indicator only tells you what is about to happen if its link to the outcome is real. The core skill (and the core risk) is picking a proxy whose connection to the lagging metric you have validated, not just one that feels predictive.</p>
+    <div class="callout"><p><strong>How this connects to experimentation:</strong> A/B tests need fast-moving, sensitive leading indicators as primary metrics — you can't wait 90 days to see LTV move. But you report results in terms of the lagging metric (revenue, subscriber count) to make the business case. The whole approach rests on one validated assumption: that the leading metric actually predicts the lagging outcome. Establish that link on past cohort data first; if you can't, you are flying on a proxy you only hope is predictive.</p></div>
+    <h2>Key takeaways</h2><ul><li>A leading indicator is trustworthy only if you have <strong>measured</strong> its link to the outcome on past cohorts.</li><li>For a brand-new flow that link is <strong>assumed, not proven</strong> — you are betting an old relationship still holds.</li><li>Lagging metrics confirm the past; leading metrics predict the future <strong>only if the link is real</strong>.</li></ul>
+    <div class="tags"><span class="tag">leading indicator</span><span class="tag">lagging indicator</span><span class="tag">proxy</span><span class="tag">predictive</span><span class="tag">engagement</span><span class="tag">revenue</span></div>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/metrics-foundations/mf06">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

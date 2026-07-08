@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Take Rate in Marketplace Analytics: The Metric That Hides Compression | Product Analytics Lab</title>
+  <meta name="description" content="Take rate = revenue / GMV. Simple formula, complex interpretation. A rising take rate on falling GMV is a warning sign most analysts miss.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/take-rate">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/take-rate">
+  <meta property="og:title"       content="Take Rate in Marketplace Analytics: The Metric That Hides Compression | Product Analytics Lab">
+  <meta property="og:description" content="Take rate = revenue / GMV. Simple formula, complex interpretation. A rising take rate on falling GMV is a warning sign most analysts miss.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Take Rate in Marketplace Analytics: The Metric That Hides Compression">
+  <meta name="twitter:description" content="Take rate = revenue / GMV. Simple formula, complex interpretation. A rising take rate on falling GMV is a warning sign most analysts miss.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Take Rate in Marketplace Analytics: The Metric That Hides Compression","description":"Take rate = revenue / GMV. Simple formula, complex interpretation. A rising take rate on falling GMV is a warning sign most analysts miss.","url":"https://experimentation-systems-lab.vercel.app/posts/take-rate","articleSection":"Metrics","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #16a34acc 30%, #16a34acc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #16a34a;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #16a34a; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #16a34a;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/take-rate" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Metrics</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>Take Rate in Marketplace Analytics: The Metric That Hides Compression</h1>
+    <p class="desc">Take rate = revenue / GMV. Simple formula, complex interpretation. A rising take rate on falling GMV is a warning sign most analysts miss.</p>
+
+    <p>Take rate is the fraction of GMV that flows to the marketplace as revenue. It measures monetization efficiency — for every dollar transacted on your platform, how many cents do you keep? A healthy take rate held steady as GMV grows is a signal that the marketplace is scaling without losing its pricing power. A take rate that requires explanation is often the early signal of a deeper competitive or retention problem.</p>
+    <h2>Industry Benchmarks</h2>
+    <p>Take rates vary widely by category and competitive intensity. Airbnb runs approximately 14% (blended host and guest fees). Uber is closer to 25% on rides, though this varies by city and product tier. Etsy has historically run around 6-7% before recent fee increases. Crafted marketplace, targeting handmade goods with a premium positioning, runs 12%. These numbers reflect not just what the marketplace wants to charge but what the market will bear — sellers who find the take rate too high will build direct channels or move to competitors.</p>
+    <blockquote class="example"><strong>Crafted take rate: 12% → what happens at 15%?:</strong> Current state: GMV $10M/month, take rate 12%, revenue $1.2M/month.<br>Seller base: 8,400 active sellers, average GMV per seller $1,190/month.<br>Seller economics: median seller margin on Crafted ~28% before fees → 16% net after 12% take rate.<br><br>At 15% take rate:<br>- Revenue on same GMV: $1.5M/month (+$300K)<br>- Seller net margin falls to 13% — below the threshold for many hobbyist sellers<br>- Estimated seller churn at higher fee: 15-20% of seller base based on price sensitivity surveys<br>- GMV impact of seller churn: -$1.5M to -$2M/month<br>- Net revenue impact: +$300K (fee increase) − ~$270K (GMV loss × 15%) = essentially flat, with lasting supply damage.</blockquote>
+    <h2>The Ceiling-and-Floor Dynamic</h2>
+    <p>Take rate operates between a ceiling and a floor. The ceiling is set by buyer and seller alternatives — if competitors charge less, you'll lose supply or demand. The floor is set by your cost structure — you need enough revenue to fund trust/safety, payments infrastructure, customer support, and product development. Between these bounds, you have pricing latitude. But the bounds compress as your marketplace matures: more established sellers have more alternatives, and as competitors scale, the ceiling drops. The take rate you can sustain at 10M GMV per month is often not the take rate you can sustain at 100M.</p>
+    <blockquote class="callout"><strong>Key insight:</strong> Rising take rate on rising GMV is healthy — the market is accepting your price. Rising take rate on flat or falling GMV is a warning: you're extracting more from a shrinking base, which is unsustainable. Monitor the two numbers together, not independently.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/metrics">Practice this in the Metrics Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/take-rate">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

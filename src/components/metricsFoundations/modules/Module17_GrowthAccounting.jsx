@@ -50,10 +50,10 @@ export function Module_MF17({ module, onNext }) {
   ];
 
   var mcq17 = [
-    { label: 'A. Increase acquisition spend — you need more new users to offset churn.', correct: false },
-    { label: 'B. Prioritize retention and resurrection — fix the leaky bucket before pouring more water in.', correct: true },
-    { label: 'C. Quick ratio of 0.9 is fine — it is close enough to 1.0.', correct: false },
-    { label: 'D. Focus on MAU growth rate instead — quick ratio is not a standard metric.', correct: false },
+    { label: 'A. Increase acquisition spend significantly — you just need more new users flowing in to offset the churn.', correct: false },
+    { label: 'B. Prioritize retention and resurrection — fix the leaky bucket before pouring more water in at the top.', correct: true },
+    { label: 'C. A quick ratio of 0.9 is basically fine as-is — it is close enough to the 1.0 breakeven mark to ignore.', correct: false },
+    { label: 'D. Focus on raw MAU growth rate instead of this ratio — quick ratio is not really a standard, trusted metric.', correct: false },
   ];
 
   const prose = { color: 'var(--text-secondary)', lineHeight: 1.75, margin: 0, fontSize: '0.92rem' };

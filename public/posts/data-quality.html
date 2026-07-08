@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Quality Checks Before You Start Any Analysis | Product Analytics Lab</title>
+  <meta name="description" content="Nulls, duplicates, grain mismatches, and timestamp anomalies. The checks that catch silent errors before they become wrong conclusions. A checklist with SQL pa…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/data-quality">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/data-quality">
+  <meta property="og:title"       content="Data Quality Checks Before You Start Any Analysis | Product Analytics Lab">
+  <meta property="og:description" content="Nulls, duplicates, grain mismatches, and timestamp anomalies. The checks that catch silent errors before they become wrong conclusions. A checklist with SQL pa…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Data Quality Checks Before You Start Any Analysis">
+  <meta name="twitter:description" content="Nulls, duplicates, grain mismatches, and timestamp anomalies. The checks that catch silent errors before they become wrong conclusions. A checklist with SQL pa…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Data Quality Checks Before You Start Any Analysis","description":"Nulls, duplicates, grain mismatches, and timestamp anomalies. The checks that catch silent errors before they become wrong conclusions. A checklist with SQL pa…","url":"https://experimentation-systems-lab.vercel.app/posts/data-quality","articleSection":"SQL & Data","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/data-quality" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">SQL &amp; Data</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>Data Quality Checks Before You Start Any Analysis</h1>
+    <p class="desc">Nulls, duplicates, grain mismatches, and timestamp anomalies. The checks that catch silent errors before they become wrong conclusions. A checklist with SQL patterns.</p>
+
+    <p>Most analysis errors are not statistical — they are data quality errors. A null value treated as zero inflates denominators. A duplicated row from a fan-out join inflates counts. A timestamp stored in UTC interpreted as local time shifts your daily buckets by 5 to 8 hours. These errors produce numbers that look plausible and are completely wrong. The five dimensions of data quality — completeness, consistency, accuracy, timeliness, and uniqueness — each require a specific check before you touch any metric.</p>
+    <h2>The Five Checks You Run Before Anything Else</h2>
+    <p>Completeness: check the null rate for every column you plan to use. SELECT COUNT(*) as total, COUNT(column_name) as non_null, ROUND(100.0 * COUNT(column_name) / COUNT(*), 1) as fill_rate FROM table tells you what fraction of rows have usable values. A 15% null rate on seller_id in the orders table means 15% of orders are unattributable — that changes your seller-level analysis fundamentally. Consistency: check whether the same entity (a user, a seller, an order) has consistent values across tables. A user in the users table with status = &quot;active&quot; who has no events in the events table for 90 days is an inconsistency that may signal a data pipeline problem. Uniqueness: check for duplicate rows at the grain you expect. SELECT COUNT(*), COUNT(DISTINCT primary_key) FROM table — if these numbers differ, you have duplicates at the supposed primary key level.</p>
+    <blockquote class="example"><strong>Crafted orders table audit before A/B test analysis:</strong> -- Step 1: Row count and date range<br>SELECT COUNT(*) as rows, MIN(created_at), MAX(created_at) FROM orders;<br>-- Result: 184,200 rows, 2024-01-01 to 2024-03-31 ✓<br><br>-- Step 2: Null rates on key columns<br>SELECT<br>  ROUND(100.0 * COUNT(buyer_id) / COUNT(*), 1) AS buyer_fill_rate,<br>  ROUND(100.0 * COUNT(seller_id) / COUNT(*), 1) AS seller_fill_rate,<br>  ROUND(100.0 * COUNT(order_value) / COUNT(*), 1) AS value_fill_rate,<br>  ROUND(100.0 * COUNT(experiment_variant) / COUNT(*), 1) AS variant_fill_rate<br>FROM orders;<br>-- Result: buyer 98.3%, seller 99.1%, value 97.7%, variant 71.4% ← problem<br>-- 28.6% of orders have no experiment_variant — these are pre-experiment or untracked orders<br><br>-- Step 3: Uniqueness check<br>SELECT COUNT(*) as total, COUNT(DISTINCT order_id) as unique_orders FROM orders;<br>-- If total > unique_orders: duplicates exist — investigate before computing any metrics<br><br>-- Step 4: Distribution check for value column<br>SELECT<br>  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY order_value) AS median,<br>  PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY order_value) AS p95,<br>  MAX(order_value) AS max_value<br>FROM orders WHERE order_value IS NOT NULL;<br>-- A max_value of $15,000 when median is $62 suggests outliers that may need capping</blockquote>
+    <h2>The Fan-Out Join Problem</h2>
+    <p>The most silent data quality error in SQL is a fan-out join: joining a table to another table where the join produces more rows than expected because the join key is not unique on one side. Joining the orders table to the reviews table on order_id, where one order can have multiple reviews, produces one row per review — not one row per order. Every user-level metric you compute from this joined table is inflated by the number of reviews per order. The check: after any join, verify that COUNT(*) in the result equals the expected number of rows at the intended grain. If it doesn't, you have a fan-out and need to aggregate before joining.</p>
+    <blockquote class="callout"><strong>The pre-analysis checklist:</strong> 1. Row count and date range — does the data cover the expected period?
+2. Null rates on all key columns — are the columns you plan to use sufficiently populated?
+3. Uniqueness at the expected grain — any duplicates at the primary key level?
+4. Distribution of numeric columns — any outliers that could distort means?
+5. After joins: verify row count at expected grain — did the join fan out?
+6. Timestamp timezone — are dates in UTC, local, or mixed? How do daily buckets behave at midnight?</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/code">Practice data quality checks in Programming Lab →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/data-quality">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

@@ -36,10 +36,10 @@ export function Module_EF07({ onComplete }) {
   }
 
   var mcqOptions = [
-    { label: 'A. Always test at alpha = 0.05 regardless of how many metrics — each test is independent', correct: false },
+    { label: 'A. Always test at alpha = 0.05 regardless of how many metrics you look at — each individual test is statistically independent', correct: false },
     { label: 'B. Apply Bonferroni correction: divide alpha by the number of metrics tested, keeping family-wise error at 5%', correct: true },
-    { label: 'C. Only report the metric with the smallest p-value — it is the most likely to be real', correct: false },
-    { label: 'D. Remove non-significant metrics from the report to reduce the multiple testing burden', correct: false },
+    { label: 'C. Only report the single metric with the smallest p-value across the batch — it is the one most likely to be a real effect', correct: false },
+    { label: 'D. Quietly remove the non-significant metrics from the report to reduce how many comparisons the reader has to reason about', correct: false },
   ];
 
   return (

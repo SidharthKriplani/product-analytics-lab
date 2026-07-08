@@ -103,10 +103,10 @@ export function Module_MF07({ module, onNext }) {
   var Q = {
     question: 'A food delivery app is choosing its North Star. Which candidate best captures value delivered to users?',
     options: [
-      { id: 'a', text: 'Gross merchandise value (GMV) — total dollar value of all orders.' },
-      { id: 'b', text: 'Orders delivered on time per active user per week — captures reliable delivery of the core value proposition.' },
-      { id: 'c', text: 'Monthly active users — captures the size of the engaged user base.' },
-      { id: 'd', text: 'Average order value — measures basket size and pricing efficiency.' },
+      { id: 'a', text: 'Gross merchandise value (GMV) — the total dollar value of all orders placed this week.' },
+      { id: 'b', text: 'Orders delivered on time per active user per week — reliable delivery of core value.' },
+      { id: 'c', text: 'Monthly active users — the total size of the engaged and returning user base.' },
+      { id: 'd', text: 'Average order value — the average basket size and per-order pricing efficiency.' },
     ],
     correct: 'b',
     explanation: 'GMV and average order value measure what the company extracts. MAU measures presence but not depth. "Orders delivered on time per active user per week" captures the core value: the user wanted food delivered reliably, and they got it. The "on time" qualifier prevents gaming via delayed orders, and "per user" normalizes for growth. It is leading (predicts retention), actionable (logistics, restaurant ops, and product teams all have levers), and hard to inflate without genuinely improving the delivery experience.',

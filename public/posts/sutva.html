@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SUTVA: The Assumption That Makes or Breaks Marketplace Experiments | Product Analytics Lab</title>
+  <meta name="description" content="When treatment and control units interact, your experiment is contaminated. Network effects, shared inventory, and marketplace dynamics all break SUTVA.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/sutva">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/sutva">
+  <meta property="og:title"       content="SUTVA: The Assumption That Makes or Breaks Marketplace Experiments | Product Analytics Lab">
+  <meta property="og:description" content="When treatment and control units interact, your experiment is contaminated. Network effects, shared inventory, and marketplace dynamics all break SUTVA.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="SUTVA: The Assumption That Makes or Breaks Marketplace Experiments">
+  <meta name="twitter:description" content="When treatment and control units interact, your experiment is contaminated. Network effects, shared inventory, and marketplace dynamics all break SUTVA.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"SUTVA: The Assumption That Makes or Breaks Marketplace Experiments","description":"When treatment and control units interact, your experiment is contaminated. Network effects, shared inventory, and marketplace dynamics all break SUTVA.","url":"https://experimentation-systems-lab.vercel.app/posts/sutva","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/sutva" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>SUTVA: The Assumption That Makes or Breaks Marketplace Experiments</h1>
+    <p class="desc">When treatment and control units interact, your experiment is contaminated. Network effects, shared inventory, and marketplace dynamics all break SUTVA.</p>
+
+    <p>SUTVA stands for Stable Unit Treatment Value Assumption. It is the foundational assumption underneath every A/B test: each unit's (user's) outcome depends only on their own treatment assignment, not on the assignment of any other unit. When SUTVA holds, your control group is a clean counterfactual — it tells you what would have happened to treatment users if they hadn't been treated. When SUTVA breaks, the control group is contaminated, and your estimated treatment effect is biased in ways that are hard to detect and easy to misinterpret.</p>
+    <h2>Three Ways SUTVA Breaks in Marketplace Experiments</h2>
+    <p>On Crafted marketplace, SUTVA breaks in predictable ways. First, shared inventory: if treatment sellers receive a ranking boost that drives more buyers to them, those buyers are drawn from the same pool as control sellers. Control sellers' sales go down not because of anything in the control experience, but because treatment sellers captured their demand. Second, network effects: if a treatment improves the social feed on Spark social, treatment users generate more content, which control users see and engage with — now control engagement is elevated by the treatment. Third, social proof: if treatment users see higher review counts (because the feature drives more reviews), that social proof signal is visible on the same listings to control users.</p>
+    <blockquote class="example"><strong>Detecting SUTVA violation: seller experiment on Crafted:</strong> Pre-experiment baseline (2 weeks before launch):<br>Control sellers average GMV: $1,180/month<br>Treatment sellers average GMV: $1,195/month (balanced at randomization)<br><br>During experiment (week 1):<br>Treatment sellers GMV: +18% vs pre-experiment baseline<br>Control sellers GMV: −9% vs pre-experiment baseline<br><br>A clean experiment would show control metrics holding flat against pre-experiment baseline. The −9% drop in control seller GMV signals demand cannibalization: treatment sellers are capturing sales that would have gone to control sellers. The estimated treatment effect (+18%) is inflated — part of that lift is stolen from control, not genuinely created.</blockquote>
+    <h2>Solutions: Geo-Cluster, Holdout, and Switchback</h2>
+    <p>Three designs address SUTVA violations. Geo-cluster randomization assigns treatment at the city or region level — all sellers and buyers in Seattle are in treatment, all in Portland are in control. This eliminates cross-unit contamination within a market at the cost of fewer independent units (metros, not users). Holdout groups isolate a clean control: a subset of the platform is completely excluded from the treatment and any indirect effects of it, used only for baseline comparison. Switchback experiments alternate treatment and control across time periods for the same units, which works well when the intervention is temporary and carryover is limited.</p>
+    <blockquote class="callout"><strong>Flag this first:</strong> In any marketplace, social, or inventory-constrained experiment design question, SUTVA is the first thing to check. Ask: can treatment units affect control units through a shared resource (inventory, demand pool, content feed, social graph)? If yes, name the contamination mechanism and propose the design that addresses it. This is the question that separates analysts who understand experimentation design from those who just know the formulas.</blockquote>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice this in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/sutva">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

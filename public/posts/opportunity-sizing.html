@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opportunity Sizing: How to Estimate Impact Before Running an Experiment | Product Analytics Lab</title>
+  <meta name="description" content="Is this worth building? Sizing the opportunity with back-of-envelope math using base rates, addressable population, and realistic lift prevents teams from opti…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/opportunity-sizing">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/opportunity-sizing">
+  <meta property="og:title"       content="Opportunity Sizing: How to Estimate Impact Before Running an Experiment | Product Analytics Lab">
+  <meta property="og:description" content="Is this worth building? Sizing the opportunity with back-of-envelope math using base rates, addressable population, and realistic lift prevents teams from opti…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Opportunity Sizing: How to Estimate Impact Before Running an Experiment">
+  <meta name="twitter:description" content="Is this worth building? Sizing the opportunity with back-of-envelope math using base rates, addressable population, and realistic lift prevents teams from opti…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Opportunity Sizing: How to Estimate Impact Before Running an Experiment","description":"Is this worth building? Sizing the opportunity with back-of-envelope math using base rates, addressable population, and realistic lift prevents teams from opti…","url":"https://experimentation-systems-lab.vercel.app/posts/opportunity-sizing","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #6B3FA0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #6B3FA0cc 30%, #6B3FA0cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #6B3FA0;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #6B3FA0; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #6B3FA0;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/opportunity-sizing" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Ambiguous Problems</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>Opportunity Sizing: How to Estimate Impact Before Running an Experiment</h1>
+    <p class="desc">Is this worth building? Sizing the opportunity with back-of-envelope math using base rates, addressable population, and realistic lift prevents teams from optimizing the wrong things.</p>
+
+    <p>Before an experiment is designed, before an engineering sprint is scoped, before a PM writes a PRD — there's a question that should always be answered first: is this worth building? Opportunity sizing is the analytical tool that answers it. It doesn't require perfect data. It requires structured estimation with documented assumptions. The output is a rough range of expected impact, which tells you whether the opportunity is worth the investment to pursue more rigorously.</p>
+    <h2>The Three-Step Framework</h2>
+    <p>Opportunity sizing follows three steps: identify the addressable population, estimate the conversion improvement, and multiply by the value per conversion. Each step requires an assumption. The assumptions should be explicit, conservative, and stated alongside the estimate. A sizing that hides its assumptions is useless — you can't interrogate it, update it, or communicate it. A sizing that surfaces its assumptions is a tool for alignment.</p>
+    <blockquote class="example"><strong>Checkout abandonment feature sizing:</strong> Feature: a "save for later" prompt when a user abandons checkout.<br><br>Step 1 — Addressable population:<br>Monthly checkout starts: 2,000,000<br>Users who abandon checkout: 34% = 680,000/month<br>Users who abandon due to "not ready to buy" (vs. payment issues): ~40% = 272,000/month<br>This is our addressable group — users the feature can plausibly recapture.<br><br>Step 2 — Conversion improvement:<br>Benchmark: similar save-for-later features recapture 8-15% of abandoners.<br>Conservative estimate: 8% recapture rate = 21,760 incremental purchases/month.<br><br>Step 3 — Value per conversion:<br>Average order value: $62<br>Incremental revenue: 21,760 × $62 = $1.35M/month = ~$16M/year<br><br>Is that worth 3 weeks of engineering? Probably yes.</blockquote>
+    <h2>Making Assumptions Explicit</h2>
+    <p>The sizing above has three major assumptions: what fraction of abandoners are &quot;not ready to buy&quot; (vs having payment problems), what recapture rate to use, and whether AOV of recaptured orders matches baseline. Each of these could be wrong. The right way to handle this is to report a range: &quot;Under conservative assumptions (5% recapture, 50% of abandoners addressable), impact is $6M/year. Under optimistic assumptions (12% recapture, 60% addressable), impact is $24M/year. Base case is ~$16M/year.&quot; That range gives stakeholders the information they need to make a prioritization decision.</p>
+    <p>In interviews, the sizing itself matters less than the structure. Interviewers are not checking whether you got the right number — they're checking whether you know how to build the estimate. The correct opening move is always: &quot;Let me size the addressable population first, then estimate the conversion improvement, then multiply by value per unit. I'll be explicit about my assumptions at each step.&quot; Then execute the steps, naming each assumption as you make it.</p>
+    <blockquote class="callout"><strong>The sizing formula:</strong> Impact = Addressable population × Realistic conversion improvement × Value per conversion
+
+Addressable population = total users who could plausibly be affected (not total users)
+Conversion improvement = conservative estimate of what fraction you can move
+Value per conversion = revenue, LTV, or whatever metric the business cares about
+
+Report a range, not a point estimate. The range signals that you understand the uncertainty.</blockquote>
+    <ul><li>Addressable population ≠ total user base. Scope it to users for whom the change is relevant.</li><li>Use conservative lift estimates — optimistic sizings don't survive stakeholder scrutiny.</li><li>State every assumption explicitly. Hidden assumptions are the failure mode of opportunity sizing.</li><li>In interviews, the process matters as much as the number. Show the structure.</li></ul>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice opportunity sizing in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/opportunity-sizing">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

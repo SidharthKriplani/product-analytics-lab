@@ -11,27 +11,27 @@ const BLUF_FIELDS_RF06 = [
   {
     field: 'Primary cause is',
     options: [
-      { label: 'iOS users are less engaged following our recent product changes — investigate all Nov release changes', correct: false },
-      { label: 'The Nov 3rd push notification permission prompt change — opt-in rate dropped 27pp (61%→34%), confirmed by segment analysis showing 22pp lower D7 retention for non-opted-in users', correct: true },
-      { label: 'An unidentified iOS release change caused a 6pp D7 retention drop across all users', correct: false },
+      { label: 'iOS users are less engaged following our recent product changes — investigate all November release changes and deploys', correct: false },
+      { label: 'The Nov 3rd push prompt change — opt-in dropped 27pp (61%→34%), confirmed by segment analysis showing lower D7 retention', correct: true },
+      { label: 'An unidentified iOS release change caused a 6pp D7 retention drop across all users, but the root cause has not yet been fully isolated', correct: false },
     ],
     explanation: 'A BLUF cause statement names the specific mechanism, not just the symptom. The correct answer identifies the exact change, the exact metric impact on opt-in rate, and the confirmation method. "Something changed" is a symptom description, not a root cause.',
   },
   {
     field: 'Confidence level',
     options: [
-      { label: 'Low — more investigation needed before conclusions can be drawn', correct: false },
-      { label: 'High — segment analysis directly confirms the retention gap correlates with opt-in status, and the timing aligns exactly with the Nov 3rd deploy', correct: true },
-      { label: 'Medium — correlation is clear but causation requires a prospective A/B test to confirm', correct: false },
+      { label: 'Low — more investigation is needed across multiple data sources before firm conclusions can be drawn', correct: false },
+      { label: 'High — segment analysis confirms the retention gap correlates with opt-in status and matches the Nov 3rd deploy', correct: true },
+      { label: 'Medium — the correlation is clear but causation requires a prospective A/B test to confirm it fully across the board', correct: false },
     ],
     explanation: 'When direct segment evidence aligns with timing evidence, confidence is high. "Medium" is for circumstantial evidence. A/B testing is for measuring effects prospectively — not for confirming a past root cause that already has segment-level confirmation.',
   },
   {
     field: 'Business impact',
     options: [
-      { label: 'Significant — a large number of users are experiencing degraded retention', correct: false },
+      { label: 'Significant — a large number of users are experiencing meaningfully degraded retention across this cycle', correct: false },
       { label: 'Approximately 2.1M iOS users affected; non-opted-in users show 22pp lower D7 retention (10% vs 32%)', correct: true },
-      { label: 'D7 retention dropped 6pp overall — from 38% to 32%', correct: false },
+      { label: 'D7 retention dropped 6pp overall — from 38% down to 32%, across the entire iOS user base', correct: false },
     ],
     explanation: 'Business impact must be quantified. "Significant" is not a number. Option C gives the aggregate drop but not the causal segment breakdown. The correct answer gives both the affected population size and the mechanism — the two pieces a decision-maker needs.',
   },

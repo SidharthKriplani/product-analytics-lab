@@ -32,9 +32,9 @@ export function Module_MF03({ module, onNext }) {
   var Q = {
     question: 'Your team redesigned the checkout page. Desktop CVR rose 4.1% to 4.5%. Mobile CVR rose 2.8% to 3.2%. But overall CVR fell 4.2% to 3.9%. A stakeholder asks: "Did the redesign help or hurt?" What do you say?',
     options: [
-      { id: 'a', text: 'The redesign helped — both segments improved, so the overall must have improved too.' },
-      { id: 'b', text: 'The redesign helped each segment, but a traffic mix shift toward mobile pulled the blended rate down. The redesign worked; the aggregate is misleading.' },
-      { id: 'c', text: 'The data is inconsistent — if both segments improved, the overall cannot fall. There must be a logging error.' },
+      { id: 'a', text: 'The redesign helped — both segments improved, so the overall conversion rate must have improved too, no further check needed.' },
+      { id: 'b', text: "The redesign helped each segment, but mobile's growing traffic share pulled the blended rate down — the aggregate is misleading." },
+      { id: 'c', text: 'The data is inconsistent — if both segments improved, the overall cannot fall. There must be a tracking or logging error somewhere.' },
     ],
     correct: 'b',
     explanation: 'Both segment CVRs improved, confirming the redesign worked. But mobile traffic share grew (say 60% to 75%), and mobile converts at a lower rate. The blended average fell because the denominator mix shifted — not because the product got worse. This is Simpson\'s Paradox. The correct answer to the stakeholder: "The redesign improved conversion in every segment. The aggregate fell because mobile grew as a share of traffic. Both things are true at the same time."',

@@ -44,10 +44,10 @@ export function Module_MF13({ module, onNext }) {
   var ciColor = isSignificant ? 'var(--green)' : (provenNull ? 'var(--green)' : 'var(--yellow)');
 
   var mcqOptions = [
-    { label: 'A. The feature does nothing — a non-significant result means there is no effect.', correct: false },
-    { label: 'B. The test is underpowered: the wide CI (-1% to +6%) still includes a meaningful win, so we cannot rule one out — not "no effect."', correct: true },
-    { label: 'C. The feature definitely helps — the point estimate is positive, so ship it.', correct: false },
-    { label: 'D. The metric is broken; rerun the analysis until it reaches significance.', correct: false },
+    { label: 'A. The feature does nothing at all — any non-significant p-value is proof the true underlying effect is exactly zero.', correct: false },
+    { label: 'B. Underpowered: the wide CI (-1% to +6%) still contains a meaningful win, so "no effect" cannot be ruled out here.', correct: true },
+    { label: 'C. The feature definitely helps users — the point estimate is positive, so the team should ship it immediately.', correct: false },
+    { label: 'D. The metric itself must be broken somehow; keep rerunning the analysis until it finally reaches significance.', correct: false },
   ];
 
   function fmt(v) { return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }

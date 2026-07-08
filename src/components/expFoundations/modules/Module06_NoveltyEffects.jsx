@@ -56,10 +56,10 @@ export function Module_EF06({ onComplete }) {
   var currentLift = weekData[obsWeek - 1].lift;
 
   var mcqOptions = [
-    { label: 'A. Ship after week 1 — the +15% lift is strong enough to act on immediately', correct: false },
+    { label: 'A. Ship after week 1 — a +15% lift that early is already well past the significance threshold, so waiting only adds risk', correct: false },
     { label: 'B. Run the experiment for at least 3-4 weeks to let novelty decay stabilize, then use the steady-state estimate as the true effect', correct: true },
-    { label: 'C. Average weeks 1 through 8 for the most accurate estimate of the treatment effect', correct: false },
-    { label: 'D. The declining curve means the feature is getting worse — do not ship', correct: false },
+    { label: 'C. Average weeks 1 through 8 together and treat that blended number as the most accurate estimate of the true treatment effect', correct: false },
+    { label: 'D. The declining curve means the feature is actively getting worse over time, so the right call is to not ship it', correct: false },
   ];
 
   return (

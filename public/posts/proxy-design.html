@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proxy Design: What to Do When You Don't Have the Exact Data | Product Analytics Lab</title>
+  <meta name="description" content="&quot;We don't have that data&quot; is never a complete answer. Senior analysts propose proxies with stated limitations. Here's how to do it under interview pressure.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/proxy-design">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/proxy-design">
+  <meta property="og:title"       content="Proxy Design: What to Do When You Don't Have the Exact Data | Product Analytics Lab">
+  <meta property="og:description" content="&quot;We don't have that data&quot; is never a complete answer. Senior analysts propose proxies with stated limitations. Here's how to do it under interview pressure.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Proxy Design: What to Do When You Don't Have the Exact Data">
+  <meta name="twitter:description" content="&quot;We don't have that data&quot; is never a complete answer. Senior analysts propose proxies with stated limitations. Here's how to do it under interview pressure.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Proxy Design: What to Do When You Don't Have the Exact Data","description":"\"We don't have that data\" is never a complete answer. Senior analysts propose proxies with stated limitations. Here's how to do it under interview pressure.","url":"https://experimentation-systems-lab.vercel.app/posts/proxy-design","articleSection":"Ambiguous Problems","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #6B3FA0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #6B3FA0cc 30%, #6B3FA0cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #6B3FA0;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #6B3FA0; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      color: #6B3FA0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(107,63,160,0.07);
+      border: 1px solid rgba(107,63,160,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #6B3FA0;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/proxy-design" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Ambiguous Problems</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Proxy Design: What to Do When You Don't Have the Exact Data</h1>
+    <p class="desc">&quot;We don't have that data&quot; is never a complete answer. Senior analysts propose proxies with stated limitations. Here's how to do it under interview pressure.</p>
+
+    <p>&quot;We don't have that data&quot; is a dead end. It's technically true in many situations — lifetime value isn't observable until a user leaves, 12-month retention takes 12 months, and true engagement quality requires surveys you haven't run. But treating unavailable data as a blocker signals analytical passivity. Senior analysts respond differently: they name what they can't observe, then design a proxy they can observe — and label it explicitly as a proxy so everyone knows what they're working with.</p>
+    <h2>The Five-Step Proxy Design Process</h2>
+    <p>Step 1: Name the true outcome. Be precise — not &quot;engagement&quot; but &quot;probability a user is still active at month 12.&quot; Step 2: Identify correlated leading indicators. What behaviors in the first 30 days predict 12-month outcomes? Session frequency, feature adoption depth, invite rate, profile completion with profile usage? Step 3: Test the correlation on historical data. Pull cohorts where you do have 12-month data and check which early behaviors predict long-run outcomes. Step 4: Pick the proxy with the highest correlation and fastest signal. If D30 login frequency correlates at r=0.74 with 12-month retention and you can observe it 11 months earlier, that's your proxy. Step 5: Label it as a proxy in every communication — never present it as the real thing.</p>
+    <blockquote class="example"><strong>Designing a proxy for 12-month LTV using D30 behavior on Crafted:</strong> True outcome: 12-month LTV (total buyer GMV over first year).<br>Problem: Only observable for cohorts that are 12+ months old.<br><br>Leading indicators tested on 6 historical cohorts:<br>- D30 purchase count → correlation with 12-month LTV: r = 0.71<br>- D30 unique seller interactions → r = 0.68<br>- D30 save-to-wishlist count → r = 0.43 (weaker signal)<br>- Whether user left a review in first 30 days → r = 0.61<br><br>Best proxy: D30 purchase count (fastest + strongest signal).<br>Proxy label: "D30 purchase count is used as a proxy for 12-month LTV. Historical correlation: r = 0.71 across 6 cohorts (n=3,200 users/cohort). We will validate against actual 12-month LTV for the Jan cohort in Q4."<br><br>This proxy lets the team run experiments with 30-day readouts rather than 12-month wait times.</blockquote>
+    <blockquote class="callout"><strong>Key insight:</strong> Proxy metrics decouple when the product changes significantly. A D30 purchase count proxy trained on Crafted's pre-recommendation-engine behavior may not hold after you ship a personalization algorithm that changes how users discover products. Re-validate proxy correlations after major product changes — don't assume the historical relationship persists.</blockquote>
+    <p>In interviews, the proxy design question often sounds like: &quot;We want to improve user quality — how would you measure that?&quot; The trap is answering with a vague metric like &quot;engagement score.&quot; The strong answer names the true outcome (long-term retention or revenue), explains why it's not directly observable in the interview timeframe, then designs a specific proxy with a stated validation plan. The validation plan — &quot;I'd back-test this proxy on 6 historical cohorts and check whether the correlation holds&quot; — is the detail that separates a strong answer from a vague one.</p>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/cases">Practice proxy design in the Cases Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/proxy-design">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

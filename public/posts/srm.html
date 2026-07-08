@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What Is SRM and Why It Should Stop Your Ship Decision | Product Analytics Lab</title>
+  <meta name="description" content="Sample Ratio Mismatch means your experiment is broken. Shipping on an experiment with SRM is worse than not running the experiment at all.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/srm">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/srm">
+  <meta property="og:title"       content="What Is SRM and Why It Should Stop Your Ship Decision | Product Analytics Lab">
+  <meta property="og:description" content="Sample Ratio Mismatch means your experiment is broken. Shipping on an experiment with SRM is worse than not running the experiment at all.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="What Is SRM and Why It Should Stop Your Ship Decision">
+  <meta name="twitter:description" content="Sample Ratio Mismatch means your experiment is broken. Shipping on an experiment with SRM is worse than not running the experiment at all.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"What Is SRM and Why It Should Stop Your Ship Decision","description":"Sample Ratio Mismatch means your experiment is broken. Shipping on an experiment with SRM is worse than not running the experiment at all.","url":"https://experimentation-systems-lab.vercel.app/posts/srm","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/srm" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">4 min read</span>
+    </div>
+    <h1>What Is SRM and Why It Should Stop Your Ship Decision</h1>
+    <p class="desc">Sample Ratio Mismatch means your experiment is broken. Shipping on an experiment with SRM is worse than not running the experiment at all.</p>
+
+    <p>Sample Ratio Mismatch (SRM) is one of the most important concepts in experimentation, and one of the most commonly skipped in practice. SRM occurs when the ratio of users assigned to your experiment's treatment and control groups doesn't match the intended allocation. If you set up a 50/50 split but end up with 48.2% in control and 51.8% in treatment, that's SRM. It sounds like a small discrepancy. It isn't. An experiment with SRM is not a valid experiment — and any results you compute from it are unreliable.</p>
+    <h2>Why SRM Invalidates an Experiment</h2>
+    <p>The reason SRM is so damaging is that it almost always indicates a systematic difference between your groups — not just a random sampling fluctuation. If the assignment mechanism worked correctly and the only randomness was in which users got treatment vs control, you'd expect the groups to be very close to the intended ratio, with deviations explained by chance alone. When you see a persistent imbalance, it usually means the assignment mechanism itself is biased, and the groups differ not just in which variant they saw but in who they are.</p>
+    <blockquote class="example"><strong>Detecting SRM with a chi-squared test:</strong> Experiment: 50/50 split, ran for 7 days<br>Intended: 50,000 control / 50,000 treatment<br>Actual: 48,200 control / 51,800 treatment<br><br>Chi-squared test:<br>- Expected: 50,000 / 50,000<br>- Observed: 48,200 / 51,800<br>- Chi-squared statistic: 128.8<br>- p-value: 0.0000000001 (effectively 0)<br><br>This is a massive SRM. The probability of seeing this imbalance by chance, if assignment was unbiased, is essentially zero. The experiment assignment is broken.</blockquote>
+    <h2>The 4 Most Common Causes of SRM</h2>
+    <p>The first and most common cause is client-side logging errors. If your assignment happens on the server but your logging happens on the client, any logging failures (crashes, network errors, slow load times) will disproportionately affect one group if they're experiencing different performance. Typically the treatment group, which may be slower to load, will show lower logging rates, creating an apparent imbalance.</p>
+    <p>The second cause is bot traffic filtering applied inconsistently. If bots are filtered out of your analysis but the filter is applied at different stages of the pipeline for treatment vs control, the final group sizes will be imbalanced. Third: redirects and caching. If the treatment involves a redirect and your assignment is cached, some users who should be in treatment will get stuck in a cached version of control, skewing the ratio. Fourth: assignment logic bugs, where the hash function used to assign users to groups has uneven distribution for certain user ID ranges.</p>
+    <blockquote class="callout"><strong>The SRM check is non-negotiable:</strong> Run the chi-squared test on group sizes before looking at any metric results. If the p-value for the ratio test is below 0.01, stop the analysis. Investigate the assignment mechanism. Fix it. Re-run the experiment if needed. There is no statistical correction that makes an SRM experiment valid — the groups are not comparable, period.</blockquote>
+    <h2>What to Do When You Find SRM</h2>
+    <p>First, don't ship. Second, investigate the assignment pipeline systematically: check logging rates by group, check whether any users experienced errors at a different rate in treatment vs control, check whether any filtering was applied asymmetrically. If you can identify the cause and it's restricted to a specific sub-population, you may be able to exclude that population and re-run the analysis — but only if the exclusion is principled and pre-registered. More often, the right answer is to fix the pipeline and re-run the experiment from scratch.</p>
+    <ul><li>Run a chi-squared test on group sizes as the very first step of any experiment readout.</li><li>If p &lt; 0.01 for the ratio test, the experiment has SRM — stop the analysis.</li><li>SRM almost always indicates a systematic bias in assignment, not random fluctuation.</li><li>No metric result from an SRM experiment is trustworthy. Don't ship, don't use the data.</li></ul>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/review">Practice experiment review in the Review Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/srm">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

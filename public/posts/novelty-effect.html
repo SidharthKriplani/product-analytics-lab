@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novelty Effect: The Trap That Fools Every Junior Analyst | Product Analytics Lab</title>
+  <meta name="description" content="Users engage with new things because they're new — not because they're better. Early experiment results are systematically biased upward. Here's how to account…">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/novelty-effect">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/novelty-effect">
+  <meta property="og:title"       content="Novelty Effect: The Trap That Fools Every Junior Analyst | Product Analytics Lab">
+  <meta property="og:description" content="Users engage with new things because they're new — not because they're better. Early experiment results are systematically biased upward. Here's how to account…">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Novelty Effect: The Trap That Fools Every Junior Analyst">
+  <meta name="twitter:description" content="Users engage with new things because they're new — not because they're better. Early experiment results are systematically biased upward. Here's how to account…">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Novelty Effect: The Trap That Fools Every Junior Analyst","description":"Users engage with new things because they're new — not because they're better. Early experiment results are systematically biased upward. Here's how to account…","url":"https://experimentation-systems-lab.vercel.app/posts/novelty-effect","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/novelty-effect" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">6 min read</span>
+    </div>
+    <h1>Novelty Effect: The Trap That Fools Every Junior Analyst</h1>
+    <p class="desc">Users engage with new things because they're new — not because they're better. Early experiment results are systematically biased upward. Here's how to account for it.</p>
+
+    <p>The novelty effect is one of the most reliable threats to experiment validity in product analytics, and one of the least discussed. When you ship a new UI, a new feature, or a new interaction pattern, a subset of users will engage with it simply because it's new. Curiosity-driven engagement is real, but it isn't sustainable. It inflates your treatment metrics in the first days of the experiment and creates a false impression of a larger lift than the feature will sustain in production.</p>
+    <h2>What the Novelty Effect Looks Like in Data</h2>
+    <p>The signature of the novelty effect is week-over-week decay in the treatment group's relative lift. In week one, treatment might show a 12% higher engagement rate. In week two, it's 8%. In week three, 5%. The effect is real but shrinking as users habituate to the new experience. If you stop the experiment after week one and declare a 12% win, you'll ship a feature that delivers 5% in production — and your credibility will take a hit when the post-launch metrics don't match the experiment projection.</p>
+    <blockquote class="example"><strong>Novelty effect decay pattern:</strong> New feed ranking algorithm experiment:<br><br>Week 1: treatment engagement +15% vs control (p < 0.001)<br>Week 2: treatment engagement +9% vs control (p = 0.002)<br>Week 3: treatment engagement +6% vs control (p = 0.03)<br>Week 4: treatment engagement +5% vs control (p = 0.04)<br><br>The effect stabilizes around +5%. This is the true sustained lift. If you shipped on week 1 data, you'd have projected +15% and delivered +5%. The team would investigate why "the experiment result didn't hold."</blockquote>
+    <h2>Detecting and Accounting for Novelty Effect</h2>
+    <p>The cleanest detection method is to plot the metric movement by week or by cohort of exposure. If the lift is decaying systematically, you're looking at a novelty effect. A genuine behavioral improvement tends to hold or improve over time as users build new habits. A novelty effect starts high and trends down toward a lower stable level.</p>
+    <p>The right response is to extend the experiment runtime until the lift stabilizes — typically three to four weeks for UI changes. Report the stabilized lift, not the first-week peak. If your experiment platform allows it, compute the lift separately for users in their first week of exposure vs users in their second week or later. The second-week-and-later cohort gives you a better estimate of the sustained effect.</p>
+    <h2>When to Worry Most</h2>
+    <p>Novelty effect is most pronounced for UI changes, new content formats, redesigned navigation, and new notification types. It's less common for infrastructure changes (latency improvements, backend changes) and for changes that users don't consciously notice. The test: did users see something different? If yes, check for novelty effect. If the change is invisible to the user, the novelty concern is lower.</p>
+    <blockquote class="callout"><strong>The novelty effect checklist:</strong> Before reading out a positive experiment result on a UI change:
+1. Plot the week-over-week lift trend. Is it decaying?
+2. If the experiment ran less than 3 weeks, flag the novelty effect risk explicitly.
+3. Compare the lift in week 1 vs weeks 3-4. Use the stable period as your estimate.
+4. If you must ship on early data (business pressure), state the confidence range and set a post-launch monitoring period.</blockquote>
+    <ul><li>UI changes have strong novelty effects. Always run for at least 3 weeks before reading out.</li><li>Plot the weekly lift trend. Decaying lift = novelty effect. Stable or growing lift = real effect.</li><li>Report the stabilized lift, not the peak. Your post-launch metrics will match the stable number.</li><li>In interviews, calling out novelty effect is a signal of experimentation maturity.</li></ul>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/review">Practice experiment review in the Review Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/novelty-effect">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

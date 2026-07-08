@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power, MDE, and Why Most A/B Tests Are Underpowered | Product Analytics Lab</title>
+  <meta name="description" content="Running an underpowered test and calling a null result &quot;no effect&quot; is a common, silent mistake. Here's how to calculate what sample size you actually need.">
+  <link rel="canonical" href="https://experimentation-systems-lab.vercel.app/posts/power-mde">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://experimentation-systems-lab.vercel.app/posts/power-mde">
+  <meta property="og:title"       content="Power, MDE, and Why Most A/B Tests Are Underpowered | Product Analytics Lab">
+  <meta property="og:description" content="Running an underpowered test and calling a null result &quot;no effect&quot; is a common, silent mistake. Here's how to calculate what sample size you actually need.">
+  <meta property="og:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+  <meta property="og:site_name"   content="Product Analytics Lab">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Power, MDE, and Why Most A/B Tests Are Underpowered">
+  <meta name="twitter:description" content="Running an underpowered test and calling a null result &quot;no effect&quot; is a common, silent mistake. Here's how to calculate what sample size you actually need.">
+  <meta name="twitter:image"       content="https://experimentation-systems-lab.vercel.app/og-image.png">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Power, MDE, and Why Most A/B Tests Are Underpowered","description":"Running an underpowered test and calling a null result \"no effect\" is a common, silent mistake. Here's how to calculate what sample size you actually need.","url":"https://experimentation-systems-lab.vercel.app/posts/power-mde","articleSection":"Experimentation","author":{"@type":"Organization","name":"Product Analytics Lab"},"publisher":{"@type":"Organization","name":"Product Analytics Lab"}}</script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #F4EFE6;
+      color: #141414;
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #2457D6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      background: #FFFCF4;
+      border-bottom: 1px solid #DDD0BE;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #4A4036;
+      letter-spacing: 0.03em;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .open-btn:hover { opacity: 0.85; text-decoration: none; }
+
+    .accent-bar { height: 3px; background: linear-gradient(90deg, transparent, #2457D6cc 30%, #2457D6cc 70%, transparent); }
+
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-size: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+    }
+    .read-time {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #141414;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .desc {
+      font-size: 15px;
+      color: #4A4036;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #DDD0BE;
+    }
+
+    h2 { font-size: 19px; font-weight: 700; color: #141414; margin: 32px 0 12px; }
+    p  { font-size: 15px; color: #2b2620; margin-bottom: 16px; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { font-size: 15px; color: #2b2620; margin-bottom: 8px; }
+    strong { color: #141414; }
+
+    blockquote {
+      border-left: 3px solid #2457D6;
+      background: #F8F1E5;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #2b2620;
+      font-size: 14px;
+    }
+    blockquote.example { border-left-color: #9B8E80; }
+    blockquote.callout { border-left-color: #2457D6; }
+
+    a.inline-cta {
+      display: inline-block;
+      margin: 8px 0 20px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      color: #2457D6;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    a.inline-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-card {
+      margin-top: 48px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(36,87,214,0.07);
+      border: 1px solid rgba(36,87,214,0.22);
+      text-align: center;
+    }
+    .cta-card h2 { margin: 0 0 8px; font-size: 18px; color: #141414; }
+    .cta-card p { margin-bottom: 20px; font-size: 13px; color: #4A4036; }
+    .cta-card a {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #2457D6;
+      color: #fff;
+    }
+    .cta-card a:hover { opacity: 0.9; text-decoration: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #9B8E80;
+      border-top: 1px solid #EDE5D5;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="https://experimentation-systems-lab.vercel.app" class="brand">Product Analytics Lab</a>
+    <a href="https://experimentation-systems-lab.vercel.app/#/blog/power-mde" class="open-btn">Open interactive version →</a>
+  </div>
+  <div class="accent-bar"></div>
+
+  <article>
+    <div class="meta">
+      <span class="badge">Experimentation</span>
+      <span class="read-time">5 min read</span>
+    </div>
+    <h1>Power, MDE, and Why Most A/B Tests Are Underpowered</h1>
+    <p class="desc">Running an underpowered test and calling a null result &quot;no effect&quot; is a common, silent mistake. Here's how to calculate what sample size you actually need.</p>
+
+    <p>Statistical power is the probability that your experiment will detect a real effect if one exists. An underpowered experiment — one with insufficient sample size — will fail to detect small real effects and produce a null result, which teams routinely misinterpret as &quot;the treatment doesn't work.&quot; In reality it means &quot;the experiment wasn't designed to find an effect this small.&quot; The failure to ship something that actually works is a real business cost, and it happens silently. Nobody raises the alarm when you call something a null.</p>
+    <h2>The Power / MDE / N Triangle</h2>
+    <p>Three quantities determine whether an experiment is valid: power (usually 80%), minimum detectable effect (MDE — the smallest lift you want to be able to detect), and sample size N. These three are locked together. If you fix power and MDE, you get a required N. If you fix power and N, you get the MDE your experiment can detect. If you fix N and MDE, you get the power. Most teams only talk about one of these — usually whether the test is &quot;significant&quot; — without thinking about the other two.</p>
+    <blockquote class="example"><strong>Calculating required sample size:</strong> Scenario: You want to detect a 1% relative lift in checkout CVR.<br><br>Baseline CVR: 8.0%<br>Absolute lift to detect: 0.08 percentage points (1% of 8%)<br>Desired power: 80%<br>Alpha: 0.05 (two-tailed)<br><br>Approximate formula: n = 16σ² / δ²<br>where σ² = p(1-p) = 0.08 × 0.92 = 0.0736, δ = 0.0008<br><br>n = 16 × 0.0736 / (0.0008²) = 1.178 / 0.00000064 ≈ 1,840,000 per group<br><br>To detect a 1% relative CVR lift at 80% power, you need roughly 1.84M users per group, or about 3.7M total. If your checkout sees 50,000 users/day, that's 74 days per group — impractical for most teams.</blockquote>
+    <h2>Why Most Tests Are Underpowered</h2>
+    <p>The most common reason tests are underpowered is that teams pick a runtime based on convenience (two weeks) rather than the power calculation. Two weeks of traffic gives you a fixed N. That N might be enough to detect a 5% relative lift. It almost certainly isn't enough to detect a 0.5% lift. When the two-week test comes back null, the team concludes the feature doesn't work — but all the data shows is that the feature doesn't produce a very large effect. A smaller, real effect could easily be hiding beneath the noise floor.</p>
+    <p>The solution is to run the power calculation before the experiment starts and set runtime accordingly. If the required runtime is impractical, you have three options: accept a larger MDE (you can only detect bigger effects), increase the allocation to treatment (more users per day), or use variance reduction techniques like CUPED to lower the required N.</p>
+    <blockquote class="callout"><strong>Before any experiment:</strong> Answer these three questions before you start:
+1. What is the smallest lift that would be meaningful for this product decision? (Your MDE)
+2. What is your baseline metric value and variance?
+3. Given 80% power and your MDE, how many users do you need per group?
+
+If your projected traffic doesn't reach that N within a reasonable timeframe, either the experiment is impractical at this lift threshold or you need to reduce variance.</blockquote>
+    <h2>Reading Null Results Carefully</h2>
+    <p>When an experiment comes back null, always check the power calculation before concluding the feature has no effect. Report it as: &quot;We did not detect a statistically significant effect. Given our sample size of N, we had 80% power to detect an effect of X or larger. Effects smaller than X remain possible.&quot; This is the honest interpretation. It distinguishes &quot;we ruled out effects larger than X&quot; from &quot;there is no effect.&quot; The former is often useful. The latter is rarely true.</p>
+    <ul><li>Run a power calculation before every experiment. Don't pick runtime by convenience.</li><li>An 80% power threshold means 20% of real effects will be missed — factor this into decisions.</li><li>When you see a null result, check: what was the MDE? Could a smaller real effect be hiding?</li><li>If required N is too large to reach, consider whether the experiment is worth running at all.</li></ul>
+    <p><a class="inline-cta" href="https://experimentation-systems-lab.vercel.app/#/stats">Practice power calculations in the Stats Room →</a></p>
+
+    <div class="cta-card">
+      <h2>Try it interactively</h2>
+      <p>Product Analytics Lab is an interactive judgment gym for data scientists and PMs — practice this exact scenario, not just read about it.</p>
+      <a href="https://experimentation-systems-lab.vercel.app/#/blog/power-mde">Open Product Analytics Lab →</a>
+    </div>
+  </article>
+
+  <footer>
+    experimentation-systems-lab.vercel.app · Practice analytics judgment, not just theory
+  </footer>
+</body>
+</html>

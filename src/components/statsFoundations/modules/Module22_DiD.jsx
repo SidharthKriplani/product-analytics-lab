@@ -7,19 +7,19 @@ const MCQ = {
   options: [
     {
       id: 'a',
-      label: 'City A grew faster, so the feature caused the additional growth above City B\'s trend',
+      label: 'City A grew faster than City B after launch, so the feature caused the additional growth on top of City B\'s background trend',
       correct: true,
       feedback: 'Correct. DiD isolates the causal effect by subtracting City B\'s background growth trend from City A\'s total growth. The difference is attributable to the feature, assuming the parallel trends assumption holds.',
     },
     {
       id: 'b',
-      label: 'City A\'s total growth after launch is the feature\'s causal effect',
+      label: 'City A\'s total growth after launch is entirely the feature\'s causal effect, since City A is the one that received the treatment',
       correct: false,
       feedback: 'The total post-launch growth in City A includes background trends that would have happened anyway. Without subtracting City B\'s change, you are overcounting the treatment effect.',
     },
     {
       id: 'c',
-      label: 'City B grew too, which proves the feature had no real effect',
+      label: 'City B grew too, which proves the feature had no real effect and any apparent difference is just noise in the two trend lines',
       correct: false,
       feedback: 'City B growing does not invalidate the feature\'s effect. DiD expects both groups to have background trends. The question is whether City A grew more than City B — and by how much.',
     },
