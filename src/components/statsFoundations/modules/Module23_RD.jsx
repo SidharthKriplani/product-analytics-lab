@@ -112,22 +112,25 @@ export function Module23_RD({ module, onNext }) {
       {/* ── Causal chain prose ── */}
       <div style={sectionGap}>
         <p style={prose}>
-          Your product has a loyalty tier system: users who accumulate 500 or more points in a month get upgraded to the Gold tier, which unlocks a set of premium benefits. You want to know if reaching Gold tier causes users to purchase more.
+          Your product approves a premium feature for anyone with a credit score of 680 or higher. You want to know something specific: does getting approved <em>cause</em> people to convert to a paid plan more often — or do approved people just convert more because they were already the kind of user who would?
         </p>
         <p style={prose}>
-          You cannot just compare Gold users to non-Gold users. Gold users earned 500+ points — they are already more active and engaged. Their higher purchase rate almost certainly predates the Gold status. You cannot run an experiment — the Gold tier threshold is a business rule you are not going to randomize.
+          Comparing everyone approved to everyone rejected won't answer that. Approved users have higher credit scores, and credit score correlates with income, financial stability, and general engagement — all things that independently predict conversion, with or without the approval. You can't run an experiment either; 680 is a risk policy, not a coin flip you get to control.
         </p>
         <p style={prose}>
-          What you have, though, is something more useful than it might appear: a sharp cutoff that determines who gets treated. And right at the cutoff, the comparison becomes nearly as good as random. A user with 499 points and a user with 501 points are essentially the same user. By a small margin — one point — one person qualifies for Gold and the other does not. The only systematic difference between the groups right at the boundary is treatment assignment.
+          Pause here: is there any way to make this comparison fair, given you can't randomize and a direct comparison is contaminated?
         </p>
         <p style={prose}>
-          This is the logic of <strong style={{ color: 'var(--text)' }}>Regression Discontinuity</strong>. You compare outcomes for units just below the threshold to units just above it, where the assignment is approximately random in the narrow band around the cutoff. The RD estimate is the jump in the outcome exactly at the threshold.
+          There is — and it's hiding in the one part of this setup you'd normally treat as an obstacle: the cutoff itself. A user with a 679 and a user with a 681 are, in every way that matters, the same person. A two-point gap in a credit score is close to noise — nobody is meaningfully more "creditworthy" over two points. And yet one of them gets approved and the other doesn't. Right at that boundary, approval is <em>effectively</em> random, even though nothing about the setup was.
         </p>
         <p style={prose}>
-          Two assumptions must hold. The first is <strong style={{ color: 'var(--text)' }}>no manipulation of the assignment variable</strong>. If users know about the 500-point threshold and can game their points to just barely qualify, users just above 500 are self-selected — they are not like users just below 500 who did not bother. You check this by looking at the density of the assignment variable: if there is an unusual spike just above the threshold and a dip just below, manipulation is occurring and the design is invalid.
+          That's <strong style={{ color: 'var(--text)' }}>Regression Discontinuity</strong>: compare outcomes for people just below the cutoff to people just above it, where the "as-good-as-random" comparison you couldn't get any other way falls directly out of the policy's own sharp line. In the chart below, conversion sits around 45% just under 680 and jumps to about 62% right at the line — that roughly 17-point jump, occurring exactly at the threshold and nowhere else, is the causal estimate.
         </p>
         <p style={prose}>
-          The key limitation of RD: it is a <strong style={{ color: 'var(--text)' }}>local estimate</strong>. It tells you the causal effect for users near the threshold. Users far from the threshold may respond differently to the Gold tier. The estimate does not generalize to them automatically.
+          One assumption has to hold for that jump to mean what you think it means: <strong style={{ color: 'var(--text)' }}>nobody can manipulate which side of 680 they land on</strong>. If users know about the threshold and can nudge their score up two points to sneak over it, the people just above 680 stop being a random slice of "close to 680" — they become the subset who specifically tried, and trying is correlated with exactly the motivation that also predicts conversion. You check this the way you'd check a coin for a hidden weight: count how many people land at each score near the cutoff. A smooth, even spread is what random assignment looks like. A spike just above 680 and a matching dip just below means people are gaming the cutoff — and the moment you see that, the design is invalid, no matter how clean the jump looks.
+        </p>
+        <p style={prose}>
+          The other catch: this estimate is <strong style={{ color: 'var(--text)' }}>local</strong>. It tells you what happens to people within a few points of 680 — not to someone at 550, not to someone at 800. Whatever the approval effect is at the boundary is a statement about the boundary, not about your whole user base.
         </p>
       </div>
 
@@ -304,7 +307,7 @@ export function Module23_RD({ module, onNext }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
             <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>One.</strong> Before using RD, check the density plot of your running variable around the threshold. Spikes just above the cutoff signal manipulation — users gaming the system. If you see this, the design is invalid. A uniform distribution near the threshold is evidence (not proof) that no manipulation is occurring.</p>
             <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Two.</strong> When reporting RD results, show the scatter plot of the outcome vs. running variable across the full range, with the fitted curves on each side and the jump at the threshold visible. This makes the evidence legible: the audience can see whether there is a plausible discontinuity or whether you are fitting noise. A jump that looks visually obvious is far more convincing than a coefficient in a table.</p>
-            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Consider whether the estimate is local enough to generalize to your actual decision. If the business question is "should we keep the Gold tier at 500 points?" — the RD estimate, which describes behavior at exactly 500 points, is directly relevant. If the question is "should we launch a loyalty program at all?" — the estimate for the 500-point threshold users tells you little about what a loyalty program would do for your average user. Be precise about the population the estimate applies to.</p>
+            <p style={{ ...prose, fontSize: '0.86rem' }}><strong style={{ color: 'var(--text)' }}>Three.</strong> Consider whether the estimate is local enough to generalize to your actual decision. If the business question is "should we keep the approval line at 680?" — the RD estimate, which describes behavior at exactly 680, is directly relevant. If the question is "should we relax underwriting across the board?" — the estimate for users right at 680 tells you little about what approval would do for someone at 550. Be precise about the population the estimate applies to.</p>
           </div>
         </div>
       )}
