@@ -6,7 +6,7 @@ export const expFoundationModules = [
     id: 'ef01',
     recap: [
       'Observational data conflates **treatment with selection** — feature-users differ in ways you cannot measure.',
-      'Power users would retain better regardless, so their higher retention proves nothing causal.',
+      'Power users would retain better regardless — their higher retention proves nothing causal.',
       '**Random assignment** is the only mechanism that breaks the confound and makes causal claims valid.',
     ],
     index: 1,
@@ -147,7 +147,7 @@ export const expFoundationModules = [
   {
     id: 'ef08',
     recap: [
-      '~5% of A/A tests show p<0.05 by chance, so **one significant A/A is expected**, not a bug.',
+      '~5% of A/A tests show p<0.05 by chance — **one significant A/A is expected**, not a bug.',
       'Validate a platform by running **many** A/A tests and checking the p-value distribution is ~uniform.',
       'The alarm is a **pattern** — too many significant results, or a distribution skewed toward 0.',
     ],

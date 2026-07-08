@@ -6,7 +6,7 @@ export const metricsFoundationModules = [
     id: 'mf01',
     recap: [
       'Every metric answers a different question: **North Star** ("are we winning?"), **L1** ("why?"), **L2** ("where?"), **guardrails** ("what are we breaking?").',
-      'Without the hierarchy every metric looks equally important — so nothing gets acted on.',
+      'Without the hierarchy every metric looks equally important — **nothing gets acted on**.',
       'The North Star is what you ultimately care about, but too slow to use as a test\'s primary metric.',
     ],
     index: 1,
@@ -49,7 +49,7 @@ export const metricsFoundationModules = [
     id: 'mf03',
     recap: [
       'Any ratio can rise in aggregate while falling in **every segment** — a **mix shift** did it.',
-      'Always decompose a ratio into **numerator, denominator, and mix** before concluding anything.',
+      'Always decompose a ratio: **numerator → denominator → mix** — before concluding anything.',
       'If treatment changes who enters the funnel, CVR can inflate with no real gain — check absolute counts too.',
     ],
     index: 3,
@@ -92,7 +92,7 @@ export const metricsFoundationModules = [
     recap: [
       'Almost every primary metric has a partner it can be **inflated at the expense of**.',
       'Push CTR → crush satisfaction; push checkout speed → hide fraud; push sessions → grow rage-quits.',
-      'A counter metric names that partner, so a quality tradeoff shows as a **win on one number, loss on the other**.',
+      'A counter metric names that partner — a quality tradeoff shows as a **win on one number, loss on the other**.',
     ],
     index: 5,
     title: 'Counter Metrics and Guardrails',

@@ -60,7 +60,7 @@ export const statsFoundationsModules = [
     id: 'sf04',
     recap: [
       'The normal distribution is fully described by just two numbers: **mean and SD**.',
-      'Sums of many independent effects converge to it — which is why it shows up everywhere.',
+      'Sums of many independent effects **converge to it** — hence its ubiquity.',
       'Under the **CLT**, sample means are normal even when the raw data is not.',
     ],
     index: 4,
@@ -114,7 +114,7 @@ export const statsFoundationsModules = [
     id: 'sf07',
     recap: [
       'Every sample gives a **slightly different mean** — that is sampling variation, not error.',
-      'Re-running a query on different dates and getting different means is expected behaviour.',
+      'Different means across date ranges is **expected sampling behaviour**, not a bug.',
       'An observed A/B lift is an **estimate, not truth**.',
     ],
     index: 7,
@@ -440,7 +440,7 @@ export const statsFoundationsModules = [
     recap: [
       'Bayesian inference starts with a **prior** and updates it with data into a **posterior**.',
       'It can answer **"P(variant B is better)"** — which frequentist testing cannot.',
-      'A credible interval\'s direct probability statement is **conditional on the prior** — so the prior must be stated and defensible.',
+      'A credible interval\'s direct probability statement is **conditional on the prior** — the prior must be stated and defensible.',
     ],
     index: 26,
     title: 'Bayesian Thinking',

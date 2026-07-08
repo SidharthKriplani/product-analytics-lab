@@ -5,9 +5,9 @@ export const rcaFoundationModules = [
   {
     id: 'rf01',
     recap: [
-      'When a metric drops, the way through is a **repeatable four-layer sequence**, not panic or a guess.',
-      'Work the layers **top-to-bottom**: data quality → external factors → product changes → user behaviour.',
-      'Each layer is **cheaper to rule out** than the one below, so ruling out is the whole game.',
+      'A metric drop resolves through one **repeatable four-layer sequence** — not panic, not a guess.',
+      'Work **top-to-bottom**: data quality → external factors → product changes → user behaviour.',
+      '**Cheaper to rule out** at each layer down — ruling out is the whole game.',
     ],
     index: 1,
     title: 'The RCA Framework',
@@ -27,8 +27,8 @@ export const rcaFoundationModules = [
     id: 'rf02',
     recap: [
       'One aggregate drop can hide **three unrelated causes**: new-user acquisition, retention, or resurrection.',
-      '**Decompose first, diagnose second** — break the metric apart before you name a cause.',
-      'Jumping to a cause before decomposing is the **single most common RCA mistake**.',
+      '**Decompose first, diagnose second** — cause only after the split.',
+      'Naming a cause before decomposing is the **single most common RCA mistake**.',
     ],
     index: 2,
     title: 'Decompose Before You Diagnose',
@@ -47,9 +47,9 @@ export const rcaFoundationModules = [
   {
     id: 'rf03',
     recap: [
-      'Before blaming product, ask four questions: did **tracking change**, did a **pipeline fail**, is it **one platform** (SDK), is it **one event type** (logging bug)?',
-      'Nine times out of ten the answer lives in one of those four — none require a product change.',
-      'Rule out instrumentation **before** you page the on-call engineer.',
+      'Four checks before blaming product: **tracking change** → **pipeline failure** → **one platform** (SDK) → **one event type** (logging bug).',
+      'Nine times out of ten the answer is one of those four — no product change required.',
+      '**Rule out instrumentation** before paging the on-call engineer.',
     ],
     index: 3,
     title: 'Data Quality First',
@@ -70,7 +70,7 @@ export const rcaFoundationModules = [
     recap: [
       'Calendar and market effects are your **null hypothesis** — check them before any war-room.',
       'Day-of-week, holidays, **competitor launches**, and paused marketing spend all move metrics with no product cause.',
-      'If you cannot rule these out, you have not started RCA — you are just guessing.',
+      'Without ruling these out first, RCA has not started — only guessing.',
     ],
     index: 4,
     title: 'Seasonality and External Factors',
@@ -111,8 +111,8 @@ export const rcaFoundationModules = [
     id: 'rf06',
     recap: [
       'Finding the cause is only halfway — a complete RCA answers **five questions**.',
-      'What dropped and by how much, the **confirmed cause + evidence**, the **fix and owner**, how you will measure the fix, and what you will **monitor** for recurrence.',
-      'Skip the last two and the same incident returns in six weeks.',
+      'What dropped, by how much → **confirmed cause + evidence** → **fix + owner** → how you\'ll measure it → what you\'ll **monitor** for recurrence.',
+      'Skip the last two and the incident **returns in six weeks**.',
     ],
     index: 6,
     title: 'From Diagnosis to Recommendation',
@@ -153,8 +153,8 @@ export const rcaFoundationModules = [
     id: 'rf08',
     recap: [
       'Start with **three simple queries**, not a complex multi-table join.',
-      'Daily event counts over ~2 weeks, a **break by platform/region**, and a **compare to the same window last year**.',
-      'Under ten minutes to either confirm the signal is real or kill the investigation.',
+      'Daily event counts (~2 weeks) → **break by platform/region** → **compare to same window last year**.',
+      'Under **ten minutes** to confirm the signal is real or kill the investigation.',
     ],
     index: 8,
     title: 'SQL Diagnosis Patterns',
@@ -174,8 +174,8 @@ export const rcaFoundationModules = [
     id: 'rf09',
     recap: [
       '**Same-week-last-year** is the first sanity check, not the last — one matching year could itself be a fluke.',
-      'Confirm the seasonality hypothesis against **two or three prior years** or a seasonally-adjusted baseline before closing.',
-      'WoW changes read without a seasonal baseline generate false alarms every quarter.',
+      'Confirm against **two or three prior years**, or a seasonally-adjusted baseline, before closing.',
+      '**WoW alone**, without a seasonal baseline, generates false alarms every quarter.',
     ],
     index: 9,
     title: 'Seasonality and Trend Separation',
@@ -257,9 +257,9 @@ export const rcaFoundationModules = [
   {
     id: 'rf13',
     recap: [
-      'The first question is **"how did it break?"**, not "what broke?" — read the **time signature** first.',
+      'Ask **"how did it break?"** before "what broke?" — the **time signature** comes first.',
       '**Cliffs** → instrumentation or deploys; **gradual declines** → product erosion or mix shift; **cyclical** → seasonality.',
-      'Read the signature before the fault tree, or you start in the wrong branch every time.',
+      'Signature before fault tree, or you start in the wrong branch every time.',
     ],
     index: 13,
     title: 'The Routing Gate',
@@ -278,7 +278,7 @@ export const rcaFoundationModules = [
   {
     id: 'rf14',
     recap: [
-      'Decompose, find the **one component that actually moved**, then **prune every unrelated branch**.',
+      'Decompose → find the **one component that moved** → **prune** every unrelated branch.',
       'If CVR is flat but AOV dropped 18%, acquisition funnels and checkout UX are **irrelevant** — not the dominant lever.',
       'Scattered investigation is the primary failure mode of smart analysts.',
     ],

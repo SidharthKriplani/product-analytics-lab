@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Icon } from './Icon.jsx';
 import { HighlightPopover } from './HighlightPopover.jsx';
+import { GlossaryHighlighter } from './GlossaryHighlighter.jsx';
 
 // Recap toggle button style (MSL-style) — active = coloured text + border on surface-2.
 function recapBtnStyle(active, color) {
@@ -46,9 +47,12 @@ export function FoundationRunnerShell({
 }) {
   var [indexOpen, setIndexOpen] = useState(false);
   var [recapMode, setRecapMode] = useState(false);
+  var [deeperOpen, setDeeperOpen] = useState(false);
   var contentRef = useRef(null);
   // Reset to full-module view whenever the module changes (MSL behaviour).
   useEffect(function () { setRecapMode(false); }, [module ? module.id : null]);
+  // Go Deeper — Academic panel always starts collapsed on a fresh module.
+  useEffect(function () { setDeeperOpen(false); }, [module ? module.id : null]);
 
   if (!module) {
     return (
@@ -190,6 +194,81 @@ export function FoundationRunnerShell({
           itemType={itemType}
           moduleId={module.id}
         />
+
+        {/* Hover/tap glossary — scans the rendered module content (same
+            contentRef surface as HighlightPopover above) for defined terms
+            and pops a short definition + a link to the module that teaches
+            it in full. See GlossaryHighlighter.jsx for the full mechanism
+            writeup. Mounted once here so it covers all 4 families/79
+            modules automatically — no per-module wiring needed. */}
+        <GlossaryHighlighter containerRef={contentRef} moduleId={module.id} />
+
+        {/* Go Deeper — Academic (skeleton). Renders nothing until a module
+            provides `deeperMath` (an array of strings / illustration blocks
+            / scene markers) — no content has been authored for any of the
+            79 modules yet, this is the mechanism only, mirroring GSL's
+            FoundationsRunner.jsx pattern adapted to PAL's inline-style
+            convention. Placed after the main module content (and the
+            highlight/glossary tools that scope to it) and before
+            "Further reading", matching GSL's "between Explanation and Key
+            Points" placement as closely as this shell's structure allows. */}
+        {module.deeperMath && module.deeperMath.length > 0 && (
+          <section style={{ marginTop: '1.5rem' }}>
+            <button
+              type='button'
+              onClick={function () { setDeeperOpen(function (v) { return !v; }); }}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                background: deeperOpen ? 'var(--surface-2)' : 'var(--surface)',
+                border: '1px solid var(--yellow-border)', borderRadius: 'var(--radius-sm)',
+                padding: '0.4rem 0.9rem', fontSize: '0.78rem', fontWeight: 700,
+                color: 'var(--yellow)', cursor: 'pointer',
+              }}
+            >
+              <span>{deeperOpen ? '▾' : '▸'}</span>
+              <span>Go Deeper — Academic</span>
+            </button>
+            {deeperOpen && (
+              <div style={{
+                marginTop: '0.6rem', padding: '1rem 1.1rem',
+                background: 'var(--yellow-bg)', border: '1px solid var(--yellow-border)',
+                borderRadius: 'var(--radius)',
+              }}>
+                {module.deeperMath.map(function (item, i) {
+                  var topGap = i === 0 ? 0 : '0.75rem';
+                  if (typeof item === 'string') {
+                    return (
+                      <p key={i} style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.65, margin: topGap + ' 0 0' }}>
+                        {renderRecapLine(item)}
+                      </p>
+                    );
+                  }
+                  if (item && item.type === 'illustration') {
+                    return (
+                      <div key={i} style={{ marginTop: topGap }}>
+                        {item.label && (
+                          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
+                            {item.label}
+                          </div>
+                        )}
+                        <pre style={{
+                          margin: 0, padding: '0.75rem 0.9rem', background: 'var(--surface)',
+                          border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                          fontSize: '0.8rem', color: 'var(--text)', overflowX: 'auto',
+                        }}>
+                          {item.code}
+                        </pre>
+                      </div>
+                    );
+                  }
+                  // PAL has no scene registry yet — skip silently, this tier is a skeleton.
+                  if (item && item.type === 'scene') return null;
+                  return null;
+                })}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Playbook links */}
         {playbookLinks && playbookLinks.length > 0 && (
