@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Icon } from './Icon.jsx';
 import { HighlightPopover } from './HighlightPopover.jsx';
 import { GlossaryHighlighter } from './GlossaryHighlighter.jsx';
+import { QnAPanel, LockIcon } from './QnAPanel.jsx';
 
 // Recap toggle button style (MSL-style) — active = coloured text + border on surface-2.
 function recapBtnStyle(active, color) {
@@ -47,10 +48,31 @@ export function FoundationRunnerShell({
 }) {
   var [indexOpen, setIndexOpen] = useState(false);
   var [recapMode, setRecapMode] = useState(false);
+  // Interview QnA view (QNA-INTERVIEW-STANDARD.md) — completion-gated third tab.
+  var [qnaMode, setQnaMode] = useState(false);
+  var [qnaLockMsg, setQnaLockMsg] = useState(false);
+  var [qnaPulse, setQnaPulse] = useState(false);
+  var prevCompleted = useRef(completed);
+  // Deep-link arrival: a `qna-<id>` anchor in the URL opens the QnA view directly (gate respected).
+  useEffect(function () {
+    if (completed && /qna-[a-z0-9-]+/.test(window.location.hash || '')) setQnaMode(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   var [deeperOpen, setDeeperOpen] = useState(false);
   var contentRef = useRef(null);
   // Reset to full-module view whenever the module changes (MSL behaviour).
   useEffect(function () { setRecapMode(false); }, [module ? module.id : null]);
+  useEffect(function () { setQnaMode(false); }, [module ? module.id : null]);
+  // Pulse the QnA tab once when completion unlocks it (user just hit "Mark as complete").
+  useEffect(function () {
+    var wasLocked = !prevCompleted.current;
+    prevCompleted.current = completed;
+    if (wasLocked && completed) {
+      setQnaPulse(true);
+      var t = setTimeout(function () { setQnaPulse(false); }, 4000);
+      return function () { clearTimeout(t); };
+    }
+  }, [completed]);
   // Go Deeper — Academic panel always starts collapsed on a fresh module.
   useEffect(function () { setDeeperOpen(false); }, [module ? module.id : null]);
 
@@ -155,20 +177,57 @@ export function FoundationRunnerShell({
           </div>
         </div>
 
-        {/* Recap toggle (MSL-style) — only when the module provides a recap */}
-        {module.recap && module.recap.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.25rem' }}>
-            <button onClick={function () { setRecapMode(false); }} style={recapBtnStyle(!recapMode, color)}>Full module</button>
-            <button onClick={function () { setRecapMode(true); }} style={recapBtnStyle(recapMode, color)}>⚡ Quick recap</button>
-          </div>
-        )}
+        {/* View tabs: Full / Quick recap (when present) / Interview QnA (completion-gated,
+            QNA-INTERVIEW-STANDARD.md). The QnA tab is always visible; locked (SVG padlock)
+            until this module is marked complete. Hover OR tap explains the gate. */}
+        <div style={{ position: 'relative', display: 'flex', gap: '0.4rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+          <button onClick={function () { setRecapMode(false); setQnaMode(false); }} style={recapBtnStyle(!recapMode && !qnaMode, color)}>Full module</button>
+          {module.recap && module.recap.length > 0 && (
+            <button onClick={function () { setRecapMode(true); setQnaMode(false); }} style={recapBtnStyle(recapMode && !qnaMode, color)}>⚡ Quick recap</button>
+          )}
+          <button
+            onClick={function () {
+              if (!completed) {
+                setQnaLockMsg(true);
+                setTimeout(function () { setQnaLockMsg(false); }, 2400);
+                return;
+              }
+              setQnaMode(true); setRecapMode(false);
+            }}
+            onMouseEnter={function () { if (!completed) setQnaLockMsg(true); }}
+            onMouseLeave={function () { setQnaLockMsg(false); }}
+            aria-disabled={!completed}
+            style={Object.assign({}, recapBtnStyle(qnaMode, color), {
+              cursor: completed ? 'pointer' : 'not-allowed',
+              opacity: completed || qnaMode ? 1 : 0.55,
+              display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+              animation: qnaPulse && !qnaMode ? 'palQnaTabPulse 1s ease-in-out 3' : 'none',
+            })}
+          >
+            {!completed && <LockIcon size={11} color="var(--text-muted)" />}
+            Interview QnA
+          </button>
+          {qnaLockMsg && !completed && (
+            <span style={{
+              position: 'absolute', top: '100%', left: 0, marginTop: '0.35rem', zIndex: 30,
+              fontSize: '0.7rem', whiteSpace: 'nowrap', color: 'var(--text-secondary)',
+              background: 'var(--surface)', border: '1px solid var(--border, rgba(128,128,128,0.35))',
+              borderRadius: '6px', padding: '0.35rem 0.6rem', boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
+            }}>
+              Mark the module complete to unlock Interview QnA
+            </span>
+          )}
+          <style>{'@keyframes palQnaTabPulse { 0%,100% { opacity: 0.55; } 50% { opacity: 1; border-color: ' + color + '; color: ' + color + '; } }'}</style>
+        </div>
 
         {/* Module content (slot) — or the quick recap when toggled.
             Wrapped in a ref'd div so the highlight-to-track toolbar can scope
             its selection listener to just this content area (not the whole
             page — selecting text in the sidebar/nav/module index is exempt). */}
         <div ref={contentRef}>
-          {recapMode && module.recap && module.recap.length > 0 ? (
+          {qnaMode ? (
+            <QnAPanel moduleId={module.id} unlocked={!!completed} color={color} />
+          ) : recapMode && module.recap && module.recap.length > 0 ? (
             <div style={{ background: 'var(--surface)', border: '1px solid ' + color, borderRadius: 'var(--radius)', padding: '1.1rem 1.25rem' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.9rem' }}>
                 Quick recap · {module.title}
