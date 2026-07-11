@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "check:content-status": "node scripts/validate-content-status.mjs",
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/prerender-modules.js && node scripts/prerender-posts.js && node scripts/prerender-sitemap.js && vite build",
+    "prerender": "node scripts/prerender-modules.js && node scripts/prerender-posts.js && node scripts/prerender-sitemap.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "validate-data": "node scripts/validate-data.js"
