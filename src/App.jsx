@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { GateOverlay } from './components/shared/GateOverlay.jsx';
+import { PageHighlighter } from './components/shared/PageHighlighter.jsx';
 import { ErrorBoundary } from './components/shared/ErrorBoundary.jsx';
 import { BrandMark } from './components/shared/BrandMark.jsx';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
@@ -1283,7 +1284,10 @@ export default function App() {
         {/* Monthly "is your employment current?" nudge — degrades gracefully pre-migration */}
         <EmploymentReminder user={user} onNavigate={navigate} />
 
-        <main style={{ flex: 1, ...(page === 'sql-lab' ? { display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 } : {}) }}>
+        {/* In-place marker-pen highlights over the whole content surface (2026-07-16) */}
+        <PageHighlighter getContainer={() => document.getElementById('pal-main')} pageKey={'page:' + page} />
+
+        <main id="pal-main" style={{ flex: 1, ...(page === 'sql-lab' ? { display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 } : {}) }}>
           <ErrorBoundary resetKey={page}>
           <Suspense fallback={
             <div style={{ padding: '2rem 2rem 0' }}>

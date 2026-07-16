@@ -298,7 +298,7 @@ const taBase = {
 
 function EditableBlock({
   block, number, focusReq, onChangeContent, onPatch, onSplit, onMergePrev,
-  onNavigate, onExitList, onPaste, onFocusBlock, onSlash, slashOpen, onSlashKey,
+  onSelectAll, lone, onRangeSelect, onNavigate, onExitList, onPaste, onFocusBlock, onSlash, slashOpen, onSlashKey,
 }) {
   const ref = useRef(null)
   const [focused, setFocused] = useState(false)
@@ -377,6 +377,17 @@ function EditableBlock({
       onMergePrev()
       return
     }
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'a' || e.key === 'A')) {
+      const whole = el.selectionStart === 0 && el.selectionEnd === block.content.length
+      if (whole || block.content === '') { e.preventDefault(); onSelectAll(); return }
+      return
+    }
+    if (e.key === 'ArrowDown' && e.shiftKey && el.selectionEnd === block.content.length) {
+      e.preventDefault(); onRangeSelect(1); return
+    }
+    if (e.key === 'ArrowUp' && e.shiftKey && el.selectionStart === 0 && el.selectionEnd === 0) {
+      e.preventDefault(); onRangeSelect(-1); return
+    }
     if (e.key === 'ArrowUp' && el.selectionStart === 0 && el.selectionEnd === 0) {
       e.preventDefault(); onNavigate(-1); return
     }
@@ -437,7 +448,8 @@ function EditableBlock({
           onPaste={onPaste}
           onFocus={() => { setFocused(true); onFocusBlock(); requestAnimationFrame(() => autosize(ref.current)) }}
           onBlur={() => { setFocused(false); onSlash(null) }}
-          placeholder={block.type === 'text' ? "Type '/' for blocks, or just write…" : ''}
+          className="nb-block-input"
+          placeholder={block.type === 'text' && (focused || lone) ? "Type '/' for blocks, or just write…" : ''}
           style={{ ...taBase, ...typo, display: showRendered ? 'none' : 'block',
             fontStyle: block.type === 'quote' ? 'italic' : 'normal' }}
           onInput={e => autosize(e.target)}
@@ -751,6 +763,7 @@ export function NoteEditor({ trackId, note, onBack }) {
     note.blocks?.length ? note.blocks : [{ id: uid(), type: 'text', content: '' }])
   const [focusReq, setFocusReq] = useState(null)          // { id, pos, t }
   const [focusedId, setFocusedId] = useState(null)
+  const [sel, setSel] = useState(null)              // block-range selection { a, h }
   const [slash, setSlash] = useState(null)                // { blockId, query, index }
   const [menuFor, setMenuFor] = useState(null)            // block id with open handle-menu
   const [dragIdx, setDragIdx] = useState(null)
@@ -779,6 +792,13 @@ export function NoteEditor({ trackId, note, onBack }) {
   }, [trackId, note.id])
 
   function commit(nextBlocks, nextTitle = title) {
+    if (sel && nextBlocks.length !== blocks.length) setSel(null) // structure changed -> stale indices
+    // History: snapshot the PRE-change blocks. Structural changes (count/id/type)
+    // always cut an undo boundary; plain typing coalesces (see snapshot()).
+    const structural = nextBlocks.length !== blocks.length ||
+      nextBlocks.some((b, i) => b.id !== blocks[i].id || b.type !== blocks[i].type)
+    snapshot(blocks, structural)
+    hist.current.redo = []
     setBlocks(nextBlocks)
     persist(nextTitle, nextBlocks)
   }
@@ -970,6 +990,97 @@ export function NoteEditor({ trackId, note, onBack }) {
     // single-line non-URL → default paste
   }
 
+  // ── Block-range selection (docs-style shift+arrow across blocks) ─────────
+
+  // Full-document undo/redo (2026-07-16). Every commit snapshots the PRE-change
+  // blocks; typing bursts coalesce (800ms window) so Cmd+Z steps back a chunk,
+  // not a keystroke. Cmd+Z / Cmd+Shift+Z work everywhere in the editor —
+  // including inside a block textarea (field-local native undo can't restore
+  // splits, merges, deletes, or paste explosions anyway).
+  const hist = useRef({ stack: [], redo: [], last: 0 })
+  function snapshot(prevBlocks, structural) {
+    const h = hist.current
+    const now = Date.now()
+    if (!structural && h.stack.length && now - h.last < 800) { h.last = now; return }
+    h.stack.push(prevBlocks)
+    if (h.stack.length > 100) h.stack.shift()
+    h.last = now
+  }
+  function applyHistory(nextBlocks) {
+    setSel(null)
+    setBlocks(nextBlocks)
+    persist(title, nextBlocks)
+  }
+  useEffect(() => {
+    const onKey = (e) => {
+      if (!(e.metaKey || e.ctrlKey) || (e.key !== 'z' && e.key !== 'Z')) return
+      const h = hist.current
+      if (e.shiftKey) {
+        const next = h.redo.pop()
+        if (next) { e.preventDefault(); h.stack.push(blocks); h.last = 0; applyHistory(next) }
+      } else {
+        const prev = h.stack.pop()
+        if (prev) { e.preventDefault(); h.redo.push(blocks); h.last = 0; applyHistory(prev) }
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }) // re-bound each render so blocks/title stay fresh
+
+  function selectAllBlocks() {
+    if (!blocks.length) return
+    try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur() } catch {}
+    setSel({ a: 0, h: blocks.length - 1 })
+  }
+
+  function rangeSelect(id, dir) {
+    const i = idx(id)
+    const h = Math.max(0, Math.min(blocks.length - 1, i + dir))
+    if (h === i) return
+    try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur() } catch {}
+    setSel({ a: i, h })
+  }
+
+  useEffect(() => {
+    if (!sel) return
+    const lo = Math.min(sel.a, sel.h), hi = Math.max(sel.a, sel.h)
+    const deleteRange = () => {
+      const kept = blocks.filter((_, i2) => i2 < lo || i2 > hi)
+      const safe = kept.length ? kept : [{ id: uid(), type: 'text', content: '' }]
+      commit(safe)
+      const target = safe[Math.min(lo, safe.length - 1)]
+      if (target) setFocusReq({ id: target.id, pos: 0, t: Date.now() })
+      setSel(null)
+    }
+    const onKey = (e) => {
+      if (e.shiftKey && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        e.preventDefault()
+        const nh = Math.max(0, Math.min(blocks.length - 1, sel.h + (e.key === 'ArrowDown' ? 1 : -1)))
+        setSel({ a: sel.a, h: nh })
+        return
+      }
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'c' || e.key === 'C')) {
+        e.preventDefault()
+        try { navigator.clipboard.writeText(blocksToMarkdown('', blocks.slice(lo, hi + 1))) } catch {}
+        return
+      }
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'x' || e.key === 'X')) {
+        e.preventDefault()
+        try { navigator.clipboard.writeText(blocksToMarkdown('', blocks.slice(lo, hi + 1))) } catch {}
+        deleteRange()
+        return
+      }
+      if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); deleteRange(); return }
+      if (e.key === 'Escape' || (!e.shiftKey && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) || (!e.metaKey && !e.ctrlKey && e.key.length === 1)) {
+        setSel(null)
+      }
+    }
+    const onMouse = (e) => { if (e.target && e.target.closest && e.target.closest('.nb-tbbtn')) return; setSel(null) }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('mousedown', onMouse)
+    return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('mousedown', onMouse) }
+  }, [sel, blocks])
+
   // ── Derived stats ─────────────────────────────────────────────────────────
 
   const stats = useMemo(() => {
@@ -1017,6 +1128,16 @@ export function NoteEditor({ trackId, note, onBack }) {
   }
 
   function toolbarType(type) {
+    if (sel) {
+      const lo = Math.min(sel.a, sel.h), hi = Math.max(sel.a, sel.h)
+      const inRange = blocks.slice(lo, hi + 1).filter(b => TEXTISH.has(b.type))
+      if (!inRange.length) return
+      const allAlready = inRange.every(b => b.type === type)
+      const nextType = allAlready ? 'text' : type
+      const ids = new Set(inRange.map(b => b.id))
+      commit(blocks.map(b => (ids.has(b.id) ? { ...b, type: nextType } : b)))
+      return
+    }
     if (!focusedId) return
     const b = blocks.find(x => x.id === focusedId)
     if (!b) return
@@ -1131,6 +1252,8 @@ export function NoteEditor({ trackId, note, onBack }) {
                       animationDelay: `${Math.min(i, 10) * 22}ms`,
                       padding: '0.14rem 0', borderTop: overIdx === i && dragIdx !== null && dragIdx !== i ? `2px solid ${T.accent}` : '2px solid transparent',
                       opacity: dragIdx === i ? 0.45 : 1,
+                      background: sel && i >= Math.min(sel.a, sel.h) && i <= Math.max(sel.a, sel.h) ? T.accentFaint : 'transparent',
+                      borderRadius: 6,
                     }}
                     className="nb-row"
                   >
@@ -1176,6 +1299,9 @@ export function NoteEditor({ trackId, note, onBack }) {
                           onPatch={(patch, opts) => patchBlock(block.id, patch, opts)}
                           onSplit={(before, after) => splitBlock(block.id, before, after)}
                           onMergePrev={() => mergePrev(block.id)}
+                          onSelectAll={() => selectAllBlocks()}
+                          lone={blocks.length === 1}
+                          onRangeSelect={dir => rangeSelect(block.id, dir)}
                           onNavigate={dir => navigate(block.id, dir)}
                           onExitList={() => patchBlock(block.id, { type: 'text' }, { refocus: true })}
                           onPaste={e => handlePaste(e, block.id)}
