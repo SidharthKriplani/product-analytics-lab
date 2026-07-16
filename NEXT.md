@@ -1,5 +1,7 @@
 # NEXT.md — Session Queue
 
+> **17 Jul FINAL:** editor got outline ☰ drawer + reposition via family patch. AUDIT WHEN NEXT HERE: tracks-sync value column type (MSL was TEXT + raw-object push = every push silently failed — PAL/PL share PAL's Supabase, same trap possible).
+
 ---
 
 ## ⚠ FIRST — 16 Jul session close state
