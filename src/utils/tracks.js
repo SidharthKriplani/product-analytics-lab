@@ -15,20 +15,51 @@ const QUICK_KEY = 'pal-tracks-quickadd-v1'; // '1' = skip the picker, add straig
 //   createdAt: ISO string,
 //   items: [
 //     { type: 'sql', problemId, title, difficulty, addedAt },
-//     { type: 'note', content, addedAt }
+//     { type: 'note', id, title, blocks: [...], addedAt, updatedAt }
 //   ]
 // }
+// Note block shapes (see components/tracks/NoteEditor.jsx):
+//   { id, type: 'text'|'h1'|'h2'|'h3'|'bullet'|'numbered'|'todo'|'quote'|'callout', content, checked? }
+//   { id, type: 'code', content, lang }
+//   { id, type: 'toggle', content, body }
+//   { id, type: 'divider' }
+//   { id, type: 'video', url, videoId, platform, title }
+//   { id, type: 'link',  url, domain, title, summary }
+// Legacy plain notes ({ type: 'note', content }) are silently migrated to the
+// block shape on first read — see load().
 
 function uid() {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 }
 
 function load() {
+  let tracks;
   try {
-    return JSON.parse(localStorage.getItem(KEY) || '[]');
+    tracks = JSON.parse(localStorage.getItem(KEY) || '[]');
   } catch {
     return [];
   }
+  if (!Array.isArray(tracks)) return [];
+  // One-time silent migration: legacy plain-text notes ({ content }) become
+  // rich block notes the NoteEditor can open. Idempotent — notes that already
+  // carry blocks are left untouched.
+  let changed = false;
+  for (const t of tracks) {
+    for (const it of (t.items || [])) {
+      if (it.type === 'note' && !Array.isArray(it.blocks)) {
+        const content = typeof it.content === 'string' ? it.content : '';
+        it.id = it.id || uid();
+        it.title = it.title || (content.split('\n')[0] || '').replace(/[*~=`#>]/g, '').slice(0, 60);
+        it.blocks = [{ id: uid(), type: 'text', content }];
+        it.updatedAt = it.updatedAt || it.addedAt || new Date().toISOString();
+        changed = true;
+      }
+    }
+  }
+  if (changed) {
+    try { localStorage.setItem(KEY, JSON.stringify(tracks)); } catch { /* ignore */ }
+  }
+  return tracks;
 }
 
 function save(data) {
@@ -120,22 +151,64 @@ export function addSqlProblem(trackId, problemId, title, difficulty) {
   setLastTrackId(trackId);
 }
 
-// Add a free-text note to a track
-export function addNote(trackId, content) {
+// ── Note CRUD (rich, block-based) ─────────────────────────────────────────────
+
+// Create a new rich note. `seedText` (optional) becomes the first text block.
+export function createNote(trackId, title = '', seedText = '') {
+  const tracks = load();
+  const t = tracks.find(t => t.id === trackId);
+  if (!t) return null;
+  const note = {
+    type: 'note',
+    id: uid(),
+    title,
+    blocks: [{ id: uid(), type: 'text', content: seedText }],
+    addedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  t.items.push(note);
+  save(tracks);
+  setLastTrackId(trackId);
+  return note;
+}
+
+// Patch a rich note by its note id — patch can be { title } or { blocks } or both.
+export function updateNoteById(trackId, noteId, patch) {
   const tracks = load();
   const t = tracks.find(t => t.id === trackId);
   if (!t) return;
-  t.items.push({ type: 'note', content, addedAt: new Date().toISOString() });
+  t.items = t.items.map(i =>
+    i.type === 'note' && i.id === noteId
+      ? { ...i, ...patch, updatedAt: new Date().toISOString() }
+      : i
+  );
   save(tracks);
-  setLastTrackId(trackId);
 }
 
-// Edit an existing plain-text note in place (by item index)
+export function deleteNoteById(trackId, noteId) {
+  const tracks = load();
+  const t = tracks.find(t => t.id === trackId);
+  if (!t) return;
+  t.items = t.items.filter(i => !(i.type === 'note' && i.id === noteId));
+  save(tracks);
+}
+
+// Legacy: add a free-text note to a track (now creates a rich note).
+export function addNote(trackId, content) {
+  return createNote(trackId, '', content);
+}
+
+// Legacy alias — index-based plain-text edit; writes into the first block
+// (load() migration guarantees blocks exist).
 export function updateNote(trackId, index, content) {
   const tracks = load();
   const t = tracks.find(t => t.id === trackId);
   if (!t || !t.items[index] || t.items[index].type !== 'note') return;
-  t.items[index] = { ...t.items[index], content, updatedAt: new Date().toISOString() };
+  const it = t.items[index];
+  const blocks = Array.isArray(it.blocks) && it.blocks.length
+    ? [{ ...it.blocks[0], content }, ...it.blocks.slice(1)]
+    : [{ id: uid(), type: 'text', content }];
+  t.items[index] = { ...it, content, blocks, updatedAt: new Date().toISOString() };
   save(tracks);
 }
 

@@ -1,10 +1,35 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
   getTracks, createTrack, deleteTrack, renameTrack,
-  removeItem, reorderItems, addNote, updateNote, updateHighlightNote, moveItem, seedTierTracks,
+  removeItem, reorderItems, createNote, updateHighlightNote, moveItem, seedTierTracks,
 } from '../utils/tracks.js';
 import { shareTrack } from '../utils/sharedTracks.js';
 import { Icon } from '../components/shared/Icon.jsx';
+import { NoteEditor } from '../components/tracks/NoteEditor.jsx';
+
+// ── Rich-note preview helpers (block shapes live in components/tracks/NoteEditor.jsx) ─
+const NOTE_TEXTISH = ['text', 'h1', 'h2', 'h3', 'bullet', 'numbered', 'todo', 'quote', 'callout'];
+
+function notePreview(note) {
+  const b = (note.blocks || []).find(x => NOTE_TEXTISH.includes(x.type) && x.content?.trim());
+  return b ? b.content.replace(/[*~=`#>]/g, '').slice(0, 90) : '';
+}
+
+function noteBlockSummary(note) {
+  const blocks = note.blocks || [];
+  const videos = blocks.filter(b => b.type === 'video').length;
+  const links = blocks.filter(b => b.type === 'link').length;
+  const todos = blocks.filter(b => b.type === 'todo').length;
+  const todosDone = blocks.filter(b => b.type === 'todo' && b.checked).length;
+  const texts = blocks.filter(b => NOTE_TEXTISH.includes(b.type) && b.type !== 'todo' && b.content?.trim()).length
+    + blocks.filter(b => ['code', 'toggle'].includes(b.type) && (b.content?.trim() || b.body?.trim())).length;
+  const parts = [];
+  if (texts) parts.push(`${texts} block${texts > 1 ? 's' : ''}`);
+  if (todos) parts.push(`${todosDone}/${todos} todos`);
+  if (videos) parts.push(`${videos} video${videos > 1 ? 's' : ''}`);
+  if (links) parts.push(`${links} link${links > 1 ? 's' : ''}`);
+  return parts.join(' · ') || 'empty';
+}
 
 // ── Difficulty badge ────────────────────────────────────────────────────────
 // Covers both SQL Lab difficulties and PAL room difficulties.
@@ -115,7 +140,7 @@ function itemGroup(item) {
 
 // ── Track item row ──────────────────────────────────────────────────────────
 function TrackItemRow({
-  item, idx, trackId, onOpenSqlProblem, onNavigate, onRemove, onUpdateNote, onUpdateHighlightNote,
+  item, idx, trackId, onOpenSqlProblem, onNavigate, onRemove, onOpenNote, onUpdateHighlightNote,
   dragIdx, overIdx, onDragStart, onDragOver, onDrop, onDragEnd,
 }) {
   const [editingNote, setEditingNote] = useState(false);
@@ -176,37 +201,31 @@ function TrackItemRow({
         </>
       )}
 
-      {/* Inline note (editable) */}
+      {/* Rich note — opens the full block editor */}
       {item.type === 'note' && (
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {editingNote ? (
-            <div>
-              <textarea
-                value={noteDraft}
-                onChange={e => setNoteDraft(e.target.value)}
-                rows={4}
-                autoFocus
-                onKeyDown={e => { if (e.key === 'Escape') setEditingNote(false); }}
-                style={{ width: '100%', fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5, padding: '0.4rem 0.5rem', borderRadius: '6px', border: '1px solid var(--accent)', background: 'var(--surface)', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
-              />
-              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.35rem' }}>
-                <button onClick={() => { onUpdateNote(idx, noteDraft.trim()); setEditingNote(false); }}
-                  style={{ background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '5px', padding: '3px 10px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600 }}>Save</button>
-                <button onClick={() => setEditingNote(false)}
-                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.72rem' }}>Cancel</button>
+        <>
+          <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => onOpenNote(item)}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.15rem' }}>
+              <span style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>📝 Note</span>
+              <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', opacity: 0.8 }}>{noteBlockSummary(item)}</span>
+            </div>
+            <div style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.35 }}>
+              {item.title || 'Untitled note'}
+            </div>
+            {notePreview(item) && (
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.45, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {notePreview(item)}
               </div>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem' }}>
-              <p style={{ flex: 1, margin: 0, fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {item.content}
-              </p>
-              <button onClick={() => { setNoteDraft(item.content); setEditingNote(true); }}
-                title="Edit note"
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.72rem', flexShrink: 0 }}>✎</button>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+          <button
+            onClick={() => onOpenNote(item)}
+            title="Open note editor"
+            style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '5px', padding: '3px 8px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-muted)', flexShrink: 0, whiteSpace: 'nowrap' }}
+          >
+            Open →
+          </button>
+        </>
       )}
 
       {/* Saved highlight (text selection captured from a Foundations module) —
@@ -424,11 +443,9 @@ function TrackList({ tracks, selectedId, onSelect, onNew, onDelete, onMoved, onB
 }
 
 // ── Track detail (right pane) ───────────────────────────────────────────────
-function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sharedUrl, onShare, onMobileBack }) {
+function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, onNewNote, onOpenNote, user, sharedUrl, onShare, onMobileBack }) {
   const [editingName, setEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(track.name);
-  const [addingNote, setAddingNote] = useState(false);
-  const [noteVal, setNoteVal] = useState('');
   const [sharing, setSharing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [dragIdx, setDragIdx] = useState(null);
@@ -443,15 +460,6 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sha
   function handleRemove(idx) {
     if (track.items[idx]?.type === 'note' && !window.confirm('Delete this note? This cannot be undone.')) return;
     removeItem(track.id, idx);
-    onChanged();
-  }
-
-  function handleAddNote(e) {
-    e.preventDefault();
-    if (!noteVal.trim()) return;
-    addNote(track.id, noteVal.trim());
-    setNoteVal('');
-    setAddingNote(false);
     onChanged();
   }
 
@@ -505,9 +513,10 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sha
         </div>
         <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexShrink: 0 }}>
           <button
-            onClick={() => setAddingNote(a => !a)}
-            style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.78rem', cursor: 'pointer', color: 'var(--text-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}
-          >+ Note</button>
+            onClick={onNewNote}
+            title="Create a rich note (headings, to-dos, code, embeds) in this track"
+            style={{ background: 'var(--accent)', border: 'none', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.78rem', cursor: 'pointer', color: '#fff', fontWeight: 600, whiteSpace: 'nowrap' }}
+          >+ New Note</button>
           <button
             disabled={sharing || !user}
             title={user ? 'Share this track (anyone with the link can view)' : 'Sign in to share tracks'}
@@ -530,25 +539,6 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sha
             style={{ flexShrink: 0, fontSize: '0.72rem', padding: '0.2rem 0.55rem', borderRadius: '5px', border: '1px solid var(--accent-border)', background: copied ? 'var(--accent)' : 'none', color: copied ? '#fff' : 'var(--accent)', cursor: 'pointer', fontWeight: 600, transition: 'all 0.15s' }}
           >{copied ? 'Copied!' : 'Copy'}</button>
         </div>
-      )}
-
-      {/* Add note form */}
-      {addingNote && (
-        <form onSubmit={handleAddNote} style={{ margin: '0.75rem 1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-          <textarea
-            autoFocus
-            value={noteVal}
-            onChange={e => setNoteVal(e.target.value)}
-            placeholder="Add a note to this track…"
-            rows={2}
-            style={{ flex: 1, fontSize: '0.82rem', padding: '0.4rem 0.6rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', resize: 'vertical', outline: 'none', lineHeight: 1.5 }}
-            onKeyDown={e => { if (e.key === 'Escape') { setAddingNote(false); setNoteVal(''); } }}
-          />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-            <button type="submit" disabled={!noteVal.trim()} style={{ background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '5px', padding: '0.35rem 0.65rem', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, opacity: noteVal.trim() ? 1 : 0.4 }}>Save</button>
-            <button type="button" onClick={() => { setAddingNote(false); setNoteVal(''); }} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '5px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.78rem', color: 'var(--text-muted)' }}>Cancel</button>
-          </div>
-        </form>
       )}
 
       {/* Items */}
@@ -590,7 +580,7 @@ function TrackDetail({ track, onChanged, onOpenSqlProblem, onNavigate, user, sha
                     onOpenSqlProblem={onOpenSqlProblem}
                     onNavigate={onNavigate}
                     onRemove={handleRemove}
-                    onUpdateNote={(i, content) => { updateNote(track.id, i, content); onChanged(); }}
+                    onOpenNote={onOpenNote}
                     onUpdateHighlightNote={(i, content) => { updateHighlightNote(track.id, i, content); onChanged(); }}
                     dragIdx={dragIdx}
                     overIdx={overIdx}
@@ -614,6 +604,7 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
   const [tracks, setTracks] = useState(() => getTracks());
   const [selectedId, setSelectedId] = useState(() => getTracks()[0]?.id || null);
   const [sharedUrls, setSharedUrls] = useState({});
+  const [openNote, setOpenNote] = useState(null); // { trackId, noteId }
   // Mobile master–detail: which pane is visible on phones (desktop shows both).
   const [mobileDetail, setMobileDetail] = useState(false);
 
@@ -655,8 +646,20 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
 
   const selectedTrack = tracks.find(t => t.id === selectedId) || null;
 
+  // If a note is open, resolve it from the latest track state.
+  const liveNote = openNote
+    ? (tracks.find(t => t.id === openNote.trackId)?.items.find(i => i.type === 'note' && i.id === openNote.noteId) || null)
+    : null;
+
+  function handleNewNote() {
+    if (!selectedTrack) return;
+    const note = createNote(selectedTrack.id, '');
+    refresh();
+    if (note) setOpenNote({ trackId: selectedTrack.id, noteId: note.id });
+  }
+
   return (
-    <div style={{ padding: '1.5rem 2rem 0', maxWidth: '900px', margin: '0 auto' }} className="mt-page">
+    <div style={{ padding: '1.5rem 2rem 0', maxWidth: openNote && liveNote ? '1100px' : '900px', margin: '0 auto' }} className="mt-page">
       {/* Page header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
         <button
@@ -679,7 +682,7 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
         <TrackList
           tracks={tracks}
           selectedId={selectedId}
-          onSelect={id => { setSelectedId(id); setMobileDetail(true); }}
+          onSelect={id => { setOpenNote(null); setSelectedId(id); setMobileDetail(true); }}
           onNew={handleNew}
           onDelete={handleDelete}
           onMoved={refresh}
@@ -695,13 +698,24 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
           }}
         />
 
-        {selectedTrack ? (
+        {openNote && liveNote ? (
+          <div className="mt-detail" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <NoteEditor
+              key={liveNote.id}
+              trackId={openNote.trackId}
+              note={liveNote}
+              onBack={() => { refresh(); setOpenNote(null); }}
+            />
+          </div>
+        ) : selectedTrack ? (
           <TrackDetail
             key={selectedTrack.id}
             track={selectedTrack}
             onChanged={refresh}
             onOpenSqlProblem={onOpenSqlProblem}
             onNavigate={onNavigate}
+            onNewNote={handleNewNote}
+            onOpenNote={note => { setOpenNote({ trackId: selectedTrack.id, noteId: note.id }); setMobileDetail(true); }}
             user={user}
             sharedUrl={sharedUrls[selectedTrack.id] || null}
             onShare={handleShare}
