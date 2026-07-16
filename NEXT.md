@@ -1,5 +1,16 @@
 # NEXT.md — Session Queue
 
+---
+
+## ⚠ FIRST — 16 Jul session close state
+
+1. **Commit may still be pending** (index.lock blocked two attempts): `rm -f .git/index.lock` then add/commit/push — files: src/components/tracks/NoteEditor.jsx, src/index.css, src/App.jsx, src/components/shared/PageHighlighter.jsx, src/utils/localHighlights.js.
+2. Verify on deploy: notes editor full feature set (selection, undo, sub-bullets ⇤⇥, hover timestamps) + page highlights.
+3. Delete `../product-analytics-lab-broken` once the fresh clone is confirmed pushed.
+4. Deferred: tracks scroll audit (calc(100vh-140px)), INITIAL_SESSION tracks-pull gap check (MSL had it; check PAL's auth handler when next in PAL).
+
+---
+
 Read at the start of every build session. Max 5 items, ordered by priority. Update before closing.
 
 ---
