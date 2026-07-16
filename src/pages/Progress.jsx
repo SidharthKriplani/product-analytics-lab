@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { UniverseView } from '../components/shared/UniverseView.jsx';
 import { ReadinessWidget } from '../components/shared/ReadinessWidget.jsx';
+import DailyDrill from '../components/shared/DailyDrill.jsx';
 import { Icon } from '../components/shared/Icon.jsx';
 import { getDueReviews } from '../utils/srQueue.js';
 
@@ -631,6 +632,15 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked,
           </button>
         )}
       </div>
+
+      {/* Daily Drill — Progress is the signed-in landing page (home redirects
+          here), so the daily loop must live HERE to be seen. Home keeps its
+          copy for signed-out visitors; the card is idempotent (same storage key). */}
+      {!universeView && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <DailyDrill onTrain={() => onNavigate && onNavigate('foundations')} />
+        </div>
+      )}
 
       {/* Universe view */}
       {universeView && (
