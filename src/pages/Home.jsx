@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 import { BrandMark } from '../components/shared/BrandMark.jsx';
 import { Icon } from '../components/shared/Icon.jsx';
+import DailyDrill from '../components/shared/DailyDrill.jsx';
 
 // Ghost data snippets — analytics content hinting at what waits inside
 const GHOSTS = [
@@ -174,6 +175,14 @@ export function Home({ onNavigate, onShowAuth, onOpenAha }) {
             <Icon name="arrow-right" size={14} color="var(--red)" strokeWidth={2} />
           </span>
         </button>
+
+        {/* Daily Drill — one judgment MCQ per day, streak + share */}
+        <div
+          className="pal-landing-el"
+          style={{ animationDelay: '360ms', width: '100%', maxWidth: 460, margin: '0 auto 1.5rem', textAlign: 'left' }}
+        >
+          <DailyDrill />
+        </div>
 
         {/* BreakLabs four-pillar one-liner */}
         <p
