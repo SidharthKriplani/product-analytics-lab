@@ -181,7 +181,7 @@ export function Home({ onNavigate, onShowAuth, onOpenAha }) {
           className="pal-landing-el"
           style={{ animationDelay: '360ms', width: '100%', maxWidth: 460, margin: '0 auto 1.5rem', textAlign: 'left' }}
         >
-          <DailyDrill />
+          <DailyDrill onTrain={() => onNavigate && onNavigate('foundations')} />
         </div>
 
         {/* BreakLabs four-pillar one-liner */}
