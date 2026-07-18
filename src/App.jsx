@@ -8,6 +8,7 @@ import { track } from './utils/analytics.js';
 import { stateToHash, parseHash } from './utils/hashRouting.js';
 import { onAuthStateChange } from './utils/auth.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from './utils/syncProgress.js';
+import { scheduleTracksPush, pushTracksNow, pullAndMergeTracks } from './utils/tracksSync.js';
 import { upsertLeaderboardRow, touchLastActive } from './utils/leaderboard.js';
 import { EmploymentReminder } from './components/shared/EmploymentReminder.jsx';
 import { CaptureNudge } from './components/shared/CaptureNudge.jsx';
@@ -412,6 +413,10 @@ export default function App() {
           touchLastActive(session.user);
           if (event === 'SIGNED_IN') pushProgressToSupabase(session.user);
         });
+        // My Tracks (incl. rich notes) sync separately from the whole-value
+        // PROGRESS_KEYS path: item-level merge + tombstones, so multi-device
+        // edits union instead of overwriting. Non-blocking, like progress above.
+        pullAndMergeTracks(session.user);
       } else {
         // Covers SIGNED_OUT, and — critically — INITIAL_SESSION firing with
         // session === null for a guest who has never signed in. Supabase fires
@@ -431,7 +436,7 @@ export default function App() {
     function handleVisibilityChange() {
       if (document.visibilityState === 'hidden') {
         setUser(currentUser => {
-          if (currentUser) { pushProgressToSupabase(currentUser); upsertLeaderboardRow(currentUser); touchLastActive(currentUser); }
+          if (currentUser) { pushProgressToSupabase(currentUser); upsertLeaderboardRow(currentUser); touchLastActive(currentUser); pushTracksNow(currentUser); }
           return currentUser;
         });
       }
@@ -444,6 +449,16 @@ export default function App() {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-push My Tracks to Supabase (debounced) after every local mutation —
+  // tracks.js dispatches 'pal_tracks' on each save(); this is the tracks
+  // equivalent of the progress push. No-op when signed out.
+  useEffect(() => {
+    if (!user) return;
+    const onTracks = () => scheduleTracksPush(user);
+    window.addEventListener('pal_tracks', onTracks);
+    return () => window.removeEventListener('pal_tracks', onTracks);
+  }, [user]);
 
   // Safety net for the `if (!authSettled) return <splash>` gate below: if
   // Supabase is unreachable/misconfigured (e.g. onAuthStateChange never fires

@@ -619,7 +619,16 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
   // Listen for cross-component track changes
   useEffect(() => {
     window.addEventListener('pal_tracks', refresh);
-    return () => window.removeEventListener('pal_tracks', refresh);
+    // Cross-tab reconciliation: the 'pal_tracks' CustomEvent is same-tab only.
+    // localStorage 'storage' events fire in OTHER tabs when any tab writes the
+    // tracks key, so a second tab won't hold stale state (or clobber the first
+    // tab's writes on its next save). Fires on key match, or key === null (clear()).
+    const onStorage = (e) => { if (e.key === 'pal-tracks-v1' || e.key === null) refresh(); };
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('pal_tracks', refresh);
+      window.removeEventListener('storage', onStorage);
+    };
   }, [refresh]);
 
   function handleNew() {

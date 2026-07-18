@@ -7,6 +7,7 @@ import { rcaFoundationModules } from '../data/rcaFoundationModules.js';
 const KEY = 'pal-tracks-v1';
 const LAST_KEY = 'pal-tracks-last-v1';   // id of the most-recently-added-to track
 const QUICK_KEY = 'pal-tracks-quickadd-v1'; // '1' = skip the picker, add straight to last track
+const TOMBSTONE_KEY = 'pal-tracks-tombstones-v1'; // { trackDeletes:[{id,deletedAt}], itemDeletes:[{trackId,itemKey,deletedAt}] }
 
 // Track shape:
 // {
@@ -69,6 +70,45 @@ function save(data) {
   } catch {
     // silently fail if storage unavailable
   }
+}
+
+// ── Cross-device sync support (tombstones + merged-state write) ────────────────
+// Used by utils/tracksSync.js. Kept here (the data layer) so tracksSync imports
+// from tracks.js one-way — no circular dependency.
+
+// Stable identity for an item within its track: notes carry a stable `id`, SQL
+// items key on `problemId` (NOT itemId), generic/foundation items on `itemId`,
+// anything else falls back to type+addedAt (addedAt is a stable ISO string).
+export function itemIdentity(item) {
+  if (item.type === 'note') return `note:${item.id}`;
+  if (item.type === 'sql') return `sql:${item.problemId}`;
+  if (item.itemId != null) return `${item.type}:${item.itemId}`;
+  return `${item.type}:${item.addedAt || ''}`;
+}
+
+export function getTombstones() {
+  try {
+    const t = JSON.parse(localStorage.getItem(TOMBSTONE_KEY));
+    return {
+      trackDeletes: Array.isArray(t?.trackDeletes) ? t.trackDeletes : [],
+      itemDeletes: Array.isArray(t?.itemDeletes) ? t.itemDeletes : [],
+    };
+  } catch { return { trackDeletes: [], itemDeletes: [] }; }
+}
+
+function saveTombstones(t) {
+  try { localStorage.setItem(TOMBSTONE_KEY, JSON.stringify(t)); } catch { /* ignore */ }
+}
+
+// Write a fully-merged {tracks, tombstones} state back after a cross-device
+// merge — persists tombstones atomically alongside tracks, then notifies
+// listeners via the same 'pal_tracks' event a normal save() dispatches.
+export function applyMergedState({ tracks, tombstones }) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(tracks));
+    if (tombstones) saveTombstones(tombstones);
+    window.dispatchEvent(new CustomEvent('pal_tracks'));
+  } catch { /* ignore */ }
 }
 
 export function getTracks() {
@@ -136,6 +176,8 @@ export function renameTrack(trackId, name) {
 }
 
 export function deleteTrack(trackId) {
+  const tomb = getTombstones();
+  saveTombstones({ ...tomb, trackDeletes: [...tomb.trackDeletes, { id: trackId, deletedAt: Date.now() }] });
   save(load().filter(t => t.id !== trackId));
 }
 
@@ -189,6 +231,11 @@ export function deleteNoteById(trackId, noteId) {
   const tracks = load();
   const t = tracks.find(t => t.id === trackId);
   if (!t) return;
+  const removed = t.items.find(i => i.type === 'note' && i.id === noteId);
+  if (removed) {
+    const tomb = getTombstones();
+    saveTombstones({ ...tomb, itemDeletes: [...tomb.itemDeletes, { trackId, itemKey: itemIdentity(removed), deletedAt: Date.now() }] });
+  }
   t.items = t.items.filter(i => !(i.type === 'note' && i.id === noteId));
   save(tracks);
 }
@@ -227,6 +274,11 @@ export function removeItem(trackId, index) {
   const tracks = load();
   const t = tracks.find(t => t.id === trackId);
   if (!t) return;
+  const removed = t.items[index];
+  if (removed) {
+    const tomb = getTombstones();
+    saveTombstones({ ...tomb, itemDeletes: [...tomb.itemDeletes, { trackId, itemKey: itemIdentity(removed), deletedAt: Date.now() }] });
+  }
   t.items.splice(index, 1);
   save(tracks);
 }

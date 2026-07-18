@@ -4,6 +4,18 @@ This is the narrative history of PAL. Not a version list (that's CHANGELOG.md) �
 
 ---
 
+### My Tracks note persistence + first cross-device sync (2026-07-18)
+
+Owner-reported tracker notes "don't get saved" / "multiple tabs conflict" — root-caused across the family (MSL/GSL/PAL/PL). PAL got the two universal fixes plus, newly, real cross-device sync it never had.
+
+**Two universal fixes** (shared with the siblings): (1) `NoteEditor` now flushes its 500ms autosave buffer on `visibilitychange`(hidden)+`pagehide` — the React unmount cleanup never runs on a real page close, so type-then-close/refresh lost the last edit. (2) `MyTracksPage` listens to `window 'storage'` (key `pal-tracks-v1`) so a 2nd tab reconciles instead of holding stale state and clobbering the 1st tab's writes on its next save (the `pal_tracks` CustomEvent is same-tab only). PAL's `<NoteEditor>` was already keyed by `liveNote.id`.
+
+**New: cross-device sync.** PAL tracks (incl. rich notes) never reached Supabase — `pal-tracks-v1` isn't in `syncProgress.PROGRESS_KEYS` and there was no tracksSync. Added `src/utils/tracksSync.js` (item-level UNION merge + tombstones, PAL-aware identity: notes by `id`, SQL by `problemId`, generic by `itemId`; PAL's `user_progress.value` is jsonb → push the object, no stringify) + tombstone support in `src/utils/tracks.js` (`getTombstones`/`applyMergedState`/`itemIdentity`; tombstone writes on `deleteTrack`/`removeItem`/`deleteNoteById`) + wiring in `src/App.jsx` (pull-and-merge on sign-in/initial-session, debounced auto-push on `pal_tracks`, immediate push on visibility-hidden). Merge is non-destructive: unions everything, drops only explicitly-tombstoned items, falls back to local on any parse/shape error. Unit-tested (union keeps all, no SQL-item collision, tombstone deletes honored, empty-remote keeps local intact).
+
+**Files:** `src/components/tracks/NoteEditor.jsx`, `src/pages/MyTracksPage.jsx`, `src/utils/tracks.js`, `src/utils/tracksSync.js` (NEW), `src/App.jsx`. esbuild-clean. **Uncommitted** — push on Mac (approve-first). Deliberately does NOT add `pal-tracks-v1` to `PROGRESS_KEYS` (would collide with the dedicated tracksSync row key). Additive; existing notes untouched. Residual: same note open in two editors at once = note-level last-writer-wins (no live block-merge, deliberate).
+
+---
+
 ### v5.47.0–v5.49.0 — PAL gets deep, picks its visual future, and starts mentoring its siblings (2026-06-23/24)
 
 The session that turned PAL from "good content" into "deep content with a spine." The SQL bank first closed its coverage gaps (18/18 against the variety benchmark), then grew the thing that's now its signature: a **judgment layer** on all 106 Hard/Master/Medium problems. Every problem with more than one valid answer now shows the alternatives, a "which method when" dial, and a runs-but-wrong trap — all machine-verified by a new harness, and surfaced in the runner. Authoring it against the live data quietly corrected ~25 stale debriefs along the way, so the bank came out more accurate than it went in.
