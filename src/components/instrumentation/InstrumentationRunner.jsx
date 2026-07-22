@@ -7,19 +7,12 @@ function clearINText(id) { try { var d = JSON.parse(localStorage.getItem(IN_TEXT
 import { track } from '../../utils/analytics.js';
 import { instrumentationCases } from '../../data/instrumentationCases.js';
 import { Icon } from '../shared/Icon.jsx';
+import { NotesBox } from '../shared/NotesBox.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 
 const ROOM_KEY = 'instrumentation';
-const NOTES_KEY = 'pal-notes-v1';
-function loadNote(room, id) {
-  try { const n = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); return n[room + ':' + id] || ''; } catch { return ''; }
-}
-function saveNote(room, id, text) {
-  try { const n = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); n[room + ':' + id] = text; localStorage.setItem(NOTES_KEY, JSON.stringify(n)); } catch {}
-}
-
 const DIFF_CFG = {
   junior: { label: 'Junior', color: 'var(--blue-text)', bg: 'var(--blue-bg)',    border: 'var(--blue-border)' },
   senior: { label: 'Senior', color: 'var(--yellow)',    bg: 'var(--yellow-bg)', border: 'var(--yellow-border)' },
@@ -295,8 +288,6 @@ function RevealScreen({ caseData, onBack, onNext, onNavigate }) {
   const existing = getInstrumentationProgress(caseData.id);
   const [rating, setRating] = useState(existing?.rating || 0);
   const [leadershipOpen, setLeadershipOpen] = useState(false);
-  const [userNote, setUserNote] = useState(() => loadNote(ROOM_KEY, caseData.id));
-  const [noteSaved, setNoteSaved] = useState(false);
   const [checked, setChecked] = useState(
     (caseData.modelAnswer.keyInsights || []).map(() => false)
   );
@@ -515,31 +506,7 @@ function RevealScreen({ caseData, onBack, onNext, onNavigate }) {
         </ul>
       </div>
 
-      <div className="pal-textarea-wrap" style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-          <Icon name="pen-line" size={12} color="currentColor" />Your notes <span style={{ fontWeight: 400, opacity: 0.6 }}>(saved locally)</span>
-        </div>
-        <textarea
-          value={userNote}
-          onChange={e => { setUserNote(e.target.value); setNoteSaved(false); }}
-          placeholder="Jot your thinking..."
-          style={{
-            width: '100%', minHeight: 72, padding: '10px 12px', background: 'var(--bg)',
-            border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text)',
-            fontSize: '0.88rem', lineHeight: 1.5, resize: 'vertical', fontFamily: 'inherit',
-            boxSizing: 'border-box',
-          }}
-        />
-        <button
-          onClick={() => { saveNote(ROOM_KEY, caseData.id, userNote); setNoteSaved(true); }}
-          style={{
-            marginTop: 8, padding: '5px 14px', background: noteSaved ? 'var(--green-bg)' : 'var(--surface)',
-            border: '1px solid ' + (noteSaved ? 'var(--green-border)' : 'var(--border)'),
-            borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.75rem',
-            color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
-          }}
-        >{noteSaved ? <><Icon name="check" size={12} color="var(--green)" /> Saved</> : 'Save note'}</button>
-      </div>
+      <NotesBox storageKey={`${ROOM_KEY}:${caseData.id}`} />
 
       {/* Star rating */}
       <div style={{

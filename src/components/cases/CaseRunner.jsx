@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { businessCases } from '../../data/businessCases.js';
 import { CaseStepPanel } from './CaseStepPanel.jsx';
 import { CaseScoreReveal } from './CaseScoreReveal.jsx';
@@ -245,20 +246,27 @@ export function CaseRunner({ caseId, savedProgress, unlocked, onBack, onNext, on
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '1.5rem 1rem' }}>
 
-      {/* Back button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-        <button
-          onClick={onBack}
-          style={{
-            background: 'none', border: 'none', color: 'var(--text-muted)',
-            fontSize: '0.78rem', cursor: 'pointer', padding: '0',
-            display: 'flex', alignItems: 'center', gap: '0.3rem',
-          }}
-        >
-          ← Cases Room
-        </button>
-        <ShareLinkButton room="cases" />
-      </div>
+      {/* Nav bar — renders into the app top bar when its context slot exists
+          (PAL top bar, 2026-07-23), else inline as before. */}
+      {(function () {
+        var slot = typeof document !== 'undefined' ? document.getElementById('pal-topbar-ctx') : null;
+        var row = (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', ...(slot ? {} : { marginBottom: '1rem' }) }}>
+            <button
+              onClick={onBack}
+              style={{
+                background: 'none', border: 'none', color: 'var(--text-muted)',
+                fontSize: '0.78rem', cursor: 'pointer', padding: '0',
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+              }}
+            >
+              ← Cases Room
+            </button>
+            <ShareLinkButton room="cases" />
+          </div>
+        );
+        return slot ? createPortal(row, slot) : row;
+      })()}
 
       <Breadcrumb crumbs={[
         { label: 'PAL', onClick: onBack },

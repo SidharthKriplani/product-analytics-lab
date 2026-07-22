@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { scenarios } from '../../data/scenarios.js';
 import { designScenarios } from '../../data/designScenarios.js';
 import { ContextPanel } from './ContextPanel.jsx';
@@ -129,16 +130,24 @@ export function ScenarioRunner({ caseId, onBack, onNext, hasNext, onGoToDesign, 
 
       {/* ── Back + title bar ──────────────────────────────────────────── */}
       <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'flex-start', gap: '0.875rem', flexWrap: 'wrap' }}>
-        <button
-          onClick={onBack}
-          style={{
-            background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
-            padding: '0.3rem 0.65rem', color: 'var(--text-muted)', fontSize: '0.78rem',
-            cursor: 'pointer', flexShrink: 0, marginTop: '3px',
-          }}
-        >
-          ← Scenarios
-        </button>
+        {/* Nav bar — renders into the app top bar when its context slot exists
+            (PAL top bar, 2026-07-23), else inline as before. */}
+        {(function () {
+          var slot = typeof document !== 'undefined' ? document.getElementById('pal-topbar-ctx') : null;
+          var row = (
+            <button
+              onClick={onBack}
+              style={{
+                background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                padding: '0.3rem 0.65rem', color: 'var(--text-muted)', fontSize: '0.78rem',
+                cursor: 'pointer', flexShrink: 0, marginTop: '3px',
+              }}
+            >
+              ← Scenarios
+            </button>
+          );
+          return slot ? createPortal(row, slot) : row;
+        })()}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.15rem', flexWrap: 'wrap' }}>
             <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em' }}>

@@ -7,6 +7,7 @@ import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
 import { Icon } from '../shared/Icon.jsx';
+import { NotesBox } from '../shared/NotesBox.jsx';
 import { GateOverlay } from '../shared/GateOverlay.jsx';
 import { saveMetricsAttempt, clearMetricsProgress, saveMetricsDraft, loadMetricsDraft, clearMetricsDraft } from '../../utils/metricsProgress.js';
 import { track } from '../../utils/analytics.js';
@@ -16,13 +17,6 @@ import { DescribePanel } from '../shared/DescribePanel.jsx';
 import { AnswerModeToggle, loadAnswerMode, saveAnswerMode } from '../shared/AnswerModeToggle.jsx';
 
 const ROOM_KEY = 'metrics';
-const NOTES_KEY = 'pal-notes-v1';
-function loadNote(room, id) {
-  try { const n = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); return n[room + ':' + id] || ''; } catch { return ''; }
-}
-function saveNote(room, id, text) {
-  try { const n = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); n[room + ':' + id] = text; localStorage.setItem(NOTES_KEY, JSON.stringify(n)); } catch {}
-}
 
 function computeScore(metricCase, fieldChoices) {
   let score = 0;
@@ -116,9 +110,7 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
       ? computeScore(metricCase, savedProgress.fieldChoices)
       : null
   );
-  const [userNote, setUserNote] = useState(() => loadNote(ROOM_KEY, metricCase.id));
-  const [noteSaved, setNoteSaved] = useState(false);
-  useEffect(() => { setUserNote(loadNote(ROOM_KEY, metricCase.id)); setNoteSaved(false); }, [metricCase.id]);
+  const [liveNote, setLiveNote] = useState('');
 
   const allAnswered = metricCase.fields.every(f => fieldChoices[f.id]);
 
@@ -287,41 +279,20 @@ export function MetricsRunner({ caseId, savedProgress, onBack, onGoToDesign, onG
       {/* Debrief view */}
       {view === 'debrief' && (
         <div className="pal-reveal-in" style={{ marginTop: '1.25rem' }}>
-          <div className="pal-textarea-wrap" style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: '0.4rem' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <Icon name="pen-line" size={12} color="currentColor" />Your notes <span style={{ fontWeight: 400, opacity: 0.6 }}>(saved locally)</span>
-              </div>
+          <NotesBox
+            storageKey={`${ROOM_KEY}:${metricCase.id}`}
+            onChange={setLiveNote}
+            right={
               <DebriefCopyButton
                 title={metricCase.title}
-                notes={userNote}
+                notes={liveNote}
                 modelAnswer={metricCase.seniorMetricDesign ? metricCase.seniorMetricDesign.summary : ''}
                 tags={metricCase.tags || []}
                 difficulty={metricCase.difficulty}
                 room={'Metrics Room'}
               />
-            </div>
-            <textarea
-              value={userNote}
-              onChange={e => { setUserNote(e.target.value); setNoteSaved(false); }}
-              placeholder="Jot your thinking — what stood out, what you missed, what to remember..."
-              style={{
-                width: '100%', minHeight: 72, padding: '10px 12px', background: 'var(--bg)',
-                border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text)',
-                fontSize: '0.88rem', lineHeight: 1.5, resize: 'vertical', fontFamily: 'inherit',
-                boxSizing: 'border-box',
-              }}
-            />
-            <button
-              onClick={() => { saveNote(ROOM_KEY, metricCase.id, userNote); setNoteSaved(true); }}
-              style={{
-                marginTop: 8, padding: '5px 14px', background: noteSaved ? 'var(--green-bg)' : 'var(--surface)',
-                border: '1px solid ' + (noteSaved ? 'var(--green-border)' : 'var(--border)'),
-                borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.75rem',
-                color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
-              }}
-            >{noteSaved ? <><Icon name="check" size={12} color="var(--green)" /> Saved</> : 'Save note'}</button>
-          </div>
+            }
+          />
           <LeadershipLens note={metricCase.leadershipNote} />
           <MetricDebriefPanel
             metricCase={metricCase}

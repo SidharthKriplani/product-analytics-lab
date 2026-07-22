@@ -8,6 +8,7 @@ import { saveStatsAttempt, clearStatsProgress } from '../../utils/statsProgress.
 import { recordSrOutcome } from '../../utils/srQueue.js';
 import { track } from '../../utils/analytics.js';
 import { Icon } from '../shared/Icon.jsx';
+import { NotesBox } from '../shared/NotesBox.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { LeadershipLens } from '../shared/LeadershipLens.jsx';
@@ -19,20 +20,6 @@ import { AnswerModeToggle, loadAnswerMode, saveAnswerMode } from '../shared/Answ
 // views: 'question' | 'reveal' | 'debrief'
 
 const ROOM_KEY = 'stats';
-
-function loadNote(room, id) {
-  try {
-    const notes = JSON.parse(localStorage.getItem('pal-notes-v1') || '{}');
-    return notes[`${room}:${id}`] || '';
-  } catch { return ''; }
-}
-function saveNote(room, id, text) {
-  try {
-    const notes = JSON.parse(localStorage.getItem('pal-notes-v1') || '{}');
-    notes[`${room}:${id}`] = text;
-    localStorage.setItem('pal-notes-v1', JSON.stringify(notes));
-  } catch {}
-}
 
 const DIFFICULTY_CFG = {
   foundational: { label: 'Foundational', color: 'var(--blue-text)', bg: 'var(--blue-bg)',    border: 'var(--blue-border)' },
@@ -125,14 +112,8 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
   const [elapsed, setElapsed] = useState(0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef(null);
-  const [userNote, setUserNote] = useState('');
-  const [noteSaved, setNoteSaved] = useState(false);
+  const [liveNote, setLiveNote] = useState('');
   const [answerFeedback, setAnswerFeedback] = useState('');
-
-  useEffect(() => {
-    setUserNote(loadNote(ROOM_KEY, module.id));
-    setNoteSaved(false);
-  }, [module.id]);
 
   useEffect(() => {
     setElapsed(0);
@@ -304,35 +285,11 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
             borderTop: '1px solid var(--border-subtle)',
             background: 'var(--surface-2)',
           }}>
-            <div className="pal-textarea-wrap" style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <Icon name="pen-line" size={12} color="currentColor" />Write your thinking first <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
-              </div>
-              <textarea
-                value={userNote}
-                onChange={e => { setUserNote(e.target.value); setNoteSaved(false); }}
-                placeholder="What's your read? Jot down your diagnosis before revealing the answer..."
-                style={{
-                  width: '100%', minHeight: 80, padding: '10px 12px', background: 'var(--bg)',
-                  border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text)',
-                  fontSize: '0.88rem', lineHeight: 1.5, resize: 'vertical', fontFamily: 'inherit',
-                  boxSizing: 'border-box',
-                }}
-              />
-              <button
-                onClick={() => { saveNote(ROOM_KEY, module.id, userNote); setNoteSaved(true); }}
-                style={{
-                  marginTop: 8, padding: '5px 14px', background: noteSaved ? 'var(--green-bg)' : 'var(--surface)',
-                  border: `1px solid ${noteSaved ? 'var(--green-border)' : 'var(--border)'}`,
-                  borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.75rem',
-                  color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
-                }}
-              >
-                {noteSaved
-                  ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><Icon name='check' size={12} color='currentColor' /> Saved</span>
-                  : 'Save note'}
-              </button>
-            </div>
+            <NotesBox
+              storageKey={`${ROOM_KEY}:${module.id}`}
+              label="Write your thinking first"
+              onChange={setLiveNote}
+            />
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 onClick={handleSubmit}
@@ -386,10 +343,10 @@ export function StatsRunner({ caseId, savedProgress, onBack, onGoToReview, onGoT
             onRetry={handleRetry}
           />
           <LeadershipLens note={module.leadershipNote} />
-          {userNote && (
+          {liveNote && (
             <div style={{ marginTop: 16, padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 6 }}>Your notes</div>
-              <div style={{ fontSize: '0.88rem', color: 'var(--text)', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{userNote}</div>
+              <div style={{ fontSize: '0.88rem', color: 'var(--text)', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{liveNote}</div>
             </div>
           )}
           {onNext && (

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { designScenarios } from '../../data/designScenarios.js';
 import { DesignPhaseNav } from './DesignPhaseNav.jsx';
 import { DesignFieldGroup } from './DesignFieldGroup.jsx';
@@ -114,19 +115,27 @@ export function DesignRunner({ caseId, savedProgress, onBack, onGoToReview, onNe
 
       {/* Header */}
       <div style={{ marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-          <button
-            onClick={onBack}
-            style={{
-              background: 'none', border: 'none', color: 'var(--text-muted)',
-              fontSize: '0.78rem', cursor: 'pointer', padding: '0',
-              display: 'flex', alignItems: 'center', gap: '0.3rem',
-            }}
-          >
-            ← Design Room
-          </button>
-          <ShareLinkButton room="design" />
-        </div>
+        {/* Nav bar — renders into the app top bar when its context slot exists
+            (PAL top bar, 2026-07-23), else inline as before. */}
+        {(function () {
+          var slot = typeof document !== 'undefined' ? document.getElementById('pal-topbar-ctx') : null;
+          var row = (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', ...(slot ? {} : { marginBottom: '0.75rem' }) }}>
+              <button
+                onClick={onBack}
+                style={{
+                  background: 'none', border: 'none', color: 'var(--text-muted)',
+                  fontSize: '0.78rem', cursor: 'pointer', padding: '0',
+                  display: 'flex', alignItems: 'center', gap: '0.3rem',
+                }}
+              >
+                ← Design Room
+              </button>
+              <ShareLinkButton room="design" />
+            </div>
+          );
+          return slot ? createPortal(row, slot) : row;
+        })()}
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
           <div>

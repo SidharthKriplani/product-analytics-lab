@@ -6,10 +6,9 @@ import { spotTheFlawCases } from '../../data/spotTheFlawCases.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
 import { ShareLinkButton } from '../shared/ShareLinkButton.jsx';
 import { Icon } from '../shared/Icon.jsx';
+import { NotesBox } from '../shared/NotesBox.jsx';
 
 const ROOM_KEY = 'spot-the-flaw';
-function loadNote(id) { try { const d = JSON.parse(localStorage.getItem('pal-notes-v1') || '{}'); return d[ROOM_KEY + ':' + id] || ''; } catch { return ''; } }
-function saveNote(id, text) { try { const d = JSON.parse(localStorage.getItem('pal-notes-v1') || '{}'); d[ROOM_KEY + ':' + id] = text; localStorage.setItem('pal-notes-v1', JSON.stringify(d)); } catch {} }
 
 const DIFF_CFG = {
   analyst: { label: 'Analyst', color: 'var(--blue-text)', bg: 'var(--blue-bg)', border: 'var(--blue-border)' },
@@ -42,11 +41,6 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
   const [hintsOpen, setHintsOpen] = useState(false);
   const [answer, setAnswer]       = useState(() => loadSTFDraft(caseData.id)?.answer || '');
   const [rating, setRating]       = useState(existing?.rating || null);
-  const [userNote, setUserNote]   = useState(() => loadNote(caseData.id));
-  const [noteSaved, setNoteSaved] = useState(false);
-
-  useEffect(() => { setUserNote(loadNote(caseData.id)); setNoteSaved(false); }, [caseData.id]);
-
   useEffect(() => {
     if (step === STEP_SETUP) saveSTFDraft(caseData.id, { answer });
   }, [answer]); // eslint-disable-line
@@ -471,40 +465,7 @@ export function SpotTheFlawRunner({ caseId, onBack, onNext, unlocked, onNavigate
       </div>
 
       {/* Personal notes */}
-      <div style={{
-        background: 'var(--surface)', border: '1px solid var(--border)',
-        borderRadius: '10px', padding: '1.1rem 1.25rem', marginBottom: '1.25rem',
-      }}>
-        <div style={{ fontWeight: 600, fontSize: '0.87rem', color: 'var(--text)', marginBottom: '0.5rem' }}>
-          Your notes
-        </div>
-        <textarea
-          value={userNote}
-          onChange={e => { setUserNote(e.target.value); setNoteSaved(false); }}
-          placeholder="What tripped you up? What's the key heuristic to remember?"
-          rows={3}
-          style={{
-            width: '100%', boxSizing: 'border-box', resize: 'vertical',
-            background: 'var(--surface-2)', border: '1px solid var(--border)',
-            borderRadius: '7px', padding: '0.6rem 0.75rem',
-            color: 'var(--text)', fontSize: '0.85rem', lineHeight: 1.6,
-            fontFamily: 'inherit',
-          }}
-        />
-        <button
-          onClick={() => { saveNote(caseData.id, userNote); setNoteSaved(true); }}
-          style={{
-            marginTop: '0.5rem', background: 'none',
-            border: '1px solid var(--border)', borderRadius: '6px',
-            padding: '0.3rem 0.8rem', color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
-            fontSize: '0.78rem', cursor: 'pointer',
-          }}
-        >
-          {noteSaved
-            ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><Icon name='check' size={12} color='currentColor' /> Saved</span>
-            : 'Save note'}
-        </button>
-      </div>
+      <NotesBox storageKey={`${ROOM_KEY}:${caseData.id}`} />
 
       {/* Self-rating */}
       <div style={{

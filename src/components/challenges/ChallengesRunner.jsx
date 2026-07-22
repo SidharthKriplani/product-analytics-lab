@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { saveChallengesProgress, getChallengesProgress, saveChallengesDraft, loadChallengesDraft, clearChallengesDraft } from '../../utils/challengesProgress.js';
 import { track } from '../../utils/analytics.js';
 import { challengesCases } from '../../data/challengesCases.js';
@@ -146,10 +147,18 @@ export function ChallengesRunner({ caseId, onBack, onNext, unlocked, onNavigate 
   if (screen === 'scenario') {
     return (
       <div style={{ maxWidth: '820px', margin: '0 auto', padding: '1.5rem 1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
-          <BackButton onBack={onBack} />
-          <ShareLinkButton room="challenges" />
-        </div>
+        {/* Nav bar — renders into the app top bar when its context slot exists
+            (PAL top bar, 2026-07-23), else inline as before. */}
+        {(function () {
+          var slot = typeof document !== 'undefined' ? document.getElementById('pal-topbar-ctx') : null;
+          var row = (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', ...(slot ? {} : { marginBottom: '1.25rem' }) }}>
+              <BackButton onBack={onBack} />
+              <ShareLinkButton room="challenges" />
+            </div>
+          );
+          return slot ? createPortal(row, slot) : row;
+        })()}
 
         {/* Challenge header */}
         <div style={{ marginBottom: '1.5rem' }}>

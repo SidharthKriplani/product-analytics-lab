@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   getTracks, createTrack, deleteTrack, renameTrack,
   removeItem, reorderItems, createNote, updateHighlightNote, moveItem, seedTierTracks,
@@ -669,15 +670,29 @@ export function MyTracksPage({ onNavigate, onOpenSqlProblem, user }) {
 
   return (
     <div style={{ padding: '1.5rem 2rem 0', maxWidth: openNote && liveNote ? '1100px' : '900px', margin: '0 auto' }} className="mt-page">
+      {/* Nav bar — renders into the app top bar when its context slot exists
+          (PAL top bar, 2026-07-23), else inline as before. Bug fix: this used to
+          read "← SQL Lab" and navigate to the (nav-hidden, internal-preview)
+          SQL Lab page — stale from when My Tracks was SQL-Lab-only (v1); My
+          Tracks is now a top-level sidebar destination (see Sidebar.jsx), so
+          the real back target is Home, matching RoomMap.jsx's own convention. */}
+      {(function () {
+        var slot = typeof document !== 'undefined' ? document.getElementById('pal-topbar-ctx') : null;
+        var row = (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', ...(slot ? {} : { marginBottom: '1.25rem' }) }}>
+            <button
+              onClick={() => onNavigate('home')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.8rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+            >
+              ← Home
+            </button>
+          </div>
+        );
+        return slot ? createPortal(row, slot) : row;
+      })()}
+
       {/* Page header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
-        <button
-          onClick={() => onNavigate('sql-lab')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.8rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-        >
-          ← SQL Lab
-        </button>
-        <span style={{ color: 'var(--border)' }}>·</span>
         <h1 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.03em' }}>My Tracks</h1>
       </div>
 

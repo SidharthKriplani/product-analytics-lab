@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { savePrioritizationAttempt, getPrioritizationProgress, savePrioritizationDraft, loadPrioritizationDraft, clearPrioritizationDraft } from '../../utils/prioritizationProgress.js';
 import { track } from '../../utils/analytics.js';
 import { prioritizationScenarios } from '../../data/prioritizationScenarios.js';
@@ -125,16 +126,23 @@ export function PrioritizationRunner({ caseId, onBack, onNext, onNavigate }) {
 
   return (
     <div style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-      {/* Back */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-        <button
-          onClick={onBack}
-          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem', padding: 0 }}
-        >
-          ← Back to Prioritization Room
-        </button>
-        <ShareLinkButton room="prioritization" />
-      </div>
+      {/* Nav bar — renders into the app top bar when its context slot exists
+          (PAL top bar, 2026-07-23), else inline as before. */}
+      {(function () {
+        var slot = typeof document !== 'undefined' ? document.getElementById('pal-topbar-ctx') : null;
+        var row = (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', ...(slot ? {} : { marginBottom: '1.5rem' }) }}>
+            <button
+              onClick={onBack}
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem', padding: 0 }}
+            >
+              ← Back to Prioritization Room
+            </button>
+            <ShareLinkButton room="prioritization" />
+          </div>
+        );
+        return slot ? createPortal(row, slot) : row;
+      })()}
 
       {/* Scenario header */}
       <div style={{ marginBottom: '1.5rem' }}>

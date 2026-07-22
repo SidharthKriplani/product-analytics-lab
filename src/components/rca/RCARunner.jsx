@@ -5,6 +5,7 @@ import { RCAScoreReveal } from './RCAScoreReveal.jsx';
 import { RCADebriefPanel } from './RCADebriefPanel.jsx';
 import { DebriefCopyButton } from '../shared/DebriefCopyButton.jsx';
 import { Icon } from '../shared/Icon.jsx';
+import { NotesBox } from '../shared/NotesBox.jsx';
 import { TimerButton } from '../shared/TimerButton.jsx';
 import { saveRCAAttempt, saveRCADraft, loadRCADraft, clearRCADraft, getAllRCAProgress } from '../../utils/rcaProgress.js';
 import { track } from '../../utils/analytics.js';
@@ -78,20 +79,6 @@ function RCAModelAnswer({ rcaCase }) {
       </p>
     </div>
   );
-}
-
-function loadNote(room, id) {
-  try {
-    const notes = JSON.parse(localStorage.getItem('pal-notes-v1') || '{}');
-    return notes[`${room}:${id}`] || '';
-  } catch { return ''; }
-}
-function saveNote(room, id, text) {
-  try {
-    const notes = JSON.parse(localStorage.getItem('pal-notes-v1') || '{}');
-    notes[`${room}:${id}`] = text;
-    localStorage.setItem('pal-notes-v1', JSON.stringify(notes));
-  } catch {}
 }
 
 // ─── Scoring ────────────────────────────────────────────────────────────────
@@ -175,8 +162,7 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
   const [sqlRevealed, setSqlRevealed] = useState(false);
   const [sqlRating, setSqlRating] = useState(null);
 
-  const [userNote, setUserNote] = useState('');
-  const [noteSaved, setNoteSaved] = useState(false);
+  const [liveNote, setLiveNote] = useState('');
 
   const [elapsed, setElapsed] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -195,11 +181,6 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
     }
     return () => clearInterval(timerRef.current);
   }, [paused, rcaCase.id]);
-
-  useEffect(() => {
-    setUserNote(loadNote(ROOM_KEY, rcaCase.id));
-    setNoteSaved(false);
-  }, [rcaCase.id]);
 
   function formatTime(s) {
     const m = Math.floor(s / 60);
@@ -372,33 +353,11 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
 
           {/* Active recall note — shown before the final "See results" button */}
           {isLastStep && currentStepSubmitted && (
-            <div className="pal-textarea-wrap" style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <Icon name="pen-line" size={12} color="currentColor" />Write your thinking first <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
-              </div>
-              <textarea
-                value={userNote}
-                onChange={e => { setUserNote(e.target.value); setNoteSaved(false); }}
-                placeholder="What's your read? Jot down your diagnosis before revealing the answer..."
-                style={{
-                  width: '100%', minHeight: 80, padding: '10px 12px', background: 'var(--bg)',
-                  border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text)',
-                  fontSize: '0.88rem', lineHeight: 1.5, resize: 'vertical', fontFamily: 'inherit',
-                  boxSizing: 'border-box',
-                }}
-              />
-              <button
-                onClick={() => { saveNote(ROOM_KEY, rcaCase.id, userNote); setNoteSaved(true); }}
-                style={{
-                  marginTop: 8, padding: '5px 14px', background: noteSaved ? 'var(--green-bg)' : 'var(--surface)',
-                  border: `1px solid ${noteSaved ? 'var(--green-border)' : 'var(--border)'}`,
-                  borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.75rem',
-                  color: noteSaved ? 'var(--green)' : 'var(--text-muted)',
-                }}
-              >
-                {noteSaved ? <><Icon name="check" size={12} color="var(--green)" /> Saved</> : 'Save note'}
-              </button>
-            </div>
+            <NotesBox
+              storageKey={`${ROOM_KEY}:${rcaCase.id}`}
+              label="Write your thinking first"
+              onChange={setLiveNote}
+            />
           )}
 
           {/* Submit / Next controls */}
@@ -464,17 +423,17 @@ export function RCARunner({ caseId, savedProgress, unlocked, onBack, onNext, onN
               <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>Your notes</div>
               <DebriefCopyButton
                 title={rcaCase.title}
-                notes={userNote}
+                notes={liveNote}
                 modelAnswer={rcaCase.seniorDiagnosis ? rcaCase.seniorDiagnosis.reasoning : ''}
                 tags={rcaCase.tags || []}
                 difficulty={rcaCase.difficulty}
                 room={'RCA Room'}
               />
             </div>
-            {userNote && (
-              <div style={{ fontSize: '0.88rem', color: 'var(--text)', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{userNote}</div>
+            {liveNote && (
+              <div style={{ fontSize: '0.88rem', color: 'var(--text)', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{liveNote}</div>
             )}
-            {!userNote && (
+            {!liveNote && (
               <div style={{ fontSize: '0.82rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>No notes added.</div>
             )}
           </div>

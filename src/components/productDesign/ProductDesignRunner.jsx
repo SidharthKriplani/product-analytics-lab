@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { productDesignScenarios } from '../../data/productDesignScenarios.js';
 import { track } from '../../utils/analytics.js';
 import { ForwardPointerCard } from '../shared/ForwardPointerCard.jsx';
@@ -435,20 +436,27 @@ export function ProductDesignRunner({ caseId, savedProgress, onBack, onNext, onN
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '1.5rem 1rem 4rem' }}>
 
-      {/* Back button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-        <button
-          onClick={onBack}
-          style={{
-            background: 'none', border: 'none', color: 'var(--text-muted)',
-            fontSize: '0.78rem', cursor: 'pointer', padding: '0',
-            display: 'flex', alignItems: 'center', gap: '0.3rem',
-          }}
-        >
-          ← Product Design Room
-        </button>
-        <ShareLinkButton room="product-design" />
-      </div>
+      {/* Nav bar — renders into the app top bar when its context slot exists
+          (PAL top bar, 2026-07-23), else inline as before. */}
+      {(function () {
+        var slot = typeof document !== 'undefined' ? document.getElementById('pal-topbar-ctx') : null;
+        var row = (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', ...(slot ? {} : { marginBottom: '1rem' }) }}>
+            <button
+              onClick={onBack}
+              style={{
+                background: 'none', border: 'none', color: 'var(--text-muted)',
+                fontSize: '0.78rem', cursor: 'pointer', padding: '0',
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+              }}
+            >
+              ← Product Design Room
+            </button>
+            <ShareLinkButton room="product-design" />
+          </div>
+        );
+        return slot ? createPortal(row, slot) : row;
+      })()}
 
       {/* Scenario header */}
       <div style={{ marginBottom: '1.5rem' }}>

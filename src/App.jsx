@@ -101,7 +101,6 @@ const SearchModal             = lazy(() => import('./components/SearchModal.jsx'
 const BookmarksBrowser        = lazy(() => import('./pages/BookmarksBrowser.jsx').then(m => ({ default: m.BookmarksBrowser })));
 const MyTracksPage            = lazy(() => import('./pages/MyTracksPage.jsx').then(m => ({ default: m.MyTracksPage })));
 const SharedTrackPage         = lazy(() => import('./pages/SharedTrackPage.jsx').then(m => ({ default: m.SharedTrackPage })));
-const ConsultationSpace = lazy(() => import('./pages/ConsultationSpace.jsx').then(m => ({ default: m.ConsultationSpace })));
 const Trainer           = lazy(() => import('./pages/Trainer.jsx').then(m => ({ default: m.Trainer })));
 const ReviewQueue       = lazy(() => import('./pages/ReviewQueue.jsx').then(m => ({ default: m.ReviewQueue })));
 const CompanyTracks     = lazy(() => import('./pages/CompanyTracks.jsx').then(m => ({ default: m.CompanyTracks })));
@@ -497,7 +496,6 @@ export default function App() {
       'bookmarks': 'Bookmarks — Product Analytics Lab',
       'my-tracks': 'My Tracks — Product Analytics Lab',
       'shared-track': 'Shared Track — Product Analytics Lab',
-      'consult':        'Consultation Space — Product Analytics Lab',
       'trainer':        'Trainer — Product Analytics Lab',
       'company-tracks': 'Company Tracks — Product Analytics Lab',
       'challenges': 'Challenges — Product Analytics Lab',
@@ -1941,32 +1939,6 @@ export default function App() {
         )}
         {/* Archived V5.80.0 — Dimensional Modeling (data-eng drift) + Study Room (no distinct job).
             Nav + route removed; DimensionalModelBrowser/StudyRoom files kept dormant. See docs/PAL-PORTFOLIO-AUDIT.md → Retired. */}
-        {page === 'consult' && (
-          <Suspense fallback={
-              <div style={{ padding: '2rem 2rem 0' }}>
-                {[1,2,3].map(i => (
-                  <div key={i} className="pal-shimmer-box" style={{ height: '88px', marginBottom: '1rem', opacity: 1 - i * 0.15 }} />
-                ))}
-              </div>
-            }>
-            <ConsultationSpace
-              onBack={() => setPage('home')}
-              onNavigate={(targetPage, itemId) => {
-                if (itemId) {
-                  switch (targetPage) {
-                    case 'playbook': setPage('playbook'); break; // playbook handles article ID via its own state
-                    case 'stat-foundations': openStatFoundationsModule(itemId); break;
-                    case 'growth-analytics': openGrowthAnalyticsCase(itemId); break;
-                    case 'trainer': setPage('trainer'); break;
-                    default: setPage(targetPage);
-                  }
-                } else {
-                  setPage(targetPage);
-                }
-              }}
-            />
-          </Suspense>
-        )}
         {page === 'trainer' && (
           <Suspense fallback={
               <div style={{ padding: '2rem 2rem 0' }}>
