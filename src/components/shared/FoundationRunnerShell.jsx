@@ -269,7 +269,7 @@ export function FoundationRunnerShell({
             it in full. See GlossaryHighlighter.jsx for the full mechanism
             writeup. Mounted once here so it covers all 4 families/79
             modules automatically — no per-module wiring needed. */}
-        <StickyScope id={'m:' + module.id} />
+        <StickyScope id={'m:' + module.id + (qnaMode ? ':qna' : recapMode ? ':recap' : '')} />
         <GlossaryHighlighter containerRef={contentRef} moduleId={module.id} />
 
         {/* Go Deeper — Academic (skeleton). Renders nothing until a module
