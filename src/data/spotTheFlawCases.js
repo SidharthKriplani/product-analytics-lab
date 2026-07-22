@@ -604,6 +604,30 @@ export const spotTheFlawCases = [
       'Only randomization (or, second-best, matching on pre-treatment signals) converts an observational gap into a causal estimate — and the causal number is usually far smaller than the raw difference.',
     ],
   },
+  {
+    id: 'STF26',
+    title: 'The Quarter Where Every Channel Won and the Company Didn\'t',
+    flawLabel: 'Attribution Double-Counting',
+    flawType: 'attribution-double-counting',
+    difficulty: 'senior',
+    isFree: false,
+    company: 'Peloton',
+    tags: ['attribution', 'last-touch', 'measurement governance', 'siloed tools', 'double-counting'],
+    setup: 'Peloton\'s marketing org has three channel teams — Paid Social, Affiliate/Influencer, and Lifecycle Email — each running its OWN last-touch attribution inside its own platform (Meta Ads Manager, an affiliate network dashboard, and the email platform\'s built-in attribution), each with a 30-day last-touch window. At the end of Q2, Paid Social claims $18M in attributed subscription revenue, Affiliate claims $9M, and Lifecycle Email claims $7M — a combined $34M. Total actual Q2 new-subscription revenue for the company was $24M.\n\nThe CMO\'s quarterly deck states: \'Paid Social drove 75% of new subscription revenue this quarter ($18M of $24M), with Affiliate and Email as incremental upside on top.\' Budget planning for Q3 proposes shifting more spend into Paid Social based on this framing.\n\nThe Paid Social lead pushes back when questioned: \'Our number comes straight out of Meta\'s own attribution — it\'s a 30-day last-touch window, industry standard. I can\'t speak to what the other teams\' tools are counting.\'',
+    question: 'What is wrong with this analysis? What decision would it lead to if uncorrected, and how do you fix it?',
+    hints: [
+      'Each team\'s attributed revenue comes from ITS OWN tool, with its OWN 30-day last-touch window, running independently. What happens when a single subscriber\'s path touches more than one of these channels within 30 days?',
+      'Add up the three teams\' claimed numbers and compare to actual total revenue. What does that comparison tell you, on its own, before you even look at any individual number?',
+    ],
+    flaw: 'The three teams are each running an independent last-touch attribution window inside their own siloed tool, and every one of them credits a conversion whenever their channel was the subscriber\'s most recent touch WITHIN THEIR OWN 30-day window — with no deduplication or shared source of truth across teams. A subscriber who saw a paid social ad, then clicked an affiliate link, then converted after an email nudge gets counted as a full conversion by all three tools simultaneously, each unaware of the others. The sum of the three teams\' claims ($34M) exceeding total actual revenue ($24M) by 42% is itself the diagnostic signal — it is arithmetically impossible for correctly-deduplicated, non-overlapping attribution to sum to more than the total pie, so the excess is a direct measurement of the overlap being triple-counted across siloed tools.\n\nWeak answer: The candidate accepts the Paid Social lead\'s defense — \'30-day last-touch is industry standard, so the number is valid\' — and evaluates each team\'s methodology individually, checking whether last-touch attribution is a reasonable choice in isolation. They never sum the three teams\' claims against total revenue, and so never notice that $34M attributed against $24M actual is impossible on its face, regardless of whether any single team\'s window or methodology is individually defensible. Interviewer follow-up: \'Each team\'s own number might be a completely reasonable computation, running correctly, inside its own tool. Add all three together and compare to total company revenue. What does that single comparison tell you about the analysis, before you evaluate any one team\'s methodology at all?\'',
+    impact: 'If Q3 budget shifts further toward Paid Social based on a 75%-of-revenue claim that is actually significantly inflated by double- and triple-counted conversions also claimed by Affiliate and Email, the company overinvests in the channel with the most aggressive (or most recent-touch-friendly) attribution setup rather than the channel with the most incremental impact — and starves channels whose real contribution is invisible because it was "stolen" by a later touch in another team\'s tool. This is the measurement-governance cousin of SRM/peeking: an individually plausible number that becomes invalid the moment it is combined with others measuring the same underlying events.',
+    fix: 'Replace the three siloed last-touch tools with a single, shared attribution layer applied across ALL channels using one consistent methodology (multi-touch/data-driven attribution, or at minimum a single deduplicated last-touch model) so a subscriber\'s full cross-channel path is credited once, not once per tool that happened to see a touch. As an immediate sanity check before any structural fix ships, require every attribution report to pass a reconciliation test: the sum of all channels\' claimed attributed revenue must not exceed total actual revenue for the same period — if it does, the report is invalid and cannot be used for budget decisions until deduplicated.',
+    keyTakeaways: [
+      'Multiple teams running independent attribution tools with overlapping windows will double- and triple-count the same conversions — check whether the SUM of all channels\' claims exceeds total actual revenue before trusting any individual channel\'s number.',
+      'A channel\'s attributed number can be computed correctly, using a defensible methodology, inside its own tool, and still be wrong in the aggregate — validity within a silo does not imply validity across silos.',
+      'The fix is a single shared attribution source of truth across channels, not a better methodology argument for any one team\'s tool.',
+    ],
+  },
 ];
 
 export const spotTheFlawCasesById = Object.fromEntries(spotTheFlawCases.map(c => [c.id, c]));
