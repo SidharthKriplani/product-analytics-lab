@@ -224,7 +224,7 @@ export function FoundationRunnerShell({
             Wrapped in a ref'd div so the highlight-to-track toolbar can scope
             its selection listener to just this content area (not the whole
             page — selecting text in the sidebar/nav/module index is exempt). */}
-        <div ref={contentRef}>
+        <div ref={contentRef} data-own-highlighter="1">
           {qnaMode ? (
             <QnAPanel moduleId={module.id} unlocked={!!completed} color={color} />
           ) : recapMode && module.recap && module.recap.length > 0 ? (
