@@ -1,6 +1,8 @@
 // Shared "Continue" resolution for SQL Lab — used by both render sites (Progress
 // dashboard section + the SQL Lab browse grid itself) so the read rule lives in one
 // place. T3 follow-up v2: typed-wins semantics from the start (v1 only tracked opens).
+// T3 follow-up v3: "next up" removed (Sidharth: two X/204-shaped numbers side by side
+// read as confusing, not useful) -- this now resolves Continue only.
 //
 // Read rule: prefer the last-TYPED problem if it still has a non-empty draft in
 // pal-sql-query-<id> (i.e. there's real unsaved-in-spirit work sitting there); otherwise
@@ -29,7 +31,5 @@ export function getSqlLabContinueInfo(solvedSet, problems) {
     if (p) continueProblem = p;
   }
 
-  const nextUpProblem = problems.find(p => !solvedSet.has(p.id)) || null;
-
-  return { continueProblem, isDraft, nextUpProblem };
+  return { continueProblem, isDraft };
 }
