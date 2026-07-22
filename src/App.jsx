@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { GateOverlay } from './components/shared/GateOverlay.jsx';
 import { PageHighlighter } from './components/shared/PageHighlighter.jsx';
+import { StickyNotes } from './components/shared/StickyNotes.jsx';
 import { ErrorBoundary } from './components/shared/ErrorBoundary.jsx';
 import { BrandMark } from './components/shared/BrandMark.jsx';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
@@ -1301,6 +1302,7 @@ export default function App() {
 
         {/* In-place marker-pen highlights over the whole content surface (2026-07-16) */}
         <PageHighlighter getContainer={() => document.getElementById('pal-main')} pageKey={'page:' + page} />
+        <StickyNotes getContainer={() => document.getElementById('pal-main')} pageKey={'page:' + page} />
 
         <main id="pal-main" style={{ flex: 1, ...(page === 'sql-lab' ? { display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 } : {}) }}>
           <ErrorBoundary resetKey={page}>

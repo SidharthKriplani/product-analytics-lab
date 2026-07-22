@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { signOut } from '../../utils/auth.js';
 import { Icon } from '../shared/Icon.jsx';
+import { StickyBarButton } from '../shared/StickyNotes.jsx';
 
 // NOTE: This component is not currently rendered. Navigation is handled by Sidebar.jsx.
 // Kept as a reference/alternative desktop nav. Do not import without updating App.jsx routing.
@@ -215,6 +216,7 @@ export function Header({ currentPage, onNavigate, unlockedStatus, theme, onToggl
           <div style={{ width: '1px', alignSelf: 'stretch', background: 'var(--border)', margin: '0 8px', flexShrink: 0 }} />
 
           {/* Theme toggle */}
+          <StickyBarButton />
           <button
             onClick={onToggleTheme}
             title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
