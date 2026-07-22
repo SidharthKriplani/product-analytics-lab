@@ -5,7 +5,15 @@ import { supabase } from './supabase.js';
 // Keep this list in sync with the KEY / STORAGE_KEY constants in src/utils/*.js.
 // When a new room is added, add its localStorage key here.
 
+import { applyAnnotationMerge } from './annotationsSync.js';
+
 export const PROGRESS_KEYS = [
+  // Annotations (2026-07-22): stickies + highlights + delete-tombstones.
+  // Pull special-cases these into a per-item merge (annotationsSync.js).
+  'lab-stickies-v1',
+  'lab-stickies-tomb-v1',
+  'pal_page_highlights_v1',
+  'pal_page_highlights_v1-tomb-v1',
   // Core room progress
   'exp-lab-progress-v1',          // Review Room (ScenarioRunner/progress.js)
   'pal-stat-foundations-progress-v1',
@@ -111,8 +119,15 @@ export async function pullProgressFromSupabase(user) {
 
   if (!data || data.length === 0) return;
 
+  const ANNOT_PAIRS = {
+    'lab-stickies-v1': 'lab-stickies-tomb-v1',
+    'pal_page_highlights_v1': 'pal_page_highlights_v1-tomb-v1',
+  };
+  const TOMB_TO_STORE = Object.fromEntries(Object.entries(ANNOT_PAIRS).map(([st, t]) => [t, st]));
   for (const row of data) {
     try {
+      if (ANNOT_PAIRS[row.key]) { applyAnnotationMerge(row.key, ANNOT_PAIRS[row.key], row.value, null); continue; }
+      if (TOMB_TO_STORE[row.key]) { applyAnnotationMerge(TOMB_TO_STORE[row.key], row.key, null, row.value); continue; }
       const merged = mergeProgressValue(localStorage.getItem(row.key), row.value);
       localStorage.setItem(row.key, JSON.stringify(merged));
     } catch (e) {
