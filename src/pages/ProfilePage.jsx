@@ -4,7 +4,6 @@ import { getBookmarks } from '../utils/bookmarks.js';
 import { pushProgressToSupabase, pullProgressFromSupabase } from '../utils/syncProgress.js';
 import { updateMyLinkedin, updateMyEmployment, fetchPublicProfile, computeWeightedScore, fetchLeaderboard, fetchLeaderboardAgg } from '../utils/leaderboard.js';
 import { getMyPoints } from '../utils/feed.js';
-import { setMyResumeLink, removeMyResume, getLocalResumeUrl } from '../utils/resume.js';
 import { COMPANIES, PROFILE_ROLES } from '../data/companyList.js';
 // Dataset lengths → true per-room totals for Card 5 "Completion by area".
 import { scenarios } from '../data/scenarios.js';
@@ -317,12 +316,6 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
   // idle | saving | saved | local | invalid | error
   const [empStatus, setEmpStatus] = useState('idle');
 
-  // ── Résumé (optional pasted link) ──
-  const [resumeUrl, setResumeUrl] = useState(() => getLocalResumeUrl()); // saved/displayed URL
-  const [resumeInput, setResumeInput] = useState(() => getLocalResumeUrl()); // editable input
-  // idle | saving | saved | local | invalid | error
-  const [resumeStatus, setResumeStatus] = useState('idle');
-
   // ── Community feed points (guarded — 0 if no backend / migration pending) ──
   const [feedPoints, setFeedPoints] = useState(0);
 
@@ -360,7 +353,6 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
       if (cancelled || !p) return;
       if (p.current_role) setEmpRole(p.current_role);
       if (p.current_company) setEmpCompany(p.current_company);
-      if (p.resume_url) { setResumeUrl(p.resume_url); setResumeInput(p.resume_url); }
     });
     return () => { cancelled = true; };
   }, [user]);
@@ -421,35 +413,6 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
       setLinkedinStatus('error');
     }
     setTimeout(() => setLinkedinStatus('idle'), 4000);
-  }
-
-  async function handleSaveResume() {
-    const url = resumeInput.trim();
-    if (url && !url.toLowerCase().startsWith('http')) {
-      setResumeStatus('invalid');
-      setTimeout(() => setResumeStatus('idle'), 3500);
-      return;
-    }
-    setResumeStatus('saving');
-    const res = await setMyResumeLink(user, url);
-    if (res.url) setResumeUrl(res.url);
-    if (res.ok) {
-      setResumeStatus('saved');
-    } else if (res.reason === 'invalid') {
-      setResumeStatus('invalid');
-    } else if (res.reason === 'migration-pending' || res.reason === 'no-backend') {
-      setResumeStatus('local');
-    } else {
-      setResumeStatus('error');
-    }
-    setTimeout(() => setResumeStatus('idle'), 4000);
-  }
-
-  async function handleRemoveResume() {
-    setResumeUrl('');
-    setResumeInput('');
-    setResumeStatus('idle');
-    await removeMyResume(user);
   }
 
   // ── Not signed in ────────────────────────────────────────────────────────────
@@ -668,78 +631,6 @@ export function ProfilePage({ user, onNavigate, onShowAuth, theme, onToggleTheme
               </div>
             ) : null}
           </div>
-
-          {/* ── Résumé (optional pasted link) ── ARCHIVED: résumé feature parked. Flip false→true to restore. */}
-          {false && (
-          <div style={{ borderTop: '1px solid var(--border)', marginTop: '1.1rem', paddingTop: '1rem' }}>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
-              Résumé
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <input
-                type="url"
-                value={resumeInput}
-                onChange={e => setResumeInput(e.target.value)}
-                placeholder="Link to your résumé (Google Drive, Dropbox, personal site)…"
-                style={{
-                  flex: 1, minWidth: '180px',
-                  background: 'var(--surface-2)', border: '1px solid var(--border)',
-                  borderRadius: '6px', padding: '0.4rem 0.6rem',
-                  fontSize: '0.82rem', color: 'var(--text)',
-                }}
-              />
-              <button
-                onClick={handleSaveResume}
-                disabled={resumeStatus === 'saving'}
-                style={{ ...btnBase, flexShrink: 0, opacity: resumeStatus === 'saving' ? 0.6 : 1 }}
-              >
-                {resumeStatus === 'saving' ? 'Saving...' : 'Save'}
-              </button>
-            </div>
-
-            {resumeUrl && (
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center', marginTop: '0.5rem' }}>
-                <a
-                  href={resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontSize: '0.78rem', color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}
-                >
-                  View résumé &rarr;
-                </a>
-                <button
-                  onClick={handleRemoveResume}
-                  style={{ background: 'none', border: 'none', padding: 0, fontSize: '0.78rem', color: 'var(--red, #dc2626)', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  Remove
-                </button>
-              </div>
-            )}
-
-            {/* Status / nudge line */}
-            {resumeStatus === 'saved' ? (
-              <div style={{ fontSize: '0.74rem', color: 'var(--green, #059669)', marginTop: '0.45rem' }}>
-                Saved. Recruiters viewing your profile can now open your résumé.
-              </div>
-            ) : resumeStatus === 'local' ? (
-              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
-                Saved locally — syncing soon.
-              </div>
-            ) : resumeStatus === 'invalid' ? (
-              <div style={{ fontSize: '0.74rem', color: 'var(--red, #dc2626)', marginTop: '0.45rem' }}>
-                That does not look like a link. It should start with http.
-              </div>
-            ) : resumeStatus === 'error' ? (
-              <div style={{ fontSize: '0.74rem', color: 'var(--red, #dc2626)', marginTop: '0.45rem' }}>
-                Could not save right now — saved locally for now.
-              </div>
-            ) : !resumeUrl ? (
-              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
-                Paste a link to your résumé. Shown on your public profile so recruiters can reach you.
-              </div>
-            ) : null}
-          </div>
-          )}
 
           {/* ── Current role & company ── */}
           <div style={{ borderTop: '1px solid var(--border)', marginTop: '1.1rem', paddingTop: '1rem' }}>
