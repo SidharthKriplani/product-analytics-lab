@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { StickyBarButton } from '../shared/StickyNotes.jsx';
 import { Icon } from '../shared/Icon.jsx';
 import { BrandMark } from '../shared/BrandMark.jsx';
 import { signOut } from '../../utils/auth.js';
@@ -363,36 +362,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
               ◼
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* Sticky-note drag source (2026-07-22) */}
-              <StickyBarButton />
-            <button
-              onClick={onToggleTheme}
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              style={{
-                background: 'none',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '0.27rem 0.52rem',
-                color: 'var(--text-muted)',
-                fontSize: '0.78rem',
-                cursor: 'pointer',
-                lineHeight: 1,
-                flexShrink: 0,
-                transition: 'border-color var(--transition), background var(--transition)',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'var(--border-strong)';
-                e.currentTarget.style.background = 'var(--surface-2)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.background = 'none';
-              }}
-            >
-              {theme === 'dark' ? <Icon name="sun" size={16} color="currentColor" /> : <Icon name="moon" size={16} color="currentColor" />}
-            </button>
-            </div>
+            null
           )}
         </div>
 

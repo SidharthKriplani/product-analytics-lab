@@ -1311,10 +1311,13 @@ export default function App() {
         {page !== 'sql-lab' && (
           <div style={{
             position: 'sticky', top: 0, zIndex: 90,
-            display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px',
+            display: 'flex', alignItems: 'center', gap: '10px',
             padding: '6px 14px', minHeight: '38px', boxSizing: 'border-box',
             background: 'var(--bg, #0b0c10)', borderBottom: '1px solid var(--border, #26262c)',
           }}>
+            {/* Left: page-context slot — module pages portal their "← All modules ·
+                Module N of M · Complete" row here (FoundationRunnerShell). */}
+            <div id="pal-topbar-ctx" style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '1rem', overflow: 'hidden' }} />
             <StickyBarButton />
             <button
               onClick={toggleTheme}

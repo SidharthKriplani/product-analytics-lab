@@ -4,6 +4,7 @@
 // and a right-side module index for quick navigation.
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from './Icon.jsx';
 import { HighlightPopover } from './HighlightPopover.jsx';
 import { GlossaryHighlighter } from './GlossaryHighlighter.jsx';
@@ -94,8 +95,12 @@ export function FoundationRunnerShell({
       {/* ── Left: main content column ── */}
       <div style={{ flex: '1 1 0', minWidth: 0 }}>
 
-        {/* Nav bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        {/* Nav bar — renders into the app top bar when its context slot exists
+            (PAL top bar, 2026-07-23), else inline as before. */}
+        {(function () {
+          var slot = typeof document !== 'undefined' ? document.getElementById('pal-topbar-ctx') : null;
+          var row = (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', ...(slot ? {} : { marginBottom: '1.5rem' }) }}>
           <button onClick={onBack} style={{
             background: 'none', border: 'none', color: 'var(--text-muted)',
             fontSize: '0.85rem', cursor: 'pointer', padding: '0.25rem 0',
@@ -132,6 +137,9 @@ export function FoundationRunnerShell({
             </button>
           )}
         </div>
+          );
+          return slot ? createPortal(row, slot) : row;
+        })()}
 
         {/* Mobile: module index dropdown */}
         {hasIndex && indexOpen && (
