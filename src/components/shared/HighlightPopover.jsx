@@ -18,6 +18,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { quickAddItem, getQuickAdd } from '../../utils/tracks.js';
 import { AddToTrackPopover } from '../tracks/AddToTrackPopover.jsx';
+import { addHighlight, occurrenceOfSelection, applyAll, removeHighlight, unpaint } from '../../utils/localHighlights.js';
 
 const HIGHLIGHT_COLORS = [
   { key: 'yellow', css: 'var(--yellow)' },
@@ -32,6 +33,26 @@ function truncateLabel(text, max) {
 }
 
 export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId }) {
+  const paintKey = `fnd::${itemType || ''}::${moduleId || ''}`;
+  const [removePop, setRemovePop] = useState(null); // { id, top, left }
+  useEffect(() => {
+    const el = containerRef?.current; if (!el) return;
+    const t1 = setTimeout(() => applyAll(el, paintKey), 0);
+    const t2 = setTimeout(() => applyAll(el, paintKey), 450);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [containerRef, paintKey]);
+  useEffect(() => {
+    const el = containerRef?.current; if (!el) return;
+    const onClick = (e) => {
+      const m = e.target instanceof Element ? e.target.closest('mark[data-hl-id]') : null;
+      if (!m || !el.contains(m)) { setRemovePop(null); return; }
+      const r = m.getBoundingClientRect();
+      setRemovePop({ id: m.getAttribute('data-hl-id'), top: r.bottom + 8, left: r.left + r.width / 2 });
+    };
+    el.addEventListener('click', onClick);
+    return () => el.removeEventListener('click', onClick);
+  }, [containerRef, paintKey]);
+  function paintGenId() { return `hl_${Date.now()}_${Math.random().toString(36).slice(2)}`; }
   var [sel, setSel] = useState(null);         // { text, rect }
   var [color, setColor] = useState(null);
   var [pickerOpen, setPickerOpen] = useState(false);
@@ -126,7 +147,7 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
   }
 
   function handleSave() {
-    if (!sel || !color) return;
+    if (!sel) return; // color optional (MSL parity)
     var id = 'hl_' + Date.now() + '_' + Math.random().toString(36).slice(2);
     var label = truncateLabel(sel.text, 80);
     var meta = {
@@ -146,7 +167,16 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
     setPickerOpen(true);
   }
 
-  if (!sel) return null;
+  const removePill = removePop ? createPortal(
+    <button
+      onClick={() => { const el = containerRef?.current; if (el && removePop.id) { removeHighlight(paintKey, removePop.id); unpaint(el, removePop.id); } setRemovePop(null); }}
+      style={{ position: 'fixed', top: removePop.top, left: removePop.left, transform: 'translateX(-50%)', zIndex: 260,
+        background: '#1f1f24', color: '#e8e8e8', border: '1px solid #3f3f46', borderRadius: '10px',
+        padding: '0.55rem 1.1rem', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer',
+        boxShadow: '0 10px 28px rgba(0,0,0,0.55)' }}
+    >Remove highlight</button>, document.body) : null;
+
+  if (!sel) return removePill;
 
   var rect = sel.rect;
   var toolbarW = 250; // approximate width (incl. 40px touch targets), used only for centering/clamping
@@ -185,7 +215,15 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
           return (
             <button
               key={c.key}
-              onClick={function () { setColor(c.key); }}
+              onClick={function () {
+                setColor(c.key);
+                const el = containerRef?.current;
+                if (el && sel?.text && (el.textContent || '').includes(sel.text)) {
+                  const n = occurrenceOfSelection(el, sel.text);
+                  addHighlight(paintKey, { id: paintGenId(), text: sel.text, n, color: c.key });
+                  applyAll(el, paintKey);
+                }
+              }}
               title={'Highlight in ' + c.key}
               style={{
                 width: 40, height: 40, minWidth: 40, minHeight: 40, borderRadius: '50%',
@@ -204,7 +242,6 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
         <span style={{ width: 1, alignSelf: 'stretch', background: 'var(--border)', margin: '0 0.15rem' }} />
         <button
           onClick={handleSave}
-          disabled={!color}
           title={color ? 'Save this highlight to a track' : 'Pick a color first'}
           style={{
             background: color ? 'var(--accent)' : 'var(--surface-2)',
@@ -228,6 +265,7 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
           ✓ Saved to <strong>{flash}</strong>
         </div>
       )}
+    {removePill}
     </>,
     document.body
   );

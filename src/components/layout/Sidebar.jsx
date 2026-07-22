@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { StickyBarButton } from '../shared/StickyNotes.jsx';
 import { Icon } from '../shared/Icon.jsx';
 import { BrandMark } from '../shared/BrandMark.jsx';
 import { signOut } from '../../utils/auth.js';
@@ -362,6 +363,9 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
               ◼
             </div>
           ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {/* Sticky-note drag source (2026-07-22) */}
+              <StickyBarButton />
             <button
               onClick={onToggleTheme}
               title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -388,6 +392,7 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
             >
               {theme === 'dark' ? <Icon name="sun" size={16} color="currentColor" /> : <Icon name="moon" size={16} color="currentColor" />}
             </button>
+            </div>
           )}
         </div>
 
