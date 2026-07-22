@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom';
 import { Icon } from './Icon.jsx';
 import { HighlightPopover } from './HighlightPopover.jsx';
 import { GlossaryHighlighter } from './GlossaryHighlighter.jsx';
+import { StickyScope } from './StickyNotes.jsx';
 import { QnAPanel, LockIcon } from './QnAPanel.jsx';
 
 // Recap toggle button style (MSL-style) — active = coloured text + border on surface-2.
@@ -268,6 +269,7 @@ export function FoundationRunnerShell({
             it in full. See GlossaryHighlighter.jsx for the full mechanism
             writeup. Mounted once here so it covers all 4 families/79
             modules automatically — no per-module wiring needed. */}
+        <StickyScope id={'m:' + module.id} />
         <GlossaryHighlighter containerRef={contentRef} moduleId={module.id} />
 
         {/* Go Deeper — Academic (skeleton). Renders nothing until a module
