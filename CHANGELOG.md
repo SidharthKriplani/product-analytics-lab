@@ -4,6 +4,22 @@ Full build lineage. Covers what changed, why, what was added, what was fixed, an
 
 ---
 
+## 2026-07-23 — Annotation stack + STF26 + QnA gate ruling (Fable orchestration session)
+
+**Added**
+- Cross-device annotation sync: `syncProgress.js` ANNOT_PAIRS (stickies `lab-stickies-v1`, `pal_page_highlights_v1` + tombstone twins) with mergeAnnotationBlobs newest-wins; `App.jsx` live-sync v2 (4s debounced push on 'annotations-changed', flush on visibilitychange/pagehide, 20s-throttled pull, 45s visible-heartbeat, push-back after merge so cloud converges to union).
+- Stickies v2.1: hashless bucket keys + load-time legacy-bucket migration (raw moves, no tombstones), `StickyScope` per module via FoundationRunnerShell, two-step delete confirm (red "Delete?" chip, 3s auto-disarm), editedTs footer.
+- Glossary G0 (worker build): 220ms hover-grace, click-pin, See-more 320×320 expanded card w/ viewport flip, seeAlso chips + back stack. PAL kept hash-router nav (onSelectModule family-scope mismatch — FLAGged, deliberate).
+- Spot the Flaw case 26 (attribution double-counting; Gemini-harvest screened, mechanics-only). File: `src/data/spotTheFlawCases.js` (26 cases; STF21–25 confirmed pre-program content, "collision" was a stale mount read).
+
+**Fixed**
+- Highlight delete-resurrection (tombstones on remove), applyAll flicker race (optimistic-lock persist), PageHighlighter click handler now defers inside `[data-own-highlighter]` (stacked-popover bug).
+
+**Decided**
+- PAL QnA gate RELAXED (user ruling, 22 Jul): answers are grounded in the TOPIC's canonical material, not the (thin) module text — heavier `[verify:]` tagging compensates. This is a DIFFERENT rule than MSL's module-text grounding and must be restated in every PAL QnA dispatch. PAL QnA waves queued behind MSL batch 59-61 + D8 audit.
+
+---
+
 ## [7.3.0] — 2026-07-03 [FEATURES — recap toggle · framework deep-dives + Frameworks→Deep-Dives bifurcation · item-level deep linking · Tracks quick-add + full coverage · PL-leaderboard ecosystem]
 
 A multi-feature session (code-complete + esbuild-validated; pushed via the `/tmp` clone workflow).
