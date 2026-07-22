@@ -1863,11 +1863,13 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange, user, on
             <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expected output</span>
             <span style={{ fontSize: '0.6rem', color: 'var(--border)' }}>·</span>
             <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{problem.expectedRowCount} row{problem.expectedRowCount !== 1 ? 's' : ''}</span>
-            <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap', marginLeft: '0.2rem' }}>
-              {problem.expectedColumns.map(col => (
-                <span key={col} style={{ fontSize: '0.6rem', fontFamily: 'monospace', padding: '1px 5px', borderRadius: '3px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--teal)' }}>{col}</span>
-              ))}
-            </div>
+            {(sqlLoading || !expectedSampleDisplay) && (
+              <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap', marginLeft: '0.2rem' }}>
+                {problem.expectedColumns.map(col => (
+                  <span key={col} style={{ fontSize: '0.6rem', fontFamily: 'monospace', padding: '1px 5px', borderRadius: '3px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--teal)' }}>{col}</span>
+                ))}
+              </div>
+            )}
           </div>
           {sqlLoading ? (
             <div style={{ padding: '0.45rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic', borderTop: '1px solid var(--border)' }}>
