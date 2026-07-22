@@ -8,7 +8,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import { track } from './utils/analytics.js';
 import { stateToHash, parseHash } from './utils/hashRouting.js';
 import { onAuthStateChange } from './utils/auth.js';
-import { pushProgressToSupabase, pullProgressFromSupabase } from './utils/syncProgress.js';
+import { pushProgressToSupabase, pullProgressFromSupabase, pullAnnotationsOnly } from './utils/syncProgress.js';
 import { scheduleTracksPush, pushTracksNow, pullAndMergeTracks } from './utils/tracksSync.js';
 import { upsertLeaderboardRow, touchLastActive } from './utils/leaderboard.js';
 import { EmploymentReminder } from './components/shared/EmploymentReminder.jsx';
@@ -184,6 +184,30 @@ export default function App() {
   const [theme, setTheme] = useState(getInitialTheme);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
+
+  // Annotations live-sync (2026-07-23): local sticky/highlight writes push to
+  // the cloud after a 4s debounce; returning to the tab (e.g. unlocking your
+  // phone) pulls the annotation keys and per-item-merges them — the fix for
+  // 'highlighted on my Mac, phone shows nothing' (pull used to run ONLY at
+  // sign-in, push only on nav changes).
+  useEffect(() => {
+    if (!user) return;
+    let t = null;
+    let lastPull = 0;
+    const onChanged = () => { clearTimeout(t); t = setTimeout(() => pushProgressToSupabase(user), 4000); };
+    const onVis = () => {
+      if (document.visibilityState !== 'visible') return;
+      const now = Date.now();
+      if (now - lastPull < 20000) return; // throttle
+      lastPull = now;
+      pullAnnotationsOnly(user);
+    };
+    onVis(); // also pull once on mount-with-user
+    window.addEventListener('annotations-changed', onChanged);
+    document.addEventListener('visibilitychange', onVis);
+    return () => { clearTimeout(t); window.removeEventListener('annotations-changed', onChanged); document.removeEventListener('visibilitychange', onVis); };
+  }, [user]);
+
   const [showAuth, setShowAuth] = useState(false);
   const [authGate, setAuthGate] = useState(false);
   const [authSettled, setAuthSettled] = useState(false);

@@ -104,6 +104,31 @@ export async function pushProgressToSupabase(user) {
 
 // ─── Pull: Supabase → localStorage ───────────────────────────────────────────
 
+// Annotation stores + tombstones — module scope, shared definitions.
+const ANNOT_PAIRS = {
+  'lab-stickies-v1': 'lab-stickies-tomb-v1',
+  'pal_page_highlights_v1': 'pal_page_highlights_v1-tomb-v1',
+};
+const TOMB_TO_STORE = Object.fromEntries(Object.entries(ANNOT_PAIRS).map(([st, t]) => [t, st]));
+
+// Annotations-only pull: per-item merge, idempotent, safe on every tab-visible.
+export async function pullAnnotationsOnly(user) {
+  if (!supabase || !user) return;
+  try {
+    const keys = [...Object.keys(ANNOT_PAIRS), ...Object.keys(TOMB_TO_STORE)];
+    const { data, error } = await supabase
+      .from('user_progress')
+      .select('key, value')
+      .eq('user_id', user.id)
+      .in('key', keys);
+    if (error || !data) return;
+    for (const row of data) {
+      if (ANNOT_PAIRS[row.key]) applyAnnotationMerge(row.key, ANNOT_PAIRS[row.key], row.value, null);
+      else if (TOMB_TO_STORE[row.key]) applyAnnotationMerge(TOMB_TO_STORE[row.key], row.key, null, row.value);
+    }
+  } catch { /* best effort */ }
+}
+
 export async function pullProgressFromSupabase(user) {
   if (!supabase || !user) return;
 
@@ -119,11 +144,6 @@ export async function pullProgressFromSupabase(user) {
 
   if (!data || data.length === 0) return;
 
-  const ANNOT_PAIRS = {
-    'lab-stickies-v1': 'lab-stickies-tomb-v1',
-    'pal_page_highlights_v1': 'pal_page_highlights_v1-tomb-v1',
-  };
-  const TOMB_TO_STORE = Object.fromEntries(Object.entries(ANNOT_PAIRS).map(([st, t]) => [t, st]));
   for (const row of data) {
     try {
       if (ANNOT_PAIRS[row.key]) { applyAnnotationMerge(row.key, ANNOT_PAIRS[row.key], row.value, null); continue; }
