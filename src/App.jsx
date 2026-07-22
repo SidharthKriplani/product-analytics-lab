@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { GateOverlay } from './components/shared/GateOverlay.jsx';
 import { PageHighlighter } from './components/shared/PageHighlighter.jsx';
-import { StickyNotes } from './components/shared/StickyNotes.jsx';
+import { StickyNotes, StickyBarButton } from './components/shared/StickyNotes.jsx';
 import { ErrorBoundary } from './components/shared/ErrorBoundary.jsx';
 import { BrandMark } from './components/shared/BrandMark.jsx';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
@@ -1303,6 +1303,29 @@ export default function App() {
         {/* In-place marker-pen highlights over the whole content surface (2026-07-16) */}
         <PageHighlighter getContainer={() => document.getElementById('pal-main')} pageKey={'page:' + page} />
         <StickyNotes getContainer={() => document.getElementById('pal-main')} pageKey={'page:' + page} />
+
+        {/* PAL top bar (2026-07-23, Sidharth request): slim never-changing strip on
+            EVERY page (the Sidebar is not) EXCEPT SQL Lab, whose full-screen layout
+            owns its own chrome. Utilities reachable everywhere: sticky-note drag
+            source + theme toggle. */}
+        {page !== 'sql-lab' && (
+          <div style={{
+            position: 'sticky', top: 0, zIndex: 90,
+            display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px',
+            padding: '6px 14px', minHeight: '38px', boxSizing: 'border-box',
+            background: 'var(--bg, #0b0c10)', borderBottom: '1px solid var(--border, #26262c)',
+          }}>
+            <StickyBarButton />
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              style={{ background: 'none', border: '1px solid var(--border, #26262c)', borderRadius: 8,
+                width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: 'var(--text-muted, #a0a0a8)', padding: 0 }}>
+              <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={15} />
+            </button>
+          </div>
+        )}
 
         <main id="pal-main" style={{ flex: 1, ...(page === 'sql-lab' ? { display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 } : {}) }}>
           <ErrorBoundary resetKey={page}>
