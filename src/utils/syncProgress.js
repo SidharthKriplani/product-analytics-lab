@@ -33,6 +33,7 @@ export const PROGRESS_KEYS = [
   'pal-sql-lab-times-v1',
   'pal-sql-lab-dates-v1',
   'pal-sql-lab-plan-v1',
+  'pal-sql-last-v1',       // T3: {id, ts} of last-opened problem, drives the Progress "Continue" strip
 
   // Learning paths (4 fixed paths)
   'pal-lp-analytics-ready-v1',

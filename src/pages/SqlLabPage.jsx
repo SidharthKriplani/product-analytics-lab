@@ -1385,6 +1385,14 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange, user, on
     if (onProblemChange && problem) onProblemChange(problem.id);
   }, [problemIdx]);
 
+  // Persist last-opened SQL Lab problem for the Progress "Continue" strip (T3, brainstorm
+  // §7). Gated on mode === 'solve' so landing on the browse grid (problemIdx defaults to 0)
+  // doesn't fabricate a fake "continue" entry -- only a real open writes the key.
+  useEffect(() => {
+    if (mode !== 'solve' || !problem) return;
+    try { localStorage.setItem('pal-sql-last-v1', JSON.stringify({ id: problem.id, ts: Date.now() })); } catch {}
+  }, [problemIdx, mode]);
+
   // Mark solved on correct answer + save elapsed time + fire analytics + record streak date
   useEffect(() => {
     if (correct !== true || !problem) return;
