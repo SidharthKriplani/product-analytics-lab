@@ -54,6 +54,7 @@ import { expFoundationModules } from '../data/expFoundationModules.js';
 import { learningPaths } from '../data/learningPaths.js';
 import { LEARNING_PATHS } from '../data/learningPathDefs.js';
 import { GuidedPathCard } from '../components/paths/GuidedPathCard.jsx';
+import { SqlLabContinueStrip } from '../components/shared/SqlLabContinueStrip.jsx';
 import { scenarios } from '../data/scenarios.js';
 
 const LEVEL_ORDER = ['junior', 'analyst', 'senior', 'staff'];
@@ -1565,46 +1566,15 @@ export function Progress({ allProgress, onSelect, onClear, onNavigate, unlocked,
                   >Open SQL Lab →</button>
                 )}
               </div>
-              {/* Continue-strip (T3, brainstorm §7): resume last-touched problem + next
-                  unstarted, deep-linked via the existing #/sql-lab/<id> hash format. */}
-              {(() => {
-                let lastTouched = null;
-                try { lastTouched = JSON.parse(localStorage.getItem('pal-sql-last-v1') || 'null'); } catch {}
-                const continueProblem = lastTouched && lastTouched.id ? sqlLabProblems.find(p => p.id === lastTouched.id) : null;
-                const nextUpId = sqlLabProblems.find(p => !sqlSolved.has(p.id))?.id;
-                const nextUpProblem = nextUpId ? sqlLabProblems.find(p => p.id === nextUpId) : null;
-                if (!continueProblem && !nextUpProblem) return null;
-                return (
-                  <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-                    {continueProblem && (
-                      <a
-                        href={`#/sql-lab/${continueProblem.id}`}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '0.4rem',
-                          padding: '0.45rem 0.75rem', borderRadius: '8px',
-                          background: 'rgba(20,184,166,0.08)', border: '1px solid rgba(20,184,166,0.25)',
-                          color: 'var(--teal)', fontSize: '0.78rem', fontWeight: 600, textDecoration: 'none',
-                        }}
-                      >
-                        Continue: {continueProblem.title} · {continueProblem.difficulty} · {totalSqlSolved}/{sqlLabProblems.length}
-                      </a>
-                    )}
-                    {nextUpProblem && nextUpProblem.id !== continueProblem?.id && (
-                      <a
-                        href={`#/sql-lab/${nextUpProblem.id}`}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '0.4rem',
-                          padding: '0.45rem 0.75rem', borderRadius: '8px',
-                          background: 'var(--surface-2)', border: '1px solid var(--border)',
-                          color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, textDecoration: 'none',
-                        }}
-                      >
-                        Next up: {nextUpProblem.title}
-                      </a>
-                    )}
-                  </div>
-                );
-              })()}
+              {/* Continue-strip (T3 follow-up v2): shared component (SqlLabContinueStrip),
+                  same read rule + markup as the SQL Lab browse-grid strip -- only the open
+                  callback differs (a #/sql-lab/<id> hash jump here, onSelect there). */}
+              <SqlLabContinueStrip
+                solved={sqlSolved}
+                problems={sqlLabProblems}
+                totalCount={sqlLabProblems.length}
+                onOpen={id => { window.location.hash = '#/sql-lab/' + id; }}
+              />
               {/* Progress bar */}
               <div style={{ height: 6, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${totalSqlSolved / sqlLabProblems.length * 100}%`, background: 'var(--teal)', borderRadius: 99, transition: 'width 0.4s' }} />

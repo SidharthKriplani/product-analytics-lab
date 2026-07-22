@@ -33,7 +33,8 @@ export const PROGRESS_KEYS = [
   'pal-sql-lab-times-v1',
   'pal-sql-lab-dates-v1',
   'pal-sql-lab-plan-v1',
-  'pal-sql-last-v1',       // T3: {id, ts} of last-opened problem, drives the Progress "Continue" strip
+  'pal-sql-last-open-v1',  // T3: {id, ts} of last-opened problem
+  'pal-sql-last-typed-v1', // T3 v2: {id, ts} of last-typed-in problem, debounced; Continue-strip prefers this when a draft is present
 
   // Learning paths (4 fixed paths)
   'pal-lp-analytics-ready-v1',

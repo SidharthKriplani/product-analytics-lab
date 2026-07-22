@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { SqlLabContinueStrip } from '../components/shared/SqlLabContinueStrip.jsx';
 import { sqlLabProblems } from '../data/sqlLabProblems.js';
 import { datamarts } from '../data/sqlLabDatamarts.js';
 import { COMPANY_DOMAINS } from '../data/companyDirectory.js';
@@ -272,8 +273,17 @@ const ALL_DATAMARTS = [...new Set(SORTED_PROBLEMS.map(p => p.datamartId).filter(
 function getStoredQuery(id) {
   try { return localStorage.getItem('pal-sql-query-' + id) || ''; } catch { return ''; }
 }
+let sqlLastTypedDebounceTimer = null;
 function saveQueryLS(id, q) {
   try { localStorage.setItem('pal-sql-query-' + id, q); } catch {}
+  // Debounced "last typed" marker (T3 follow-up v2) -- same event that saves the draft,
+  // just written on a delay so a fast typist doesn't hammer localStorage with a new
+  // timestamp on every keystroke. The Continue-strip read rule prefers this over
+  // pal-sql-last-open-v1 whenever the draft it points at is still non-empty.
+  if (sqlLastTypedDebounceTimer) clearTimeout(sqlLastTypedDebounceTimer);
+  sqlLastTypedDebounceTimer = setTimeout(function () {
+    try { localStorage.setItem('pal-sql-last-typed-v1', JSON.stringify({ id: id, ts: Date.now() })); } catch {}
+  }, 800);
 }
 function getStoredSubs(id) {
   try { return JSON.parse(localStorage.getItem('pal-sql-subs-' + id) || '[]'); } catch { return []; }
@@ -774,6 +784,13 @@ function SqlLabBrowserView({ onBack, onSelect, solved, onShowPlan, onStartBeginn
           onClick={onShowPlan}
           style={{ marginLeft: 'auto', background: 'var(--teal-bg)', border: '1px solid var(--teal-border)', borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.75rem', fontSize: '0.78rem', fontWeight: 600, color: 'var(--teal)', cursor: 'pointer' }}
         >Study Plan</button>
+      </div>
+
+      {/* Continue-strip (T3 follow-up v2): shared component, same read rule + markup as
+          the Progress-page strip -- only the open callback differs (onSelect here, a hash
+          jump there). Placed above the crash-plan cards so it's the first thing seen. */}
+      <div style={{ marginBottom: '0.85rem' }}>
+        <SqlLabContinueStrip solved={solved} problems={SORTED_PROBLEMS} onOpen={onSelect} />
       </div>
 
       {/* Plan tabs — All / 3–4 day Intermediate / 7 day Advanced. Switching swaps the whole body. */}
@@ -1385,12 +1402,14 @@ export function SqlLabPage({ onBack, initialProblemId, onProblemChange, user, on
     if (onProblemChange && problem) onProblemChange(problem.id);
   }, [problemIdx]);
 
-  // Persist last-opened SQL Lab problem for the Progress "Continue" strip (T3, brainstorm
-  // §7). Gated on mode === 'solve' so landing on the browse grid (problemIdx defaults to 0)
+  // Persist last-opened SQL Lab problem for the Continue strip (T3, brainstorm §7).
+  // Gated on mode === 'solve' so landing on the browse grid (problemIdx defaults to 0)
   // doesn't fabricate a fake "continue" entry -- only a real open writes the key.
+  // Renamed to *-open-v1 in the T3 follow-up v2 alongside the new *-last-typed-v1 marker
+  // (see saveQueryLS) -- the Continue-strip read rule prefers typed, falls back to open.
   useEffect(() => {
     if (mode !== 'solve' || !problem) return;
-    try { localStorage.setItem('pal-sql-last-v1', JSON.stringify({ id: problem.id, ts: Date.now() })); } catch {}
+    try { localStorage.setItem('pal-sql-last-open-v1', JSON.stringify({ id: problem.id, ts: Date.now() })); } catch {}
   }, [problemIdx, mode]);
 
   // Mark solved on correct answer + save elapsed time + fire analytics + record streak date
