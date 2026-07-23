@@ -558,6 +558,29 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
 
         </nav>
 
+        {/* D25 item 3 (GSL doctrine parity): search restored here for mobile — chrome's own
+            search trigger is desktop-only there too (BreaklabsChrome.jsx), and this Sidebar
+            IS the mobile drawer (see the D21/D23 FLAG-3 comment above), so this is the only
+            reachable mobile search entry. sidebar-desktop-hide keeps it out of the fixed
+            >=769px desktop rail, where chrome's trigger already covers search. onOpenSearch
+            was already wired in as a prop but unused since the box was killed — purely
+            additive, no new prop plumbing. */}
+        <div className="sidebar-desktop-hide" style={{ padding: '0.65rem 0.8rem 0' }}>
+          <button
+            onClick={() => { onOpenSearch(); onClose(); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              width: '100%', textAlign: 'left',
+              padding: '0.5rem 0.7rem',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-subtle)', background: 'var(--surface-2)',
+              color: 'var(--text-muted)', fontSize: '0.8rem', cursor: 'pointer',
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.2" stroke="currentColor" strokeWidth="1.3"/><line x1="7.3" y1="7.3" x2="10.5" y2="10.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+            Search…
+          </button>
+        </div>
         {/* Search promoted into BreaklabsChrome top bar (D23, GSL D17 / MSL D21 parity) —
             box killed here. Sign out added in its place (standing "sign out -> left-nav
             bottom, user-only, all labs" ruling; `signOut` was already imported above but
