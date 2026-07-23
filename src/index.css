@@ -603,6 +603,11 @@ table { border-collapse: collapse; }
 
 @media (min-width: 769px) {
   .app-sidebar { transform: none !important; }
+
+  /* D23: TRACK-cluster rows superseded by the BreaklabsChrome ProfileChip dropdown /
+     onShowAuth button on desktop only — neither exists below this breakpoint, so these
+     rows stay in the mobile drawer (see Sidebar.jsx TRACK cluster). */
+  .sidebar-desktop-hide { display: none; }
 }
 
 /* ── Animations ──────────────────────────────────────────────────────────── */

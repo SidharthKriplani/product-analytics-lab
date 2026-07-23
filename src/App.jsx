@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { GateOverlay } from './components/shared/GateOverlay.jsx';
 import { PageHighlighter } from './components/shared/PageHighlighter.jsx';
 import { StickyNotes, StickyBarButton } from './components/shared/StickyNotes.jsx';
+import BreaklabsChrome from './components/BreaklabsChrome.jsx';
 import { ErrorBoundary } from './components/shared/ErrorBoundary.jsx';
 import { BrandMark } from './components/shared/BrandMark.jsx';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
@@ -1352,10 +1353,10 @@ export default function App() {
         <PageHighlighter getContainer={() => document.getElementById('pal-main')} pageKey={'page:' + page} />
         <StickyNotes getContainer={() => document.getElementById('pal-main')} pageKey={'page:' + page} />
 
-        {/* PAL top bar (2026-07-23, Sidharth request): slim never-changing strip on
-            EVERY page (the Sidebar is not) EXCEPT SQL Lab, whose full-screen layout
-            owns its own chrome. Utilities reachable everywhere: sticky-note drag
-            source + theme toggle. */}
+        {/* PAL top bar (2026-07-23, Sidharth request; D23 chrome rollout): slim
+            never-changing strip on EVERY page (the Sidebar is not) EXCEPT SQL Lab, whose
+            full-screen layout owns its own chrome. Utilities + search + profile chip now
+            live in the shared BreaklabsChrome (GSL D17 master, MSL D21 parity). */}
         {page !== 'sql-lab' && (
           <div style={{
             position: 'sticky', top: 0, zIndex: 90,
@@ -1364,17 +1365,30 @@ export default function App() {
             background: 'var(--bg, #0b0c10)', borderBottom: '1px solid var(--border, #26262c)',
           }}>
             {/* Left: page-context slot — module pages portal their "← All modules ·
-                Module N of M · Complete" row here (FoundationRunnerShell). */}
-            <div id="pal-topbar-ctx" style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '1rem', overflow: 'hidden' }} />
-            <StickyBarButton />
-            <button
-              onClick={toggleTheme}
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              style={{ background: 'none', border: '1px solid var(--border, #26262c)', borderRadius: 8,
-                width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: 'var(--text-muted, #a0a0a8)', padding: 0 }}>
-              <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={15} />
-            </button>
+                Module N of M · Complete" row here (FoundationRunnerShell). D23: dropped
+                flex:1 (was the only flex-grow claimant pre-D23) now that BreaklabsChrome
+                is the sibling and itself declares flex-1 internally — two flex:1 siblings
+                would 50/50-split the row instead of giving this slot its natural width
+                (same fix as MSL's D21 breadcrumb-div bug). */}
+            <div id="pal-topbar-ctx" style={{ flexShrink: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '1rem', overflow: 'hidden' }} />
+            <BreaklabsChrome
+              onSearchOpen={() => setSearchOpen(true)}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              user={user}
+              supabaseEnabled={true}
+              onShowAuth={() => setShowAuth(true)}
+              onNavigateProfile={() => navigate('profile')}
+              onNavigateProgress={() => navigate('progress')}
+              onNavigateReview={() => navigate('review-queue')}
+              onNavigateMyTracks={() => navigate('my-tracks')}
+              onNavigateLeaderboard={() => navigate('leaderboard')}
+              onNavigateStartHere={() => navigate('start-here')}
+              onNavigateResources={() => navigate('resources')}
+              onNavigateAbout={() => navigate('about')}
+              onNavigatePlans={() => navigate('plans')}
+              stickyTrayButton={<StickyBarButton />}
+            />
           </div>
         )}
 

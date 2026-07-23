@@ -382,79 +382,102 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
                 in, this nav row and "My Progress" below it pointed at the exact
                 same page — a duplicate, dead-click nav item. Only show it signed out. */}
             {!user && <NavItem id="home" label="Home" currentPage={currentPage} onNav={handleNav} />}
-            {!user ? (
-              <button
-                onClick={() => { onShowAuth(); onClose(); }}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '0.45rem',
-                  width: '100%', textAlign: 'left',
-                  padding: '0.34rem 0.65rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: 'none', background: 'transparent',
-                  color: 'var(--text-muted)', fontWeight: 400,
-                  fontSize: '0.825rem', cursor: 'pointer',
-                  transition: 'background var(--transition-fast), color var(--transition-fast)',
-                  letterSpacing: '-0.005em',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
-              >
-                <Icon name="user" size={13} color="currentColor" style={{ opacity: 0.7, flexShrink: 0 }} />
-                <span>Sign In</span>
-              </button>
+            {/* D21/D23 FLAG-3: this Sidebar IS the mobile drawer too (see .app-sidebar
+                in index.css — off-canvas <=768px, fixed >=769px, same pattern as MSL). The
+                rows below are superseded on DESKTOP by BreaklabsChrome's ProfileChip dropdown
+                (signed in) or its onShowAuth "Sign in" button (signed out) — both desktop-only
+                (hidden lg:flex). So: the Sign In/Profile row + My Progress/Review/My Tracks/
+                Leaderboard stay reachable on mobile in both auth states, hidden only at the
+                >=769px breakpoint via .sidebar-desktop-hide (desktop's copy lives in the chrome
+                dropdown instead). Public items (start-here/plans/resources/about) stay reachable
+                on mobile always; on desktop they hide only when signed in (no dropdown exists
+                for signed-out desktop users, so they must stay visible there too). */}
+            <div className="sidebar-desktop-hide">
+              {!user ? (
+                <button
+                  onClick={() => { onShowAuth(); onClose(); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.45rem',
+                    width: '100%', textAlign: 'left',
+                    padding: '0.34rem 0.65rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: 'none', background: 'transparent',
+                    color: 'var(--text-muted)', fontWeight: 400,
+                    fontSize: '0.825rem', cursor: 'pointer',
+                    transition: 'background var(--transition-fast), color var(--transition-fast)',
+                    letterSpacing: '-0.005em',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+                >
+                  <Icon name="user" size={13} color="currentColor" style={{ opacity: 0.7, flexShrink: 0 }} />
+                  <span>Sign In</span>
+                </button>
+              ) : (
+                (() => {
+                  const isActive = activeTab === 'profile';
+                  return (
+                    <button
+                      onClick={() => handleNav('profile')}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={isActive ? 'sidebar-nav-active' : ''}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.45rem',
+                        width: '100%', textAlign: 'left',
+                        padding: '0.34rem 0.65rem',
+                        borderRadius: 'var(--radius-sm)',
+                        border: 'none',
+                        background: isActive ? undefined : 'transparent',
+                        color: isActive ? undefined : 'var(--text-muted)',
+                        fontWeight: isActive ? undefined : 400,
+                        fontSize: '0.825rem', cursor: 'pointer',
+                        transition: 'background var(--transition-fast), color var(--transition-fast)',
+                        letterSpacing: '-0.005em',
+                      }}
+                      onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
+                      onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
+                    >
+                      {user.user_metadata?.avatar_url ? (
+                        <img
+                          src={user.user_metadata.avatar_url}
+                          alt=""
+                          style={{ width: 15, height: 15, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, opacity: isActive ? 1 : 0.8 }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: 15, height: 15, borderRadius: '50%', flexShrink: 0,
+                          background: 'var(--accent-bg, var(--surface-2))',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '0.52rem', fontWeight: 800, color: 'var(--accent)',
+                        }}>
+                          {user.email?.[0]?.toUpperCase()}
+                        </div>
+                      )}
+                      <span>Profile</span>
+                    </button>
+                  );
+                })()
+              )}
+              <NavItem id="progress" label="My Progress" currentPage={currentPage} onNav={handleNav} />
+              <NavItem id="review-queue" label="Review" currentPage={currentPage} onNav={handleNav} badge={srDue} />
+              <NavItem id="my-tracks" label="My Tracks" currentPage={currentPage} onNav={handleNav} />
+              <NavItem id="leaderboard" label="Leaderboard" currentPage={currentPage} onNav={handleNav} />
+            </div>
+            {user ? (
+              <div className="sidebar-desktop-hide">
+                <NavItem id="start-here" label="Start Here" currentPage={currentPage} onNav={handleNav} />
+                <NavItem id="plans" label="Plans & Access" currentPage={currentPage} onNav={handleNav} />
+                <NavItem id="resources" label="Resources" currentPage={currentPage} onNav={handleNav} />
+                <NavItem id="about" label="About" currentPage={currentPage} onNav={handleNav} />
+              </div>
             ) : (
-              (() => {
-                const isActive = activeTab === 'profile';
-                return (
-                  <button
-                    onClick={() => handleNav('profile')}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={isActive ? 'sidebar-nav-active' : ''}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '0.45rem',
-                      width: '100%', textAlign: 'left',
-                      padding: '0.34rem 0.65rem',
-                      borderRadius: 'var(--radius-sm)',
-                      border: 'none',
-                      background: isActive ? undefined : 'transparent',
-                      color: isActive ? undefined : 'var(--text-muted)',
-                      fontWeight: isActive ? undefined : 400,
-                      fontSize: '0.825rem', cursor: 'pointer',
-                      transition: 'background var(--transition-fast), color var(--transition-fast)',
-                      letterSpacing: '-0.005em',
-                    }}
-                    onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
-                    onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
-                  >
-                    {user.user_metadata?.avatar_url ? (
-                      <img
-                        src={user.user_metadata.avatar_url}
-                        alt=""
-                        style={{ width: 15, height: 15, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, opacity: isActive ? 1 : 0.8 }}
-                      />
-                    ) : (
-                      <div style={{
-                        width: 15, height: 15, borderRadius: '50%', flexShrink: 0,
-                        background: 'var(--accent-bg, var(--surface-2))',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '0.52rem', fontWeight: 800, color: 'var(--accent)',
-                      }}>
-                        {user.email?.[0]?.toUpperCase()}
-                      </div>
-                    )}
-                    <span>Profile</span>
-                  </button>
-                );
-              })()
+              <>
+                <NavItem id="start-here" label="Start Here" currentPage={currentPage} onNav={handleNav} />
+                <NavItem id="plans" label="Plans & Access" currentPage={currentPage} onNav={handleNav} />
+                <NavItem id="resources" label="Resources" currentPage={currentPage} onNav={handleNav} />
+                <NavItem id="about" label="About" currentPage={currentPage} onNav={handleNav} />
+              </>
             )}
-            <NavItem id="progress" label="My Progress" currentPage={currentPage} onNav={handleNav} />
-            <NavItem id="review-queue" label="Review" currentPage={currentPage} onNav={handleNav} badge={srDue} />
-            <NavItem id="my-tracks" label="My Tracks" currentPage={currentPage} onNav={handleNav} />
-            <NavItem id="leaderboard" label="Leaderboard" currentPage={currentPage} onNav={handleNav} />
-            <NavItem id="start-here" label="Start Here" currentPage={currentPage} onNav={handleNav} />
-            <NavItem id="plans" label="Plans & Access" currentPage={currentPage} onNav={handleNav} />
-            <NavItem id="resources" label="Resources" currentPage={currentPage} onNav={handleNav} />
-            <NavItem id="about" label="About" currentPage={currentPage} onNav={handleNav} />
           </div>
 
           {/* FRAMES — KNOW · DO · BUILD · JUDGE · LIVE (accordion, one open per level) */}
@@ -535,48 +558,44 @@ export function Sidebar({ currentPage, onNavigate, unlockedStatus, theme, onTogg
 
         </nav>
 
-        {/* ── Bottom: search ── */}
-        <div style={{
-          padding: '0.65rem 0.8rem',
-          borderTop: '1px solid var(--border-subtle)',
-          flexShrink: 0,
-        }}>
-          <button
-            onClick={() => { if (onOpenSearch) { onOpenSearch(); onClose(); } else { handleNav('search'); } }}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              width: '100%', textAlign: 'left',
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '0.42rem 0.7rem',
-              color: 'var(--text-muted)',
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              transition: 'border-color var(--transition), color var(--transition), box-shadow var(--transition)',
-              letterSpacing: '-0.005em',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'var(--accent-border)';
-              e.currentTarget.style.color = 'var(--text)';
-              e.currentTarget.style.boxShadow = 'var(--shadow-glow)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = 'var(--border)';
-              e.currentTarget.style.color = 'var(--text-muted)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            <Icon name="search" size={14} color="currentColor" style={{ opacity: 0.65, flexShrink: 0 }} />
-            <span style={{ flex: 1 }}>Search</span>
-            <kbd style={{
-              fontSize: '0.68rem', padding: '0.12rem 0.35rem',
-              background: 'var(--surface)', border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)', color: 'var(--text-muted)',
-              fontFamily: 'inherit',
-            }}>⌘K</kbd>
-          </button>
-        </div>
+        {/* Search promoted into BreaklabsChrome top bar (D23, GSL D17 / MSL D21 parity) —
+            box killed here. Sign out added in its place (standing "sign out -> left-nav
+            bottom, user-only, all labs" ruling; `signOut` was already imported above but
+            never called — PAL had no sign-out surface anywhere before this). */}
+        {user && (
+          <div style={{
+            padding: '0.65rem 0.8rem',
+            borderTop: '1px solid var(--border-subtle)',
+            flexShrink: 0,
+          }}>
+            <button
+              onClick={() => { signOut(); onClose(); }}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                width: '100%', textAlign: 'center',
+                background: 'transparent',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '0.42rem 0.7rem',
+                color: 'var(--text-muted)',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                transition: 'border-color var(--transition), color var(--transition)',
+                letterSpacing: '-0.005em',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = 'var(--accent-border)';
+                e.currentTarget.style.color = 'var(--text)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.color = 'var(--text-muted)';
+              }}
+            >
+              Sign out
+            </button>
+          </div>
+        )}
 
       </aside>
     </>
