@@ -6,6 +6,24 @@ import { statsFoundationsModules } from '../../data/statsFoundationsModules.js';
 class ModuleErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null }; }
   static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidCatch(error) {
+    // 2026-07-23 auto-heal (GSL pattern): highlight-mark DOM corruption family
+    // auto-retries once — see components/shared/ErrorBoundary.jsx for rationale.
+    const msg = String(error && error.message || '');
+    if (/insertBefore|removeChild|not a child of this node|NotFoundError/i.test(msg) && (this._heals || 0) < 2) {
+      this._heals = (this._heals || 0) + 1;
+      try {
+        document.querySelectorAll('mark[data-hl-id]').forEach(m => {
+          const parent = m.parentNode; if (!parent) return;
+          while (m.firstChild) parent.insertBefore(m.firstChild, m);
+          parent.removeChild(m);
+          parent.normalize();
+        });
+      } catch { /* best-effort */ }
+      setTimeout(() => this.setState({ hasError: false, error: null }), 0);
+      setTimeout(() => { this._heals = 0; }, 15000);
+    }
+  }
   render() {
     if (this.state.hasError) {
       return (
