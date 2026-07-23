@@ -9,6 +9,7 @@ import { Icon } from './Icon.jsx';
 import { HighlightPopover } from './HighlightPopover.jsx';
 import { GlossaryHighlighter } from './GlossaryHighlighter.jsx';
 import { StickyScope } from './StickyNotes.jsx';
+import { AnnexPanel } from './AnnexBlocks.jsx';
 import { QnAPanel, LockIcon } from './QnAPanel.jsx';
 
 // Recap toggle button style (MSL-style) — active = coloured text + border on surface-2.
@@ -52,6 +53,8 @@ export function FoundationRunnerShell({
   var [recapMode, setRecapMode] = useState(false);
   // Interview QnA view (QNA-INTERVIEW-STANDARD.md) — completion-gated third tab.
   var [qnaMode, setQnaMode] = useState(false);
+  var [annexMode, setAnnexMode] = useState(null); // 'academic' | 'cloud' | 'min' — annex-tab skeleton (2026-07-23)
+  var [tabTip, setTabTip] = useState(null);
   var [qnaLockMsg, setQnaLockMsg] = useState(false);
   var [qnaPulse, setQnaPulse] = useState(false);
   var prevCompleted = useRef(completed);
@@ -190,9 +193,33 @@ export function FoundationRunnerShell({
             QNA-INTERVIEW-STANDARD.md). The QnA tab is always visible; locked (SVG padlock)
             until this module is marked complete. Hover OR tap explains the gate. */}
         <div style={{ position: 'relative', display: 'flex', gap: '0.4rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-          <button onClick={function () { setRecapMode(false); setQnaMode(false); }} style={recapBtnStyle(!recapMode && !qnaMode, color)}>Full module</button>
+          <button onClick={function () { setRecapMode(false); setQnaMode(false); setAnnexMode(null); }}
+            onMouseEnter={function () { setTabTip('Full — the complete lesson: teaching, worked examples, key points'); }}
+            onMouseLeave={function () { setTabTip(null); }}
+            style={recapBtnStyle(!recapMode && !qnaMode && !annexMode, color)}>Full module</button>
+          {module.deeperMath && module.deeperMath.length > 0 && (
+            <button onClick={function () { setAnnexMode('academic'); setRecapMode(false); setQnaMode(false); }}
+              onMouseEnter={function () { setTabTip('Academic — formal setup and derivations: the math behind the lesson'); }}
+              onMouseLeave={function () { setTabTip(null); }}
+              style={recapBtnStyle(annexMode === 'academic', '#e8a030')}>Academic</button>
+          )}
+          {module.cloudMap && module.cloudMap.length > 0 && (
+            <button onClick={function () { setAnnexMode('cloud'); setRecapMode(false); setQnaMode(false); }}
+              onMouseEnter={function () { setTabTip('Cloud — this concept in AWS / GCP / Azure: names, deltas, costs, vendor-lock answers'); }}
+              onMouseLeave={function () { setTabTip(null); }}
+              style={recapBtnStyle(annexMode === 'cloud', '#38bdf8')}>Cloud</button>
+          )}
+          {module.interviewMin && module.interviewMin.length > 0 && (
+            <button onClick={function () { setAnnexMode('min'); setRecapMode(false); setQnaMode(false); }}
+              onMouseEnter={function () { setTabTip('20:80 — the interview minimum: the 20% of this module that carries 80% of interview asks'); }}
+              onMouseLeave={function () { setTabTip(null); }}
+              style={recapBtnStyle(annexMode === 'min', '#34d399')}>20:80</button>
+          )}
           {module.recap && module.recap.length > 0 && (
-            <button onClick={function () { setRecapMode(true); setQnaMode(false); }} style={recapBtnStyle(recapMode && !qnaMode, color)}>⚡ Quick recap</button>
+            <button onClick={function () { setRecapMode(true); setQnaMode(false); setAnnexMode(null); }}
+              onMouseEnter={function () { setTabTip('Compressed refresher of what this module taught'); }}
+              onMouseLeave={function () { setTabTip(null); }}
+              style={recapBtnStyle(recapMode && !qnaMode, color)}>⚡ Quick recap</button>
           )}
           <button
             onClick={function () {
@@ -201,10 +228,10 @@ export function FoundationRunnerShell({
                 setTimeout(function () { setQnaLockMsg(false); }, 2400);
                 return;
               }
-              setQnaMode(true); setRecapMode(false);
+              setQnaMode(true); setRecapMode(false); setAnnexMode(null);
             }}
-            onMouseEnter={function () { if (!completed) setQnaLockMsg(true); }}
-            onMouseLeave={function () { setQnaLockMsg(false); }}
+            onMouseEnter={function () { if (!completed) setQnaLockMsg(true); else setTabTip('Interview QnA — real interview questions with answers for this module'); }}
+            onMouseLeave={function () { setQnaLockMsg(false); setTabTip(null); }}
             aria-disabled={!completed}
             style={Object.assign({}, recapBtnStyle(qnaMode, color), {
               cursor: completed ? 'pointer' : 'not-allowed',
@@ -216,6 +243,14 @@ export function FoundationRunnerShell({
             {!completed && <LockIcon size={11} color="var(--text-muted)" />}
             Interview QnA
           </button>
+          {tabTip && !qnaLockMsg && (
+            <span style={{
+              position: 'absolute', top: '100%', left: 0, marginTop: '0.35rem', zIndex: 30,
+              fontSize: '0.7rem', whiteSpace: 'nowrap', color: 'var(--text-secondary)',
+              background: 'var(--surface)', border: '1px solid var(--border, rgba(128,128,128,0.35))',
+              borderRadius: '6px', padding: '0.35rem 0.6rem', boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
+            }}>{tabTip}</span>
+          )}
           {qnaLockMsg && !completed && (
             <span style={{
               position: 'absolute', top: '100%', left: 0, marginTop: '0.35rem', zIndex: 30,
@@ -236,6 +271,8 @@ export function FoundationRunnerShell({
         <div ref={contentRef} data-own-highlighter="1">
           {qnaMode ? (
             <QnAPanel moduleId={module.id} unlocked={!!completed} color={color} />
+          ) : annexMode ? (
+            <AnnexPanel mode={annexMode} module={module} />
           ) : recapMode && module.recap && module.recap.length > 0 ? (
             <div style={{ background: 'var(--surface)', border: '1px solid ' + color, borderRadius: 'var(--radius)', padding: '1.1rem 1.25rem' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.9rem' }}>
@@ -269,7 +306,7 @@ export function FoundationRunnerShell({
             it in full. See GlossaryHighlighter.jsx for the full mechanism
             writeup. Mounted once here so it covers all 4 families/79
             modules automatically — no per-module wiring needed. */}
-        <StickyScope id={'m:' + module.id + (qnaMode ? ':qna' : recapMode ? ':recap' : '')} />
+        <StickyScope id={'m:' + module.id + (qnaMode ? ':qna' : annexMode ? ':' + annexMode : recapMode ? ':recap' : '')} />
         <GlossaryHighlighter containerRef={contentRef} moduleId={module.id} />
 
         {/* Go Deeper — Academic (skeleton). Renders nothing until a module
