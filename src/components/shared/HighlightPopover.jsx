@@ -18,7 +18,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { quickAddItem, getQuickAdd } from '../../utils/tracks.js';
 import { AddToTrackPopover } from '../tracks/AddToTrackPopover.jsx';
-import { addHighlight, occurrenceOfSelection, applyAll, removeHighlight, unpaint } from '../../utils/localHighlights.js';
+import { addHighlight, occurrenceOfSelection, applyAll, removeHighlight, unpaint, hitHighlight } from '../../utils/localHighlights.js';
 
 const HIGHLIGHT_COLORS = [
   { key: 'yellow', css: 'var(--yellow)' },
@@ -44,10 +44,11 @@ export function HighlightPopover({ containerRef, sourceLabel, itemType, moduleId
   useEffect(() => {
     const el = containerRef?.current; if (!el) return;
     const onClick = (e) => {
-      const m = e.target instanceof Element ? e.target.closest('mark[data-hl-id]') : null;
-      if (!m || !el.contains(m)) { setRemovePop(null); return; }
-      const r = m.getBoundingClientRect();
-      setRemovePop({ id: m.getAttribute('data-hl-id'), top: r.bottom + 8, left: r.left + r.width / 2 });
+      // F4 (2026-07-23): native ::highlight() ranges -- hit-test the painted
+      // ranges' client rects instead of closest('mark').
+      const hit = hitHighlight(el, e.clientX, e.clientY);
+      if (!hit) { setRemovePop(null); return; }
+      setRemovePop({ id: hit.id, top: hit.rect.bottom + 8, left: hit.rect.left + hit.rect.width / 2 });
     };
     el.addEventListener('click', onClick);
     return () => el.removeEventListener('click', onClick);

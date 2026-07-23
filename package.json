@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/labcheck.mjs",
     "check:content-status": "node scripts/validate-content-status.mjs",
     "dev": "vite",
     "build": "node scripts/prerender-modules.js && node scripts/prerender-posts.js && node scripts/prerender-sitemap.js && vite build",
