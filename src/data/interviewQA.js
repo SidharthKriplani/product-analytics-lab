@@ -1494,4 +1494,244 @@ export const interviewQA = [
     },
   },
 
+  {
+    id: 'qa99',
+    category: 'Statistics',
+    difficulty: 'analyst',
+    isFree: true,
+    question: 'Your revenue A/B test shows a statistically significant lift in average revenue. When you dig into the raw treatment-arm numbers, three users each spent $10,000 and everyone else spent about $12. Do you trust the result?',
+    context: 'Revenue, LTV, and session-length metrics are classically right-skewed — a small number of high-value users can pull the mean far above what a typical user experiences.',
+    tags: ['skewness', 'right-skewed', 'mean-vs-median', 'revenue-metrics'],
+    answers: {
+      analyst: 'No, not as reported. A mean-based test on a right-skewed metric like revenue can be driven almost entirely by a few whale users, and three $10,000 spenders against a sea of $12 spenders is exactly that failure mode. I\'d recompute the comparison on the median, or on a winsorized version of revenue that caps the influence of extreme values, and check whether the lift survives. If the median shows no movement, the "significant" mean result is really describing three people, not a shift in typical user behavior.',
+      senior: 'The root problem is that a standard t-test assumes a well-behaved variance, and revenue violates that — the variance is dominated by the tail, so the standard error and the test result both become unstable to whichever handful of extreme values happen to land in each arm that week. I\'d log-transform revenue before testing, which compresses the tail and gives a cleaner, more stable comparison — but that test is now measuring the geometric mean, not the arithmetic mean, which is a different question than "did average revenue go up." I\'d report both: the log-based test for statistical stability, the raw mean for the dollar impact leadership actually wants.',
+      staff: 'I\'d treat this as a signal that revenue needs a standing analysis convention, not a one-off fix. Before the experiment even launches, I\'d pre-register whether the primary metric is mean revenue, median revenue, or log-revenue, precisely because picking after seeing results this specific — three whales tipping the outcome — invites cherry-picking whichever version already looks good. If the business genuinely cares about total dollars, a clean log-based significant result can quietly answer a different question than the one being asked, and shipping on that basis risks overstating impact to finance. I\'d present the median lift, the mean lift, and the log-transformed result side by side so the tradeoff is visible rather than buried in the choice of test.',
+    },
+  },
+
+  {
+    id: 'qa100',
+    category: 'Statistics',
+    difficulty: 'senior',
+    isFree: false,
+    question: 'A colleague proposes always log-transforming revenue before running significance tests, since it fixes the skew problem. What\'s the catch?',
+    context: 'Log-transforming is a common recommendation for right-skewed metrics like revenue, LTV, and session length.',
+    tags: ['log-transform', 'geometric-mean', 'skewness', 'metric-selection'],
+    answers: {
+      analyst: 'Log-transforming does make the test statistically cleaner — it compresses the influence of the tail and makes the normality assumption behind a t-test much more reasonable. The catch is that a test on log(revenue) is testing whether the geometric mean moved, not the arithmetic mean, and those can disagree: a treatment that helps the median user a little but does nothing for the top spenders can show a real geometric-mean lift while barely moving total dollars.',
+      senior: 'I\'d confirm with the stakeholder what number they actually plan to act on before trusting a log-transformed result as the ship decision. If finance wants "total revenue is up X%," geometric-mean movement doesn\'t translate cleanly back to that, because the log scale compresses exactly the large values that dominate a dollar total. The two statistics can point in different directions: log-revenue can show significance while the raw dollar mean, driven by a few large accounts, shows nothing, or the reverse. I\'d report both explicitly rather than let a stable-looking p-value stand in for "revenue went up."',
+      staff: 'The broader lesson is that fixing the statistics doesn\'t fix the question — it changes it, and that swap is easy to miss under time pressure. I\'d push the team to name the actual business quantity of interest up front (total revenue, revenue per typical user, or revenue per whale) and pick the test that answers that quantity, rather than defaulting to whichever transform produces the tightest confidence interval. In practice I\'ll often run both the raw and log-transformed comparisons, and treat disagreement between them as itself informative — it usually means the effect concentrates in one part of the distribution, which is worth understanding before deciding whether to ship.',
+    },
+  },
+
+  {
+    id: 'qa101',
+    category: 'Statistics',
+    difficulty: 'analyst',
+    isFree: true,
+    question: 'A post-purchase satisfaction survey comes back with an average score of 4.3 out of 5. Leadership wants to cite this as evidence the product experience is strong. What\'s your concern?',
+    context: 'The survey is emailed to users two weeks after purchase and has a typical response rate well under half.',
+    tags: ['selection-bias', 'survivorship-bias', 'survey-methodology'],
+    answers: {
+      analyst: 'The 4.3 only reflects people who were still engaged enough to open the email and respond — users who churned or had a bad enough experience to disengage entirely are underrepresented or missing outright, and they\'re exactly the users who\'d most likely give low scores. I\'d check the response rate and compare responder characteristics (recency, order count) against the full purchaser population before treating 4.3 as representative of "the product experience."',
+      senior: 'This is survivorship bias applied to feedback collection: you only measure the survivors, and survivors are systematically different from the people who left. I\'d look at whether response rate correlates with churn risk — if power users and repeat purchasers are overrepresented among responders, the 4.3 is really "satisfaction among our best customers," not satisfaction overall. A more honest read would stratify the sample by purchase recency and frequency, or report the score alongside the response rate so it isn\'t presented as unconditional.',
+      staff: 'I\'d push back on using this number as a headline metric without a denominator caveat, because it will get cited in a deck stripped of context and used to justify decisions the data doesn\'t support. The fix isn\'t just methodological — a non-response follow-up (a short win-back survey to a sample of non-responders and churned users) would tell us what the missing half actually thinks, which is usually worse news but far more decision-useful. I\'d frame the ask to leadership as "4.3 among engaged responders, unknown among the rest — here\'s how we\'d close that gap," rather than let a flattering number stand unqualified.',
+    },
+  },
+
+  {
+    id: 'qa102',
+    category: 'Statistics',
+    difficulty: 'staff',
+    isFree: false,
+    question: 'You\'re asked to analyze whether a new onboarding feature improves long-term retention, comparing users who engaged with it in their first week to those who didn\'t. Why is this analysis at risk of survivorship bias, and how would you fix it?',
+    context: 'The team wants to compare 90-day retention between users who used the new onboarding feature and users who didn\'t.',
+    tags: ['survivorship-bias', 'feature-analysis', 'retention', 'confounding'],
+    answers: {
+      analyst: 'Comparing "used the feature" to "didn\'t use the feature" isn\'t a clean comparison, because using the feature at all requires surviving long enough in onboarding to reach it — users who churned before ever seeing the feature are excluded from both groups in a way that likely correlates with retention. Users who engaged with onboarding are probably more motivated to begin with, so the comparison partly measures pre-existing engagement, not the feature\'s effect.',
+      senior: 'This is a selection problem, not just a survivorship one — feature usage is self-selected, so the "used it" group is confounded with whatever underlying trait made those users stick around long enough to reach and engage with the feature. At minimum I\'d control for early-session engagement signals (session count before feature exposure, day-1 activity) as covariates, but the cleaner fix is to check whether this feature was ever run as a proper randomized experiment and use its intent-to-treat comparison instead of a post-hoc usage comparison.',
+      staff: 'If no experiment exists, I\'d recommend running one before trusting any causal claim from the observational comparison, because the selection effect here is large enough that even careful covariate adjustment is unlikely to fully remove it — motivated-to-engage is exactly the kind of unobserved trait that also predicts retention directly. In the meantime, I\'d present the observational number with an explicit caveat that it\'s correlational, framing the finding to the PM as "engaged users retain better, we can\'t yet say the feature caused it" — conflating the two is how teams end up crediting a feature for retention it never actually drove.',
+    },
+  },
+
+  {
+    id: 'qa103',
+    category: 'Experimentation',
+    difficulty: 'analyst',
+    isFree: true,
+    question: 'Three days into an experiment on a redesigned UI, you see +8% engagement and the PM wants to call it and ship immediately. What do you tell them?',
+    context: 'The experiment is scheduled to run for 3 weeks. No guardrail metrics have moved.',
+    tags: ['novelty-effect', 'experiment-runtime', 'premature-stopping'],
+    answers: {
+      analyst: 'I\'d recommend against calling it this early — the first few days of a new UI measure curiosity as much as real value, and an early lift can be pure novelty that decays back to baseline or below once users stop noticing the change. I\'d ask the PM to let the experiment run at least one full weekly cycle, ideally the originally planned 3 weeks, before treating +8% as the real effect.',
+      senior: 'Novelty effects are common enough with UI changes that I\'d treat a large early lift as a hypothesis to verify, not a result to act on. I\'d segment the metric by day since exposure — if engagement is highest on day 1-2 and trending down toward baseline by day 5-7, that\'s the signature of novelty decay, not a stable effect. I\'d also check whether the lift is concentrated in returning users reacting to something being different, versus new users with no baseline to compare against, whose behavior is more likely to reflect the redesign\'s actual merit.',
+      staff: 'I\'d frame the tradeoff explicitly for the PM: stopping early on a promising number optimizes for speed at the cost of shipping something that regresses once the novelty wears off, which is worse than waiting three more weeks, because rolling back a shipped feature after a bad post-launch surprise costs more credibility and engineering time than the delay would have. I\'d also propose this as a standing platform rule rather than a one-off argument — any experiment on a UI or interaction change requires at least one full week-over-week cycle before a ship decision, so individual PMs aren\'t re-litigating this tradeoff under time pressure every time a number looks good early.',
+    },
+  },
+
+  {
+    id: 'qa104',
+    category: 'Experimentation',
+    difficulty: 'senior',
+    isFree: false,
+    question: 'How would you design ongoing monitoring to catch novelty decay after a feature has already shipped, rather than only checking for it during the experiment?',
+    context: 'The team has been burned before by features that tested well and then underperformed a few weeks after full rollout.',
+    tags: ['novelty-decay', 'post-launch-monitoring', 'long-run-validity'],
+    answers: {
+      analyst: 'I\'d set up a time-series view of the key engagement metric segmented by cohort — specifically tracking the cohort exposed to the feature at rollout, week over week, rather than looking only at an aggregate snapshot. If that cohort\'s engagement trends down over the following weeks even as the aggregate metric looks flat, that\'s the same novelty-decay signature the experiment should have caught, just visible after the fact.',
+      senior: 'Novelty decay is the temporal version of a mix shift — just as a mix shift hides in aggregate numbers until you segment by cohort or channel, novelty decay hides in aggregate numbers until you segment by time since exposure. I\'d build a standard "weeks since exposure" curve for any shipped feature with a measurable engagement metric, and set an automated check that flags if week-4 engagement for the exposed cohort has dropped materially relative to week-1, so decay gets caught by a dashboard rather than by someone noticing a slow decline months later.',
+      staff: 'I\'d push for this to become a standard post-launch checkpoint, not an ad hoc investigation triggered after something feels off. Concretely: any feature that showed a meaningful lift during its experiment gets a mandatory post-launch check, on roughly the same multi-week cycle the original experiment ran on, comparing the exposed cohort\'s trajectory against its own experiment-period baseline, with an owner accountable for reviewing it. The failure mode I\'d guard against is that experiments end, credit gets assigned, and the team moves on before anyone checks whether the lift actually held — building the check into the launch process is what prevents that.',
+    },
+  },
+
+  {
+    id: 'qa105',
+    category: 'Experimentation',
+    difficulty: 'analyst',
+    isFree: true,
+    question: 'You run an A/A test on your experimentation platform before trusting it with a real experiment, and it comes back p = 0.02. A junior analyst says the platform is broken. Is it?',
+    context: 'Both "arms" of the A/A test received the identical experience — there is no treatment.',
+    tags: ['a-a-testing', 'false-positives', 'platform-validation'],
+    answers: {
+      analyst: 'Not necessarily. Under a working platform, roughly 5% of A/A tests will show p < 0.05 purely by chance, since that\'s the definition of a 5% significance threshold — one significant A/A result out of the tests you run is exactly what you\'d expect, not evidence of a bug. I wouldn\'t conclude anything from a single A/A result either way; I\'d want to see how the platform behaves across many A/A runs before judging it. [verify: ~5% false-positive rate is the standard alpha=0.05 definition, not a module-specific figure]',
+      senior: 'The right validation isn\'t one A/A test, it\'s the distribution of p-values across many of them. If the platform is unbiased, that distribution should be roughly uniform between 0 and 1, with about 5% falling below 0.05 — a single p=0.02 is a normal draw from that distribution, not an anomaly. What would actually worry me is a pattern: far more than 5% of A/A tests coming back significant, or a distribution skewed toward 0, which points to broken randomization or an underestimated variance in the significance calculation.',
+      staff: 'I\'d treat this as an opportunity to fix a common misunderstanding before it costs the team real experiments later: individual significance results are noisy by design, and the junior analyst\'s instinct — "significant means something happened" — is exactly the instinct that leads to false alarms on legitimate A/B results too. I\'d use this as a teaching moment to run a batch of A/A tests, plot the p-value distribution together, and show that a handful of significant results among many is healthy, not alarming — building the intuition that individual results are draws from a distribution, and the platform is judged on the distribution, not any one draw.',
+    },
+  },
+
+  {
+    id: 'qa106',
+    category: 'Experimentation',
+    difficulty: 'senior',
+    isFree: false,
+    question: 'After running 50 A/A tests on a new experimentation platform, 12 of them come back significant at p < 0.05. What does this tell you and what would you check?',
+    context: 'Under a correctly functioning platform, you\'d expect roughly 5% — about 2 to 3 — of 50 A/A tests to be significant by chance alone.',
+    tags: ['a-a-testing', 'randomization-bug', 'variance-estimation'],
+    answers: {
+      analyst: '12 out of 50 (24%) is far above the ~5% expected by chance, so this is a pattern, not noise — something about the platform is producing false positives at an elevated rate. I\'d start by checking the randomization logic itself: is assignment actually random, or is there a bug causing correlated or non-random group membership, such as a hash that isn\'t evenly distributed or a caching issue that assigns the same group to clustered users?',
+      senior: 'Beyond randomization, I\'d check whether the variance used in the significance calculation is underestimated — if the platform doesn\'t account for correlated observations within a user, such as counting each pageview as an independent unit when a single user contributes many pageviews, the effective sample size is inflated, standard errors come out too small, and everything looks more significant than it should. I\'d pull the raw variance estimates from a few of the 12 significant tests and check them against an independently computed variance on the same data.',
+      staff: 'Given a false-positive rate this elevated, I wouldn\'t trust any real experiment run on this platform until the root cause is found and fixed, because every "significant" result from now until then could be an artifact rather than a real effect. I\'d treat this as a platform incident: pause new experiment launches, prioritize the randomization and variance-estimation audit, and once fixed, re-run the batch of A/A tests to confirm the false-positive rate has returned to roughly 5% before resuming trust in the platform\'s output. I\'d also make batch A/A checks a recurring validation step, since a future infra change could reintroduce the same class of bug silently.',
+    },
+  },
+
+  {
+    id: 'qa107',
+    category: 'Metrics',
+    difficulty: 'analyst',
+    isFree: true,
+    question: 'You present the monthly metrics review showing conversion rate up 2% overall. A PM asks how it breaks down by traffic source, and it turns out conversion is flat or down in every single channel. How is the aggregate up?',
+    context: 'No single channel shows improvement, yet the blended conversion rate across all channels increased.',
+    tags: ['ratio-metrics', 'mix-shift', 'simpsons-paradox', 'conversion-rate'],
+    answers: {
+      analyst: 'This is a mix shift: if a channel with a naturally higher conversion rate grew as a share of total traffic, the blended average rises even though no individual channel improved, because the aggregate is a weighted average and the weights themselves changed. I\'d pull the traffic-share breakdown by channel for both periods and check whether a high-converting channel, such as a high-intent organic channel, grew in volume relative to lower-converting channels.',
+      senior: 'I\'d decompose the ratio explicitly into three pieces before drawing any conclusion: numerator movement, denominator movement, and mix — a ratio metric can move from any combination of these, and treating a 2% aggregate lift as "the business got better at converting" without checking mix is a common and costly misread. The diagnosis is confirmed when every per-channel rate is flat-to-down but the mix moved toward the higher-converting channel — that pulls the blended number up with zero improvement in actual conversion behavior anywhere.',
+      staff: 'I\'d flag this pattern as a standing risk for any headline ratio metric, not just this month\'s number, and push for the monthly review to report the metric decomposed by channel by default rather than only as a blended figure, since Simpson\'s-paradox-style reversals like this one are easy to miss and easy to misreport as real improvement. The same logic applies directly to A/B testing: if a treatment changes who enters the funnel — say, a redesigned landing page that attracts a different, higher-intent visitor mix — conversion rate can rise with zero improvement in how well the treatment actually converts the people it\'s given. I\'d always check absolute counts and segment-level rates alongside any ratio-metric result before trusting it.',
+    },
+  },
+
+  {
+    id: 'qa108',
+    category: 'Metrics',
+    difficulty: 'senior',
+    isFree: false,
+    question: 'A treatment in your checkout A/B test shows conversion rate (CVR) up 5%, but the PM is surprised revenue per visitor barely moved. How would you investigate?',
+    context: 'CVR is defined as completed checkouts divided by checkout-page visitors. The treatment changed the checkout page copy and layout.',
+    tags: ['ratio-metrics', 'denominator-effect', 'funnel-analysis', 'metric-decomposition'],
+    answers: {
+      analyst: 'A CVR lift with flat revenue per visitor suggests the numerator (completed checkouts) and denominator (checkout-page visitors) aren\'t moving the way a simple "more people converted" story would predict. I\'d check the denominator first: did the treatment change who reaches the checkout page at all, or how many low-intent visitors bounce before ever being counted in the denominator, which would inflate CVR without adding real completed orders.',
+      senior: 'I\'d specifically check whether the treatment\'s layout change filtered out low-intent visitors earlier in the funnel — if a clearer checkout step causes uncertain visitors to abandon before reaching the checkout page, removing them from the denominator rather than converting them, CVR at the checkout page rises purely from a smaller, higher-intent denominator, while completed orders and revenue stay roughly the same. I\'d pull absolute counts for both arms, not just the ratio, since the ratio alone can\'t distinguish "we converted more people" from "we filtered out the ones who wouldn\'t have converted anyway."',
+      staff: 'This is exactly the ratio-metric trap that makes CVR a risky primary metric on its own: it can move in a direction that looks like a win while the metric leadership actually cares about — revenue — stays flat. I\'d recommend the team report absolute conversions and revenue per visitor as co-primary metrics alongside CVR for any checkout experiment going forward, specifically because a treatment that reshapes who reaches a funnel step can move a ratio metric independent of any real improvement in the underlying behavior. For this specific test, I\'d hold off on a ship recommendation until the absolute-count breakdown clarifies whether real orders increased or the denominator just got smaller.',
+    },
+  },
+
+  {
+    id: 'qa109',
+    category: 'Metrics',
+    difficulty: 'analyst',
+    isFree: true,
+    question: 'DAU has grown to 2 million and leadership is thrilled. You check DAU/MAU and it\'s 0.12. Should leadership still be thrilled?',
+    context: 'DAU/MAU (stickiness) of 0.12 implies the average monthly active user opens the app roughly 3 to 4 days out of the month.',
+    tags: ['dau-mau', 'stickiness', 'engagement-depth', 'vanity-metrics'],
+    answers: {
+      analyst: 'Not without a closer look — a DAU/MAU of 0.12 means the typical monthly active user is only opening the app about 3-4 days a month, which points to a large base of infrequent, once-a-week-or-less visitors rather than users forming a real habit. Rising DAU alone doesn\'t tell you whether that growth is healthy engagement or just a bigger base of light, occasional users inflating the numerator.',
+      senior: 'I\'d break the question into breadth versus depth: is DAU growing because more new light users are showing up (breadth), or because existing users are coming back more often (depth)? A stickiness ratio this low, alongside DAU growth, suggests breadth is doing most of the work — the product is acquiring users faster than it\'s deepening their engagement. I\'d pull an Lness curve (what fraction of MAU was active on exactly L of the last 28 days) to see whether the distribution is bimodal (mostly very-light plus a smaller habitual core) or more evenly spread, which changes what "growth" actually means here.',
+      staff: 'I\'d push leadership to track stickiness and power-user concentration alongside raw DAU as standing metrics, not just when a number like this raises a flag, because DAU alone is a vanity metric that can rise for reasons that don\'t indicate product health — a viral spike, a marketing push, or a feature that trades depth for breadth. I\'d also connect this to power-user concentration: if a small core of habitual users carries a disproportionate share of total sessions, the product\'s retention story depends on protecting and growing that core, not just adding more light users at the top of the funnel.',
+    },
+  },
+
+  {
+    id: 'qa110',
+    category: 'Metrics',
+    difficulty: 'senior',
+    isFree: false,
+    question: 'An A/B test shows DAU up 4% for the treatment group. The PM wants to ship immediately. What follow-up question do you ask before signing off?',
+    context: 'DAU increased for the treatment arm relative to control over the experiment period.',
+    tags: ['engagement-depth', 'ab-test-interpretation', 'breadth-vs-depth'],
+    answers: {
+      analyst: 'I\'d ask whether the DAU lift is coming from breadth (new or previously-light users opening the app who wouldn\'t have otherwise) or depth (existing regular users opening it more often than before), because those two stories have very different implications for whether this is a durable win. A DAU number alone can\'t distinguish them.',
+      senior: 'I\'d decompose the treatment-arm DAU lift the same way you\'d decompose engagement more generally — check DAU/MAU for treatment versus control, and look at the Lness distribution for treatment users. If the lift is all breadth, retention may not actually improve, since those users haven\'t formed a habit; if it\'s depth, that\'s a stronger signal of real behavioral change, but I\'d also check it isn\'t concentrated entirely in the already-most-engaged power-user segment, which would mean the change is over-serving people who were already going to stick around.',
+      staff: 'Before signing off, I\'d want the team to treat "DAU up 4%" as the headline of an unfinished story, not the conclusion — I\'d ask for a post-launch retention check on roughly the same multi-week cycle the experiment ran on, since a breadth-driven DAU lift with no retention improvement often reverts once the initial exposure fades, similar to a novelty effect. I\'d frame the ship decision to the PM as: "DAU is up, here\'s the breadth/depth breakdown, and here\'s what we\'ll check afterward to confirm it\'s real growth and not a temporary bump" — shipping isn\'t the wrong call, but shipping without that follow-up plan risks over-crediting a change that doesn\'t hold.',
+    },
+  },
+
+  {
+    id: 'qa111',
+    category: 'RCA',
+    difficulty: 'analyst',
+    isFree: true,
+    question: 'Your PM pings you: DAU dropped 18% overnight. You have two hours before the leadership standup and no idea why. Where do you start?',
+    context: 'No specific hypothesis has been suggested yet — this is the first message you\'ve received about the drop.',
+    tags: ['rca-framework', 'metric-drop', 'structured-diagnosis'],
+    answers: {
+      analyst: 'I\'d work through a fixed sequence rather than guessing: data quality first (is the drop even real, or is it a tracking or pipeline issue?), then external factors (an outage, a holiday, a platform-wide issue), then product changes (did anything ship recently?), then user behavior (a genuine shift in engagement). I\'d start at data quality specifically because it\'s the cheapest layer to rule out, and if the "drop" is actually a broken pipeline, everything downstream is wasted effort.',
+      senior: 'The four-layer order isn\'t arbitrary — each layer is cheaper to rule out than the one below it, so working top-to-bottom means spending the least time possible before finding the real cause. A data pipeline check (are event counts actually down, or is a job failing to load data) takes minutes; confirming an external factor takes a quick check of status pages and calendars; digging into a specific product change or user behavior shift takes much longer. I\'d avoid jumping straight to "what did we ship," even though it\'s often the PM\'s first instinct, because ruling out the two cheaper layers first protects the two hours I have.',
+      staff: 'With two hours before a leadership standup, the goal isn\'t necessarily a full root cause — it\'s a credible, defensible status update, and the four-layer structure is exactly what makes that possible under time pressure: I can walk into the standup and say "we\'ve ruled out data quality and external factors, we\'re narrowing between two product changes" even without the final answer, which is a far stronger position than either silence or a premature guess. I\'d also use this incident afterward to check whether an automated check could have caught the data-quality layer before a human needed to spend any of those two hours confirming the drop was real.',
+    },
+  },
+
+  {
+    id: 'qa112',
+    category: 'RCA',
+    difficulty: 'senior',
+    isFree: false,
+    question: 'A colleague skips straight to investigating product changes when DAU drops, reasoning that "we probably broke something." Why does the RCA framework insist on checking data quality and external factors first, even when a recent product change is the most likely suspect?',
+    context: 'The team shipped two feature changes in the 48 hours before the DAU drop was noticed.',
+    tags: ['rca-framework', 'investigation-ordering', 'confirmation-bias'],
+    answers: {
+      analyst: 'Even when a product change looks like the obvious suspect, starting there skips two cheaper checks that could resolve the investigation faster if the real cause is elsewhere — a broken event pipeline or an external outage can produce an identical-looking DAU drop, and confirming or ruling those out takes far less time than digging into a specific feature change.',
+      senior: 'There\'s also a bias risk in jumping straight to "we probably broke something": once you\'ve committed to investigating a specific product change, you tend to interpret ambiguous evidence as confirming that hypothesis, which can burn significant time chasing the wrong cause while the actual issue — say, a tracking SDK bug introduced by one of those same two releases, which is a data-quality issue, not a behavioral one — goes unchecked. Working top-to-bottom forces a cheap, hypothesis-neutral check before any specific theory gets investigated in depth.',
+      staff: 'The ordering is a defense against the failure mode where a plausible-sounding story gets accepted without verification because it fits what everyone already expected — "we shipped two things, so we probably broke something" is a reasonable prior, but a prior isn\'t a diagnosis. I\'d insist on the data-quality and external-factor checks even under time pressure specifically because they\'re fast, and because skipping them is how teams end up publicly attributing a drop to a shipped feature, rolling it back, and then discovering days later the real cause was a tracking regression — a far more expensive and credibility-costly mistake than the few minutes the cheaper checks would have taken.',
+    },
+  },
+
+  {
+    id: 'qa113',
+    category: 'RCA',
+    difficulty: 'analyst',
+    isFree: true,
+    question: 'An alert fires: purchases are down 22% in the last hour. You open your SQL editor. What\'s the first query you run?',
+    context: 'You have no prior context on what might have changed. The alert is automated and pages on-call.',
+    tags: ['sql-diagnosis', 'rca', 'time-series', 'incident-response'],
+    answers: {
+      analyst: 'I wouldn\'t start with a complex multi-table join trying to find the cause directly — I\'d start with a simple daily (or hourly, given the alert window) event count over the past two weeks, to see the shape of the drop against recent history. That single query tells me whether this is a sudden cliff, a gradual decline that just crossed a threshold, or possibly noise within normal hour-to-hour variance.',
+      senior: 'After confirming the shape of the drop, I\'d run two more simple queries before touching anything complex: a breakdown of the same metric by platform and region, to see if the drop is uniform or concentrated (concentrated points toward a specific client, region, or infra issue; uniform points toward something upstream or business-wide), and a comparison to the same hour/day window from a prior period, such as last week or the same window last year, to rule out expected seasonality. All three queries together take under ten minutes and either confirm the signal is real and worth escalating, or kill the investigation before anyone gets paged unnecessarily.',
+      staff: 'The discipline here is resisting the urge to reach for a sophisticated query before the cheap ones have ruled out the boring explanations — a 22% hourly drop that turns out to be a known low-traffic period, or a single region\'s outage, wastes everyone\'s time if the first move is a deep multi-table investigation instead of these three baseline checks. I\'d also make sure these three query patterns are saved as a standard, shareable runbook so any on-call analyst, not just the ones who\'ve internalized this order, can run the same first ten minutes consistently during a page.',
+    },
+  },
+
+  {
+    id: 'qa114',
+    category: 'RCA',
+    difficulty: 'senior',
+    isFree: false,
+    question: 'These same three diagnostic queries — time series by day, breakdown by platform/region, comparison to a prior period — get mentioned as useful outside of incident response too. Where else would you use them?',
+    context: 'The team currently only reaches for this query pattern when an alert fires.',
+    tags: ['sql-diagnosis', 'experiment-monitoring', 'reusable-patterns'],
+    answers: {
+      analyst: 'I\'d use the same three queries as a sanity check right after launching an A/B test, before trusting any of the experiment platform\'s reported numbers — a time series of the primary metric by day, broken down by platform/region, compared to the pre-launch baseline period, catches the same class of problems (a broken pipeline, an uneven rollout) that they catch during an incident.',
+      senior: 'Specifically, if a control group shows an unexpected pattern right after an experiment launches, these three queries are the fastest way to tell whether that\'s a real environmental shift (external factor or seasonality, caught by the prior-period comparison) or a platform-side issue like uneven traffic allocation by region (caught by the platform/region breakdown), before attributing anything to the treatment itself. Running them as a standard pre-analysis step, rather than only when something looks wrong, catches issues before they contaminate the read on the experiment.',
+      staff: 'I\'d formalize this pattern as a shared pre-launch and pre-analysis checklist across both incident response and experimentation, since the underlying failure modes — pipeline breakage, uneven segment behavior, unaccounted-for seasonality — are the same regardless of whether you\'re diagnosing an alert or validating an experiment. Standardizing the same three lightweight queries across both workflows means less duplicated tooling, and it means analysts build one habit that transfers, instead of treating incident diagnosis and experiment monitoring as unrelated skills.',
+    },
+  },
+
 ];
