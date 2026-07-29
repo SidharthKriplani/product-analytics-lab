@@ -323,7 +323,7 @@ export const instrumentationCases = [
         'CI enforcement of dbt test --select source:* before any warehouse schema change prevents the 2am page'
       ]
     },
-    leadershipNote: 'A staff analytics engineer would have shipped source contracts (dbt 1.5+ contracts: block) on all production sources, making breaking changes fail at CI rather than at 2am. The 2am page is a CI gap, not a human error.',
+    leadershipNote: 'A staff analytics engineer would have shipped source contracts (dbt 1.5+ contracts: block) on all production sources, making breaking changes fail at CI rather than at 2am. The 2am page is a CI gap, not a human error. dbt here is one batch tier sitting on top of the warehouse/lakehouse layer, not the whole data stack — see "Lakehouse Fundamentals" for how the underlying table layer this pipeline writes to has evolved, and "Batch vs Streaming: the Decision" for when an hourly-model pipeline like this one is, and is not, the right cadence.',
     failureMode: {
       weakAnswer: 'The candidate\'s incident response is to update the dbt source() reference in the YAML file and re-run all 340 models overnight. They treat the fix as a simple find-and-replace and ignore that the dashboards need restoring immediately. They miss the compatibility shim approach and have no governance recommendation beyond "add a comment in the PR."',
       interviewerFollowUp: '"It\'s 2:05am. The dashboards have been broken for 12 hours. Updating the dbt YAML and re-running 340 models will take 4 more hours. What do you do in the next 10 minutes to restore dashboard access before the full re-run completes?"',

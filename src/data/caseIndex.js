@@ -326,6 +326,16 @@ export const biCaseIndex = [
   { id: 'BI14', isFree: false, title: 'Looker Exploration Gone Wrong: Governance After Self-Serve Chaos' },
   { id: 'BI15', isFree: false, title: 'The Attribution Model Switch' },
   { id: 'BI16', isFree: false, title: 'SQL for Cohort Retention Analysis' },
+  { id: 'BI17', isFree: true,  title: 'The Misleading Axis' },
+  { id: 'BI18', isFree: false, title: 'Simpson\'s Paradox in Checkout Funnels' },
+  { id: 'BI19', isFree: false, title: 'Dual-Axis Deception' },
+  { id: 'BI20', isFree: true,  title: 'The Cherry-Picked Time Window' },
+  { id: 'BI21', isFree: false, title: 'Aggregation Hides a Divergence' },
+  { id: 'BI22', isFree: false, title: 'The Missing Seasonal Baseline' },
+  { id: 'BI23', isFree: false, title: 'The Omitted Zero Baseline' },
+  { id: 'BI24', isFree: false, title: 'Lakehouse Fundamentals' },
+  { id: 'BI25', isFree: false, title: 'Streaming Hot Tier' },
+  { id: 'BI26', isFree: false, title: 'Batch vs Streaming: the Decision' },
 ];
 
 export const stfCaseIndex = [
